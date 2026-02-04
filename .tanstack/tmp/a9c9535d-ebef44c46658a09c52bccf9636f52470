@@ -1,0 +1,6 @@
+import { Outlet, createRootRouteWithContext, createFileRoute } from '@tanstack/react-router'
+
+export const Route = createRootRouteWithContext('/_authenticated')({
+  component: () => <Outlet />,
+})
+
