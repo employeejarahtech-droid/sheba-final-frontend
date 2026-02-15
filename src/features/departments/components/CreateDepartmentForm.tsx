@@ -74,11 +74,11 @@ export function CreateDepartmentForm() {
             </SheetTrigger>
 
             <SheetContent side="right" className="w-[400px] sm:w-[450px] overflow-y-auto">
-                <SheetHeader>
+                <SheetHeader className="pb-0">
                     <SheetTitle>Add New Department</SheetTitle>
                 </SheetHeader>
 
-                <div className="space-y-6 mt-6 p-4">
+                <div className="space-y-6 p-4 pt-2">
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div className="space-y-2">
                             <Label>Department Name</Label>

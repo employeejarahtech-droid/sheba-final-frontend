@@ -136,7 +136,9 @@ import { Route as AuthenticatedOutdoorMasterCategoriesIndexRouteImport } from '.
 import { Route as AuthenticatedIndoorMasterTreatmentOutcomesIndexRouteImport } from './routes/_authenticated/indoor/master/treatment-outcomes/index'
 import { Route as AuthenticatedIndoorMasterServicesIndexRouteImport } from './routes/_authenticated/indoor/master/services/index'
 import { Route as AuthenticatedIndoorMasterServiceCategoriesIndexRouteImport } from './routes/_authenticated/indoor/master/service-categories/index'
+import { Route as AuthenticatedIndoorMasterPatientTypesIndexRouteImport } from './routes/_authenticated/indoor/master/patient-types/index'
 import { Route as AuthenticatedIndoorMasterOperationTypesIndexRouteImport } from './routes/_authenticated/indoor/master/operation-types/index'
+import { Route as AuthenticatedIndoorMasterDoctorTypesIndexRouteImport } from './routes/_authenticated/indoor/master/doctor-types/index'
 import { Route as AuthenticatedIndoorMasterBedCabinListIndexRouteImport } from './routes/_authenticated/indoor/master/bed-cabin-list/index'
 import { Route as AuthenticatedIndoorMasterAnasthesiaTypesIndexRouteImport } from './routes/_authenticated/indoor/master/anasthesia-types/index'
 import { Route as AuthenticatedCustomersIdEditIndexRouteImport } from './routes/_authenticated/customers/$id/edit/index'
@@ -158,13 +160,17 @@ import { Route as AuthenticatedOutdoorMasterTestTablesIdRouteImport } from './ro
 import { Route as AuthenticatedOutdoorMasterDoctorsCreateRouteImport } from './routes/_authenticated/outdoor/master/doctors/create'
 import { Route as AuthenticatedOutdoorMasterDepartmentsIdRouteImport } from './routes/_authenticated/outdoor/master/departments/$id'
 import { Route as AuthenticatedOutdoorMasterCategoriesIdRouteImport } from './routes/_authenticated/outdoor/master/categories/$id'
+import { Route as AuthenticatedIndoorMasterServicesIdRouteImport } from './routes/_authenticated/indoor/master/services/$id'
 import { Route as AuthenticatedEcgAllEditIdRouteImport } from './routes/_authenticated/ecg/all/edit/$id'
 import { Route as AuthenticatedPurchaseInvoicesIdPreviewIndexRouteImport } from './routes/_authenticated/purchase/invoices/$id/preview/index'
 import { Route as AuthenticatedOutdoorReceptionInvoicesListIndexRouteImport } from './routes/_authenticated/outdoor/reception/invoices/list/index'
 import { Route as AuthenticatedOutdoorReceptionInvoicesCreateIndexRouteImport } from './routes/_authenticated/outdoor/reception/invoices/create/index'
 import { Route as AuthenticatedOutdoorMasterTestsCreateIndexRouteImport } from './routes/_authenticated/outdoor/master/tests/create/index'
 import { Route as AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRouteImport } from './routes/_authenticated/outdoor/master/doctors/$doctorId/index'
+import { Route as AuthenticatedIndoorMasterServicesCreateIndexRouteImport } from './routes/_authenticated/indoor/master/services/create/index'
 import { Route as AuthenticatedIndoorMasterBedCabinListCreateIndexRouteImport } from './routes/_authenticated/indoor/master/bed-cabin-list/create/index'
+import { Route as AuthenticatedXRayAllEditBuilderIdRouteImport } from './routes/_authenticated/x-ray/all/edit/builder/$id'
+import { Route as AuthenticatedUltrasonogramAllEditBuilderIdRouteImport } from './routes/_authenticated/ultrasonogram/all/edit/builder/$id'
 import { Route as AuthenticatedPathologyUrineUrineForSugarReportReportIdRouteImport } from './routes/_authenticated/pathology/urine/urine-for-sugar/report/$reportId'
 import { Route as AuthenticatedPathologyUrineUrineForReFullReportReportIdRouteImport } from './routes/_authenticated/pathology/urine/urine-for-re-full/report/$reportId'
 import { Route as AuthenticatedPathologyUrineUrineForReFullEditIdRouteImport } from './routes/_authenticated/pathology/urine/urine-for-re-full/edit/$id'
@@ -196,6 +202,8 @@ import { Route as AuthenticatedPathologyBiochemicalLipidProfileReportReportIdRou
 import { Route as AuthenticatedPathologyBiochemicalAllReportReportIdRouteImport } from './routes/_authenticated/pathology/biochemical/all/report/$reportId'
 import { Route as AuthenticatedPathologyBiochemicalAllEditReportIdRouteImport } from './routes/_authenticated/pathology/biochemical/all/edit/$reportId'
 import { Route as AuthenticatedOutdoorMasterDoctorsDoctorIdEditRouteImport } from './routes/_authenticated/outdoor/master/doctors/$doctorId/edit'
+import { Route as AuthenticatedIndoorMasterServicesEditIdRouteImport } from './routes/_authenticated/indoor/master/services/edit/$id'
+import { Route as AuthenticatedEcgAllEditBuilderIdRouteImport } from './routes/_authenticated/ecg/all/edit/builder/$id'
 import { Route as AuthenticatedPathologyImmunologyAllEditIdIndexRouteImport } from './routes/_authenticated/pathology/immunology/all/edit/[$id]/index'
 import { Route as AuthenticatedPathologyHormoneAllEditIdIndexRouteImport } from './routes/_authenticated/pathology/hormone/all/edit/[$id]/index'
 import { Route as AuthenticatedPathologyHematologyAllEditIdIndexRouteImport } from './routes/_authenticated/pathology/hematology/all/edit/[$id]/index'
@@ -937,10 +945,22 @@ const AuthenticatedIndoorMasterServiceCategoriesIndexRoute =
     path: '/indoor/master/service-categories/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedIndoorMasterPatientTypesIndexRoute =
+  AuthenticatedIndoorMasterPatientTypesIndexRouteImport.update({
+    id: '/indoor/master/patient-types/',
+    path: '/indoor/master/patient-types/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedIndoorMasterOperationTypesIndexRoute =
   AuthenticatedIndoorMasterOperationTypesIndexRouteImport.update({
     id: '/indoor/master/operation-types/',
     path: '/indoor/master/operation-types/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIndoorMasterDoctorTypesIndexRoute =
+  AuthenticatedIndoorMasterDoctorTypesIndexRouteImport.update({
+    id: '/indoor/master/doctor-types/',
+    path: '/indoor/master/doctor-types/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedIndoorMasterBedCabinListIndexRoute =
@@ -1069,6 +1089,12 @@ const AuthenticatedOutdoorMasterCategoriesIdRoute =
     path: '/outdoor/master/categories/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedIndoorMasterServicesIdRoute =
+  AuthenticatedIndoorMasterServicesIdRouteImport.update({
+    id: '/indoor/master/services/$id',
+    path: '/indoor/master/services/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedEcgAllEditIdRoute =
   AuthenticatedEcgAllEditIdRouteImport.update({
     id: '/ecg/all/edit/$id',
@@ -1105,10 +1131,28 @@ const AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute =
     path: '/outdoor/master/doctors/$doctorId/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedIndoorMasterServicesCreateIndexRoute =
+  AuthenticatedIndoorMasterServicesCreateIndexRouteImport.update({
+    id: '/indoor/master/services/create/',
+    path: '/indoor/master/services/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedIndoorMasterBedCabinListCreateIndexRoute =
   AuthenticatedIndoorMasterBedCabinListCreateIndexRouteImport.update({
     id: '/indoor/master/bed-cabin-list/create/',
     path: '/indoor/master/bed-cabin-list/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedXRayAllEditBuilderIdRoute =
+  AuthenticatedXRayAllEditBuilderIdRouteImport.update({
+    id: '/x-ray/all/edit/builder/$id',
+    path: '/x-ray/all/edit/builder/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedUltrasonogramAllEditBuilderIdRoute =
+  AuthenticatedUltrasonogramAllEditBuilderIdRouteImport.update({
+    id: '/ultrasonogram/all/edit/builder/$id',
+    path: '/ultrasonogram/all/edit/builder/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute =
@@ -1305,6 +1349,18 @@ const AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute =
     path: '/outdoor/master/doctors/$doctorId/edit',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedIndoorMasterServicesEditIdRoute =
+  AuthenticatedIndoorMasterServicesEditIdRouteImport.update({
+    id: '/indoor/master/services/edit/$id',
+    path: '/indoor/master/services/edit/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEcgAllEditBuilderIdRoute =
+  AuthenticatedEcgAllEditBuilderIdRouteImport.update({
+    id: '/ecg/all/edit/builder/$id',
+    path: '/ecg/all/edit/builder/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPathologyImmunologyAllEditIdIndexRoute =
   AuthenticatedPathologyImmunologyAllEditIdIndexRouteImport.update({
     id: '/pathology/immunology/all/edit/$id/',
@@ -1421,6 +1477,7 @@ export interface FileRoutesByFullPath {
   '/ultrasonogram/all': typeof AuthenticatedUltrasonogramAllIndexRoute
   '/x-ray/all': typeof AuthenticatedXRayAllIndexRoute
   '/ecg/all/edit/$id': typeof AuthenticatedEcgAllEditIdRoute
+  '/indoor/master/services/$id': typeof AuthenticatedIndoorMasterServicesIdRoute
   '/outdoor/master/categories/$id': typeof AuthenticatedOutdoorMasterCategoriesIdRoute
   '/outdoor/master/departments/$id': typeof AuthenticatedOutdoorMasterDepartmentsIdRoute
   '/outdoor/master/doctors/create': typeof AuthenticatedOutdoorMasterDoctorsCreateRoute
@@ -1442,7 +1499,9 @@ export interface FileRoutesByFullPath {
   '/customers/$id/edit': typeof AuthenticatedCustomersIdEditIndexRoute
   '/indoor/master/anasthesia-types': typeof AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute
   '/indoor/master/bed-cabin-list': typeof AuthenticatedIndoorMasterBedCabinListIndexRoute
+  '/indoor/master/doctor-types': typeof AuthenticatedIndoorMasterDoctorTypesIndexRoute
   '/indoor/master/operation-types': typeof AuthenticatedIndoorMasterOperationTypesIndexRoute
+  '/indoor/master/patient-types': typeof AuthenticatedIndoorMasterPatientTypesIndexRoute
   '/indoor/master/service-categories': typeof AuthenticatedIndoorMasterServiceCategoriesIndexRoute
   '/indoor/master/services': typeof AuthenticatedIndoorMasterServicesIndexRoute
   '/indoor/master/treatment-outcomes': typeof AuthenticatedIndoorMasterTreatmentOutcomesIndexRoute
@@ -1484,6 +1543,8 @@ export interface FileRoutesByFullPath {
   '/purchase/payments/$id': typeof AuthenticatedPurchasePaymentsIdIndexRoute
   '/purchase/payments/create': typeof AuthenticatedPurchasePaymentsCreateIndexRoute
   '/suppliers/$id/edit': typeof AuthenticatedSuppliersIdEditIndexRoute
+  '/ecg/all/edit/builder/$id': typeof AuthenticatedEcgAllEditBuilderIdRoute
+  '/indoor/master/services/edit/$id': typeof AuthenticatedIndoorMasterServicesEditIdRoute
   '/outdoor/master/doctors/$doctorId/edit': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute
   '/pathology/biochemical/all/edit/$reportId': typeof AuthenticatedPathologyBiochemicalAllEditReportIdRoute
   '/pathology/biochemical/all/report/$reportId': typeof AuthenticatedPathologyBiochemicalAllReportReportIdRoute
@@ -1515,7 +1576,10 @@ export interface FileRoutesByFullPath {
   '/pathology/urine/urine-for-re-full/edit/$id': typeof AuthenticatedPathologyUrineUrineForReFullEditIdRoute
   '/pathology/urine/urine-for-re-full/report/$reportId': typeof AuthenticatedPathologyUrineUrineForReFullReportReportIdRoute
   '/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
+  '/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
+  '/x-ray/all/edit/builder/$id': typeof AuthenticatedXRayAllEditBuilderIdRoute
   '/indoor/master/bed-cabin-list/create': typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
+  '/indoor/master/services/create': typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
   '/outdoor/master/doctors/$doctorId': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
   '/outdoor/master/tests/create': typeof AuthenticatedOutdoorMasterTestsCreateIndexRoute
   '/outdoor/reception/invoices/create': typeof AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute
@@ -1611,6 +1675,7 @@ export interface FileRoutesByTo {
   '/ultrasonogram/all': typeof AuthenticatedUltrasonogramAllIndexRoute
   '/x-ray/all': typeof AuthenticatedXRayAllIndexRoute
   '/ecg/all/edit/$id': typeof AuthenticatedEcgAllEditIdRoute
+  '/indoor/master/services/$id': typeof AuthenticatedIndoorMasterServicesIdRoute
   '/outdoor/master/categories/$id': typeof AuthenticatedOutdoorMasterCategoriesIdRoute
   '/outdoor/master/departments/$id': typeof AuthenticatedOutdoorMasterDepartmentsIdRoute
   '/outdoor/master/doctors/create': typeof AuthenticatedOutdoorMasterDoctorsCreateRoute
@@ -1632,7 +1697,9 @@ export interface FileRoutesByTo {
   '/customers/$id/edit': typeof AuthenticatedCustomersIdEditIndexRoute
   '/indoor/master/anasthesia-types': typeof AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute
   '/indoor/master/bed-cabin-list': typeof AuthenticatedIndoorMasterBedCabinListIndexRoute
+  '/indoor/master/doctor-types': typeof AuthenticatedIndoorMasterDoctorTypesIndexRoute
   '/indoor/master/operation-types': typeof AuthenticatedIndoorMasterOperationTypesIndexRoute
+  '/indoor/master/patient-types': typeof AuthenticatedIndoorMasterPatientTypesIndexRoute
   '/indoor/master/service-categories': typeof AuthenticatedIndoorMasterServiceCategoriesIndexRoute
   '/indoor/master/services': typeof AuthenticatedIndoorMasterServicesIndexRoute
   '/indoor/master/treatment-outcomes': typeof AuthenticatedIndoorMasterTreatmentOutcomesIndexRoute
@@ -1674,6 +1741,8 @@ export interface FileRoutesByTo {
   '/purchase/payments/$id': typeof AuthenticatedPurchasePaymentsIdIndexRoute
   '/purchase/payments/create': typeof AuthenticatedPurchasePaymentsCreateIndexRoute
   '/suppliers/$id/edit': typeof AuthenticatedSuppliersIdEditIndexRoute
+  '/ecg/all/edit/builder/$id': typeof AuthenticatedEcgAllEditBuilderIdRoute
+  '/indoor/master/services/edit/$id': typeof AuthenticatedIndoorMasterServicesEditIdRoute
   '/outdoor/master/doctors/$doctorId/edit': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute
   '/pathology/biochemical/all/edit/$reportId': typeof AuthenticatedPathologyBiochemicalAllEditReportIdRoute
   '/pathology/biochemical/all/report/$reportId': typeof AuthenticatedPathologyBiochemicalAllReportReportIdRoute
@@ -1705,7 +1774,10 @@ export interface FileRoutesByTo {
   '/pathology/urine/urine-for-re-full/edit/$id': typeof AuthenticatedPathologyUrineUrineForReFullEditIdRoute
   '/pathology/urine/urine-for-re-full/report/$reportId': typeof AuthenticatedPathologyUrineUrineForReFullReportReportIdRoute
   '/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
+  '/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
+  '/x-ray/all/edit/builder/$id': typeof AuthenticatedXRayAllEditBuilderIdRoute
   '/indoor/master/bed-cabin-list/create': typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
+  '/indoor/master/services/create': typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
   '/outdoor/master/doctors/$doctorId': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
   '/outdoor/master/tests/create': typeof AuthenticatedOutdoorMasterTestsCreateIndexRoute
   '/outdoor/reception/invoices/create': typeof AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute
@@ -1806,6 +1878,7 @@ export interface FileRoutesById {
   '/_authenticated/ultrasonogram/all/': typeof AuthenticatedUltrasonogramAllIndexRoute
   '/_authenticated/x-ray/all/': typeof AuthenticatedXRayAllIndexRoute
   '/_authenticated/ecg/all/edit/$id': typeof AuthenticatedEcgAllEditIdRoute
+  '/_authenticated/indoor/master/services/$id': typeof AuthenticatedIndoorMasterServicesIdRoute
   '/_authenticated/outdoor/master/categories/$id': typeof AuthenticatedOutdoorMasterCategoriesIdRoute
   '/_authenticated/outdoor/master/departments/$id': typeof AuthenticatedOutdoorMasterDepartmentsIdRoute
   '/_authenticated/outdoor/master/doctors/create': typeof AuthenticatedOutdoorMasterDoctorsCreateRoute
@@ -1827,7 +1900,9 @@ export interface FileRoutesById {
   '/_authenticated/customers/$id/edit/': typeof AuthenticatedCustomersIdEditIndexRoute
   '/_authenticated/indoor/master/anasthesia-types/': typeof AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute
   '/_authenticated/indoor/master/bed-cabin-list/': typeof AuthenticatedIndoorMasterBedCabinListIndexRoute
+  '/_authenticated/indoor/master/doctor-types/': typeof AuthenticatedIndoorMasterDoctorTypesIndexRoute
   '/_authenticated/indoor/master/operation-types/': typeof AuthenticatedIndoorMasterOperationTypesIndexRoute
+  '/_authenticated/indoor/master/patient-types/': typeof AuthenticatedIndoorMasterPatientTypesIndexRoute
   '/_authenticated/indoor/master/service-categories/': typeof AuthenticatedIndoorMasterServiceCategoriesIndexRoute
   '/_authenticated/indoor/master/services/': typeof AuthenticatedIndoorMasterServicesIndexRoute
   '/_authenticated/indoor/master/treatment-outcomes/': typeof AuthenticatedIndoorMasterTreatmentOutcomesIndexRoute
@@ -1869,6 +1944,8 @@ export interface FileRoutesById {
   '/_authenticated/purchase/payments/$id/': typeof AuthenticatedPurchasePaymentsIdIndexRoute
   '/_authenticated/purchase/payments/create/': typeof AuthenticatedPurchasePaymentsCreateIndexRoute
   '/_authenticated/suppliers/$id/edit/': typeof AuthenticatedSuppliersIdEditIndexRoute
+  '/_authenticated/ecg/all/edit/builder/$id': typeof AuthenticatedEcgAllEditBuilderIdRoute
+  '/_authenticated/indoor/master/services/edit/$id': typeof AuthenticatedIndoorMasterServicesEditIdRoute
   '/_authenticated/outdoor/master/doctors/$doctorId/edit': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute
   '/_authenticated/pathology/biochemical/all/edit/$reportId': typeof AuthenticatedPathologyBiochemicalAllEditReportIdRoute
   '/_authenticated/pathology/biochemical/all/report/$reportId': typeof AuthenticatedPathologyBiochemicalAllReportReportIdRoute
@@ -1900,7 +1977,10 @@ export interface FileRoutesById {
   '/_authenticated/pathology/urine/urine-for-re-full/edit/$id': typeof AuthenticatedPathologyUrineUrineForReFullEditIdRoute
   '/_authenticated/pathology/urine/urine-for-re-full/report/$reportId': typeof AuthenticatedPathologyUrineUrineForReFullReportReportIdRoute
   '/_authenticated/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
+  '/_authenticated/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
+  '/_authenticated/x-ray/all/edit/builder/$id': typeof AuthenticatedXRayAllEditBuilderIdRoute
   '/_authenticated/indoor/master/bed-cabin-list/create/': typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
+  '/_authenticated/indoor/master/services/create/': typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
   '/_authenticated/outdoor/master/doctors/$doctorId/': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
   '/_authenticated/outdoor/master/tests/create/': typeof AuthenticatedOutdoorMasterTestsCreateIndexRoute
   '/_authenticated/outdoor/reception/invoices/create/': typeof AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute
@@ -1999,6 +2079,7 @@ export interface FileRouteTypes {
     | '/ultrasonogram/all'
     | '/x-ray/all'
     | '/ecg/all/edit/$id'
+    | '/indoor/master/services/$id'
     | '/outdoor/master/categories/$id'
     | '/outdoor/master/departments/$id'
     | '/outdoor/master/doctors/create'
@@ -2020,7 +2101,9 @@ export interface FileRouteTypes {
     | '/customers/$id/edit'
     | '/indoor/master/anasthesia-types'
     | '/indoor/master/bed-cabin-list'
+    | '/indoor/master/doctor-types'
     | '/indoor/master/operation-types'
+    | '/indoor/master/patient-types'
     | '/indoor/master/service-categories'
     | '/indoor/master/services'
     | '/indoor/master/treatment-outcomes'
@@ -2062,6 +2145,8 @@ export interface FileRouteTypes {
     | '/purchase/payments/$id'
     | '/purchase/payments/create'
     | '/suppliers/$id/edit'
+    | '/ecg/all/edit/builder/$id'
+    | '/indoor/master/services/edit/$id'
     | '/outdoor/master/doctors/$doctorId/edit'
     | '/pathology/biochemical/all/edit/$reportId'
     | '/pathology/biochemical/all/report/$reportId'
@@ -2093,7 +2178,10 @@ export interface FileRouteTypes {
     | '/pathology/urine/urine-for-re-full/edit/$id'
     | '/pathology/urine/urine-for-re-full/report/$reportId'
     | '/pathology/urine/urine-for-sugar/report/$reportId'
+    | '/ultrasonogram/all/edit/builder/$id'
+    | '/x-ray/all/edit/builder/$id'
     | '/indoor/master/bed-cabin-list/create'
+    | '/indoor/master/services/create'
     | '/outdoor/master/doctors/$doctorId'
     | '/outdoor/master/tests/create'
     | '/outdoor/reception/invoices/create'
@@ -2189,6 +2277,7 @@ export interface FileRouteTypes {
     | '/ultrasonogram/all'
     | '/x-ray/all'
     | '/ecg/all/edit/$id'
+    | '/indoor/master/services/$id'
     | '/outdoor/master/categories/$id'
     | '/outdoor/master/departments/$id'
     | '/outdoor/master/doctors/create'
@@ -2210,7 +2299,9 @@ export interface FileRouteTypes {
     | '/customers/$id/edit'
     | '/indoor/master/anasthesia-types'
     | '/indoor/master/bed-cabin-list'
+    | '/indoor/master/doctor-types'
     | '/indoor/master/operation-types'
+    | '/indoor/master/patient-types'
     | '/indoor/master/service-categories'
     | '/indoor/master/services'
     | '/indoor/master/treatment-outcomes'
@@ -2252,6 +2343,8 @@ export interface FileRouteTypes {
     | '/purchase/payments/$id'
     | '/purchase/payments/create'
     | '/suppliers/$id/edit'
+    | '/ecg/all/edit/builder/$id'
+    | '/indoor/master/services/edit/$id'
     | '/outdoor/master/doctors/$doctorId/edit'
     | '/pathology/biochemical/all/edit/$reportId'
     | '/pathology/biochemical/all/report/$reportId'
@@ -2283,7 +2376,10 @@ export interface FileRouteTypes {
     | '/pathology/urine/urine-for-re-full/edit/$id'
     | '/pathology/urine/urine-for-re-full/report/$reportId'
     | '/pathology/urine/urine-for-sugar/report/$reportId'
+    | '/ultrasonogram/all/edit/builder/$id'
+    | '/x-ray/all/edit/builder/$id'
     | '/indoor/master/bed-cabin-list/create'
+    | '/indoor/master/services/create'
     | '/outdoor/master/doctors/$doctorId'
     | '/outdoor/master/tests/create'
     | '/outdoor/reception/invoices/create'
@@ -2383,6 +2479,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ultrasonogram/all/'
     | '/_authenticated/x-ray/all/'
     | '/_authenticated/ecg/all/edit/$id'
+    | '/_authenticated/indoor/master/services/$id'
     | '/_authenticated/outdoor/master/categories/$id'
     | '/_authenticated/outdoor/master/departments/$id'
     | '/_authenticated/outdoor/master/doctors/create'
@@ -2404,7 +2501,9 @@ export interface FileRouteTypes {
     | '/_authenticated/customers/$id/edit/'
     | '/_authenticated/indoor/master/anasthesia-types/'
     | '/_authenticated/indoor/master/bed-cabin-list/'
+    | '/_authenticated/indoor/master/doctor-types/'
     | '/_authenticated/indoor/master/operation-types/'
+    | '/_authenticated/indoor/master/patient-types/'
     | '/_authenticated/indoor/master/service-categories/'
     | '/_authenticated/indoor/master/services/'
     | '/_authenticated/indoor/master/treatment-outcomes/'
@@ -2446,6 +2545,8 @@ export interface FileRouteTypes {
     | '/_authenticated/purchase/payments/$id/'
     | '/_authenticated/purchase/payments/create/'
     | '/_authenticated/suppliers/$id/edit/'
+    | '/_authenticated/ecg/all/edit/builder/$id'
+    | '/_authenticated/indoor/master/services/edit/$id'
     | '/_authenticated/outdoor/master/doctors/$doctorId/edit'
     | '/_authenticated/pathology/biochemical/all/edit/$reportId'
     | '/_authenticated/pathology/biochemical/all/report/$reportId'
@@ -2477,7 +2578,10 @@ export interface FileRouteTypes {
     | '/_authenticated/pathology/urine/urine-for-re-full/edit/$id'
     | '/_authenticated/pathology/urine/urine-for-re-full/report/$reportId'
     | '/_authenticated/pathology/urine/urine-for-sugar/report/$reportId'
+    | '/_authenticated/ultrasonogram/all/edit/builder/$id'
+    | '/_authenticated/x-ray/all/edit/builder/$id'
     | '/_authenticated/indoor/master/bed-cabin-list/create/'
+    | '/_authenticated/indoor/master/services/create/'
     | '/_authenticated/outdoor/master/doctors/$doctorId/'
     | '/_authenticated/outdoor/master/tests/create/'
     | '/_authenticated/outdoor/reception/invoices/create/'
@@ -3397,11 +3501,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndoorMasterServiceCategoriesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/indoor/master/patient-types/': {
+      id: '/_authenticated/indoor/master/patient-types/'
+      path: '/indoor/master/patient-types'
+      fullPath: '/indoor/master/patient-types'
+      preLoaderRoute: typeof AuthenticatedIndoorMasterPatientTypesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/indoor/master/operation-types/': {
       id: '/_authenticated/indoor/master/operation-types/'
       path: '/indoor/master/operation-types'
       fullPath: '/indoor/master/operation-types'
       preLoaderRoute: typeof AuthenticatedIndoorMasterOperationTypesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/indoor/master/doctor-types/': {
+      id: '/_authenticated/indoor/master/doctor-types/'
+      path: '/indoor/master/doctor-types'
+      fullPath: '/indoor/master/doctor-types'
+      preLoaderRoute: typeof AuthenticatedIndoorMasterDoctorTypesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/indoor/master/bed-cabin-list/': {
@@ -3551,6 +3669,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOutdoorMasterCategoriesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/indoor/master/services/$id': {
+      id: '/_authenticated/indoor/master/services/$id'
+      path: '/indoor/master/services/$id'
+      fullPath: '/indoor/master/services/$id'
+      preLoaderRoute: typeof AuthenticatedIndoorMasterServicesIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ecg/all/edit/$id': {
       id: '/_authenticated/ecg/all/edit/$id'
       path: '/ecg/all/edit/$id'
@@ -3593,11 +3718,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/indoor/master/services/create/': {
+      id: '/_authenticated/indoor/master/services/create/'
+      path: '/indoor/master/services/create'
+      fullPath: '/indoor/master/services/create'
+      preLoaderRoute: typeof AuthenticatedIndoorMasterServicesCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/indoor/master/bed-cabin-list/create/': {
       id: '/_authenticated/indoor/master/bed-cabin-list/create/'
       path: '/indoor/master/bed-cabin-list/create'
       fullPath: '/indoor/master/bed-cabin-list/create'
       preLoaderRoute: typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/x-ray/all/edit/builder/$id': {
+      id: '/_authenticated/x-ray/all/edit/builder/$id'
+      path: '/x-ray/all/edit/builder/$id'
+      fullPath: '/x-ray/all/edit/builder/$id'
+      preLoaderRoute: typeof AuthenticatedXRayAllEditBuilderIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ultrasonogram/all/edit/builder/$id': {
+      id: '/_authenticated/ultrasonogram/all/edit/builder/$id'
+      path: '/ultrasonogram/all/edit/builder/$id'
+      fullPath: '/ultrasonogram/all/edit/builder/$id'
+      preLoaderRoute: typeof AuthenticatedUltrasonogramAllEditBuilderIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/pathology/urine/urine-for-sugar/report/$reportId': {
@@ -3817,6 +3963,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOutdoorMasterDoctorsDoctorIdEditRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/indoor/master/services/edit/$id': {
+      id: '/_authenticated/indoor/master/services/edit/$id'
+      path: '/indoor/master/services/edit/$id'
+      fullPath: '/indoor/master/services/edit/$id'
+      preLoaderRoute: typeof AuthenticatedIndoorMasterServicesEditIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ecg/all/edit/builder/$id': {
+      id: '/_authenticated/ecg/all/edit/builder/$id'
+      path: '/ecg/all/edit/builder/$id'
+      fullPath: '/ecg/all/edit/builder/$id'
+      preLoaderRoute: typeof AuthenticatedEcgAllEditBuilderIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/pathology/immunology/all/edit/$id/': {
       id: '/_authenticated/pathology/immunology/all/edit/$id/'
       path: '/pathology/immunology/all/edit/$id'
@@ -3944,6 +4104,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedUltrasonogramAllIndexRoute: typeof AuthenticatedUltrasonogramAllIndexRoute
   AuthenticatedXRayAllIndexRoute: typeof AuthenticatedXRayAllIndexRoute
   AuthenticatedEcgAllEditIdRoute: typeof AuthenticatedEcgAllEditIdRoute
+  AuthenticatedIndoorMasterServicesIdRoute: typeof AuthenticatedIndoorMasterServicesIdRoute
   AuthenticatedOutdoorMasterCategoriesIdRoute: typeof AuthenticatedOutdoorMasterCategoriesIdRoute
   AuthenticatedOutdoorMasterDepartmentsIdRoute: typeof AuthenticatedOutdoorMasterDepartmentsIdRoute
   AuthenticatedOutdoorMasterDoctorsCreateRoute: typeof AuthenticatedOutdoorMasterDoctorsCreateRoute
@@ -3965,7 +4126,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCustomersIdEditIndexRoute: typeof AuthenticatedCustomersIdEditIndexRoute
   AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute: typeof AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute
   AuthenticatedIndoorMasterBedCabinListIndexRoute: typeof AuthenticatedIndoorMasterBedCabinListIndexRoute
+  AuthenticatedIndoorMasterDoctorTypesIndexRoute: typeof AuthenticatedIndoorMasterDoctorTypesIndexRoute
   AuthenticatedIndoorMasterOperationTypesIndexRoute: typeof AuthenticatedIndoorMasterOperationTypesIndexRoute
+  AuthenticatedIndoorMasterPatientTypesIndexRoute: typeof AuthenticatedIndoorMasterPatientTypesIndexRoute
   AuthenticatedIndoorMasterServiceCategoriesIndexRoute: typeof AuthenticatedIndoorMasterServiceCategoriesIndexRoute
   AuthenticatedIndoorMasterServicesIndexRoute: typeof AuthenticatedIndoorMasterServicesIndexRoute
   AuthenticatedIndoorMasterTreatmentOutcomesIndexRoute: typeof AuthenticatedIndoorMasterTreatmentOutcomesIndexRoute
@@ -4007,6 +4170,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPurchasePaymentsIdIndexRoute: typeof AuthenticatedPurchasePaymentsIdIndexRoute
   AuthenticatedPurchasePaymentsCreateIndexRoute: typeof AuthenticatedPurchasePaymentsCreateIndexRoute
   AuthenticatedSuppliersIdEditIndexRoute: typeof AuthenticatedSuppliersIdEditIndexRoute
+  AuthenticatedEcgAllEditBuilderIdRoute: typeof AuthenticatedEcgAllEditBuilderIdRoute
+  AuthenticatedIndoorMasterServicesEditIdRoute: typeof AuthenticatedIndoorMasterServicesEditIdRoute
   AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute: typeof AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute
   AuthenticatedPathologyBiochemicalAllEditReportIdRoute: typeof AuthenticatedPathologyBiochemicalAllEditReportIdRoute
   AuthenticatedPathologyBiochemicalAllReportReportIdRoute: typeof AuthenticatedPathologyBiochemicalAllReportReportIdRoute
@@ -4038,7 +4203,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPathologyUrineUrineForReFullEditIdRoute: typeof AuthenticatedPathologyUrineUrineForReFullEditIdRoute
   AuthenticatedPathologyUrineUrineForReFullReportReportIdRoute: typeof AuthenticatedPathologyUrineUrineForReFullReportReportIdRoute
   AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute: typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
+  AuthenticatedUltrasonogramAllEditBuilderIdRoute: typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
+  AuthenticatedXRayAllEditBuilderIdRoute: typeof AuthenticatedXRayAllEditBuilderIdRoute
   AuthenticatedIndoorMasterBedCabinListCreateIndexRoute: typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
+  AuthenticatedIndoorMasterServicesCreateIndexRoute: typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
   AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute: typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
   AuthenticatedOutdoorMasterTestsCreateIndexRoute: typeof AuthenticatedOutdoorMasterTestsCreateIndexRoute
   AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute: typeof AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute
@@ -4151,6 +4319,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedUltrasonogramAllIndexRoute,
   AuthenticatedXRayAllIndexRoute: AuthenticatedXRayAllIndexRoute,
   AuthenticatedEcgAllEditIdRoute: AuthenticatedEcgAllEditIdRoute,
+  AuthenticatedIndoorMasterServicesIdRoute:
+    AuthenticatedIndoorMasterServicesIdRoute,
   AuthenticatedOutdoorMasterCategoriesIdRoute:
     AuthenticatedOutdoorMasterCategoriesIdRoute,
   AuthenticatedOutdoorMasterDepartmentsIdRoute:
@@ -4191,8 +4361,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute,
   AuthenticatedIndoorMasterBedCabinListIndexRoute:
     AuthenticatedIndoorMasterBedCabinListIndexRoute,
+  AuthenticatedIndoorMasterDoctorTypesIndexRoute:
+    AuthenticatedIndoorMasterDoctorTypesIndexRoute,
   AuthenticatedIndoorMasterOperationTypesIndexRoute:
     AuthenticatedIndoorMasterOperationTypesIndexRoute,
+  AuthenticatedIndoorMasterPatientTypesIndexRoute:
+    AuthenticatedIndoorMasterPatientTypesIndexRoute,
   AuthenticatedIndoorMasterServiceCategoriesIndexRoute:
     AuthenticatedIndoorMasterServiceCategoriesIndexRoute,
   AuthenticatedIndoorMasterServicesIndexRoute:
@@ -4275,6 +4449,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedPurchasePaymentsCreateIndexRoute,
   AuthenticatedSuppliersIdEditIndexRoute:
     AuthenticatedSuppliersIdEditIndexRoute,
+  AuthenticatedEcgAllEditBuilderIdRoute: AuthenticatedEcgAllEditBuilderIdRoute,
+  AuthenticatedIndoorMasterServicesEditIdRoute:
+    AuthenticatedIndoorMasterServicesEditIdRoute,
   AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute:
     AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute,
   AuthenticatedPathologyBiochemicalAllEditReportIdRoute:
@@ -4337,8 +4514,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedPathologyUrineUrineForReFullReportReportIdRoute,
   AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute:
     AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute,
+  AuthenticatedUltrasonogramAllEditBuilderIdRoute:
+    AuthenticatedUltrasonogramAllEditBuilderIdRoute,
+  AuthenticatedXRayAllEditBuilderIdRoute:
+    AuthenticatedXRayAllEditBuilderIdRoute,
   AuthenticatedIndoorMasterBedCabinListCreateIndexRoute:
     AuthenticatedIndoorMasterBedCabinListCreateIndexRoute,
+  AuthenticatedIndoorMasterServicesCreateIndexRoute:
+    AuthenticatedIndoorMasterServicesCreateIndexRoute,
   AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute:
     AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute,
   AuthenticatedOutdoorMasterTestsCreateIndexRoute:

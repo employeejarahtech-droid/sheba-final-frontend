@@ -9,50 +9,23 @@ import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
-import { getCookie } from '@/lib/cookies';
 import { useState } from 'react';
+import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
+import { topNav } from '@/data/data';
 
-
-export const Route = createFileRoute(
-  '/_authenticated/pathology/biochemical/all/',
-)({
+export const Route = createFileRoute('/_authenticated/pathology/biochemical/all/')({
   component: AllReportsBiochemical,
 })
 
-const topNav = [
-  {
-    title: 'Overview',
-    href: 'dashboard/overview',
-    isActive: true,
-    disabled: false,
-  },
-  {
-    title: 'Customers',
-    href: 'dashboard/customers',
-    isActive: false,
-    disabled: true,
-  },
-  {
-    title: 'Products',
-    href: 'dashboard/products',
-    isActive: false,
-    disabled: true,
-  },
-  {
-    title: 'Settings',
-    href: 'dashboard/settings',
-    isActive: false,
-    disabled: true,
-  },
-]
 
 type ReportsItem = {
-  id: string;
-  receiptId: string;
-  patientName: string;
-  tests: string[];
-  date: string;
+  ReciptID: number;
+  PatientId: number | null;
+  PatientName: string | null;
+  Date: string | null;
+  Tests: string;
+  Status: string;
 };
 
 function AllReportsBiochemical() {
@@ -86,65 +59,65 @@ function AllReportsBiochemical() {
         },
   });
 
-  console.log('BioChemical All', biochemicalAllReports);
-
 
   const columns: ColumnDef<ReportsItem>[] = [
-    // Row selection
-
     {
-      accessorKey: "invoice_id",
+      accessorKey: "ReciptID",
       header: "Receipt ID",
     },
     {
-      accessorKey: "patient_name",
+      accessorKey: "PatientId",
+      header: "Patient ID",
+    },
+    {
+      accessorKey: "PatientName",
       header: "Patient Name",
-    },
-
-    // // ✅ FIXED Tests column
-    // {
-    //   accessorKey: "tests",
-    //   header: "Tests",
-    //   cell: ({ row }) => {
-    //     const tests = row.getValue("tests") as string[];
-    //     return tests.join(", ");
-    //   },
-    // },
-
-    {
-      accessorKey: "created_at",
-      header: "Date",
-    },
-
-    {
-      accessorKey: "test_id",
-      header: "Test",
       cell: ({ row }) => {
-        const tests = row.getValue("test_id");
-        return tests;
+        const patientName = row.getValue("PatientName") as string | null;
+        return patientName || '-';
       }
     },
-
     {
-      accessorKey: "test_result",
-      header: "Test Result",
+      accessorKey: "Date",
+      header: "Date",
+      cell: ({ row }) => {
+        const date = row.getValue("Date") as string | null;
+        return date ? new Date(date).toLocaleDateString() : '-';
+      }
     },
+    {
+      accessorKey: "Tests",
+      header: "Biochemical Record IDs",
+      cell: ({ row }) => {
+        const tests = row.getValue("Tests") as string;
+        if (!tests) return '-';
 
-    // {
-    //   accessorKey: "status",
-    //   header: "Status",
-    //   cell: ({ row }) => {
-    //     const status = row.getValue("status") as string;
-    //     const color =
-    //       status === "passed"
-    //         ? "bg-green-500"
-    //         : status === "failed"
-    //           ? "bg-red-500"
-    //           : "bg-yellow-500";
-
-    //     return <Badge className={color + " text-white"}>{status}</Badge>;
-    //   },
-    // },
+        // Split comma-separated IDs and display as badges
+        const testIds = tests.split(',').filter(id => id.trim() !== '');
+        return (
+          <div className="flex flex-wrap gap-1">
+            {testIds.map((id, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors cursor-pointer"
+                title={`Biochemical Record ID: ${id.trim()}`}
+              >
+                {id.trim()}
+              </span>
+            ))}
+          </div>
+        );
+      }
+    },
+    {
+      accessorKey: "Status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.getValue("Status") as string;
+        const statusColor = status === 'Completed' ? 'text-green-600' : 'text-yellow-600';
+        return <span className={statusColor}>{status}</span>;
+      }
+    },
     // Actions Column
     {
       id: "actions",
@@ -154,15 +127,15 @@ function AllReportsBiochemical() {
 
         return (
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => alert("View " + item.id)}>
+            <Button size="sm" variant="outline" onClick={() => alert("View " + item.ReciptID)}>
               View
             </Button>
-            <Link to={`/pathology/biochemical/all/edit/$reportId`} params={{ reportId: item.id }}>
+            <Link to={`/pathology/biochemical/all/edit/$reportId`} params={{ reportId: String(item.ReciptID) }}>
               <Button size="sm" variant="default">
                 Edit
               </Button>
             </Link>
-            <Button size="sm" variant="destructive" onClick={() => alert("Delete " + item.id)}>
+            <Button size="sm" variant="destructive" onClick={() => alert("Delete " + item.ReciptID)}>
               Delete
             </Button>
           </div>
@@ -186,7 +159,7 @@ function AllReportsBiochemical() {
         <div className="mb-4">
           <h1 className='text-2xl font-bold tracking-tight'>All Reports (Biochemical)</h1>
         </div>
-        <DataTable columns={columns} data={biochemicalAllReports?.data.items || []} meta={biochemicalAllReports?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
+        <DataTable columns={columns} data={biochemicalAllReports?.data?.items || []} meta={biochemicalAllReports?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
       </Main>
     </>
 

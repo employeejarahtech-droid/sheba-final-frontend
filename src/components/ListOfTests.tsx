@@ -132,7 +132,11 @@ export default function ListOfTests() {
             header: "Match Table Name",
             cell: ({ row }) => {
                 const matchTableName = row.original.match_table_name;
-                return matchTableName ? matchTableName : "N/A";
+                return matchTableName ? (
+                    matchTableName
+                ) : (
+                    <span className="text-red-500 font-semibold">N/A</span>
+                );
             }
         },
         {
@@ -144,7 +148,7 @@ export default function ListOfTests() {
 
                 return (
                     <div className="flex flex-col">
-                        <span>{category?.name ?? "N/A"}</span>
+                        <span>{category?.name ?? <span className="text-red-500 font-semibold">N/A</span>}</span>
                         <span className="text-xs text-muted-foreground">
                             {department?.name}
                         </span>

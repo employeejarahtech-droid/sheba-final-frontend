@@ -13,6 +13,8 @@ import {
   List,
   Scale,
   PieChart,
+  TrendingUp,
+  TrendingDown,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -173,6 +175,14 @@ export const sidebarData: SidebarData = {
             {
               title: '- Bed Cabin List',
               url: '/indoor/master/bed-cabin-list',
+            },
+            {
+              title: '- List of Doctor Type',
+              url: '/indoor/master/doctor-types',
+            },
+            {
+              title: '- List of Patient Type',
+              url: '/indoor/master/patient-types',
             },
           ],
         },
@@ -494,6 +504,21 @@ export const sidebarData: SidebarData = {
               title: "Profit & Loss",
               url: "/accounting/reports/profit-and-loss",
               icon: PieChart,
+            },
+            {
+              title: "Balance Sheet",
+              url: "/accounting/reports/balance-sheet",
+              icon: FileText,
+            },
+            {
+              title: "Income List",
+              url: "/accounting/income",
+              icon: TrendingUp,
+            },
+            {
+              title: "Expense List",
+              url: "/accounting/expense",
+              icon: TrendingDown,
             },
           ],
         },

@@ -12,6 +12,7 @@ import { useState, useMemo } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { Stethoscope, Award, Globe, MapPin, Plus } from 'lucide-react'
+import { formatId } from '@/lib/prefix-format'
 
 
 type DoctorItem = {
@@ -25,6 +26,8 @@ type DoctorItem = {
     phone: string;
     mobile: string;
     email: string;
+    doctor_id?: string;
+    sequence?: number;
 };
 
 export default function Doctors() {
@@ -33,6 +36,20 @@ export default function Doctors() {
     const limit = 10;
 
     const token = getCookie('accessToken');
+
+    // Fetch app settings for doctor prefix format
+    const { data: settings } = useQuery({
+        queryKey: ['app-settings'],
+        queryFn: async () => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/app-settings`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) throw new Error('Failed to fetch settings');
+            const json = await res.json();
+            return json.data || {};
+        },
+        enabled: !!token,
+    });
 
     const { data } = useQuery({
         queryKey: ["doctor", page, search],
@@ -120,6 +137,7 @@ export default function Doctors() {
 
     //console.log(data?.data);
 
+    // Define columns with access to settings for formatted ID
     const columns: ColumnDef<DoctorItem>[] = [
         // Row selection
         {
@@ -143,7 +161,26 @@ export default function Doctors() {
         },
         {
             accessorKey: "id",
-            header: "ID",
+            header: "Doctor ID",
+            cell: ({ row }) => {
+                const item = row.original;
+
+                // If API returns formatted doctor_id, use it
+                if (item.doctor_id) {
+                    return <span className="font-mono font-medium">{item.doctor_id}</span>;
+                }
+
+                // Otherwise, format using prefix settings
+                // Use sequence if available, otherwise use numeric part of id
+                const sequence = item.sequence || parseInt(String(item.id).replace(/\D/g, '')) || 0;
+                const doctorPrefix = settings?.doctorPrefix || 'DOC-{0000}';
+
+                return (
+                    <span className="font-mono font-medium">
+                        {formatId(doctorPrefix, sequence)}
+                    </span>
+                );
+            },
         },
         {
             accessorKey: "doctor_name",
@@ -226,7 +263,7 @@ export default function Doctors() {
                 <h1 className="text-2xl font-bold tracking-tight">List of Doctor</h1>
                 <Link to="/outdoor/master/doctors/create">
                     <Button>
-                        <Plus className="h-4 w-4 mr-2" />
+                        <Plus className="h-4 w-4" />
                         Add Doctor
                     </Button>
                 </Link>

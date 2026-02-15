@@ -130,11 +130,11 @@ export function EditCategoryForm({
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetContent side="right" className="w-[400px] sm:w-[450px] overflow-y-auto">
-                <SheetHeader>
+                <SheetHeader className="pb-0">
                     <SheetTitle>Update Category</SheetTitle>
                 </SheetHeader>
 
-                <div className="space-y-6 mt-6 p-4">
+                <div className="space-y-6 p-4 pt-2">
 
                     {/* Department Selection */}
                     <div className="space-y-2">

@@ -20,11 +20,12 @@ export const Route = createFileRoute('/_authenticated/x-ray/all/')({
 
 
 type ReportsItem = {
-  id: string;
-  receiptId: string;
-  patientName: string;
-  tests: string[];
-  date: string;
+  ReciptID: number;
+  PatientId: number | null;
+  PatientName: string | null;
+  Date: string | null;
+  Tests: string;
+  Status: string;
 };
 
 function AllXRayReports() {
@@ -58,45 +59,63 @@ function AllXRayReports() {
         },
   });
 
-  console.log('X-Ray All Reports', xrayAllReports);
-
   const columns: ColumnDef<ReportsItem>[] = [
     {
-      accessorKey: "invoice_id",
+      accessorKey: "ReciptID",
       header: "Receipt ID",
     },
     {
-      accessorKey: "patient_name",
+      accessorKey: "PatientId",
+      header: "Patient ID",
+    },
+    {
+      accessorKey: "PatientName",
       header: "Patient Name",
-    },
-
-    // // ✅ FIXED Tests column
-    // {
-    //   accessorKey: "tests",
-    //   header: "Tests",
-    //   cell: ({ row }) => {
-    //     const tests = row.getValue("tests") as string[];
-    //     return tests.join(", ");
-    //   },
-    // },
-
-    {
-      accessorKey: "created_at",
-      header: "Date",
-    },
-
-    {
-      accessorKey: "test_id",
-      header: "Test",
       cell: ({ row }) => {
-        const tests = row.getValue("test_id");
-        return tests;
+        const patientName = row.getValue("PatientName") as string | null;
+        return patientName || '-';
       }
     },
-
     {
-      accessorKey: "test_result",
-      header: "Test Result",
+      accessorKey: "Date",
+      header: "Date",
+      cell: ({ row }) => {
+        const date = row.getValue("Date") as string | null;
+        return date ? new Date(date).toLocaleDateString() : '-';
+      }
+    },
+    {
+      accessorKey: "Tests",
+      header: "X-Ray Record IDs",
+      cell: ({ row }) => {
+        const tests = row.getValue("Tests") as string;
+        if (!tests) return '-';
+
+        // Split comma-separated IDs and display as badges
+        const testIds = tests.split(',').filter(id => id.trim() !== '');
+        return (
+          <div className="flex flex-wrap gap-1">
+            {testIds.map((id, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors cursor-pointer"
+                title={`X-Ray Record ID: ${id.trim()}`}
+              >
+                {id.trim()}
+              </span>
+            ))}
+          </div>
+        );
+      }
+    },
+    {
+      accessorKey: "Status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.getValue("Status") as string;
+        const statusColor = status === 'Completed' ? 'text-green-600' : 'text-yellow-600';
+        return <span className={statusColor}>{status}</span>;
+      }
     },
     // Actions Column
     {
@@ -107,15 +126,15 @@ function AllXRayReports() {
 
         return (
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => alert("View " + item.id)}>
+            <Button size="sm" variant="outline" onClick={() => alert("View " + item.ReciptID)}>
               View
             </Button>
-            <Link to={`/x-ray/all/edit/$id`} params={{ id: item.id }}>
+            <Link to={`/x-ray/all/edit/$id`} params={{ id: String(item.ReciptID) }}>
               <Button size="sm" variant="default">
                 Edit
               </Button>
             </Link>
-            <Button size="sm" variant="destructive" onClick={() => alert("Delete " + item.id)}>
+            <Button size="sm" variant="destructive" onClick={() => alert("Delete " + item.ReciptID)}>
               Delete
             </Button>
           </div>
@@ -144,6 +163,8 @@ function AllXRayReports() {
     </>
 
   )
+
 }
+
 
 

@@ -126,6 +126,9 @@ export type ChartOfAccount = {
     };
     children?: ChartOfAccount[];
     level?: number;
+    debit?: number;
+    credit?: number;
+    balance?: number;
 };
 
 // -------------------- TRANSACTIONS --------------------

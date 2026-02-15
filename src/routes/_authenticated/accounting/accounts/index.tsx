@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import React from "react";
 import { Plus, Edit, ChevronsUpDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +43,7 @@ import {
     useLazyGetAccountingAccountsQuery,
     useAddAccountingAccountMutation,
     useUpdateAccountingAccountMutation,
+    useGetTrialBalanceQuery,
 } from "@/features/accounting/accountingQueries";
 import { ChartOfAccount } from "@/types/accounting.types";
 import { toast } from "sonner";
@@ -72,6 +74,38 @@ function ChartOfAccounts() {
     const [editingAccount, setEditingAccount] = useState<ChartOfAccount | null>(null);
 
     const { data: accountsData, isFetching } = useGetAccountingAccountsQuery({ page, limit, search });
+    const { data: trialBalanceData } = useGetTrialBalanceQuery();
+
+    // Create a map of account balances from trial balance
+    const balanceMap = React.useMemo(() => {
+        const map = new Map<string, { debit: number; credit: number; balance: number }>();
+        const items = trialBalanceData?.data;
+        if (Array.isArray(items)) {
+            items.forEach((item: any) => {
+                const debit = parseFloat(item.debit) || 0;
+                const credit = parseFloat(item.credit) || 0;
+                map.set(item.account, {
+                    debit,
+                    credit,
+                    balance: debit - credit,
+                });
+            });
+        }
+        return map;
+    }, [trialBalanceData]);
+
+    // Merge accounts with their balances
+    const accountsWithBalances = React.useMemo(() => {
+        return accountsData?.data?.map((account) => {
+            const balance = balanceMap.get(account.name);
+            return {
+                ...account,
+                debit: balance?.debit,
+                credit: balance?.credit,
+                balance: balance?.balance,
+            };
+        }) || [];
+    }, [accountsData, balanceMap]);
 
     const { mutateAsync: addAccountingAccount, isPending: isAdding } = useAddAccountingAccountMutation();
     const { mutateAsync: updateAccountingAccount, isPending: isUpdating } = useUpdateAccountingAccountMutation();
@@ -190,6 +224,41 @@ function ChartOfAccounts() {
         },
         { accessorKey: "type", header: "Type", cell: ({ row }) => <Badge variant="outline">{row.original.type}</Badge> },
         {
+            accessorKey: "debit",
+            header: () => <div className="text-right">Debit</div>,
+            cell: ({ row }) => (
+                <div className="text-right font-medium text-emerald-600">
+                    {row.original.debit !== undefined ? row.original.debit.toFixed(2) : "-"}
+                </div>
+            ),
+        },
+        {
+            accessorKey: "credit",
+            header: () => <div className="text-right">Credit</div>,
+            cell: ({ row }) => (
+                <div className="text-right font-medium text-red-600">
+                    {row.original.credit !== undefined ? row.original.credit.toFixed(2) : "-"}
+                </div>
+            ),
+        },
+        {
+            accessorKey: "balance",
+            header: () => <div className="text-right">Balance</div>,
+            cell: ({ row }) => {
+                const balance = row.original.balance;
+                const balanceClass = balance > 0
+                    ? "text-emerald-600"
+                    : balance < 0
+                        ? "text-red-600"
+                        : "text-muted-foreground";
+                return (
+                    <div className={`text-right font-semibold ${balanceClass}`}>
+                        {balance !== undefined ? balance.toFixed(2) : "-"}
+                    </div>
+                );
+            },
+        },
+        {
             id: "actions",
             header: () => <div className="text-right">Actions</div>,
             cell: ({ row }) => (
@@ -287,7 +356,7 @@ function ChartOfAccounts() {
                     <CardContent>
                         <DataTable
                             columns={accountColumns}
-                            data={accountsData?.data || []}
+                            data={accountsWithBalances}
                             pageIndex={page - 1}
                             pageSize={limit}
                             // @ts-ignore

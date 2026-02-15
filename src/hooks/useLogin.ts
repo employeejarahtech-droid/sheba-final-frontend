@@ -15,9 +15,10 @@ export function useLogin() {
     },
 
     onSuccess: (res) => {
- 
-      const token = res.data?.token;
-      const user = res.data?.user;
+      // Handle nested data structure: { status, message, data: { user, accessToken } }
+      const data = res.data || res;
+      const token = data.accessToken || data.token;
+      const user = data.user;
 
       if (!token || !user) {
         toast.error("Invalid response from server", { id: "login-toast" });
@@ -26,9 +27,6 @@ export function useLogin() {
 
       // Save token & user
       setAuth(user, token);
-
-      console.log("user set", user);
-
       toast.success("Login successful!", { id: "login-toast" });
     },
 

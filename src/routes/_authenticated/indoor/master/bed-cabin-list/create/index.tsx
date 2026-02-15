@@ -89,9 +89,9 @@ function CreateBedCabin() {
             </Header>
 
             <Main className="p-6 lg:p-10 w-full flex-1">
-                <div className="space-y-8 max-w-5xl mx-auto">
+                <div className="space-y-6 max-w-5xl mx-auto">
                     {/* Page Header */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 dark:border-gray-800 pb-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-1 border-gray-200 dark:border-gray-800 pb-4">
                         <div>
                             <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent uppercase">
                                 Register New Room/Bed
@@ -116,9 +116,9 @@ function CreateBedCabin() {
                                 className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 border-none px-6 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] font-bold"
                             >
                                 {createMutation.isPending ? (
-                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
+                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                                 ) : (
-                                    <CircleCheck className="h-4 w-4 mr-2" />
+                                    <CircleCheck className="h-4 w-4" />
                                 )}
                                 {createMutation.isPending ? "Registering..." : "Confirm & Register"}
                             </Button>
@@ -127,8 +127,8 @@ function CreateBedCabin() {
 
                     <Form {...form}>
                         <form id="create-bed-cabin-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                            <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg">
-                                <CardHeader className="p-0 border-b border-blue-100 dark:border-blue-900">
+                            <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
+                                <CardHeader className="p-0 border-b-1 border-blue-100 dark:border-blue-900 gap-0">
                                     <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 px-6 py-4 flex items-center gap-4">
                                         <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
                                             <Bed className="h-6 w-6 text-white" />
@@ -143,8 +143,8 @@ function CreateBedCabin() {
                                         </div>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="p-8">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+                                <CardContent className="p-4 md:p-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
                                         {/* Code */}
                                         <FormField<BedCabinValues>
                                             control={form.control}
@@ -178,7 +178,7 @@ function CreateBedCabin() {
                                                     <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Resource Type</FormLabel>
                                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                         <FormControl>
-                                                            <SelectTrigger className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm text-sm">
+                                                            <SelectTrigger className="w-full !h-auto h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm text-sm">
                                                                 <SelectValue placeholder="Select type" />
                                                             </SelectTrigger>
                                                         </FormControl>
@@ -247,7 +247,7 @@ function CreateBedCabin() {
                                         />
                                     </div>
 
-                                    <Separator className="my-10" />
+                                    <Separator className="my-6" />
 
                                     <div className="flex justify-end gap-4">
                                         <Button

@@ -20,12 +20,14 @@ export const Route = createFileRoute(
   component: ReportsImmunology,
 })
 
+
 type ReportsItem = {
-  id: string;
-  receiptId: string;
-  patientName: string;
-  tests: string[];
-  date: string;
+  ReciptID: number;
+  PatientId: number | null;
+  PatientName: string | null;
+  Date: string | null;
+  Tests: string;
+  Status: string;
 };
 
 function ReportsImmunology() {
@@ -39,7 +41,7 @@ function ReportsImmunology() {
     queryKey: ["immunology-all", page, search],
     queryFn: async () => {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/immunology-all/invoices-only?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
+        `${import.meta.env.VITE_API_URL}/api/immunology-all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -59,46 +61,64 @@ function ReportsImmunology() {
         },
   });
 
-  console.log('Immunology All Reports', immunologyAllReports);
-
 
   const columns: ColumnDef<ReportsItem>[] = [
-   {
-      accessorKey: "invoice_id",
+    {
+      accessorKey: "ReciptID",
       header: "Receipt ID",
     },
     {
-      accessorKey: "patient_name",
+      accessorKey: "PatientId",
+      header: "Patient ID",
+    },
+    {
+      accessorKey: "PatientName",
       header: "Patient Name",
-    },
-
-    // // ✅ FIXED Tests column
-    // {
-    //   accessorKey: "tests",
-    //   header: "Tests",
-    //   cell: ({ row }) => {
-    //     const tests = row.getValue("tests") as string[];
-    //     return tests.join(", ");
-    //   },
-    // },
-
-    {
-      accessorKey: "created_at",
-      header: "Date",
-    },
-
-    {
-      accessorKey: "test_id",
-      header: "Test",
       cell: ({ row }) => {
-        const tests = row.getValue("test_id");
-        return tests;
+        const patientName = row.getValue("PatientName") as string | null;
+        return patientName || '-';
       }
     },
-
     {
-      accessorKey: "test_result",
-      header: "Test Result",
+      accessorKey: "Date",
+      header: "Date",
+      cell: ({ row }) => {
+        const date = row.getValue("Date") as string | null;
+        return date ? new Date(date).toLocaleDateString() : '-';
+      }
+    },
+    {
+      accessorKey: "Tests",
+      header: "Immunology Record IDs",
+      cell: ({ row }) => {
+        const tests = row.getValue("Tests") as string;
+        if (!tests) return '-';
+
+        // Split comma-separated IDs and display as badges
+        const testIds = tests.split(',').filter(id => id.trim() !== '');
+        return (
+          <div className="flex flex-wrap gap-1">
+            {testIds.map((id, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors cursor-pointer"
+                title={`Immunology Record ID: ${id.trim()}`}
+              >
+                {id.trim()}
+              </span>
+            ))}
+          </div>
+        );
+      }
+    },
+    {
+      accessorKey: "Status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.getValue("Status") as string;
+        const statusColor = status === 'Completed' ? 'text-green-600' : 'text-yellow-600';
+        return <span className={statusColor}>{status}</span>;
+      }
     },
     // Actions Column
     {
@@ -109,22 +129,21 @@ function ReportsImmunology() {
 
         return (
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => alert("View " + item.id)}>
+            <Button size="sm" variant="outline" onClick={() => alert("View " + item.ReciptID)}>
               View
             </Button>
-
-            <Link to="/pathology/immunology/all/edit/$id" params={{ id: item.id }}>
-              <Button size="sm" variant="default">Edit</Button>
+            <Link to={`/pathology/immunology/all/edit/$id`} params={{ id: String(item.ReciptID) }}>
+              <Button size="sm" variant="default">
+                Edit
+              </Button>
             </Link>
-
-            <Button size="sm" variant="destructive" onClick={() => alert("Delete " + item.id)}>
+            <Button size="sm" variant="destructive" onClick={() => alert("Delete " + item.ReciptID)}>
               Delete
             </Button>
           </div>
         );
       },
     },
-
   ];
 
   return (
@@ -142,7 +161,7 @@ function ReportsImmunology() {
         <div className="mb-4">
           <h1 className='text-2xl font-bold tracking-tight'>All Reports (Immunology)</h1>
         </div>
-        <DataTable columns={columns} data={immunologyAllReports?.data.items || []} meta={immunologyAllReports?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
+        <DataTable columns={columns} data={immunologyAllReports?.data?.items || []} meta={immunologyAllReports?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
       </Main>
     </>
 

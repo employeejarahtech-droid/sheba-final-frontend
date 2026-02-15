@@ -140,7 +140,7 @@ function BedCabinList() {
 
             <Main className="p-6 lg:p-10 w-full flex-1">
                 <div className="space-y-6 max-w-7xl mx-auto">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 dark:border-gray-800 pb-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 dark:border-gray-800 pb-6">
                         <div>
                             <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent uppercase flex items-center gap-3">
                                 Bed & Cabin Management
@@ -154,13 +154,13 @@ function BedCabinList() {
                                 className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 border-none px-6 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] font-bold"
                                 onClick={() => navigate({ to: '/indoor/master/bed-cabin-list/create' })}
                             >
-                                <PlusCircle className="h-4 w-4 mr-2" />
+                                <PlusCircle className="h-4 w-4" />
                                 Add New Room/Bed
                             </Button>
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-card rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+                    <div className="">
                         {isLoading ? (
                             <div className="p-20 text-center text-muted-foreground animate-pulse">
                                 Loading Bed & Cabin data...

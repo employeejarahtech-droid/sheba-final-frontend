@@ -114,7 +114,7 @@ function ViewDoctorPage() {
 
     return (
         <>
-            <Header>
+            <Header fixed>
                 <Search />
                 <div className='ms-auto flex items-center space-x-4'>
                     <ThemeSwitch />
@@ -147,7 +147,7 @@ function ViewDoctorPage() {
                             {/* Info Section */}
                             <div className="flex-1 space-y-4">
                                 <div>
-                                    <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                                    <div className="flex items-center justify-center md:justify-start gap-3 mb-2 flex-wrap">
                                         <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200 px-3 py-1">
                                             {doctorData.speciality}
                                         </Badge>
@@ -155,6 +155,33 @@ function ViewDoctorPage() {
                                             <Star className="h-4 w-4 fill-current mr-1" />
                                             {doctorData.score || "New"}
                                         </div>
+                                        {/* Doctor Type Badges */}
+                                        {(() => {
+                                            const types = typeof doctorData.doctor_type === 'string'
+                                                ? doctorData.doctor_type.split(',').map((t: string) => t.trim())
+                                                : (doctorData.doctor_type || []);
+
+                                                    const typeConfig = {
+                                                        "Surgeon": { icon: "🔪", color: "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800" },
+                                                        "Consultant": { icon: "👨‍⚕️", color: "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800" },
+                                                        "Assistant": { icon: "🤝", color: "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800" },
+                                                        "Normal": { icon: "👤", color: "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700" },
+                                                        "Quak": { icon: "🌙", color: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800" },
+                                                    };
+
+                                                    return types.slice(0, 2).map((type: string, idx: number) => {
+                                                        const config = typeConfig[type as keyof typeof typeConfig] || typeConfig["Normal"];
+                                                        return (
+                                                            <Badge
+                                                                key={idx}
+                                                                className={`${config.color} px-3 py-1 text-xs font-semibold border-2`}
+                                                            >
+                                                                <span className="mr-1">{config.icon}</span>
+                                                                {type}
+                                                            </Badge>
+                                                        );
+                                                    });
+                                                })()}
                                     </div>
                                     <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white tracking-tight">
                                         {doctorData.doctor_name}
@@ -306,6 +333,45 @@ function ViewDoctorPage() {
                                             <p className="text-sm text-muted-foreground leading-relaxed">
                                                 Specialized in {doctorData.speciality}, providing expert care and consultation. Dr. {doctorData.doctor_name} is dedicated to patient well-being and maintaining high medical standards.
                                             </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Doctor Type Section */}
+                                    <div className="space-y-4">
+                                        <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider border-b pb-2">Doctor Type</h3>
+                                        <div className="bg-violet-50 dark:bg-violet-950/20 rounded-2xl p-6 border border-violet-100 dark:border-violet-900/20">
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <User className="h-6 w-6 text-violet-600" />
+                                                <h4 className="font-bold text-gray-900 dark:text-white">Professional Categories</h4>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {(() => {
+                                                    const types = typeof doctorData.doctor_type === 'string'
+                                                        ? doctorData.doctor_type.split(',').map((t: string) => t.trim())
+                                                        : (doctorData.doctor_type || []);
+
+                                                    const typeConfig = {
+                                                        "Surgeon": { icon: "🔪", color: "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800" },
+                                                        "Consultant": { icon: "👨‍⚕️", color: "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800" },
+                                                        "Assistant": { icon: "🤝", color: "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800" },
+                                                        "Normal": { icon: "👤", color: "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700" },
+                                                        "Quak": { icon: "🌙", color: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800" },
+                                                    };
+
+                                                    return types.map((type: string, idx: number) => {
+                                                        const config = typeConfig[type as keyof typeof typeConfig] || typeConfig["Normal"];
+                                                        return (
+                                                            <Badge
+                                                                key={idx}
+                                                                className={`${config.color} px-4 py-2 text-sm font-semibold border-2 shadow-sm`}
+                                                            >
+                                                                <span className="mr-2">{config.icon}</span>
+                                                                {type}
+                                                            </Badge>
+                                                        );
+                                                    });
+                                                })()}
+                                            </div>
                                         </div>
                                     </div>
 

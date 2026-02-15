@@ -127,8 +127,46 @@ export default function DueCollectionDetails() {
         }
     });
 
-    // Helper to update department inputs
+    // Helper to update department inputs with validation
     const handleDeptInputChange = (dept: string, field: 'discount' | 'payment', value: string) => {
+        // Get department data for validation
+        const tests = testsByDept[dept];
+        const deptId = tests?.[0]?.test?.category?.department?.id;
+        const billTotal = deptTotals[dept] || 0;
+        const histDisc = getDeptDiscountAmount(deptId);
+        const histPaid = getDeptPaidAmount(deptId, billTotal);
+
+        // Calculate current due amount
+        const discountedTotal = Math.max(0, billTotal - histDisc);
+        const currentDue = Math.max(0, discountedTotal - histPaid);
+
+        // Get current input values
+        const currentDiscount = field === 'discount' ? value : (deptInputs[dept]?.discount || '0');
+        const currentPayment = field === 'payment' ? value : (deptInputs[dept]?.payment || '0');
+
+        // Validate numeric input (allow empty string, positive numbers and decimals)
+        if (value !== '' && !/^\d*\.?\d*$/.test(value)) {
+            return; // Invalid input, don't update state
+        }
+
+        // Parse numeric values
+        const discountAmt = parseFloat(currentDiscount) || 0;
+        const paymentAmt = parseFloat(currentPayment) || 0;
+
+        // Validate discount doesn't exceed current due
+        if (field === 'discount' && discountAmt > currentDue) {
+            toast.error(`Discount cannot exceed current due (৳${currentDue.toFixed(0)}) for ${dept}`);
+            return;
+        }
+
+        // Validate payment doesn't exceed current due minus discount
+        const maxPayment = Math.max(0, currentDue - discountAmt);
+        if (field === 'payment' && paymentAmt > maxPayment) {
+            toast.error(`Payment cannot exceed due amount (৳${maxPayment.toFixed(0)}) for ${dept}`);
+            return;
+        }
+
+        // All validations passed, update state
         setDeptInputs(prev => ({
             ...prev,
             [dept]: {
@@ -185,6 +223,31 @@ export default function DueCollectionDetails() {
             return;
         }
 
+        // Final validation: Check each department's amounts don't exceed due
+        let hasInvalidAmount = false;
+        Object.entries(deptInputs).forEach(([deptName, inputs]) => {
+            const tests = testsByDept[deptName];
+            const deptId = tests?.[0]?.test?.category?.department?.id;
+            const billTotal = deptTotals[deptName] || 0;
+            const histDisc = getDeptDiscountAmount(deptId);
+            const histPaid = getDeptPaidAmount(deptId, billTotal);
+            const discountedTotal = Math.max(0, billTotal - histDisc);
+            const currentDue = Math.max(0, discountedTotal - histPaid);
+
+            const discountAmt = parseFloat(inputs.discount || '0');
+            const paymentAmt = parseFloat(inputs.payment || '0');
+            const totalReduction = discountAmt + paymentAmt;
+
+            if (totalReduction > currentDue) {
+                toast.error(`${deptName}: Total (৳${totalReduction}) exceeds due amount (৳${currentDue})`);
+                hasInvalidAmount = true;
+            }
+        });
+
+        if (hasInvalidAmount) {
+            return;
+        }
+
         // Calculate totals
         const totalPayment = department_payments.reduce((sum, p) => sum + p.amount, 0);
         const totalDiscount = department_discounts.reduce((sum, d) => sum + d.discount, 0);
@@ -222,6 +285,54 @@ export default function DueCollectionDetails() {
         testsByDept[deptName].push(item);
         deptTotals[deptName] += parseFloat(item.price) || 0;
     });
+
+    // Calculate total bill across all departments
+    const totalBill = Object.values(deptTotals).reduce((sum, val) => sum + val, 0);
+
+    // Calculate total department-wise payments already recorded
+    const totalDeptWisePaid = invoice.department_payments?.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0) || 0;
+
+    // NOTE: We DON'T distribute global payments proportionally because we don't know
+    // which specific departments/tests the payment was for. The payment might have
+    // been for tests in a specific department, so distributing it would be wrong.
+    // Only use department-wise payments that were explicitly recorded.
+    const totalGlobalPaid = Math.max(0, totalPaid - totalDeptWisePaid);
+
+    // Helper to get department-wise paid amount
+    const getDeptPaidAmount = (deptId: number | undefined, deptBillTotal: number): number => {
+        // Only count department-specific payments from database
+        // Do NOT include proportional global payments
+        const deptSpecificPaid = invoice.department_payments
+            ?.filter(p => p.department_id === deptId)
+            .reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0) || 0;
+
+        return deptSpecificPaid;
+    };
+
+    // Helper to get department-wise discount amount
+    const getDeptDiscountAmount = (deptId: number | undefined): number => {
+        const discounts = invoice.department_discounts || [];
+
+        // Filter by department_id - handle both defined and undefined cases
+        const deptDiscounts = deptId === undefined || deptId === null
+            ? discounts.filter(d => !d.department_id || d.department_id === null)
+            : discounts.filter(d => d.department_id === deptId);
+
+        return deptDiscounts.reduce((sum, d) => sum + (parseFloat(d.discount) || 0), 0);
+    };
+
+    // Calculate total due across all departments
+    const totalDueAcrossAllDepts = Object.entries(deptTotals).reduce((sum, [dept]) => {
+        const tests = testsByDept[dept];
+        const deptId = tests?.[0]?.test?.category?.department?.id;
+        const histDisc = getDeptDiscountAmount(deptId);
+        const histPaid = getDeptPaidAmount(deptTotals[dept], deptId);
+        const discountedTotal = Math.max(0, deptTotals[dept] - histDisc);
+        const currentDue = Math.max(0, discountedTotal - histPaid);
+        return sum + currentDue;
+    }, 0);
+
+    const isFullyPaid = totalDueAcrossAllDepts === 0;
 
     return (
         <>
@@ -385,50 +496,74 @@ export default function DueCollectionDetails() {
                                             {Object.entries(deptTotals).map(([dept, billTotal], idx) => {
                                                 // Find Dept ID
                                                 const tests = testsByDept[dept];
-                                                const deptId = tests?.[0]?.test?.category?.department?.id; // Need to ensure type support
+                                                const deptId = tests?.[0]?.test?.category?.department?.id;
 
-                                                // Historical Data (safeguard against missing arrays)
-                                                const histDisc = invoice.department_discounts
-                                                    ?.filter(d => d.department_id === deptId)
-                                                    .reduce((sum, d) => sum + (parseFloat(d.discount) || 0), 0) || 0;
-
-                                                const histPaid = invoice.department_payments
-                                                    ?.filter(p => p.department_id === deptId)
-                                                    .reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0) || 0;
+                                                // Historical Data (using helper functions for proper calculation)
+                                                const histDisc = getDeptDiscountAmount(deptId);
+                                                const histPaid = getDeptPaidAmount(deptId, billTotal);
 
                                                 // Inputs
                                                 const inputDisc = parseFloat(deptInputs[dept]?.discount || "0");
                                                 const inputPay = parseFloat(deptInputs[dept]?.payment || "0");
 
-                                                // Calculations
-                                                const discountedTotal = billTotal - histDisc;
-                                                const currentDue = discountedTotal - histPaid;
-                                                const finalDue = currentDue - inputDisc - inputPay;
+                                                // Calculations with safeguards to prevent negative values
+                                                const discountedTotal = Math.max(0, billTotal - histDisc);
+                                                const currentDue = Math.max(0, discountedTotal - histPaid);
+                                                const finalDue = Math.max(0, currentDue - inputDisc - inputPay);
 
                                                 const isInvalid = finalDue < 0;
+                                                const hasInvalidDiscount = histDisc > billTotal;
+                                                const isPaidOff = currentDue === 0;
 
                                                 return (
-                                                    <tr key={idx} className="border-b last:border-0 hover:bg-muted/50">
+                                                    <tr key={idx} className={`border-b last:border-0 hover:bg-muted/50 ${hasInvalidDiscount ? 'bg-red-50 dark:bg-red-950/20' : ''}`}>
                                                         <td className="p-2 font-medium text-left">{dept}</td>
                                                         <td className="p-2 text-right">{billTotal.toFixed(0)}</td>
-                                                        <td className="p-2 text-right text-muted-foreground">{histDisc.toFixed(0)}</td>
-                                                        <td className="p-2 text-right">{discountedTotal.toFixed(0)}</td>
+                                                        <td className={`p-2 text-right text-muted-foreground ${hasInvalidDiscount ? 'text-red-600 font-bold' : ''}`}>
+                                                            {histDisc.toFixed(0)}
+                                                            {hasInvalidDiscount && <span className="block text-[10px]">⚠️ Invalid!</span>}
+                                                        </td>
+                                                        <td className={`p-2 text-right ${hasInvalidDiscount ? 'text-red-600 font-bold' : ''}`}>
+                                                            {discountedTotal.toFixed(0)}
+                                                        </td>
                                                         <td className="p-2 text-right text-green-600">{histPaid.toFixed(0)}</td>
-                                                        <td className="p-2 text-right font-semibold text-orange-600">{currentDue.toFixed(0)}</td>
+                                                        <td className={`p-2 text-right font-semibold ${hasInvalidDiscount ? 'text-red-600' : 'text-orange-600'}`}>
+                                                            {currentDue.toFixed(0)}
+                                                        </td>
                                                         <td className="p-2">
                                                             <Input
                                                                 className="h-7 text-right p-1"
+                                                                type="number"
+                                                                min="0"
+                                                                step="0.01"
                                                                 value={deptInputs[dept]?.discount || ''}
                                                                 onChange={(e) => handleDeptInputChange(dept, 'discount', e.target.value)}
                                                                 placeholder="0"
+                                                                disabled={isPaidOff}
+                                                                onKeyPress={(e) => {
+                                                                    // Prevent negative sign
+                                                                    if (e.key === '-') {
+                                                                        e.preventDefault();
+                                                                    }
+                                                                }}
                                                             />
                                                         </td>
                                                         <td className="p-2">
                                                             <Input
-                                                                className={`h-7 text-right p-1 ${isInvalid ? 'border-red-500' : ''}`}
+                                                                className={`h-7 text-right p-1 ${isInvalid ? 'border-red-500' : ''} ${isPaidOff ? 'opacity-50' : ''}`}
+                                                                type="number"
+                                                                min="0"
+                                                                step="0.01"
                                                                 value={deptInputs[dept]?.payment || ''}
                                                                 onChange={(e) => handleDeptInputChange(dept, 'payment', e.target.value)}
                                                                 placeholder="0"
+                                                                disabled={isPaidOff}
+                                                                onKeyPress={(e) => {
+                                                                    // Prevent negative sign
+                                                                    if (e.key === '-') {
+                                                                        e.preventDefault();
+                                                                    }
+                                                                }}
                                                             />
                                                         </td>
                                                         <td className={`p-2 text-right font-bold ${isInvalid ? 'text-red-600' : 'text-blue-600'}`}>
@@ -441,21 +576,30 @@ export default function DueCollectionDetails() {
                                         <tfoot className="bg-muted/50 font-bold text-xs uppercase">
                                             <tr>
                                                 <td className="p-2 text-left">Total</td>
-                                                <td className="p-2 text-right">{Object.values(deptTotals).reduce((a, b) => a + b, 0).toFixed(0)}</td>
+                                                <td className="p-2 text-right">{totalBill.toFixed(0)}</td>
                                                 <td className="p-2 text-right">
-                                                    {(invoice.department_discounts?.reduce((s, d) => s + parseFloat(d.discount) || 0, 0) || 0).toFixed(0)}
+                                                    {(Object.entries(deptTotals).reduce((sum, [dept]) => {
+                                                        const tests = testsByDept[dept];
+                                                        const deptId = tests?.[0]?.test?.category?.department?.id;
+                                                        return sum + getDeptDiscountAmount(deptId);
+                                                    }, 0)).toFixed(0)}
                                                 </td>
                                                 <td className="p-2 text-right">
-                                                    {(Object.values(deptTotals).reduce((a, b) => a + b, 0) - (invoice.department_discounts?.reduce((s, d) => s + parseFloat(d.discount) || 0, 0) || 0)).toFixed(0)}
+                                                    {(totalBill - Object.entries(deptTotals).reduce((sum, [dept]) => {
+                                                        const tests = testsByDept[dept];
+                                                        const deptId = tests?.[0]?.test?.category?.department?.id;
+                                                        return sum + getDeptDiscountAmount(deptId);
+                                                    }, 0)).toFixed(0)}
                                                 </td>
                                                 <td className="p-2 text-right text-green-600">
-                                                    {(invoice.department_payments?.reduce((s, p) => s + parseFloat(p.amount) || 0, 0) || 0).toFixed(0)}
+                                                    {totalPaid.toFixed(0)}
                                                 </td>
                                                 <td className="p-2 text-right text-orange-600">
-                                                    {(
-                                                        (Object.values(deptTotals).reduce((a, b) => a + b, 0) - (invoice.department_discounts?.reduce((s, d) => s + parseFloat(d.discount) || 0, 0) || 0)) -
-                                                        (invoice.department_payments?.reduce((s, p) => s + parseFloat(p.amount) || 0, 0) || 0)
-                                                    ).toFixed(0)}
+                                                    {(totalBill - Object.entries(deptTotals).reduce((sum, [dept]) => {
+                                                        const tests = testsByDept[dept];
+                                                        const deptId = tests?.[0]?.test?.category?.department?.id;
+                                                        return sum + getDeptDiscountAmount(deptId);
+                                                    }, 0) - totalPaid).toFixed(0)}
                                                 </td>
                                                 <td className="p-2 text-right text-blue-600">
                                                     {calculateTotalInput('discount')}
@@ -465,8 +609,11 @@ export default function DueCollectionDetails() {
                                                 </td>
                                                 <td className="p-2 text-right text-blue-600">
                                                     {(
-                                                        (Object.values(deptTotals).reduce((a, b) => a + b, 0) - (invoice.department_discounts?.reduce((s, d) => s + parseFloat(d.discount) || 0, 0) || 0)) -
-                                                        (invoice.department_payments?.reduce((s, p) => s + parseFloat(p.amount) || 0, 0) || 0) -
+                                                        (totalBill - Object.entries(deptTotals).reduce((sum, [dept]) => {
+                                                            const tests = testsByDept[dept];
+                                                            const deptId = tests?.[0]?.test?.category?.department?.id;
+                                                            return sum + getDeptDiscountAmount(deptId);
+                                                        }, 0) - totalPaid) -
                                                         parseFloat(calculateTotalInput('discount')) -
                                                         parseFloat(calculateTotalInput('payment'))
                                                     ).toFixed(0)}
@@ -547,10 +694,15 @@ export default function DueCollectionDetails() {
                                     className="w-full"
                                     size="lg"
                                     onClick={handleConfirmCollection}
-                                    disabled={collectMutation.isPending}
+                                    disabled={collectMutation.isPending || isFullyPaid}
                                 >
-                                    {collectMutation.isPending ? "Processing..." : "Confirm & Collect"}
+                                    {isFullyPaid ? "Fully Paid" : collectMutation.isPending ? "Processing..." : "Confirm & Collect"}
                                 </Button>
+                                {isFullyPaid && (
+                                    <p className="text-sm text-green-600 text-center mt-2">
+                                        ✅ This invoice has been fully paid
+                                    </p>
+                                )}
                             </CardFooter>
                         </Card>
                     </div>

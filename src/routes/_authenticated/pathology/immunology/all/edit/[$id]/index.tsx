@@ -1,14 +1,18 @@
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
-import { TopNav } from '@/components/layout/top-nav'
 import PatientInvoiceInfo from '@/components/pathology/PatientInvoiceInfo'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { Button } from "@/components/ui/button";
+import { Main } from '@/components/layout/main';
+import { Header } from '@/components/layout/header';
+import { TopNav } from '@/components/layout/top-nav';
+import { Search } from '@/components/search';
+import { ThemeSwitch } from '@/components/theme-switch';
+import { ConfigDrawer } from '@/components/config-drawer';
+import { ProfileDropdown } from '@/components/profile-dropdown';
+import { Card, CardContent } from '@/components/ui/card';
+import { getCookie } from '@/lib/cookies';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { topNav } from '@/data/data';
+import { useState, useEffect } from 'react';
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/immunology/all/edit/$id/',
@@ -16,51 +20,135 @@ export const Route = createFileRoute(
   component: EditReportImmunology,
 })
 
-const topNav = [
-  {
-    title: 'Overview',
-    href: 'dashboard/overview',
-    isActive: true,
-    disabled: false,
-  },
-  {
-    title: 'Customers',
-    href: 'dashboard/customers',
-    isActive: false,
-    disabled: true,
-  },
-  {
-    title: 'Products',
-    href: 'dashboard/products',
-    isActive: false,
-    disabled: true,
-  },
-  {
-    title: 'Settings',
-    href: 'dashboard/settings',
-    isActive: false,
-    disabled: true,
-  },
-]
+type LabTest = {
+  id: number
+  invoice_id: number
+  test_id: number | null
+  test_name: string | null
+  test_result: string | null
+  created_at: string | null
+  updated_at: string | null
+}
 
-// types/lab-test.ts
-
- type LabTest = {
-  id: string
-  testName: string
-  testResult: string
-  range: string
+type InvoiceData = {
+  invoice_information: {
+    id: number
+    patient_name: string
+    age: string
+    sex: string
+    invoice_date: string
+    phone: string
+  } | null
+  immunology_all_info: LabTest[]
 }
 
 
-const testData: LabTest[] = [
-  { id: "1", testName: "Hemoglobin", testResult: "13.2 g/dL", range: "12–16 g/dL" },
-  { id: "2", testName: "WBC Count", testResult: "7,500 /µL", range: "4,000–11,000 /µL" },
-  { id: "3", testName: "Platelet Count", testResult: "220,000 /µL", range: "150,000–400,000 /µL" },
-]
-
 
 function EditReportImmunology() {
+  const { id } = Route.useParams();
+  const router = useRouter();
+  const token = getCookie('accessToken');
+  const queryClient = useQueryClient();
+
+
+  const [testResults, setTestResults] = useState<Record<number, string>>({});
+
+  // Fetch Immunology data for this invoice (includes invoice info + Immunology records)
+  const { data: invoiceData, isLoading } = useQuery({
+    queryKey: ["immunology-invoice", id],
+    queryFn: async (): Promise<InvoiceData> => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/immunology-all/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch Immunology data (${res.status}: ${res.statusText})`);
+      }
+
+      const json = await res.json();
+      return json.data;
+    },
+    enabled: !!token,
+  });
+
+  // Initialize test results when data loads
+  useEffect(() => {
+    if (invoiceData?.immunology_all_info) {
+      const initialResults: Record<number, string> = {};
+      invoiceData.immunology_all_info.forEach(test => {
+        if (test.id) {
+          initialResults[test.id] = test.test_result || '';
+        }
+      });
+      setTestResults(initialResults);
+    }
+  }, [invoiceData]);
+
+  const updateMutation = useMutation({
+    mutationFn: async (immunologyId: number) => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/immunology-all/${immunologyId}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            test_result: testResults[immunologyId],
+          }),
+        }
+      );
+      if (!res.ok) throw new Error("Failed to update Immunology record");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["immunology-all", id] });
+      queryClient.invalidateQueries({ queryKey: ["outdoor-invoice", id] });
+      queryClient.invalidateQueries({ queryKey: ["immunology-all"] });
+      // Navigate back to list page after successful save
+      router.navigate({ to: '/pathology/immunology/all' });
+    },
+  });
+
+  const handleSaveAll = () => {
+    // Save all test results and test IDs
+    Object.keys(testResults).forEach(immunologyId => {
+      updateMutation.mutate(Number(immunologyId));
+    });
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  if (isLoading) {
+    return (
+      <>
+        <Header>
+          <TopNav links={topNav} />
+          <div className="ms-auto flex items-center space-x-4">
+            <Search />
+            <ThemeSwitch />
+            <ConfigDrawer />
+            <ProfileDropdown />
+          </div>
+        </Header>
+        <Main>
+          <div className="flex justify-center items-center h-64">
+            <p className="text-gray-500">Loading...</p>
+          </div>
+        </Main>
+      </>
+    );
+  }
+
+  const tests = invoiceData?.immunology_all_info || [];
+  const invoiceInformation = invoiceData?.invoice_information;
+
   return (
     <>
       {/* Header */}
@@ -73,65 +161,78 @@ function EditReportImmunology() {
           <ProfileDropdown />
         </div>
       </Header>
+
+      {/* Main */}
       <Main>
         <h1 className="text-2xl font-bold tracking-tight mb-6">Edit Report - Immunology</h1>
-        <Card>
-          <CardContent>
-            <PatientInvoiceInfo
-              invoiceInfo={{
-                invoiceNo: "RPT-1017",
-                patientName: "Sadia Hossain",
-                age: "37 Years",
-                gender: "Female",
-              }}
-            />
-          </CardContent>
-        </Card>
+
+        {invoiceInformation && (
+          <Card>
+            <CardContent>
+              <PatientInvoiceInfo
+                invoiceInfo={{
+                  invoiceNo: `RPT-${invoiceInformation.id}`,
+                  patientName: invoiceInformation.patient_name,
+                  age: invoiceInformation.age,
+                  gender: invoiceInformation.sex,
+                }}
+              />
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="mt-6">
           <CardContent>
-            <form>
+            <form onSubmit={(e) => { e.preventDefault(); handleSaveAll(); }}>
               <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                 <thead className="bg-gray-100">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">ID</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Test Name</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Immunology Record ID</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Test Information</th>
                     <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Test Result</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Range</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {testData.map((test, index) => (
+                  {tests.map((test, index) => (
                     <tr
                       key={test.id}
-                      className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}
+                      className={`${index % 2 === 0 ? `bg-white` : `bg-gray-50`} hover:bg-gray-100`}
                     >
                       <td className="px-4 py-3 text-sm text-gray-700 border-b">{test.id}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700 border-b">{test.testName}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700 border-b">
+                        {test.test_name ? (
+                          <div>
+                            <div className="font-medium">{test.test_name}</div>
+                            <div className="text-xs text-gray-500">Test ID: {test.test_id}</div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
 
                       {/* Input field for testResult */}
                       <td className="px-4 py-3 text-sm text-gray-700 border-b">
                         <textarea
-                          value={test.testResult}
+                          value={testResults[test.id] || ''}
+                          onChange={(e) => setTestResults(prev => ({ ...prev, [test.id]: e.target.value }))}
                           className="w-full px-2 py-1.5 border rounded focus:outline-none focus:ring focus:ring-blue-300"
-                          onChange={() => { console.log("Test Result Updated") }}
+                          rows={3}
+                          placeholder="Enter test result..."
                         />
                       </td>
-
-                      <td className="px-4 py-3 text-sm text-gray-700 border-b">{test.range}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
               <div className="flex justify-center gap-3 pt-4">
-                <Button type="submit" variant="success">
-                  Save Report
+                <Button type="submit" variant="default" disabled={updateMutation.isPending}>
+                  {updateMutation.isPending ? 'Saving...' : 'Save Report'}
                 </Button>
 
-                <Button type="button" variant="warning">
+                <Button type="button" variant="outline" onClick={handlePrint}>
                   Print
                 </Button>
-
               </div>
             </form>
 
@@ -139,5 +240,6 @@ function EditReportImmunology() {
         </Card>
       </Main>
     </>
-  )
+  );
 }
+export default EditReportImmunology

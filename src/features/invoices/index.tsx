@@ -4,7 +4,6 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { ColumnDef } from "@tanstack/react-table";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
 import { useState, useMemo } from 'react'
@@ -69,8 +68,18 @@ export default function Invoices() {
                 ? prev
                 : {
                     data: {
-                        rows: [],
-                        total: 0,
+                        items: [],
+                        meta: {
+                            total: 0,
+                            page: 1,
+                            limit: 10
+                        },
+                        stats: {
+                            total_bill: 0,
+                            total_discount: 0,
+                            total_paid: 0,
+                            total_due: 0
+                        }
                     },
                 },
     });
@@ -123,41 +132,25 @@ export default function Invoices() {
     //console.log(data?.data);
 
     const columns: ColumnDef<InvoiceItem>[] = [
-        // Row selection
-        {
-            id: "select",
-            header: ({ table }) => (
-                <Checkbox
-                    checked={table.getIsAllPageRowsSelected()}
-                    onCheckedChange={(value) =>
-                        table.toggleAllPageRowsSelected(Boolean(value))
-                    }
-                />
-            ),
-            cell: ({ row }) => (
-                <Checkbox
-                    checked={row.getIsSelected()}
-                    onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-                />
-            ),
-            enableSorting: false,
-            enableHiding: false,
-        },
         {
             accessorKey: "id",
             header: "Invoice ID",
+            enableHiding: true,
         },
         {
             accessorKey: "patient_name",
             header: "Patient Name",
+            enableHiding: true,
         },
         {
             accessorKey: "phone",
             header: "Phone",
+            enableHiding: true,
         },
         {
             accessorKey: "reference_doctor",
             header: "Reference Doctor",
+            enableHiding: true,
             cell: ({ row }) => {
                 const doctorName = row.original.doctor?.doctor_name;
                 const refDoctor = row.original.reference_doctor;
@@ -167,6 +160,7 @@ export default function Invoices() {
         {
             accessorKey: "total_amount",
             header: "Total Amount",
+            enableHiding: true,
             cell: ({ row }) => {
                 const amount = row.getValue("total_amount") as number | null;
                 return <div>{amount ?? "-"}</div>;
@@ -175,6 +169,7 @@ export default function Invoices() {
         {
             id: "discount",
             header: "Discount",
+            enableHiding: true,
             cell: ({ row }) => {
                 const total = Number(row.original.total_amount || 0);
                 const net = Number(row.original.net_amount || 0);
@@ -185,16 +180,19 @@ export default function Invoices() {
         {
             accessorKey: "total_paid",
             header: "Paid (৳)",
+            enableHiding: true,
             cell: ({ row }) => <div className="text-emerald-600 font-medium">{row.original.total_paid ?? 0}</div>,
         },
         {
             accessorKey: "due_amount",
             header: "Due (৳)",
+            enableHiding: true,
             cell: ({ row }) => <div className="text-red-600 font-bold">{row.original.due_amount ?? 0}</div>,
         },
         {
             accessorKey: "created_at",
             header: "Date",
+            enableHiding: true,
             cell: ({ row }) => {
                 const iso = row.getValue("created_at") as string;
                 const date = new Date(iso);
@@ -211,9 +209,12 @@ export default function Invoices() {
         {
             accessorKey: "status",
             header: "Status",
+            enableHiding: true,
             cell: ({ row }) => {
-                const status = row.original.status || (row.index % 2 === 0 ? "paid" : "unpaid");
-                const isPaid = status.toLowerCase() === "paid";
+                // Calculate actual status based on due_amount
+                const dueAmount = Number(row.original.due_amount || 0);
+                const isPaid = dueAmount === 0;
+                const status = isPaid ? "paid" : "unpaid";
                 return (
                     <Badge
                         variant={isPaid ? "default" : "destructive"}
@@ -229,6 +230,7 @@ export default function Invoices() {
         {
             id: "actions",
             header: "Actions",
+            enableHiding: false, // Keep Actions column always visible
             cell: ({ row }) => {
                 const item = row.original;
 
@@ -244,9 +246,6 @@ export default function Invoices() {
                                 Pay Now
                             </Button>
                         </Link>
-                        <Button size="sm" variant="default" onClick={() => alert("Edit " + item.id)}>
-                            Edit
-                        </Button>
                     </div>
                 );
             },

@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, CircleCheck, Building2, Mail, Phone, MapPin, Award, User } from "lucide-react";
-import { getCookie } from "@/lib/cookies";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
@@ -27,10 +26,13 @@ import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Main } from "@/components/layout/main";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TagInput } from "@/components/ui/tag-input";
+import { ProtectedRoute } from "@/components/protected-route";
+import { authenticatedFetch, handleFetchError } from "@/lib/authenticated-fetch";
 
 const doctorSchema = z.object({
     doctor_name: z.string().min(1, { message: "Required" }),
     title: z.string().min(1, { message: "Required" }),
+    doctor_type: z.array(z.enum(["Surgeon", "Consultant", "Assistant", "Normal", "Quak"])).min(1, { message: "Select at least one type" }),
     qualification: z.array(z.string()).min(1, { message: "At least one qualification required" }),
     speciality: z.array(z.string()).min(1, { message: "At least one speciality required" }),
     country: z.string().min(1, { message: "Required" }),
@@ -47,13 +49,13 @@ type DoctorValues = z.infer<typeof doctorSchema>;
 export default function CreateDoctorPage() {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    const token = getCookie('accessToken');
 
     const form = useForm<DoctorValues>({
         resolver: zodResolver(doctorSchema),
         defaultValues: {
             doctor_name: "",
             title: "",
+            doctor_type: ["Normal"],
             qualification: [],
             speciality: [],
             country: "",
@@ -74,23 +76,21 @@ export default function CreateDoctorPage() {
                 ...data,
                 qualification: data.qualification.join(', '),
                 speciality: data.speciality.join(', '),
+                doctor_type: data.doctor_type.join(', '),
             };
 
-            const res = await fetch(
+            const res = await authenticatedFetch(
                 `${import.meta.env.VITE_API_URL}/api/doctor`,
                 {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify(apiData),
                 }
             );
-            if (!res.ok) {
-                const error = await res.json();
-                throw new Error(error?.message || "Failed to create doctor");
-            }
+
+            await handleFetchError(res);
             return res.json();
         },
         onSuccess: () => {
@@ -99,7 +99,10 @@ export default function CreateDoctorPage() {
             navigate({ to: "/outdoor/master/doctors" });
         },
         onError: (error: Error) => {
-            toast.error(error.message || "Failed to create doctor");
+            // Don't show toast for 401 - it's handled in authenticatedFetch
+            if (error.message !== "Unauthorized") {
+                toast.error(error.message || "Failed to create doctor");
+            }
         },
     });
 
@@ -108,8 +111,8 @@ export default function CreateDoctorPage() {
     };
 
     return (
-        <>
-            <Header>
+        <ProtectedRoute>
+            <Header fixed>
                 <Search />
                 <div className="ms-auto flex items-center space-x-4">
                     <ThemeSwitch />
@@ -134,7 +137,7 @@ export default function CreateDoctorPage() {
                                 className="h-11 px-6 rounded-xl border-gray-200 dark:border-zinc-700 bg-white hover:bg-gray-50 shadow-sm"
                                 onClick={() => navigate({ to: "/outdoor/master/doctors" })}
                             >
-                                <ArrowLeft className="h-4 w-4 mr-2" />
+                                <ArrowLeft className="h-4 w-4" />
                                 Discard
                             </Button>
                             <Button
@@ -146,7 +149,7 @@ export default function CreateDoctorPage() {
                                 {createMutation.isPending ? (
                                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
                                 ) : (
-                                    <CircleCheck className="h-4 w-4 mr-2" />
+                                    <CircleCheck className="h-4 w-4" />
                                 )}
                                 <span>{createMutation.isPending ? "Registering..." : "Confirm Registration"}</span>
                             </Button>
@@ -157,8 +160,8 @@ export default function CreateDoctorPage() {
                         <form id="create-doctor-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
                             {/* Personal Info Group */}
-                            <Card className="rounded-2xl border-none shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden">
-                                <CardHeader className="bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-zinc-900 border-b pb-6">
+                            <Card className="rounded-2xl border shadow-lg shadow-gray-200/50 dark:shadow-none overflow-hidden pt-0">
+                                <CardHeader className="bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-zinc-900 border-b-1 py-4 gap-0">
                                     <CardTitle className="flex items-center gap-2">
                                         <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 shadow-inner">
                                             <User className="h-5 w-5" />
@@ -167,7 +170,7 @@ export default function CreateDoctorPage() {
                                     </CardTitle>
                                     <CardDescription>Basic identification and professional title</CardDescription>
                                 </CardHeader>
-                                <CardContent className="p-6 md:p-8">
+                                <CardContent className="px-4 md:px-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <FormField
                                             control={form.control}
@@ -227,9 +230,98 @@ export default function CreateDoctorPage() {
                                 </CardContent>
                             </Card>
 
+                            {/* Doctor Type Card */}
+                            <Card className="rounded-2xl border shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden pt-0">
+                                <CardHeader className="bg-gradient-to-br from-violet-50 to-white dark:from-violet-950/30 dark:to-zinc-900 border-b-1 py-4 gap-0">
+                                    <CardTitle className="flex items-center gap-2">
+                                        <div className="p-2 rounded-lg bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 shadow-inner">
+                                            <User className="h-5 w-5" />
+                                        </div>
+                                        Doctor Type
+                                    </CardTitle>
+                                    <CardDescription>Select all applicable categories for this doctor</CardDescription>
+                                </CardHeader>
+                                <CardContent className="px-4 md:px-6">
+                                    <FormField
+                                        control={form.control}
+                                        name="doctor_type"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                        {[
+                                                            { value: "Surgeon", label: "Surgeon", icon: "🔪", color: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700", checked: "bg-red-100 dark:bg-red-950/50 border-red-400 dark:border-red-600" },
+                                                            { value: "Consultant", label: "Consultant", icon: "👨‍⚕️", color: "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700", checked: "bg-blue-100 dark:bg-blue-950/50 border-blue-400 dark:border-blue-600" },
+                                                            { value: "Assistant", label: "Assistant", icon: "🤝", color: "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:border-green-300 dark:hover:border-green-700", checked: "bg-green-100 dark:bg-green-950/50 border-green-400 dark:border-green-600" },
+                                                            { value: "Normal", label: "Normal", icon: "👤", color: "bg-gray-50 dark:bg-gray-800/30 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600", checked: "bg-gray-100 dark:bg-gray-800/50 border-gray-400 dark:border-gray-600" },
+                                                            { value: "Quak", label: "Quak", icon: "🌙", color: "bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800 hover:border-purple-300 dark:hover:border-purple-700", checked: "bg-purple-100 dark:bg-purple-950/50 border-purple-400 dark:border-purple-600" },
+                                                        ].map((type) => {
+                                                            const isSelected = field.value.includes(type.value);
+                                                            return (
+                                                                <label
+                                                                    key={type.value}
+                                                                    className={`
+                                                                        relative flex items-center gap-4 p-5 rounded-xl border-2 cursor-pointer transition-all duration-200 group
+                                                                        ${isSelected
+                                                                            ? type.checked + " shadow-md scale-[1.02]"
+                                                                            : type.color + " shadow-sm hover:shadow-md hover:scale-[1.01]"
+                                                                        }
+                                                                    `}
+                                                                >
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        {...field}
+                                                                        value={type.value}
+                                                                        checked={isSelected}
+                                                                        onChange={(e) => {
+                                                                            const checked = e.target.checked;
+                                                                            const newValue = checked
+                                                                                ? [...field.value, type.value]
+                                                                                : field.value.filter((v) => v !== type.value);
+                                                                            field.onChange(newValue);
+                                                                        }}
+                                                                        className="sr-only"
+                                                                    />
+                                                                    <div className={`
+                                                                        w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0
+                                                                        ${isSelected
+                                                                            ? "border-current bg-current shadow-sm"
+                                                                            : "border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 group-hover:border-current"
+                                                                        }
+                                                                    `}>
+                                                                        {isSelected && (
+                                                                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 12l4 4 8-8" />
+                                                                            </svg>
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="flex items-center gap-3 flex-1">
+                                                                        <span className="text-2xl">{type.icon}</span>
+                                                                        <div className="flex flex-col">
+                                                                            <span className="font-semibold text-base">{type.label}</span>
+                                                                            {isSelected && (
+                                                                                <span className="text-xs font-medium opacity-70">Selected</span>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </label>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </FormControl>
+                                                <FormDescription className="text-sm mt-4">
+                                                    Choose all doctor types that apply to this profile
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </CardContent>
+                            </Card>
+
                             {/* Expertise Group */}
-                            <Card className="rounded-2xl border-none shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden">
-                                <CardHeader className="bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-zinc-900 border-b pb-6">
+                            <Card className="rounded-2xl border shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden pt-0">
+                                <CardHeader className="bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-zinc-900 border-b-1 py-4 gap-0">
                                     <CardTitle className="flex items-center gap-2">
                                         <div className="p-2 rounded-lg bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 shadow-inner">
                                             <Award className="h-5 w-5" />
@@ -238,7 +330,7 @@ export default function CreateDoctorPage() {
                                     </CardTitle>
                                     <CardDescription>Educational background and medical specializations</CardDescription>
                                 </CardHeader>
-                                <CardContent className="p-6 md:p-8">
+                                <CardContent className="px-4 md:px-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <FormField
                                             control={form.control}
@@ -283,8 +375,8 @@ export default function CreateDoctorPage() {
                             </Card>
 
                             {/* Contact Group */}
-                            <Card className="rounded-2xl border-none shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden">
-                                <CardHeader className="bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-zinc-900 border-b pb-6">
+                            <Card className="rounded-2xl border shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden pt-0">
+                                <CardHeader className="bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-zinc-900 border-b-1 py-4 gap-0">
                                     <CardTitle className="flex items-center gap-2">
                                         <div className="p-2 rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 shadow-inner">
                                             <Building2 className="h-5 w-5" />
@@ -293,7 +385,7 @@ export default function CreateDoctorPage() {
                                     </CardTitle>
                                     <CardDescription>Communication details and clinic location</CardDescription>
                                 </CardHeader>
-                                <CardContent className="p-6 md:p-8">
+                                <CardContent className="px-4 md:px-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <FormField
                                             control={form.control}
@@ -356,6 +448,6 @@ export default function CreateDoctorPage() {
                     </Form>
                 </div>
             </Main>
-        </>
+        </ProtectedRoute>
     );
 }

@@ -45,7 +45,8 @@ export const Route = createFileRoute('/_authenticated/admission/new-admission/')
 const admissionSchema = z.object({
     patientName: z.string().min(1, "Patient name is required"),
     fatherName: z.string().min(1, "Father name is required"),
-    age: z.string().min(1, "Age is required"),
+    ageValue: z.string().min(1, "Age value is required"),
+    ageUnit: z.enum(["Y", "M"], { required_error: "Age unit is required" }),
     gender: z.string().min(1, "Gender is required"),
     patientType: z.string().min(1, "Patient type is required"),
     mobile_number: z.string().min(11, "Phone number required"),
@@ -69,7 +70,8 @@ function IndoorNewAdmission() {
         defaultValues: {
             patientName: "",
             fatherName: "",
-            age: "",
+            ageValue: "",
+            ageUnit: "Y",
             gender: "",
             patientType: "",
             mobile_number: "",
@@ -104,7 +106,7 @@ function IndoorNewAdmission() {
             <Main className="p-6 lg:p-10 w-full flex-1">
                 <div className="max-w-5xl mx-auto space-y-8">
                     {/* Page Header */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 dark:border-gray-800 pb-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 dark:border-gray-800 pb-6">
                         <div>
                             <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent uppercase">
                                 Indoor Patient Admission
@@ -127,7 +129,7 @@ function IndoorNewAdmission() {
                                 form="hospital-admission-form"
                                 className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 border-none px-6 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] font-bold"
                             >
-                                <CircleCheck className="h-4 w-4 mr-2" />
+                                <CircleCheck className="h-4 w-4" />
                                 Admit Patient
                             </Button>
                         </div>
@@ -137,8 +139,8 @@ function IndoorNewAdmission() {
                         <form id="hospital-admission-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
                             {/* Card 1: Patient Identity */}
-                            <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg">
-                                <CardHeader className="p-0 border-b border-blue-100 dark:border-blue-900">
+                            <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
+                                <CardHeader className="p-0 border-b-1 border-blue-100 dark:border-blue-900 gap-0">
                                     <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 px-6 py-4 flex items-center gap-4">
                                         <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
                                             <User className="h-6 w-6 text-white" />
@@ -153,48 +155,84 @@ function IndoorNewAdmission() {
                                         </div>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="p-8">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
-                                        <FormField
-                                            control={form.control}
-                                            name="patientName"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Patient Name</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="Full name" className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage className="text-[10px]" />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={form.control}
-                                            name="fatherName"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Father / Husband Name</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="Guardian name" className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage className="text-[10px]" />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <div className="grid grid-cols-2 gap-4">
+                                <CardContent className="p-4 md:p-6">
+                                    <div className="space-y-6">
+                                        {/* First Row: Patient Name & Father/Husband Name */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <FormField
                                                 control={form.control}
-                                                name="age"
+                                                name="patientName"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Age</FormLabel>
+                                                        <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Patient Name</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="Years" className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" {...field} />
+                                                            <Input placeholder="Full name" className="h-11 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" {...field} />
                                                         </FormControl>
                                                         <FormMessage className="text-[10px]" />
                                                     </FormItem>
                                                 )}
                                             />
+                                            <FormField
+                                                control={form.control}
+                                                name="fatherName"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Father / Husband Name</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="Guardian name" className="h-11 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage className="text-[10px]" />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+
+                                        {/* Second Row: Age & Gender */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {/* Age Column */}
+                                            <div>
+                                                <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Age</FormLabel>
+                                                <div className="flex gap-2 mt-2">
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="ageValue"
+                                                        render={({ field }) => (
+                                                            <FormItem className="grid gap-2 flex-1">
+                                                                <FormControl>
+                                                                    <Input
+                                                                        type="number"
+                                                                        placeholder="Value"
+                                                                        className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all shadow-sm"
+                                                                        {...field}
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage className="text-[10px]" />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="ageUnit"
+                                                        render={({ field }) => (
+                                                            <FormItem className="grid gap-2 w-28">
+                                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                                    <FormControl>
+                                                                        <SelectTrigger className="w-full !h-auto h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all shadow-sm">
+                                                                            <SelectValue placeholder="Years" />
+                                                                        </SelectTrigger>
+                                                                    </FormControl>
+                                                                    <SelectContent className="rounded-xl border-gray-100 shadow-xl">
+                                                                        <SelectItem value="Y">Years</SelectItem>
+                                                                        <SelectItem value="M">Months</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <FormMessage className="text-[10px]" />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                </div>
+                                            </div>
+                                            {/* Gender Column */}
                                             <FormField
                                                 control={form.control}
                                                 name="gender"
@@ -203,8 +241,8 @@ function IndoorNewAdmission() {
                                                         <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Gender</FormLabel>
                                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                             <FormControl>
-                                                                <SelectTrigger className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">
-                                                                    <SelectValue placeholder="Gender" />
+                                                                <SelectTrigger className="w-full !h-auto h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all shadow-sm">
+                                                                    <SelectValue placeholder="Select" />
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent className="rounded-xl border-gray-100 shadow-xl">
@@ -218,72 +256,76 @@ function IndoorNewAdmission() {
                                                 )}
                                             />
                                         </div>
-                                        <FormField
-                                            control={form.control}
-                                            name="patientType"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Patient Type</FormLabel>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                        <FormControl>
-                                                            <SelectTrigger className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">
-                                                                <SelectValue placeholder="Select type" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent className="rounded-xl border-gray-100 shadow-xl">
-                                                            {patientTypes.map((type) => (
-                                                                <SelectItem key={type.value} value={type.value}>
-                                                                    {type.label}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage className="text-[10px]" />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={form.control}
-                                            name="mobile_number"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Mobile Number</FormLabel>
-                                                    <FormControl>
-                                                        <div className="relative group">
-                                                            <Activity className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
-                                                            <Input placeholder="017XXX..." className="h-10 pl-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" {...field} />
-                                                        </div>
-                                                    </FormControl>
-                                                    <FormMessage className="text-[10px]" />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <div className="lg:col-span-3">
+
+                                        {/* Third Row: Patient Type & Mobile */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <FormField
                                                 control={form.control}
-                                                name="address"
+                                                name="patientType"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Detailed Address</FormLabel>
+                                                        <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Patient Type</FormLabel>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                            <FormControl>
+                                                                <SelectTrigger className="w-full !h-auto h-10 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">
+                                                                    <SelectValue placeholder="Select type" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent className="rounded-xl border-gray-100 shadow-xl">
+                                                                {patientTypes.map((type) => (
+                                                                    <SelectItem key={type.value} value={type.value}>
+                                                                        {type.label}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage className="text-[10px]" />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="mobile_number"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Mobile Number</FormLabel>
                                                         <FormControl>
-                                                            <Textarea
-                                                                placeholder="Enter complete residential address"
-                                                                className="min-h-[80px] rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm resize-none"
-                                                                {...field}
-                                                            />
+                                                            <div className="relative group">
+                                                                <Activity className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
+                                                                <Input placeholder="017XXX..." className="h-10 pl-10 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" {...field} />
+                                                            </div>
                                                         </FormControl>
                                                         <FormMessage className="text-[10px]" />
                                                     </FormItem>
                                                 )}
                                             />
                                         </div>
+
+                                        {/* Fourth Row: Address */}
+                                        <FormField
+                                            control={form.control}
+                                            name="address"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Detailed Address</FormLabel>
+                                                    <FormControl>
+                                                        <Textarea
+                                                            placeholder="Enter complete residential address"
+                                                            className="min-h-[90px] rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm resize-none"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage className="text-[10px]" />
+                                                </FormItem>
+                                            )}
+                                        />
                                     </div>
                                 </CardContent>
                             </Card>
 
                             {/* Card 2: Clinical Assignment */}
-                            <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg">
-                                <CardHeader className="p-0 border-b border-blue-100 dark:border-blue-900">
+                            <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
+                                <CardHeader className="p-0 border-b-1 border-blue-100 dark:border-blue-900 gap-0">
                                     <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 px-6 py-4 flex items-center gap-4">
                                         <div className="p-3 bg-gradient-to-br from-indigo-600 to-indigo-500 rounded-xl shadow-lg shadow-indigo-500/30">
                                             <Stethoscope className="h-6 w-6 text-white" />
@@ -298,8 +340,8 @@ function IndoorNewAdmission() {
                                         </div>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="p-8">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                <CardContent className="p-4 md:p-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {[
                                             { name: "underConsultant", label: "Under Consultant", placeholder: "Select consultant" },
                                             { name: "referredBy", label: "Referred By", placeholder: "Select referrer" },
@@ -315,7 +357,7 @@ function IndoorNewAdmission() {
                                                         <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">{fieldInfo.label}</FormLabel>
                                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                             <FormControl>
-                                                                <SelectTrigger className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm text-sm">
+                                                                <SelectTrigger className="w-full !h-auto h-11 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">
                                                                     <SelectValue placeholder={fieldInfo.placeholder} />
                                                                 </SelectTrigger>
                                                             </FormControl>
@@ -335,8 +377,8 @@ function IndoorNewAdmission() {
                             </Card>
 
                             {/* Card 3: Admission Logistics */}
-                            <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg">
-                                <CardHeader className="p-0 border-b border-blue-100 dark:border-blue-900">
+                            <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
+                                <CardHeader className="p-0 border-b-1 border-blue-100 dark:border-blue-900 gap-0">
                                     <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 px-6 py-4 flex items-center gap-4">
                                         <div className="p-3 bg-gradient-to-br from-cyan-600 to-cyan-500 rounded-xl shadow-lg shadow-cyan-500/30">
                                             <Bed className="h-6 w-6 text-white" />
@@ -351,8 +393,8 @@ function IndoorNewAdmission() {
                                         </div>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="p-8">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                <CardContent className="p-4 md:p-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <FormField
                                             control={form.control}
                                             name="admissionDate"
@@ -364,7 +406,7 @@ function IndoorNewAdmission() {
                                                             <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
                                                             <Input
                                                                 type="date"
-                                                                className="h-10 pl-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                                                                className="h-11 pl-10 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
                                                                 {...field}
                                                             />
                                                         </div>
@@ -381,7 +423,7 @@ function IndoorNewAdmission() {
                                                     <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Bed / Cabin Allocation</FormLabel>
                                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                         <FormControl>
-                                                            <SelectTrigger className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">
+                                                            <SelectTrigger className="w-full !h-auto h-11 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">
                                                                 <SelectValue placeholder="Select bed number" />
                                                             </SelectTrigger>
                                                         </FormControl>
@@ -401,8 +443,8 @@ function IndoorNewAdmission() {
                             </Card>
 
                             {/* Card 4: Admission Notes */}
-                            <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg">
-                                <CardHeader className="p-0 border-b border-blue-100 dark:border-blue-900">
+                            <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
+                                <CardHeader className="p-0 border-b-1 border-blue-100 dark:border-blue-900 gap-0">
                                     <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 px-6 py-4 flex items-center gap-4">
                                         <div className="p-3 bg-gradient-to-br from-emerald-600 to-emerald-500 rounded-xl shadow-lg shadow-emerald-500/30">
                                             <ClipboardList className="h-6 w-6 text-white" />
@@ -417,7 +459,7 @@ function IndoorNewAdmission() {
                                         </div>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="p-8">
+                                <CardContent className="p-4 md:p-6">
                                     <FormField
                                         control={form.control}
                                         name="reason"
@@ -427,7 +469,7 @@ function IndoorNewAdmission() {
                                                 <FormControl>
                                                     <Textarea
                                                         placeholder="Describe the clinical reason for patient admission..."
-                                                        className="min-h-[120px] rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm resize-none"
+                                                        className="min-h-[120px] rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm resize-none"
                                                         {...field}
                                                     />
                                                 </FormControl>
@@ -442,7 +484,7 @@ function IndoorNewAdmission() {
                             </Card>
 
                             {/* Final Footer Actions */}
-                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-10 border-t border-gray-100 dark:border-gray-800">
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8 border-t border-gray-100 dark:border-gray-800">
                                 <Button
                                     type="button"
                                     variant="outline"
