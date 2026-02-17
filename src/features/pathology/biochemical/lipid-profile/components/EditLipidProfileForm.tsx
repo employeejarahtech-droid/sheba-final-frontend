@@ -37,6 +37,7 @@ const formSchema = z.object({
     vldl: z.string().min(1, { message: "Required" }),
     cholesterol_ratio: z.string().min(1, { message: "Required" }),
     testCarriedOutBy: z.string().optional(),
+    machineId: z.string().optional(),
 });
 
 // Infer the TypeScript type from the Zod schema
@@ -69,6 +70,7 @@ export function EditLipidProfileForm({ open, setOpen, reportId, invoiceId }: Edi
             vldl: '',
             cholesterol_ratio: '',
             testCarriedOutBy: "",
+            machineId: "",
         },
         // You could set initial data here if passed via props
         // values: initialData,
@@ -103,6 +105,8 @@ export function EditLipidProfileForm({ open, setOpen, reportId, invoiceId }: Edi
                 triglycerides: lipidProfileData.triglycerides || '',
                 vldl: lipidProfileData.vldl || '',
                 cholesterol_ratio: lipidProfileData.cholesterol_ratio || '',
+                testCarriedOutBy: lipidProfileData.test_carried_out_by || '',
+                machineId: lipidProfileData.machine_id ? String(lipidProfileData.machine_id) : '',
             })
         }
     }, [lipidProfileData]);
@@ -126,6 +130,8 @@ export function EditLipidProfileForm({ open, setOpen, reportId, invoiceId }: Edi
                     triglycerides: payload.triglycerides,
                     vldl: payload.vldl,
                     cholesterol_ratio: payload.cholesterol_ratio,
+                    test_carried_out_by: payload.testCarriedOutBy,
+                    machine_id: payload.machineId ? parseInt(payload.machineId) : null,
                 }),
             });
 
@@ -161,14 +167,23 @@ export function EditLipidProfileForm({ open, setOpen, reportId, invoiceId }: Edi
     // Helper to handle the other button actions
     const handleView = () => alert("View action triggered.");
 
+    // Fetch machines from API
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/machine`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch machines");
+            return res.json();
+        },
+        enabled: !!token,
+    });
 
-    const machineList = [
-        "Sysmex XN-1000",
-        "Sysmex XP-300",
-        "Mindray BC-20",
-        "Abbott CELL-DYN Ruby",
-        "Nihon Kohden MEK-9100",
-    ];
+    const machineList = machinesData?.data?.items || [];
 
     //const invoice = outdoorInvoices.find((item) => item.id === reportId);
 
@@ -286,15 +301,26 @@ export function EditLipidProfileForm({ open, setOpen, reportId, invoiceId }: Edi
                                 <FormItem>
                                     <FormLabel>Test carried out by</FormLabel>
                                     <FormControl>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                // Find the selected machine
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    // Update both fields
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
                                             <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select lab technician" />
+                                                <SelectValue placeholder="Select machine" />
                                             </SelectTrigger>
 
                                             <SelectContent>
-                                                {machineList.map((machine) => (
-                                                    <SelectItem key={machine} value={machine}>
-                                                        {machine}
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>

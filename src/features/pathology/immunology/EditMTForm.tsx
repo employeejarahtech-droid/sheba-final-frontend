@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -34,6 +35,8 @@ const tuberculinSchema = z.object({
     induration: z.string().min(1, { message: "Required" }),
     result: z.string().min(1, { message: "Required" }),
     comments: z.string().optional(),
+    testCarriedOutBy: z.string().optional(),
+    machineId: z.string().optional(),
 });
 
 type TuberculinFormValues = z.infer<typeof tuberculinSchema>;
@@ -58,6 +61,8 @@ export function EditMTForm({ open, setOpen, reportId, invoiceId }: TuberculinTes
             induration: "",
             result: "",
             comments: "",
+            testCarriedOutBy: "",
+            machineId: "",
         },
     });
 
@@ -85,6 +90,8 @@ export function EditMTForm({ open, setOpen, reportId, invoiceId }: TuberculinTes
                 induration: mtData.induration_mm || '',
                 result: mtData.result || '',
                 comments: mtData.remarks || '',
+                testCarriedOutBy: mtData.test_carried_out_by || '',
+                machineId: mtData.machine_id ? String(mtData.machine_id) : '',
             })
         }
     }, [mtData, form]);
@@ -103,7 +110,9 @@ export function EditMTForm({ open, setOpen, reportId, invoiceId }: TuberculinTes
                     invoice_id: invoiceId,
                     induration_mm: payload.induration,
                     result: payload.result,
-                    remarks: payload.comments
+                    remarks: payload.comments,
+                    test_carried_out_by: payload.testCarriedOutBy,
+                    machine_id: payload.machineId ? parseInt(payload.machineId) : null,
                 }),
             });
 
@@ -139,6 +148,24 @@ export function EditMTForm({ open, setOpen, reportId, invoiceId }: TuberculinTes
     }
 
     const handleView = () => alert("View triggered.");
+
+    // Fetch machines from API
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/machine`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch machines");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const machineList = machinesData?.data?.items || [];
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
@@ -203,6 +230,42 @@ export function EditMTForm({ open, setOpen, reportId, invoiceId }: TuberculinTes
                                     <FormLabel>Comments / Remarks (Optional)</FormLabel>
                                     <FormControl>
                                         <Textarea placeholder="Additional notes..." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* TEST CARRIED OUT BY */}
+                        <FormField
+                            control={form.control}
+                            name="testCarriedOutBy"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select machine" />
+                                            </SelectTrigger>
+
+                                            <SelectContent>
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

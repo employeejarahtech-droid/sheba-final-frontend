@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -32,6 +33,8 @@ import { useEffect } from "react";
 const btctSchema = z.object({
     bt: z.string().min(1, { message: "Required" }), // Bleeding Time
     ct: z.string().min(1, { message: "Required" }), // Clotting Time
+    testCarriedOutBy: z.string().optional(),
+    machineId: z.string().optional(),
 });
 
 type BTCTFormValues = z.infer<typeof btctSchema>;
@@ -54,34 +57,47 @@ export function EditBloodForBTCTForm({ open, setOpen, reportId, invoiceId }: BTC
         defaultValues: {
             bt: '',
             ct: '',
+            testCarriedOutBy: '',
+            machineId: '',
         },
     });
 
      // Fetching existing data
-    const { data: bloodForBTCTData } = useQuery({
+    const { data: bloodForBTCTData, error: btctError, isLoading: btctLoading } = useQuery({
         queryKey: ["btct", reportId],
         queryFn: async () => {
+            console.log('Fetching BTCT record for reportId:', reportId);
+            const url = `${import.meta.env.VITE_API_URL}/api/btct/${reportId}`;
+            console.log('Fetch URL:', url);
             const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/btct/${reportId}`,
+                url,
                 {
                     method: "GET",
                     headers: { Authorization: `Bearer ${token}` },
                 }
             );
-            if (!res.ok) throw new Error("Failed to fetch lipid-profile report");
+            console.log('BTCT record response status:', res.status);
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error('BTCT record fetch failed:', errorText);
+                throw new Error(`Failed to fetch BT/CT report: ${errorText}`);
+            }
             const result = await res.json();
+            console.log('BTCT record response:', result);
             return result.data;
         },
-        enabled: !!token && !!reportId,
+        enabled: !!token && !!reportId && reportId !== 0,
     });
 
-    console.log('bloodForBTCTData', bloodForBTCTData);
+    console.log('BTCT Form State:', { bloodForBTCTData, btctError, btctLoading, reportId });
 
     useEffect(() => {
         if (bloodForBTCTData) {
             form.reset({
                 bt: bloodForBTCTData.bleeding_time,
-                ct: bloodForBTCTData.clotting_time
+                ct: bloodForBTCTData.clotting_time,
+                testCarriedOutBy: bloodForBTCTData.test_carried_out_by || '',
+                machineId: bloodForBTCTData.machine_id ? String(bloodForBTCTData.machine_id) : '',
             })
         }
     }, [bloodForBTCTData]);
@@ -99,6 +115,8 @@ export function EditBloodForBTCTForm({ open, setOpen, reportId, invoiceId }: BTC
                     invoice_id: invoiceId,
                     bleeding_time: payload.bt,
                     clotting_time: payload.ct,
+                    test_carried_out_by: payload.testCarriedOutBy,
+                    machine_id: payload.machineId ? parseInt(payload.machineId) : null,
                 }),
             });
 
@@ -130,6 +148,24 @@ export function EditBloodForBTCTForm({ open, setOpen, reportId, invoiceId }: BTC
     }
 
     const handleView = () => alert("View triggered.");
+
+    // Fetch machines from API
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/machine`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch machines");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const machineList = machinesData?.data?.items || [];
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
@@ -179,6 +215,42 @@ export function EditBloodForBTCTForm({ open, setOpen, reportId, invoiceId }: BTC
                                     <FormLabel>Clotting Time (CT)</FormLabel>
                                     <FormControl>
                                         <Input placeholder="Enter CT (minutes)" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* TEST CARRIED OUT BY */}
+                        <FormField
+                            control={form.control}
+                            name="testCarriedOutBy"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select machine" />
+                                            </SelectTrigger>
+
+                                            <SelectContent>
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

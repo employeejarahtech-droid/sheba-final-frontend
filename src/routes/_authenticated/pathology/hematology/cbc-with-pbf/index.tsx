@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { ConfigDrawer } from "@/components/config-drawer";
 import { DataTable } from "@/components/DataTable";
 import { Header } from "@/components/layout/header";
@@ -7,13 +7,9 @@ import { TopNav } from "@/components/layout/top-nav";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ColumnDef } from "@tanstack/react-table";
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { topNav } from '@/data/data';
 
 export const Route = createFileRoute(
@@ -74,42 +70,36 @@ function CBCWithPBF() {
 
 
   //console.log(data?.data);
-  const columns: ColumnDef<CBCItem>[] = [
-    // Row selection
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) =>
-            table.toggleAllPageRowsSelected(Boolean(value))
-          }
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
 
-    {
-      accessorKey: "invoice_id",
-      header: "Invoice ID",
-    },
-    {
-      accessorKey: "patient_name",
-      header: "Patient Name",
-    },
+  // Expose view function to window
+  useEffect(() => {
+    (window as any).viewCBCWithPBF = (id: string) => {
+      alert("View " + id);
+    };
+  }, []);
 
+  const columns = [
     {
-      accessorKey: "created_at",
-      header: "Date",
-      cell: ({ row }) => {
-        const iso = row.getValue("created_at") as string;
+      data: "invoice_id",
+      title: "Invoice ID",
+      orderable: true,
+      responsivePriority: 2,
+      defaultContent: "",
+    },
+    {
+      data: "patient_name",
+      title: "Patient Name",
+      orderable: true,
+      responsivePriority: 1,
+      defaultContent: "",
+    },
+    {
+      data: "created_at",
+      title: "Date",
+      orderable: true,
+      responsivePriority: 3,
+      render: (_data: any, _type: string, row: CBCItem) => {
+        const iso = row.created_at;
         const date = new Date(iso);
 
         const formatted = date.toLocaleDateString("en-US", {
@@ -118,15 +108,17 @@ function CBCWithPBF() {
           day: "numeric",
         });
 
-        return <div>{formatted}</div>; // Example: Nov 23, 2025
+        return `<div>${formatted}</div>`; // Example: Nov 23, 2025
       },
+      defaultContent: "",
     },
-
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
+      data: "status",
+      title: "Status",
+      orderable: true,
+      responsivePriority: 4,
+      render: (_data: any, _type: string, row: CBCItem) => {
+        const status = row.status || 'Pending';
         const color =
           status === "passed"
             ? "bg-green-500"
@@ -134,29 +126,29 @@ function CBCWithPBF() {
               ? "bg-red-500"
               : "bg-yellow-500";
 
-        return <Badge className={color + " text-white"}>{status || 'Pending'}</Badge>;
+        return `<span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status}</span>`;
       },
+      defaultContent: "",
     },
     // Actions Column
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => alert("View " + item.id)}>
+      data: null,
+      title: "Actions",
+      orderable: false,
+      responsivePriority: 1,
+      render: (_data: any, _type: string, row: CBCItem) => {
+        return `
+          <div class="flex gap-2">
+            <button onclick="window.viewCBCWithPBF('${row.id}')" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
               View
-            </Button>
-            <Link to="/pathology/hematology/cbc-with-pbf/edit/$id" params={{ id: item.id }}>
-              <Button size="sm" variant="default">
-                Edit
-              </Button>
-            </Link>
+            </button>
+            <a href="/pathology/hematology/cbc-with-pbf/edit/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+              Edit
+            </a>
           </div>
-        );
+        `;
       },
+      defaultContent: "",
     },
   ];
 

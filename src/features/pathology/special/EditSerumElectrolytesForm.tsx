@@ -20,6 +20,13 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -36,6 +43,8 @@ const serumElectrolytesSchema = z.object({
     chloride: z.string().min(1, { message: "Required" }),
     bicarbonate: z.string().min(1, { message: "Required" }),
     comments: z.string().optional(),
+    testCarriedOutBy: z.string().optional(),
+    machineId: z.string().optional(),
 });
 
 type SerumElectrolytesFormValues = z.infer<typeof serumElectrolytesSchema>;
@@ -61,10 +70,10 @@ export function EditSerumElectrolytesForm({ open, setOpen, reportId, invoiceId }
             chloride: "",
             bicarbonate: "",
             comments: "",
+            testCarriedOutBy: "",
+            machineId: "",
         },
     });
-
-
 
     // Fetching existing data
     const { data: serumElectrolytesData } = useQuery({
@@ -84,7 +93,23 @@ export function EditSerumElectrolytesForm({ open, setOpen, reportId, invoiceId }
         enabled: !!token && !!reportId,
     });
 
-    console.log("Sputum Data:", serumElectrolytesData);
+    // Fetch machines from API
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/machine`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch machines");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const machineList = machinesData?.data?.items || [];
 
     useEffect(() => {
         if (serumElectrolytesData) {
@@ -94,6 +119,8 @@ export function EditSerumElectrolytesForm({ open, setOpen, reportId, invoiceId }
                 chloride: serumElectrolytesData.chloride || '',
                 bicarbonate: serumElectrolytesData.bicarbonate || '',
                 comments: serumElectrolytesData.remarks || '',
+                testCarriedOutBy: serumElectrolytesData.test_carried_out_by || '',
+                machineId: serumElectrolytesData.machine_id?.toString() || '',
             })
         }
     }, [serumElectrolytesData, form]);
@@ -114,7 +141,9 @@ export function EditSerumElectrolytesForm({ open, setOpen, reportId, invoiceId }
                     potassium: payload.potassium,
                     chloride: payload.chloride,
                     bicarbonate: payload.bicarbonate,
-                    remarks: payload.comments
+                    remarks: payload.comments,
+                    test_carried_out_by: payload.testCarriedOutBy,
+                    machine_id: payload.machineId ? parseInt(payload.machineId) : null,
                 }),
             });
 
@@ -142,7 +171,6 @@ export function EditSerumElectrolytesForm({ open, setOpen, reportId, invoiceId }
             toast.error(error.message || "Something went wrong");
         },
     });
-
 
 
 
@@ -247,6 +275,42 @@ export function EditSerumElectrolytesForm({ open, setOpen, reportId, invoiceId }
                                     <FormLabel>Comments / Remarks (Optional)</FormLabel>
                                     <FormControl>
                                         <Textarea placeholder="Additional notes..." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Test Carried Out By */}
+                        <FormField
+                            control={form.control}
+                            name="testCarriedOutBy"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select machine" />
+                                            </SelectTrigger>
+
+                                            <SelectContent>
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

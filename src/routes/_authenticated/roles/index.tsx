@@ -5,12 +5,9 @@ import { TopNav } from '@/components/layout/top-nav'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { topNav } from '@/data/data'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { ColumnDef } from '@tanstack/react-table'
+import { createFileRoute } from '@tanstack/react-router'
 import { Users, ShieldCheck, XCircle } from 'lucide-react'
 import { useState, useMemo } from 'react'
 import AddNewRoleForm from '@/features/roles/AddNewRoleForm'
@@ -71,51 +68,44 @@ function ListOfRoles() {
     ]
   }, [roles, pagination])
 
-  const columns: ColumnDef<Role>[] = [
+  const columns = [
     {
-      accessorKey: 'id',
-      header: 'ID',
+      data: 'id',
+      title: 'ID',
+      className: 'font-mono text-sm',
     },
     {
-      accessorKey: 'role',
-      header: 'Role',
-      cell: ({ row }) => <span className="font-medium">{row.getValue('role')}</span>,
+      data: 'role',
+      title: 'Role',
+      className: 'font-medium',
     },
     {
-      accessorKey: 'display_name',
-      header: 'Display Name',
+      data: 'display_name',
+      title: 'Display Name',
     },
     {
-      accessorKey: 'description',
-      header: 'Description',
+      data: 'description',
+      title: 'Description',
+      className: 'text-sm text-muted-foreground',
     },
     {
-      accessorKey: 'status',
-      header: 'Status',
-      cell: ({ row }) => {
-        const status = row.getValue('status') as string
+      data: 'status',
+      title: 'Status',
+      render: (data: any) => {
+        const status = data as string
         const isActive = status.toLowerCase() === 'active'
-        return (
-          <Badge className={isActive ? 'bg-emerald-500 hover:bg-emerald-600 text-white border-transparent' : 'bg-rose-500 hover:bg-rose-600 text-white border-transparent'}>
-            {status.toUpperCase()}
-          </Badge>
-        )
+        const colorClass = isActive
+          ? 'bg-emerald-500 hover:bg-emerald-600'
+          : 'bg-rose-500 hover:bg-rose-600'
+        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass} text-white border-transparent">${status.toUpperCase()}</span>`
       },
     },
     {
-      id: 'actions',
-      header: 'Actions',
-      cell: ({ row }) => {
-        const role = row.original
-        return (
-          <div className="flex gap-2">
-            <Link to={'/roles/permissions/$id/edit' as any} params={{ id: role.id } as any}>
-              <Button size="sm" variant="outline">
-                Edit
-              </Button>
-            </Link>
-          </div>
-        )
+      data: null,
+      title: 'Actions',
+      orderable: false,
+      render: (_data: any, _type: string, row: Role) => {
+        return `<a href="/roles/permissions/${row.id}/edit" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3">Edit</a>`
       },
     },
   ]

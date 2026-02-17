@@ -7,14 +7,11 @@ import { TopNav } from "@/components/layout/top-nav";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 import { ThyroidFunctionTestForm } from '@/features/pathology/special/EditT3T4TshForm';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
+import { topNav } from '@/data/data';
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/hormone/t3t4tsh/',
@@ -22,43 +19,17 @@ export const Route = createFileRoute(
   component: T3T4TSH,
 })
 
-const topNav = [
-  {
-    title: 'Overview',
-    href: 'dashboard/overview',
-    isActive: true,
-    disabled: false,
-  },
-  {
-    title: 'Customers',
-    href: 'dashboard/customers',
-    isActive: false,
-    disabled: true,
-  },
-  {
-    title: 'Products',
-    href: 'dashboard/products',
-    isActive: false,
-    disabled: true,
-  },
-  {
-    title: 'Settings',
-    href: 'dashboard/settings',
-    isActive: false,
-    disabled: true,
-  },
-]
 
 type ReportsItem = {
-  id: string;
-  receiptId: string;
-  patientName: string;
-  tests: string[];
-  date: string;
+  id: number;
+  invoice_id: number;
+  patient_name: string | null;
+  created_at: string | null;
 };
 
 function T3T4TSH() {
-  const [reportId, setReportId] = useState<number>(1);
+  const [reportId, setReportId] = useState<number>(0);
+  const [invoiceId, setInvoiceId] = useState<number>(0);
   const [open, setOpen] = useState<boolean>(false);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -66,9 +37,8 @@ function T3T4TSH() {
 
   const token = getCookie('accessToken');
 
-  const { data } = useQuery({
+  const { data: t3t4tshReports } = useQuery({
     queryKey: ["t3t4tsh", page, search],
-
     queryFn: async () => {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/t3t4tsh?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
@@ -76,117 +46,84 @@ function T3T4TSH() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
-      if (!res.ok) throw new Error("Failed to fetch blood for tcdc reports");
-      return res.json(); // MUST match placeholderData
+      if (!res.ok) throw new Error("Failed to fetch t3t4tsh reports");
+      return res.json();
     },
-
     enabled: !!token,
-
-    // ⭐ Perfect smooth pagination
     placeholderData: (prev) =>
       prev
         ? prev
         : {
           data: {
             items: [],
-            meta: {
-              page,
-              limit,
-              total: 0,
-            },
+            total: 0,
           },
         },
   });
 
-  //console.log(data);
+  // Expose edit function to window for onclick handler
+  if (typeof window !== 'undefined') {
+    (window as any).editT3T4TSH = (id: number, invId: number) => {
+      setOpen(true);
+      setReportId(id);
+      setInvoiceId(invId);
+    };
+  }
 
+  const items = t3t4tshReports?.data?.items || [];
+  const meta = t3t4tshReports?.data?.meta || { page, limit, total: 0 };
 
-  const columns: ColumnDef<ReportsItem>[] = [
-    // Row selection
+  const columns = [
     {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) =>
-            table.toggleAllPageRowsSelected(Boolean(value))
-          }
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-
-    {
-      accessorKey: "invoice_id",
-      header: "Invoice ID",
+      data: 'id',
+      title: 'ID',
+      orderable: true,
+      defaultContent: '',
     },
     {
-      accessorKey: "patient_name",
-      header: "Patient Name",
+      data: 'invoice_id',
+      title: 'Invoice ID',
+      orderable: true,
+      defaultContent: '',
     },
-
     {
-      accessorKey: "created_at",
-      header: "Date",
-      cell: ({ row }) => {
-        const iso = row.getValue("created_at") as string;
-        const date = new Date(iso);
-
-        const formatted = date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-
-        return <div>{formatted}</div>; // Example: Nov 23, 2025
+      data: 'patient_name',
+      title: 'Patient Name',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const patientName = row.patient_name;
+        return patientName || '-';
       },
+      defaultContent: '',
     },
-
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
-        const color =
-          status === "passed"
-            ? "bg-green-500"
-            : status === "failed"
-              ? "bg-red-500"
-              : "bg-yellow-500";
-
-        return <Badge className={color + " text-white"}>{status || 'Pending'}</Badge>;
+      data: 'created_at',
+      title: 'Date',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const date = row.created_at;
+        return date ? new Date(date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        }) : '-';
       },
+      defaultContent: '',
     },
-    // Actions Column
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => alert("View " + item.id)}>
-              View
-            </Button>
-            <Button size="sm" variant="default" onClick={() => { setOpen(true); setReportId(Number(item.id)); }}>
+      data: null,
+      title: 'Actions',
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return `
+          <div class="flex gap-2">
+            <button onclick="window.editT3T4TSH(${row.id}, ${row.invoice_id})" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
               Edit
-            </Button>
-
-            <Button size="sm" variant="destructive" onClick={() => alert("Delete " + item.id)}>
-              Delete
-            </Button>
+            </button>
           </div>
-        );
+        `;
       },
+      defaultContent: '',
     },
   ];
 
@@ -205,12 +142,11 @@ function T3T4TSH() {
         <div className="mb-4">
           <h1 className='text-2xl font-bold tracking-tight'>T3T4TSH</h1>
         </div>
-        <DataTable columns={columns} data={data?.data?.items || []} meta={data?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
-        <ThyroidFunctionTestForm open={open} setOpen={setOpen} reportId={reportId} />
+        <DataTable columns={columns} data={items} meta={meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
+        <ThyroidFunctionTestForm open={open} setOpen={setOpen} reportId={reportId} invoiceId={invoiceId} />
       </Main>
     </>
 
   )
+
 }
-
-

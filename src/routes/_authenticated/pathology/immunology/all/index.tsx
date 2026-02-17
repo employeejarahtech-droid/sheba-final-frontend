@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { ConfigDrawer } from "@/components/config-drawer";
 import { DataTable } from "@/components/DataTable";
 import { Header } from "@/components/layout/header";
@@ -7,8 +7,6 @@ import { TopNav } from "@/components/layout/top-nav";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { Button } from "@/components/ui/button";
-import { ColumnDef } from "@tanstack/react-table";
 import { useState } from 'react';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
@@ -56,93 +54,100 @@ function ReportsImmunology() {
         : {
           data: {
             items: [],
-            total: 0,
+            meta: {
+              page,
+              limit,
+              total: 0,
+            },
           },
         },
   });
 
 
-  const columns: ColumnDef<ReportsItem>[] = [
+  const columns = [
     {
-      accessorKey: "ReciptID",
-      header: "Receipt ID",
+      data: "ReciptID",
+      title: "Receipt ID",
+      orderable: true,
+      defaultContent: "",
     },
     {
-      accessorKey: "PatientId",
-      header: "Patient ID",
+      data: "PatientId",
+      title: "Patient ID",
+      orderable: true,
+      defaultContent: "",
     },
     {
-      accessorKey: "PatientName",
-      header: "Patient Name",
-      cell: ({ row }) => {
-        const patientName = row.getValue("PatientName") as string | null;
-        return patientName || '-';
+      data: "PatientName",
+      title: "Patient Name",
+      orderable: true,
+      responsivePriority: 1,
+      defaultContent: "",
+      render: (data: any) => data || '-'
+    },
+    {
+      data: "Date",
+      title: "Date",
+      orderable: true,
+      responsivePriority: 2,
+      defaultContent: "",
+      render: (data: any) => {
+        if (!data) return '-';
+        const date = new Date(data);
+        return date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
       }
     },
     {
-      accessorKey: "Date",
-      header: "Date",
-      cell: ({ row }) => {
-        const date = row.getValue("Date") as string | null;
-        return date ? new Date(date).toLocaleDateString() : '-';
-      }
-    },
-    {
-      accessorKey: "Tests",
-      header: "Immunology Record IDs",
-      cell: ({ row }) => {
-        const tests = row.getValue("Tests") as string;
-        if (!tests) return '-';
+      data: "Tests",
+      title: "Immunology Record IDs",
+      orderable: false,
+      responsivePriority: 1,
+      defaultContent: "",
+      render: (data: any) => {
+        if (!data) return '-';
 
         // Split comma-separated IDs and display as badges
-        const testIds = tests.split(',').filter(id => id.trim() !== '');
-        return (
-          <div className="flex flex-wrap gap-1">
-            {testIds.map((id, index) => (
-              <span
-                key={index}
-                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors cursor-pointer"
-                title={`Immunology Record ID: ${id.trim()}`}
-              >
-                {id.trim()}
-              </span>
-            ))}
-          </div>
-        );
+        const testIds = data.split(',').filter((id: string) => id.trim() !== '');
+        return testIds.map((id: string) =>
+          `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1">${id.trim()}</span>`
+        ).join('');
       }
     },
     {
-      accessorKey: "Status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("Status") as string;
-        const statusColor = status === 'Completed' ? 'text-green-600' : 'text-yellow-600';
-        return <span className={statusColor}>{status}</span>;
+      data: "Status",
+      title: "Status",
+      orderable: true,
+      responsivePriority: 3,
+      defaultContent: "",
+      render: (data: any) => {
+        const status = data || 'Pending';
+        const color = status === 'Completed' ? 'bg-green-500' : 'bg-yellow-500';
+        return `<span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status}</span>`;
       }
     },
     // Actions Column
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => alert("View " + item.ReciptID)}>
+      data: null,
+      title: "Actions",
+      orderable: false,
+      responsivePriority: 1,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return `
+          <div class="flex gap-2">
+            <a href="/pathology/immunology/all/report/${row.ReciptID}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
               View
-            </Button>
-            <Link to={`/pathology/immunology/all/edit/$id`} params={{ id: String(item.ReciptID) }}>
-              <Button size="sm" variant="default">
-                Edit
-              </Button>
-            </Link>
-            <Button size="sm" variant="destructive" onClick={() => alert("Delete " + item.ReciptID)}>
-              Delete
-            </Button>
+            </a>
+            <a href="/pathology/immunology/all/edit/${row.ReciptID}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+              Edit
+            </a>
           </div>
-        );
+        `;
       },
+      defaultContent: "",
     },
   ];
 

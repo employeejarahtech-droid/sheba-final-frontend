@@ -22,10 +22,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getCookie } from "@/lib/cookies";
 import { useEffect } from "react";
+import { getCookie } from "@/lib/cookies";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -34,6 +35,8 @@ const hcgSchema = z.object({
     hcgValue: z.string().min(1, { message: "Required" }),
     result: z.string().min(1, { message: "Required" }),
     comments: z.string().optional(),
+    testCarriedOutBy: z.string().optional(),
+    machineId: z.string().optional(),
 });
 
 type HCGFormValues = z.infer<typeof hcgSchema>;
@@ -47,10 +50,9 @@ interface HCGTestFormProps {
 
 export function EditBetaHCGTestForm({ open, setOpen, reportId, invoiceId }: HCGTestFormProps) {
     const navigate = useNavigate();
-
-    const token = getCookie('accessToken');
     const queryClient = useQueryClient();
 
+    const token = getCookie('accessToken');
 
     const form = useForm<HCGFormValues>({
         resolver: zodResolver(hcgSchema),
@@ -58,9 +60,10 @@ export function EditBetaHCGTestForm({ open, setOpen, reportId, invoiceId }: HCGT
             hcgValue: "",
             result: "",
             comments: "",
+            testCarriedOutBy: "",
+            machineId: "",
         },
     });
-
 
     // Fetching existing data
     const { data: betaHCGData } = useQuery({
@@ -73,7 +76,7 @@ export function EditBetaHCGTestForm({ open, setOpen, reportId, invoiceId }: HCGT
                     headers: { Authorization: `Bearer ${token}` },
                 }
             );
-            if (!res.ok) throw new Error("Failed to fetch Tuberculin (MT) Test report");
+            if (!res.ok) throw new Error("Failed to fetch Beta HCG Test report");
             const result = await res.json();
             return result.data;
         },
@@ -86,15 +89,16 @@ export function EditBetaHCGTestForm({ open, setOpen, reportId, invoiceId }: HCGT
                 hcgValue: betaHCGData.hcg_level || '',
                 result: betaHCGData.result || '',
                 comments: betaHCGData.remarks || '',
+                testCarriedOutBy: betaHCGData.test_carried_out_by || '',
+                machineId: betaHCGData.machine_id ? String(betaHCGData.machine_id) : '',
             })
         }
     }, [betaHCGData, form]);
 
-     //PUT api call
-
+    //PUT api call
     const updateBetaHCGMutation = useMutation({
         mutationFn: async (payload: HCGFormValues) => {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/mt/${reportId}`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/hcg/${reportId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -104,7 +108,9 @@ export function EditBetaHCGTestForm({ open, setOpen, reportId, invoiceId }: HCGT
                     invoice_id: invoiceId,
                     hcg_level: payload.hcgValue,
                     result: payload.result,
-                    remarks: payload.comments
+                    remarks: payload.comments,
+                    test_carried_out_by: payload.testCarriedOutBy,
+                    machine_id: payload.machineId ? parseInt(payload.machineId) : null,
                 }),
             });
 
@@ -120,19 +126,15 @@ export function EditBetaHCGTestForm({ open, setOpen, reportId, invoiceId }: HCGT
             toast.success(data.message || "Test created successfully!");
             console.log("API Response:", data);
             navigate({ to: "/pathology/immunology/beta-hcg" });
-            // optional:
-            // form.reset();
             queryClient.invalidateQueries({
-                queryKey: ["mt", reportId],
+                queryKey: ["hcg", reportId],
             });
-
         },
 
         onError: (error: any) => {
             toast.error(error.message || "Something went wrong");
         },
     });
-
 
     function onSubmit(values: HCGFormValues) {
         console.log("HCG Test Report:", values);
@@ -141,6 +143,24 @@ export function EditBetaHCGTestForm({ open, setOpen, reportId, invoiceId }: HCGT
     }
 
     const handleView = () => alert("View triggered.");
+
+    // Fetch machines from API
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/machine`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch machines");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const machineList = machinesData?.data?.items || [];
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
@@ -165,7 +185,6 @@ export function EditBetaHCGTestForm({ open, setOpen, reportId, invoiceId }: HCGT
                         onSubmit={form.handleSubmit(onSubmit)}
                         className="space-y-6 mt-4 p-4"
                     >
-
                         {/* HCG Value */}
                         <FormField
                             control={form.control}
@@ -205,6 +224,42 @@ export function EditBetaHCGTestForm({ open, setOpen, reportId, invoiceId }: HCGT
                                     <FormLabel>Comments / Remarks (Optional)</FormLabel>
                                     <FormControl>
                                         <Textarea placeholder="Additional notes..." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* TEST CARRIED OUT BY */}
+                        <FormField
+                            control={form.control}
+                            name="testCarriedOutBy"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select machine" />
+                                            </SelectTrigger>
+
+                                            <SelectContent>
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

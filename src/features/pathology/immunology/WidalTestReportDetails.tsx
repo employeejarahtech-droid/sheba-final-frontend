@@ -1,7 +1,40 @@
 import { Button } from "@/components/ui/button";
 
-export default function WidalTestReportDetails({ invoice: invoice }: any) {
+interface WidalTestData {
+  id: number;
+  invoice_id: number;
+  s_typhi_o: string | null;
+  s_typhi_h: string | null;
+  s_paratyphi_a: string | null;
+  s_paratyphi_b: string | null;
+  s_paratyphi_c: string | null;
+  remarks: string | null;
+  machine_id: number | null;
+  test_carried_out_by: string | null;
+  created_at: string;
+  outdoor_invoice?: {
+    id: number;
+    patient_name: string;
+    age: string;
+    sex: string;
+    age_text: string;
+    doctor_id: number | null;
+    invoice_date: string;
+  };
+}
+
+export default function WidalTestReportDetails({ data }: { data: WidalTestData | null }) {
   const borderWidth = 2;
+
+  if (!data) {
+    return <div className="flex justify-center items-center min-h-screen">No data available</div>;
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+
   return (
     <div className="max-w-4xl w-full mx-auto bg-background pt-40 pb-10 px-5 mt-6 print:w-[850px] print-report">
       <style>
@@ -48,18 +81,26 @@ export default function WidalTestReportDetails({ invoice: invoice }: any) {
       <table className="w-full text-sm border">
         <tbody>
           <tr className="border">
-            <td className="border px-3 py-2 w-1/4">Receipt ID : {invoice.id}</td>
-            <td className="border px-3 py-2 w-1/4">Date: 01/01/2025</td>
-            <td className="border px-3 py-2 w-1/4">Age: {invoice.age} years</td>
+            <td className="border px-3 py-2 w-1/4">Receipt ID : {data.invoice_id}</td>
+            <td className="border px-3 py-2 w-1/4">
+              Date: {data.outdoor_invoice?.invoice_date ? formatDate(data.outdoor_invoice.invoice_date) : formatDate(data.created_at)}
+            </td>
+            <td className="border px-3 py-2 w-1/4">
+              Age: {data.outdoor_invoice?.age_text || data.outdoor_invoice?.age || 'N/A'}
+            </td>
 
           </tr>
           <tr className="border">
-            <td className="border px-3 py-2" colSpan={2}>Patient name: {invoice.patient_name}</td>
-            <td className="border px-3 py-2">Sex: {invoice.sex}</td>
+            <td className="border px-3 py-2" colSpan={2}>
+              Patient name: {data.outdoor_invoice?.patient_name || 'N/A'}
+            </td>
+            <td className="border px-3 py-2">
+              Sex: {data.outdoor_invoice?.sex || 'N/A'}
+            </td>
           </tr>
           <tr className="border">
             <td className="border px-3 py-2" colSpan={3}>
-              Refd. By: Prof./Dr. {invoice.reference_doctor}
+              Refd. By: Prof./Dr. {data.outdoor_invoice?.doctor_id || '--'}
             </td>
 
           </tr>
@@ -78,36 +119,44 @@ export default function WidalTestReportDetails({ invoice: invoice }: any) {
 
         <tbody>
           <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-            <td className="px-3 py-2">Fasting Blood Suger (F.B.S)</td>
-            <td className="px-3 py-2">145.0 mg/dl (8.0 mmol/L)</td>
-            <td className="px-3 py-2">65-110 mg/dl (3.6-6.1 mmol/L)</td>
+            <td className="px-3 py-2">Salmonella Typhi O (S. Typhi O)</td>
+            <td className="px-3 py-2">{data.s_typhi_o || 'N/A'}</td>
+            <td className="px-3 py-2">&lt;1:80</td>
           </tr>
           <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-            <td className="px-3 py-2">Corresponding Urine Sugar (CUS)</td>
-            <td className="px-3 py-2">N/A</td>
-            <td className="px-3 py-2">Nil</td>
+            <td className="px-3 py-2">Salmonella Typhi H (S. Typhi H)</td>
+            <td className="px-3 py-2">{data.s_typhi_h || 'N/A'}</td>
+            <td className="px-3 py-2">&lt;1:80</td>
           </tr>
           <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-            <td className="px-3 py-2">Blood Suger 2 hours after Breakfast</td>
-            <td className="px-3 py-2">
-              242.3 mg/dl (13.4 mmol/L)
-            </td>
-            <td className="px-3 py-2">
-              &lt;140 mg/dl (&lt;7.8 mmol/L)
-            </td>
+            <td className="px-3 py-2">Salmonella Paratyphi A (S. Paratyphi A)</td>
+            <td className="px-3 py-2">{data.s_paratyphi_a || 'N/A'}</td>
+            <td className="px-3 py-2">&lt;1:80</td>
           </tr>
           <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-            <td className="px-3 py-2">2hrs (CUS)</td>
-            <td className="px-3 py-2">Not done</td>
-            <td className="px-3 py-2">--</td>
+            <td className="px-3 py-2">Salmonella Paratyphi B (S. Paratyphi B)</td>
+            <td className="px-3 py-2">{data.s_paratyphi_b || 'N/A'}</td>
+            <td className="px-3 py-2">&lt;1:80</td>
+          </tr>
+          <tr className={`border-b-${borderWidth} border-dashed border-b`}>
+            <td className="px-3 py-2">Salmonella Paratyphi C (S. Paratyphi C)</td>
+            <td className="px-3 py-2">{data.s_paratyphi_c || 'N/A'}</td>
+            <td className="px-3 py-2">&lt;1:80</td>
           </tr>
         </tbody>
       </table>
 
+      {/* Remarks */}
+      {data.remarks && (
+        <div className="mt-4 text-sm">
+          <span className="font-semibold">Remarks:</span> {data.remarks}
+        </div>
+      )}
+
       {/* Tested By */}
       <p className="text-sm mt-4">
         <span className="font-semibold">Test Carried out by:</span> &nbsp;
-        Humalyzer 3000 Biochemistry Analyser
+        {data.test_carried_out_by || 'N/A'}
       </p>
 
       {/* Footer Signatures */}

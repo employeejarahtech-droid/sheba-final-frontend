@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { ConfigDrawer } from "@/components/config-drawer";
 import { DataTable } from "@/components/DataTable";
 import { Header } from "@/components/layout/header";
@@ -7,12 +7,8 @@ import { TopNav } from "@/components/layout/top-nav";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ColumnDef } from "@tanstack/react-table";
-import { useState } from 'react';
 import { EditBloodForTcDcForm } from '@/features/pathology/hematology/blood-for-tcdc/EditBloodForTcDcForm';
+import { useState, useEffect } from 'react';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
 import { topNav } from '@/data/data';
@@ -25,11 +21,10 @@ export const Route = createFileRoute(
 
 
 type TCDCItem = {
-  id: string;
-  invoice_id: string;
+  id: number;
+  invoice_id: number;
   patient_name: string;
   created_at: string;
-  status: string;
 };
 
 function BloodForTcdc() {
@@ -42,10 +37,11 @@ function BloodForTcdc() {
 
   const token = getCookie('accessToken');
 
-  const { data } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["tcdc", page, search],
 
     queryFn: async () => {
+      console.log('Fetching TCDC data...', { page, limit, search });
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/tcdc?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
         {
@@ -53,8 +49,11 @@ function BloodForTcdc() {
         }
       );
 
-      if (!res.ok) throw new Error("Failed to fetch blood for tcdc reports");
-      return res.json(); // MUST match placeholderData
+      console.log('TCDC Response status:', res.status);
+      if (!res.ok) throw new Error("Failed to fetch blood for TCDC reports");
+      const json = await res.json();
+      console.log('TCDC Response JSON:', json);
+      return json; // MUST match placeholderData
     },
 
     enabled: !!token,
@@ -75,46 +74,39 @@ function BloodForTcdc() {
         },
   });
 
+  console.log('TCDC Data State:', { data, isLoading, error });
 
-  //console.log(data?.data);
+  // Expose edit function to window
+  useEffect(() => {
+    (window as any).editBloodForTcdc = (id: number, invoiceId: number) => {
+      setReportId(id);
+      setInvoiceId(invoiceId);
+      setOpen(true);
+    };
+  }, [setReportId, setInvoiceId]);
 
-  const columns: ColumnDef<TCDCItem>[] = [
-    // Row selection
+  const columns = [
     {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) =>
-            table.toggleAllPageRowsSelected(Boolean(value))
-          }
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
+      data: "invoice_id",
+      title: "Invoice ID",
+      orderable: true,
+      responsivePriority: 2,
+      defaultContent: "",
     },
-
     {
-      accessorKey: "invoice_id",
-      header: "Invoice ID",
+      data: "patient_name",
+      title: "Patient Name",
+      orderable: true,
+      responsivePriority: 1,
+      defaultContent: "",
     },
-
     {
-      accessorKey: "patient_name",
-      header: "Patient Name",
-    },
-
-    {
-      accessorKey: "created_at",
-      header: "Date",
-      cell: ({ row }) => {
-        const iso = row.getValue("created_at") as string;
+      data: "created_at",
+      title: "Date",
+      orderable: true,
+      responsivePriority: 3,
+      render: (_data: any, _type: string, row: TCDCItem) => {
+        const iso = row.created_at;
         const date = new Date(iso);
 
         const formatted = date.toLocaleDateString("en-US", {
@@ -123,51 +115,30 @@ function BloodForTcdc() {
           day: "numeric",
         });
 
-        return <div>{formatted}</div>; // Example: Nov 23, 2025
+        return `<div>${formatted}</div>`; // Example: Nov 23, 2025
       },
-    },
-
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
-        const color =
-          status === "passed"
-            ? "bg-green-500"
-            : status === "failed"
-              ? "bg-red-500"
-              : "bg-yellow-500";
-
-        return <Badge className={color + " text-white"}>{status || 'Pending'}</Badge>;
-      },
+      defaultContent: "",
     },
     // Actions Column
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="flex gap-2">
-
-            <Link to={`/pathology/hematology/blood-for-tcdc/report/$reportId`} params={{ reportId: item.id.toString() }}>
-              <Button size="sm" variant="outline">
-                View
-              </Button>
-            </Link>
-
-            <Button size="sm" variant="default" onClick={() => {
-              setReportId(Number(item.id));
-              setOpen(true);
-              setInvoiceId(Number(item.invoice_id));
-            }}>Edit</Button>
+      data: null,
+      title: "Actions",
+      orderable: false,
+      responsivePriority: 1,
+      render: (_data: any, _type: string, row: TCDCItem) => {
+        return `
+          <div class="flex gap-2">
+            <a href="/pathology/hematology/blood-for-tcdc/report/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+              View
+            </a>
+            <button onclick="window.editBloodForTcdc(${row.id}, ${row.invoice_id})" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+              Edit
+            </button>
           </div>
-        );
+        `;
       },
+      defaultContent: "",
     },
-
   ];
 
   return (
@@ -185,6 +156,12 @@ function BloodForTcdc() {
         <div className="mb-4">
           <h1 className='text-2xl font-bold tracking-tight'>Blood For TCDC</h1>
         </div>
+        {(() => {
+          const items = data?.data?.items || [];
+          const meta = data?.data?.meta;
+          console.log('Passing to DataTable:', { items, meta });
+          return null;
+        })()}
         <DataTable columns={columns} data={data?.data?.items || []} meta={data?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
         <EditBloodForTcDcForm open={open} setOpen={setOpen} reportId={reportId} invoiceId={invoiceId} />
       </Main>

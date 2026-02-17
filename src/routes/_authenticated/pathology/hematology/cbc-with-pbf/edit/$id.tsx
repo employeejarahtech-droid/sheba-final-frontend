@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { Main } from "@/components/layout/main";
 import { Header } from "@/components/layout/header";
@@ -58,6 +59,8 @@ const cbcSchema = z.object({
     basophils: z.string().min(1, "Required"),
 
     pbf_findings: z.string().optional(),
+    machineId: z.string().optional(),
+    testCarriedOutBy: z.string().optional(),
 });
 
 type CBCFormValues = z.infer<typeof cbcSchema>;
@@ -89,6 +92,8 @@ function EditCBCWithPBF() {
             basophils: "",
 
             pbf_findings: "",
+            machineId: "",
+            testCarriedOutBy: "",
         },
     });
 
@@ -111,25 +116,41 @@ function EditCBCWithPBF() {
 
     console.log('cbcData', cbcWithPbfData);
 
+    // Fetch machines data
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/machine`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            return res.json();
+        },
+    });
+
+    const machineList = machinesData?.data?.items || [];
+
     useEffect(() => {
         if (cbcWithPbfData) {
             form.reset({
-                hemoglobin: cbcWithPbfData.hemoglobin,
-                rbc_count: cbcWithPbfData.rbc_count,
-                wbc_count: cbcWithPbfData.wbc_count,
-                platelets: cbcWithPbfData.platelets,
+                hemoglobin: cbcWithPbfData.hemoglobin?.toString() || "",
+                rbc_count: cbcWithPbfData.rbc_count?.toString() || "",
+                wbc_count: cbcWithPbfData.wbc_count?.toString() || "",
+                platelets: cbcWithPbfData.platelets?.toString() || "",
 
-                hct: cbcWithPbfData.hct,
-                mcv: cbcWithPbfData.mcv,
-                mch: cbcWithPbfData.mch,
-                mchc: cbcWithPbfData.mchc,
+                hct: cbcWithPbfData.hct?.toString() || "",
+                mcv: cbcWithPbfData.mcv?.toString() || "",
+                mch: cbcWithPbfData.mch?.toString() || "",
+                mchc: cbcWithPbfData.mchc?.toString() || "",
 
-                neutrophils: cbcWithPbfData.neutrophils,
-                lymphocytes: cbcWithPbfData.lymphocytes,
-                monocytes: cbcWithPbfData.monocytes,
-                eosinophils: cbcWithPbfData.eosinophils,
-                basophils: cbcWithPbfData.basophils,
+                neutrophils: cbcWithPbfData.neutrophils?.toString() || "",
+                lymphocytes: cbcWithPbfData.lymphocytes?.toString() || "",
+                monocytes: cbcWithPbfData.monocytes?.toString() || "",
+                eosinophils: cbcWithPbfData.eosinophils?.toString() || "",
+                basophils: cbcWithPbfData.basophils?.toString() || "",
 
+                pbf_findings: cbcWithPbfData.pbf_findings || "",
+                machineId: cbcWithPbfData.machine_id?.toString() || "",
+                testCarriedOutBy: cbcWithPbfData.test_carried_out_by || "",
             })
         }
     }, [cbcWithPbfData, form]);
@@ -148,7 +169,9 @@ function EditCBCWithPBF() {
                     },
                     body: JSON.stringify({
                         invoice_id: cbcWithPbfData?.invoice_id,
-                        ...data
+                        ...data,
+                        machine_id: data.machineId ? parseInt(data.machineId) : null,
+                        test_carried_out_by: data.testCarriedOutBy,
                     }),
                 }
             );
@@ -399,6 +422,45 @@ function EditCBCWithPBF() {
                                                 </FormItem>
                                             )}
                                         />
+                                </div>
+
+                                {/* Test Carried Out By */}
+                                <div>
+                                    <h2 className="text-xl font-semibold mb-4 mt-8">Test Information</h2>
+                                    <FormField
+                                        control={form.control}
+                                        name="testCarriedOutBy"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Test carried out by</FormLabel>
+                                                <FormControl>
+                                                    <Select
+                                                        onValueChange={(value) => {
+                                                            const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                            if (selectedMachine) {
+                                                                field.onChange(value);
+                                                                form.setValue('machineId', String(selectedMachine.id));
+                                                            }
+                                                        }}
+                                                        value={field.value}
+                                                    >
+                                                        <SelectTrigger className="w-full">
+                                                            <SelectValue placeholder="Select machine" />
+                                                        </SelectTrigger>
+
+                                                        <SelectContent>
+                                                            {machineList.map((machine: any) => (
+                                                                <SelectItem key={machine.id} value={machine.name}>
+                                                                    {machine.name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                 </div>
 
                                 {/* Buttons */}

@@ -13,6 +13,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +26,9 @@ import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { ProfileDropdown } from "@/components/profile-dropdown";
+import { useQuery } from "@tanstack/react-query";
+import { getCookie } from "@/lib/cookies";
+import { useEffect } from "react";
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/stool/stool-re/edit/$id',
@@ -95,6 +99,8 @@ const stoolSchema = z.object({
   others: z.string().optional(),
 
   comments: z.string().optional(),
+  testCarriedOutBy: z.string().optional(),
+  machineId: z.string().optional(),
 });
 
 type StoolFormValues = z.infer<typeof stoolSchema>;
@@ -104,6 +110,8 @@ type StoolFormValues = z.infer<typeof stoolSchema>;
 // --------------------------------------------------
 function EditStoolRe() {
   const { id } = Route.useParams();
+  const token = getCookie('accessToken');
+
   const form = useForm<StoolFormValues>({
     resolver: zodResolver(stoolSchema),
     defaultValues: {
@@ -130,8 +138,28 @@ function EditStoolRe() {
       fatGlobules: "",
       others: "",
       comments: "",
+      testCarriedOutBy: "",
+      machineId: "",
     },
   });
+
+  // Fetch machines from API
+  const { data: machinesData } = useQuery({
+    queryKey: ["machine"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/machine`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch machines");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+
+  const machineList = machinesData?.data?.items || [];
 
   const onSubmit = (values: StoolFormValues) => {
     console.log("Stool Examination Report:", values);
@@ -292,6 +320,42 @@ function EditStoolRe() {
                       <FormControl>
                         <Input placeholder="Additional notes..." {...field} />
                       </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                {/* TEST CARRIED OUT BY */}
+                <FormField
+                  control={form.control}
+                  name="testCarriedOutBy"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Test carried out by</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => {
+                            const selectedMachine = machineList.find((m: any) => m.name === value);
+                            if (selectedMachine) {
+                              field.onChange(value);
+                              form.setValue('machineId', String(selectedMachine.id));
+                            }
+                          }}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select machine" />
+                          </SelectTrigger>
+
+                          <SelectContent>
+                            {machineList.map((machine: any) => (
+                              <SelectItem key={machine.id} value={machine.name}>
+                                {machine.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />

@@ -3,7 +3,6 @@ import { Header } from '@/components/layout/header'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
 import { useState, useMemo } from 'react'
@@ -13,7 +12,6 @@ import { Link } from '@tanstack/react-router'
 import { TopNav } from '@/components/layout/top-nav'
 import { topNav } from '@/data/data'
 import { FileText, DollarSign, TrendingUp, Calendar, Plus } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 
 
 type InvoiceItem = {
@@ -131,124 +129,125 @@ export default function Invoices() {
 
     //console.log(data?.data);
 
-    const columns: ColumnDef<InvoiceItem>[] = [
+    const columns = [
         {
-            accessorKey: "id",
-            header: "Invoice ID",
-            enableHiding: true,
+            data: "id",
+            title: "Invoice ID",
+            orderable: true,
+            responsivePriority: 1, // Always visible (highest priority)
+            defaultContent: "",
         },
         {
-            accessorKey: "patient_name",
-            header: "Patient Name",
-            enableHiding: true,
+            data: "patient_name",
+            title: "Patient Name",
+            orderable: true,
+            responsivePriority: 1, // Always visible
+            defaultContent: "",
         },
         {
-            accessorKey: "phone",
-            header: "Phone",
-            enableHiding: true,
+            data: "phone",
+            title: "Phone",
+            orderable: true,
+            responsivePriority: 2, // Hide on small screens
+            defaultContent: "-",
         },
         {
-            accessorKey: "reference_doctor",
-            header: "Reference Doctor",
-            enableHiding: true,
-            cell: ({ row }) => {
-                const doctorName = row.original.doctor?.doctor_name;
-                const refDoctor = row.original.reference_doctor;
-                return <div>{doctorName || refDoctor || "-"}</div>;
+            data: null, // Use null for computed fields
+            title: "Reference Doctor",
+            orderable: true,
+            responsivePriority: 3, // Hide earlier
+            render: (_data: any, _type: string, row: InvoiceItem) => {
+                const doctorName = row.doctor?.doctor_name;
+                const refDoctor = row.reference_doctor;
+                return doctorName || refDoctor || "-";
             },
+            defaultContent: "-",
         },
         {
-            accessorKey: "total_amount",
-            header: "Total Amount",
-            enableHiding: true,
-            cell: ({ row }) => {
-                const amount = row.getValue("total_amount") as number | null;
-                return <div>{amount ?? "-"}</div>;
-            },
+            data: "total_amount",
+            title: "Total Amount",
+            orderable: true,
+            responsivePriority: 4,
+            render: (data: any) => String(data ?? "-"),
+            defaultContent: "-",
         },
         {
-            id: "discount",
-            header: "Discount",
-            enableHiding: true,
-            cell: ({ row }) => {
-                const total = Number(row.original.total_amount || 0);
-                const net = Number(row.original.net_amount || 0);
+            data: null, // Computed field
+            title: "Discount",
+            orderable: false,
+            responsivePriority: 5,
+            render: (_data: any, _type: string, row: InvoiceItem) => {
+                const total = Number(row.total_amount || 0);
+                const net = Number(row.net_amount || 0);
                 const discount = total - net;
-                return <div>{discount > 0 ? discount : "-"}</div>;
+                return String(discount > 0 ? discount : "-");
             },
+            defaultContent: "-",
         },
         {
-            accessorKey: "total_paid",
-            header: "Paid (৳)",
-            enableHiding: true,
-            cell: ({ row }) => <div className="text-emerald-600 font-medium">{row.original.total_paid ?? 0}</div>,
+            data: "total_paid",
+            title: "Paid (৳)",
+            orderable: true,
+            responsivePriority: 2,
+            render: (data: any) => `<span class="text-emerald-600 font-medium">${data ?? 0}</span>`,
+            defaultContent: "0",
         },
         {
-            accessorKey: "due_amount",
-            header: "Due (৳)",
-            enableHiding: true,
-            cell: ({ row }) => <div className="text-red-600 font-bold">{row.original.due_amount ?? 0}</div>,
+            data: "due_amount",
+            title: "Due (৳)",
+            orderable: true,
+            responsivePriority: 2, // Always show due amount
+            render: (data: any) => `<span class="text-red-600 font-bold">${data ?? 0}</span>`,
+            defaultContent: "0",
         },
         {
-            accessorKey: "created_at",
-            header: "Date",
-            enableHiding: true,
-            cell: ({ row }) => {
-                const iso = row.getValue("created_at") as string;
-                const date = new Date(iso);
-
-                const formatted = date.toLocaleDateString("en-US", {
+            data: "created_at",
+            title: "Date",
+            orderable: true,
+            responsivePriority: 3,
+            render: (data: any) => {
+                if (!data) return "-";
+                const date = new Date(data);
+                return date.toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
                 });
-
-                return <div>{formatted}</div>; // Example: Nov 23, 2025
             },
+            defaultContent: "-",
         },
         {
-            accessorKey: "status",
-            header: "Status",
-            enableHiding: true,
-            cell: ({ row }) => {
-                // Calculate actual status based on due_amount
-                const dueAmount = Number(row.original.due_amount || 0);
+            data: null, // Computed field
+            title: "Status",
+            orderable: true,
+            responsivePriority: 1, // Always visible
+            render: (_data: any, _type: string, row: InvoiceItem) => {
+                const dueAmount = Number(row.due_amount || 0);
                 const isPaid = dueAmount === 0;
                 const status = isPaid ? "paid" : "unpaid";
-                return (
-                    <Badge
-                        variant={isPaid ? "default" : "destructive"}
-                        className={isPaid ? "bg-emerald-500 hover:bg-emerald-500 text-white border-transparent" : ""}
-                    >
-                        {status.toUpperCase()}
-                    </Badge>
-                );
+                const bgColor = isPaid ? "bg-emerald-500" : "bg-red-500";
+                return `<span class="${bgColor} text-white px-2 py-1 rounded text-xs font-semibold">${status.toUpperCase()}</span>`;
             },
+            defaultContent: "",
         },
-
-        // Actions Column
         {
-            id: "actions",
-            header: "Actions",
-            enableHiding: false, // Keep Actions column always visible
-            cell: ({ row }) => {
-                const item = row.original;
-
-                return (
-                    <div className="flex gap-2">
-                        <Link to={`/outdoor/reception/invoices/$invoiceId`} params={{ invoiceId: row.original.id.toString() }}>
-                            <Button size="sm" variant="outline">
-                                View
-                            </Button>
-                        </Link>
-                        <Link to={`/outdoor/reception/due-collection/$invoiceId`} params={{ invoiceId: row.original.id.toString() }}>
-                            <Button size="sm" variant="secondary" className="bg-emerald-600 text-white hover:bg-emerald-700">
-                                Pay Now
-                            </Button>
-                        </Link>
+            data: null, // Computed field
+            title: "Actions",
+            orderable: false,
+            responsivePriority: 1, // Always visible
+            render: (_data: any, _type: string, row: InvoiceItem) => {
+                return `
+                    <div class="flex gap-2">
+                        <a href="/outdoor/reception/invoices/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+                            View
+                        </a>
+                        <a href="/outdoor/reception/due-collection/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-emerald-600 text-white hover:bg-emerald-700 h-8 px-4 py-2">
+                            Pay Now
+                        </a>
                     </div>
-                );
+                `;
             },
+            defaultContent: "",
         },
     ];
     return <>

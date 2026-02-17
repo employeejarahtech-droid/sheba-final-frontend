@@ -1,11 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
@@ -125,6 +124,14 @@ export default function Categories() {
 
     console.log('data', data);
 
+    // Expose edit function to window for onclick handlers
+    useEffect(() => {
+        (window as any).editCategory = (id: number) => {
+            setSelectedCategoryId(id);
+            setOpenEditForm(true);
+        };
+    }, [setSelectedCategoryId, setOpenEditForm]);
+
     // Delete mutation
 
 
@@ -132,49 +139,46 @@ export default function Categories() {
 
     console.log(data?.data);
 
-    const columns: ColumnDef<CategoryItem>[] = [
-
+    const columns = [
         {
-            accessorKey: "id",
-            header: "Category ID",
+            data: "id",
+            title: "Category ID",
+            orderable: true,
+            responsivePriority: 2,
+            defaultContent: "",
         },
         {
-            accessorKey: "name",
-            header: "Category Name",
+            data: "name",
+            title: "Category Name",
+            orderable: true,
+            responsivePriority: 1,
+            defaultContent: "",
         },
         {
-            accessorKey: "department_name",
-            header: "Department Name",
+            data: "department_name",
+            title: "Department Name",
+            orderable: true,
+            responsivePriority: 2,
+            defaultContent: "",
         },
-        // Actions Column
         {
-            id: "actions",
-            header: "Actions",
-            cell: ({ row }) => {
-                const item = row.original;
-
-                return (
-                    <div className="flex gap-2">
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => navigate({ to: `/outdoor/master/categories/${item.id}` })}
-                        >
+            data: null,
+            title: "Actions",
+            orderable: false,
+            responsivePriority: 1,
+            render: (_data: any, _type: string, row: CategoryItem) => {
+                return `
+                    <div class="flex gap-2">
+                        <a href="/outdoor/master/categories/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
                             View
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant="default"
-                            onClick={() => {
-                                setSelectedCategoryId(item.id);
-                                setOpenEditForm(true);
-                            }}
-                        >
+                        </a>
+                        <button onclick="window.editCategory(${row.id})" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
                             Edit
-                        </Button>
+                        </button>
                     </div>
-                );
+                `;
             },
+            defaultContent: "",
         },
     ];
 

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { ConfigDrawer } from "@/components/config-drawer";
 import { DataTable } from "@/components/DataTable";
 import { Header } from "@/components/layout/header";
@@ -7,8 +7,6 @@ import { TopNav } from "@/components/layout/top-nav";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { Button } from "@/components/ui/button";
-import { ColumnDef } from "@tanstack/react-table";
 import { useState } from 'react';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
@@ -61,88 +59,87 @@ function AllHormones() {
         },
   });
 
+  const items = hormoneAllReports?.data?.items || [];
+  const meta = hormoneAllReports?.data?.meta || { page, limit, total: 0 };
 
-  const columns: ColumnDef<ReportsItem>[] = [
+  const columns = [
     {
-      accessorKey: "ReciptID",
-      header: "Receipt ID",
+      data: 'ReciptID',
+      title: 'Receipt ID',
+      orderable: true,
+      defaultContent: '',
     },
     {
-      accessorKey: "PatientId",
-      header: "Patient ID",
+      data: 'PatientId',
+      title: 'Patient ID',
+      orderable: true,
+      defaultContent: '',
     },
     {
-      accessorKey: "PatientName",
-      header: "Patient Name",
-      cell: ({ row }) => {
-        const patientName = row.getValue("PatientName") as string | null;
+      data: 'PatientName',
+      title: 'Patient Name',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const patientName = row.PatientName;
         return patientName || '-';
-      }
+      },
+      defaultContent: '',
     },
     {
-      accessorKey: "Date",
-      header: "Date",
-      cell: ({ row }) => {
-        const date = row.getValue("Date") as string | null;
-        return date ? new Date(date).toLocaleDateString() : '-';
-      }
+      data: 'Date',
+      title: 'Date',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const date = row.Date;
+        return date ? new Date(date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        }) : '-';
+      },
+      defaultContent: '',
     },
     {
-      accessorKey: "Tests",
-      header: "Hormone Record IDs",
-      cell: ({ row }) => {
-        const tests = row.getValue("Tests") as string;
+      data: 'Tests',
+      title: 'Hormone Record IDs',
+      render: (data: any) => {
+        const tests = data as string;
         if (!tests) return '-';
 
         // Split comma-separated IDs and display as badges
         const testIds = tests.split(',').filter(id => id.trim() !== '');
-        return (
-          <div className="flex flex-wrap gap-1">
-            {testIds.map((id, index) => (
-              <span
-                key={index}
-                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors cursor-pointer"
-                title={`Hormone Record ID: ${id.trim()}`}
-              >
-                {id.trim()}
-              </span>
-            ))}
-          </div>
-        );
-      }
-    },
-    {
-      accessorKey: "Status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("Status") as string;
-        const statusColor = status === 'Completed' ? 'text-green-600' : 'text-yellow-600';
-        return <span className={statusColor}>{status}</span>;
-      }
-    },
-    // Actions Column
-    {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => alert("View " + item.ReciptID)}>
-              View
-            </Button>
-            <Link to={`/pathology/hormone/all/edit/$id`} params={{ id: String(item.ReciptID) }}>
-              <Button size="sm" variant="default">
-                Edit
-              </Button>
-            </Link>
-            <Button size="sm" variant="destructive" onClick={() => alert("Delete " + item.ReciptID)}>
-              Delete
-            </Button>
-          </div>
-        );
+        return testIds.map((id) =>
+          `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 mr-1 mb-1">${id.trim()}</span>`
+        ).join('');
       },
+      orderable: false,
+      defaultContent: '',
+    },
+    {
+      data: 'Status',
+      title: 'Status',
+      orderable: true,
+      render: (data: any) => {
+        const status = data as string;
+        const statusColor = status === 'Completed' ? 'text-green-600' : 'text-yellow-600';
+        return `<span class="${statusColor}">${status || 'Pending'}</span>`;
+      },
+      defaultContent: '',
+    },
+    {
+      data: null,
+      title: 'Actions',
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return `
+          <div class="flex gap-2">
+            <a href="/pathology/hormone/all/edit/${row.ReciptID}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+              Edit
+            </a>
+          </div>
+        `;
+      },
+      defaultContent: '',
     },
   ];
 
@@ -161,9 +158,10 @@ function AllHormones() {
         <div className="mb-4">
           <h1 className='text-2xl font-bold tracking-tight'>All Reports (Hormones)</h1>
         </div>
-        <DataTable columns={columns} data={hormoneAllReports?.data?.items || []} meta={hormoneAllReports?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
+        <DataTable columns={columns} data={items} meta={meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
       </Main>
     </>
 
   )
+
 }

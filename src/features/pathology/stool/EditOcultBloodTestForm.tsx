@@ -20,6 +20,13 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -33,6 +40,8 @@ import { Textarea } from "@/components/ui/textarea";
 const occultBloodSchema = z.object({
     result: z.string().min(1, { message: "Required" }),
     comments: z.string().optional(),
+    testCarriedOutBy: z.string().optional(),
+    machineId: z.string().optional(),
 });
 
 type UrineOccultBloodFormValues = z.infer<typeof occultBloodSchema>;
@@ -55,6 +64,8 @@ export function EditOccultBloodTestForm({ open, setOpen, reportId, invoiceId }: 
         defaultValues: {
             result: "",
             comments: "",
+            testCarriedOutBy: "",
+            machineId: "",
         },
     });
 
@@ -76,11 +87,31 @@ export function EditOccultBloodTestForm({ open, setOpen, reportId, invoiceId }: 
         enabled: !!token && !!reportId,
     });
 
+    // Fetch machines from API
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/machine`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch machines");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const machineList = machinesData?.data?.items || [];
+
     useEffect(() => {
         if (occultBloodData) {
             form.reset({
                 result: occultBloodData.test_result || '',
                 comments: occultBloodData.remarks || '',
+                testCarriedOutBy: occultBloodData.test_carried_out_by || '',
+                machineId: occultBloodData.machine_id?.toString() || '',
             })
         }
     }, [occultBloodData, form]);
@@ -98,7 +129,9 @@ export function EditOccultBloodTestForm({ open, setOpen, reportId, invoiceId }: 
                 body: JSON.stringify({
                     invoice_id: invoiceId,
                     test_result: payload.result,
-                    remarks: payload.comments
+                    remarks: payload.comments,
+                    test_carried_out_by: payload.testCarriedOutBy,
+                    machine_id: payload.machineId ? parseInt(payload.machineId) : null,
                 }),
             });
 
@@ -184,6 +217,42 @@ export function EditOccultBloodTestForm({ open, setOpen, reportId, invoiceId }: 
                                     <FormLabel>Comments / Remarks (Optional)</FormLabel>
                                     <FormControl>
                                         <Textarea placeholder="Additional notes..." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Test Carried Out By */}
+                        <FormField
+                            control={form.control}
+                            name="testCarriedOutBy"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select machine" />
+                                            </SelectTrigger>
+
+                                            <SelectContent>
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

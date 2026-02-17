@@ -3,12 +3,10 @@ import { Header } from '@/components/layout/header'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { ColumnDef } from "@tanstack/react-table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
+import { Button } from "@/components/ui/button";
 import { Link } from '@tanstack/react-router'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { Stethoscope, Award, Globe, MapPin, Plus } from 'lucide-react'
@@ -134,118 +132,111 @@ export default function Doctors() {
     }, [data]);
 
 
-
     //console.log(data?.data);
 
     // Define columns with access to settings for formatted ID
-    const columns: ColumnDef<DoctorItem>[] = [
-        // Row selection
+    const columns = [
         {
-            id: "select",
-            header: ({ table }) => (
-                <Checkbox
-                    checked={table.getIsAllPageRowsSelected()}
-                    onCheckedChange={(value) =>
-                        table.toggleAllPageRowsSelected(Boolean(value))
-                    }
-                />
-            ),
-            cell: ({ row }) => (
-                <Checkbox
-                    checked={row.getIsSelected()}
-                    onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-                />
-            ),
-            enableSorting: false,
-            enableHiding: false,
-        },
-        {
-            accessorKey: "id",
-            header: "Doctor ID",
-            cell: ({ row }) => {
-                const item = row.original;
-
+            data: "id",
+            title: "Doctor ID",
+            orderable: true,
+            responsivePriority: 2,
+            render: (_data: any, _type: string, row: DoctorItem) => {
                 // If API returns formatted doctor_id, use it
-                if (item.doctor_id) {
-                    return <span className="font-mono font-medium">{item.doctor_id}</span>;
+                if (row.doctor_id) {
+                    return `<span class="font-mono font-medium">${row.doctor_id}</span>`;
                 }
 
                 // Otherwise, format using prefix settings
                 // Use sequence if available, otherwise use numeric part of id
-                const sequence = item.sequence || parseInt(String(item.id).replace(/\D/g, '')) || 0;
+                const sequence = row.sequence || parseInt(String(row.id).replace(/\D/g, '')) || 0;
                 const doctorPrefix = settings?.doctorPrefix || 'DOC-{0000}';
 
-                return (
-                    <span className="font-mono font-medium">
-                        {formatId(doctorPrefix, sequence)}
-                    </span>
-                );
+                return `<span class="font-mono font-medium">${formatId(doctorPrefix, sequence)}</span>`;
             },
+            defaultContent: "",
         },
         {
-            accessorKey: "doctor_name",
-            header: "Doctor's Name",
+            data: "doctor_name",
+            title: "Doctor's Name",
+            orderable: true,
+            responsivePriority: 1,
+            defaultContent: "",
         },
         {
-            accessorKey: "title",
-            header: "Title",
+            data: "title",
+            title: "Title",
+            orderable: true,
+            responsivePriority: 3,
+            defaultContent: "",
         },
         {
-            accessorKey: "qualification",
-            header: "Qualification",
+            data: "qualification",
+            title: "Qualification",
+            orderable: true,
+            responsivePriority: 4,
+            defaultContent: "",
         },
         {
-            accessorKey: "speciality",
-            header: "Speciality",
+            data: "speciality",
+            title: "Speciality",
+            orderable: true,
+            responsivePriority: 3,
+            defaultContent: "",
         },
         {
-            accessorKey: "country",
-            header: "Country",
+            data: "country",
+            title: "Country",
+            orderable: true,
+            responsivePriority: 5,
+            defaultContent: "",
         },
         {
-            accessorKey: "city",
-            header: "City",
+            data: "city",
+            title: "City",
+            orderable: true,
+            responsivePriority: 5,
+            defaultContent: "",
         },
         {
-            accessorKey: "phone",
-            header: "Phone",
+            data: "phone",
+            title: "Phone",
+            orderable: true,
+            responsivePriority: 6,
+            defaultContent: "",
         },
         {
-            accessorKey: "mobile",
-            header: "Mobile",
+            data: "mobile",
+            title: "Mobile",
+            orderable: true,
+            responsivePriority: 6,
+            defaultContent: "",
         },
         {
-            accessorKey: "email",
-            header: "Email",
+            data: "email",
+            title: "Email",
+            orderable: true,
+            responsivePriority: 6,
+            defaultContent: "",
         },
         {
-            accessorKey: "score",
-            header: "Score",
-        },
-
-        // Actions Column
-        {
-            id: "actions",
-            header: "Actions",
-            cell: ({ row }) => {
-                const item = row.original;
-
-                return (
-                    <div className="flex gap-2">
-                        <Link to={`/outdoor/master/doctors/$doctorId`} params={{ doctorId: item.id }}>
-                            <Button size="sm" variant="outline">
-                                View
-                            </Button>
-                        </Link>
-                        <Link to={`/outdoor/master/doctors/$doctorId/edit`} params={{ doctorId: item.id }}>
-                            <Button size="sm" variant="default">
-                                Edit
-                            </Button>
-                        </Link>
-
+            data: null,
+            title: "Actions",
+            orderable: false,
+            responsivePriority: 1,
+            render: (_data: any, _type: string, row: DoctorItem) => {
+                return `
+                    <div class="flex gap-2">
+                        <a href="/outdoor/master/doctors/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+                            View
+                        </a>
+                        <a href="/outdoor/master/doctors/${row.id}/edit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+                            Edit
+                        </a>
                     </div>
-                );
+                `;
             },
+            defaultContent: "",
         },
     ];
     return <>

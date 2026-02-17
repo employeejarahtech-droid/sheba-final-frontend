@@ -1,14 +1,14 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
- 
+
 import {
     Sheet,
     SheetContent,
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
- 
+
 import {
     Form,
     FormControl,
@@ -17,36 +17,45 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
- 
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
- 
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { getCookie } from "@/lib/cookies";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { toast } from "sonner";
- 
+
 // --- Schema ---
 const skinScrapingSchema = z.object({
     site: z.string().min(1, { message: "Required" }),
     fungus_type: z.string().min(1, { message: "Required" }),
     comments: z.string().optional(),
+    testCarriedOutBy: z.string().optional(),
+    machineId: z.string().optional(),
 });
- 
+
 type SkinScrapingFormValues = z.infer<typeof skinScrapingSchema>;
- 
+
 interface SkinScrapingFormProps {
     open: boolean;
     setOpen: (open: boolean) => void;
     reportId: number;
     invoiceId: number;
 }
- 
+
 export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoiceId }: SkinScrapingFormProps) {
      const navigate = useNavigate();
-    
+
         const token = getCookie('accessToken');
         const queryClient = useQueryClient();
 
@@ -56,10 +65,12 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
             site: "",
             fungus_type: "",
             comments: "",
+            testCarriedOutBy: "",
+            machineId: "",
         },
     });
 
-    
+
     // Fetching existing data
     const { data: skinScrappingData } = useQuery({
         queryKey: ["skin-scraping", reportId],
@@ -78,7 +89,23 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
         enabled: !!token && !!reportId,
     });
 
-    console.log("Sputum Data:", skinScrappingData);
+    // Fetch machines from API
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/machine`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch machines");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const machineList = machinesData?.data?.items || [];
 
     useEffect(() => {
         if (skinScrappingData) {
@@ -86,6 +113,8 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
                 site: skinScrappingData.site || '',
                 fungus_type: skinScrappingData.fungus_type || '',
                 comments: skinScrappingData.remarks || '',
+                testCarriedOutBy: skinScrappingData.test_carried_out_by || '',
+                machineId: skinScrappingData.machine_id?.toString() || '',
             })
         }
     }, [skinScrappingData, form]);
@@ -104,13 +133,15 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
                     invoice_id: invoiceId,
                     site: payload.site,
                     fungus_type: payload.fungus_type,
-                    remarks: payload.comments
+                    remarks: payload.comments,
+                    test_carried_out_by: payload.testCarriedOutBy,
+                    machine_id: payload.machineId ? parseInt(payload.machineId) : null,
                 }),
             });
 
             if (!res.ok) {
                 const msg = await res.text();
-                throw new Error(msg || "Failed to update electrolytes test");
+                throw new Error(msg || "Failed to update skin scraping test");
             }
 
             return res.json();
@@ -135,39 +166,38 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
 
 
 
- 
     function onSubmit(values: SkinScrapingFormValues) {
         console.log("Skin Scraping for Fungal Study:", values);
         updateSkinScrappingMutation.mutate(values);
         setOpen(false);
     }
- 
+
     const handleView = () => alert("View triggered.");
- 
+
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetContent className="max-w-[450px] w-full overflow-y-auto">
                 <SheetHeader>
                     <SheetTitle>Skin Scraping for Fungal Study</SheetTitle>
                 </SheetHeader>
- 
+
                 <div className="px-4">
                     <PatientInvoiceInfo
-                    invoiceInfo={{
-                        invoiceNo: "RPT-1010",
-                        patientName: "Jannatul Ferdous",
-                        age: "33 Years",
-                        gender: "Female",
-                    }}
-                />
+                        invoiceInfo={{
+                            invoiceNo: "RPT-1010",
+                            patientName: "Jannatul Ferdous",
+                            age: "33 Years",
+                            gender: "Female",
+                        }}
+                    />
                 </div>
- 
+
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
                         className="space-y-6 mt-4 p-4"
                     >
- 
+
                         {/* KOH Result */}
                         <FormField
                             control={form.control}
@@ -182,8 +212,8 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
                                 </FormItem>
                             )}
                         />
- 
- 
+
+
                         {/* Type of Fungus */}
                         <FormField
                             control={form.control}
@@ -198,7 +228,7 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
                                 </FormItem>
                             )}
                         />
- 
+
                         {/* Comments */}
                         <FormField
                             control={form.control}
@@ -213,7 +243,43 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
                                 </FormItem>
                             )}
                         />
- 
+
+                        {/* Test Carried Out By */}
+                        <FormField
+                            control={form.control}
+                            name="testCarriedOutBy"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select machine" />
+                                            </SelectTrigger>
+
+                                            <SelectContent>
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
                         {/* Buttons */}
                         <div className="flex justify-center gap-2 pt-4">
                             <Button
@@ -223,7 +289,7 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
                             >
                                 {form.formState.isSubmitting ? "Saving..." : "Save"}
                             </Button>
- 
+
                             <Link to={`/pathology/hormone/skin-scrapping-for-fungus/report/$reportId`} params={{ reportId: reportId.toString() }} >
                                 <Button type="button" variant="warning">
                                 Print Preview
@@ -233,11 +299,11 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
                                 View
                             </Button>
                         </div>
- 
+
                     </form>
                 </Form>
             </SheetContent>
         </Sheet>
     );
 }
- 
+

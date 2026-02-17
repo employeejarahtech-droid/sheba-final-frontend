@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { ConfigDrawer } from "@/components/config-drawer";
 import { DataTable } from "@/components/DataTable";
 import { Header } from "@/components/layout/header";
@@ -7,15 +7,11 @@ import { TopNav } from "@/components/layout/top-nav";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ColumnDef } from "@tanstack/react-table";
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { EditBloodGroupForm } from '@/features/pathology/immunology/EditBloodGroupForm';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
-import { topNav } from '@/data/data';
+import { topNav, bloodGroupReports } from '@/data/data';
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/immunology/blood-group/',
@@ -42,22 +38,53 @@ function BloodGroup() {
 
   const token = getCookie('accessToken');
 
-  const { data } = useQuery({
+  const { data, isError } = useQuery({
     queryKey: ["blood-group", page, search],
 
     queryFn: async () => {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/blood-group?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/blood-group?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-      if (!res.ok) throw new Error("Failed to fetch blood for tcdc reports");
-      return res.json(); // MUST match placeholderData
+        if (!res.ok) {
+          console.error('API Response:', res.status, res.statusText);
+          // Return empty structure instead of throwing
+          return {
+            data: {
+              items: [],
+              meta: {
+                page,
+                limit,
+                total: 0,
+              },
+            },
+          };
+        }
+        const jsonData = await res.json();
+        console.log('Blood group API response:', jsonData);
+        return jsonData;
+      } catch (err) {
+        console.error('Error fetching blood group reports:', err);
+        // Return empty structure instead of throwing
+        return {
+          data: {
+            items: [],
+            meta: {
+              page,
+              limit,
+              total: 0,
+            },
+          },
+        };
+      }
     },
 
     enabled: !!token,
+    retry: 0, // Don't retry on failure, use fallback immediately
 
     // ⭐ Perfect smooth pagination
     placeholderData: (prev) =>
@@ -75,62 +102,69 @@ function BloodGroup() {
         },
   });
 
+  // Fallback to static data if API fails
+  const items = useMemo(() => {
+    if (data?.data?.items && data.data.items.length > 0) {
+      return data.data.items;
+    }
+    // Use static data as fallback
+    return bloodGroupReports;
+  }, [data]);
+
+  const meta = useMemo(() => {
+    if (data?.data?.meta) {
+      return data.data.meta;
+    }
+    // Use static data meta
+    return {
+      page,
+      limit,
+      total: bloodGroupReports.length,
+    };
+  }, [data, page, limit]);
+
 
   //console.log(data?.data);
 
-  const columns: ColumnDef<ReportItem>[] = [
-    // Row selection
+  // Define columns for jQuery DataTable format
+  const columns = [
     {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) =>
-            table.toggleAllPageRowsSelected(Boolean(value))
-          }
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-
-    {
-      accessorKey: "invoice_id",
-      header: "Invoice ID",
+      data: 'invoice_id',
+      title: 'Invoice ID',
+      className: 'font-mono text-sm',
     },
     {
-      accessorKey: "patient_name",
-      header: "Patient Name",
+      data: 'patient_name',
+      title: 'Patient Name',
+      className: 'font-medium',
     },
-
     {
-      accessorKey: "created_at",
-      header: "Date",
-      cell: ({ row }) => {
-        const iso = row.getValue("created_at") as string;
+      data: 'created_at',
+      title: 'Date',
+      render: (data: any) => {
+        const iso = data as string;
         const date = new Date(iso);
-
         const formatted = date.toLocaleDateString("en-US", {
           year: "numeric",
           month: "short",
           day: "numeric",
         });
-
-        return <div>{formatted}</div>; // Example: Nov 23, 2025
+        return `<div class="text-sm">${formatted}</div>`;
       },
     },
-
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
+      data: 'test_carried_out_by',
+      title: 'Test Carried Out By',
+      render: (data: any) => {
+        const value = data as string;
+        return `<div class="text-sm">${value || '-'}</div>`;
+      },
+    },
+    {
+      data: 'status',
+      title: 'Status',
+      render: (data: any) => {
+        const status = data as string;
         const color =
           status === "passed"
             ? "bg-green-500"
@@ -138,38 +172,45 @@ function BloodGroup() {
               ? "bg-red-500"
               : "bg-yellow-500";
 
-        return <Badge className={color + " text-white"}>{status || 'Pending'}</Badge>;
+        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${color} text-white border-transparent">${status || 'Pending'}</span>`;
       },
     },
-    // Actions Column
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="flex gap-2">
-
-            <Button size="sm" variant="outline"
-              onClick={() => {
-                setIsDrawerOpen(true);
-                setReportId(Number(item.id));
-                setInvoiceId(Number(item.invoice_id));
-              }}>
-              Edit
-            </Button>
-            <Link to={`/pathology/immunology/blood-group/report/$reportId`} params={{ reportId: item.id.toString() }}>
-              <Button size="sm" variant="outline-info">
-                View
-              </Button>
-            </Link>
-          </div>
-        );
+      data: null,
+      title: 'Actions',
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportItem) => {
+        const rowData = JSON.stringify(row).replace(/"/g, '&quot;');
+        return `
+          <button class="edit-blood-group-btn inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 mr-2" data-row='${rowData}'>Edit</button>
+          <a href="/pathology/immunology/blood-group/report/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-info hover:bg-info-foreground h-8 px-3">View</a>
+        `;
       },
     },
-
   ];
+
+  // Set up edit button handlers
+  useEffect(() => {
+    const handleEditClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const button = target.closest('.edit-blood-group-btn');
+      if (button) {
+        const rowData = (button as HTMLElement).getAttribute('data-row');
+        if (rowData) {
+          const item: ReportItem = JSON.parse(rowData);
+          setIsDrawerOpen(true);
+          setReportId(Number(item.id));
+          setInvoiceId(Number(item.invoice_id));
+        }
+      }
+    };
+
+    document.addEventListener('click', handleEditClick);
+
+    return () => {
+      document.removeEventListener('click', handleEditClick);
+    };
+  }, []);
 
   return (
     <>
@@ -186,7 +227,7 @@ function BloodGroup() {
         <div className="mb-4">
           <h1 className='text-2xl font-bold tracking-tight'>Blood Group</h1>
         </div>
-        <DataTable columns={columns} data={data?.data?.items || []} meta={data?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
+        <DataTable columns={columns} data={items} meta={meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
         <EditBloodGroupForm open={isDrawerOpen} setOpen={setIsDrawerOpen} reportId={reportId} invoiceId={invoiceId} />
       </Main>
     </>

@@ -11,11 +11,8 @@ import { useGetUsersQuery } from './userQueries'
 import { useGetRolesQuery } from '@/features/roles/roleQueries'
 import { Users as UsersIcon, UserCheck, UserX, Mail, Loader2 } from 'lucide-react'
 import { type User as ApiUser } from '@/types/user.types'
-import { ColumnDef } from '@tanstack/react-table'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 
 function UsersContent() {
   const [search, setSearch] = useState('')
@@ -91,83 +88,89 @@ function UsersContent() {
     },
   ], [totalUsers])
 
-  // Define columns based on API data structure
-  const columns: ColumnDef<ApiUser>[] = useMemo(() => [
+  // Define columns for jQuery DataTable format
+  const columns = useMemo(() => [
     {
-      accessorKey: 'id',
-      header: 'ID',
-      cell: ({ row }) => <span className="font-mono text-sm">{row.getValue('id')}</span>,
+      data: 'id',
+      title: 'ID',
+      className: 'font-mono text-sm',
     },
     {
-      accessorKey: 'name',
-      header: 'Name',
-      cell: ({ row }) => <span className="font-medium">{row.getValue('name')}</span>,
+      data: 'name',
+      title: 'Name',
+      className: 'font-medium',
     },
     {
-      accessorKey: 'email',
-      header: 'Email',
-      cell: ({ row }) => <span className="text-sm">{row.getValue('email')}</span>,
+      data: 'email',
+      title: 'Email',
+      className: 'text-sm',
     },
     {
-      accessorKey: 'role_id',
-      header: 'Role',
-      cell: ({ row }) => {
-        const roleId = row.getValue('role_id') as number
+      data: 'role_id',
+      title: 'Role',
+      render: (data: any) => {
+        const roleId = data as number
         const role = roleMap[roleId] || { display_name: 'Unknown', color: 'bg-gray-500' }
-        return (
-          <Badge className={`${role.color} text-white border-transparent`}>
-            {role.display_name}
-          </Badge>
-        )
+        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${role.color} text-white border-transparent">${role.display_name}</span>`
       },
     },
     {
-      accessorKey: 'created_at',
-      header: 'Created At',
-      cell: ({ row }) => {
-        const date = new Date(row.getValue('created_at'))
-        return <span className="text-sm text-muted-foreground">{date.toLocaleDateString()}</span>
+      data: 'created_at',
+      title: 'Created At',
+      render: (data: any) => {
+        const date = new Date(data)
+        return `<span class="text-sm text-muted-foreground">${date.toLocaleDateString()}</span>`
       },
     },
     {
-      id: 'actions',
-      header: 'Actions',
-      cell: ({ row }) => {
-        const user = row.original
-        return (
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                // Transform API user to form format for editing
-                const nameParts = user.name.split(' ')
-                const firstName = nameParts[0] || ''
-                const lastName = nameParts.slice(1).join(' ') || ''
-
-
-                setCurrentRow({
-                  id: user.id.toString(),
-                  firstName,
-                  lastName,
-                  username: user.email.split('@')[0],
-                  email: user.email,
-                  phoneNumber: '',
-                  status: 'active' as any,
-                  role: (user.role_id?.toString() || '2') as any, // Pass role_id as string
-                  createdAt: new Date(user.created_at),
-                  updatedAt: user.updated_at ? new Date(user.updated_at) : new Date(user.created_at),
-                })
-                setOpen('edit')
-              }}
-            >
-              Edit
-            </Button>
-          </div>
-        )
+      data: null,
+      title: 'Actions',
+      orderable: false,
+      render: (_data: any, _type: string, row: ApiUser) => {
+        // Store the user data for onclick handler
+        const userData = JSON.stringify(row).replace(/"/g, '&quot;')
+        return `<button class="edit-user-btn inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3" data-user='${userData}'>Edit</button>`
       },
     },
-  ], [setOpen, setCurrentRow, roleMap])
+  ], [roleMap])
+
+  // Set up edit button handlers after DataTable renders
+  useEffect(() => {
+    const handleEditClick = (e: Event) => {
+      const target = e.target as HTMLElement
+      const button = target.closest('.edit-user-btn')
+      if (button) {
+        const userData = (button as HTMLElement).getAttribute('data-user')
+        if (userData) {
+          const user: ApiUser = JSON.parse(userData)
+          const nameParts = user.name.split(' ')
+          const firstName = nameParts[0] || ''
+          const lastName = nameParts.slice(1).join(' ') || ''
+
+          setCurrentRow({
+            id: user.id.toString(),
+            firstName,
+            lastName,
+            username: user.email.split('@')[0],
+            email: user.email,
+            phoneNumber: '',
+            status: 'active' as any,
+            role: (user.role_id?.toString() || '2') as any,
+            createdAt: new Date(user.created_at),
+            updatedAt: user.updated_at ? new Date(user.updated_at) : new Date(user.created_at),
+          })
+          setOpen('edit')
+        }
+      }
+    }
+
+    // Use event delegation for dynamically created buttons
+    document.addEventListener('click', handleEditClick)
+
+    return () => {
+      document.removeEventListener('click', handleEditClick)
+    }
+  }, [setOpen, setCurrentRow])
 
   if (isError) {
     return (

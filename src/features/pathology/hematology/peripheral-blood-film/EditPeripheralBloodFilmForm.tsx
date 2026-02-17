@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
@@ -35,6 +36,8 @@ const pbfSchema = z.object({
     wbcMorphology: z.string().min(1, { message: "Required" }),
     platelet: z.string().min(1, { message: "Required" }),
     comments: z.string().optional(),
+    machineId: z.string().optional(),
+    testCarriedOutBy: z.string().optional(),
 });
 
 type PBFFormValues = z.infer<typeof pbfSchema>;
@@ -58,6 +61,8 @@ export function EditPeripheralBloodFilmForm({ open, setOpen, reportId, invoiceId
             wbcMorphology: "",
             platelet: "",
             comments: "",
+            machineId: "",
+            testCarriedOutBy: "",
         },
     });
 
@@ -80,6 +85,19 @@ export function EditPeripheralBloodFilmForm({ open, setOpen, reportId, invoiceId
 
     console.log('peripheralBloodFilm', peripheralBloodFilm);
 
+    // Fetch machines data
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/machine`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            return res.json();
+        },
+    });
+
+    const machineList = machinesData?.data?.items || [];
+
     useEffect(() => {
         if (peripheralBloodFilm) {
             form.reset({
@@ -87,6 +105,8 @@ export function EditPeripheralBloodFilmForm({ open, setOpen, reportId, invoiceId
                 wbcMorphology: peripheralBloodFilm.wbc,
                 platelet: peripheralBloodFilm.platelets,
                 comments: peripheralBloodFilm.remarks,
+                machineId: peripheralBloodFilm.machine_id?.toString() || "",
+                testCarriedOutBy: peripheralBloodFilm.test_carried_out_by || "",
             })
         }
     }, [peripheralBloodFilm]);
@@ -111,6 +131,8 @@ export function EditPeripheralBloodFilmForm({ open, setOpen, reportId, invoiceId
                         wbc: data.wbcMorphology,
                         platelets: data.platelet,
                         remarks: data.comments,
+                        machine_id: data.machineId ? parseInt(data.machineId) : null,
+                        test_carried_out_by: data.testCarriedOutBy,
                     }),
                 }
             );
@@ -214,6 +236,41 @@ export function EditPeripheralBloodFilmForm({ open, setOpen, reportId, invoiceId
                                     <FormLabel>Comments / Impression (Optional)</FormLabel>
                                     <FormControl>
                                         <Textarea placeholder="Enter additional notes..." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Test Carried Out By (Machine) */}
+                        <FormField
+                            control={form.control}
+                            name="testCarriedOutBy"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Test Carried Out By (Machine)</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select machine" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

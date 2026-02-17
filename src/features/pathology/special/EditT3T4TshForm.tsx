@@ -20,9 +20,20 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { getCookie } from "@/lib/cookies";
+import { useEffect } from "react";
 
 // --- Schema ---
 const thyroidFunctionSchema = z.object({
@@ -30,6 +41,8 @@ const thyroidFunctionSchema = z.object({
     t4: z.string().min(1, { message: "Required" }),
     tsh: z.string().min(1, { message: "Required" }),
     comments: z.string().optional(),
+    testCarriedOutBy: z.string().optional(),
+    machineId: z.string().optional(),
 });
 
 type ThyroidFunctionFormValues = z.infer<typeof thyroidFunctionSchema>;
@@ -37,10 +50,15 @@ type ThyroidFunctionFormValues = z.infer<typeof thyroidFunctionSchema>;
 interface ThyroidFunctionFormProps {
     open: boolean;
     setOpen: (open: boolean) => void;
-    reportId: number
+    reportId: number;
+    invoiceId: number;
 }
 
-export function ThyroidFunctionTestForm({ open, setOpen, reportId }: ThyroidFunctionFormProps) {
+export function ThyroidFunctionTestForm({ open, setOpen, reportId, invoiceId }: ThyroidFunctionFormProps) {
+    const navigate = useNavigate();
+    const token = getCookie('accessToken');
+    const queryClient = useQueryClient();
+
     const form = useForm<ThyroidFunctionFormValues>({
         resolver: zodResolver(thyroidFunctionSchema),
         defaultValues: {
@@ -48,11 +66,106 @@ export function ThyroidFunctionTestForm({ open, setOpen, reportId }: ThyroidFunc
             t4: "",
             tsh: "",
             comments: "",
+            testCarriedOutBy: "",
+            machineId: "",
+        },
+    });
+
+    // Fetching existing data
+    const { data: t3t4tshData } = useQuery({
+        queryKey: ["t3t4tsh", reportId],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/t3t4tsh/${reportId}`,
+                {
+                    method: "GET",
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch t3t4tsh report");
+            const result = await res.json();
+            return result.data;
+        },
+        enabled: !!token && !!reportId,
+    });
+
+    // Fetch machines from API
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/machine`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch machines");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const machineList = machinesData?.data?.items || [];
+
+    useEffect(() => {
+        if (t3t4tshData) {
+            form.reset({
+                t3: t3t4tshData.t3 || '',
+                t4: t3t4tshData.t4 || '',
+                tsh: t3t4tshData.tsh || '',
+                comments: t3t4tshData.remarks || '',
+                testCarriedOutBy: t3t4tshData.test_carried_out_by || '',
+                machineId: t3t4tshData.machine_id?.toString() || '',
+            })
+        }
+    }, [t3t4tshData, form]);
+
+    //PUT api call
+    const updateT3T4TSHMutation = useMutation({
+        mutationFn: async (payload: ThyroidFunctionFormValues) => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/t3t4tsh/${reportId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    invoice_id: invoiceId,
+                    t3: payload.t3,
+                    t4: payload.t4,
+                    tsh: payload.tsh,
+                    remarks: payload.comments,
+                    test_carried_out_by: payload.testCarriedOutBy,
+                    machine_id: payload.machineId ? parseInt(payload.machineId) : null,
+                }),
+            });
+
+            if (!res.ok) {
+                const msg = await res.text();
+                throw new Error(msg || "Failed to update t3t4tsh test");
+            }
+
+            return res.json();
+        },
+
+        onSuccess: (data) => {
+            toast.success(data.message || "Test created successfully!");
+            console.log("API Response:", data);
+            navigate({ to: "/pathology/hormone/t3t4tsh" });
+            queryClient.invalidateQueries({
+                queryKey: ["t3t4tsh", reportId],
+            });
+
+        },
+
+        onError: (error: any) => {
+            toast.error(error.message || "Something went wrong");
         },
     });
 
     function onSubmit(values: ThyroidFunctionFormValues) {
         console.log("Thyroid Function Test Report:", values);
+        updateT3T4TSHMutation.mutate(values);
         setOpen(false);
     }
 
@@ -142,6 +255,42 @@ export function ThyroidFunctionTestForm({ open, setOpen, reportId }: ThyroidFunc
                             )}
                         />
 
+                        {/* Test Carried Out By */}
+                        <FormField
+                            control={form.control}
+                            name="testCarriedOutBy"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select machine" />
+                                            </SelectTrigger>
+
+                                            <SelectContent>
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
                         {/* Buttons */}
                         <div className="flex justify-center gap-2 pt-4">
                             <Button
@@ -152,7 +301,7 @@ export function ThyroidFunctionTestForm({ open, setOpen, reportId }: ThyroidFunc
                                 {form.formState.isSubmitting ? "Saving..." : "Save"}
                             </Button>
 
-                            <Link to="/pathology/special/t3t4tsh/report/$reportId" params={{ reportId: reportId.toString() }}>
+                            <Link to="/pathology/hormone/t3t4tsh/report/$reportId" params={{ reportId: reportId.toString() }}>
                                 <Button type="button" variant="warning">
                                     Print Preview
                                 </Button>

@@ -1,6 +1,22 @@
 import { Button } from "@/components/ui/button";
 
-export default function UrineForSugarFullReportDetails({ invoice: invoice }: any) {
+interface UrineForSugarReportDetailsProps {
+  report?: any;
+  invoice?: any;
+}
+
+export default function UrineForSugarFullReportDetails({ report, invoice }: UrineForSugarReportDetailsProps) {
+  // Format date for display
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+  };
+
   const borderWidth = 2;
   return (
     <div className="max-w-4xl w-full mx-auto bg-background pt-40 pb-10 px-5 mt-6 print:w-[850px] print-report">
@@ -48,18 +64,18 @@ export default function UrineForSugarFullReportDetails({ invoice: invoice }: any
       <table className="w-full text-sm border">
         <tbody>
           <tr className="border">
-            <td className="border px-3 py-2 w-1/4">Receipt ID : {invoice?.id}</td>
-            <td className="border px-3 py-2 w-1/4">Date: 01/01/2025</td>
-            <td className="border px-3 py-2 w-1/4">Age: {invoice?.age} years</td>
+            <td className="border px-3 py-2 w-1/4">Receipt ID : {report?.invoice_id || invoice?.id || 'N/A'}</td>
+            <td className="border px-3 py-2 w-1/4">Date: {formatDate(report?.created_at)}</td>
+            <td className="border px-3 py-2 w-1/4">Age: {invoice?.patient?.age || 'N/A'} years</td>
 
           </tr>
           <tr className="border">
-            <td className="border px-3 py-2" colSpan={2}>Patient name: {invoice?.patient_name}</td>
-            <td className="border px-3 py-2">Sex: {invoice?.sex}</td>
+            <td className="border px-3 py-2" colSpan={2}>Patient name: {invoice?.patient?.name || invoice?.patient_name || 'N/A'}</td>
+            <td className="border px-3 py-2">Sex: {invoice?.patient?.sex || invoice?.patient?.gender || 'N/A'}</td>
           </tr>
           <tr className="border">
             <td className="border px-3 py-2" colSpan={3}>
-              Refd. By: Prof./Dr. {invoice?.reference_doctor}
+              Refd. By: {invoice?.doctor?.name || invoice?.reference_doctor || 'Prof./Dr. N/A'}
             </td>
 
           </tr>
@@ -67,7 +83,7 @@ export default function UrineForSugarFullReportDetails({ invoice: invoice }: any
       </table>
 
       {/* Test Table */}
-      <table className="w-full text-sm mt-6">
+      <table className="w-full text-sm mt-6 border">
         <thead>
           <tr className="border-t border-b bg-row-blue">
             <th className="px-3 py-2 text-left w-[40%]">Test name</th>
@@ -78,36 +94,24 @@ export default function UrineForSugarFullReportDetails({ invoice: invoice }: any
 
         <tbody>
           <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-            <td className="px-3 py-2">Fasting Blood Suger (F.B.S)</td>
-            <td className="px-3 py-2">145.0 mg/dl (8.0 mmol/L)</td>
-            <td className="px-3 py-2">65-110 mg/dl (3.6-6.1 mmol/L)</td>
-          </tr>
-          <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-            <td className="px-3 py-2">Corresponding Urine Sugar (CUS)</td>
-            <td className="px-3 py-2">N/A</td>
-            <td className="px-3 py-2">Nil</td>
-          </tr>
-          <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-            <td className="px-3 py-2">Blood Suger 2 hours after Breakfast</td>
-            <td className="px-3 py-2">
-              242.3 mg/dl (13.4 mmol/L)
-            </td>
-            <td className="px-3 py-2">
-              &lt;140 mg/dl (&lt;7.8 mmol/L)
-            </td>
-          </tr>
-          <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-            <td className="px-3 py-2">2hrs (CUS)</td>
-            <td className="px-3 py-2">Not done</td>
-            <td className="px-3 py-2">--</td>
+            <td className="px-3 py-2">Urine Sugar</td>
+            <td className="px-3 py-2">{report?.glucose || '-'}</td>
+            <td className="px-3 py-2">Negative</td>
           </tr>
         </tbody>
       </table>
 
+      {/* Remarks */}
+      {report?.remarks && (
+        <div className="mt-6 text-sm border p-4">
+          <p><span className="font-semibold">Remarks:</span> {report.remarks}</p>
+        </div>
+      )}
+
       {/* Tested By */}
       <p className="text-sm mt-4">
         <span className="font-semibold">Test Carried out by:</span> &nbsp;
-        Humalyzer 3000 Biochemistry Analyser
+        {report?.test_carried_out_by || invoice?.reference_doctor || 'N/A'}
       </p>
 
       {/* Footer Signatures */}

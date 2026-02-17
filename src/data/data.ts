@@ -262,3 +262,386 @@ export const outdoorInvoices: Invoice[] = [
     created_at: new Date()
   }
 ];
+
+// Widal Test Reports Data
+export type WidalTestReport = {
+  id: number
+  invoice_id: number
+  s_typhi_o: string | null
+  s_typhi_h: string | null
+  s_paratyphi_a: string | null
+  s_paratyphi_b: string | null
+  s_paratyphi_c: string | null
+  remarks: string | null
+  machine_id: number | null
+  test_carried_out_by: string | null
+  created_at: string
+  outdoor_invoice?: {
+    id: number
+    patient_name: string
+    age: string
+    sex: string
+    age_text: string
+    doctor_id: number | null
+    invoice_date: string
+  }
+}
+
+export const widalTestReports: WidalTestReport[] = [
+  {
+    id: 1,
+    invoice_id: 1,
+    s_typhi_o: "1:160",
+    s_typhi_h: "1:80",
+    s_paratyphi_a: "1:40",
+    s_paratyphi_b: "<1:40",
+    s_paratyphi_c: "<1:40",
+    remarks: "Suggestive of recent typhoid infection",
+    machine_id: 1,
+    test_carried_out_by: "Dr. Smith",
+    created_at: new Date("2025-01-10").toISOString(),
+    outdoor_invoice: {
+      id: 1,
+      patient_name: "John Doe",
+      age: "32",
+      age_text: "32 Years",
+      sex: "Male",
+      doctor_id: 1,
+      invoice_date: new Date("2025-01-10").toISOString()
+    }
+  },
+  {
+    id: 2,
+    invoice_id: 2,
+    s_typhi_o: "<1:80",
+    s_typhi_h: "<1:80",
+    s_paratyphi_a: "<1:40",
+    s_paratyphi_b: "<1:40",
+    s_paratyphi_c: "<1:40",
+    remarks: "Normal values - no evidence of active infection",
+    machine_id: 1,
+    test_carried_out_by: "Dr. Allen",
+    created_at: new Date("2025-01-11").toISOString(),
+    outdoor_invoice: {
+      id: 2,
+      patient_name: "Jane Roe",
+      age: "28",
+      age_text: "28 Years",
+      sex: "Female",
+      doctor_id: 2,
+      invoice_date: new Date("2025-01-11").toISOString()
+    }
+  },
+  {
+    id: 3,
+    invoice_id: 3,
+    s_typhi_o: "1:320",
+    s_typhi_h: "1:160",
+    s_paratyphi_a: "1:80",
+    s_paratyphi_b: "1:40",
+    s_paratyphi_c: "<1:40",
+    remarks: "High titers suggestive of acute typhoid fever",
+    machine_id: 1,
+    test_carried_out_by: "Dr. Carter",
+    created_at: new Date("2025-01-09").toISOString(),
+    outdoor_invoice: {
+      id: 3,
+      patient_name: "Michael Johnson",
+      age: "45",
+      age_text: "45 Years",
+      sex: "Male",
+      doctor_id: 3,
+      invoice_date: new Date("2025-01-09").toISOString()
+    }
+  }
+];
+
+// Blood Group Test Reports Data
+export type BloodGroupReport = {
+  id: number
+  invoice_id: number
+  blood_group: string
+  rh_factor: string
+  remarks: string | null
+  test_carried_out_by: string | null
+  machine_id: number | null
+  created_at: string
+  patient_name: string
+}
+
+export const bloodGroupReports: BloodGroupReport[] = [
+  {
+    id: 1,
+    invoice_id: 1,
+    blood_group: "A",
+    rh_factor: "Positive",
+    remarks: "Normal blood group",
+    test_carried_out_by: "Dr. Smith",
+    machine_id: 1,
+    created_at: new Date("2025-01-10").toISOString(),
+    patient_name: "John Doe",
+  },
+  {
+    id: 2,
+    invoice_id: 2,
+    blood_group: "B",
+    rh_factor: "Negative",
+    remarks: null,
+    test_carried_out_by: "Dr. Allen",
+    machine_id: 2,
+    created_at: new Date("2025-01-11").toISOString(),
+    patient_name: "Jane Roe",
+  },
+  {
+    id: 3,
+    invoice_id: 3,
+    blood_group: "O",
+    rh_factor: "Positive",
+    remarks: "Universal donor",
+    test_carried_out_by: "Dr. Carter",
+    machine_id: 1,
+    created_at: new Date("2025-01-12").toISOString(),
+    patient_name: "Michael Johnson",
+  },
+  {
+    id: 4,
+    invoice_id: 4,
+    blood_group: "AB",
+    rh_factor: "Positive",
+    remarks: "Universal recipient",
+    test_carried_out_by: "Dr. Ross",
+    machine_id: 3,
+    created_at: new Date("2025-01-13").toISOString(),
+    patient_name: "Emily Watson",
+  },
+  {
+    id: 5,
+    invoice_id: 5,
+    blood_group: "A",
+    rh_factor: "Negative",
+    remarks: null,
+    test_carried_out_by: null,
+    machine_id: null,
+    created_at: new Date("2025-01-14").toISOString(),
+    patient_name: "Chris Evans",
+  },
+];
+
+// Mantoux Test (MT) Reports Data
+export type MTReport = {
+  id: number
+  invoice_id: number
+  patient_name: string
+  test_result: string | null
+  induration_size: number | null
+  remarks: string | null
+  test_carried_out_by: string | null
+  machine_id: number | null
+  created_at: string
+  status: string
+}
+
+export const mtReports: MTReport[] = [
+  {
+    id: 1,
+    invoice_id: 1,
+    patient_name: "John Doe",
+    test_result: "Positive",
+    induration_size: 15,
+    remarks: "Significant induration detected",
+    test_carried_out_by: "Dr. Smith",
+    machine_id: 1,
+    created_at: new Date("2025-01-10").toISOString(),
+    status: "passed",
+  },
+  {
+    id: 2,
+    invoice_id: 2,
+    patient_name: "Jane Roe",
+    test_result: "Negative",
+    induration_size: 5,
+    remarks: null,
+    test_carried_out_by: "Dr. Allen",
+    machine_id: 2,
+    created_at: new Date("2025-01-11").toISOString(),
+    status: "passed",
+  },
+  {
+    id: 3,
+    invoice_id: 3,
+    patient_name: "Michael Johnson",
+    test_result: "Positive",
+    induration_size: 18,
+    remarks: "Strong positive reaction",
+    test_carried_out_by: "Dr. Carter",
+    machine_id: 1,
+    created_at: new Date("2025-01-12").toISOString(),
+    status: "passed",
+  },
+  {
+    id: 4,
+    invoice_id: 4,
+    patient_name: "Emily Watson",
+    test_result: "Negative",
+    induration_size: 8,
+    remarks: "Normal reaction",
+    test_carried_out_by: "Dr. Ross",
+    machine_id: 3,
+    created_at: new Date("2025-01-13").toISOString(),
+    status: "passed",
+  },
+  {
+    id: 5,
+    invoice_id: 5,
+    patient_name: "Chris Evans",
+    test_result: "Pending",
+    induration_size: null,
+    remarks: null,
+    test_carried_out_by: null,
+    machine_id: null,
+    created_at: new Date("2025-01-14").toISOString(),
+    status: "pending",
+  },
+];
+
+// Beta HCG Test Reports Data
+export type BetaHCGReport = {
+  id: number
+  invoice_id: number
+  patient_name: string
+  test_result: string | null
+  remarks: string | null
+  test_carried_out_by: string | null
+  machine_id: number | null
+  created_at: string
+  status: string
+}
+
+export const betaHCGReports: BetaHCGReport[] = [
+  {
+    id: 1,
+    invoice_id: 1,
+    patient_name: "Sarah Johnson",
+    test_result: "Positive",
+    remarks: "Pregnancy detected",
+    test_carried_out_by: "Dr. Smith",
+    machine_id: 1,
+    created_at: new Date("2025-01-10").toISOString(),
+    status: "passed",
+  },
+  {
+    id: 2,
+    invoice_id: 2,
+    patient_name: "Emily Davis",
+    test_result: "Negative",
+    remarks: null,
+    test_carried_out_by: "Dr. Allen",
+    machine_id: 2,
+    created_at: new Date("2025-01-11").toISOString(),
+    status: "passed",
+  },
+  {
+    id: 3,
+    invoice_id: 3,
+    patient_name: "Maria Garcia",
+    test_result: "Positive",
+    remarks: "Early pregnancy",
+    test_carried_out_by: "Dr. Carter",
+    machine_id: 1,
+    created_at: new Date("2025-01-12").toISOString(),
+    status: "passed",
+  },
+  {
+    id: 4,
+    invoice_id: 4,
+    patient_name: "Lisa Brown",
+    test_result: "Negative",
+    remarks: "Not pregnant",
+    test_carried_out_by: "Dr. Ross",
+    machine_id: 3,
+    created_at: new Date("2025-01-13").toISOString(),
+    status: "passed",
+  },
+  {
+    id: 5,
+    invoice_id: 5,
+    patient_name: "Anna White",
+    test_result: "Pending",
+    remarks: null,
+    test_carried_out_by: null,
+    machine_id: null,
+    created_at: new Date("2025-01-14").toISOString(),
+    status: "pending",
+  },
+];
+
+// Urine For Albumin Test Reports Data
+export type UrineAlbuminReport = {
+  id: number
+  invoice_id: number
+  patient_name: string
+  test_result: string | null
+  remarks: string | null
+  test_carried_out_by: string | null
+  machine_id: number | null
+  created_at: string
+  status: string
+}
+
+export const urineAlbuminReports: UrineAlbuminReport[] = [
+  {
+    id: 1,
+    invoice_id: 1,
+    patient_name: "Robert Johnson",
+    test_result: "Positive",
+    remarks: "Albumin present",
+    test_carried_out_by: "Dr. Smith",
+    machine_id: 1,
+    created_at: new Date("2025-01-10").toISOString(),
+    status: "passed",
+  },
+  {
+    id: 2,
+    invoice_id: 2,
+    patient_name: "Patricia Davis",
+    test_result: "Negative",
+    remarks: null,
+    test_carried_out_by: "Dr. Allen",
+    machine_id: 2,
+    created_at: new Date("2025-01-11").toISOString(),
+    status: "passed",
+  },
+  {
+    id: 3,
+    invoice_id: 3,
+    patient_name: "Thomas Wilson",
+    test_result: "Trace",
+    remarks: "Trace amount detected",
+    test_carried_out_by: "Dr. Carter",
+    machine_id: 1,
+    created_at: new Date("2025-01-12").toISOString(),
+    status: "passed",
+  },
+  {
+    id: 4,
+    invoice_id: 4,
+    patient_name: "Jessica Martinez",
+    test_result: "Negative",
+    remarks: "Normal",
+    test_carried_out_by: "Dr. Ross",
+    machine_id: 3,
+    created_at: new Date("2025-01-13").toISOString(),
+    status: "passed",
+  },
+  {
+    id: 5,
+    invoice_id: 5,
+    patient_name: "Daniel Anderson",
+    test_result: "Pending",
+    remarks: null,
+    test_carried_out_by: null,
+    machine_id: null,
+    created_at: new Date("2025-01-14").toISOString(),
+    status: "pending",
+  },
+];

@@ -9,10 +9,8 @@ import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ColumnDef } from "@tanstack/react-table";
 import { Activity, Clock, FileText, AlertCircle } from 'lucide-react';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EditLipidProfileForm } from '@/features/pathology/biochemical/lipid-profile/components/EditLipidProfileForm';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
@@ -78,42 +76,38 @@ function LipidProfile() {
 
   //console.log(data?.data);
 
-  const columns: ColumnDef<LipidProfileItem>[] = [
-    // Row selection
+  // Expose edit function to window for onclick handlers
+  useEffect(() => {
+    (window as any).editLipidProfile = (id: number, invoiceId: number) => {
+      setOpen(true);
+      setReportId(id);
+      setInvoiceId(invoiceId);
+    };
+  }, [setOpen, setReportId, setInvoiceId]);
+
+  const columns = [
     {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) =>
-            table.toggleAllPageRowsSelected(Boolean(value))
-          }
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
+      data: "invoice_id",
+      title: "Invoice ID",
+      orderable: true,
+      responsivePriority: 2,
+      defaultContent: "",
+    },
+    {
+      data: "patient_name",
+      title: "Patient Name",
+      orderable: true,
+      responsivePriority: 1,
+      defaultContent: "",
     },
 
     {
-      accessorKey: "invoice_id",
-      header: "Invoice ID",
-    },
-    {
-      accessorKey: "patient_name",
-      header: "Patient Name",
-    },
-
-    {
-      accessorKey: "created_at",
-      header: "Date",
-      cell: ({ row }) => {
-        const iso = row.getValue("created_at") as string;
+      data: "created_at",
+      title: "Date",
+      orderable: true,
+      responsivePriority: 3,
+      render: (_data: any, _type: string, row: LipidProfileItem) => {
+        const iso = row.created_at;
         const date = new Date(iso);
 
         const formatted = date.toLocaleDateString("en-US", {
@@ -122,15 +116,18 @@ function LipidProfile() {
           day: "numeric",
         });
 
-        return <div>{formatted}</div>; // Example: Nov 23, 2025
+        return `<div>${formatted}</div>`; // Example: Nov 23, 2025
       },
+      defaultContent: "",
     },
 
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
+      data: "status",
+      title: "Status",
+      orderable: true,
+      responsivePriority: 3,
+      render: (_data: any, _type: string, row: LipidProfileItem) => {
+        const status = row.status;
         const color =
           status === "passed"
             ? "bg-green-500"
@@ -138,36 +135,29 @@ function LipidProfile() {
               ? "bg-red-500"
               : "bg-yellow-500";
 
-        return <Badge className={color + " text-white"}>{status || 'Pending'}</Badge>;
+        return `<span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status || 'Pending'}</span>`;
       },
+      defaultContent: "",
     },
     // Actions Column
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="flex gap-2">
-            <Link to={`/pathology/biochemical/lipid-profile/report/$reportId`} params={{ reportId: item.id.toString() }}>
-              <Button size="sm" variant="outline">
-                View
-              </Button>
-            </Link>
-
-            <Button size="sm" variant="default" onClick={() => {
-              setOpen(true);
-              setReportId(item.id);
-              setInvoiceId(Number(item.invoice_id));
-            }}>Edit</Button>
-
-            {/* <Button size="sm" variant="destructive" onClick={() => alert("Delete " + item.id)}>
-              Delete
-            </Button> */}
+      data: null,
+      title: "Actions",
+      orderable: false,
+      responsivePriority: 1,
+      render: (_data: any, _type: string, row: LipidProfileItem) => {
+        return `
+          <div class="flex gap-2">
+            <a href="/pathology/biochemical/lipid-profile/report/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+              Report
+            </a>
+            <button onclick="window.editLipidProfile(${row.id}, ${row.invoice_id})" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+              Edit
+            </button>
           </div>
-        );
+        `;
       },
+      defaultContent: "",
     },
 
   ];

@@ -10,8 +10,6 @@ import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ColumnDef } from "@tanstack/react-table";
 import { useState } from 'react';
 import { EditStoolReducingSubstanceForm } from '@/features/pathology/stool/EditReducingSubstanceForm';
 import { getCookie } from '@/lib/cookies';
@@ -26,17 +24,17 @@ export const Route = createFileRoute(
 
 
 type ReportsItem = {
-  id: string;
-  receiptId: string;
-  invoice_id: string;
-  patientName: string;
-  tests: string[];
-  date: string;
+  id: number;
+  invoice_id: number;
+  patient_name: string | null;
+  created_at: string | null;
+  status: string | null;
+  test_carried_out_by: string | null;
 };
 
 function ReducingSubstance() {
-  const [reportId, setReportId] = useState<number>(1);
-  const [invoiceId, setInvoiceId] = useState<number>(1);
+  const [reportId, setReportId] = useState<number>(0);
+  const [invoiceId, setInvoiceId] = useState<number>(0);
   const [open, setOpen] = useState<boolean>(false);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -55,13 +53,12 @@ function ReducingSubstance() {
         }
       );
 
-      if (!res.ok) throw new Error("Failed to fetch blood for tcdc reports");
-      return res.json(); // MUST match placeholderData
+      if (!res.ok) throw new Error("Failed to fetch reducing substance reports");
+      return res.json();
     },
 
     enabled: !!token,
 
-    // ⭐ Perfect smooth pagination
     placeholderData: (prev) =>
       prev
         ? prev
@@ -77,96 +74,98 @@ function ReducingSubstance() {
         },
   });
 
-  console.log(data);
+  const items = data?.data?.items || [];
+  const meta = data?.data?.meta || { page, limit, total: 0 };
 
-
-  const columns: ColumnDef<ReportsItem>[] = [
-    // Row selection
+  const columns = [
     {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) =>
-            table.toggleAllPageRowsSelected(Boolean(value))
-          }
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-
-    {
-      accessorKey: "invoice_id",
-      header: "Invoice ID",
+      data: 'invoice_id',
+      title: 'Invoice ID',
+      orderable: true,
+      defaultContent: '',
     },
     {
-      accessorKey: "patient_name",
-      header: "Patient Name",
-    },
-
-    {
-      accessorKey: "created_at",
-      header: "Date",
-      cell: ({ row }) => {
-        const iso = row.getValue("created_at") as string;
-        const date = new Date(iso);
-
-        const formatted = date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-
-        return <div>{formatted}</div>; // Example: Nov 23, 2025
+      data: 'patient_name',
+      title: 'Patient Name',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const patientName = row.patient_name;
+        return patientName || '-';
       },
+      defaultContent: '',
     },
-
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
+      data: 'created_at',
+      title: 'Date',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const date = row.created_at;
+        return date ? new Date(date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        }) : '-';
+      },
+      defaultContent: '',
+    },
+    {
+      data: 'test_carried_out_by',
+      title: 'Test Carried Out By',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const testCarriedOutBy = row.test_carried_out_by;
+        return testCarriedOutBy || '-';
+      },
+      defaultContent: '',
+    },
+    {
+      data: 'status',
+      title: 'Status',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const status = row.status;
         const color =
-          status === "passed"
-            ? "bg-green-500"
-            : status === "failed"
-              ? "bg-red-500"
-              : "bg-yellow-500";
+          status === 'passed'
+            ? 'bg-green-500'
+            : status === 'failed'
+            ? 'bg-red-500'
+            : 'bg-yellow-500';
 
-        return <Badge className={color + " text-white"}>{status || 'Pending'}</Badge>;
+        return `<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-white ${color}">${status || 'Pending'}</span>`;
       },
+      defaultContent: '',
     },
-    // Actions Column
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => alert("View " + item.id)}>
-              View
-            </Button>
-            <Button size="sm" variant="default" onClick={() => { setOpen(true); setReportId(Number(item.id)); setInvoiceId(Number(item.invoice_id)); }}>
+      data: null,
+      title: 'Actions',
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return `
+          <div class="flex gap-2">
+            <button
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2"
+              onclick="window.editReducingSubstance(${row.id}, ${row.invoice_id})"
+            >
               Edit
-            </Button>
-
-            <Button size="sm" variant="destructive" onClick={() => alert("Delete " + item.id)}>
-              Delete
-            </Button>
+            </button>
+            <a href="/pathology/stool/reducing-substance/report/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+              View
+            </a>
           </div>
-        );
+        `;
       },
+      defaultContent: '',
     },
   ];
+
+  // Expose edit function to window for onclick handler
+  if (typeof window !== 'undefined') {
+    (window as any).editReducingSubstance = (id: number, invoiceId: number) => {
+      setOpen(true);
+      setReportId(id);
+      setInvoiceId(invoiceId);
+    };
+  }
 
   return (
     <>
@@ -183,7 +182,7 @@ function ReducingSubstance() {
         <div className="mb-4">
           <h1 className='text-2xl font-bold tracking-tight'>Reducing Substance</h1>
         </div>
-        <DataTable columns={columns} data={data?.data.items} meta={data?.data.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
+        <DataTable columns={columns} data={items} meta={meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
         <EditStoolReducingSubstanceForm open={open} setOpen={setOpen} reportId={reportId} invoiceId={invoiceId} />
       </Main>
     </>

@@ -9,12 +9,11 @@ import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ColumnDef } from "@tanstack/react-table";
 import { useState } from 'react';
 import { EditOccultBloodTestForm } from '@/features/pathology/stool/EditOcultBloodTestForm';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
+import { topNav } from '@/data/data';
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/stool/ocult-blood-test/',
@@ -22,41 +21,13 @@ export const Route = createFileRoute(
   component: OcultBloodTest,
 })
 
-
-const topNav = [
-  {
-    title: 'Overview',
-    href: 'dashboard/overview',
-    isActive: true,
-    disabled: false,
-  },
-  {
-    title: 'Customers',
-    href: 'dashboard/customers',
-    isActive: false,
-    disabled: true,
-  },
-  {
-    title: 'Products',
-    href: 'dashboard/products',
-    isActive: false,
-    disabled: true,
-  },
-  {
-    title: 'Settings',
-    href: 'dashboard/settings',
-    isActive: false,
-    disabled: true,
-  },
-]
-
 type ReportsItem = {
-  id: string;
-  receiptId: string;
-  invoice_id: string;
-  patientName: string;
-  tests: string[];
-  date: string;
+  id: number;
+  invoice_id: number;
+  patient_name: string | null;
+  created_at: string | null;
+  status: string | null;
+  test_carried_out_by: string | null;
 };
 
 function OcultBloodTest() {
@@ -106,95 +77,101 @@ function OcultBloodTest() {
 
   //console.log(data?.data);
 
-  const columns: ColumnDef<ReportsItem>[] = [
-    // Row selection
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) =>
-            table.toggleAllPageRowsSelected(Boolean(value))
-          }
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
+  // Initialize DataTable after data is loaded
+  const items = data?.data?.items || [];
+  const meta = data?.data?.meta || { page, limit, total: 0 };
 
+  const columns = [
     {
-      accessorKey: "invoice_id",
-      header: "Invoice ID",
+      data: 'invoice_id',
+      title: 'Invoice ID',
+      className: 'font-mono text-sm',
+      orderable: true,
+      defaultContent: '',
     },
     {
-      accessorKey: "patient_name",
-      header: "Patient Name",
-    },
-
-    {
-      accessorKey: "created_at",
-      header: "Date",
-      cell: ({ row }) => {
-        const iso = row.getValue("created_at") as string;
-        const date = new Date(iso);
-
-        const formatted = date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-
-        return <div>{formatted}</div>; // Example: Nov 23, 2025
+      data: 'patient_name',
+      title: 'Patient Name',
+      className: 'font-medium',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const patientName = row.patient_name;
+        return patientName || '-';
       },
+      defaultContent: '',
     },
-
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
+      data: 'created_at',
+      title: 'Date',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const date = row.created_at;
+        return date ? new Date(date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        }) : '-';
+      },
+      defaultContent: '',
+    },
+    {
+      data: 'test_carried_out_by',
+      title: 'Test Carried Out By',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const testCarriedOutBy = row.test_carried_out_by;
+        return testCarriedOutBy || '-';
+      },
+      defaultContent: '',
+    },
+    {
+      data: 'status',
+      title: 'Status',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const status = row.status;
         const color =
-          status === "passed"
-            ? "bg-green-500"
-            : status === "failed"
-              ? "bg-red-500"
-              : "bg-yellow-500";
+          status === 'passed'
+            ? 'bg-green-500'
+            : status === 'failed'
+            ? 'bg-red-500'
+            : 'bg-yellow-500';
 
-        return <Badge className={color + " text-white"}>{status || 'Pending'}</Badge>;
+        return `<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-white ${color}">${status || 'Pending'}</span>`;
       },
+      defaultContent: '',
     },
-    // Actions Column
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => {
-              setOpen(true); 
-              setReportId(Number(item.id));
-              setInvoiceId(Number(item.invoice_id));
-            }}>
+      data: null,
+      title: 'Actions',
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return `
+          <div class="flex gap-2">
+            <button
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2"
+              onclick="window.editOccultBlood(${row.id}, ${row.invoice_id})"
+            >
               Edit
-            </Button>
-             <Link to={`/pathology/stool/ocult-blood-test/report/$reportId`} params={{ reportId: item.id.toString() }}>
-              <Button size="sm" variant="outline-info">
-                View
-              </Button>
-            </Link>
+            </button>
+            <a href="/pathology/stool/ocult-blood-test/report/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+              View
+            </a>
           </div>
-        );
+        `;
       },
+      defaultContent: '',
     },
   ];
+
+  // Expose edit function to window for onclick handler
+  if (typeof window !== 'undefined') {
+    (window as any).editOccultBlood = (id: number, invoiceId: number) => {
+      setOpen(true);
+      setReportId(id);
+      setInvoiceId(invoiceId);
+    };
+  }
 
   return (
     <>
@@ -211,7 +188,7 @@ function OcultBloodTest() {
         <div className="mb-4">
           <h1 className='text-2xl font-bold tracking-tight'>Ocult Blood Test(O.B.T)</h1>
         </div>
-        <DataTable columns={columns} data={data?.data?.items || []} meta={data?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
+        <DataTable columns={columns} data={items} meta={meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
         <EditOccultBloodTestForm open={open} setOpen={setOpen} reportId={reportId} invoiceId={invoiceId} />
       </Main>
     </>

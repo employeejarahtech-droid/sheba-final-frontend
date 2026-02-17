@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { ConfigDrawer } from "@/components/config-drawer";
 import { DataTable } from "@/components/DataTable";
 import { Header } from "@/components/layout/header";
@@ -7,10 +7,6 @@ import { TopNav } from "@/components/layout/top-nav";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ColumnDef } from "@tanstack/react-table";
 import { useState } from 'react';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
@@ -23,14 +19,13 @@ export const Route = createFileRoute(
   component: UrineForSugar,
 })
 
-
 type ReportsItem = {
   id: number;
-  receiptId: string;
   invoice_id: number;
-  patientName: string;
-  tests: string[];
-  date: string;
+  patient_name: string | null;
+  created_at: string | null;
+  status: string | null;
+  test_carried_out_by: string | null;
 };
 
 function UrineForSugar() {
@@ -39,14 +34,13 @@ function UrineForSugar() {
   const [reportId, setReportId] = useState<number>(0);
   const [invoiceId, setInvoiceId] = useState<number>(0);
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const limit = 10;
 
   const token = getCookie('accessToken');
 
-  const { data } = useQuery({
+  const { data: urineSugarData } = useQuery({
     queryKey: ["urine-sugar", page, search],
-
     queryFn: async () => {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/urine-sugar?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
@@ -55,13 +49,12 @@ function UrineForSugar() {
         }
       );
 
-      if (!res.ok) throw new Error("Failed to fetch blood for tcdc reports");
-      return res.json(); // MUST match placeholderData
+      if (!res.ok) throw new Error("Failed to fetch urine sugar reports");
+      return res.json();
     },
 
     enabled: !!token,
 
-    // ⭐ Perfect smooth pagination
     placeholderData: (prev) =>
       prev
         ? prev
@@ -77,100 +70,89 @@ function UrineForSugar() {
         },
   });
 
-
-  //console.log(data?.data);
-
-  const columns: ColumnDef<ReportsItem>[] = [
-    // Row selection
+  const columns = [
     {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) =>
-            table.toggleAllPageRowsSelected(Boolean(value))
-          }
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-
-    {
-      accessorKey: "invoice_id",
-      header: "Invoice ID",
+      data: "invoice_id",
+      title: "Invoice ID",
+      orderable: true,
+      defaultContent: "",
     },
     {
-      accessorKey: "patient_name",
-      header: "Patient Name",
+      data: "patient_name",
+      title: "Patient Name",
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const patientName = row.patient_name;
+        return patientName || '-';
+      },
+      defaultContent: "",
     },
-
     {
-      accessorKey: "created_at",
-      header: "Date",
-      cell: ({ row }) => {
-        const iso = row.getValue("created_at") as string;
-        const date = new Date(iso);
-
-        const formatted = date.toLocaleDateString("en-US", {
+      data: "created_at",
+      title: "Date",
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const date = row.created_at;
+        return date ? new Date(date).toLocaleDateString("en-US", {
           year: "numeric",
           month: "short",
           day: "numeric",
-        });
-
-        return <div>{formatted}</div>; // Example: Nov 23, 2025
+        }) : '-';
       },
+      defaultContent: "",
     },
-
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
-        const color =
-          status === "passed"
-            ? "bg-green-500"
-            : status === "failed"
-              ? "bg-red-500"
-              : "bg-yellow-500";
-
-        return <Badge className={color + " text-white"}>{status || 'Pending'}</Badge>;
+      data: "test_carried_out_by",
+      title: "Test Carried Out By",
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const testCarriedOutBy = row.test_carried_out_by;
+        return testCarriedOutBy || '-';
       },
+      defaultContent: "",
     },
-    // Actions Column
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => {
-              setOpen(true);
-              setReportId(Number(item.id));
-              setInvoiceId(Number(item.invoice_id));
-            }}>
+      data: "status",
+      title: "Status",
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const status = row.status;
+        const color = status === 'Completed' ? 'bg-green-500' : status === 'Pending' ? 'bg-yellow-500' : 'bg-gray-500';
+        return `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${color} text-white">${status || 'Pending'}</span>`;
+      },
+      defaultContent: "",
+    },
+    {
+      data: null,
+      title: "Actions",
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return `
+          <div class="flex gap-2">
+            <button
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2"
+              onclick="window.editUrineSugar(${row.id}, ${row.invoice_id})"
+            >
               Edit
-            </Button>
-
-            <Link to="/pathology/urine/urine-for-sugar/report/$reportId" params={{ reportId: item.id.toString() }}>
-              <Button size="sm" variant="outline-info">
-                View
-              </Button>
-            </Link>
+            </button>
+            <a href="/pathology/urine/urine-for-sugar/report/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+              View
+            </a>
           </div>
-        );
+        `;
       },
+      defaultContent: "",
     },
-
   ];
+
+  // Expose edit function to window for onclick handler
+  if (typeof window !== 'undefined') {
+    (window as any).editUrineSugar = (id: number, invoiceId: number) => {
+      setOpen(true);
+      setReportId(id);
+      setInvoiceId(invoiceId);
+    };
+  }
 
   return (
     <>
@@ -187,13 +169,10 @@ function UrineForSugar() {
         <div className="mb-4">
           <h1 className='text-2xl font-bold tracking-tight'>Urine For Sugar</h1>
         </div>
-        <DataTable columns={columns} data={data?.data?.items || []} meta={data?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
+        <DataTable columns={columns} data={urineSugarData?.data?.items || []} meta={urineSugarData?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
         <EditUrineForSugarForm open={open} setOpen={setOpen} reportId={reportId} invoiceId={invoiceId} />
       </Main>
     </>
 
   )
 }
-
-
-

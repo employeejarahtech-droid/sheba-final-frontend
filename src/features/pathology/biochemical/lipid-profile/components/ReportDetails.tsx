@@ -1,7 +1,12 @@
 import { Button } from "@/components/ui/button";
 
 export default function ReportDetails({ invoice: invoice, testName }: any) {
-  //const borderWidth = 2;
+  // Extract patient info from nested outdoor_invoice object
+  const patientInfo = invoice?.outdoor_invoice || {};
+  const invoiceDate = patientInfo.invoice_date
+    ? new Date(patientInfo.invoice_date).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })
+    : "N/A";
+
   return (
     <div className="max-w-4xl w-full mx-auto bg-background pt-40 pb-10 px-5 mt-6 print:w-[850px] print-report">
       <style>
@@ -48,18 +53,18 @@ export default function ReportDetails({ invoice: invoice, testName }: any) {
       <table className="w-full text-sm border">
         <tbody>
           <tr className="border">
-            <td className="border px-3 py-2 w-1/4">Receipt ID : {invoice.id}</td>
-            <td className="border px-3 py-2 w-1/4">Date: 01/01/2025</td>
-            <td className="border px-3 py-2 w-1/4">Age: {invoice.age} years</td>
+            <td className="border px-3 py-2 w-1/4">Receipt ID : {invoice.invoice_id || patientInfo.id}</td>
+            <td className="border px-3 py-2 w-1/4">Date: {invoiceDate}</td>
+            <td className="border px-3 py-2 w-1/4">Age: {patientInfo.age_text || patientInfo.age || 'N/A'}</td>
 
           </tr>
           <tr className="border">
-            <td className="border px-3 py-2" colSpan={2}>Patient name: {invoice.patient_name}</td>
-            <td className="border px-3 py-2">Sex: {invoice.sex}</td>
+            <td className="border px-3 py-2" colSpan={2}>Patient name: {patientInfo.patient_name || 'N/A'}</td>
+            <td className="border px-3 py-2">Sex: {patientInfo.sex || 'N/A'}</td>
           </tr>
           <tr className="border">
             <td className="border px-3 py-2" colSpan={3}>
-              Refd. By: Prof./Dr. {invoice.reference_doctor}
+              Refd. By: {patientInfo.doctor_id ? `Dr. ID: ${patientInfo.doctor_id}` : 'N/A'}
             </td>
 
           </tr>
@@ -78,28 +83,34 @@ export default function ReportDetails({ invoice: invoice, testName }: any) {
 
         <tbody>
           <tr className={`border-b border-dashed`}>
-            <td className="px-3 py-2">Fasting Blood Suger (F.B.S)</td>
-            <td className="px-3 py-2">145.0 mg/dl (8.0 mmol/L)</td>
-            <td className="px-3 py-2">65-110 mg/dl (3.6-6.1 mmol/L)</td>
+            <td className="px-3 py-2">Total Cholesterol</td>
+            <td className="px-3 py-2">{invoice.total_cholesterol || 'N/A'} mg/dl</td>
+            <td className="px-3 py-2">&lt;200 mg/dl</td>
           </tr>
           <tr className={`border-b border-dashed`}>
-            <td className="px-3 py-2">Corresponding Urine Sugar (CUS)</td>
-            <td className="px-3 py-2">N/A</td>
-            <td className="px-3 py-2">Nil</td>
+            <td className="px-3 py-2">HDL Cholesterol</td>
+            <td className="px-3 py-2">{invoice.hdl || 'N/A'} mg/dl</td>
+            <td className="px-3 py-2">&gt;40 mg/dl (Male), &gt;50 mg/dl (Female)</td>
           </tr>
           <tr className={`border-b border-dashed`}>
-            <td className="px-3 py-2">Blood Suger 2 hours after Breakfast</td>
-            <td className="px-3 py-2">
-              242.3 mg/dl (13.4 mmol/L)
-            </td>
-            <td className="px-3 py-2">
-              &lt;140 mg/dl (&lt;7.8 mmol/L)
-            </td>
+            <td className="px-3 py-2">LDL Cholesterol</td>
+            <td className="px-3 py-2">{invoice.ldl || 'N/A'} mg/dl</td>
+            <td className="px-3 py-2">&lt;100 mg/dl (Optimal)</td>
           </tr>
           <tr className={`border-b border-dashed`}>
-            <td className="px-3 py-2">2hrs (CUS)</td>
-            <td className="px-3 py-2">Not done</td>
-            <td className="px-3 py-2">--</td>
+            <td className="px-3 py-2">Triglycerides</td>
+            <td className="px-3 py-2">{invoice.triglycerides || 'N/A'} mg/dl</td>
+            <td className="px-3 py-2">&lt;150 mg/dl</td>
+          </tr>
+          <tr className={`border-b border-dashed`}>
+            <td className="px-3 py-2">VLDL Cholesterol</td>
+            <td className="px-3 py-2">{invoice.vldl || 'N/A'} mg/dl</td>
+            <td className="px-3 py-2">5-40 mg/dl</td>
+          </tr>
+          <tr className={`border-b border-dashed`}>
+            <td className="px-3 py-2">Cholesterol Ratio</td>
+            <td className="px-3 py-2">{invoice.cholesterol_ratio || 'N/A'}</td>
+            <td className="px-3 py-2">&lt;4.5 (Optimal)</td>
           </tr>
         </tbody>
       </table>

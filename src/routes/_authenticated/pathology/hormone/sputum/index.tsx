@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { ConfigDrawer } from "@/components/config-drawer";
 import { DataTable } from "@/components/DataTable";
 import { Header } from "@/components/layout/header";
@@ -7,10 +7,6 @@ import { TopNav } from "@/components/layout/top-nav";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ColumnDef } from "@tanstack/react-table";
 import { useState } from 'react';
 import { EditSputumTestForm } from '@/features/pathology/special/EditSputumTestForm';
 import { getCookie } from '@/lib/cookies';
@@ -25,12 +21,10 @@ export const Route = createFileRoute(
 
 
 type ReportsItem = {
-  id: string;
-  receiptId: string;
+  id: number;
   invoice_id: number;
-  patientName: string;
-  tests: string[];
-  date: string;
+  patient_name: string | null;
+  created_at: string | null;
 };
 
 function Sputum() {
@@ -43,9 +37,8 @@ function Sputum() {
 
   const token = getCookie('accessToken');
 
-  const { data } = useQuery({
+  const { data: sputumReports } = useQuery({
     queryKey: ["sputum", page, search],
-
     queryFn: async () => {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/sputum?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
@@ -53,121 +46,87 @@ function Sputum() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
-      if (!res.ok) throw new Error("Failed to fetch blood for tcdc reports");
-      return res.json(); // MUST match placeholderData
+      if (!res.ok) throw new Error("Failed to fetch sputum reports");
+      return res.json();
     },
-
     enabled: !!token,
-
-    // ⭐ Perfect smooth pagination
     placeholderData: (prev) =>
       prev
         ? prev
         : {
           data: {
             items: [],
-            meta: {
-              page,
-              limit,
-              total: 0,
-            },
+            total: 0,
           },
         },
   });
 
-  //console.log(data);
+  // Expose edit function to window for onclick handler
+  if (typeof window !== 'undefined') {
+    (window as any).editSputum = (id: number, invoiceId: number) => {
+      setOpen(true);
+      setReportId(id);
+      setInvoiceId(invoiceId);
+    };
+  }
 
+  const items = sputumReports?.data?.items || [];
+  const meta = sputumReports?.data?.meta || { page, limit, total: 0 };
 
-  const columns: ColumnDef<ReportsItem>[] = [
-    // Row selection
+  const columns = [
     {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) =>
-            table.toggleAllPageRowsSelected(Boolean(value))
-          }
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-
-    {
-      accessorKey: "invoice_id",
-      header: "Invoice ID",
+      data: 'id',
+      title: 'ID',
+      orderable: true,
+      defaultContent: '',
     },
     {
-      accessorKey: "patient_name",
-      header: "Patient Name",
+      data: 'invoice_id',
+      title: 'Invoice ID',
+      orderable: true,
+      defaultContent: '',
     },
-
     {
-      accessorKey: "created_at",
-      header: "Date",
-      cell: ({ row }) => {
-        const iso = row.getValue("created_at") as string;
-        const date = new Date(iso);
-
-        const formatted = date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-
-        return <div>{formatted}</div>; // Example: Nov 23, 2025
+      data: 'patient_name',
+      title: 'Patient Name',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const patientName = row.patient_name;
+        return patientName || '-';
       },
+      defaultContent: '',
     },
-
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
-        const color =
-          status === "passed"
-            ? "bg-green-500"
-            : status === "failed"
-              ? "bg-red-500"
-              : "bg-yellow-500";
-
-        return <Badge className={color + " text-white"}>{status || 'Pending'}</Badge>;
+      data: 'created_at',
+      title: 'Date',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const date = row.created_at;
+        return date ? new Date(date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        }) : '-';
       },
+      defaultContent: '',
     },
-    // Actions Column
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="flex gap-2">
-
-            <Button size="sm" variant="outline" onClick={() => {
-              setOpen(true);
-              setReportId(Number(item.id));
-              setInvoiceId(Number(item.invoice_id));
-            }}>
+      data: null,
+      title: 'Actions',
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return `
+          <div class="flex gap-2">
+            <button onclick="window.editSputum(${row.id}, ${row.invoice_id})" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
               Edit
-            </Button>
-
-            <Link to={`/pathology/hormone/sputum/report/$reportId`} params={{ reportId: item.id.toString() }}>
-              <Button size="sm" variant="outline-info">
-                View
-              </Button>
-            </Link>
+            </button>
+            <a href="/pathology/hormone/sputum/report/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+              View
+            </a>
           </div>
-        );
+        `;
       },
+      defaultContent: '',
     },
   ];
 
@@ -186,7 +145,7 @@ function Sputum() {
         <div className="mb-4">
           <h1 className='text-2xl font-bold tracking-tight'>Sputum Tests</h1>
         </div>
-        <DataTable columns={columns} data={data?.data?.items || []} meta={data?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
+        <DataTable columns={columns} data={items} meta={meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
         <EditSputumTestForm open={open} setOpen={setOpen} reportId={reportId} invoiceId={invoiceId} />
       </Main>
     </>

@@ -20,6 +20,13 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -33,6 +40,8 @@ import { Textarea } from "@/components/ui/textarea";
 const reducingSubstanceSchema = z.object({
     result: z.string().min(1, { message: "Required" }),
     comments: z.string().optional(),
+    testCarriedOutBy: z.string().optional(),
+    machineId: z.string().optional(),
 });
 
 type UrineReducingSubstanceFormValues = z.infer<typeof reducingSubstanceSchema>;
@@ -55,6 +64,8 @@ export function EditStoolReducingSubstanceForm({ open, setOpen, reportId, invoic
         defaultValues: {
             result: "",
             comments: "",
+            testCarriedOutBy: "",
+            machineId: "",
         },
     });
 
@@ -82,6 +93,8 @@ export function EditStoolReducingSubstanceForm({ open, setOpen, reportId, invoic
             form.reset({
                 result: reducingSubstanceData.test_result || '',
                 comments: reducingSubstanceData.remarks || '',
+                testCarriedOutBy: reducingSubstanceData.test_carried_out_by || '',
+                machineId: reducingSubstanceData.machine_id?.toString() || '',
             })
         }
     }, [reducingSubstanceData, form]);
@@ -99,7 +112,9 @@ export function EditStoolReducingSubstanceForm({ open, setOpen, reportId, invoic
                 body: JSON.stringify({
                     invoice_id: invoiceId,
                     test_result: payload.result,
-                    remarks: payload.comments
+                    remarks: payload.comments,
+                    test_carried_out_by: payload.testCarriedOutBy,
+                    machine_id: payload.machineId ? parseInt(payload.machineId) : null,
                 }),
             });
 
@@ -136,6 +151,24 @@ export function EditStoolReducingSubstanceForm({ open, setOpen, reportId, invoic
     }
 
     const handleView = () => alert("View triggered.");
+
+    // Fetch machines from API
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/machine`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch machines");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const machineList = machinesData?.data?.items || [];
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
@@ -185,6 +218,42 @@ export function EditStoolReducingSubstanceForm({ open, setOpen, reportId, invoic
                                     <FormLabel>Comments / Remarks (Optional)</FormLabel>
                                     <FormControl>
                                         <Textarea placeholder="Additional notes..." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Test Carried Out By */}
+                        <FormField
+                            control={form.control}
+                            name="testCarriedOutBy"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select machine" />
+                                            </SelectTrigger>
+
+                                            <SelectContent>
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

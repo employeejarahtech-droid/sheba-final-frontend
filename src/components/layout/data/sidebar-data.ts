@@ -124,6 +124,10 @@ export const sidebarData: SidebarData = {
               title: '- List of Doctor',
               url: '/outdoor/master/doctors',
             },
+            {
+              title: '- List of Machines',
+              url: '/outdoor/master/machines',
+            },
           ],
         },
         {

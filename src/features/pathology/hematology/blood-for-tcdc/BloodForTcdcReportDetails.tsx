@@ -1,11 +1,16 @@
 import { Button } from "@/components/ui/button";
 
-export default function BloodForTcdcReportDetails({ invoice: invoice }: any) {
-    const borderWidth = 2;
-    return (
-        <div className="max-w-4xl w-full mx-auto bg-background pt-40 pb-10 px-5 mt-6 print:w-[850px]">
-            <style>
-                {`
+export default function BloodForTcdcReportDetails({ invoice: invoice, testName }: any) {
+  // Extract patient info from nested outdoor_invoice object
+  const patientInfo = invoice?.outdoor_invoice || {};
+  const invoiceDate = patientInfo.invoice_date
+    ? new Date(patientInfo.invoice_date).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })
+    : "N/A";
+
+  return (
+    <div className="max-w-4xl w-full mx-auto bg-background pt-40 pb-10 px-5 mt-6 print:w-[850px] print-report">
+      <style>
+        {`
           .bg-row-blue {
             background-color: #cfd2d8ff !important;
           }
@@ -38,98 +43,104 @@ export default function BloodForTcdcReportDetails({ invoice: invoice }: any) {
           }
         }
         `}
-            </style>
-            {/* Title */}
-            <h1 className="text-2xl font-bold text-center underline mb-6 tracking-wide">
-                BLOOD FOR TCDC REPORT
-            </h1>
+      </style>
+      {/* Title */}
+      <h1 className="text-2xl font-bold text-center underline mb-6 tracking-wide uppercase">
+        {testName}
+      </h1>
 
-            {/* Header Table */}
-            <table className="w-full text-sm border">
-                <tbody>
-                    <tr className="border">
-                        <td className="border px-3 py-2 w-1/4">Receipt ID : {invoice.id}</td>
-                        <td className="border px-3 py-2 w-1/4">Date: 01/01/2025</td>
-                        <td className="border px-3 py-2 w-1/4">Age: {invoice.age} years</td>
+      {/* Header Table */}
+      <table className="w-full text-sm border">
+        <tbody>
+          <tr className="border">
+            <td className="border px-3 py-2 w-1/4">Receipt ID : {invoice.invoice_id || patientInfo.id}</td>
+            <td className="border px-3 py-2 w-1/4">Date: {invoiceDate}</td>
+            <td className="border px-3 py-2 w-1/4">Age: {patientInfo.age_text || patientInfo.age || 'N/A'}</td>
 
-                    </tr>
-                    <tr className="border">
-                        <td className="border px-3 py-2" colSpan={2}>Patient name: {invoice.patient_name}</td>
-                        <td className="border px-3 py-2">Sex: {invoice.sex}</td>
-                    </tr>
-                    <tr className="border">
-                        <td className="border px-3 py-2" colSpan={3}>
-                            Refd. By: Prof./Dr. {invoice.reference_doctor}
-                        </td>
+          </tr>
+          <tr className="border">
+            <td className="border px-3 py-2" colSpan={2}>Patient name: {patientInfo.patient_name || 'N/A'}</td>
+            <td className="border px-3 py-2">Sex: {patientInfo.sex || 'N/A'}</td>
+          </tr>
+          <tr className="border">
+            <td className="border px-3 py-2" colSpan={3}>
+              Refd. By: {patientInfo.doctor_id ? `Dr. ID: ${patientInfo.doctor_id}` : 'N/A'}
+            </td>
 
-                    </tr>
-                </tbody>
-            </table>
+          </tr>
+        </tbody>
+      </table>
 
-            {/* Test Table */}
-            <table className="w-full text-sm mt-6">
-                <thead>
-                    <tr className="border-t border-b bg-row-blue">
-                        <th className="px-3 py-2 text-left w-[40%]">Test name</th>
-                        <th className="px-3 py-2 text-left w-[30%]">Test Result</th>
-                        <th className="px-3 py-2 text-left w-[30%]">Normal Range</th>
-                    </tr>
-                </thead>
+      {/* Test Table */}
+      <table className="w-full text-sm mt-6">
+        <thead>
+          <tr className="border-t border-b bg-row-blue">
+            <th className="px-3 py-2 text-left w-[40%]">Test name</th>
+            <th className="px-3 py-2 text-left w-[30%]">Test Result</th>
+            <th className="px-3 py-2 text-left w-[30%]">Normal Range</th>
+          </tr>
+        </thead>
 
-                <tbody>
-                    <tr className={`border-b-${borderWidth} border-dashed`}>
-                        <td className="px-3 py-2">Fasting Blood Suger (F.B.S)</td>
-                        <td className="px-3 py-2">145.0 mg/dl (8.0 mmol/L)</td>
-                        <td className="px-3 py-2">65-110 mg/dl (3.6-6.1 mmol/L)</td>
-                    </tr>
-                    <tr className={`border-b-${borderWidth} border-dashed`}>
-                        <td className="px-3 py-2">Corresponding Urine Sugar (CUS)</td>
-                        <td className="px-3 py-2">N/A</td>
-                        <td className="px-3 py-2">Nil</td>
-                    </tr>
-                    <tr className={`border-b-${borderWidth} border-dashed`}>
-                        <td className="px-3 py-2">Blood Suger 2 hours after Breakfast</td>
-                        <td className="px-3 py-2">
-                            242.3 mg/dl (13.4 mmol/L)
-                        </td>
-                        <td className="px-3 py-2">
-                            &lt;140 mg/dl (&lt;7.8 mmol/L)
-                        </td>
-                    </tr>
-                    <tr className={`border-b-${borderWidth} border-dashed`}>
-                        <td className="px-3 py-2">2hrs (CUS)</td>
-                        <td className="px-3 py-2">Not done</td>
-                        <td className="px-3 py-2">--</td>
-                    </tr>
-                </tbody>
-            </table>
+        <tbody>
+          <tr className="border-b border-dashed">
+            <td className="px-3 py-2">Total Count (TC)</td>
+            <td className="px-3 py-2">{invoice.total_count || 'N/A'}</td>
+            <td className="px-3 py-2">4000-11000 cells/cmm</td>
+          </tr>
+          <tr className="border-b border-dashed">
+            <td className="px-3 py-2">Neutrophils</td>
+            <td className="px-3 py-2">{invoice.neutrophils || 'N/A'} %</td>
+            <td className="px-3 py-2">40-80 %</td>
+          </tr>
+          <tr className="border-b border-dashed">
+            <td className="px-3 py-2">Lymphocytes</td>
+            <td className="px-3 py-2">{invoice.lymphocytes || 'N/A'} %</td>
+            <td className="px-3 py-2">20-40 %</td>
+          </tr>
+          <tr className="border-b border-dashed">
+            <td className="px-3 py-2">Monocytes</td>
+            <td className="px-3 py-2">{invoice.monocytes || 'N/A'} %</td>
+            <td className="px-3 py-2">2-10 %</td>
+          </tr>
+          <tr className="border-b border-dashed">
+            <td className="px-3 py-2">Eosinophils</td>
+            <td className="px-3 py-2">{invoice.eosinophils || 'N/A'} %</td>
+            <td className="px-3 py-2">1-6 %</td>
+          </tr>
+          <tr className="border-b border-dashed">
+            <td className="px-3 py-2">Basophils</td>
+            <td className="px-3 py-2">{invoice.basophils || 'N/A'} %</td>
+            <td className="px-3 py-2">0-1 %</td>
+          </tr>
+        </tbody>
+      </table>
 
-            {/* Tested By */}
-            <p className="text-sm mt-4">
-                <span className="font-semibold">Test Carried out by:</span> &nbsp;
-                Humalyzer 3000 Biochemistry Analyser
-            </p>
+      {/* Tested By */}
+      <p className="text-sm mt-4">
+        <span className="font-semibold">Test Carried out by:</span> &nbsp;
+        {invoice.test_carried_out_by || 'N/A'}
+      </p>
 
-            {/* Footer Signatures */}
-            <div className="grid grid-cols-2 mt-32 text-sm">
-                <div>
-                    <p className="border-t border-dashed w-40 pt-1 text-center">Checked By:</p>
-                </div>
-
-                <div className="text-right">
-                    <p className="border-t border-dashed w-56 ml-auto pt-1">
-                        Medical Technologist (Lab):
-                    </p>
-                </div>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex justify-end gap-3 mt-10 print:hidden">
-                <Button variant="outline" onClick={() => window.print()}>
-                    Print
-                </Button>
-                <Button variant="outline">Download</Button>
-            </div>
+      {/* Footer Signatures */}
+      <div className="grid grid-cols-2 mt-32 text-sm">
+        <div>
+          <p className="border-t border-dashed w-40 pt-1 text-center">Checked By:</p>
         </div>
-    );
+
+        <div className="text-right">
+          <p className="border-t border-dashed w-56 ml-auto pt-1">
+            Medical Technologist (Lab):
+          </p>
+        </div>
+      </div>
+
+      {/* Buttons */}
+      <div className="flex justify-end gap-3 mt-10 print:hidden">
+        <Button variant="outline" onClick={() => window.print()}>
+          Print
+        </Button>
+        <Button variant="outline">Download</Button>
+      </div>
+    </div>
+  );
 }

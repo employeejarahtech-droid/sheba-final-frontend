@@ -22,11 +22,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
-import { Link } from "@tanstack/react-router";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
-import { useNavigate } from "@tanstack/react-router";
 import { Textarea } from "@/components/ui/textarea";
 import { useEffect } from "react";
 
@@ -35,6 +35,8 @@ const bloodGroupSchema = z.object({
     aboGroup: z.string().min(1, { message: "Required" }),
     rhFactor: z.string().min(1, { message: "Required" }),
     comments: z.string().optional(),
+    testCarriedOutBy: z.string().optional(),
+    machineId: z.string().optional(),
 });
 
 type BloodGroupFormValues = z.infer<typeof bloodGroupSchema>;
@@ -48,9 +50,9 @@ interface BloodGroupFormProps {
 
 export function EditBloodGroupForm({ open, setOpen, reportId, invoiceId }: BloodGroupFormProps) {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
     const token = getCookie('accessToken');
-    const queryClient = useQueryClient();
 
     const form = useForm<BloodGroupFormValues>({
         resolver: zodResolver(bloodGroupSchema),
@@ -58,6 +60,8 @@ export function EditBloodGroupForm({ open, setOpen, reportId, invoiceId }: Blood
             aboGroup: "",
             rhFactor: "",
             comments: "",
+            testCarriedOutBy: "",
+            machineId: "",
         },
     });
 
@@ -86,6 +90,8 @@ export function EditBloodGroupForm({ open, setOpen, reportId, invoiceId }: Blood
                 aboGroup: bloodGroupData.blood_group || '',
                 rhFactor: bloodGroupData.rh_factor || '',
                 comments: bloodGroupData.remarks || '',
+                testCarriedOutBy: bloodGroupData.test_carried_out_by || '',
+                machineId: bloodGroupData.machine_id ? String(bloodGroupData.machine_id) : '',
             })
         }
     }, [bloodGroupData]);
@@ -106,6 +112,8 @@ export function EditBloodGroupForm({ open, setOpen, reportId, invoiceId }: Blood
                     blood_group: payload.aboGroup,
                     rh_factor: payload.rhFactor,
                     remarks: payload.comments,
+                    test_carried_out_by: payload.testCarriedOutBy,
+                    machine_id: payload.machineId ? parseInt(payload.machineId) : null,
                 }),
             });
 
@@ -140,6 +148,26 @@ export function EditBloodGroupForm({ open, setOpen, reportId, invoiceId }: Blood
         updateBloodGroupMutation.mutate(values);
         setOpen(false);
     }
+
+    const handleView = () => alert("View action triggered.");
+
+    // Fetch machines from API
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/machine`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch machines");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const machineList = machinesData?.data?.items || [];
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
@@ -210,6 +238,42 @@ export function EditBloodGroupForm({ open, setOpen, reportId, invoiceId }: Blood
                             )}
                         />
 
+                        {/* TEST CARRIED OUT BY */}
+                        <FormField
+                            control={form.control}
+                            name="testCarriedOutBy"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select machine" />
+                                            </SelectTrigger>
+
+                                            <SelectContent>
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
                         {/* Buttons */}
                         <div className="flex justify-center gap-2 pt-4">
                             <Button
@@ -226,7 +290,7 @@ export function EditBloodGroupForm({ open, setOpen, reportId, invoiceId }: Blood
                                 </Button>
                             </Link>
 
-                            <Button type="button" variant="info">
+                            <Button type="button" variant="info" onClick={handleView}>
                                 View
                             </Button>
                         </div>

@@ -3,7 +3,6 @@ import { Header } from '@/components/layout/header'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
 import { useState, useMemo } from 'react'
@@ -56,7 +55,11 @@ export default function ListOfTests() {
                 : {
                     data: {
                         items: [],
-                        total: 0,
+                        meta: {
+                            total: 0,
+                            page: 1,
+                            limit: 10
+                        }
                     },
                 },
     });
@@ -108,83 +111,90 @@ export default function ListOfTests() {
 
     //console.log(data);
 
-    const columns: ColumnDef<TestItem>[] = [
+    const columns = [
         {
-            id: "sl",
-            header: "SL",
-            cell: ({ row }) => (
-                <div className="">
-                    {row.index + 1}
-                </div>
-            ),
-            enableSorting: false,
+            data: null,
+            title: "SL",
+            orderable: false,
+            responsivePriority: 3,
+            render: (_data: any, _type: string, _row: TestItem, meta: any) => {
+                return meta.row + 1;
+            },
+            defaultContent: "",
         },
         {
-            accessorKey: "id",
-            header: "Test ID",
+            data: "id",
+            title: "Test ID",
+            orderable: true,
+            responsivePriority: 4,
+            defaultContent: "",
         },
         {
-            accessorKey: "name",
-            header: "Test Name",
+            data: "name",
+            title: "Test Name",
+            orderable: true,
+            responsivePriority: 1,
+            defaultContent: "",
         },
         {
-            accessorKey: "match_table_name",
-            header: "Match Table Name",
-            cell: ({ row }) => {
-                const matchTableName = row.original.match_table_name;
-                return matchTableName ? (
-                    matchTableName
-                ) : (
-                    <span className="text-red-500 font-semibold">N/A</span>
-                );
-            }
+            data: "match_table_name",
+            title: "Match Table Name",
+            orderable: true,
+            responsivePriority: 5,
+            render: (data: any) => {
+                return data ? String(data) : '<span class="text-red-500 font-semibold">N/A</span>';
+            },
+            defaultContent: "",
         },
         {
-            accessorKey: "category_id",
-            header: "Category",
-            cell: ({ row }) => {
-                const category = row.original.category;
+            data: null,
+            title: "Category",
+            orderable: true,
+            responsivePriority: 2,
+            render: (_data: any, _type: string, row: TestItem) => {
+                const category = row.category;
                 const department = category?.department;
 
-                return (
-                    <div className="flex flex-col">
-                        <span>{category?.name ?? <span className="text-red-500 font-semibold">N/A</span>}</span>
-                        <span className="text-xs text-muted-foreground">
-                            {department?.name}
+                return `
+                    <div class="flex flex-col">
+                        <span>${category?.name || '<span class="text-red-500 font-semibold">N/A</span>'}</span>
+                        <span class="text-xs text-muted-foreground">
+                            ${department?.name || ''}
                         </span>
                     </div>
-                );
-            }
-
-        },
-        {
-            accessorKey: "price",
-            header: "Price (BDT)",
-            cell: ({ row }) => {
-                const price = Number(row.original.price);
-                return `${price.toFixed(2)}`;
+                `;
             },
+            defaultContent: "",
         },
         {
-            id: "actions",
-            header: "Actions",
-            cell: ({ row }) => {
-                const item = row.original;
-                return (
-                    <div className="flex gap-2">
-                        <Link to={`/outdoor/master/tests/$id`} params={{ id: String(item.id) }}>
-                            <Button size="sm" variant="outline">
-                                View
-                            </Button>
-                        </Link>
-                        <Link to={`/outdoor/master/tests/edit/$id`} params={{ id: String(item.id) }}>
-                            <Button size="sm" variant="default">
-                                Edit
-                            </Button>
-                        </Link>
+            data: "price",
+            title: "Price (BDT)",
+            orderable: true,
+            responsivePriority: 2,
+            render: (data: any) => {
+                const price = Number(data || 0);
+                return price.toFixed(2);
+            },
+            defaultContent: "0.00",
+        },
+        {
+            data: null,
+            title: "Actions",
+            orderable: false,
+            responsivePriority: 1,
+            render: (_data: any, _type: string, row: TestItem) => {
+                return `
+                    <div class="flex gap-2">
+                        <a href="/outdoor/master/tests/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+                            View
+                        </a>
+                        <a href="/outdoor/master/tests/edit/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+                            Edit
+                        </a>
                     </div>
-                );
+                `;
             },
+            defaultContent: "",
         },
     ];
 

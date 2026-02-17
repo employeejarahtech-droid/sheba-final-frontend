@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { ConfigDrawer } from "@/components/config-drawer";
 import { DataTable } from "@/components/DataTable";
 import { Header } from "@/components/layout/header";
@@ -7,12 +7,8 @@ import { TopNav } from "@/components/layout/top-nav";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ColumnDef } from "@tanstack/react-table";
-import { useState } from 'react';
 import { EditProthrombinTimeForm } from '@/features/pathology/hematology/prothom-bin-time/EditProthomBinTimeForm';
+import { useState, useEffect } from 'react';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
 import { topNav } from '@/data/data';
@@ -78,42 +74,37 @@ function ProthomBinTimeFull() {
 
   // console.log(data?.data);
 
-  const columns: ColumnDef<ReportsItem>[] = [
-    // Row selection
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) =>
-            table.toggleAllPageRowsSelected(Boolean(value))
-          }
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
+  // Expose edit function to window
+  useEffect(() => {
+    (window as any).editProthrombinTime = (id: number, invoiceId: number) => {
+      setReportId(id);
+      setInvoiceId(invoiceId);
+      setIsDrawerOpen(true);
+    };
+  }, [setReportId, setInvoiceId]);
 
+  const columns = [
     {
-      accessorKey: "invoice_id",
-      header: "Invoice ID",
+      data: "invoice_id",
+      title: "Invoice ID",
+      orderable: true,
+      responsivePriority: 2,
+      defaultContent: "",
     },
     {
-      accessorKey: "patient_name",
-      header: "Patient Name",
+      data: "patient_name",
+      title: "Patient Name",
+      orderable: true,
+      responsivePriority: 1,
+      defaultContent: "",
     },
-
     {
-      accessorKey: "created_at",
-      header: "Date",
-      cell: ({ row }) => {
-        const iso = row.getValue("created_at") as string;
+      data: "created_at",
+      title: "Date",
+      orderable: true,
+      responsivePriority: 3,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const iso = row.created_at;
         const date = new Date(iso);
 
         const formatted = date.toLocaleDateString("en-US", {
@@ -122,15 +113,17 @@ function ProthomBinTimeFull() {
           day: "numeric",
         });
 
-        return <div>{formatted}</div>; // Example: Nov 23, 2025
+        return `<div>${formatted}</div>`; // Example: Nov 23, 2025
       },
+      defaultContent: "",
     },
-
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
+      data: "status",
+      title: "Status",
+      orderable: true,
+      responsivePriority: 4,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const status = row.status || 'Pending';
         const color =
           status === "passed"
             ? "bg-green-500"
@@ -138,34 +131,30 @@ function ProthomBinTimeFull() {
               ? "bg-red-500"
               : "bg-yellow-500";
 
-        return <Badge className={color + " text-white"}>{status || 'Pending'}</Badge>;
+        return `<span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status}</span>`;
       },
+      defaultContent: "",
     },
     // Actions Column
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="flex gap-2">
-            <Link to={`/pathology/hematology/prothom-bin-time-full/report/$reportId`} params={{ reportId: item.id.toString() }}>
-              <Button size="sm" variant="outline">
-                View
-              </Button>
-            </Link>
-
-            <Button size="sm" variant="default" onClick={() => { setIsDrawerOpen(true); setReportId(Number(item.id)); setInvoiceId(Number(item.invoice_id)); }}>Edit</Button>
-
-            <Button size="sm" variant="destructive" onClick={() => alert("Delete " + item.id)}>
-              Delete
-            </Button>
+      data: null,
+      title: "Actions",
+      orderable: false,
+      responsivePriority: 1,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return `
+          <div class="flex gap-2">
+            <a href="/pathology/hematology/prothom-bin-time-full/report/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+              View
+            </a>
+            <button onclick="window.editProthrombinTime(${row.id}, ${row.invoice_id})" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+              Edit
+            </button>
           </div>
-        );
+        `;
       },
+      defaultContent: "",
     },
-
   ];
 
   return (

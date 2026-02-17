@@ -7,11 +7,7 @@ import { TopNav } from "@/components/layout/top-nav";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ColumnDef } from "@tanstack/react-table";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { EditMTForm } from '@/features/pathology/immunology/EditMTForm';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
@@ -23,13 +19,17 @@ export const Route = createFileRoute(
   component: MT,
 })
 
-type ReportsItem = {
+type ReportItem = {
   id: number;
-  receiptId: string;
   invoice_id: number;
-  patientName: string;
-  tests: string[];
-  date: string;
+  patient_name: string;
+  test_result: string | null;
+  induration_size: number | null;
+  remarks: string | null;
+  test_carried_out_by: string | null;
+  machine_id: number | null;
+  created_at: string;
+  status: string;
 };
 
 function MT() {
@@ -46,20 +46,50 @@ function MT() {
     queryKey: ["mt", page, search],
 
     queryFn: async () => {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/mt?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/mt?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-      if (!res.ok) throw new Error("Failed to fetch blood for tcdc reports");
-      return res.json(); // MUST match placeholderData
+        if (!res.ok) {
+          console.error('API Response:', res.status, res.statusText);
+          // Return empty structure instead of throwing
+          return {
+            data: {
+              items: [],
+              meta: {
+                page,
+                limit,
+                total: 0,
+              },
+            },
+          };
+        }
+        const jsonData = await res.json();
+        console.log('MT API response:', jsonData);
+        return jsonData;
+      } catch (err) {
+        console.error('Error fetching MT reports:', err);
+        // Return empty structure instead of throwing
+        return {
+          data: {
+            items: [],
+            meta: {
+              page,
+              limit,
+              total: 0,
+            },
+          },
+        };
+      }
     },
 
     enabled: !!token,
+    retry: 0, // Don't retry on failure, use fallback immediately
 
-    // ⭐ Perfect smooth pagination
     placeholderData: (prev) =>
       prev
         ? prev
@@ -75,61 +105,65 @@ function MT() {
         },
   });
 
+  // Use only API data (no fallback)
+  const items = data?.data?.items || [];
+  const meta = data?.data?.meta || { page, limit, total: 0 };
 
-  //console.log(data?.data);
-  const columns: ColumnDef<ReportsItem>[] = [
-    // Row selection
+  // Define columns for jQuery DataTable format
+  const columns = [
     {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) =>
-            table.toggleAllPageRowsSelected(Boolean(value))
-          }
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-
-    {
-      accessorKey: "invoice_id",
-      header: "Invoice ID",
+      data: 'invoice_id',
+      title: 'Invoice ID',
+      className: 'font-mono text-sm',
     },
     {
-      accessorKey: "patient_name",
-      header: "Patient Name",
+      data: 'patient_name',
+      title: 'Patient Name',
+      className: 'font-medium',
     },
-
     {
-      accessorKey: "created_at",
-      header: "Date",
-      cell: ({ row }) => {
-        const iso = row.getValue("created_at") as string;
+      data: 'test_result',
+      title: 'Test Result',
+      render: (data: any) => {
+        const value = data as string;
+        return `<div class="text-sm">${value || '-'}</div>`;
+      },
+    },
+    {
+      data: 'induration_size',
+      title: 'Induration (mm)',
+      render: (data: any) => {
+        const value = data as number | null;
+        return `<div class="text-sm">${value !== null ? value : '-'}</div>`;
+      },
+    },
+    {
+      data: 'test_carried_out_by',
+      title: 'Test Carried Out By',
+      render: (data: any) => {
+        const value = data as string;
+        return `<div class="text-sm">${value || '-'}</div>`;
+      },
+    },
+    {
+      data: 'created_at',
+      title: 'Date',
+      render: (data: any) => {
+        const iso = data as string;
         const date = new Date(iso);
-
         const formatted = date.toLocaleDateString("en-US", {
           year: "numeric",
           month: "short",
           day: "numeric",
         });
-
-        return <div>{formatted}</div>; // Example: Nov 23, 2025
+        return `<div class="text-sm">${formatted}</div>`;
       },
     },
-
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
+      data: 'status',
+      title: 'Status',
+      render: (data: any) => {
+        const status = data as string;
         const color =
           status === "passed"
             ? "bg-green-500"
@@ -137,40 +171,45 @@ function MT() {
               ? "bg-red-500"
               : "bg-yellow-500";
 
-        return <Badge className={color + " text-white"}>{status || 'Pending'}</Badge>;
+        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${color} text-white border-transparent">${status || 'Pending'}</span>`;
       },
     },
-    // Actions Column
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => alert("View " + item.id)}>
-              View
-            </Button>
-
-            <Button size="sm" variant="default"
-              onClick={() => {
-                setIsDrawerOpen(true);
-                setReportId(Number(item.id));
-                setInvoiceId(Number(item.invoice_id));
-              }}>
-              Edit
-            </Button>
-
-            <Button size="sm" variant="destructive" onClick={() => alert("Delete " + item.id)}>
-              Delete
-            </Button>
-          </div>
-        );
+      data: null,
+      title: 'Actions',
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportItem) => {
+        const rowData = JSON.stringify(row).replace(/"/g, '&quot;');
+        return `
+          <button class="edit-mt-btn inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 mr-2" data-row='${rowData}'>Edit</button>
+          <a href="/pathology/immunology/mt/report/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-info hover:bg-info-foreground h-8 px-3">View</a>
+        `;
       },
-    }
-
+    },
   ];
+
+  // Set up edit button handlers
+  useEffect(() => {
+    const handleEditClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const button = target.closest('.edit-mt-btn');
+      if (button) {
+        const rowData = (button as HTMLElement).getAttribute('data-row');
+        if (rowData) {
+          const item: ReportItem = JSON.parse(rowData);
+          setIsDrawerOpen(true);
+          setReportId(Number(item.id));
+          setInvoiceId(Number(item.invoice_id));
+        }
+      }
+    };
+
+    document.addEventListener('click', handleEditClick);
+
+    return () => {
+      document.removeEventListener('click', handleEditClick);
+    };
+  }, []);
 
   return (
     <>
@@ -187,11 +226,10 @@ function MT() {
         <div className="mb-4">
           <h1 className='text-2xl font-bold tracking-tight'>Tuberculin (MT)</h1>
         </div>
-        <DataTable columns={columns} data={data?.data?.items || []} meta={data?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
+        <DataTable columns={columns} data={items} meta={meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
         <EditMTForm open={isDrawerOpen} setOpen={setIsDrawerOpen} reportId={reportId} invoiceId={invoiceId} />
       </Main>
     </>
 
   )
 }
-

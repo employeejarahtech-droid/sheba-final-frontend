@@ -20,6 +20,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -35,6 +36,8 @@ const ptSchema = z.object({
     control_pt: z.number().min(1, { message: "Required" }),      // Control Time
     inr: z.number().min(1, { message: "Required" }),          // INR value
     remarks: z.string().optional(),
+    machineId: z.string().optional(),
+    testCarriedOutBy: z.string().optional(),
 });
 
 type ProthrombinFormValues = z.infer<typeof ptSchema>;
@@ -58,6 +61,8 @@ export function EditProthrombinTimeForm({ open, setOpen, reportId, invoiceId }: 
             control_pt: 0,
             inr: 0,
             remarks: "",
+            machineId: "",
+            testCarriedOutBy: "",
         },
     });
 
@@ -80,13 +85,28 @@ export function EditProthrombinTimeForm({ open, setOpen, reportId, invoiceId }: 
 
     console.log('prothombinTime', prothombinTime);
 
+    // Fetch machines data
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/machine`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            return res.json();
+        },
+    });
+
+    const machineList = machinesData?.data?.items || [];
+
     useEffect(() => {
         if (prothombinTime) {
             form.reset({
-                pt_test: prothombinTime.pt_test || 0,
-                control_pt: prothombinTime.control_pt || 0,
-                inr: prothombinTime.inr || 0,
+                pt_test: parseFloat(prothombinTime.pt_test) || 0,
+                control_pt: parseFloat(prothombinTime.control_pt) || 0,
+                inr: parseFloat(prothombinTime.inr) || 0,
                 remarks: prothombinTime.remarks || "",
+                machineId: prothombinTime.machine_id?.toString() || "",
+                testCarriedOutBy: prothombinTime.test_carried_out_by || "",
             })
         }
     }, [prothombinTime]);
@@ -104,7 +124,15 @@ export function EditProthrombinTimeForm({ open, setOpen, reportId, invoiceId }: 
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
                     },
-                    body: JSON.stringify({ ...data, invoice_id: invoiceId }),
+                    body: JSON.stringify({
+                        invoice_id: invoiceId,
+                        pt_test: data.pt_test?.toString() || null,
+                        control_pt: data.control_pt?.toString() || null,
+                        inr: data.inr?.toString() || null,
+                        remarks: data.remarks,
+                        machine_id: data.machineId ? parseInt(data.machineId) : null,
+                        test_carried_out_by: data.testCarriedOutBy,
+                    }),
                 }
             );
             if (!res.ok) throw new Error("Failed to update prothombin time report");
@@ -203,9 +231,44 @@ export function EditProthrombinTimeForm({ open, setOpen, reportId, invoiceId }: 
                             name="remarks"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>INR</FormLabel>
+                                    <FormLabel>Remarks / Comments</FormLabel>
                                     <FormControl>
                                         <Textarea placeholder="Comments" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Test Carried Out By */}
+                        <FormField
+                            control={form.control}
+                            name="testCarriedOutBy"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Test Carried Out By (Machine)</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select machine" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

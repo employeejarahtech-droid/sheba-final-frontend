@@ -22,6 +22,7 @@ import { ThemeSwitch } from "@/components/theme-switch";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { topNav } from "@/data/data";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -55,6 +56,9 @@ const cbcSchema = z.object({
   monocytes: z.string().min(1, "Required"),
   eosinophils: z.string().min(1, "Required"),
   basophils: z.string().min(1, "Required"),
+
+  testCarriedOutBy: z.string().optional(),
+  machineId: z.string().optional(),
 });
 
 type CBCFormValues = z.infer<typeof cbcSchema>;
@@ -88,6 +92,8 @@ function EditCBCShort() {
       eosinophils: "",
       basophils: "",
 
+      testCarriedOutBy: "",
+      machineId: "",
     },
   });
 
@@ -110,6 +116,24 @@ function EditCBCShort() {
 
   console.log('cbcData', cbcData);
 
+  // Fetch machines from API
+  const { data: machinesData } = useQuery({
+    queryKey: ["machine"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/machine`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch machines");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+
+  const machineList = machinesData?.data?.items || [];
+
   useEffect(() => {
     if (cbcData) {
       form.reset({
@@ -129,6 +153,8 @@ function EditCBCShort() {
         eosinophils: cbcData.eosinophils,
         basophils: cbcData.basophils,
 
+        testCarriedOutBy: cbcData.test_carried_out_by || '',
+        machineId: cbcData.machine_id ? String(cbcData.machine_id) : '',
       })
     }
   }, [cbcData, form]);
@@ -147,7 +173,21 @@ function EditCBCShort() {
                     },
                     body: JSON.stringify({
                         invoice_id: cbcData?.invoice_id,
-                        ...data
+                        hemoglobin: data.hemoglobin,
+                        rbc_count: data.rbc_count,
+                        wbc_count: data.wbc_count,
+                        platelets: data.platelets,
+                        hct: data.hct,
+                        mcv: data.mcv,
+                        mch: data.mch,
+                        mchc: data.mchc,
+                        neutrophils: data.neutrophils,
+                        lymphocytes: data.lymphocytes,
+                        monocytes: data.monocytes,
+                        eosinophils: data.eosinophils,
+                        basophils: data.basophils,
+                        test_carried_out_by: data.testCarriedOutBy,
+                        machine_id: data.machineId ? parseInt(data.machineId) : null,
                     }),
                 }
             );
@@ -382,6 +422,45 @@ function EditCBCShort() {
                       )}
                     />
                   </div>
+                </div>
+
+                {/* Test Carried Out By */}
+                <div>
+                  <h2 className="text-xl font-semibold mb-4 mt-8">Test Information</h2>
+                  <FormField
+                    control={form.control}
+                    name="testCarriedOutBy"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Test carried out by</FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={(value) => {
+                              const selectedMachine = machineList.find((m: any) => m.name === value);
+                              if (selectedMachine) {
+                                field.onChange(value);
+                                form.setValue('machineId', String(selectedMachine.id));
+                              }
+                            }}
+                            value={field.value}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select machine" />
+                            </SelectTrigger>
+
+                            <SelectContent>
+                              {machineList.map((machine: any) => (
+                                <SelectItem key={machine.id} value={machine.name}>
+                                  {machine.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 {/* Buttons */}

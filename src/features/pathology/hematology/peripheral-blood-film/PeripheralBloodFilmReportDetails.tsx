@@ -1,9 +1,14 @@
 import { Button } from "@/components/ui/button";
 
-export default function PeripheralBloodFilmReportDetails({ invoice: invoice }: any) {
-    const borderWidth = 2;
+export default function PeripheralBloodFilmReportDetails({ invoice: invoice, testName }: any) {
+    // Extract patient info from nested outdoor_invoice object
+    const patientInfo = invoice?.outdoor_invoice || {};
+    const invoiceDate = patientInfo.invoice_date
+        ? new Date(patientInfo.invoice_date).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })
+        : "N/A";
+
     return (
-        <div className="max-w-4xl w-full mx-auto bg-background pt-40 pb-10 px-5 mt-6 print:w-[850px]">
+        <div className="max-w-4xl w-full mx-auto bg-background pt-40 pb-10 px-5 mt-6 print:w-[850px] print-report">
             <style>
                 {`
           .bg-row-blue {
@@ -40,26 +45,26 @@ export default function PeripheralBloodFilmReportDetails({ invoice: invoice }: a
         `}
             </style>
             {/* Title */}
-            <h1 className="text-2xl font-bold text-center underline mb-6 tracking-wide">
-                PERIPHERAL BLOOD FILM (PBF) REPORT
+            <h1 className="text-2xl font-bold text-center underline mb-6 tracking-wide uppercase">
+                {testName}
             </h1>
 
             {/* Header Table */}
             <table className="w-full text-sm border">
                 <tbody>
                     <tr className="border">
-                        <td className="border px-3 py-2 w-1/4">Receipt ID : {invoice.id}</td>
-                        <td className="border px-3 py-2 w-1/4">Date: 01/01/2025</td>
-                        <td className="border px-3 py-2 w-1/4">Age: {invoice.age} years</td>
+                        <td className="border px-3 py-2 w-1/4">Receipt ID : {invoice.invoice_id || patientInfo.id}</td>
+                        <td className="border px-3 py-2 w-1/4">Date: {invoiceDate}</td>
+                        <td className="border px-3 py-2 w-1/4">Age: {patientInfo.age_text || patientInfo.age || 'N/A'}</td>
 
                     </tr>
                     <tr className="border">
-                        <td className="border px-3 py-2" colSpan={2}>Patient name: {invoice.patient_name}</td>
-                        <td className="border px-3 py-2">Sex: {invoice.sex}</td>
+                        <td className="border px-3 py-2" colSpan={2}>Patient name: {patientInfo.patient_name || 'N/A'}</td>
+                        <td className="border px-3 py-2">Sex: {patientInfo.sex || 'N/A'}</td>
                     </tr>
                     <tr className="border">
                         <td className="border px-3 py-2" colSpan={3}>
-                            Refd. By: Prof./Dr. {invoice.reference_doctor}
+                            Refd. By: {patientInfo.doctor_id ? `Dr. ID: ${patientInfo.doctor_id}` : 'N/A'}
                         </td>
 
                     </tr>
@@ -71,43 +76,36 @@ export default function PeripheralBloodFilmReportDetails({ invoice: invoice }: a
                 <thead>
                     <tr className="border-t border-b bg-row-blue">
                         <th className="px-3 py-2 text-left w-[40%]">Test name</th>
-                        <th className="px-3 py-2 text-left w-[30%]">Test Result</th>
-                        <th className="px-3 py-2 text-left w-[30%]">Normal Range</th>
+                        <th className="px-3 py-2 text-left w-[60%]">Test Result</th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    <tr className={`border-b-${borderWidth} border-dashed`}>
-                        <td className="px-3 py-2">Fasting Blood Suger (F.B.S)</td>
-                        <td className="px-3 py-2">145.0 mg/dl (8.0 mmol/L)</td>
-                        <td className="px-3 py-2">65-110 mg/dl (3.6-6.1 mmol/L)</td>
+                    <tr className="border-b border-dashed">
+                        <td className="px-3 py-2">RBC Morphology</td>
+                        <td className="px-3 py-2">{invoice.rbc || 'N/A'}</td>
                     </tr>
-                    <tr className={`border-b-${borderWidth} border-dashed`}>
-                        <td className="px-3 py-2">Corresponding Urine Sugar (CUS)</td>
-                        <td className="px-3 py-2">N/A</td>
-                        <td className="px-3 py-2">Nil</td>
+                    <tr className="border-b border-dashed">
+                        <td className="px-3 py-2">WBC Morphology</td>
+                        <td className="px-3 py-2">{invoice.wbc || 'N/A'}</td>
                     </tr>
-                    <tr className={`border-b-${borderWidth} border-dashed`}>
-                        <td className="px-3 py-2">Blood Suger 2 hours after Breakfast</td>
-                        <td className="px-3 py-2">
-                            242.3 mg/dl (13.4 mmol/L)
-                        </td>
-                        <td className="px-3 py-2">
-                            &lt;140 mg/dl (&lt;7.8 mmol/L)
-                        </td>
+                    <tr className="border-b border-dashed">
+                        <td className="px-3 py-2">Platelet Count / Morphology</td>
+                        <td className="px-3 py-2">{invoice.platelets || 'N/A'}</td>
                     </tr>
-                    <tr className={`border-b-${borderWidth} border-dashed`}>
-                        <td className="px-3 py-2">2hrs (CUS)</td>
-                        <td className="px-3 py-2">Not done</td>
-                        <td className="px-3 py-2">--</td>
-                    </tr>
+                    {invoice.remarks && (
+                        <tr className="border-b border-dashed">
+                            <td className="px-3 py-2">Comments / Impression</td>
+                            <td className="px-3 py-2">{invoice.remarks}</td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
 
             {/* Tested By */}
             <p className="text-sm mt-4">
                 <span className="font-semibold">Test Carried out by:</span> &nbsp;
-                Humalyzer 3000 Biochemistry Analyser
+                {invoice.test_carried_out_by || 'N/A'}
             </p>
 
             {/* Footer Signatures */}

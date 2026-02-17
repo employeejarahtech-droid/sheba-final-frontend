@@ -38,6 +38,7 @@ const formSchema = z.object({
     eosinophils: z.string().min(1, { message: "Required" }),
     basophils: z.string().min(1, { message: "Required" }),
     testCarriedOutBy: z.string().optional(),
+    machineId: z.string().optional(),
 });
 
 type TCDCFormValues = z.infer<typeof formSchema>;
@@ -65,29 +66,39 @@ export function EditBloodForTcDcForm({ open, setOpen, reportId, invoiceId }: Blo
             eosinophils: "",
             basophils: "",
             testCarriedOutBy: "",
+            machineId: "",
         },
     });
 
 
     // Fetching existing data
-    const { data: bloodForTcdcData } = useQuery({
+    const { data: bloodForTcdcData, error: tcdcError, isLoading: tcdcLoading } = useQuery({
         queryKey: ["tcdc", reportId],
         queryFn: async () => {
+            console.log('Fetching TCDC record for reportId:', reportId);
+            const url = `${import.meta.env.VITE_API_URL}/api/tcdc/${reportId}`;
+            console.log('Fetch URL:', url);
             const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/tcdc/${reportId}`,
+                url,
                 {
                     method: "GET",
                     headers: { Authorization: `Bearer ${token}` },
                 }
             );
-            if (!res.ok) throw new Error("Failed to fetch lipid-profile report");
+            console.log('TCDC record response status:', res.status);
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error('TCDC record fetch failed:', errorText);
+                throw new Error(`Failed to fetch TCDC report: ${errorText}`);
+            }
             const result = await res.json();
+            console.log('TCDC record response:', result);
             return result.data;
         },
-        enabled: !!token && !!reportId,
+        enabled: !!token && !!reportId && reportId !== 0,
     });
 
-    console.log('tcdc', bloodForTcdcData);
+    console.log('TCDC Form State:', { bloodForTcdcData, tcdcError, tcdcLoading, reportId });
 
     useEffect(() => {
         if (bloodForTcdcData) {
@@ -98,6 +109,8 @@ export function EditBloodForTcDcForm({ open, setOpen, reportId, invoiceId }: Blo
                 monocytes: bloodForTcdcData.monocytes || '',
                 eosinophils: bloodForTcdcData.eosinophils || '',
                 basophils: bloodForTcdcData.basophils || '',
+                testCarriedOutBy: bloodForTcdcData.test_carried_out_by || '',
+                machineId: bloodForTcdcData.machine_id ? String(bloodForTcdcData.machine_id) : '',
             })
         }
     }, [bloodForTcdcData]);
@@ -115,7 +128,14 @@ export function EditBloodForTcDcForm({ open, setOpen, reportId, invoiceId }: Blo
                 },
                 body: JSON.stringify({
                     invoice_id: invoiceId,
-                    ...payload
+                    total_count: payload.total_count,
+                    neutrophils: payload.neutrophils,
+                    lymphocytes: payload.lymphocytes,
+                    monocytes: payload.monocytes,
+                    eosinophils: payload.eosinophils,
+                    basophils: payload.basophils,
+                    test_carried_out_by: payload.testCarriedOutBy,
+                    machine_id: payload.machineId ? parseInt(payload.machineId) : null,
                 }),
             });
 
@@ -150,13 +170,23 @@ export function EditBloodForTcDcForm({ open, setOpen, reportId, invoiceId }: Blo
 
     const handleView = () => alert("View action triggered.");
 
-    const machineList = [
-        "Sysmex XN-1000",
-        "Sysmex XP-300",
-        "Mindray BC-20",
-        "Abbott CELL-DYN Ruby",
-        "Nihon Kohden MEK-9100",
-    ];
+    // Fetch machines from API
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/machine`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch machines");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const machineList = machinesData?.data?.items || [];
 
 
 
@@ -209,15 +239,24 @@ export function EditBloodForTcDcForm({ open, setOpen, reportId, invoiceId }: Blo
                                 <FormItem>
                                     <FormLabel>Test carried out by</FormLabel>
                                     <FormControl>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
                                             <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select lab technician" />
+                                                <SelectValue placeholder="Select machine" />
                                             </SelectTrigger>
 
                                             <SelectContent>
-                                                {machineList.map((machine) => (
-                                                    <SelectItem key={machine} value={machine}>
-                                                        {machine}
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>

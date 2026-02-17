@@ -14,10 +14,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
+import { getCookie } from "@/lib/cookies";
 
 import { Main } from '@/components/layout/main';
 import { Header } from '@/components/layout/header';
@@ -26,39 +35,13 @@ import { Search } from '@/components/search';
 import { ThemeSwitch } from '@/components/theme-switch';
 import { ConfigDrawer } from '@/components/config-drawer';
 import { ProfileDropdown } from '@/components/profile-dropdown';
+import { topNav } from '@/data/data';
 
 export const Route = createFileRoute(
   "/_authenticated/pathology/hormone/semen/edit/$reportId"
 )({
   component: EditSemenReport,
 });
-
-const topNav = [
-  {
-    title: 'Overview',
-    href: 'dashboard/overview',
-    isActive: true,
-    disabled: false,
-  },
-  {
-    title: 'Customers',
-    href: 'dashboard/customers',
-    isActive: false,
-    disabled: true,
-  },
-  {
-    title: 'Products',
-    href: 'dashboard/products',
-    isActive: false,
-    disabled: true,
-  },
-  {
-    title: 'Settings',
-    href: 'dashboard/settings',
-    isActive: false,
-    disabled: true,
-  },
-]
 
 // ------------- Zod Schema -------------
 const semenAnalysisSchema = z.object({
@@ -83,6 +66,8 @@ const semenAnalysisSchema = z.object({
   morphology: z.string().min(1, "Required"),
 
   comment: z.string().optional(),
+  testCarriedOutBy: z.string().optional(),
+  machineId: z.string().optional(),
 });
 
 type SemenFormValues = z.infer<typeof semenAnalysisSchema>;
@@ -90,6 +75,25 @@ type SemenFormValues = z.infer<typeof semenAnalysisSchema>;
 // ------------- Component -------------
 function EditSemenReport() {
   const { reportId } = Route.useParams();
+  const token = getCookie('accessToken');
+
+  // Fetch machines from API
+  const { data: machinesData } = useQuery({
+    queryKey: ["machine"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/machine`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch machines");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+
+  const machineList = machinesData?.data?.items || [];
 
   const form = useForm<SemenFormValues>({
     resolver: zodResolver(semenAnalysisSchema),
@@ -110,6 +114,8 @@ function EditSemenReport() {
       motility: "",
       morphology: "",
       comment: "",
+      testCarriedOutBy: "",
+      machineId: "",
     },
   });
 
@@ -410,13 +416,54 @@ function EditSemenReport() {
                   </div>
                 </section>
 
+                {/* TEST CARRIED OUT BY */}
+                <section className="border rounded-md p-4">
+                  <h3 className="text-sm font-semibold mb-3">Test Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="testCarriedOutBy"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Test carried out by</FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={(value) => {
+                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                if (selectedMachine) {
+                                  field.onChange(value);
+                                  form.setValue('machineId', String(selectedMachine.id));
+                                }
+                              }}
+                              value={field.value}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select machine" />
+                              </SelectTrigger>
+
+                              <SelectContent>
+                                {machineList.map((machine: any) => (
+                                  <SelectItem key={machine.id} value={machine.name}>
+                                    {machine.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </section>
+
                 {/* Buttons */}
                 <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4">
                   <Button type="submit" variant="success" className="flex-1">
                     {form.formState.isSubmitting ? "Saving..." : "Save"}
                   </Button>
 
-                  <Link to="/pathology/special/semen/report/$reportId" params={{ reportId: reportId }}>
+                  <Link to="/pathology/hormone/semen/report/$reportId" params={{ reportId: reportId }}>
                     <Button type="button" variant="default" className="flex-1">
                       Print Preview
                     </Button>

@@ -5,11 +5,9 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { ColumnDef } from "@tanstack/react-table";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { CreateTestTableForm } from '@/features/test-tables/CreateTestTableForm';
@@ -41,6 +39,14 @@ function TestTables() {
   const token = getCookie('accessToken');
   const navigate = useNavigate();
 
+  // Expose edit function to window for onclick handlers
+  useEffect(() => {
+    (window as any).editTestTable = (id: number) => {
+      setTableId(id);
+      setOpen(true);
+    };
+  }, []);
+
   const { data, refetch: refetchTestTables } = useQuery({
     queryKey: ["test-tables", page, search],
     queryFn: async () => {
@@ -60,73 +66,67 @@ function TestTables() {
         : {
           data: {
             items: [],
-            total: 0,
+            meta: {
+              total: 0,
+              page: 1,
+              limit: 10
+            }
           },
         },
   });
 
   //console.log(data);
 
-
-
-
-
-
-
-  const columns: ColumnDef<TestItem>[] = [
+  const columns = [
     {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) =>
-            table.toggleAllPageRowsSelected(Boolean(value))
-          }
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
-      id: "sl",
-      header: "SL",
-      cell: ({ row }) => (page - 1) * limit + row.index + 1,
-    },
-    {
-      accessorKey: "table_name",
-      header: "Test Table Name",
-    },
-    {
-      accessorKey: "display_name",
-      header: "Display Name",
-    },
-    {
-      accessorKey: "description",
-      header: "Description",
-    },
-    {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-        return (
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => navigate({ to: `/outdoor/master/test-tables/${item.id}` })}>
-              View
-            </Button>
-            <Button size="sm" variant="default" onClick={() => { setOpen(true); setTableId(Number(item.id)) }}>
-              Edit
-            </Button>
-
-          </div>
-        );
+      data: null,
+      title: "SL",
+      orderable: false,
+      responsivePriority: 3,
+      render: (_data: any, _type: string, _row: TestItem, meta: any) => {
+        return (page - 1) * limit + meta.row + 1;
       },
+      defaultContent: "",
+    },
+    {
+      data: "table_name",
+      title: "Test Table Name",
+      orderable: true,
+      responsivePriority: 1,
+      defaultContent: "",
+    },
+    {
+      data: "display_name",
+      title: "Display Name",
+      orderable: true,
+      responsivePriority: 2,
+      defaultContent: "",
+    },
+    {
+      data: "description",
+      title: "Description",
+      orderable: true,
+      responsivePriority: 4,
+      defaultContent: "",
+    },
+    {
+      data: null,
+      title: "Actions",
+      orderable: false,
+      responsivePriority: 1,
+      render: (_data: any, _type: string, row: TestItem) => {
+        return `
+          <div class="flex gap-2">
+            <button onclick="window.location.href='/outdoor/master/test-tables/${row.id}'" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+              View
+            </button>
+            <button onclick="window.editTestTable(${row.id})" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+              Edit
+            </button>
+          </div>
+        `;
+      },
+      defaultContent: "",
     },
   ];
 

@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { getCookie } from "@/lib/cookies";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -33,6 +34,8 @@ import { Textarea } from "@/components/ui/textarea";
 const urineAlbuminSchema = z.object({
     albuminLevel: z.string().min(1, { message: "Required" }),
     comments: z.string().optional(),
+    testCarriedOutBy: z.string().optional(),
+    machineId: z.string().optional(),
 });
 
 type UrineAlbuminFormValues = z.infer<typeof urineAlbuminSchema>;
@@ -46,15 +49,17 @@ interface UrineAlbuminFormProps {
 
 export function EditUrineForAlbuminForm({ open, setOpen, reportId, invoiceId }: UrineAlbuminFormProps) {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
     const token = getCookie('accessToken');
-    const queryClient = useQueryClient();
 
     const form = useForm<UrineAlbuminFormValues>({
         resolver: zodResolver(urineAlbuminSchema),
         defaultValues: {
             albuminLevel: "",
             comments: "",
+            testCarriedOutBy: "",
+            machineId: "",
         },
     });
 
@@ -81,12 +86,13 @@ export function EditUrineForAlbuminForm({ open, setOpen, reportId, invoiceId }: 
             form.reset({
                 albuminLevel: urineAlbuminData.albumin || '',
                 comments: urineAlbuminData.remarks || '',
+                testCarriedOutBy: urineAlbuminData.test_carried_out_by || '',
+                machineId: urineAlbuminData.machine_id ? String(urineAlbuminData.machine_id) : '',
             })
         }
     }, [urineAlbuminData, form]);
 
     //PUT api call
-
     const updateUrineAlbuminMutation = useMutation({
         mutationFn: async (payload: UrineAlbuminFormValues) => {
             const res = await fetch(`${import.meta.env.VITE_API_URL}/api/urine-albumin/${reportId}`, {
@@ -98,7 +104,9 @@ export function EditUrineForAlbuminForm({ open, setOpen, reportId, invoiceId }: 
                 body: JSON.stringify({
                     invoice_id: invoiceId,
                     albumin: payload.albuminLevel,
-                    remarks: payload.comments
+                    remarks: payload.comments,
+                    test_carried_out_by: payload.testCarriedOutBy,
+                    machine_id: payload.machineId ? parseInt(payload.machineId) : null,
                 }),
             });
 
@@ -114,20 +122,15 @@ export function EditUrineForAlbuminForm({ open, setOpen, reportId, invoiceId }: 
             toast.success(data.message || "Test created successfully!");
             console.log("API Response:", data);
             navigate({ to: "/pathology/urine/urine-for-albumin" });
-            // optional:
-            // form.reset();
             queryClient.invalidateQueries({
                 queryKey: ["urine-albumin", reportId],
             });
-
         },
 
         onError: (error: any) => {
             toast.error(error.message || "Something went wrong");
         },
     });
-
-
 
     function onSubmit(values: UrineAlbuminFormValues) {
         console.log("Urine for Albumin Report:", values);
@@ -136,6 +139,24 @@ export function EditUrineForAlbuminForm({ open, setOpen, reportId, invoiceId }: 
     }
 
     const handleView = () => alert("View triggered.");
+
+    // Fetch machines from API
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/machine`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch machines");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const machineList = machinesData?.data?.items || [];
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
@@ -160,7 +181,6 @@ export function EditUrineForAlbuminForm({ open, setOpen, reportId, invoiceId }: 
                         onSubmit={form.handleSubmit(onSubmit)}
                         className="space-y-6 mt-4 p-4"
                     >
-
                         {/* Albumin Level */}
                         <FormField
                             control={form.control}
@@ -185,6 +205,42 @@ export function EditUrineForAlbuminForm({ open, setOpen, reportId, invoiceId }: 
                                     <FormLabel>Comments / Remarks (Optional)</FormLabel>
                                     <FormControl>
                                         <Textarea placeholder="Additional notes..." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* TEST CARRIED OUT BY */}
+                        <FormField
+                            control={form.control}
+                            name="testCarriedOutBy"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select machine" />
+                                            </SelectTrigger>
+
+                                            <SelectContent>
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

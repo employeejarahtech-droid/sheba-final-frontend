@@ -20,6 +20,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -37,6 +38,8 @@ const widalSchema = z.object({
     s_paratyphi_b: z.string().min(1, { message: "Required" }),
     s_paratyphi_c: z.string().min(1, { message: "Required" }),
     remarks: z.string().optional(),
+    machineId: z.string().optional(),
+    testCarriedOutBy: z.string().optional(),
 });
 
 type WidalFormValues = z.infer<typeof widalSchema>;
@@ -64,6 +67,8 @@ export function WidalTestForm({ open, setOpen, reportId, invoiceId }: WidalTestF
             s_paratyphi_b: "",
             s_paratyphi_c: "",
             remarks: "",
+            machineId: "",
+            testCarriedOutBy: "",
         },
     });
 
@@ -87,6 +92,19 @@ export function WidalTestForm({ open, setOpen, reportId, invoiceId }: WidalTestF
 
     console.log('tcdc', widalTestData);
 
+    // Fetch machines data
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/machine`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            return res.json();
+        },
+    });
+
+    const machineList = machinesData?.data?.items || [];
+
     useEffect(() => {
         if (widalTestData) {
             form.reset({
@@ -96,6 +114,8 @@ export function WidalTestForm({ open, setOpen, reportId, invoiceId }: WidalTestF
                 s_paratyphi_b: widalTestData.s_paratyphi_b || '',
                 s_paratyphi_c: widalTestData.s_paratyphi_c || '',
                 remarks: widalTestData.remarks || '',
+                machineId: widalTestData.machine_id?.toString() || "",
+                testCarriedOutBy: widalTestData.test_carried_out_by || "",
             })
         }
     }, [widalTestData]);
@@ -114,7 +134,14 @@ export function WidalTestForm({ open, setOpen, reportId, invoiceId }: WidalTestF
                 },
                 body: JSON.stringify({
                     invoice_id: invoiceId,
-                    ...payload
+                    s_typhi_o: payload.s_typhi_o,
+                    s_typhi_h: payload.s_typhi_h,
+                    s_paratyphi_a: payload.s_paratyphi_a,
+                    s_paratyphi_b: payload.s_paratyphi_b,
+                    s_paratyphi_c: payload.s_paratyphi_c,
+                    remarks: payload.remarks,
+                    machine_id: payload.machineId ? parseInt(payload.machineId) : null,
+                    test_carried_out_by: payload.testCarriedOutBy,
                 }),
             });
 
@@ -249,7 +276,7 @@ export function WidalTestForm({ open, setOpen, reportId, invoiceId }: WidalTestF
                             )}
                         />
 
-                        
+
                         <FormField
                             control={form.control}
                             name="remarks"
@@ -258,6 +285,41 @@ export function WidalTestForm({ open, setOpen, reportId, invoiceId }: WidalTestF
                                     <FormLabel>Remarks</FormLabel>
                                     <FormControl>
                                         <Textarea placeholder="Comments" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Test Carried Out By */}
+                        <FormField
+                            control={form.control}
+                            name="testCarriedOutBy"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Test Carried Out By (Machine)</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select machine" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

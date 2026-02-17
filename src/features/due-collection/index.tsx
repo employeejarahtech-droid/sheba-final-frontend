@@ -3,8 +3,6 @@ import { Header } from '@/components/layout/header'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { ColumnDef } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
 import { DataTable } from '@/components/DataTable'
 import { useState, useMemo } from 'react'
 import { getCookie } from '@/lib/cookies'
@@ -75,73 +73,93 @@ export default function DueCollection() {
     ];
   }, [data]);
 
-  const columns: ColumnDef<InvoiceItem>[] = [
+  const columns = [
     {
-      accessorKey: "id",
-      header: "Invoice ID",
+      data: "id",
+      title: "Invoice ID",
+      className: "font-mono text-sm",
     },
     {
-      accessorKey: "patient_name",
-      header: "Patient Name",
+      data: "patient_name",
+      title: "Patient Name",
+      className: "font-medium",
     },
     {
-      accessorKey: "phone",
-      header: "Phone",
-    },
-    {
-      accessorKey: "doctor.doctor_name",
-      header: "Ref. Doctor",
-      cell: ({ row }) => <div>{row.original.doctor?.doctor_name ?? "-"}</div>,
-    },
-    {
-      accessorKey: "total_amount",
-      header: "Total Amount",
-      cell: ({ row }) => <div>{row.original.total_amount ?? 0}</div>,
-    },
-    {
-      accessorKey: "discount",
-      header: "Discount",
-      cell: ({ row }) => <div>{row.original.discount ?? 0}</div>,
-    },
-    {
-      accessorKey: "total_paid",
-      header: "Paid (৳)",
-      cell: ({ row }) => <div className="text-emerald-600 font-medium">{row.original.total_paid ?? 0}</div>,
-    },
-    {
-      accessorKey: "due_amount",
-      header: "Due (৳)",
-      cell: ({ row }) => <div className="text-red-600 font-bold">{row.original.due_amount ?? 0}</div>,
-    },
-    {
-      accessorKey: "invoice_date",
-      header: "Date",
-      cell: ({ row }) => <div>{new Date(row.original.invoice_date).toLocaleDateString()}</div>,
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const due = parseFloat(row.original.due_amount as any || 0);
-        return (
-          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${due > 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-            }`}>
-            {due > 0 ? 'Due' : 'Paid'}
-          </span>
-        )
+      data: "phone",
+      title: "Phone",
+      render: (data: any) => {
+        return data || '-';
       },
     },
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        return (
-          <Link to={`/outdoor/reception/due-collection/$invoiceId`} params={{ invoiceId: row.original.id.toString() }}>
-            <Button size="sm" variant="outline">
-              Collect Due
-            </Button>
-          </Link>
-        );
+      data: null,
+      title: "Ref. Doctor",
+      render: (_data: any, _type: string, row: InvoiceItem) => {
+        const doctor = (row as any).doctor;
+        return doctor?.doctor_name || '-';
+      },
+    },
+    {
+      data: "total_amount",
+      title: "Total Amount",
+      render: (data: any) => {
+        return data ? parseFloat(data).toFixed(2) : '0.00';
+      },
+    },
+    {
+      data: "discount",
+      title: "Discount",
+      render: (data: any) => {
+        return data ? parseFloat(data).toFixed(2) : '0.00';
+      },
+    },
+    {
+      data: "total_paid",
+      title: "Paid (৳)",
+      render: (data: any) => {
+        const paid = data ? parseFloat(data).toFixed(2) : '0.00';
+        return `<div class="text-emerald-600 font-medium">${paid}</div>`;
+      },
+    },
+    {
+      data: "due_amount",
+      title: "Due (৳)",
+      render: (data: any) => {
+        const due = data ? parseFloat(data).toFixed(2) : '0.00';
+        return `<div class="text-red-600 font-bold">${due}</div>`;
+      },
+    },
+    {
+      data: "invoice_date",
+      title: "Date",
+      render: (data: any) => {
+        const date = new Date(data);
+        return date.toLocaleDateString();
+      },
+    },
+    {
+      data: "status",
+      title: "Status",
+      orderable: false,
+      render: (_data: any, _type: string, row: InvoiceItem) => {
+        const due = parseFloat((row as any).due_amount || 0);
+        const statusClass = due > 0
+          ? 'bg-red-100 text-red-700'
+          : 'bg-green-100 text-green-700';
+        return `<span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClass}">
+          ${due > 0 ? 'Due' : 'Paid'}
+        </span>`;
+      },
+    },
+    {
+      data: null,
+      title: "Actions",
+      orderable: false,
+      render: (_data: any, _type: string, row: InvoiceItem) => {
+        const id = (row as any).id;
+        return `<a href="/outdoor/reception/due-collection/${id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+          Collect Due
+        </a>`;
       },
     },
   ];

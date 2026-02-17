@@ -20,11 +20,18 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { getCookie } from "@/lib/cookies";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getCookie } from "@/lib/cookies";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,6 +40,8 @@ import { Textarea } from "@/components/ui/textarea";
 const sputumTestSchema = z.object({
     result: z.string().min(1, { message: "Required" }),
     comments: z.string().optional(),
+    testCarriedOutBy: z.string().optional(),
+    machineId: z.string().optional(),
 });
 
 type SputumTestFormValues = z.infer<typeof sputumTestSchema>;
@@ -55,9 +64,10 @@ export function EditSputumTestForm({ open, setOpen, reportId, invoiceId }: Sputu
         defaultValues: {
             result: "",
             comments: "",
+            testCarriedOutBy: "",
+            machineId: "",
         },
     });
-
 
     // Fetching existing data
     const { data: sputumData } = useQuery({
@@ -70,20 +80,38 @@ export function EditSputumTestForm({ open, setOpen, reportId, invoiceId }: Sputu
                     headers: { Authorization: `Bearer ${token}` },
                 }
             );
-            if (!res.ok) throw new Error("Failed to fetch Occult Blood Test report");
+            if (!res.ok) throw new Error("Failed to fetch Sputum Test report");
             const result = await res.json();
             return result.data;
         },
         enabled: !!token && !!reportId,
     });
 
-    console.log("Sputum Data:", sputumData);
+    // Fetch machines from API
+    const { data: machinesData } = useQuery({
+        queryKey: ["machine"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/machine`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch machines");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const machineList = machinesData?.data?.items || [];
 
     useEffect(() => {
         if (sputumData) {
             form.reset({
                 result: sputumData.test_result || '',
                 comments: sputumData.remarks || '',
+                testCarriedOutBy: sputumData.test_carried_out_by || '',
+                machineId: sputumData.machine_id?.toString() || '',
             })
         }
     }, [sputumData, form]);
@@ -101,13 +129,15 @@ export function EditSputumTestForm({ open, setOpen, reportId, invoiceId }: Sputu
                 body: JSON.stringify({
                     invoice_id: invoiceId,
                     test_result: payload.result,
-                    remarks: payload.comments
+                    remarks: payload.comments,
+                    test_carried_out_by: payload.testCarriedOutBy,
+                    machine_id: payload.machineId ? parseInt(payload.machineId) : null,
                 }),
             });
 
             if (!res.ok) {
                 const msg = await res.text();
-                throw new Error(msg || "Failed to update occult blood test");
+                throw new Error(msg || "Failed to update sputum test");
             }
 
             return res.json();
@@ -193,6 +223,42 @@ export function EditSputumTestForm({ open, setOpen, reportId, invoiceId }: Sputu
                             )}
                         />
 
+                        {/* Test Carried Out By */}
+                        <FormField
+                            control={form.control}
+                            name="testCarriedOutBy"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                                if (selectedMachine) {
+                                                    field.onChange(value);
+                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                }
+                                            }}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select machine" />
+                                            </SelectTrigger>
+
+                                            <SelectContent>
+                                                {machineList.map((machine: any) => (
+                                                    <SelectItem key={machine.id} value={machine.name}>
+                                                        {machine.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
                         {/* Buttons */}
                         <div className="flex justify-center gap-2 pt-4">
                             <Button
@@ -203,7 +269,7 @@ export function EditSputumTestForm({ open, setOpen, reportId, invoiceId }: Sputu
                                 {form.formState.isSubmitting ? "Saving..." : "Save"}
                             </Button>
 
-                            <Link to="/pathology/stool/ocult-blood-test/report/$reportId" params={{ reportId: reportId.toString() }}>
+                            <Link to="/pathology/hormone/sputum/report/$reportId" params={{ reportId: reportId.toString() }}>
                                 <Button type="button" variant="warning">
                                     Print Preview
                                 </Button>
