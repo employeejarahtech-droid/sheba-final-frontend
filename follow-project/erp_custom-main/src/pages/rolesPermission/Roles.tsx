@@ -89,8 +89,8 @@ export default function Roles() {
 
   // Stats calculation
   const totalRoles = pagination.total || 0;
-  const activeRoles = rolelist.filter(r => r.status?.toLowerCase() === 'active').length;
-  const inactiveRoles = rolelist.filter(r => r.status?.toLowerCase() === 'inactive').length;
+  const activeRoles = rolelist.filter(r => r.status && r.status.toLowerCase() === 'active').length;
+  const inactiveRoles = rolelist.filter(r => !r.status || r.status.toLowerCase() === 'inactive').length;
 
   const stats = [
     {
@@ -177,21 +177,22 @@ export default function Roles() {
       header: "Description",
       cell: ({ row }) => <div>{row.getValue("description")}</div>,
     },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
-        const color =
-          status.toLowerCase() === "active"
-            ? "bg-green-400"
-            : status.toLowerCase() === "inactive"
-              ? "bg-blue-500"
-              : "bg-gray-500";
-
-        return <Badge className={`${color} capitalize`}>{status}</Badge>;
-      },
-    },
+    // Status column commented out - following /users pattern
+    // {
+    //   accessorKey: "status",
+    //   header: "Status",
+    //   cell: ({ row }) => {
+    //     const status = row.getValue("status") as string | null;
+    //     const statusValue = status || "inactive";
+    //     const color =
+    //       statusValue.toLowerCase() === "active"
+    //         ? "bg-green-400"
+    //         : statusValue.toLowerCase() === "inactive"
+    //           ? "bg-blue-500"
+    //           : "bg-gray-500";
+    //     return <Badge className={`${color} capitalize`}>{statusValue}</Badge>;
+    //   },
+    // },
     {
       id: "actions",
       header: "Actions",
@@ -218,12 +219,21 @@ export default function Roles() {
   ];
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
-        <h1 className="text-3xl font-bold">Existing Roles</h1>
-        <AddNewRoleForm open={open} setOpen={setOpen} />
-      </div>
+      <header className="z-50 h-16 header-fixed peer/header sticky top-0 w-[inherit] shadow">
+        <div className="relative flex h-full items-center gap-3 p-4 sm:gap-4 after:bg-background/20 after:absolute after:inset-0 after:-z-10 after:backdrop-blur-lg">
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+              Roles & Permissions
+            </h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Manage user roles and their permissions
+            </p>
+          </div>
+          <AddNewRoleForm open={open} setOpen={setOpen} />
+        </div>
+      </header>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -277,8 +287,6 @@ export default function Roles() {
           />
         </CardContent>
       </Card>
-
-
 
       {/* Delete confirmation modal */}
       <ConfirmModal

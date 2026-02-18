@@ -1,7 +1,18 @@
 import PeripheralBloodFilmReportDetails from '@/features/pathology/hematology/peripheral-blood-film/PeripheralBloodFilmReportDetails'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from '@/lib/cookies';
+import { Header } from "@/components/layout/header";
+import { Main } from "@/components/layout/main";
+import { TopNav } from "@/components/layout/top-nav";
+import { ProfileDropdown } from "@/components/profile-dropdown";
+import { Search } from "@/components/search";
+import { ThemeSwitch } from "@/components/theme-switch";
+import { ConfigDrawer } from "@/components/config-drawer";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { topNav } from '@/data/data';
+import { Loader2 } from 'lucide-react';
 
 export const Route = createFileRoute(
     '/_authenticated/pathology/hematology/peripheral-blood-film/report/$reportId',
@@ -13,6 +24,7 @@ function PeripheralBloodFilmReport() {
     const { reportId } = Route.useParams();
     const token = getCookie('accessToken');
 
+    // Fetch peripheral blood film test data
     const { data: reportData, isLoading, error } = useQuery({
         queryKey: ["peripheral-blood-report", reportId],
         queryFn: async () => {
@@ -30,11 +42,19 @@ function PeripheralBloodFilmReport() {
     });
 
     if (isLoading) {
-        return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+        );
     }
 
     if (error) {
-        return <div className="flex items-center justify-center min-h-screen text-red-500">Error loading report</div>;
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <p className="text-red-600">Error loading Peripheral Blood Film report: {(error as Error).message}</p>
+            </div>
+        );
     }
 
     const invoice = reportData?.data;
@@ -45,7 +65,26 @@ function PeripheralBloodFilmReport() {
 
     return (
         <>
-            <PeripheralBloodFilmReportDetails invoice={invoice} testName="Peripheral Blood Film (PBF) Report" />
+            <Header fixed className="print:hidden">
+                <TopNav links={topNav} />
+                <div className='ms-auto flex items-center space-x-4'>
+                    <Search />
+                    <ThemeSwitch />
+                    <ConfigDrawer />
+                    <ProfileDropdown />
+                </div>
+            </Header>
+            <Main>
+                <div className="mb-4 print:hidden">
+                    <Link to="/pathology/hematology/peripheral-blood-film">
+                        <Button variant="outline" size="sm">
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back to Peripheral Blood Film
+                        </Button>
+                    </Link>
+                </div>
+                <PeripheralBloodFilmReportDetails invoice={invoice} testName="Peripheral Blood Film (PBF) Report" />
+            </Main>
         </>
     )
 }

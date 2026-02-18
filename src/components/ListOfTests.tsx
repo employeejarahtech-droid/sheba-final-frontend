@@ -5,10 +5,10 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useSearch, useNavigate } from '@tanstack/react-router'
 import { FlaskConical, CheckCircle, FolderTree, DollarSign } from 'lucide-react'
 
 type TestItem = {
@@ -16,7 +16,6 @@ type TestItem = {
     name: string
     category_id: number
     match_table_name: number
-    status: string
     price: number
     category: {
         id: number;
@@ -30,14 +29,38 @@ type TestItem = {
 };
 
 export default function ListOfTests() {
-    const [page, setPage] = useState(1);
-    const [search, setSearch] = useState("");
-    const limit = 10;
+    const searchParams: any = useSearch({ strict: false });
+    const navigate = useNavigate();
+
+    const page = Number(searchParams?.page) || 1;
+    const limit = Number(searchParams?.limit) || 10;
+    const search = searchParams?.search || "";
+
+    const setPage = (newPage: number) => {
+        (navigate as any)({
+            to: '.',
+            search: (prev: any) => ({ ...prev, page: newPage }),
+        });
+    };
+
+    const setLimit = (newLimit: number) => {
+        (navigate as any)({
+            to: '.',
+            search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }),
+        });
+    };
+
+    const setSearch = (newSearch: string) => {
+        (navigate as any)({
+            to: '.',
+            search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }),
+        });
+    };
 
     const token = getCookie('accessToken');
 
-    const { data } = useQuery({
-        queryKey: ["tests", page, search],
+    const { data, isFetching } = useQuery({
+        queryKey: ["tests", page, limit, search],
         queryFn: async () => {
             const res = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/tests?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
@@ -49,26 +72,12 @@ export default function ListOfTests() {
             return res.json();
         },
         enabled: !!token,
-        placeholderData: (prev) =>
-            prev
-                ? prev
-                : {
-                    data: {
-                        items: [],
-                        meta: {
-                            total: 0,
-                            page: 1,
-                            limit: 10
-                        }
-                    },
-                },
     });
 
     // Calculate stats
     const stats = useMemo(() => {
         const tests = data?.data?.items || [];
         const totalTests = data?.data?.meta?.total || 0;
-        const activeTests = tests.filter((t: TestItem) => t.status === 'active').length;
 
         // Get unique categories
         const uniqueCategories = new Set(tests.map((t: TestItem) => t.category?.name).filter(Boolean));
@@ -86,18 +95,18 @@ export default function ListOfTests() {
                 icon: <FlaskConical className="w-6 h-6 text-white" />,
             },
             {
-                label: "Active Tests",
-                value: activeTests,
-                gradient: "from-emerald-600 to-emerald-400",
-                shadow: "shadow-emerald-500/30",
-                icon: <CheckCircle className="w-6 h-6 text-white" />,
-            },
-            {
                 label: "Categories",
                 value: totalCategories,
                 gradient: "from-purple-600 to-purple-400",
                 shadow: "shadow-purple-500/30",
                 icon: <FolderTree className="w-6 h-6 text-white" />,
+            },
+            {
+                label: "Avg Price",
+                value: totalTests > 0 ? `৳${(totalRevenue / totalTests).toFixed(0)}` : '৳0',
+                gradient: "from-emerald-600 to-emerald-400",
+                shadow: "shadow-emerald-500/30",
+                icon: <CheckCircle className="w-6 h-6 text-white" />,
             },
             {
                 label: "Total Revenue",
@@ -111,14 +120,14 @@ export default function ListOfTests() {
 
     //console.log(data);
 
-    const columns = [
+    const columns = useMemo(() => [
         {
             data: null,
             title: "SL",
             orderable: false,
             responsivePriority: 3,
             render: (_data: any, _type: string, _row: TestItem, meta: any) => {
-                return meta.row + 1;
+                return (page - 1) * limit + meta.row + 1;
             },
             defaultContent: "",
         },
@@ -141,8 +150,9 @@ export default function ListOfTests() {
             title: "Match Table Name",
             orderable: true,
             responsivePriority: 5,
-            render: (data: any) => {
-                return data ? String(data) : '<span class="text-red-500 font-semibold">N/A</span>';
+            render: (_data: any, _type: string, row: TestItem) => {
+                const value = row.match_table_name;
+                return value ? String(value) : '<span class="text-red-500 font-semibold">N/A</span>';
             },
             defaultContent: "",
         },
@@ -196,7 +206,7 @@ export default function ListOfTests() {
             },
             defaultContent: "",
         },
-    ];
+    ], [page, limit]);
 
     return <>
         <Header fixed>
@@ -250,7 +260,13 @@ export default function ListOfTests() {
                 columns={columns}
                 data={data?.data?.items || []}
                 meta={data?.data?.meta}
-                onPageChange={(newPage) => setPage(newPage)} search={search}
+                onPageChange={(newPage) => setPage(newPage)}
+                onLimitChange={(newLimit) => {
+                    setLimit(newLimit);
+                    setPage(1); // reset page when changing page size
+                }}
+                search={search}
+                isLoading={isFetching}
                 onSearchChange={(value) => {
                     setSearch(value);
                     setPage(1); // reset page when searching

@@ -23,9 +23,9 @@ export const Route = createFileRoute(
 type TestItem = {
   id: string;
   name: string;
-  category_id: number;
-  category_name: string;
-  price: string;
+  table_name: string;
+  description: string;
+  display_name: string;
   created_at: string;
 };
 
@@ -75,8 +75,6 @@ function TestTables() {
         },
   });
 
-  //console.log(data);
-
   const columns = [
     {
       data: null,
@@ -89,25 +87,24 @@ function TestTables() {
       defaultContent: "",
     },
     {
-      data: "table_name",
+      data: "display_name",
       title: "Test Table Name",
       orderable: true,
       responsivePriority: 1,
-      defaultContent: "",
+      render: (_data: any, _type: string, row: TestItem) => {
+        return row.display_name || row.name || 'N/A';
+      },
+      defaultContent: "N/A",
     },
     {
-      data: "display_name",
-      title: "Display Name",
+      data: "table_name",
+      title: "Match Table Name",
       orderable: true,
       responsivePriority: 2,
-      defaultContent: "",
-    },
-    {
-      data: "description",
-      title: "Description",
-      orderable: true,
-      responsivePriority: 4,
-      defaultContent: "",
+      render: (_data: any, _type: string, row: TestItem) => {
+        return row.table_name || 'N/A';
+      },
+      defaultContent: "N/A",
     },
     {
       data: null,

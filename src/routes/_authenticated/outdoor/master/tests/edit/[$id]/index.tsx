@@ -9,6 +9,7 @@ import { ProfileDropdown } from '@/components/profile-dropdown';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -36,7 +37,8 @@ const testSchema = z.object({
         .transform((val) => Number(val))
         .refine((val) => !isNaN(val), {
             message: "Price must be a valid number",
-        })
+        }),
+    sample_normal_range: z.string().optional(),
 })
 
 type TestValues = z.infer<typeof testSchema>
@@ -61,6 +63,7 @@ function EditTest() {
             match_table_name: 0,
             status: "active",
             price: 0,
+            sample_normal_range: "",
         },
     })
 
@@ -145,6 +148,7 @@ function EditTest() {
             match_table_name: tableId || 0,
             status: testData.status || "active",
             price: Number(testData.price),
+            sample_normal_range: testData.sample_normal_range || "",
         });
     }, [testData, testTables, categoriesData, form]);
 
@@ -192,7 +196,8 @@ function EditTest() {
             category_id: Number(data.category_id),
             price: Number(data.price),
             match_table_name: selectedTable.table_name || selectedTable.display_name,
-            status: data.status
+            status: data.status,
+            sample_normal_range: data.sample_normal_range,
         };
 
         updateMutation.mutate(payload);
@@ -461,6 +466,28 @@ function EditTest() {
                                                 )}
                                             />
                                         </div>
+
+                                        {/* Sample Normal Range */}
+                                        <FormField
+                                            control={form.control}
+                                            name="sample_normal_range"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Sample Normal Range</FormLabel>
+                                                    <FormControl>
+                                                        <Textarea
+                                                            placeholder="e.g. 4.5-11.0 x 10^9/L for WBC"
+                                                            className="min-h-[80px] resize-y"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormDescription className="text-xs">
+                                                        Enter the reference or normal range for this test (optional)
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
                                     </div>
                                 </CardContent>
                             </Card>

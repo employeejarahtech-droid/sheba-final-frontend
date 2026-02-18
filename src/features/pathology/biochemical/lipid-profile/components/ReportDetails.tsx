@@ -118,7 +118,7 @@ export default function ReportDetails({ invoice: invoice, testName }: any) {
       {/* Tested By */}
       <p className="text-sm mt-4">
         <span className="font-semibold">Test Carried out by:</span> &nbsp;
-        Humalyzer 3000 Biochemistry Analyser
+        {invoice.test_carried_out_by || 'Not specified'}
       </p>
 
       {/* Footer Signatures */}

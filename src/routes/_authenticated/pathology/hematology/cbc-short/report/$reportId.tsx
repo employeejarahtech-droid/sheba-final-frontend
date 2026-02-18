@@ -1,6 +1,18 @@
-import { outdoorInvoices } from '@/data/data'
 import CBCShortReportDetails from '@/features/pathology/hematology/cbc/CBCShortReportDetails'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query';
+import { getCookie } from '@/lib/cookies';
+import { Header } from "@/components/layout/header";
+import { Main } from "@/components/layout/main";
+import { TopNav } from "@/components/layout/top-nav";
+import { ProfileDropdown } from "@/components/profile-dropdown";
+import { Search } from "@/components/search";
+import { ThemeSwitch } from "@/components/theme-switch";
+import { ConfigDrawer } from "@/components/config-drawer";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { topNav } from '@/data/data';
+import { Loader2 } from 'lucide-react';
 
 export const Route = createFileRoute(
     '/_authenticated/pathology/hematology/cbc-short/report/$reportId',
@@ -10,10 +22,82 @@ export const Route = createFileRoute(
 
 function CBCShortReport() {
     const { reportId } = Route.useParams()
-    const invoice = outdoorInvoices.find((invoice) => invoice.id === Number(reportId))
+    const token = getCookie('accessToken');
+
+    // Fetch CBC test data
+    const { data: cbcData, isLoading: isLoadingCBC, error: cbcError } = useQuery({
+        queryKey: ['cbc', reportId],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/cbc/${reportId}`,
+                {
+                    method: 'GET',
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error('Failed to fetch CBC test report');
+            const result = await res.json();
+            return result.data;
+        },
+        enabled: !!token && !!reportId,
+    });
+
+    // Fetch invoice data
+    const { data: invoiceData, isLoading: isLoadingInvoice } = useQuery({
+        queryKey: ['outdoor-invoice', cbcData?.invoice_id],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/outdoor-invoice/${cbcData.invoice_id}`,
+                {
+                    method: 'GET',
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error('Failed to fetch invoice details');
+            const result = await res.json();
+            return result.data;
+        },
+        enabled: !!token && !!cbcData?.invoice_id,
+    });
+
+    if (isLoadingCBC || isLoadingInvoice) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    if (cbcError) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <p className="text-red-600">Error loading CBC report: {(cbcError as Error).message}</p>
+            </div>
+        );
+    }
+
     return (
         <>
-            <CBCShortReportDetails invoice={invoice} />
+            <Header fixed className="print:hidden">
+                <TopNav links={topNav} />
+                <div className='ms-auto flex items-center space-x-4'>
+                    <Search />
+                    <ThemeSwitch />
+                    <ConfigDrawer />
+                    <ProfileDropdown />
+                </div>
+            </Header>
+            <Main>
+                <div className="mb-4 print:hidden">
+                    <Link to="/pathology/hematology/cbc-short">
+                        <Button variant="outline" size="sm">
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back to CBC Short
+                        </Button>
+                    </Link>
+                </div>
+                <CBCShortReportDetails cbcData={cbcData} invoiceData={invoiceData} />
+            </Main>
         </>
     )
 }

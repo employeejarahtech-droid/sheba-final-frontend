@@ -5,7 +5,15 @@ import $ from 'jquery';
 import 'datatables.net-dt';
 import 'datatables.net-responsive-dt';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { getPageNumbers } from '@/lib/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface DataTableProps<TData> {
   columns: {
@@ -25,8 +33,10 @@ interface DataTableProps<TData> {
     total?: number;
   };
   onPageChange?: (page: number) => void;
+  onLimitChange?: (limit: number) => void;
   search?: string;
   onSearchChange?: (value: string) => void;
+  isLoading?: boolean;
 }
 
 export function DataTable<TData extends Record<string, any>>({
@@ -34,12 +44,21 @@ export function DataTable<TData extends Record<string, any>>({
   data,
   meta,
   onPageChange,
+  onLimitChange,
   search,
   onSearchChange,
+  isLoading,
 }: DataTableProps<TData>) {
   const tableRef = useRef<HTMLTableElement>(null);
   const dataTableRef = useRef<any>(null);
-  const isProgrammaticPageChange = useRef(false);
+  const columnsRef = useRef(columns);
+  const searchRef = useRef(search);
+
+  // Update refs on every render to avoid stale closures in jQuery events
+  useEffect(() => {
+    columnsRef.current = columns;
+    searchRef.current = search;
+  }, [columns, search]);
 
   // Initialize DataTable
   useEffect(() => {
@@ -60,18 +79,26 @@ export function DataTable<TData extends Record<string, any>>({
     // Initialize jQuery DataTable with Responsive
     const table = $(tableRef.current).DataTable({
       data: data,
-      columns: columnsWithControl.map((col: any) => ({
-        data: col.data,
-        title: col.title,
-        render: col.render
-          ? (_data: any, _type: string, row: TData, meta: any) => col.render!(_data, _type, row, meta)
-          : undefined,
-        orderable: col.orderable !== false,
-        searchable: col.searchable !== false,
-        className: col.className,
-        responsivePriority: col.responsivePriority || 10000,
-        visible: col.visible !== false,
-        defaultContent: col.defaultContent || "",
+      columns: columnsWithControl.map((_col: any, index: number) => ({
+        data: _col.data,
+        title: _col.title,
+        render: (data: any, type: string, row: TData, dtMeta: any) => {
+          // Find the LATEST renderer for this column
+          // index 0 is control, index > 0 maps to columns[index-1]
+          if (index === 0) return '';
+
+          const latestCol = columnsRef.current[index - 1];
+          if (latestCol && latestCol.render) {
+            return latestCol.render(data, type, row, dtMeta);
+          }
+          return data;
+        },
+        orderable: _col.orderable !== false,
+        searchable: _col.searchable !== false,
+        className: _col.className,
+        responsivePriority: _col.responsivePriority || 10000,
+        visible: _col.visible !== false,
+        defaultContent: _col.defaultContent || "",
       })),
       pageLength: meta?.limit || 10,
       lengthMenu: [10, 25, 50, 100],
@@ -103,28 +130,16 @@ export function DataTable<TData extends Record<string, any>>({
         },
         emptyTable: "No data available",
       },
-      dom: '<"top"rt<"bottom"ip><"clear">',
+      dom: '<"top"rt><"clear">', // Removed 'i' and 'p'
+      paging: true, // Keep paging logic for internal page() API consumption
     });
 
     dataTableRef.current = table;
 
-    // Handle page change (only from user interaction, not from programmatic changes)
-    table.on('page.dt', () => {
-      // Only trigger onPageChange if this is a user-initiated page change
-      if (!isProgrammaticPageChange.current) {
-        const info = table.page.info();
-        if (onPageChange) {
-          onPageChange(info.page + 1);
-        }
-      }
-      // Reset the flag after handling
-      isProgrammaticPageChange.current = false;
-    });
-
     // Handle search
     table.on('search.dt', () => {
       const searchValue = table.search();
-      if (onSearchChange && typeof searchValue === 'string') {
+      if (onSearchChange && typeof searchValue === 'string' && searchValue !== searchRef.current) {
         onSearchChange(searchValue);
       }
     });
@@ -158,19 +173,6 @@ export function DataTable<TData extends Record<string, any>>({
       }
     }
   }, [search]);
-
-  // Update page when controlled page prop changes (for server-side pagination)
-  useEffect(() => {
-    if (dataTableRef.current && meta?.page) {
-      const table = dataTableRef.current;
-      const currentPage = table.page.info().page; // 0-based
-      const targetPage = meta.page - 1; // Convert to 0-based
-      if (currentPage !== targetPage) {
-        isProgrammaticPageChange.current = true; // Mark as programmatic change
-        table.page(targetPage).draw(false);
-      }
-    }
-  }, [meta?.page]);
 
   // Export to CSV
   const exportToCSV = () => {
@@ -239,7 +241,7 @@ export function DataTable<TData extends Record<string, any>>({
           )}
           <div className="text-sm text-gray-600">
             {meta?.total && (
-              <span>Total: {meta.total} records</span>
+              <span>Total: {meta.total} records {isLoading && "(Loading...)"}</span>
             )}
           </div>
         </div>
@@ -274,11 +276,101 @@ export function DataTable<TData extends Record<string, any>>({
         </table>
       </div>
 
-      {/* Custom Pagination Info */}
+      {/* Custom Pagination Info & Buttons */}
       {meta && (
-        <div className="flex items-center justify-between text-sm text-gray-600">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600 mt-4">
           <div>
             Showing {(page - 1) * limit + 1}–{Math.min(page * limit, total)} of {total} results
+          </div>
+
+          <div className="flex items-center space-x-6">
+            {/* Limit Selector */}
+            {onLimitChange && (
+              <div className="flex items-center space-x-2">
+                <span className="text-xs whitespace-nowrap text-muted-foreground font-medium">Rows per page</span>
+                <Select
+                  value={String(limit)}
+                  onValueChange={(val) => onLimitChange(Number(val))}
+                >
+                  <SelectTrigger size="sm" className="h-8 w-[70px]">
+                    <SelectValue placeholder={limit} />
+                  </SelectTrigger>
+                  <SelectContent side="top">
+                    {[10, 25, 50, 100].map((val) => (
+                      <SelectItem key={val} value={String(val)}>
+                        {val}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className="flex items-center space-x-2">
+              {/* First Page */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden lg:flex h-8 w-8 p-0"
+                onClick={() => onPageChange?.(1)}
+                disabled={page <= 1}
+              >
+                <ChevronsLeft className="h-4 w-4" />
+                <span className="sr-only">First Page</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange?.(page - 1)}
+                disabled={page <= 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Previous
+              </Button>
+
+              {/* Page Buttons */}
+              <div className="hidden md:flex items-center space-x-1">
+                {getPageNumbers(page, Math.ceil(total / limit)).map((p, idx) => (
+                  <div key={idx}>
+                    {p === '...' ? (
+                      <span className="px-2">...</span>
+                    ) : (
+                      <Button
+                        variant={page === p ? "default" : "outline"}
+                        size="sm"
+                        className="w-9 h-9 p-0"
+                        onClick={() => onPageChange?.(Number(p))}
+                      >
+                        {p}
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange?.(page + 1)}
+                disabled={page >= Math.ceil(total / limit)}
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+
+              {/* Last Page */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden lg:flex h-8 w-8 p-0"
+                onClick={() => onPageChange?.(Math.ceil(total / limit))}
+                disabled={page >= Math.ceil(total / limit)}
+              >
+                <ChevronsRight className="h-4 w-4" />
+                <span className="sr-only">Last Page</span>
+              </Button>
+            </div>
           </div>
         </div>
       )}

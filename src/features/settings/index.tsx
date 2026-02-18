@@ -18,7 +18,7 @@ export function Settings() {
   return (
     <>
       {/* ===== Top Heading ===== */}
-      <Header>
+      <Header fixed>
         <Search />
         <div className='ms-auto flex items-center space-x-4'>
           <ThemeSwitch />
@@ -26,6 +26,8 @@ export function Settings() {
           <ProfileDropdown />
         </div>
       </Header>
+
+
 
       <Main className="p-6 lg:p-10 w-full flex-1 bg-gray-50/50 dark:bg-black/20">
         <div className="space-y-6 max-w-7xl mx-auto">

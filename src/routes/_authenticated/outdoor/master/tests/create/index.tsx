@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { getCookie } from '@/lib/cookies'
@@ -40,7 +41,8 @@ const testSchema = z.object({
     .transform((val) => Number(val))  // force convert using Number()
     .refine((val) => !isNaN(val), {
       message: "Price must be a valid number",
-    })
+    }),
+  sample_normal_range: z.string().optional(),
 })
 
 type TestValues = {
@@ -49,6 +51,7 @@ type TestValues = {
   match_table_name: number
   status: string
   price: number
+  sample_normal_range?: string
 }
 
 
@@ -135,6 +138,7 @@ function CreateTest() {
       match_table_name: undefined,
       status: "active",
       price: 0,
+      sample_normal_range: "",
     },
   })
 
@@ -152,6 +156,7 @@ function CreateTest() {
           match_table_name: payload.match_table_name,
           status: payload.status,
           price: payload.price,
+          sample_normal_range: payload.sample_normal_range,
         }),
       });
 
@@ -438,6 +443,28 @@ function CreateTest() {
                         )}
                       />
                     </div>
+
+                    {/* Sample Normal Range */}
+                    <FormField
+                      control={form.control}
+                      name="sample_normal_range"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Sample Normal Range</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="e.g. 4.5-11.0 x 10^9/L for WBC"
+                              className="min-h-[80px] resize-y"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription className="text-xs">
+                            Enter the reference or normal range for this test (optional)
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </CardContent>
               </Card>

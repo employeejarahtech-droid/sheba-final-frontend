@@ -40,8 +40,8 @@ function ListOfRoles() {
     // We'll calculate it from current page data for now, or just show total if preferred.
     // However, if the user wants real stats, the API might need to provide them.
     // For now, let's keep it consistent with the UI.
-    const active = roles.filter((r) => r.status === 'active').length
-    const inactive = roles.filter((r) => r.status === 'inactive').length
+    const active = roles.filter((r) => r.status && r.status.toLowerCase() === 'active').length
+    const inactive = roles.filter((r) => !r.status || r.status.toLowerCase() === 'inactive').length
 
     return [
       {
@@ -92,12 +92,13 @@ function ListOfRoles() {
       data: 'status',
       title: 'Status',
       render: (data: any) => {
-        const status = data as string
-        const isActive = status.toLowerCase() === 'active'
+        const status = data as string | null
+        const statusValue = status || 'inactive'
+        const isActive = statusValue.toLowerCase() === 'active'
         const colorClass = isActive
           ? 'bg-emerald-500 hover:bg-emerald-600'
           : 'bg-rose-500 hover:bg-rose-600'
-        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass} text-white border-transparent">${status.toUpperCase()}</span>`
+        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass} text-white border-transparent">${statusValue.toUpperCase()}</span>`
       },
     },
     {
