@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon, FileText, Printer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from "zod";
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -22,14 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DataTable } from "@/components/DataTable";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 // Layout
@@ -43,25 +37,52 @@ import { topNav } from '@/data/data'
 
 // Data
 import { useGetAccountingAccountsQuery } from "@/features/accounting/accountingQueries";
+import { useLedgerReport } from "@/features/accounting/api/queries";
 import { ChartOfAccount } from "@/types/accounting.types";
 
+const ledgerSearchSchema = z.object({
+  account_id: z.coerce.number().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+})
+
 export const Route = createFileRoute('/_authenticated/accounting/reports/ledger/')({
+  validateSearch: (search) => ledgerSearchSchema.parse(search),
   component: LedgerReport,
 })
 
-// Dummy Data (Placeholder until API supports specific ledger endpoint)
-const ledgerData = [
-  { id: 1, date: "2024-03-01", narration: "Opening Balance", debit: 0, credit: 0, balance: 5000.00 },
-  { id: 2, date: "2024-03-05", narration: "Sales - Invoice #101", debit: 2000.00, credit: 0, balance: 7000.00 },
-  { id: 3, date: "2024-03-08", narration: "Rent Payment", debit: 0, credit: 1500.00, balance: 5500.00 },
-  { id: 4, date: "2024-03-10", narration: "Utility Bill", debit: 0, credit: 200.00, balance: 5300.00 },
-];
+
 
 function LedgerReport() {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [selectedAccount, setSelectedAccount] = useState<string>("");
+  const searchParams = Route.useSearch();
+  const navigate = Route.useNavigate();
+
+  const accountId = searchParams.account_id ? String(searchParams.account_id) : "";
+  const fromDate = searchParams.from || format(new Date(), "yyyy-MM-dd");
+  const toDate = searchParams.to || format(new Date(), "yyyy-MM-dd");
+
+  const [localAccountId, setLocalAccountId] = useState(accountId);
+  const [localFrom, setLocalFrom] = useState<Date | undefined>(searchParams.from ? new Date(searchParams.from) : new Date());
+  const [localTo, setLocalTo] = useState<Date | undefined>(searchParams.to ? new Date(searchParams.to) : new Date());
 
   const { data: accountsData } = useGetAccountingAccountsQuery({ limit: 1000 });
+
+  const { data: ledgerResponse, isLoading: isLedgerLoading } = useLedgerReport({
+    account_id: Number(accountId),
+    from: fromDate,
+    to: toDate
+  });
+
+  const handleGenerateReport = () => {
+    navigate({
+      search: (prev: any) => ({
+        ...prev,
+        account_id: localAccountId ? Number(localAccountId) : undefined,
+        from: localFrom ? format(localFrom, "yyyy-MM-dd") : undefined,
+        to: localTo ? format(localTo, "yyyy-MM-dd") : undefined,
+      })
+    });
+  };
   // @ts-ignore
   const accounts: ChartOfAccount[] = accountsData?.data || [];
   const currency = '৳';
@@ -93,7 +114,7 @@ function LedgerReport() {
             <div className="grid md:grid-cols-3 gap-6 items-end">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Select Account</label>
-                <Select value={selectedAccount} onValueChange={setSelectedAccount}>
+                <Select value={localAccountId} onValueChange={setLocalAccountId}>
                   <SelectTrigger className="md:w-full">
                     <SelectValue placeholder="Select account" />
                   </SelectTrigger>
@@ -107,31 +128,56 @@ function LedgerReport() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Date Range</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Date From</label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant={"outline"}
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !date && "text-muted-foreground"
+                        !localFrom && "text-muted-foreground"
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                      {localFrom ? format(localFrom, "PPP") : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={date}
-                      onSelect={setDate}
+                      selected={localFrom}
+                      onSelect={setLocalFrom}
                       initialFocus
                     />
                   </PopoverContent>
                 </Popover>
               </div>
-              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Date To</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !localTo && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {localTo ? format(localTo, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={localTo}
+                      onSelect={setLocalTo}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <Button onClick={handleGenerateReport} className="bg-emerald-600 hover:bg-emerald-700 text-white">
                 <FileText className="mr-2 h-4 w-4" /> Generate Report
               </Button>
             </div>
@@ -143,25 +189,29 @@ function LedgerReport() {
           <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardDescription>Opening Balance</CardDescription>
-              <CardTitle className="text-2xl">{currency} 5,000.00</CardTitle>
+              <CardTitle className="text-2xl">{currency} {ledgerResponse?.opening_balance?.toFixed(2) || "0.00"}</CardTitle>
             </CardHeader>
           </Card>
           <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardDescription>Total Debit</CardDescription>
-              <CardTitle className="text-2xl text-emerald-600">{currency} 2,000.00</CardTitle>
+              <CardTitle className="text-2xl text-emerald-600">
+                {currency} {ledgerResponse?.transactions?.reduce((sum: number, t: any) => sum + (t.debit || 0), 0).toFixed(2) || "0.00"}
+              </CardTitle>
             </CardHeader>
           </Card>
           <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardDescription>Total Credit</CardDescription>
-              <CardTitle className="text-2xl text-red-600">{currency} 1,700.00</CardTitle>
+              <CardTitle className="text-2xl text-red-600">
+                {currency} {ledgerResponse?.transactions?.reduce((sum: number, t: any) => sum + (t.credit || 0), 0).toFixed(2) || "0.00"}
+              </CardTitle>
             </CardHeader>
           </Card>
           <Card className="bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardDescription className="text-emerald-700 dark:text-emerald-400">Closing Balance</CardDescription>
-              <CardTitle className="text-2xl text-emerald-700 dark:text-emerald-400">{currency} 5,300.00</CardTitle>
+              <CardTitle className="text-2xl text-emerald-700 dark:text-emerald-400">{currency} {ledgerResponse?.closing_balance?.toFixed(2) || "0.00"}</CardTitle>
             </CardHeader>
           </Card>
         </div>
@@ -171,28 +221,39 @@ function LedgerReport() {
             <CardTitle>Transactions</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader className="bg-gray-50 dark:bg-gray-900/50">
-                <TableRow>
-                  <TableHead className="py-4">Date</TableHead>
-                  <TableHead className="py-4">Particulars</TableHead>
-                  <TableHead className="text-right py-4 text-emerald-600">Debit ({currency})</TableHead>
-                  <TableHead className="text-right py-4 text-red-600">Credit ({currency})</TableHead>
-                  <TableHead className="text-right py-4 font-bold">Balance ({currency})</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {ledgerData.map((row) => (
-                  <TableRow key={row.id} className="hover:bg-gray-50/50 transition-colors">
-                    <TableCell className="py-3 font-medium">{row.date}</TableCell>
-                    <TableCell className="py-3">{row.narration}</TableCell>
-                    <TableCell className="text-right py-3">{row.debit > 0 ? row.debit.toFixed(2) : "-"}</TableCell>
-                    <TableCell className="text-right py-3">{row.credit > 0 ? row.credit.toFixed(2) : "-"}</TableCell>
-                    <TableCell className="text-right font-bold py-3">{row.balance.toFixed(2)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <DataTable
+              columns={[
+                {
+                  data: "date",
+                  title: "Date",
+                  render: (data: any) => format(new Date(data), "dd/MM/yyyy")
+                },
+                { data: "narration", title: "Particulars" },
+                {
+                  data: "debit",
+                  title: `Debit (${currency})`,
+                  className: "text-right text-emerald-600",
+                  render: (data: any) => (Number(data) || 0).toFixed(2)
+                },
+                {
+                  data: "credit",
+                  title: `Credit (${currency})`,
+                  className: "text-right text-red-600",
+                  render: (data: any) => (Number(data) || 0).toFixed(2)
+                },
+                {
+                  data: "balance",
+                  title: `Balance (${currency})`,
+                  className: "text-right font-bold",
+                  render: (data: any) => (Number(data) || 0).toFixed(2)
+                },
+              ]}
+              data={ledgerResponse?.transactions || []}
+              isLoading={isLedgerLoading}
+            // Ledger reports usually aren't paginated the same way list views are,
+            // but we can provide meta if the API eventually supports it.
+            // For now, we show all transactions returned for the range.
+            />
           </CardContent>
         </Card>
       </main>

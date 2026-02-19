@@ -18,6 +18,7 @@ export const ACCOUNTING_KEYS = {
     accounts: () => [...ACCOUNTING_KEYS.all, 'accounts'] as const,
     journalReport: () => [...ACCOUNTING_KEYS.all, 'journalReport'] as const,
     trialBalance: () => [...ACCOUNTING_KEYS.all, 'trialBalance'] as const,
+    balanceSheet: () => [...ACCOUNTING_KEYS.all, 'balanceSheet'] as const,
     profitLoss: () => [...ACCOUNTING_KEYS.all, 'profitLoss'] as const,
     transactions: () => [...ACCOUNTING_KEYS.all, 'transactions'] as const,
 };
@@ -171,6 +172,13 @@ export const useGetProfitLossQuery = (params?: { from?: string; to?: string }) =
     return useQuery({
         queryKey: [...ACCOUNTING_KEYS.profitLoss(), params],
         queryFn: () => accountingService.getProfitLoss(params),
+    });
+};
+
+export const useGetBalanceSheetQuery = (params?: { date?: string }) => {
+    return useQuery({
+        queryKey: [...ACCOUNTING_KEYS.balanceSheet(), params],
+        queryFn: () => accountingService.getBalanceSheet(params),
     });
 };
 

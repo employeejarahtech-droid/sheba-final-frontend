@@ -236,7 +236,24 @@ export type ProfitLossItem = {
 export type ProfitLossResponse = {
     income: ProfitLossItem[];
     expense: ProfitLossItem[];
+    total_income: number;
+    total_expense: number;
     net_profit: number;
+};
+
+export type BalanceSheetItem = {
+    code: string;
+    name: string;
+    amount: number;
+};
+
+export type BalanceSheetResponse = {
+    assets: BalanceSheetItem[];
+    liabilities: BalanceSheetItem[];
+    equity: BalanceSheetItem[];
+    total_assets: number;
+    total_liabilities: number;
+    total_equity: number;
 };
 
 // -------------------- ADDITIONAL RESPONSES --------------------

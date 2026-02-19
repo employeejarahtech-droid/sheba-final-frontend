@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import React from "react";
-import { Plus, Edit, ChevronsUpDown, Check } from "lucide-react";
+import { Plus, ChevronsUpDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -24,15 +24,14 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { createFileRoute } from '@tanstack/react-router';
 
 // Helper Components
 import CreateExpenseHeadForm from "./components/CreateExpenseHead";
 import CreateIncomeHeadForm from "./components/CreateIncomeHead";
 
-import { DataTable } from "@/components/dashboard/components/DataTable";
-import type { ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/DataTable";
+import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
@@ -55,7 +54,14 @@ import { ConfigDrawer } from "@/components/config-drawer";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Header } from "@/components/layout/header";
 
+const accountsSearchSchema = z.object({
+    page: z.coerce.number().catch(1),
+    limit: z.coerce.number().catch(10),
+    search: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/accounting/accounts/')({
+    validateSearch: (search) => accountsSearchSchema.parse(search),
     component: ChartOfAccounts,
 })
 
@@ -67,11 +73,36 @@ type CreateAccountFormValues = {
 };
 
 function ChartOfAccounts() {
+    const searchParams: any = Route.useSearch();
+    const navigate = Route.useNavigate();
     const [isOpen, setIsOpen] = useState(false);
-    const [page, setPage] = useState(1);
-    const [limit] = useState(200);
-    const [search, setSearch] = useState("");
+
+    const page = Number(searchParams?.page) || 1;
+    const limit = Number(searchParams?.limit) || 10;
+    const search = searchParams?.search || "";
+
     const [editingAccount, setEditingAccount] = useState<ChartOfAccount | null>(null);
+
+    const setPage = (newPage: number) => {
+        navigate({
+            to: '.',
+            search: (prev: any) => ({ ...prev, page: newPage }),
+        });
+    };
+
+    const setLimit = (newLimit: number) => {
+        navigate({
+            to: '.',
+            search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }),
+        });
+    };
+
+    const setSearch = (newSearch: string) => {
+        navigate({
+            to: '.',
+            search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }),
+        });
+    };
 
     const { data: accountsData, isFetching } = useGetAccountingAccountsQuery({ page, limit, search });
     const { data: trialBalanceData } = useGetTrialBalanceQuery();
@@ -210,64 +241,94 @@ function ChartOfAccounts() {
         );
     };
 
-    const accountColumns: ColumnDef<ChartOfAccount>[] = [
-        { accessorKey: "code", header: "Code", cell: ({ row }) => <span className="font-mono text-xs text-muted-foreground">{row.original.code}</span> },
+    const accountColumns = [
         {
-            accessorKey: "name",
-            header: "Account Name",
-            cell: ({ row }) => (
-                <div className="flex items-center" style={{ paddingLeft: `${(row.original.level || 0) * 20}px` }}>
-                    {(row.original.level || 0) > 0 && <span className="mr-2 text-muted-foreground">└─</span>}
-                    <span className={(row.original.level || 0) === 0 ? "font-semibold" : ""}>{row.original.name}</span>
-                </div>
-            ),
-        },
-        { accessorKey: "type", header: "Type", cell: ({ row }) => <Badge variant="outline">{row.original.type}</Badge> },
-        {
-            accessorKey: "debit",
-            header: () => <div className="text-right">Debit</div>,
-            cell: ({ row }) => (
-                <div className="text-right font-medium text-emerald-600">
-                    {row.original.debit !== undefined ? row.original.debit.toFixed(2) : "-"}
-                </div>
-            ),
+            data: "code",
+            title: "Code",
+            render: (_data: any) => `<span class="font-mono text-xs text-muted-foreground">${_data || ''}</span>`
         },
         {
-            accessorKey: "credit",
-            header: () => <div className="text-right">Credit</div>,
-            cell: ({ row }) => (
-                <div className="text-right font-medium text-red-600">
-                    {row.original.credit !== undefined ? row.original.credit.toFixed(2) : "-"}
-                </div>
-            ),
+            data: "name",
+            title: "Account Name",
+            render: (_data: any, _type: string, row: ChartOfAccount) => {
+                const padding = (row.level || 0) * 20;
+                const prefix = (row.level || 0) > 0 ? `<span class="mr-2 text-muted-foreground">└─</span>` : '';
+                const fontClass = (row.level || 0) === 0 ? "font-semibold" : "";
+                return `
+                    <div class="flex items-center" style="padding-left: ${padding}px">
+                        ${prefix}
+                        <span class="${fontClass}">${row.name}</span>
+                    </div>
+                `;
+            },
         },
         {
-            accessorKey: "balance",
-            header: () => <div className="text-right">Balance</div>,
-            cell: ({ row }) => {
-                const balance = row.original.balance;
+            data: "type",
+            title: "Type",
+            render: (_data: any) => `<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">${_data || ''}</span>`
+        },
+        {
+            data: "debit",
+            title: "Debit",
+            className: "text-right",
+            render: (_data: any) => {
+                const val = parseFloat(_data) || 0;
+                return `<div class="font-medium text-emerald-600">${val.toFixed(2)}</div>`;
+            },
+        },
+        {
+            data: "credit",
+            title: "Credit",
+            className: "text-right",
+            render: (_data: any) => {
+                const val = parseFloat(_data) || 0;
+                return `<div class="font-medium text-red-600">${val.toFixed(2)}</div>`;
+            },
+        },
+        {
+            data: "balance",
+            title: "Balance",
+            className: "text-right",
+            render: (_data: any, _type: string, row: ChartOfAccount) => {
+                const balance = row.balance || 0;
                 const balanceClass = balance > 0
                     ? "text-emerald-600"
                     : balance < 0
                         ? "text-red-600"
                         : "text-muted-foreground";
-                return (
-                    <div className={`text-right font-semibold ${balanceClass}`}>
-                        {balance !== undefined ? balance.toFixed(2) : "-"}
-                    </div>
-                );
+                return `<div class="font-semibold ${balanceClass}">${balance.toFixed(2)}</div>`;
             },
         },
         {
-            id: "actions",
-            header: () => <div className="text-right">Actions</div>,
-            cell: ({ row }) => (
-                <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => onEdit(row.original)}><Edit className="h-4 w-4" /></Button>
-                </div>
-            ),
+            data: null,
+            title: "Actions",
+            orderable: false,
+            className: "text-right",
+            render: (_data: any, _type: string, row: ChartOfAccount) => {
+                return `
+                    <div class="flex justify-end gap-2">
+                        <button class="edit-account-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 w-9" data-id="${row.id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+                        </button>
+                    </div>
+                `;
+            },
         },
     ];
+
+    // Effect to handle jQuery delegated clicks for edit button
+    useEffect(() => {
+        const handleEdit = (e: any) => {
+            const btn = (e.target as HTMLElement).closest('.edit-account-btn');
+            if (btn) {
+                const id = btn.getAttribute('data-id');
+                const account = accountsWithBalances.find(a => String(a.id) === id);
+                if (account) onEdit(account);
+            }
+        };
+        document.addEventListener('click', handleEdit);
+        return () => document.removeEventListener('click', handleEdit);
+    }, [accountsWithBalances]);
 
     return (
         <div className="space-y-6">
@@ -357,13 +418,16 @@ function ChartOfAccounts() {
                         <DataTable
                             columns={accountColumns}
                             data={accountsWithBalances}
-                            pageIndex={page - 1}
-                            pageSize={limit}
-                            // @ts-ignore
-                            totalCount={accountsData?.pagination?.total || 0}
-                            onPageChange={(newPageIndex) => setPage(newPageIndex + 1)}
-                            onSearch={(value) => { setSearch(value); setPage(1); }}
-                            isFetching={isFetching}
+                            meta={{
+                                page,
+                                limit,
+                                total: accountsData?.pagination?.total || 0
+                            }}
+                            onPageChange={setPage}
+                            onLimitChange={setLimit}
+                            onSearchChange={setSearch}
+                            search={search}
+                            isLoading={isFetching}
                         />
                     </CardContent>
                 </Card>

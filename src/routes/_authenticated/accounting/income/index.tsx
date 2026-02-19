@@ -1,16 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { createFileRoute } from '@tanstack/react-router';
-import { ColumnDef } from "@tanstack/react-table";
 import { Plus, DollarSign, TrendingUp, CreditCard } from "lucide-react";
 
 import { useGetIncomesQuery } from "@/features/accounting/accountingQueries";
 import { Income } from "@/types/accounting.types";
-import { DataTable } from "@/components/dashboard/components/DataTable";
+import { DataTable } from "@/components/DataTable";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { AddIncomeModal } from "../components/AddIncomeModal";
+import { Button } from "@/components/ui/button";
+import { getCookie } from "@/lib/cookies";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import api from "@/lib/axios";
 
 // Layout
 import { ConfigDrawer } from '@/components/config-drawer'
@@ -27,10 +30,12 @@ export const Route = createFileRoute('/_authenticated/accounting/income/')({
 
 function IncomesPage() {
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
   const [date, setDate] = useState("");
-  const limit = 10;
   const currency = '৳';
+  const token = getCookie('accessToken');
+  const queryClient = useQueryClient();
 
   const {
     data: fetchedData,
@@ -43,96 +48,221 @@ function IncomesPage() {
     date,
   });
 
-  // @ts-ignore
   const incomes: Income[] = fetchedData?.data || [];
+  const total = fetchedData?.pagination?.total || 0;
 
-  // Stats
-  const { data: allIncomesData } = useGetIncomesQuery({ limit: 1000 });
-  // @ts-ignore
-  const allIncomes = allIncomesData?.data || [];
-
-  const totalIncome = allIncomes.reduce((sum: number, item: any) => sum + Number(item.amount), 0);
-  const totalTransactions = allIncomes.length;
-  const avgTransaction = totalTransactions > 0 ? totalIncome / totalTransactions : 0;
+  // Stats (calculated from current page data, total count from pagination)
+  const totalIncome = incomes.reduce((sum: number, item: any) => sum + Number(item.amount || 0), 0);
+  const currentPageTransactions = incomes.length;
+  const avgTransaction = currentPageTransactions > 0 ? totalIncome / currentPageTransactions : 0;
 
   const stats = [
     {
-      label: "Total Income",
+      label: "Page Income",
       value: `${currency} ${totalIncome.toLocaleString()}`,
       gradient: "from-emerald-600 to-emerald-400",
       shadow: "shadow-emerald-500/30",
       icon: <DollarSign className="w-6 h-6 text-white" />,
     },
     {
-      label: "Total Transactions",
-      value: totalTransactions,
+      label: "Total Records",
+      value: total,
       gradient: "from-blue-600 to-blue-400",
       shadow: "shadow-blue-500/30",
       icon: <TrendingUp className="w-6 h-6 text-white" />,
     },
     {
       label: "Avg. Transaction",
-      value: `${currency} ${avgTransaction.toLocaleString(undefined, { maximumFractionDigits: 2 })}`,
+      value: `${currency} ${avgTransaction.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
       gradient: "from-violet-600 to-violet-400",
       shadow: "shadow-violet-500/30",
       icon: <CreditCard className="w-6 h-6 text-white" />,
     },
   ];
 
-  const incomeColumns: ColumnDef<Income>[] = [
-    {
-      accessorKey: "id",
-      header: "ID",
-      meta: { className: "md:sticky md:left-0 z-20 bg-background min-w-[60px]" } as any
-    },
-    {
-      accessorKey: "title",
-      header: "Title",
-      meta: { className: "md:sticky md:left-[60px] z-20 bg-background md:shadow-[4px_0px_5px_-2px_rgba(0,0,0,0.1)]" } as any
-    },
-    { accessorKey: "description", header: "Description" },
-    {
-      accessorKey: "creditHead",
-      header: "Category",
-      cell: ({ row }: { row: any }) => {
-        const creditHead = row?.original?.creditHead?.name;
-        return <span className="font-medium">{creditHead}</span>;
-      },
-    },
-    {
-      accessorKey: "amount",
-      header: () => (
-        <div className="text-right">Amount ({currency})</div>
-      ),
-      cell: ({ row }: { row: any }) => (
-        <div className="text-right">{Number(row.getValue("amount")).toFixed(2)}</div>
-      ),
-    },
-    { accessorKey: "income_date", header: "Date" },
-    { accessorKey: "payment_method", header: "Payment Method" },
-    { accessorKey: "reference_number", header: "Reference" },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }: { row: any }) => {
-        const status = (row.getValue("status") as string) || "pending";
-        let className = "capitalize ";
-        if (status.toLowerCase() === "paid" || status.toLowerCase() === "received") {
-          className += "bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200";
-        } else if (status.toLowerCase() === "pending") {
-          className += "bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200";
-        } else {
-          className += "bg-rose-100 text-rose-700 border-rose-200 hover:bg-rose-200";
-        }
-        return <Badge variant="outline" className={className}>{status}</Badge>;
-      },
-    },
-  ];
+  // Delete income handler
+  const handleDelete = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this income record?")) return;
 
-  if (isError) return <div className="p-8 text-center text-red-500">Error loading incomes</div>;
+    try {
+      await api.delete(`/accounting/incomes/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success("Income deleted successfully");
+      queryClient.invalidateQueries({ queryKey: [['accounting'], 'incomes'] });
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.response?.data?.message || "Failed to delete income");
+    }
+  };
+
+  const columns = useMemo(() => [
+    {
+      data: null,
+      title: "SL",
+      orderable: false,
+      responsivePriority: 3,
+      render: (_data: any, _type: string, _row: Income, meta: any) => {
+        return meta.row + 1;
+      },
+      defaultContent: "",
+    },
+    {
+      data: "id",
+      title: "ID",
+      orderable: true,
+      responsivePriority: 5,
+      defaultContent: "",
+    },
+    {
+      data: "title",
+      title: "Title",
+      orderable: true,
+      responsivePriority: 1,
+      defaultContent: "",
+    },
+    {
+      data: "description",
+      title: "Description",
+      orderable: false,
+      responsivePriority: 4,
+      defaultContent: "",
+    },
+    {
+      data: null,
+      title: "Category",
+      orderable: true,
+      responsivePriority: 2,
+      render: (_data: any, _type: string, row: Income) => {
+        const creditHead = row?.creditHead?.name;
+        return creditHead || '<span class="text-red-500 font-semibold">N/A</span>';
+      },
+      defaultContent: "",
+    },
+    {
+      data: "amount",
+      title: `Amount (${currency})`,
+      orderable: true,
+      responsivePriority: 2,
+      render: (data: any) => {
+        return Number(data || 0).toFixed(2);
+      },
+      defaultContent: "0.00",
+    },
+    {
+      data: "income_date",
+      title: "Date",
+      orderable: true,
+      responsivePriority: 3,
+      render: (data: any) => {
+        return data || new Date().toISOString().split('T')[0];
+      },
+      defaultContent: "",
+    },
+    {
+      data: "payment_method",
+      title: "Payment Method",
+      orderable: true,
+      responsivePriority: 4,
+      defaultContent: "",
+    },
+    {
+      data: "reference_number",
+      title: "Reference",
+      orderable: true,
+      responsivePriority: 5,
+      defaultContent: "",
+    },
+    {
+      data: "status",
+      title: "Status",
+      orderable: true,
+      responsivePriority: 3,
+      render: (data: any) => {
+        const status = data || "pending";
+        let className = "capitalize inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ";
+        if (status.toLowerCase() === "paid" || status.toLowerCase() === "received") {
+          className += "bg-emerald-100 text-emerald-700 border-emerald-200";
+        } else if (status.toLowerCase() === "pending") {
+          className += "bg-amber-100 text-amber-700 border-amber-200";
+        } else {
+          className += "bg-rose-100 text-rose-700 border-rose-200";
+        }
+        return `<span class="${className}">${status}</span>`;
+      },
+      defaultContent: "pending",
+    },
+    {
+      data: null,
+      title: "Actions",
+      orderable: false,
+      responsivePriority: 1,
+      render: (_data: any, _type: string, row: Income) => {
+        return `
+          <div class="flex gap-2">
+            <button
+              onclick="window.viewIncome(${row.id})"
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3"
+              title="View"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <button
+              onclick="window.editIncome(${row.id})"
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3"
+              title="Edit"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+            </button>
+            <button
+              onclick="window.deleteIncome(${row.id})"
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-8 px-3"
+              title="Delete"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          </div>
+        `;
+      },
+      defaultContent: "",
+    },
+  ], []);
+
+  // Expose functions to window for onclick handlers
+  if (typeof window !== 'undefined') {
+    (window as any).viewIncome = (id: number) => {
+      // TODO: Implement view modal
+      console.log("View income:", id);
+    };
+    (window as any).editIncome = (id: number) => {
+      // TODO: Implement edit modal
+      console.log("Edit income:", id);
+    };
+    (window as any).deleteIncome = handleDelete;
+  }
+
+  if (isError) {
+    return (
+      <div className="p-8 text-center">
+        <div className="max-w-md mx-auto">
+          <div className="text-6xl mb-4">📋</div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Unable to Load Incomes</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            The income list endpoint may not be available yet. Please ensure the backend API is running and the endpoint is configured.
+          </p>
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-left text-sm">
+            <p className="font-mono text-xs text-gray-700 dark:text-gray-300">
+              <strong>Endpoint:</strong> GET /api/accounting/incomes<br />
+              <strong>Status:</strong> 404 Not Found
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="">
+    <>
       <Header fixed>
         <TopNav links={topNav} />
         <div className='ms-auto flex items-center space-x-4'>
@@ -144,7 +274,7 @@ function IncomesPage() {
       </Header>
       <main className='p-6 lg:p-10'>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h2 className="text-2xl font-bold">All Income</h2>
+          <h1 className="text-2xl font-bold tracking-tight">All Income</h1>
           <div className="flex gap-2 items-center w-full sm:w-auto">
             <Input
               type="date"
@@ -156,9 +286,9 @@ function IncomesPage() {
               }}
             />
             <AddIncomeModal>
-              <button className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 font-medium text-white shadow-lg shadow-emerald-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-emerald-500/40 active:translate-y-0 active:shadow-none whitespace-nowrap">
+              <Button className="flex items-center gap-2">
                 <Plus size={18} /> Add Income
-              </button>
+              </Button>
             </AddIncomeModal>
           </div>
         </div>
@@ -186,7 +316,7 @@ function IncomesPage() {
                 </div>
               </div>
 
-              {/* Progress/Indicator line (optional visual flair) */}
+              {/* Progress/Indicator line */}
               <div className="mt-4 h-1 w-full rounded-full bg-black/10">
                 <div className="h-full w-2/3 rounded-full bg-white/40" />
               </div>
@@ -195,20 +325,26 @@ function IncomesPage() {
         </div>
 
         <DataTable
-          columns={incomeColumns}
+          columns={columns}
           data={incomes}
-          pageIndex={page - 1}
-          pageSize={limit}
-          // @ts-ignore
-          totalCount={fetchedData?.pagination?.total || 0}
-          onPageChange={setPage}
-          onSearch={(val) => {
-            setSearch(val);
+          meta={{
+            page,
+            limit,
+            total: fetchedData?.pagination?.total || 0,
+          }}
+          onPageChange={(newPage) => setPage(newPage)}
+          onLimitChange={(newLimit) => {
+            setLimit(newLimit);
             setPage(1);
           }}
-          isFetching={isFetching}
+          search={search}
+          onSearchChange={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          isLoading={isFetching}
         />
       </main>
-    </div>
+    </>
   );
 }

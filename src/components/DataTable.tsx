@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import $ from 'jquery';
 import 'datatables.net-dt';
 import 'datatables.net-responsive-dt';
 import { Button } from '@/components/ui/button';
-import { Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search as SearchIcon } from 'lucide-react';
 import { getPageNumbers } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
+import { useDebounce } from '@/hooks/useDebounce';
 import {
   Select,
   SelectContent,
@@ -53,6 +55,22 @@ export function DataTable<TData extends Record<string, any>>({
   const dataTableRef = useRef<any>(null);
   const columnsRef = useRef(columns);
   const searchRef = useRef(search);
+  const [localSearch, setLocalSearch] = useState(search || "");
+  const debouncedSearch = useDebounce(localSearch, 500);
+
+  // Sync localSearch with search prop if search prop changes from outside
+  useEffect(() => {
+    if (search !== undefined && search !== localSearch) {
+      setLocalSearch(search);
+    }
+  }, [search]);
+
+  // Handle debounced search change - push to parent
+  useEffect(() => {
+    if (onSearchChange && debouncedSearch !== search) {
+      onSearchChange(debouncedSearch);
+    }
+  }, [debouncedSearch, onSearchChange, search]);
 
   // Update refs on every render to avoid stale closures in jQuery events
   useEffect(() => {
@@ -136,14 +154,6 @@ export function DataTable<TData extends Record<string, any>>({
 
     dataTableRef.current = table;
 
-    // Handle search
-    table.on('search.dt', () => {
-      const searchValue = table.search();
-      if (onSearchChange && typeof searchValue === 'string' && searchValue !== searchRef.current) {
-        onSearchChange(searchValue);
-      }
-    });
-
     return () => {
       // Destroy DataTable on cleanup
       if (dataTableRef.current) {
@@ -163,16 +173,12 @@ export function DataTable<TData extends Record<string, any>>({
     }
   }, [data]);
 
-  // Update search when controlled search prop changes
+  // Update pageLength when limit changes
   useEffect(() => {
-    if (dataTableRef.current && search !== undefined) {
-      const currentSearch = dataTableRef.current.search();
-      const currentSearchString = typeof currentSearch === 'string' ? currentSearch : '';
-      if (currentSearchString !== search) {
-        dataTableRef.current.search(search).draw();
-      }
+    if (dataTableRef.current && meta?.limit) {
+      dataTableRef.current.page.len(meta.limit).draw();
     }
-  }, [search]);
+  }, [meta?.limit]);
 
   // Export to CSV
   const exportToCSV = () => {
@@ -229,13 +235,14 @@ export function DataTable<TData extends Record<string, any>>({
         <div className="flex items-center gap-4">
           {/* Search Input */}
           {onSearchChange && (
-            <div className="relative">
-              <input
+            <div className="relative w-64">
+              <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
                 type="text"
                 placeholder="Search..."
-                value={search || ''}
-                onChange={(e) => onSearchChange(e.target.value)}
-                className="h-9 w-64 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
+                className="pl-8"
               />
             </div>
           )}

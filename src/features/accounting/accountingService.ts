@@ -16,6 +16,7 @@ import type {
     RecentActivityResponse,
     Transaction,
     TrialBalanceResponse,
+    BalanceSheetResponse,
     ChartResponse,
     CreditHeadByIdResponse,
     CreditHeadResponse,
@@ -223,6 +224,12 @@ export const accountingService = {
     // GET PROFIT & LOSS
     getProfitLoss: async (params?: { from?: string; to?: string }) => {
         const response = await api.get<ProfitLossResponse>('/accounting/reports/profit-and-loss', { params });
+        return response.data;
+    },
+
+    // GET BALANCE SHEET
+    getBalanceSheet: async (params?: { date?: string }) => {
+        const response = await api.get<BalanceSheetResponse>('/accounting/reports/balance-sheet', { params });
         return response.data;
     },
 

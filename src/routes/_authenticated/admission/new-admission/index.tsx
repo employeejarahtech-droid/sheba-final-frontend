@@ -10,8 +10,13 @@ import {
     Stethoscope,
     Bed,
     ClipboardList,
-    CalendarIcon
+    CalendarIcon,
+    Check,
+    ChevronDown
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getCookie } from "@/lib/cookies";
+import { useState } from "react";
 
 import {
     Form,
@@ -27,6 +32,19 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command";
 import { Header } from '@/components/layout/header';
 import { TopNav } from '@/components/layout/top-nav';
 import { Search } from '@/components/search';
@@ -36,6 +54,7 @@ import { ProfileDropdown } from '@/components/profile-dropdown';
 import { Main } from '@/components/layout/main';
 import { patientTypes, topNav } from '@/data/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from "@/lib/utils";
 
 
 export const Route = createFileRoute('/_authenticated/admission/new-admission/')({
@@ -61,10 +80,133 @@ const admissionSchema = z.object({
     reason: z.string().min(1, "Reason required"),
 });
 
+// Doctor Select Component with Search
+interface DoctorSelectProps {
+    doctors: any[];
+    value: string;
+    onChange: (value: string) => void;
+    label: string;
+    placeholder: string;
+    disabled?: boolean;
+    loading?: boolean;
+}
 
+function DoctorSelect({
+    doctors,
+    value,
+    onChange,
+    label,
+    placeholder,
+    disabled = false,
+    loading = false
+}: DoctorSelectProps) {
+    const [open, setOpen] = useState(false);
+
+    const selectedDoctor = doctors.find((d: any) => String(d.id) === value);
+
+    return (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <FormControl>
+                    <Button
+                        variant="outline"
+                        role="combobox"
+                        className={cn(
+                            "w-full justify-between h-11 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm",
+                            !value && "text-muted-foreground"
+                        )}
+                        disabled={disabled || loading}
+                    >
+                        {selectedDoctor ? (
+                            <div className="flex flex-col items-start">
+                                <span className="font-medium">
+                                    Dr. {selectedDoctor.doctor_name}
+                                    {selectedDoctor.qualification && ` (${selectedDoctor.qualification})`}
+                                </span>
+                                {selectedDoctor.speciality && (
+                                    <span className="text-xs text-muted-foreground">
+                                        {selectedDoctor.speciality}
+                                    </span>
+                                )}
+                            </div>
+                        ) : (
+                            placeholder
+                        )}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                </FormControl>
+            </PopoverTrigger>
+            <PopoverContent className="w-[400px] p-0" align="start">
+                <Command>
+                    <CommandInput placeholder="Search doctor by name, qualification, or specialty..." />
+                    <CommandList>
+                        <CommandEmpty>
+                            {loading ? "Loading doctors..." : "No doctor found."}
+                        </CommandEmpty>
+                        <CommandGroup>
+                            {doctors.map((doctor: any) => {
+                                const displayName = `Dr. ${doctor.doctor_name}`;
+                                const subtitle = [
+                                    doctor.qualification,
+                                    doctor.speciality
+                                ].filter(Boolean).join(" - ");
+
+                                return (
+                                    <CommandItem
+                                        key={doctor.id}
+                                        value={`${doctor.doctor_name} ${doctor.qualification || ''} ${doctor.speciality || ''} ${doctor.id}`}
+                                        onSelect={() => {
+                                            onChange(String(doctor.id));
+                                            setOpen(false);
+                                        }}
+                                    >
+                                        <Check
+                                            className={cn(
+                                                "mr-2 h-4 w-4",
+                                                value === String(doctor.id) ? "opacity-100" : "opacity-0"
+                                            )}
+                                        />
+                                        <div className="flex flex-col">
+                                            <span className="font-medium">{displayName}</span>
+                                            {subtitle && (
+                                                <span className="text-xs text-muted-foreground">
+                                                    {subtitle}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </CommandItem>
+                                );
+                            })}
+                        </CommandGroup>
+                    </CommandList>
+                </Command>
+            </PopoverContent>
+        </Popover>
+    );
+}
 
 function IndoorNewAdmission() {
     const navigate = useNavigate();
+    const token = getCookie('accessToken');
+
+    // Fetch doctors list
+    const { data: doctorsData, isLoading: doctorsLoading } = useQuery({
+        queryKey: ['doctors-list'],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/doctor?limit=1000`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch doctors");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const doctors = doctorsData?.data?.rows || doctorsData?.data?.items || [];
+
     const form = useForm({
         resolver: zodResolver(admissionSchema),
         defaultValues: {
@@ -355,18 +497,15 @@ function IndoorNewAdmission() {
                                                 render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">{fieldInfo.label}</FormLabel>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                            <FormControl>
-                                                                <SelectTrigger className="w-full !h-auto h-11 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">
-                                                                    <SelectValue placeholder={fieldInfo.placeholder} />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent className="rounded-xl border-gray-100 shadow-xl">
-                                                                <SelectItem value="dr-maksud">Dr. Maksudul Haque</SelectItem>
-                                                                <SelectItem value="dr-mahmud">Dr. Mahmudul Haque</SelectItem>
-                                                                <SelectItem value="dr-ahmed">Dr. Ahmed Shaikh</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
+                                                        <DoctorSelect
+                                                            doctors={doctors}
+                                                            value={field.value}
+                                                            onChange={field.onChange}
+                                                            label={fieldInfo.label}
+                                                            placeholder={fieldInfo.placeholder}
+                                                            disabled={doctorsLoading}
+                                                            loading={doctorsLoading}
+                                                        />
                                                         <FormMessage className="text-[10px]" />
                                                     </FormItem>
                                                 )}

@@ -150,6 +150,7 @@ import { Route as AuthenticatedAccountingReportsProfitLossIndexRouteImport } fro
 import { Route as AuthenticatedAccountingReportsProfitAndLossIndexRouteImport } from './routes/_authenticated/accounting/reports/profit-and-loss/index'
 import { Route as AuthenticatedAccountingReportsLedgerIndexRouteImport } from './routes/_authenticated/accounting/reports/ledger/index'
 import { Route as AuthenticatedAccountingReportsJournalIndexRouteImport } from './routes/_authenticated/accounting/reports/journal/index'
+import { Route as AuthenticatedAccountingReportsBalanceSheetIndexRouteImport } from './routes/_authenticated/accounting/reports/balance-sheet/index'
 import { Route as AuthenticatedXRayAllEditIdRouteImport } from './routes/_authenticated/x-ray/all/edit/$id'
 import { Route as AuthenticatedUltrasonogramAllEditIdRouteImport } from './routes/_authenticated/ultrasonogram/all/edit/$id'
 import { Route as AuthenticatedRolesPermissionsRoleIdEditRouteImport } from './routes/_authenticated/roles/permissions/$roleId/edit'
@@ -1030,6 +1031,12 @@ const AuthenticatedAccountingReportsJournalIndexRoute =
     path: '/accounting/reports/journal/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAccountingReportsBalanceSheetIndexRoute =
+  AuthenticatedAccountingReportsBalanceSheetIndexRouteImport.update({
+    id: '/accounting/reports/balance-sheet/',
+    path: '/accounting/reports/balance-sheet/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedXRayAllEditIdRoute =
   AuthenticatedXRayAllEditIdRouteImport.update({
     id: '/x-ray/all/edit/$id',
@@ -1496,6 +1503,7 @@ export interface FileRoutesByFullPath {
   '/roles/permissions/$roleId/edit': typeof AuthenticatedRolesPermissionsRoleIdEditRoute
   '/ultrasonogram/all/edit/$id': typeof AuthenticatedUltrasonogramAllEditIdRoute
   '/x-ray/all/edit/$id': typeof AuthenticatedXRayAllEditIdRoute
+  '/accounting/reports/balance-sheet': typeof AuthenticatedAccountingReportsBalanceSheetIndexRoute
   '/accounting/reports/journal': typeof AuthenticatedAccountingReportsJournalIndexRoute
   '/accounting/reports/ledger': typeof AuthenticatedAccountingReportsLedgerIndexRoute
   '/accounting/reports/profit-and-loss': typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
@@ -1695,6 +1703,7 @@ export interface FileRoutesByTo {
   '/roles/permissions/$roleId/edit': typeof AuthenticatedRolesPermissionsRoleIdEditRoute
   '/ultrasonogram/all/edit/$id': typeof AuthenticatedUltrasonogramAllEditIdRoute
   '/x-ray/all/edit/$id': typeof AuthenticatedXRayAllEditIdRoute
+  '/accounting/reports/balance-sheet': typeof AuthenticatedAccountingReportsBalanceSheetIndexRoute
   '/accounting/reports/journal': typeof AuthenticatedAccountingReportsJournalIndexRoute
   '/accounting/reports/ledger': typeof AuthenticatedAccountingReportsLedgerIndexRoute
   '/accounting/reports/profit-and-loss': typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
@@ -1899,6 +1908,7 @@ export interface FileRoutesById {
   '/_authenticated/roles/permissions/$roleId/edit': typeof AuthenticatedRolesPermissionsRoleIdEditRoute
   '/_authenticated/ultrasonogram/all/edit/$id': typeof AuthenticatedUltrasonogramAllEditIdRoute
   '/_authenticated/x-ray/all/edit/$id': typeof AuthenticatedXRayAllEditIdRoute
+  '/_authenticated/accounting/reports/balance-sheet/': typeof AuthenticatedAccountingReportsBalanceSheetIndexRoute
   '/_authenticated/accounting/reports/journal/': typeof AuthenticatedAccountingReportsJournalIndexRoute
   '/_authenticated/accounting/reports/ledger/': typeof AuthenticatedAccountingReportsLedgerIndexRoute
   '/_authenticated/accounting/reports/profit-and-loss/': typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
@@ -2101,6 +2111,7 @@ export interface FileRouteTypes {
     | '/roles/permissions/$roleId/edit'
     | '/ultrasonogram/all/edit/$id'
     | '/x-ray/all/edit/$id'
+    | '/accounting/reports/balance-sheet'
     | '/accounting/reports/journal'
     | '/accounting/reports/ledger'
     | '/accounting/reports/profit-and-loss'
@@ -2300,6 +2311,7 @@ export interface FileRouteTypes {
     | '/roles/permissions/$roleId/edit'
     | '/ultrasonogram/all/edit/$id'
     | '/x-ray/all/edit/$id'
+    | '/accounting/reports/balance-sheet'
     | '/accounting/reports/journal'
     | '/accounting/reports/ledger'
     | '/accounting/reports/profit-and-loss'
@@ -2503,6 +2515,7 @@ export interface FileRouteTypes {
     | '/_authenticated/roles/permissions/$roleId/edit'
     | '/_authenticated/ultrasonogram/all/edit/$id'
     | '/_authenticated/x-ray/all/edit/$id'
+    | '/_authenticated/accounting/reports/balance-sheet/'
     | '/_authenticated/accounting/reports/journal/'
     | '/_authenticated/accounting/reports/ledger/'
     | '/_authenticated/accounting/reports/profit-and-loss/'
@@ -3612,6 +3625,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccountingReportsJournalIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/accounting/reports/balance-sheet/': {
+      id: '/_authenticated/accounting/reports/balance-sheet/'
+      path: '/accounting/reports/balance-sheet'
+      fullPath: '/accounting/reports/balance-sheet'
+      preLoaderRoute: typeof AuthenticatedAccountingReportsBalanceSheetIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/x-ray/all/edit/$id': {
       id: '/_authenticated/x-ray/all/edit/$id'
       path: '/x-ray/all/edit/$id'
@@ -4136,6 +4156,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRolesPermissionsRoleIdEditRoute: typeof AuthenticatedRolesPermissionsRoleIdEditRoute
   AuthenticatedUltrasonogramAllEditIdRoute: typeof AuthenticatedUltrasonogramAllEditIdRoute
   AuthenticatedXRayAllEditIdRoute: typeof AuthenticatedXRayAllEditIdRoute
+  AuthenticatedAccountingReportsBalanceSheetIndexRoute: typeof AuthenticatedAccountingReportsBalanceSheetIndexRoute
   AuthenticatedAccountingReportsJournalIndexRoute: typeof AuthenticatedAccountingReportsJournalIndexRoute
   AuthenticatedAccountingReportsLedgerIndexRoute: typeof AuthenticatedAccountingReportsLedgerIndexRoute
   AuthenticatedAccountingReportsProfitAndLossIndexRoute: typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
@@ -4362,6 +4383,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUltrasonogramAllEditIdRoute:
     AuthenticatedUltrasonogramAllEditIdRoute,
   AuthenticatedXRayAllEditIdRoute: AuthenticatedXRayAllEditIdRoute,
+  AuthenticatedAccountingReportsBalanceSheetIndexRoute:
+    AuthenticatedAccountingReportsBalanceSheetIndexRoute,
   AuthenticatedAccountingReportsJournalIndexRoute:
     AuthenticatedAccountingReportsJournalIndexRoute,
   AuthenticatedAccountingReportsLedgerIndexRoute:

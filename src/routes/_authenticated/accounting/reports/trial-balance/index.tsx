@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -14,14 +15,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { DataTable } from "@/components/DataTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -34,17 +28,37 @@ import { ConfigDrawer } from "@/components/config-drawer";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Header } from "@/components/layout/header";
 
+const trialBalanceSearchSchema = z.object({
+    date: z.string().optional(),
+})
+
 export const Route = createFileRoute('/_authenticated/accounting/reports/trial-balance/')({
+    validateSearch: (search) => trialBalanceSearchSchema.parse(search),
     component: TrialBalance,
 })
 
 function TrialBalance() {
-    const [date, setDate] = useState<Date | undefined>(new Date());
-    const formattedDate = date ? format(date, "yyyy-MM-dd") : undefined;
+    const searchParams = Route.useSearch();
+    const navigate = Route.useNavigate();
+
+    const dateStr = searchParams.date || format(new Date(), "yyyy-MM-dd");
+    const [localDate, setLocalDate] = useState<Date | undefined>(searchParams.date ? new Date(searchParams.date) : new Date());
 
     const { data: reportData, isLoading } = useGetTrialBalanceQuery({
-        date: formattedDate
+        date: dateStr
     });
+
+    const handleDateChange = (newDate: Date | undefined) => {
+        setLocalDate(newDate);
+        if (newDate) {
+            navigate({
+                search: (prev: any) => ({
+                    ...prev,
+                    date: format(newDate, "yyyy-MM-dd")
+                })
+            });
+        }
+    };
 
     // @ts-ignore
     const trialBalanceData = reportData?.data?.trial_balance || [];
@@ -82,18 +96,18 @@ function TrialBalance() {
                                     variant={"outline"}
                                     className={cn(
                                         "w-[240px] justify-start text-left font-normal",
-                                        !date && "text-muted-foreground"
+                                        !localDate && "text-muted-foreground"
                                     )}
                                 >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                                    {localDate ? format(localDate, "PPP") : <span>Pick a date</span>}
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0" align="end">
                                 <Calendar
                                     mode="single"
-                                    selected={date}
-                                    onSelect={setDate}
+                                    selected={localDate}
+                                    onSelect={handleDateChange}
                                     initialFocus
                                 />
                             </PopoverContent>
@@ -116,63 +130,51 @@ function TrialBalance() {
                             </Badge>
                         )}
                     </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-[100px]">Code</TableHead>
-                                    <TableHead>Account Name</TableHead>
-                                    <TableHead className="text-xs text-muted-foreground">Type</TableHead>
-                                    <TableHead className="text-right">Debit Balance</TableHead>
-                                    <TableHead className="text-right">Credit Balance</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {isLoading ? (
-                                    Array.from({ length: 5 }).map((_, i) => (
-                                        <TableRow key={i}>
-                                            <TableCell><div className="h-4 w-12 bg-gray-100 animate-pulse rounded" /></TableCell>
-                                            <TableCell><div className="h-4 w-32 bg-gray-100 animate-pulse rounded" /></TableCell>
-                                            <TableCell><div className="h-4 w-16 bg-gray-100 animate-pulse rounded" /></TableCell>
-                                            <TableCell><div className="h-4 w-full bg-gray-100 animate-pulse rounded" /></TableCell>
-                                            <TableCell><div className="h-4 w-full bg-gray-100 animate-pulse rounded" /></TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : trialBalanceData.length > 0 ? (
-                                    trialBalanceData.map((row: any, idx: number) => (
-                                        <TableRow key={idx}>
-                                            <TableCell className="font-mono text-xs text-muted-foreground">{row.code}</TableCell>
-                                            <TableCell className="font-medium">{row.account}</TableCell>
-                                            <TableCell className="text-xs text-muted-foreground">{row.type}</TableCell>
-                                            <TableCell className="text-right font-mono text-sm">
-                                                {row.debit > 0 ? row.debit.toLocaleString(undefined, { minimumFractionDigits: 2 }) : "-"}
-                                            </TableCell>
-                                            <TableCell className="text-right font-mono text-sm">
-                                                {row.credit > 0 ? row.credit.toLocaleString(undefined, { minimumFractionDigits: 2 }) : "-"}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={5} className="h-24 text-center">
-                                            No data available for this date.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-
-                                {!isLoading && trialBalanceData.length > 0 && (
-                                    <TableRow className="bg-muted/50 font-bold text-base">
-                                        <TableCell colSpan={3} className="text-right">Totals</TableCell>
-                                        <TableCell className="text-right text-emerald-600 border-t-2 border-emerald-600">
-                                            {totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                        </TableCell>
-                                        <TableCell className="text-right text-emerald-600 border-t-2 border-emerald-600">
-                                            {totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
+                    <CardContent className="p-0">
+                        <DataTable
+                            columns={[
+                                {
+                                    data: "code",
+                                    title: "Code",
+                                    render: (data: any) => `<span class="font-mono text-xs text-muted-foreground">${data || ''}</span>`
+                                },
+                                {
+                                    data: "account",
+                                    title: "Account Name",
+                                    className: "font-medium"
+                                },
+                                {
+                                    data: "type",
+                                    title: "Type",
+                                    className: "text-xs text-muted-foreground"
+                                },
+                                {
+                                    data: "debit",
+                                    title: "Debit Balance",
+                                    className: "text-right font-mono text-sm",
+                                    render: (data: any) => data > 0 ? Number(data).toLocaleString(undefined, { minimumFractionDigits: 2 }) : "-"
+                                },
+                                {
+                                    data: "credit",
+                                    title: "Credit Balance",
+                                    className: "text-right font-mono text-sm",
+                                    render: (data: any) => data > 0 ? Number(data).toLocaleString(undefined, { minimumFractionDigits: 2 }) : "-"
+                                },
+                            ]}
+                            data={trialBalanceData}
+                            isLoading={isLoading}
+                        />
+                        {!isLoading && trialBalanceData.length > 0 && (
+                            <div className="flex items-center gap-4 bg-muted/50 p-4 font-bold text-base border-t">
+                                <div className="ml-auto">Totals</div>
+                                <div className="w-[150px] text-right text-emerald-600">
+                                    {totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </div>
+                                <div className="w-[150px] text-right text-emerald-600">
+                                    {totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </div>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </main>
