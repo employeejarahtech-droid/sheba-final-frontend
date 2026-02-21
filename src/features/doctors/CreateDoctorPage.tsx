@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, CircleCheck, Building2, Mail, Phone, MapPin, Award, User } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 import { Header } from "@/components/layout/header";
@@ -28,11 +28,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { TagInput } from "@/components/ui/tag-input";
 import { ProtectedRoute } from "@/components/protected-route";
 import { authenticatedFetch, handleFetchError } from "@/lib/authenticated-fetch";
+import { getCookie } from "@/lib/cookies";
 
 const doctorSchema = z.object({
     doctor_name: z.string().min(1, { message: "Required" }),
     title: z.string().min(1, { message: "Required" }),
-    doctor_type: z.array(z.enum(["Surgeon", "Consultant", "Assistant", "Normal", "Quak"])).min(1, { message: "Select at least one type" }),
+    doctor_type_ids: z.array(z.number()).min(1, { message: "Select at least one type" }),
     qualification: z.array(z.string()).min(1, { message: "At least one qualification required" }),
     speciality: z.array(z.string()).min(1, { message: "At least one speciality required" }),
     country: z.string().min(1, { message: "Required" }),
@@ -49,13 +50,31 @@ type DoctorValues = z.infer<typeof doctorSchema>;
 export default function CreateDoctorPage() {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
+    const token = getCookie('accessToken');
+
+    // Fetch doctor types
+    const { data: doctorTypes = [], isLoading: isLoadingDoctorTypes, error: doctorTypesError } = useQuery({
+        queryKey: ["doctor-types"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/doctor-type?limit=100`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch doctor types");
+            const result = await res.json();
+            return result.data?.items || result.data || [];
+        },
+        enabled: !!token,
+    });
 
     const form = useForm<DoctorValues>({
         resolver: zodResolver(doctorSchema),
         defaultValues: {
             doctor_name: "",
             title: "",
-            doctor_type: ["Normal"],
+            doctor_type_ids: [],
             qualification: [],
             speciality: [],
             country: "",
@@ -76,7 +95,7 @@ export default function CreateDoctorPage() {
                 ...data,
                 qualification: data.qualification.join(', '),
                 speciality: data.speciality.join(', '),
-                doctor_type: data.doctor_type.join(', '),
+                doctor_type_ids: data.doctor_type_ids,
             };
 
             const res = await authenticatedFetch(
@@ -244,74 +263,101 @@ export default function CreateDoctorPage() {
                                 <CardContent className="px-4 md:px-6">
                                     <FormField
                                         control={form.control}
-                                        name="doctor_type"
+                                        name="doctor_type_ids"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormControl>
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                                        {[
-                                                            { value: "Surgeon", label: "Surgeon", icon: "🔪", color: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700", checked: "bg-red-100 dark:bg-red-950/50 border-red-400 dark:border-red-600" },
-                                                            { value: "Consultant", label: "Consultant", icon: "👨‍⚕️", color: "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700", checked: "bg-blue-100 dark:bg-blue-950/50 border-blue-400 dark:border-blue-600" },
-                                                            { value: "Assistant", label: "Assistant", icon: "🤝", color: "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:border-green-300 dark:hover:border-green-700", checked: "bg-green-100 dark:bg-green-950/50 border-green-400 dark:border-green-600" },
-                                                            { value: "Normal", label: "Normal", icon: "👤", color: "bg-gray-50 dark:bg-gray-800/30 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600", checked: "bg-gray-100 dark:bg-gray-800/50 border-gray-400 dark:border-gray-600" },
-                                                            { value: "Quak", label: "Quak", icon: "🌙", color: "bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800 hover:border-purple-300 dark:hover:border-purple-700", checked: "bg-purple-100 dark:bg-purple-950/50 border-purple-400 dark:border-purple-600" },
-                                                        ].map((type) => {
-                                                            const isSelected = field.value.includes(type.value);
-                                                            return (
-                                                                <label
-                                                                    key={type.value}
-                                                                    className={`
-                                                                        relative flex items-center gap-4 p-5 rounded-xl border-2 cursor-pointer transition-all duration-200 group
-                                                                        ${isSelected
-                                                                            ? type.checked + " shadow-md scale-[1.02]"
-                                                                            : type.color + " shadow-sm hover:shadow-md hover:scale-[1.01]"
-                                                                        }
-                                                                    `}
-                                                                >
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        {...field}
-                                                                        value={type.value}
-                                                                        checked={isSelected}
-                                                                        onChange={(e) => {
-                                                                            const checked = e.target.checked;
-                                                                            const newValue = checked
-                                                                                ? [...field.value, type.value]
-                                                                                : field.value.filter((v) => v !== type.value);
-                                                                            field.onChange(newValue);
-                                                                        }}
-                                                                        className="sr-only"
-                                                                    />
-                                                                    <div className={`
-                                                                        w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0
-                                                                        ${isSelected
-                                                                            ? "border-current bg-current shadow-sm"
-                                                                            : "border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 group-hover:border-current"
-                                                                        }
-                                                                    `}>
-                                                                        {isSelected && (
-                                                                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 12l4 4 8-8" />
-                                                                            </svg>
-                                                                        )}
-                                                                    </div>
-                                                                    <div className="flex items-center gap-3 flex-1">
-                                                                        <span className="text-2xl">{type.icon}</span>
-                                                                        <div className="flex flex-col">
-                                                                            <span className="font-semibold text-base">{type.label}</span>
+                                                {isLoadingDoctorTypes ? (
+                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                                                        Loading doctor types...
+                                                    </div>
+                                                ) : doctorTypesError ? (
+                                                    <div className="flex items-center gap-2 text-sm text-red-500 py-4">
+                                                        Failed to load doctor types
+                                                    </div>
+                                                ) : doctorTypes.length === 0 ? (
+                                                    <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground py-8">
+                                                        <p>No doctor types available.</p>
+                                                        <a
+                                                            href="/indoor/master/doctor-types"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-primary hover:underline font-medium"
+                                                        >
+                                                            Create doctor types first →
+                                                        </a>
+                                                    </div>
+                                                ) : (
+                                                    <FormControl>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                            {doctorTypes.map((type: any) => {
+                                                                const isSelected = field.value?.includes(type.id);
+                                                                // Assign colors based on type.id for consistent styling
+                                                                const colorVariants = [
+                                                                    { color: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700", checked: "bg-red-100 dark:bg-red-950/50 border-red-400 dark:border-red-600" },
+                                                                    { color: "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700", checked: "bg-blue-100 dark:bg-blue-950/50 border-blue-400 dark:border-blue-600" },
+                                                                    { color: "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:border-green-300 dark:hover:border-green-700", checked: "bg-green-100 dark:bg-green-950/50 border-green-400 dark:border-green-600" },
+                                                                    { color: "bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800 hover:border-purple-300 dark:hover:border-purple-700", checked: "bg-purple-100 dark:bg-purple-950/50 border-purple-400 dark:border-purple-600" },
+                                                                    { color: "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 hover:border-amber-300 dark:hover:border-amber-700", checked: "bg-amber-100 dark:bg-amber-950/50 border-amber-400 dark:border-amber-600" },
+                                                                    { color: "bg-cyan-50 dark:bg-cyan-950/30 border-cyan-200 dark:border-cyan-800 hover:border-cyan-300 dark:hover:border-cyan-700", checked: "bg-cyan-100 dark:bg-cyan-950/50 border-cyan-400 dark:border-cyan-600" },
+                                                                ];
+                                                                const variant = colorVariants[type.id % colorVariants.length];
+                                                                return (
+                                                                    <label
+                                                                        key={type.id}
+                                                                        className={`
+                                                                            relative flex items-center gap-4 p-5 rounded-xl border-2 cursor-pointer transition-all duration-200 group
+                                                                            ${isSelected
+                                                                                ? variant.checked + " shadow-md scale-[1.02]"
+                                                                                : variant.color + " shadow-sm hover:shadow-md hover:scale-[1.01]"
+                                                                            }
+                                                                        `}
+                                                                    >
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={isSelected}
+                                                                            onChange={(e) => {
+                                                                                const checked = e.target.checked;
+                                                                                const currentValues = field.value || [];
+                                                                                const newValue = checked
+                                                                                    ? [...currentValues, type.id]
+                                                                                    : currentValues.filter((v) => v !== type.id);
+                                                                                field.onChange(newValue);
+                                                                            }}
+                                                                            className="sr-only"
+                                                                        />
+                                                                        <div className={`
+                                                                            w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0
+                                                                            ${isSelected
+                                                                                ? "border-current bg-current shadow-sm"
+                                                                                : "border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 group-hover:border-current"
+                                                                            }
+                                                                        `}>
                                                                             {isSelected && (
-                                                                                <span className="text-xs font-medium opacity-70">Selected</span>
+                                                                                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 12l4 4 8-8" />
+                                                                                </svg>
                                                                             )}
                                                                         </div>
-                                                                    </div>
-                                                                </label>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </FormControl>
-                                                <FormDescription className="text-sm mt-4">
-                                                    Choose all doctor types that apply to this profile
-                                                </FormDescription>
+                                                                        <div className="flex items-center gap-3 flex-1">
+                                                                            <span className="text-2xl">👨‍⚕️</span>
+                                                                            <div className="flex flex-col">
+                                                                                <span className="font-semibold text-base">{type.name}</span>
+                                                                                {isSelected && (
+                                                                                    <span className="text-xs font-medium opacity-70">Selected</span>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    </label>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </FormControl>
+                                                )}
+                                                {field.value && field.value.length > 0 && (
+                                                    <FormDescription className="text-sm mt-4">
+                                                        {field.value.length} doctor type(s) selected
+                                                    </FormDescription>
+                                                )}
                                                 <FormMessage />
                                             </FormItem>
                                         )}

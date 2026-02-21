@@ -6,9 +6,7 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DataTable } from '@/components/DataTable'
-import { ColumnDef } from "@tanstack/react-table"
 import { useState, useMemo } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
@@ -68,20 +66,21 @@ export default function DatabaseBrowser() {
     const rows = tableData?.data?.items || [];
     const meta = tableData?.data?.meta || { total: 0, page: 1, limit: 10 };
 
-    // Generate columns dynamically from the first row keys
-    const columns = useMemo<ColumnDef<any>[]>(() => {
+    // Generate columns dynamically from the first row keys (jQuery DataTables format)
+    const columns = useMemo(() => {
         if (!rows.length) return [];
         const firstRow = rows[0];
         return Object.keys(firstRow).map((key) => ({
-            accessorKey: key,
-            header: key,
-            cell: ({ row }) => {
-                const val = row.getValue(key);
-                if (typeof val === 'object' && val !== null) {
-                    return JSON.stringify(val);
+            data: key,
+            title: key,
+            orderable: true,
+            render: (data: any, _type: string, _row: any) => {
+                if (typeof data === 'object' && data !== null) {
+                    return JSON.stringify(data);
                 }
-                return String(val ?? "");
-            }
+                return String(data ?? "");
+            },
+            defaultContent: "",
         }));
     }, [rows]);
 

@@ -14,9 +14,10 @@ import {
     Check,
     ChevronDown
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import {
     Form,
@@ -52,9 +53,10 @@ import { ThemeSwitch } from '@/components/theme-switch';
 import { ConfigDrawer } from '@/components/config-drawer';
 import { ProfileDropdown } from '@/components/profile-dropdown';
 import { Main } from '@/components/layout/main';
-import { patientTypes, topNav } from '@/data/data';
+import { topNav } from '@/data/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 
 export const Route = createFileRoute('/_authenticated/admission/new-admission/')({
@@ -65,16 +67,17 @@ const admissionSchema = z.object({
     patientName: z.string().min(1, "Patient name is required"),
     fatherName: z.string().min(1, "Father name is required"),
     ageValue: z.string().min(1, "Age value is required"),
-    ageUnit: z.enum(["Y", "M"], { required_error: "Age unit is required" }),
+    ageUnit: z.enum(["Y", "M", "D"]),
     gender: z.string().min(1, "Gender is required"),
     patientType: z.string().min(1, "Patient type is required"),
     mobile_number: z.string().min(11, "Phone number required"),
     address: z.string().min(1, "Address required"),
-    underConsultant: z.string().min(1, "Doctor name required"),
-    referredBy: z.string(),
-    attendingDoctor: z.string(),
-    admittedBy: z.string(),
+    underConsultant: z.string().optional(),
+    referredBy: z.string().optional(),
+    attendingDoctor: z.string().optional(),
+    admittedBy: z.string().optional(),
     admissionDate: z.string().min(1, "Admission date required"),
+    admissionTime: z.string().min(1, "Admission time required"),
     ward: z.string().optional(),
     bedNumber: z.string().min(1, "Bed number required"),
     reason: z.string().min(1, "Reason required"),
@@ -185,9 +188,207 @@ function DoctorSelect({
     );
 }
 
+// Bed Select Component with Search
+interface BedSelectProps {
+    beds: any[];
+    value: string;
+    onChange: (value: string) => void;
+    label: string;
+    placeholder: string;
+    disabled?: boolean;
+    loading?: boolean;
+}
+
+function BedSelect({
+    beds,
+    value,
+    onChange,
+    label,
+    placeholder,
+    disabled = false,
+    loading = false
+}: BedSelectProps) {
+    const [open, setOpen] = useState(false);
+
+    const selectedBed = beds.find((b: any) => String(b.id) === value);
+
+    return (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <FormControl>
+                    <Button
+                        variant="outline"
+                        role="combobox"
+                        className={cn(
+                            "w-full justify-between h-11 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm",
+                            !value && "text-muted-foreground"
+                        )}
+                        disabled={disabled || loading}
+                    >
+                        {selectedBed ? (
+                            <div className="flex flex-col items-start">
+                                <span className="font-medium">{selectedBed.code}</span>
+                                <span className="text-xs text-muted-foreground">
+                                    {selectedBed.type} - {selectedBed.ward} (৳{selectedBed.price})
+                                </span>
+                            </div>
+                        ) : (
+                            placeholder
+                        )}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                </FormControl>
+            </PopoverTrigger>
+            <PopoverContent className="w-[450px] p-0" align="start">
+                <Command>
+                    <CommandInput placeholder="Search by code, type, or ward..." />
+                    <CommandList>
+                        <CommandEmpty>
+                            {loading ? "Loading beds..." : "No bed found."}
+                        </CommandEmpty>
+                        <CommandGroup>
+                            {beds.map((bed: any) => {
+                                const displayName = bed.code;
+                                const subtitle = `${bed.type} - ${bed.ward} - ৳${bed.price}`;
+
+                                return (
+                                    <CommandItem
+                                        key={bed.id}
+                                        value={`${bed.code} ${bed.type} ${bed.ward} ${bed.price} ${bed.id}`}
+                                        onSelect={() => {
+                                            onChange(String(bed.id));
+                                            setOpen(false);
+                                        }}
+                                    >
+                                        <Check
+                                            className={cn(
+                                                "mr-2 h-4 w-4",
+                                                value === String(bed.id) ? "opacity-100" : "opacity-0"
+                                            )}
+                                        />
+                                        <div className="flex flex-col flex-1">
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-medium">{displayName}</span>
+                                                <span className="text-sm font-semibold text-blue-600">৳{bed.price}</span>
+                                            </div>
+                                            <span className="text-xs text-muted-foreground">
+                                                {subtitle}
+                                            </span>
+                                        </div>
+                                    </CommandItem>
+                                );
+                            })}
+                        </CommandGroup>
+                    </CommandList>
+                </Command>
+            </PopoverContent>
+        </Popover>
+    );
+}
+
+// Patient Type Select Component with Search
+interface PatientTypeSelectProps {
+    patientTypes: any[];
+    value: string;
+    onChange: (value: string) => void;
+    label: string;
+    placeholder: string;
+    disabled?: boolean;
+    loading?: boolean;
+}
+
+function PatientTypeSelect({
+    patientTypes,
+    value,
+    onChange,
+    label,
+    placeholder,
+    disabled = false,
+    loading = false
+}: PatientTypeSelectProps) {
+    const [open, setOpen] = useState(false);
+
+    const selectedType = patientTypes.find((t: any) => String(t.id) === value);
+
+    return (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <FormControl>
+                    <Button
+                        variant="outline"
+                        role="combobox"
+                        className={cn(
+                            "w-full justify-between h-10 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm",
+                            !value && "text-muted-foreground"
+                        )}
+                        disabled={disabled || loading}
+                    >
+                        {selectedType ? (
+                            <div className="flex flex-col items-start">
+                                <span className="font-medium">{selectedType.name}</span>
+                                {selectedType.description && (
+                                    <span className="text-xs text-muted-foreground">
+                                        {selectedType.description}
+                                    </span>
+                                )}
+                            </div>
+                        ) : (
+                            placeholder
+                        )}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                </FormControl>
+            </PopoverTrigger>
+            <PopoverContent className="w-[400px] p-0" align="start">
+                <Command>
+                    <CommandInput placeholder="Search patient type..." />
+                    <CommandList>
+                        <CommandEmpty>
+                            {loading ? "Loading patient types..." : "No patient type found."}
+                        </CommandEmpty>
+                        <CommandGroup>
+                            {patientTypes.map((type: any) => {
+                                const displayName = type.name;
+                                const subtitle = type.description;
+
+                                return (
+                                    <CommandItem
+                                        key={type.id}
+                                        value={`${type.name} ${type.description || ''} ${type.id}`}
+                                        onSelect={() => {
+                                            onChange(String(type.id));
+                                            setOpen(false);
+                                        }}
+                                    >
+                                        <Check
+                                            className={cn(
+                                                "mr-2 h-4 w-4",
+                                                value === String(type.id) ? "opacity-100" : "opacity-0"
+                                            )}
+                                        />
+                                        <div className="flex flex-col">
+                                            <span className="font-medium">{displayName}</span>
+                                            {subtitle && (
+                                                <span className="text-xs text-muted-foreground">
+                                                    {subtitle}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </CommandItem>
+                                );
+                            })}
+                        </CommandGroup>
+                    </CommandList>
+                </Command>
+            </PopoverContent>
+        </Popover>
+    );
+}
+
 function IndoorNewAdmission() {
     const navigate = useNavigate();
     const token = getCookie('accessToken');
+    const queryClient = useQueryClient();
 
     // Fetch doctors list
     const { data: doctorsData, isLoading: doctorsLoading } = useQuery({
@@ -207,6 +408,42 @@ function IndoorNewAdmission() {
 
     const doctors = doctorsData?.data?.rows || doctorsData?.data?.items || [];
 
+    // Fetch patient types
+    const { data: patientTypesData } = useQuery({
+        queryKey: ['patient-types'],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/patient-type?limit=100`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) return { data: { items: [] } };
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const patientTypes = patientTypesData?.data?.items || [];
+
+    // Fetch beds/cabins
+    const { data: bedsData } = useQuery({
+        queryKey: ['beds-cabins'],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/bed-cabin?limit=100&status=Active`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) return { data: { items: [] } };
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const beds = bedsData?.data?.items || [];
+
     const form = useForm({
         resolver: zodResolver(admissionSchema),
         defaultValues: {
@@ -223,19 +460,60 @@ function IndoorNewAdmission() {
             attendingDoctor: "",
             admittedBy: "",
             admissionDate: new Date().toISOString().split('T')[0],
+            admissionTime: new Date().toTimeString().slice(0, 5),
             ward: "",
             bedNumber: "",
             reason: "",
         },
     });
 
+    // Create admission mutation
+    const createMutation = useMutation({
+        mutationFn: async (values: z.infer<typeof admissionSchema>) => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admission`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    patient_name: values.patientName,
+                    age: parseInt(values.ageValue),
+                    sex: values.gender,
+                    phone: values.mobile_number,
+                    admission_date: values.admissionDate,
+                    bed_cabin_id: parseInt(values.bedNumber),
+                    doctor_id: values.underConsultant ? parseInt(values.underConsultant) : null,
+                    diagnosis: values.reason,
+                    status: 'active',
+                }),
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                console.error('Admission API Error:', errorData);
+                throw new Error(errorData.message || errorData.error || 'Failed to create admission');
+            }
+
+            return res.json();
+        },
+        onSuccess: () => {
+            toast.success("Patient admitted successfully");
+            queryClient.invalidateQueries({ queryKey: ['admissions'] });
+            navigate({ to: '/admission/patients' });
+        },
+        onError: (error: Error) => {
+            toast.error(error.message || 'Failed to admit patient');
+        },
+    });
+
     function onSubmit(values: z.infer<typeof admissionSchema>) {
-        console.log("Admission Data:", values);
+        createMutation.mutate(values);
     }
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-background">
-            <Header>
+            <Header fixed>
                 <TopNav links={topNav} />
                 <div className='ms-auto flex items-center space-x-4'>
                     <Search />
@@ -261,7 +539,7 @@ function IndoorNewAdmission() {
                             <Button
                                 variant="outline"
                                 className="hidden sm:flex items-center gap-2 rounded-xl border-gray-200"
-                                onClick={() => navigate({ to: '..' })}
+                                onClick={() => navigate({ to: '/admission/patients' })}
                             >
                                 <ArrowLeft className="h-4 w-4" />
                                 Back to List
@@ -269,10 +547,15 @@ function IndoorNewAdmission() {
                             <Button
                                 type="submit"
                                 form="hospital-admission-form"
+                                disabled={createMutation.isPending}
                                 className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 border-none px-6 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] font-bold"
                             >
-                                <CircleCheck className="h-4 w-4" />
-                                Admit Patient
+                                {createMutation.isPending ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <CircleCheck className="h-4 w-4" />
+                                )}
+                                {createMutation.isPending ? "Submitting..." : "Admit Patient"}
                             </Button>
                         </div>
                     </div>
@@ -366,6 +649,7 @@ function IndoorNewAdmission() {
                                                                     <SelectContent className="rounded-xl border-gray-100 shadow-xl">
                                                                         <SelectItem value="Y">Years</SelectItem>
                                                                         <SelectItem value="M">Months</SelectItem>
+                                                                        <SelectItem value="D">Days</SelectItem>
                                                                     </SelectContent>
                                                                 </Select>
                                                                 <FormMessage className="text-[10px]" />
@@ -407,20 +691,15 @@ function IndoorNewAdmission() {
                                                 render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Patient Type</FormLabel>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                            <FormControl>
-                                                                <SelectTrigger className="w-full !h-auto h-10 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">
-                                                                    <SelectValue placeholder="Select type" />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent className="rounded-xl border-gray-100 shadow-xl">
-                                                                {patientTypes.map((type) => (
-                                                                    <SelectItem key={type.value} value={type.value}>
-                                                                        {type.label}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
+                                                        <PatientTypeSelect
+                                                            patientTypes={patientTypes}
+                                                            value={field.value}
+                                                            onChange={field.onChange}
+                                                            label="Patient Type"
+                                                            placeholder="Select patient type"
+                                                            disabled={false}
+                                                            loading={false}
+                                                        />
                                                         <FormMessage className="text-[10px]" />
                                                     </FormItem>
                                                 )}
@@ -533,46 +812,68 @@ function IndoorNewAdmission() {
                                     </div>
                                 </CardHeader>
                                 <CardContent className="p-4 md:p-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <FormField
-                                            control={form.control}
-                                            name="admissionDate"
-                                            render={({ field }) => (
-                                                <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Admission Date</FormLabel>
-                                                    <FormControl>
-                                                        <div className="relative group">
-                                                            <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
-                                                            <Input
-                                                                type="date"
-                                                                className="h-11 pl-10 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
-                                                                {...field}
-                                                            />
-                                                        </div>
-                                                    </FormControl>
-                                                    <FormMessage className="text-[10px]" />
-                                                </FormItem>
-                                            )}
-                                        />
+                                    <div className="space-y-6">
+                                        {/* Admission Date and Time Row */}
+                                        <div>
+                                            <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 block">Admission Date and Time</FormLabel>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <FormField
+                                                    control={form.control}
+                                                    name="admissionDate"
+                                                    render={({ field }) => (
+                                                        <FormItem className="flex flex-col gap-2">
+                                                            <FormControl>
+                                                                <div className="relative group">
+                                                                    <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
+                                                                    <Input
+                                                                        type="date"
+                                                                        className="h-11 pl-10 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                                                                        {...field}
+                                                                    />
+                                                                </div>
+                                                            </FormControl>
+                                                            <FormMessage className="text-[10px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="admissionTime"
+                                                    render={({ field }) => (
+                                                        <FormItem className="flex flex-col gap-2">
+                                                            <FormControl>
+                                                                <div className="relative group">
+                                                                    <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
+                                                                    <Input
+                                                                        type="time"
+                                                                        className="h-11 pl-10 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                                                                        {...field}
+                                                                    />
+                                                                </div>
+                                                            </FormControl>
+                                                            <FormMessage className="text-[10px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Bed Allocation */}
                                         <FormField
                                             control={form.control}
                                             name="bedNumber"
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Bed / Cabin Allocation</FormLabel>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                        <FormControl>
-                                                            <SelectTrigger className="w-full !h-auto h-11 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">
-                                                                <SelectValue placeholder="Select bed number" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent className="rounded-xl border-gray-100 shadow-xl">
-                                                            <SelectItem value="bed-100">Bed 100 (General Ward)</SelectItem>
-                                                            <SelectItem value="bed-101">Bed 101 (General Ward)</SelectItem>
-                                                            <SelectItem value="cabin-201">Cabin 201 (VIP)</SelectItem>
-                                                            <SelectItem value="cabin-202">Cabin 202 (Executive)</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
+                                                    <BedSelect
+                                                        beds={beds}
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                        label="Bed / Cabin Allocation"
+                                                        placeholder="Select bed or cabin"
+                                                        disabled={false}
+                                                        loading={false}
+                                                    />
                                                     <FormMessage className="text-[10px]" />
                                                 </FormItem>
                                             )}
@@ -624,28 +925,6 @@ function IndoorNewAdmission() {
 
                             {/* Final Footer Actions */}
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8 border-t border-gray-100 dark:border-gray-800">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="w-full sm:w-auto px-10 h-14 text-lg rounded-xl border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-all font-semibold"
-                                    onClick={() => form.reset()}
-                                >
-                                    Reset Form
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="w-full sm:w-auto px-10 h-14 text-lg rounded-xl border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-all font-semibold"
-                                >
-                                    Print Application
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    className="w-full sm:w-auto px-12 h-14 text-lg rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 font-bold text-white shadow-xl shadow-blue-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/40 active:translate-y-0"
-                                >
-                                    <CircleCheck className="mr-2 h-6 w-6" />
-                                    Confirm Admission
-                                </Button>
                             </div>
                         </form>
                     </Form>

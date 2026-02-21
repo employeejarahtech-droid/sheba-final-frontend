@@ -12,6 +12,10 @@ import { Link } from '@tanstack/react-router'
 import { TopNav } from '@/components/layout/top-nav'
 import { topNav } from '@/data/data'
 import { FileText, DollarSign, TrendingUp, Calendar, Plus } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { Check, Filter } from 'lucide-react'
+import { cn } from "@/lib/utils"
 
 
 type InvoiceItem = {
@@ -39,16 +43,19 @@ type InvoiceItem = {
 export default function Invoices() {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
+    const [statusFilter, setStatusFilter] = useState<string>("all");
+    const [openFilter, setOpenFilter] = useState(false);
     const limit = 10;
 
     const token = getCookie('accessToken');
 
     const { data } = useQuery({
-        queryKey: ["invoices", page, search],
+        queryKey: ["invoices", page, search, statusFilter],
 
         queryFn: async () => {
+            const statusParam = statusFilter !== "all" ? `&status=${statusFilter}` : "";
             const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/outdoor-invoice?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
+                `${import.meta.env.VITE_API_URL}/api/outdoor-invoice?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
@@ -303,7 +310,52 @@ export default function Invoices() {
                 ))}
             </div>
 
-            <DataTable columns={columns} data={data?.data?.items || []} meta={data?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
+            <DataTable
+                columns={columns}
+                data={data?.data?.items || []}
+                meta={data?.data?.meta}
+                onPageChange={setPage}
+                search={search}
+                onSearchChange={setSearch}
+                filterSlot={
+                    <Popover open={openFilter} onOpenChange={setOpenFilter}>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" size="sm">
+                                <Filter className="mr-2 h-4 w-4" />
+                                {statusFilter !== "all" ? `Status: ${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}` : "Filter Status"}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0">
+                            <Command>
+                                <CommandInput placeholder="Search status..." />
+                                <CommandList>
+                                    <CommandEmpty>No status found.</CommandEmpty>
+                                    <CommandGroup>
+                                        {["all", "paid", "unpaid"].map((status) => (
+                                            <CommandItem
+                                                key={status}
+                                                value={status}
+                                                onSelect={(currentValue) => {
+                                                    setStatusFilter(currentValue === statusFilter ? "all" : currentValue)
+                                                    setOpenFilter(false)
+                                                }}
+                                            >
+                                                <Check
+                                                    className={cn(
+                                                        "mr-2 h-4 w-4",
+                                                        statusFilter === status ? "opacity-100" : "opacity-0"
+                                                    )}
+                                                />
+                                                {status === "all" ? "All Status" : status.charAt(0).toUpperCase() + status.slice(1)}
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
+                }
+            />
         </main>
     </>
 }

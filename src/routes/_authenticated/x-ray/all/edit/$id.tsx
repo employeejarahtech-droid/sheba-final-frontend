@@ -122,13 +122,14 @@ function EditXRayReport() {
   };
 
   const handlePrint = () => {
-    window.print();
+    // Navigate to print page in same tab
+    router.navigate({ to: '/x-ray/all/print/$id', params: { id } });
   };
 
   if (isLoading) {
     return (
       <>
-        <Header>
+        <Header fixed>
           <TopNav links={topNav} />
           <div className="ms-auto flex items-center space-x-4">
             <Search />

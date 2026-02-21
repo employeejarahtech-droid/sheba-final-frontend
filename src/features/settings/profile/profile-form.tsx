@@ -1,10 +1,15 @@
+import { useState } from 'react'
 import { z } from 'zod'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
-import { showSubmittedData } from '@/lib/show-submitted-data'
+import { useMutation } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { ProfileImageUploader } from '@/components/profile-image-uploader'
+import { getCookie } from '@/lib/cookies'
 import {
   Form,
   FormControl,
@@ -49,6 +54,8 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>
 
 // This can come from your database or API.
 const defaultValues: Partial<ProfileFormValues> = {
+  username: '',
+  email: 'm@example.com',
   bio: 'I own a computer.',
   urls: [
     { value: 'https://shadcn.com' },
@@ -57,6 +64,9 @@ const defaultValues: Partial<ProfileFormValues> = {
 }
 
 export function ProfileForm() {
+  const [profileImage, setProfileImage] = useState<File | null>(null)
+  const token = getCookie('accessToken')
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
@@ -68,12 +78,67 @@ export function ProfileForm() {
     control: form.control,
   })
 
+  // Mutation to update profile
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: ProfileFormValues & { profileImage?: File | null }) => {
+      // Create FormData to handle file upload
+      const formData = new FormData()
+      formData.append('username', data.username)
+      formData.append('email', data.email)
+      formData.append('bio', data.bio)
+
+      if (data.urls) {
+        formData.append('urls', JSON.stringify(data.urls))
+      }
+
+      if (data.profileImage) {
+        formData.append('avatar', data.profileImage)
+      }
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/profile`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.message || 'Failed to update profile')
+      }
+
+      return res.json()
+    },
+    onSuccess: () => {
+      toast.success('Profile updated successfully')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to update profile')
+    },
+  })
+
+  const handleSubmit = (data: ProfileFormValues) => {
+    updateProfileMutation.mutate({
+      ...data,
+      profileImage,
+    })
+  }
+
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => showSubmittedData(data))}
+        onSubmit={form.handleSubmit(handleSubmit)}
         className='space-y-8'
       >
+        {/* Profile Image Uploader */}
+        <div className="flex flex-col items-center pb-6 border-b border-gray-200 dark:border-gray-800">
+          <ProfileImageUploader
+            currentImage="/api/placeholder/128/128" // Replace with actual user avatar URL
+            onImageChange={setProfileImage}
+          />
+        </div>
+
         <FormField
           control={form.control}
           name='username'
@@ -170,7 +235,16 @@ export function ProfileForm() {
             Add URL
           </Button>
         </div>
-        <Button type='submit'>Update profile</Button>
+        <Button type='submit' disabled={updateProfileMutation.isPending}>
+          {updateProfileMutation.isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Updating...
+            </>
+          ) : (
+            'Update profile'
+          )}
+        </Button>
       </form>
     </Form>
   )

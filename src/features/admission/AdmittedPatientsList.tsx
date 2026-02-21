@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useSearch, useNavigate } from '@tanstack/react-router'
 import { Users, Activity, CheckCircle, AlertCircle, UserPlus } from 'lucide-react'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
@@ -7,23 +8,68 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { DataTable } from '@/components/DataTable'
 import { Button } from '@/components/ui/button'
-import Cookies from 'js-cookie'
+import { getCookie } from '@/lib/cookies'
 
 const API_URL = import.meta.env.VITE_API_URL
 
-export function AdmittedPatientsList() {
-    const [search, setSearch] = useState('')
-    const [statusFilter, setStatusFilter] = useState('')
-    const [page, setPage] = useState(1)
-    const limit = 10
+type AdmissionItem = {
+    id: number
+    patient_name: string
+    age: number
+    sex: string
+    phone: string
+    admission_date: string
+    discharge_date: string | null
+    status: 'active' | 'discharged' | 'critical'
+    bed_cabin_id: number | null
+    doctor_id: number | null
+    diagnosis: string | null
+    created_at: string
+    bedCabin?: {
+        id: number
+        code: string
+        type: string
+        ward: string
+    }
+    doctor?: {
+        id: number
+        doctor_name: string
+        speciality: string
+    }
+}
 
-    const token = Cookies.get('accessToken')
+export function AdmittedPatientsList() {
+    const searchParams: any = useSearch({ strict: false })
+    const navigate = useNavigate()
+
+    const page = Number(searchParams?.page) || 1
+    const limit = Number(searchParams?.limit) || 10
+    const search = searchParams?.search || ""
+
+    const setPage = (newPage: number) => {
+        (navigate as any)({
+            to: '.',
+            search: (prev: any) => ({ ...prev, page: newPage }),
+        })
+    }
+
+    const setLimit = (newLimit: number) => {
+        (navigate as any)({
+            to: '.',
+            search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }),
+        })
+    }
+
+    const setSearch = (newSearch: string) => {
+        (navigate as any)({
+            to: '.',
+            search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }),
+        })
+    }
+
+    const token = getCookie('accessToken')
 
     // Fetch statistics
     const { data: statsData } = useQuery({
@@ -34,47 +80,177 @@ export function AdmittedPatientsList() {
                     'Authorization': `Bearer ${token}`,
                 },
             })
-            if (!response.ok) throw new Error('Failed to fetch statistics')
+            if (!response.ok) {
+                console.error('Statistics API Error:', response.status, await response.text())
+                throw new Error('Failed to fetch statistics')
+            }
             return response.json()
         },
     })
 
     // Fetch admissions list
-    const { data: admissionsData, isLoading } = useQuery({
-        queryKey: ['admissions', page, search, statusFilter],
+    const { data: admissionsData, isFetching } = useQuery({
+        queryKey: ['admissions', page, limit, search],
         queryFn: async () => {
             const params = new URLSearchParams({
                 page: page.toString(),
                 limit: limit.toString(),
                 ...(search && { search }),
-                ...(statusFilter && { status: statusFilter }),
             })
             const response = await fetch(`${API_URL}/api/admission?${params}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
             })
-            if (!response.ok) throw new Error('Failed to fetch admissions')
+            if (!response.ok) {
+                console.error('Admissions API Error:', response.status, await response.text())
+                throw new Error('Failed to fetch admissions')
+            }
             return response.json()
         },
     })
 
     const stats = statsData?.data || { total: 0, active: 0, discharged: 0, critical: 0 }
     const admissions = admissionsData?.data || []
-    const pagination = admissionsData?.pagination || { total: 0, page: 1, totalPages: 1 }
-
-    const getStatusBadge = (status: string) => {
-        const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-            active: 'default',
-            discharged: 'secondary',
-            critical: 'destructive',
-        }
-        return (
-            <Badge variant={variants[status] || 'default'}>
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-            </Badge>
-        )
+    const meta = {
+        page,
+        limit,
+        total: admissionsData?.pagination?.total || 0,
     }
+
+    // Calculate stats for cards
+    const statsCards = useMemo(() => [
+        {
+            label: "Total Admitted",
+            value: stats.total,
+            gradient: "from-blue-600 to-blue-400",
+            shadow: "shadow-blue-500/30",
+            icon: <Users className="w-6 h-6 text-white" />,
+        },
+        {
+            label: "Active Patients",
+            value: stats.active,
+            gradient: "from-green-600 to-green-400",
+            shadow: "shadow-green-500/30",
+            icon: <Activity className="w-6 h-6 text-white" />,
+        },
+        {
+            label: "Discharged",
+            value: stats.discharged,
+            gradient: "from-gray-600 to-gray-400",
+            shadow: "shadow-gray-500/30",
+            icon: <CheckCircle className="w-6 h-6 text-white" />,
+        },
+        {
+            label: "Critical Cases",
+            value: stats.critical,
+            gradient: "from-red-600 to-red-400",
+            shadow: "shadow-red-500/30",
+            icon: <AlertCircle className="w-6 h-6 text-white" />,
+        },
+    ], [stats])
+
+    const columns = useMemo(() => [
+        {
+            data: null,
+            title: "SL",
+            orderable: false,
+            responsivePriority: 3,
+            render: (_data: any, _type: string, _row: AdmissionItem, meta: any) => {
+                return (page - 1) * limit + meta.row + 1
+            },
+            defaultContent: "",
+        },
+        {
+            data: "patient_name",
+            title: "Patient Name",
+            orderable: true,
+            responsivePriority: 1,
+            defaultContent: "",
+        },
+        {
+            data: null,
+            title: "Age/Sex",
+            orderable: true,
+            responsivePriority: 4,
+            render: (_data: any, _type: string, row: AdmissionItem) => {
+                return row.age && row.sex ? `${row.age}/${row.sex.charAt(0).toUpperCase()}` : '-'
+            },
+            defaultContent: "",
+        },
+        {
+            data: "phone",
+            title: "Phone",
+            orderable: true,
+            responsivePriority: 5,
+            defaultContent: "-",
+        },
+        {
+            data: "admission_date",
+            title: "Admission Date",
+            orderable: true,
+            responsivePriority: 2,
+            render: (data: any) => {
+                return new Date(data).toLocaleDateString()
+            },
+            defaultContent: "",
+        },
+        {
+            data: null,
+            title: "Status",
+            orderable: true,
+            responsivePriority: 2,
+            render: (_data: any, _type: string, row: AdmissionItem) => {
+                const statusColors: Record<string, string> = {
+                    active: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                    discharged: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+                    critical: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+                }
+                return `<span class="px-2 py-1 rounded-full text-xs font-semibold ${statusColors[row.status] || statusColors.active}">${row.status.charAt(0).toUpperCase() + row.status.slice(1)}</span>`
+            },
+            defaultContent: "",
+        },
+        {
+            data: null,
+            title: "Bed/Cabin",
+            orderable: true,
+            responsivePriority: 3,
+            render: (_data: any, _type: string, row: AdmissionItem) => {
+                return row.bedCabin ? `${row.bedCabin.code} (${row.bedCabin.type})` : '-'
+            },
+            defaultContent: "",
+        },
+        {
+            data: null,
+            title: "Doctor",
+            orderable: true,
+            responsivePriority: 4,
+            render: (_data: any, _type: string, row: AdmissionItem) => {
+                return row.doctor?.doctor_name || '-'
+            },
+            defaultContent: "",
+        },
+        {
+            data: null,
+            title: "Actions",
+            orderable: false,
+            responsivePriority: 1,
+            render: (_data: any, _type: string, row: AdmissionItem) => {
+                return `
+                    <button
+                        onclick="window.location.href='/admission/patients/${row.id}/billing'"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        Add Billing
+                    </button>
+                `;
+            },
+            defaultContent: "",
+        },
+    ], [page, limit])
 
     return (
         <>
@@ -87,8 +263,8 @@ export function AdmittedPatientsList() {
                 </div>
             </Header>
 
-            <Main className="p-6 lg:p-10 w-full flex-1 bg-gray-50/50 dark:bg-black/20">
-                <div className="space-y-6 max-w-7xl mx-auto">
+            <Main className="p-6 lg:p-10 w-full flex-1 dark:bg-black/20">
+                <div className="space-y-6 mx-auto">
                     {/* Header */}
                     <div className="flex flex-wrap justify-between items-start gap-4">
                         <div className="space-y-2">
@@ -110,165 +286,44 @@ export function AdmittedPatientsList() {
 
                     {/* Statistics Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <Card className="border-2 hover:border-blue-200 transition-all">
-                            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground">
-                                    Total Admitted
-                                </CardTitle>
-                                <Users className="h-5 w-5 text-blue-600" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-3xl font-bold text-blue-600">{stats.total}</div>
-                                <p className="text-xs text-muted-foreground mt-1">All time admissions</p>
-                            </CardContent>
-                        </Card>
+                        {statsCards.map((item, idx) => (
+                            <div
+                                key={idx}
+                                className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${item.gradient} p-6 shadow-lg ${item.shadow} transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]`}
+                            >
+                                <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+                                <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
 
-                        <Card className="border-2 hover:border-green-200 transition-all">
-                            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground">
-                                    Active Patients
-                                </CardTitle>
-                                <Activity className="h-5 w-5 text-green-600" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-3xl font-bold text-green-600">{stats.active}</div>
-                                <p className="text-xs text-muted-foreground mt-1">Currently admitted</p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="border-2 hover:border-gray-200 transition-all">
-                            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground">
-                                    Discharged
-                                </CardTitle>
-                                <CheckCircle className="h-5 w-5 text-gray-600" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-3xl font-bold text-gray-600">{stats.discharged}</div>
-                                <p className="text-xs text-muted-foreground mt-1">Successfully treated</p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="border-2 hover:border-red-200 transition-all">
-                            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground">
-                                    Critical Cases
-                                </CardTitle>
-                                <AlertCircle className="h-5 w-5 text-red-600" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-3xl font-bold text-red-600">{stats.critical}</div>
-                                <p className="text-xs text-muted-foreground mt-1">Requires attention</p>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    {/* Filters and Search */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Patient List</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex flex-col md:flex-row gap-4">
-                                <Input
-                                    placeholder="Search by name or phone..."
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    className="md:w-96"
-                                />
-                                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                    <SelectTrigger className="md:w-48">
-                                        <SelectValue placeholder="Filter by status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="">All Status</SelectItem>
-                                        <SelectItem value="active">Active</SelectItem>
-                                        <SelectItem value="discharged">Discharged</SelectItem>
-                                        <SelectItem value="critical">Critical</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Table */}
-                            <div className="rounded-lg border">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Patient Name</TableHead>
-                                            <TableHead>Age/Sex</TableHead>
-                                            <TableHead>Phone</TableHead>
-                                            <TableHead>Admission Date</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead>Bed/Cabin</TableHead>
-                                            <TableHead>Doctor</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {isLoading ? (
-                                            <TableRow>
-                                                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                                                    Loading...
-                                                </TableCell>
-                                            </TableRow>
-                                        ) : admissions.length === 0 ? (
-                                            <TableRow>
-                                                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                                                    No patients found
-                                                </TableCell>
-                                            </TableRow>
-                                        ) : (
-                                            admissions.map((admission: any) => (
-                                                <TableRow key={admission.id}>
-                                                    <TableCell className="font-medium">{admission.patient_name}</TableCell>
-                                                    <TableCell>
-                                                        {admission.age && admission.sex
-                                                            ? `${admission.age}/${admission.sex.charAt(0).toUpperCase()}`
-                                                            : '-'}
-                                                    </TableCell>
-                                                    <TableCell>{admission.phone || '-'}</TableCell>
-                                                    <TableCell>{new Date(admission.admission_date).toLocaleDateString()}</TableCell>
-                                                    <TableCell>{getStatusBadge(admission.status)}</TableCell>
-                                                    <TableCell>
-                                                        {admission.bedCabin
-                                                            ? `${admission.bedCabin.code} (${admission.bedCabin.type})`
-                                                            : '-'}
-                                                    </TableCell>
-                                                    <TableCell>{admission.doctor?.doctor_name || '-'}</TableCell>
-                                                </TableRow>
-                                            ))
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </div>
-
-                            {/* Pagination */}
-                            {pagination.totalPages > 1 && (
-                                <div className="flex items-center justify-between">
-                                    <p className="text-sm text-muted-foreground">
-                                        Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, pagination.total)} of {pagination.total} results
-                                    </p>
-                                    <div className="flex gap-2">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => setPage(p => Math.max(1, p - 1))}
-                                            disabled={page === 1}
-                                        >
-                                            Previous
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
-                                            disabled={page === pagination.totalPages}
-                                        >
-                                            Next
-                                        </Button>
+                                <div className="relative flex items-start justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-white/90">{item.label}</p>
+                                        <h3 className="mt-2 text-3xl font-bold text-white">
+                                            {item.value || 0}
+                                        </h3>
+                                    </div>
+                                    <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                                        {item.icon}
                                     </div>
                                 </div>
-                            )}
-                        </CardContent>
-                    </Card>
+
+                                <div className="mt-4 h-1 w-full rounded-full bg-black/10">
+                                    <div className="h-full w-2/3 rounded-full bg-white/40" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* DataTable */}
+                    <DataTable
+                        columns={columns}
+                        data={admissions}
+                        meta={meta}
+                        onPageChange={setPage}
+                        onLimitChange={setLimit}
+                        search={search}
+                        isLoading={isFetching}
+                        onSearchChange={setSearch}
+                    />
                 </div>
             </Main>
         </>

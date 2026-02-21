@@ -220,6 +220,21 @@ export const RouteOperationPermission = {
   STAFF_WISE_ROUTE: "route_operations.staff_wise_route.view" as const,
 };
 
+// --- Indoor ---
+export const IndoorPermission = {
+  VIEW: "indoor.view" as const,
+  BED_CABIN_LIST: "indoor.bed_cabin.list" as const,
+  BED_CABIN_CREATE: "indoor.bed_cabin.create" as const,
+  BED_CABIN_EDIT: "indoor.bed_cabin.edit" as const,
+  BED_CABIN_DELETE: "indoor.bed_cabin.delete" as const,
+  PATIENT_TYPE_LIST: "indoor.patient_type.list" as const,
+  PATIENT_TYPE_CREATE: "indoor.patient_type.create" as const,
+  DOCTOR_TYPE_LIST: "indoor.doctor_type.list" as const,
+  DOCTOR_TYPE_CREATE: "indoor.doctor_type.create" as const,
+  CLINIC_SERVICES_LIST: "indoor.clinic_services.list" as const,
+  CLINIC_SERVICES_CREATE: "indoor.clinic_services.create" as const,
+};
+
 // --- Help ---
 export const HelpPermission = {
   VIEW: "help.view" as const,
@@ -244,6 +259,7 @@ export const PERMISSION_GROUPS = {
   Production: ProductionPermission,
   RouteOperations: RouteOperationPermission,
   Help: HelpPermission,
+  Indoor: IndoorPermission,
 } as const;
 
 
@@ -265,4 +281,5 @@ export type PermissionType =
   | typeof RawMaterialPermission[keyof typeof RawMaterialPermission]
   | typeof ProductionPermission[keyof typeof ProductionPermission]
   | typeof RouteOperationPermission[keyof typeof RouteOperationPermission]
-  | typeof HelpPermission[keyof typeof HelpPermission];
+  | typeof HelpPermission[keyof typeof HelpPermission]
+  | typeof IndoorPermission[keyof typeof IndoorPermission];

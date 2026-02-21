@@ -122,7 +122,8 @@ function EditUltrasonogramReport() {
   };
 
   const handlePrint = () => {
-    window.print();
+    // Navigate to print page in same tab
+    router.navigate({ to: '/ultrasonogram/all/print/$id', params: { id } });
   };
 
   if (isLoading) {

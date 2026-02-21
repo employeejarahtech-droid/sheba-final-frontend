@@ -11,16 +11,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { topNav } from '@/data/data';
-import { Building2, CreditCard, DollarSign, TrendingUp } from 'lucide-react';
-import { useState } from 'react';
+import { Building2, CreditCard, DollarSign, TrendingUp, Loader2 } from 'lucide-react';
 import { AddBankAccountModal } from './components/AddBankAccountModal';
+import { getCookie } from '@/lib/cookies';
+import { useQuery } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/_authenticated/banks/bank-accounts/')({
     component: BankAccountsPage,
 })
 
 type BankAccount = {
-    id: string;
+    id: number;
     accountName: string;
     accountNumber: string;
     bankName: string;
@@ -33,59 +34,47 @@ type BankAccount = {
 };
 
 function BankAccountsPage() {
-    const [bankAccounts] = useState<BankAccount[]>([
-        {
-            id: '1',
-            accountName: 'Hospital Main Account',
-            accountNumber: '1234567890',
-            bankName: 'Sonali Bank',
-            branchName: 'Dhaka Main Branch',
-            accountType: 'current',
-            balance: 2500000,
-            currency: 'BDT',
-            status: 'active',
-            openingDate: '2020-01-15',
+    const token = getCookie('accessToken');
+
+    const { data: bankAccounts = [], isLoading } = useQuery({
+        queryKey: ["bank-accounts"],
+        queryFn: async (): Promise<BankAccount[]> => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/bank-accounts`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch bank accounts");
+            const json = await res.json();
+            return json.data;
         },
-        {
-            id: '2',
-            accountName: 'Payroll Account',
-            accountNumber: '0987654321',
-            bankName: 'Dutch-Bangla Bank',
-            branchName: 'Gulshan Branch',
-            accountType: 'current',
-            balance: 850000,
-            currency: 'BDT',
-            status: 'active',
-            openingDate: '2020-03-20',
-        },
-        {
-            id: '3',
-            accountName: 'Emergency Fund',
-            accountNumber: '5555666677',
-            bankName: 'BRAC Bank',
-            branchName: 'Banani Branch',
-            accountType: 'savings',
-            balance: 1200000,
-            currency: 'BDT',
-            status: 'active',
-            openingDate: '2021-06-10',
-        },
-        {
-            id: '4',
-            accountName: 'Fixed Deposit',
-            accountNumber: '9999888877',
-            bankName: 'City Bank',
-            branchName: 'Dhanmondi Branch',
-            accountType: 'fixed-deposit',
-            balance: 5000000,
-            currency: 'BDT',
-            status: 'active',
-            openingDate: '2022-01-01',
-        },
-    ]);
+        enabled: !!token,
+    });
 
     const totalBalance = bankAccounts.reduce((sum, account) => sum + account.balance, 0);
     const activeAccounts = bankAccounts.filter(acc => acc.status === 'active').length;
+
+    if (isLoading) {
+        return (
+            <>
+                <Header fixed>
+                    <TopNav links={topNav} />
+                    <div className='ms-auto flex items-center space-x-4'>
+                        <Search />
+                        <ThemeSwitch />
+                        <ConfigDrawer />
+                        <ProfileDropdown />
+                    </div>
+                </Header>
+                <Main>
+                    <div className="flex items-center justify-center h-64">
+                        <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+                    </div>
+                </Main>
+            </>
+        );
+    }
 
     return (
         <>

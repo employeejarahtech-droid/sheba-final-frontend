@@ -16,7 +16,7 @@ import { z } from 'zod'
 import { toast } from 'sonner'
 import { ArrowLeft, Stethoscope } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getCookie } from '@/lib/cookies';
 
 export const Route = createFileRoute('/_authenticated/indoor/master/services/create/')({
@@ -24,6 +24,7 @@ export const Route = createFileRoute('/_authenticated/indoor/master/services/cre
 })
 
 const serviceSchema = z.object({
+    serviceCategoryId: z.string().optional(),
     name: z.string().min(1, 'Service name is required'),
     price: z.coerce.number().min(0, 'Price must be zero or positive'),
     description: z.string().optional(),
@@ -40,6 +41,7 @@ function CreateService() {
     const form = useForm<ServiceValues>({
         resolver: zodResolver(serviceSchema) as any,
         defaultValues: {
+            serviceCategoryId: "",
             name: "",
             price: 0,
             description: "",
@@ -47,16 +49,41 @@ function CreateService() {
         },
     })
 
+    // Fetch service categories for dropdown
+    const { data: categoriesData } = useQuery({
+        queryKey: ["service-categories"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/service-category?limit=100`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) {
+                // Return empty array instead of throwing error
+                return { data: { items: [] } };
+            }
+            return res.json();
+        },
+        enabled: !!token,
+        retry: false,
+    });
+
+    const categories = categoriesData?.data?.items || [];
+
     // Create mutation
     const createMutation = useMutation({
         mutationFn: async (data: ServiceValues) => {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/clinic-services`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/service`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(data),
+                body: JSON.stringify({
+                    ...data,
+                    serviceCategoryId: (data.serviceCategoryId && data.serviceCategoryId !== "none") ? parseInt(data.serviceCategoryId) : null,
+                }),
             });
 
             if (!res.ok) {
@@ -68,7 +95,8 @@ function CreateService() {
         },
         onSuccess: () => {
             toast.success("Service created successfully");
-            queryClient.invalidateQueries({ queryKey: ['clinic-services'] });
+            queryClient.invalidateQueries({ queryKey: ['services'] });
+            queryClient.invalidateQueries({ queryKey: ['services-overall-stats'] });
             navigate({ to: '/indoor/master/services' });
         },
         onError: (error: Error) => {
@@ -131,6 +159,33 @@ function CreateService() {
                                 </CardHeader>
                                 <CardContent className="px-4 md:px-6">
                                     <div className="py-5 space-y-5">
+                                        {/* Category */}
+                                        <FormField
+                                            control={form.control}
+                                            name="serviceCategoryId"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Category</FormLabel>
+                                                    <Select onValueChange={field.onChange} value={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger className="h-10">
+                                                                <SelectValue placeholder="Select category (optional)" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="none">No Category</SelectItem>
+                                                            {categories.map((cat: any) => (
+                                                                <SelectItem key={cat.id} value={cat.id.toString()}>
+                                                                    {cat.name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
                                         {/* Service Name */}
                                         <FormField
                                             control={form.control}
