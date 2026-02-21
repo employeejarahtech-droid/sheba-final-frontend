@@ -187,6 +187,6 @@ function ServiceDetails() {
                     </Card>
                 </div>
             </Main>
-        </div>
+        </>
     )
 }

@@ -1,13 +1,22 @@
 import ElectrolytesReportDetails from '@/features/pathology/special/ElectrolytesReportDetails'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from '@/lib/cookies';
-import { Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Printer } from 'lucide-react';
+import { Header } from '@/components/layout/header';
+import { TopNav } from '@/components/layout/top-nav';
+import { topNav } from '@/data/data';
+import { Search } from '@/components/search';
+import { ThemeSwitch } from '@/components/theme-switch';
+import { ConfigDrawer } from '@/components/config-drawer';
+import { ProfileDropdown } from '@/components/profile-dropdown';
+import { Main } from '@/components/layout/main';
+import { Button } from '@/components/ui/button';
 
 export const Route = createFileRoute(
-  '/_authenticated/pathology/hormone/electrolytes/report/$reportId',
+    '/_authenticated/pathology/hormone/electrolytes/report/$reportId',
 )({
-  component: SerumElectrolytesReport,
+    component: SerumElectrolytesReport,
 })
 
 function SerumElectrolytesReport() {
@@ -66,9 +75,32 @@ function SerumElectrolytesReport() {
         );
     }
 
-  return (
-    <>
-      <ElectrolytesReportDetails electrolytesData={electrolytesData} invoiceData={invoiceData} />
-    </>
-  )
+    return (
+        <>
+            <Header fixed className="print:hidden">
+                <TopNav links={topNav} />
+                <div className='ms-auto flex items-center space-x-4'>
+                    <Search />
+                    <ThemeSwitch />
+                    <ConfigDrawer />
+                    <ProfileDropdown />
+                </div>
+            </Header>
+            <Main>
+                <div className="print:hidden flex items-center justify-between gap-4">
+                    <Link to="/pathology/hormone/electrolytes">
+                        <Button variant="outline" size="sm">
+                            <ArrowLeft className="h-4 w-4" />
+                            Back to Electrolytes Tests
+                        </Button>
+                    </Link>
+                    <Button variant="outline" size="sm" onClick={() => window.print()}>
+                        <Printer className="h-4 w-4" />
+                        Print
+                    </Button>
+                </div>
+                <ElectrolytesReportDetails electrolytesData={electrolytesData} invoiceData={invoiceData} />
+            </Main>
+        </>
+    )
 }

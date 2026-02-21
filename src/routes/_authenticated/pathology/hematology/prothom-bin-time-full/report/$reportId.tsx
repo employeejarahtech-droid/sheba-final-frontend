@@ -11,7 +11,7 @@ import { ConfigDrawer } from '@/components/config-drawer'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Main } from '@/components/layout/main'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Printer } from 'lucide-react'
 
 export const Route = createFileRoute(
     '/_authenticated/pathology/hematology/prothom-bin-time-full/report/$reportId',
@@ -54,13 +54,17 @@ function ProthomBinTimeReport() {
                 </div>
             </Header>
             <Main>
-                <div className="print:hidden">
+                <div className="print:hidden flex items-center justify-between gap-4">
                     <Link to="/pathology/hematology/prothom-bin-time-full">
                         <Button variant="outline" size="sm">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            <ArrowLeft className="h-4 w-4" />
                             Back to Prothom Bin Time Full
                         </Button>
                     </Link>
+                    <Button variant="outline" size="sm" onClick={() => window.print()}>
+                        <Printer className="h-4 w-4" />
+                        Print
+                    </Button>
                 </div>
                 <ProthomBinTimeReportDetails data={prothombinData?.data} />
 
