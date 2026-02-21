@@ -77,6 +77,7 @@ const admissionSchema = z.object({
     attendingDoctor: z.string().optional(),
     admittedBy: z.string().optional(),
     admissionDate: z.string().min(1, "Admission date required"),
+    admissionTime: z.string().min(1, "Admission time required"),
     ward: z.string().optional(),
     bedNumber: z.string().min(1, "Bed number required"),
     reason: z.string().min(1, "Reason required"),
@@ -459,6 +460,7 @@ function IndoorNewAdmission() {
             attendingDoctor: "",
             admittedBy: "",
             admissionDate: new Date().toISOString().split('T')[0],
+            admissionTime: new Date().toTimeString().slice(0, 5),
             ward: "",
             bedNumber: "",
             reason: "",
@@ -498,7 +500,7 @@ function IndoorNewAdmission() {
         onSuccess: () => {
             toast.success("Patient admitted successfully");
             queryClient.invalidateQueries({ queryKey: ['admissions'] });
-            navigate({ to: '/admission/admission-list' });
+            navigate({ to: '/admission/patients' });
         },
         onError: (error: Error) => {
             toast.error(error.message || 'Failed to admit patient');
@@ -511,7 +513,7 @@ function IndoorNewAdmission() {
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-background">
-            <Header>
+            <Header fixed>
                 <TopNav links={topNav} />
                 <div className='ms-auto flex items-center space-x-4'>
                     <Search />
@@ -537,7 +539,7 @@ function IndoorNewAdmission() {
                             <Button
                                 variant="outline"
                                 className="hidden sm:flex items-center gap-2 rounded-xl border-gray-200"
-                                onClick={() => navigate({ to: '..' })}
+                                onClick={() => navigate({ to: '/admission/patients' })}
                             >
                                 <ArrowLeft className="h-4 w-4" />
                                 Back to List
@@ -810,27 +812,53 @@ function IndoorNewAdmission() {
                                     </div>
                                 </CardHeader>
                                 <CardContent className="p-4 md:p-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <FormField
-                                            control={form.control}
-                                            name="admissionDate"
-                                            render={({ field }) => (
-                                                <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Admission Date</FormLabel>
-                                                    <FormControl>
-                                                        <div className="relative group">
-                                                            <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
-                                                            <Input
-                                                                type="date"
-                                                                className="h-11 pl-10 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
-                                                                {...field}
-                                                            />
-                                                        </div>
-                                                    </FormControl>
-                                                    <FormMessage className="text-[10px]" />
-                                                </FormItem>
-                                            )}
-                                        />
+                                    <div className="space-y-6">
+                                        {/* Admission Date and Time Row */}
+                                        <div>
+                                            <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 block">Admission Date and Time</FormLabel>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <FormField
+                                                    control={form.control}
+                                                    name="admissionDate"
+                                                    render={({ field }) => (
+                                                        <FormItem className="flex flex-col gap-2">
+                                                            <FormControl>
+                                                                <div className="relative group">
+                                                                    <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
+                                                                    <Input
+                                                                        type="date"
+                                                                        className="h-11 pl-10 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                                                                        {...field}
+                                                                    />
+                                                                </div>
+                                                            </FormControl>
+                                                            <FormMessage className="text-[10px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="admissionTime"
+                                                    render={({ field }) => (
+                                                        <FormItem className="flex flex-col gap-2">
+                                                            <FormControl>
+                                                                <div className="relative group">
+                                                                    <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
+                                                                    <Input
+                                                                        type="time"
+                                                                        className="h-11 pl-10 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                                                                        {...field}
+                                                                    />
+                                                                </div>
+                                                            </FormControl>
+                                                            <FormMessage className="text-[10px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Bed Allocation */}
                                         <FormField
                                             control={form.control}
                                             name="bedNumber"
@@ -897,33 +925,6 @@ function IndoorNewAdmission() {
 
                             {/* Final Footer Actions */}
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8 border-t border-gray-100 dark:border-gray-800">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="w-full sm:w-auto px-10 h-14 text-lg rounded-xl border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-all font-semibold"
-                                    onClick={() => form.reset()}
-                                >
-                                    Reset Form
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="w-full sm:w-auto px-10 h-14 text-lg rounded-xl border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-all font-semibold"
-                                >
-                                    Print Application
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={createMutation.isPending}
-                                    className="w-full sm:w-auto px-12 h-14 text-lg rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 font-bold text-white shadow-xl shadow-blue-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/40 active:translate-y-0"
-                                >
-                                    {createMutation.isPending ? (
-                                        <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-                                    ) : (
-                                        <CircleCheck className="mr-2 h-6 w-6" />
-                                    )}
-                                    {createMutation.isPending ? "Submitting..." : "Confirm Admission"}
-                                </Button>
                             </div>
                         </form>
                     </Form>

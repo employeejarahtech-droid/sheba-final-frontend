@@ -230,6 +230,26 @@ export function AdmittedPatientsList() {
             },
             defaultContent: "",
         },
+        {
+            data: null,
+            title: "Actions",
+            orderable: false,
+            responsivePriority: 1,
+            render: (_data: any, _type: string, row: AdmissionItem) => {
+                return `
+                    <button
+                        onclick="window.location.href='/admission/patients/${row.id}/billing'"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        Add Billing
+                    </button>
+                `;
+            },
+            defaultContent: "",
+        },
     ], [page, limit])
 
     return (
@@ -243,8 +263,8 @@ export function AdmittedPatientsList() {
                 </div>
             </Header>
 
-            <Main className="p-6 lg:p-10 w-full flex-1 bg-gray-50/50 dark:bg-black/20">
-                <div className="space-y-6 max-w-7xl mx-auto">
+            <Main className="p-6 lg:p-10 w-full flex-1 dark:bg-black/20">
+                <div className="space-y-6 mx-auto">
                     {/* Header */}
                     <div className="flex flex-wrap justify-between items-start gap-4">
                         <div className="space-y-2">

@@ -39,6 +39,7 @@ interface DataTableProps<TData> {
   search?: string;
   onSearchChange?: (value: string) => void;
   isLoading?: boolean;
+  filterSlot?: React.ReactNode;
 }
 
 export function DataTable<TData extends Record<string, any>>({
@@ -50,6 +51,7 @@ export function DataTable<TData extends Record<string, any>>({
   search,
   onSearchChange,
   isLoading,
+  filterSlot,
 }: DataTableProps<TData>) {
   const tableRef = useRef<HTMLTableElement>(null);
   const dataTableRef = useRef<any>(null);
@@ -252,10 +254,13 @@ export function DataTable<TData extends Record<string, any>>({
             )}
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={exportToCSV}>
-          <Download className="mr-2 h-4 w-4" />
-          Export CSV
-        </Button>
+        <div className="flex items-center gap-2">
+          {filterSlot}
+          <Button variant="outline" size="sm" onClick={exportToCSV}>
+            <Download className="mr-2 h-4 w-4" />
+            Export CSV
+          </Button>
+        </div>
       </div>
 
       {/* DataTable */}

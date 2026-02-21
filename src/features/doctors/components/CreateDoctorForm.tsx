@@ -23,8 +23,15 @@ import {
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { getCookie } from "@/lib/cookies";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const doctorSchema = z.object({
   doctor_name: z.string().min(1, { message: "Required" }),
@@ -37,12 +44,30 @@ const doctorSchema = z.object({
   mobile: z.string().min(1, { message: "Required" }),
   email: z.string().email({ message: "Invalid email" }),
   score: z.number().min(0, { message: "Score must be at least 0" }),
+  doctor_type_ids: z.array(z.number()).optional(),
 });
 
 export function CreateDoctorForm() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const token = getCookie('accessToken');
+
+  // Fetch doctor types
+  const { data: doctorTypes = [], isLoading: isLoadingDoctorTypes, error: doctorTypesError } = useQuery({
+    queryKey: ["doctor-types"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/doctor-type?limit=100`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch doctor types");
+      const result = await res.json();
+      return result.data?.items || result.data || [];
+    },
+    enabled: !!token,
+  });
 
   const form = useForm<z.infer<typeof doctorSchema>>({
     resolver: zodResolver(doctorSchema),
@@ -57,6 +82,7 @@ export function CreateDoctorForm() {
       mobile: "",
       email: "",
       score: 0,
+      doctor_type_ids: [],
     },
   });
 
@@ -168,6 +194,82 @@ export function CreateDoctorForm() {
                     <FormControl>
                       <Input placeholder="Cardiology, Neurology, etc." {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Doctor Type - Multi Select */}
+              <FormField
+                control={form.control}
+                name="doctor_type_ids"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Doctor Types</FormLabel>
+                    {isLoadingDoctorTypes ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        Loading doctor types...
+                      </div>
+                    ) : doctorTypesError ? (
+                      <div className="flex items-center gap-2 text-sm text-red-500">
+                        Failed to load doctor types
+                      </div>
+                    ) : doctorTypes.length === 0 ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        No doctor types available.
+                        <a
+                          href="/indoor/master/doctor-types"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          Create doctor types first
+                        </a>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap gap-2">
+                          {doctorTypes.map((type: any) => {
+                            const isSelected = field.value?.includes(type.id);
+                            return (
+                              <button
+                                key={type.id}
+                                type="button"
+                                onClick={() => {
+                                  const currentValues = field.value || [];
+                                  if (isSelected) {
+                                    // Remove the type
+                                    field.onChange(currentValues.filter((id: number) => id !== type.id));
+                                  } else {
+                                    // Add the type
+                                    field.onChange([...currentValues, type.id]);
+                                  }
+                                }}
+                                className={`
+                                  inline-flex items-center gap-2 px-3 py-2 rounded-md border text-sm font-medium
+                                  transition-colors
+                                  ${
+                                    isSelected
+                                    ? 'bg-primary text-primary-foreground border-primary'
+                                    : 'bg-background hover:bg-accent border-input'
+                                  }
+                                `}
+                              >
+                                {type.name}
+                                {isSelected && (
+                                  <span className="h-4 w-4">✓</span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {field.value && field.value.length > 0 && (
+                          <div className="text-sm text-muted-foreground">
+                            {field.value.length} type(s) selected
+                          </div>
+                        )}
+                      </div>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}

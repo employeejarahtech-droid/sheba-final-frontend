@@ -148,6 +148,7 @@ import { Route as AuthenticatedIndoorMasterAnasthesiaTypesIndexRouteImport } fro
 import { Route as AuthenticatedCustomersIdEditIndexRouteImport } from './routes/_authenticated/customers/$id/edit/index'
 import { Route as AuthenticatedAdmissionInvoiceListIndexRouteImport } from './routes/_authenticated/admission/invoice/list/index'
 import { Route as AuthenticatedAdmissionInvoiceCreateIndexRouteImport } from './routes/_authenticated/admission/invoice/create/index'
+import { Route as AuthenticatedAdmissionBillingBillingIdIndexRouteImport } from './routes/_authenticated/admission/billing/$billingId/index'
 import { Route as AuthenticatedAccountingReportsTrialBalanceIndexRouteImport } from './routes/_authenticated/accounting/reports/trial-balance/index'
 import { Route as AuthenticatedAccountingReportsProfitLossIndexRouteImport } from './routes/_authenticated/accounting/reports/profit-loss/index'
 import { Route as AuthenticatedAccountingReportsProfitAndLossIndexRouteImport } from './routes/_authenticated/accounting/reports/profit-and-loss/index'
@@ -178,6 +179,7 @@ import { Route as AuthenticatedOutdoorMasterTestsCreateIndexRouteImport } from '
 import { Route as AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRouteImport } from './routes/_authenticated/outdoor/master/doctors/$doctorId/index'
 import { Route as AuthenticatedIndoorMasterServicesCreateIndexRouteImport } from './routes/_authenticated/indoor/master/services/create/index'
 import { Route as AuthenticatedIndoorMasterBedCabinListCreateIndexRouteImport } from './routes/_authenticated/indoor/master/bed-cabin-list/create/index'
+import { Route as AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/billing/index'
 import { Route as AuthenticatedXRayAllEditBuilderIdRouteImport } from './routes/_authenticated/x-ray/all/edit/builder/$id'
 import { Route as AuthenticatedUltrasonogramAllEditBuilderIdRouteImport } from './routes/_authenticated/ultrasonogram/all/edit/builder/$id'
 import { Route as AuthenticatedPathologyUrineUrineForSugarReportReportIdRouteImport } from './routes/_authenticated/pathology/urine/urine-for-sugar/report/$reportId'
@@ -1026,6 +1028,12 @@ const AuthenticatedAdmissionInvoiceCreateIndexRoute =
     path: '/admission/invoice/create/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdmissionBillingBillingIdIndexRoute =
+  AuthenticatedAdmissionBillingBillingIdIndexRouteImport.update({
+    id: '/admission/billing/$billingId/',
+    path: '/admission/billing/$billingId/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAccountingReportsTrialBalanceIndexRoute =
   AuthenticatedAccountingReportsTrialBalanceIndexRouteImport.update({
     id: '/accounting/reports/trial-balance/',
@@ -1204,6 +1212,12 @@ const AuthenticatedIndoorMasterBedCabinListCreateIndexRoute =
   AuthenticatedIndoorMasterBedCabinListCreateIndexRouteImport.update({
     id: '/indoor/master/bed-cabin-list/create/',
     path: '/indoor/master/bed-cabin-list/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute =
+  AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRouteImport.update({
+    id: '/admission/patients/$admissionId/billing/',
+    path: '/admission/patients/$admissionId/billing/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedXRayAllEditBuilderIdRoute =
@@ -1563,6 +1577,7 @@ export interface FileRoutesByFullPath {
   '/accounting/reports/profit-and-loss': typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
   '/accounting/reports/profit-loss': typeof AuthenticatedAccountingReportsProfitLossIndexRoute
   '/accounting/reports/trial-balance': typeof AuthenticatedAccountingReportsTrialBalanceIndexRoute
+  '/admission/billing/$billingId': typeof AuthenticatedAdmissionBillingBillingIdIndexRoute
   '/admission/invoice/create': typeof AuthenticatedAdmissionInvoiceCreateIndexRoute
   '/admission/invoice/list': typeof AuthenticatedAdmissionInvoiceListIndexRoute
   '/customers/$id/edit': typeof AuthenticatedCustomersIdEditIndexRoute
@@ -1650,6 +1665,7 @@ export interface FileRoutesByFullPath {
   '/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
   '/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
   '/x-ray/all/edit/builder/$id': typeof AuthenticatedXRayAllEditBuilderIdRoute
+  '/admission/patients/$admissionId/billing': typeof AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute
   '/indoor/master/bed-cabin-list/create': typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
   '/indoor/master/services/create': typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
   '/outdoor/master/doctors/$doctorId': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
@@ -1770,6 +1786,7 @@ export interface FileRoutesByTo {
   '/accounting/reports/profit-and-loss': typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
   '/accounting/reports/profit-loss': typeof AuthenticatedAccountingReportsProfitLossIndexRoute
   '/accounting/reports/trial-balance': typeof AuthenticatedAccountingReportsTrialBalanceIndexRoute
+  '/admission/billing/$billingId': typeof AuthenticatedAdmissionBillingBillingIdIndexRoute
   '/admission/invoice/create': typeof AuthenticatedAdmissionInvoiceCreateIndexRoute
   '/admission/invoice/list': typeof AuthenticatedAdmissionInvoiceListIndexRoute
   '/customers/$id/edit': typeof AuthenticatedCustomersIdEditIndexRoute
@@ -1857,6 +1874,7 @@ export interface FileRoutesByTo {
   '/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
   '/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
   '/x-ray/all/edit/builder/$id': typeof AuthenticatedXRayAllEditBuilderIdRoute
+  '/admission/patients/$admissionId/billing': typeof AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute
   '/indoor/master/bed-cabin-list/create': typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
   '/indoor/master/services/create': typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
   '/outdoor/master/doctors/$doctorId': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
@@ -1982,6 +2000,7 @@ export interface FileRoutesById {
   '/_authenticated/accounting/reports/profit-and-loss/': typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
   '/_authenticated/accounting/reports/profit-loss/': typeof AuthenticatedAccountingReportsProfitLossIndexRoute
   '/_authenticated/accounting/reports/trial-balance/': typeof AuthenticatedAccountingReportsTrialBalanceIndexRoute
+  '/_authenticated/admission/billing/$billingId/': typeof AuthenticatedAdmissionBillingBillingIdIndexRoute
   '/_authenticated/admission/invoice/create/': typeof AuthenticatedAdmissionInvoiceCreateIndexRoute
   '/_authenticated/admission/invoice/list/': typeof AuthenticatedAdmissionInvoiceListIndexRoute
   '/_authenticated/customers/$id/edit/': typeof AuthenticatedCustomersIdEditIndexRoute
@@ -2069,6 +2088,7 @@ export interface FileRoutesById {
   '/_authenticated/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
   '/_authenticated/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
   '/_authenticated/x-ray/all/edit/builder/$id': typeof AuthenticatedXRayAllEditBuilderIdRoute
+  '/_authenticated/admission/patients/$admissionId/billing/': typeof AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute
   '/_authenticated/indoor/master/bed-cabin-list/create/': typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
   '/_authenticated/indoor/master/services/create/': typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
   '/_authenticated/outdoor/master/doctors/$doctorId/': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
@@ -2192,6 +2212,7 @@ export interface FileRouteTypes {
     | '/accounting/reports/profit-and-loss'
     | '/accounting/reports/profit-loss'
     | '/accounting/reports/trial-balance'
+    | '/admission/billing/$billingId'
     | '/admission/invoice/create'
     | '/admission/invoice/list'
     | '/customers/$id/edit'
@@ -2279,6 +2300,7 @@ export interface FileRouteTypes {
     | '/pathology/urine/urine-for-sugar/report/$reportId'
     | '/ultrasonogram/all/edit/builder/$id'
     | '/x-ray/all/edit/builder/$id'
+    | '/admission/patients/$admissionId/billing'
     | '/indoor/master/bed-cabin-list/create'
     | '/indoor/master/services/create'
     | '/outdoor/master/doctors/$doctorId'
@@ -2399,6 +2421,7 @@ export interface FileRouteTypes {
     | '/accounting/reports/profit-and-loss'
     | '/accounting/reports/profit-loss'
     | '/accounting/reports/trial-balance'
+    | '/admission/billing/$billingId'
     | '/admission/invoice/create'
     | '/admission/invoice/list'
     | '/customers/$id/edit'
@@ -2486,6 +2509,7 @@ export interface FileRouteTypes {
     | '/pathology/urine/urine-for-sugar/report/$reportId'
     | '/ultrasonogram/all/edit/builder/$id'
     | '/x-ray/all/edit/builder/$id'
+    | '/admission/patients/$admissionId/billing'
     | '/indoor/master/bed-cabin-list/create'
     | '/indoor/master/services/create'
     | '/outdoor/master/doctors/$doctorId'
@@ -2610,6 +2634,7 @@ export interface FileRouteTypes {
     | '/_authenticated/accounting/reports/profit-and-loss/'
     | '/_authenticated/accounting/reports/profit-loss/'
     | '/_authenticated/accounting/reports/trial-balance/'
+    | '/_authenticated/admission/billing/$billingId/'
     | '/_authenticated/admission/invoice/create/'
     | '/_authenticated/admission/invoice/list/'
     | '/_authenticated/customers/$id/edit/'
@@ -2697,6 +2722,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pathology/urine/urine-for-sugar/report/$reportId'
     | '/_authenticated/ultrasonogram/all/edit/builder/$id'
     | '/_authenticated/x-ray/all/edit/builder/$id'
+    | '/_authenticated/admission/patients/$admissionId/billing/'
     | '/_authenticated/indoor/master/bed-cabin-list/create/'
     | '/_authenticated/indoor/master/services/create/'
     | '/_authenticated/outdoor/master/doctors/$doctorId/'
@@ -3702,6 +3728,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdmissionInvoiceCreateIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admission/billing/$billingId/': {
+      id: '/_authenticated/admission/billing/$billingId/'
+      path: '/admission/billing/$billingId'
+      fullPath: '/admission/billing/$billingId'
+      preLoaderRoute: typeof AuthenticatedAdmissionBillingBillingIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/accounting/reports/trial-balance/': {
       id: '/_authenticated/accounting/reports/trial-balance/'
       path: '/accounting/reports/trial-balance'
@@ -3910,6 +3943,13 @@ declare module '@tanstack/react-router' {
       path: '/indoor/master/bed-cabin-list/create'
       fullPath: '/indoor/master/bed-cabin-list/create'
       preLoaderRoute: typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/patients/$admissionId/billing/': {
+      id: '/_authenticated/admission/patients/$admissionId/billing/'
+      path: '/admission/patients/$admissionId/billing'
+      fullPath: '/admission/patients/$admissionId/billing'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/x-ray/all/edit/builder/$id': {
@@ -4307,6 +4347,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountingReportsProfitAndLossIndexRoute: typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
   AuthenticatedAccountingReportsProfitLossIndexRoute: typeof AuthenticatedAccountingReportsProfitLossIndexRoute
   AuthenticatedAccountingReportsTrialBalanceIndexRoute: typeof AuthenticatedAccountingReportsTrialBalanceIndexRoute
+  AuthenticatedAdmissionBillingBillingIdIndexRoute: typeof AuthenticatedAdmissionBillingBillingIdIndexRoute
   AuthenticatedAdmissionInvoiceCreateIndexRoute: typeof AuthenticatedAdmissionInvoiceCreateIndexRoute
   AuthenticatedAdmissionInvoiceListIndexRoute: typeof AuthenticatedAdmissionInvoiceListIndexRoute
   AuthenticatedCustomersIdEditIndexRoute: typeof AuthenticatedCustomersIdEditIndexRoute
@@ -4394,6 +4435,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute: typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
   AuthenticatedUltrasonogramAllEditBuilderIdRoute: typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
   AuthenticatedXRayAllEditBuilderIdRoute: typeof AuthenticatedXRayAllEditBuilderIdRoute
+  AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute
   AuthenticatedIndoorMasterBedCabinListCreateIndexRoute: typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
   AuthenticatedIndoorMasterServicesCreateIndexRoute: typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
   AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute: typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
@@ -4550,6 +4592,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAccountingReportsProfitLossIndexRoute,
   AuthenticatedAccountingReportsTrialBalanceIndexRoute:
     AuthenticatedAccountingReportsTrialBalanceIndexRoute,
+  AuthenticatedAdmissionBillingBillingIdIndexRoute:
+    AuthenticatedAdmissionBillingBillingIdIndexRoute,
   AuthenticatedAdmissionInvoiceCreateIndexRoute:
     AuthenticatedAdmissionInvoiceCreateIndexRoute,
   AuthenticatedAdmissionInvoiceListIndexRoute:
@@ -4723,6 +4767,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedUltrasonogramAllEditBuilderIdRoute,
   AuthenticatedXRayAllEditBuilderIdRoute:
     AuthenticatedXRayAllEditBuilderIdRoute,
+  AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute:
+    AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute,
   AuthenticatedIndoorMasterBedCabinListCreateIndexRoute:
     AuthenticatedIndoorMasterBedCabinListCreateIndexRoute,
   AuthenticatedIndoorMasterServicesCreateIndexRoute:

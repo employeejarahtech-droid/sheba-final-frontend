@@ -49,19 +49,29 @@ export default function Doctors() {
         enabled: !!token,
     });
 
-    const { data } = useQuery({
+    const { data, error, isLoading } = useQuery({
         queryKey: ["doctor", page, search],
 
         queryFn: async () => {
-            const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/doctor?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
+            const apiUrl = `${import.meta.env.VITE_API_URL}/api/doctor?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`;
+            console.log('Fetching from:', apiUrl);
 
-            if (!res.ok) throw new Error("Failed to fetch doctors");
-            return res.json(); // MUST match placeholderData
+            const res = await fetch(apiUrl, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            console.log('Response status:', res.status);
+            console.log('Response ok:', res.ok);
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error('Error response:', errorText);
+                throw new Error(`Failed to fetch doctors: ${res.status} ${errorText}`);
+            }
+
+            const json = await res.json();
+            console.log('Parsed JSON:', JSON.stringify(json, null, 2));
+            return json;
         },
 
         enabled: !!token,
@@ -81,6 +91,19 @@ export default function Doctors() {
                     },
                 },
     });
+
+    // Debug logging
+    console.log('Doctors data:', data);
+    console.log('Doctors items:', data?.data?.items);
+    console.log('Doctors rows:', data?.data?.rows);
+    console.log('Full response:', JSON.stringify(data, null, 2));
+
+    // Extract data with fallbacks for different response structures
+    const doctorsData = data?.data?.items || data?.data?.rows || data?.items || data?.rows || [];
+    const doctorsMeta = data?.data?.meta || data?.meta || { page, limit, total: data?.data?.total || data?.total || 0 };
+
+    console.log('Extracted doctorsData:', doctorsData);
+    console.log('Extracted doctorsMeta:', doctorsMeta);
 
     // Calculate stats
     const stats = useMemo(() => {
@@ -293,11 +316,12 @@ export default function Doctors() {
 
             <DataTable
                 columns={columns}
-                data={data?.data?.rows || data?.data?.items || []}
-                meta={data?.data?.meta || { page, limit, total: data?.data?.total || 0 }}
+                data={doctorsData}
+                meta={doctorsMeta}
                 onPageChange={setPage}
                 search={search}
                 onSearchChange={setSearch}
+                isLoading={isLoading}
             />
 
         </main>

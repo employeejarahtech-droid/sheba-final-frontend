@@ -8,6 +8,13 @@ import { Button } from "@/components/ui/button";
 import { getCookie } from "@/lib/cookies";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type DoctorItem = {
   id: string;
@@ -21,6 +28,8 @@ type DoctorItem = {
   mobile: string;
   email: string;
   score: number;
+  doctor_type_id?: number;
+  doctor_type_ids?: number[];
 };
 
 export function EditDoctorForm({
@@ -46,6 +55,39 @@ export function EditDoctorForm({
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [score, setScore] = useState(0);
+  const [doctorTypeIds, setDoctorTypeIds] = useState<number[]>([]);
+
+  // Fetch doctor types
+  const { data: doctorTypes = [], isLoading: isLoadingDoctorTypes } = useQuery({
+    queryKey: ["doctor-types"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/doctor-types`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch doctor types");
+      const result = await res.json();
+      return result.data || [];
+    },
+    enabled: !!token,
+  });
+  const { data: doctorTypes = [] } = useQuery({
+    queryKey: ["doctor-types"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/doctor-types`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch doctor types");
+      const result = await res.json();
+      return result.data || [];
+    },
+    enabled: !!token,
+  });
 
   // Fetch doctor data when doctorId changes
   const { data: doctorData } = useQuery({
@@ -78,6 +120,14 @@ export function EditDoctorForm({
       setMobile(doctor.mobile || "");
       setEmail(doctor.email || "");
       setScore(doctor.score || 0);
+      // Handle multiple doctor types - if single value, convert to array
+      if (doctor.doctor_type_ids) {
+        setDoctorTypeIds(doctor.doctor_type_ids);
+      } else if (doctor.doctor_type_id) {
+        setDoctorTypeIds([doctor.doctor_type_id]);
+      } else {
+        setDoctorTypeIds([]);
+      }
     }
   }, [doctorData]);
 
@@ -120,6 +170,7 @@ export function EditDoctorForm({
     setMobile("");
     setEmail("");
     setScore(0);
+    setDoctorTypeIds([]);
   };
 
   const handleSubmit = () => {
@@ -139,6 +190,7 @@ export function EditDoctorForm({
       mobile,
       email,
       score: Number(score),
+      doctor_type_ids: doctorTypeIds,
     };
 
     updateMutation.mutate(updatedDoctor);
@@ -175,6 +227,64 @@ export function EditDoctorForm({
           <div className="space-y-2">
             <Label>Speciality</Label>
             <Input placeholder="Cardiology, Neurology, etc." value={speciality} onChange={(e) => setSpeciality(e.target.value)} />
+          </div>
+
+          {/* Doctor Types - Multi Select */}
+          <div className="space-y-2">
+            <Label>Doctor Types</Label>
+            {isLoadingDoctorTypes ? (
+              <div className="text-sm text-muted-foreground">Loading doctor types...</div>
+            ) : doctorTypes.length === 0 ? (
+              <div className="text-sm text-muted-foreground">
+                No doctor types available.
+                <a
+                  href="/indoor/master/doctor-types"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline ml-2"
+                >
+                  Create doctor types
+                </a>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {doctorTypes.map((type: any) => {
+                    const isSelected = doctorTypeIds.includes(type.id);
+                    return (
+                      <button
+                        key={type.id}
+                        type="button"
+                        onClick={() => {
+                          if (isSelected) {
+                            setDoctorTypeIds(doctorTypeIds.filter((id: number) => id !== type.id));
+                          } else {
+                            setDoctorTypeIds([...doctorTypeIds, type.id]);
+                          }
+                        }}
+                        className={`
+                          inline-flex items-center gap-2 px-3 py-2 rounded-md border text-sm font-medium
+                          transition-colors
+                          ${
+                            isSelected
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-background hover:bg-accent border-input'
+                          }
+                        `}
+                      >
+                        {type.name}
+                        {isSelected && <span className="h-4 w-4">✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+                {doctorTypeIds.length > 0 && (
+                  <div className="text-sm text-muted-foreground">
+                    {doctorTypeIds.length} type(s) selected
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Country */}

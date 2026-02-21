@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from 'react'
 import { toast } from "sonner"
-import { Loader2, ArrowLeft, Check, ChevronsUpDown } from 'lucide-react'
+import { Loader2, ArrowLeft, Check, ChevronsUpDown, Printer } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
@@ -347,9 +347,16 @@ export default function DueCollectionDetails() {
             </Header>
 
             <main className='p-6 lg:p-10'>
-                <div className="mb-6">
+                <div className="mb-6 flex items-center gap-4">
                     <Button variant="ghost" onClick={() => navigate({ to: '/outdoor/reception/due-collection' })}>
                         <ArrowLeft className="mr-2 h-4 w-4" /> Back to List
+                    </Button>
+                    <Button
+                        variant="outline"
+                        onClick={() => window.open(`/outdoor/reception/invoices/${invoiceId}`, '_blank')}
+                        className="ml-auto"
+                    >
+                        <Printer className="mr-2 h-4 w-4" /> Print Invoice
                     </Button>
                 </div>
 
