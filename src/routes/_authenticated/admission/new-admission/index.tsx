@@ -482,6 +482,7 @@ function IndoorNewAdmission() {
                     sex: values.gender,
                     phone: values.mobile_number,
                     admission_date: values.admissionDate,
+                    admission_time: values.admissionTime,
                     bed_cabin_id: parseInt(values.bedNumber),
                     doctor_id: values.underConsultant ? parseInt(values.underConsultant) : null,
                     diagnosis: values.reason,

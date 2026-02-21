@@ -19,6 +19,7 @@ import {
     CalendarDays,
     CalendarRange,
     Plus,
+    Loader2,
 } from 'lucide-react'
 import {
     Bar,
@@ -33,10 +34,67 @@ import {
     Cell,
 } from 'recharts'
 import { Overview } from '@/types/accounting.types'
+import { Suspense } from 'react'
 
 export const Route = createFileRoute('/_authenticated/accounting/')({
     component: AccountingOverview,
 })
+
+// Loading component
+function AccountingLoading() {
+    return (
+        <>
+            <Header fixed>
+                <TopNav links={topNav} />
+                <div className='ms-auto flex items-center space-x-4'>
+                    <div className='hidden md:block'><Search /></div>
+                    <ThemeSwitch />
+                    <ConfigDrawer />
+                    <ProfileDropdown />
+                </div>
+            </Header>
+            <main className='p-6 lg:p-10'>
+                <div className='flex items-center justify-center min-h-[400px]'>
+                    <div className='text-center'>
+                        <Loader2 className='h-8 w-8 animate-spin mx-auto mb-4' />
+                        <p className='text-muted-foreground'>Loading accounting data...</p>
+                    </div>
+                </div>
+            </main>
+        </>
+    )
+}
+
+// Error boundary component
+function AccountingError({ error }: { error: Error }) {
+    return (
+        <>
+            <Header fixed>
+                <TopNav links={topNav} />
+                <div className='ms-auto flex items-center space-x-4'>
+                    <div className='hidden md:block'><Search /></div>
+                    <ThemeSwitch />
+                    <ConfigDrawer />
+                    <ProfileDropdown />
+                </div>
+            </Header>
+            <main className='p-6 lg:p-10'>
+                <div className='flex items-center justify-center min-h-[400px]'>
+                    <div className='text-center'>
+                        <p className='text-red-500 font-semibold mb-2'>Error loading accounting data</p>
+                        <p className='text-muted-foreground text-sm'>{error.message}</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className='mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md'
+                        >
+                            Retry
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </>
+    )
+}
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
 
