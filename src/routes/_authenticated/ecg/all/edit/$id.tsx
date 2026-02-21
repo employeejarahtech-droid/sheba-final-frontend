@@ -123,7 +123,8 @@ function EditECGReport() {
   };
 
   const handlePrint = () => {
-    window.print();
+    // Navigate to print page in same tab
+    router.navigate({ to: '/ecg/all/print/$id', params: { id } });
   };
 
   if (isLoading) {

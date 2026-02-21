@@ -1,12 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { ColumnDef } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
 import { CreatePatientTypeForm } from './components/CreatePatientTypeForm'
 import { EditPatientTypeForm } from './components/EditPatientTypeForm'
@@ -95,59 +93,72 @@ export default function PatientTypes() {
         },
     ];
 
-    const columns: ColumnDef<PatientTypeItem>[] = [
+    const columns = [
         {
-            accessorKey: "id",
-            header: "ID",
+            data: "id",
+            title: "ID",
         },
         {
-            accessorKey: "name",
-            header: "Type Name",
+            data: "name",
+            title: "Type Name",
         },
         {
-            accessorKey: "description",
-            header: "Description",
-            cell: ({ row }) => row.original.description || '-',
+            data: "description",
+            title: "Description",
+            render: (data: any) => data || '-',
         },
         {
-            accessorKey: "created_at",
-            header: "Created Date",
-            cell: ({ row }) => {
-                const date = row.original.created_at;
-                if (!date) return '-';
-                const parsedDate = new Date(date);
+            data: "created_at",
+            title: "Created Date",
+            render: (data: any) => {
+                if (!data) return '-';
+                const parsedDate = new Date(data);
                 return isNaN(parsedDate.getTime()) ? '-' : parsedDate.toLocaleDateString();
             },
         },
         {
-            id: "actions",
-            header: "Actions",
-            cell: ({ row }) => {
-                const item = row.original;
-                return (
-                    <div className="flex gap-2">
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => navigate({ to: `/indoor/master/patient-types/${item.id}` })}
-                        >
+            data: null,
+            title: "Actions",
+            render: (data: any, type: string, row: PatientTypeItem) => {
+                return `
+                    <div class="flex gap-2">
+                        <button data-action="view" data-id="${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3">
                             View
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant="default"
-                            onClick={() => {
-                                setSelectedPatientTypeId(item.id);
-                                setOpenEditForm(true);
-                            }}
-                        >
+                        </button>
+                        <button data-action="edit" data-id="${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3">
                             Edit
-                        </Button>
+                        </button>
                     </div>
-                );
+                `;
             },
         },
     ];
+
+    // Handle button clicks via event delegation
+    useEffect(() => {
+        const handleTableClick = (e: Event) => {
+            const target = e.target as HTMLElement;
+            const button = target.closest('button[data-action]');
+            if (!button) return;
+
+            const action = button.getAttribute('data-action');
+            const id = button.getAttribute('data-id');
+
+            if (action === 'view' && id) {
+                navigate({ to: `/indoor/master/patient-types/${id}` });
+            } else if (action === 'edit' && id) {
+                setSelectedPatientTypeId(Number(id));
+                setOpenEditForm(true);
+            }
+        };
+
+        // Add event listener to the document
+        document.addEventListener('click', handleTableClick);
+
+        return () => {
+            document.removeEventListener('click', handleTableClick);
+        };
+    }, [navigate]);
 
     return <>
         <Header fixed>

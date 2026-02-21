@@ -796,6 +796,7 @@ export default function HospitalInvoiceForm() {
                               <SelectContent>
                                 <SelectItem value="Y">Years</SelectItem>
                                 <SelectItem value="M">Months</SelectItem>
+                                <SelectItem value="D">Days</SelectItem>
                               </SelectContent>
                             </Select>
                           </FormControl>

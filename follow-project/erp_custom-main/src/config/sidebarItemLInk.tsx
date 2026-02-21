@@ -28,6 +28,7 @@ import {
   Users,
   CheckCircle,
   Clock,
+  BedDouble,
 } from "lucide-react";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Products from "../pages/products/Products";
@@ -123,6 +124,7 @@ import {
   SuperAdminPermission,
   RouteOperationPermission,
   HelpPermission,
+  IndoorPermission,
 } from "./permissions";
 import SalesReportsPage from "@/pages/reports/SalesReports";
 import SalesRouteDetails from "@/pages/salesOrders/salesRoutes/SalesRouteDetails";
@@ -181,6 +183,7 @@ import PayrollReports from "@/pages/HrAndPayroll/PayrollReports";
 import { ConfirmedOrders } from "@/pages/salesOrders/order/ConfirmedOrders";
 import IntransitOrder from "@/pages/salesOrders/order/IntransitOrder";
 import EditRoutePage from "@/pages/salesOrders/salesRoutes/EditRoutePage";
+import BedCabinListPage from "@/pages/indoor/bed-cabin";
 
 export const sidebarItemLink = [
   // DASHBOARD
@@ -1532,6 +1535,30 @@ export const sidebarItemLink = [
       },
     ],
   },
+
+  // INDOOR MANAGEMENT
+  {
+    title: "Indoor",
+    url: "#",
+    icon: BedDouble,
+    allowedPermissions: [
+      IndoorPermission.VIEW,
+      SuperAdminPermission.ACCESS_ALL,
+    ],
+    items: [
+      {
+        title: "Bed/Cabin List",
+        url: "/dashboard/indoor/bed-cabin",
+        element: <BedCabinListPage />,
+        icon: List,
+        allowedPermissions: [
+          IndoorPermission.BED_CABIN_LIST,
+          SuperAdminPermission.ACCESS_ALL,
+        ],
+      },
+    ],
+  },
+
   // ROUTE OPERATIONS
   {
     title: "Help",

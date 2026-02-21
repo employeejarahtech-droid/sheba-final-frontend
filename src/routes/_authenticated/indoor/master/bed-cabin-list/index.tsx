@@ -5,12 +5,9 @@ import { Main } from '@/components/layout/main';
 import { ProfileDropdown } from '@/components/profile-dropdown';
 import { Search } from '@/components/search';
 import { ThemeSwitch } from '@/components/theme-switch';
-import { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable';
-import { PlusCircle, PenLine, Trash2 } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from '@/lib/cookies';
@@ -32,98 +29,98 @@ function BedCabinList() {
     const navigate = useNavigate();
     const token = getCookie('accessToken');
 
-    const { data, isLoading } = useQuery({
+    const { data, isLoading, error } = useQuery({
         queryKey: ['bed-cabin-list'],
         queryFn: async () => {
+            console.log('Fetching bed/cabin list from:', `${import.meta.env.VITE_API_URL}/api/bed-cabin?limit=100`);
+            console.log('Token exists:', !!token);
+
             const res = await fetch(`${import.meta.env.VITE_API_URL}/api/bed-cabin?limit=100`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            if (!res.ok) throw new Error('Failed to fetch bed/cabin list');
-            const result = await res.json();
-            return result.data.items as BedCabinItem[];
-        },
-        enabled: !!token
-    });
-    const columns: ColumnDef<BedCabinItem>[] = [
-        {
-            id: "select",
-            header: ({ table }) => (
-                <Checkbox
-                    checked={table.getIsAllPageRowsSelected()}
-                    onCheckedChange={(value) =>
-                        table.toggleAllPageRowsSelected(Boolean(value))
-                    }
-                />
-            ),
-            cell: ({ row }) => (
-                <Checkbox
-                    checked={row.getIsSelected()}
-                    onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-                />
-            ),
-            enableSorting: false,
-            enableHiding: false,
-        },
-        {
-            accessorKey: "code",
-            header: "Bed/Cabin Code",
-            cell: ({ row }) => <span className="font-bold text-blue-600">{row.getValue("code")}</span>
-        },
-        {
-            accessorKey: "type",
-            header: "Type",
-            cell: ({ row }) => {
-                const type = row.getValue("type") as string;
-                return (
-                    <Badge variant="outline" className="rounded-md font-medium px-2 py-0.5 border-blue-100 bg-blue-50/30 text-blue-700">
-                        {type}
-                    </Badge>
-                );
+
+            console.log('Response status:', res.status, res.statusText);
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error('API Error:', res.status, errorText);
+                throw new Error(`Failed to fetch bed/cabin list: ${res.status} - ${errorText}`);
             }
+
+            const result = await res.json();
+            console.log('Full API Response:', JSON.stringify(result, null, 2));
+
+            // Return the full result, not just items - we'll access .data?.items in the render
+            return result;
+        },
+        enabled: !!token,
+        placeholderData: (prev) => prev || { data: { items: [], meta: { total: 0, page: 1, limit: 100 } } }
+    });
+
+    // Log current data state
+    console.log('Current data state:', data);
+    console.log('Loading:', isLoading, 'Error:', error);
+
+    const columns = [
+        {
+            data: 'code',
+            title: 'Bed/Cabin Code',
+            render: (data: string) => `<span class="font-bold text-blue-600">${data}</span>`,
         },
         {
-            accessorKey: "ward",
-            header: "Ward/Department",
-        },
-        {
-            accessorKey: "status",
-            header: "Current Status",
-            cell: ({ row }) => {
-                const status = row.getValue("status") as string;
-                const variants: Record<string, string> = {
-                    Available: "bg-emerald-500",
-                    Occupied: "bg-blue-500",
-                    Maintenance: "bg-amber-500",
+            data: 'type',
+            title: 'Type',
+            render: (data: string) => {
+                const colors: Record<string, string> = {
+                    'Bed': 'bg-blue-100 text-blue-700 border-blue-200',
+                    'Cabin': 'bg-purple-100 text-purple-700 border-purple-200',
+                    'Special': 'bg-amber-100 text-amber-700 border-amber-200',
                 };
-                const color = variants[status] || "bg-gray-500";
-                return <Badge className={cn(color, "text-white rounded-md")}>{status}</Badge>;
+                const colorClass = colors[data] || 'bg-gray-100 text-gray-700 border-gray-200';
+                return `<span class="px-2 py-1 rounded-md text-xs font-medium border ${colorClass}">${data}</span>`;
             },
         },
         {
-            accessorKey: "price",
-            header: "Price/Day",
-            cell: ({ row }) => {
-                const price = parseFloat(row.getValue("price"));
-                return <span className="font-semibold text-gray-700">৳ {price.toLocaleString()}</span>;
+            data: 'ward',
+            title: 'Ward/Department',
+        },
+        {
+            data: 'status',
+            title: 'Status',
+            render: (data: string) => {
+                const colors: Record<string, string> = {
+                    'Available': 'bg-emerald-500',
+                    'Occupied': 'bg-blue-500',
+                    'Maintenance': 'bg-amber-500',
+                };
+                const colorClass = colors[data] || 'bg-gray-500';
+                return `<span class="px-2 py-1 rounded-md text-xs font-medium text-white ${colorClass}">${data}</span>`;
             },
         },
         {
-            id: "actions",
-            header: "Actions",
-            cell: () => {
-                return (
-                    <div className="flex gap-2">
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50">
-                            <PenLine className="h-4 w-4" />
-                        </Button>
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50">
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                    </div>
-                );
+            data: 'price',
+            title: 'Price/Day',
+            render: (data: string) => {
+                const price = parseFloat(data);
+                return `<span class="font-semibold text-gray-700">৳ ${price.toLocaleString()}</span>`;
             },
+        },
+        {
+            data: null,
+            title: 'Actions',
+            render: (data: any, type: string, row: BedCabinItem) => `
+                <div class="flex gap-2">
+                    <button class="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded flex items-center justify-center" onclick="window.editBedCabin('${row.id}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    </button>
+                    <button class="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 rounded flex items-center justify-center" onclick="deleteBedCabin(${row.id})">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    </button>
+                </div>
+            `,
+            orderable: false,
         },
     ];
 
@@ -165,8 +162,16 @@ function BedCabinList() {
                             <div className="p-20 text-center text-muted-foreground animate-pulse">
                                 Loading Bed & Cabin data...
                             </div>
+                        ) : error ? (
+                            <div className="p-10 text-center">
+                                <div className="text-red-500 font-semibold mb-2">Error loading data</div>
+                                <div className="text-sm text-muted-foreground">{(error as Error).message}</div>
+                                <div className="text-xs text-muted-foreground mt-2">
+                                    Please check browser console for details
+                                </div>
+                            </div>
                         ) : (
-                            <DataTable columns={columns} data={data || []} />
+                            <DataTable columns={columns} data={data?.data?.items || []} meta={data?.data?.meta} />
                         )}
                     </div>
                 </div>
@@ -175,7 +180,40 @@ function BedCabinList() {
     );
 }
 
-// Utility for status colors
-function cn(...classes: (string | boolean | undefined)[]) {
-    return classes.filter(Boolean).join(" ");
+// Global delete function for inline button clicks
+declare global {
+    interface Window {
+        deleteBedCabin?: (id: number) => void;
+        editBedCabin?: (id: string) => void;
+    }
+}
+
+if (typeof window !== 'undefined') {
+    window.deleteBedCabin = async (id: number) => {
+        if (!confirm('Are you sure you want to delete this bed/cabin?')) return;
+
+        const token = getCookie('accessToken');
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/bed-cabin/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (res.ok) {
+                alert('Bed/Cabin deleted successfully');
+                window.location.reload();
+            } else {
+                alert('Failed to delete bed/cabin');
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert('Error deleting bed/cabin');
+        }
+    };
+
+    window.editBedCabin = (id: string) => {
+        window.location.href = `/indoor/master/bed-cabin-list/${id}`;
+    };
 }
