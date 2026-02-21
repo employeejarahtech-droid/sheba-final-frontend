@@ -68,14 +68,6 @@ export const sidebarData: SidebarData = {
               title: '- List of Roles',
               url: "/roles",
             },
-            {
-              title: '- User Wise Themes',
-              url: "#",
-            },
-            {
-              title: '- User Wise Menus',
-              url: "#",
-            },
           ]
         },
         {

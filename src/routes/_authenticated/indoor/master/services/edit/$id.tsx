@@ -135,7 +135,7 @@ function EditService() {
 
     return (
         <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-background dark:via-slate-950/50 dark:to-indigo-950/20">
-            <Header>
+            <Header fixed>
                 <Search />
                 <div className='ms-auto flex items-center space-x-4'>
                     <ThemeSwitch />

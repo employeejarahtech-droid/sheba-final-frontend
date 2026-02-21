@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 
-export default function CBCWithPBFReportDetails({ invoice: invoice }: any) {
+export default function CBCWithPBFReportDetails({ report: invoice }: any) {
     // Extract patient info from nested outdoor_invoice object
     const patientInfo = invoice?.outdoor_invoice || {};
     const invoiceDate = patientInfo.invoice_date

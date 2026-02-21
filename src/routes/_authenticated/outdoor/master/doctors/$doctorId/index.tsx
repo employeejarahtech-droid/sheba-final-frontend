@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit, Stethoscope, Award, MapPin, Phone, Mail, User, Building2, GraduationCap, Star, Calendar, Clock, ChevronRight } from "lucide-react";
+import { ArrowLeft, Edit, Stethoscope, Award, MapPin, Phone, Mail, User, Star, Calendar, Clock } from "lucide-react";
 import { getCookie } from "@/lib/cookies";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
@@ -11,10 +11,9 @@ import { ThemeSwitch } from "@/components/theme-switch";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Main } from "@/components/layout/main";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export const Route = createFileRoute('/_authenticated/outdoor/master/doctors/$doctorId/')({
     component: ViewDoctorPage,
@@ -71,7 +70,7 @@ function ViewDoctorPage() {
     if (error) {
         return (
             <>
-                <Header>
+                <Header fixed>
                     <Search />
                     <div className='ms-auto flex items-center space-x-4'>
                         <ThemeSwitch />

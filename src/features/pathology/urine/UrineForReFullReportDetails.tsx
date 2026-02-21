@@ -18,7 +18,7 @@ export default function UrineForReFullReportDetails({ report, invoice }: UrineFo
   };
 
   return (
-    <div className="max-w-4xl w-full mx-auto bg-background pt-40 pb-10 px-5 mt-6 print:w-[850px] print-report">
+    <div className="max-w-4xl w-full mx-auto bg-background pt-32 pb-10 px-5 mt-6 print:w-[850px] print-report">
       <style>
         {`
           .bg-row-blue {
@@ -60,7 +60,7 @@ export default function UrineForReFullReportDetails({ report, invoice }: UrineFo
       </h1>
 
       {/* Header Table */}
-      <table className="w-full text-sm border">
+      <table className="w-full text-sm">
         <tbody>
           <tr className="border">
             <td className="border px-3 py-2 w-1/4">Receipt ID : {report?.invoice_id || invoice?.id || 'N/A'}</td>
@@ -82,56 +82,56 @@ export default function UrineForReFullReportDetails({ report, invoice }: UrineFo
       </table>
 
       {/* Test Table - 2 Column Layout */}
-      <table className="w-full text-sm mt-6 border">
+      <table className="w-full text-sm mt-4">
         <tbody>
           {/* Row 1: PHYSICAL EXAMINATION | MICROSCOPIC EXAMINATION */}
-          <tr className="border-b">
-            <td className="px-3 py-2 font-semibold" colSpan={2}>
+          <tr className="align-top">
+            <td className="py-1" colSpan={2}>
               <table className="w-full">
                 <tbody>
                   <tr className="border-b">
-                    <td className="px-3 py-2 font-semibold bg-gray-100" colSpan={2}>PHYSICAL EXAMINATION</td>
+                    <td className="px-3 py-1 font-semibold bg-gray-100" colSpan={2}>PHYSICAL EXAMINATION</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Color</td>
-                    <td className="px-3 py-2">{report?.color || '-'}</td>
+                    <td className="px-3 py-1">Color</td>
+                    <td className="px-3 py-1">{report?.color || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Appearance</td>
-                    <td className="px-3 py-2">{report?.appearance || '-'}</td>
+                    <td className="px-3 py-1">Appearance</td>
+                    <td className="px-3 py-1">{report?.appearance || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Sediment</td>
-                    <td className="px-3 py-2">{report?.sediment || '-'}</td>
+                    <td className="px-3 py-1">Sediment</td>
+                    <td className="px-3 py-1">{report?.sediment || '-'}</td>
                   </tr>
                 </tbody>
               </table>
             </td>
-            <td className="px-3 py-2 font-semibold" colSpan={2}>
-              <table className="w-full">
+            <td className="pl-4 py-1" colSpan={2}>
+              <table className="w-full mb-2">
                 <tbody>
                   <tr className="border-b">
-                    <td className="px-3 py-2 font-semibold bg-gray-100" colSpan={2}>MICROSCOPIC EXAMINATION</td>
+                    <td className="px-3 py-1 font-semibold bg-gray-100" colSpan={2}>MICROSCOPIC EXAMINATION</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Epithelial Cells</td>
-                    <td className="px-3 py-2">{report?.epithelial_cells || '-'}</td>
+                    <td className="px-3 py-1">Epithelial Cells</td>
+                    <td className="px-3 py-1">{report?.epithelial_cells || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">RBC Cells</td>
-                    <td className="px-3 py-2">{report?.rbc_cells || '-'}</td>
+                    <td className="px-3 py-1">RBC Cells</td>
+                    <td className="px-3 py-1">{report?.rbc_cells || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Pus Cells</td>
-                    <td className="px-3 py-2">{report?.pus_cells || '-'}</td>
+                    <td className="px-3 py-1">Pus Cells</td>
+                    <td className="px-3 py-1">{report?.pus_cells || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Yeast Cells</td>
-                    <td className="px-3 py-2">{report?.yeast_cells || '-'}</td>
+                    <td className="px-3 py-1">Yeast Cells</td>
+                    <td className="px-3 py-1">{report?.yeast_cells || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Spermatozoa</td>
-                    <td className="px-3 py-2">{report?.spermatozoa || '-'}</td>
+                    <td className="px-3 py-1">Spermatozoa</td>
+                    <td className="px-3 py-1">{report?.spermatozoa || '-'}</td>
                   </tr>
                 </tbody>
               </table>
@@ -139,57 +139,57 @@ export default function UrineForReFullReportDetails({ report, invoice }: UrineFo
           </tr>
 
           {/* Row 2: CRYSTALS | CASTS / LPE */}
-          <tr className="border-b">
-            <td className="px-3 py-2 font-semibold" colSpan={2}>
+          <tr className="align-top">
+            <td className="py-1" colSpan={2}>
               <table className="w-full">
                 <tbody>
                   <tr className="border-b">
-                    <td className="px-3 py-2 font-semibold bg-gray-100" colSpan={2}>CRYSTALS</td>
+                    <td className="px-3 py-1 font-semibold bg-gray-100" colSpan={2}>CRYSTALS</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Uric Acid Crystals</td>
-                    <td className="px-3 py-2">{report?.uric_acid_crystals || '-'}</td>
+                    <td className="px-3 py-1">Uric Acid Crystals</td>
+                    <td className="px-3 py-1">{report?.uric_acid_crystals || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Calcium Oxalate</td>
-                    <td className="px-3 py-2">{report?.calcium_oxalate || '-'}</td>
+                    <td className="px-3 py-1">Calcium Oxalate</td>
+                    <td className="px-3 py-1">{report?.calcium_oxalate || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Triple Phosphate</td>
-                    <td className="px-3 py-2">{report?.triple_phosphate || '-'}</td>
+                    <td className="px-3 py-1">Triple Phosphate</td>
+                    <td className="px-3 py-1">{report?.triple_phosphate || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Amorphous Deposits</td>
-                    <td className="px-3 py-2">{report?.amorphous_deposits || '-'}</td>
+                    <td className="px-3 py-1">Amorphous Deposits</td>
+                    <td className="px-3 py-1">{report?.amorphous_deposits || '-'}</td>
                   </tr>
                 </tbody>
               </table>
             </td>
-            <td className="px-3 py-2 font-semibold" colSpan={2}>
-              <table className="w-full">
+            <td className="pl-4 py-1" colSpan={2}>
+              <table className="w-full mb-2">
                 <tbody>
                   <tr className="border-b">
-                    <td className="px-3 py-2 font-semibold bg-gray-100" colSpan={2}>CASTS / LPE</td>
+                    <td className="px-3 py-1 font-semibold bg-gray-100" colSpan={2}>CASTS / LPE</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Hyaline Casts</td>
-                    <td className="px-3 py-2">{report?.hyaline_casts || '-'}</td>
+                    <td className="px-3 py-1">Hyaline Casts</td>
+                    <td className="px-3 py-1">{report?.hyaline_casts || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Granular Casts</td>
-                    <td className="px-3 py-2">{report?.granular_casts || '-'}</td>
+                    <td className="px-3 py-1">Granular Casts</td>
+                    <td className="px-3 py-1">{report?.granular_casts || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">RBC Casts</td>
-                    <td className="px-3 py-2">{report?.rbc_casts || '-'}</td>
+                    <td className="px-3 py-1">RBC Casts</td>
+                    <td className="px-3 py-1">{report?.rbc_casts || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">WBC Casts</td>
-                    <td className="px-3 py-2">{report?.wbc_casts || '-'}</td>
+                    <td className="px-3 py-1">WBC Casts</td>
+                    <td className="px-3 py-1">{report?.wbc_casts || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Epithelial Casts</td>
-                    <td className="px-3 py-2">{report?.epithelial_casts || '-'}</td>
+                    <td className="px-3 py-1">Epithelial Casts</td>
+                    <td className="px-3 py-1">{report?.epithelial_casts || '-'}</td>
                   </tr>
                 </tbody>
               </table>
@@ -197,61 +197,61 @@ export default function UrineForReFullReportDetails({ report, invoice }: UrineFo
           </tr>
 
           {/* Row 3: CHEMICAL EXAMINATION (2 Columns) */}
-          <tr className="border-b">
-            <td className="px-3 py-2 font-semibold" colSpan={2}>
+          <tr className="align-top">
+            <td className="py-1" colSpan={2}>
               <table className="w-full">
                 <tbody>
                   <tr className="border-b">
-                    <td className="px-3 py-2 font-semibold bg-gray-100" colSpan={2}>CHEMICAL EXAMINATION</td>
+                    <td className="px-3 py-1 font-semibold bg-gray-100" colSpan={2}>CHEMICAL EXAMINATION</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Urobilinogen</td>
-                    <td className="px-3 py-2">{report?.urobilinogen || '-'}</td>
+                    <td className="px-3 py-1">Urobilinogen</td>
+                    <td className="px-3 py-1">{report?.urobilinogen || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Bilirubin</td>
-                    <td className="px-3 py-2">{report?.bilirubin || '-'}</td>
+                    <td className="px-3 py-1">Bilirubin</td>
+                    <td className="px-3 py-1">{report?.bilirubin || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Ketone</td>
-                    <td className="px-3 py-2">{report?.ketones || '-'}</td>
+                    <td className="px-3 py-1">Ketone</td>
+                    <td className="px-3 py-1">{report?.ketones || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Blood</td>
-                    <td className="px-3 py-2">{report?.blood || '-'}</td>
+                    <td className="px-3 py-1">Blood</td>
+                    <td className="px-3 py-1">{report?.blood || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Protein</td>
-                    <td className="px-3 py-2">{report?.protein || '-'}</td>
+                    <td className="px-3 py-1">Protein</td>
+                    <td className="px-3 py-1">{report?.protein || '-'}</td>
                   </tr>
                 </tbody>
               </table>
             </td>
-            <td className="px-3 py-2 font-semibold" colSpan={2}>
+            <td className="pl-4 py-1" colSpan={2}>
               <table className="w-full">
                 <tbody>
                   <tr className="border-b">
-                    <td className="px-3 py-2 font-semibold bg-gray-100" colSpan={2}>CHEMICAL EXAMINATION</td>
+                    <td className="px-3 py-1 font-semibold bg-gray-100" colSpan={2}>CHEMICAL EXAMINATION</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Nitrite</td>
-                    <td className="px-3 py-2">{report?.nitrite || '-'}</td>
+                    <td className="px-3 py-1">Nitrite</td>
+                    <td className="px-3 py-1">{report?.nitrite || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Leukocytes</td>
-                    <td className="px-3 py-2">{report?.leukocytes || '-'}</td>
+                    <td className="px-3 py-1">Leukocytes</td>
+                    <td className="px-3 py-1">{report?.leukocytes || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Glucose</td>
-                    <td className="px-3 py-2">{report?.glucose || '-'}</td>
+                    <td className="px-3 py-1">Glucose</td>
+                    <td className="px-3 py-1">{report?.glucose || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Specific Gravity</td>
-                    <td className="px-3 py-2">{report?.specific_gravity || '-'}</td>
+                    <td className="px-3 py-1">Specific Gravity</td>
+                    <td className="px-3 py-1">{report?.specific_gravity || '-'}</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2">Reaction (pH)</td>
-                    <td className="px-3 py-2">{report?.ph || '-'}</td>
+                    <td className="px-3 py-1">Reaction (pH)</td>
+                    <td className="px-3 py-1">{report?.ph || '-'}</td>
                   </tr>
                 </tbody>
               </table>
@@ -274,7 +274,7 @@ export default function UrineForReFullReportDetails({ report, invoice }: UrineFo
       </p>
 
       {/* Footer Signatures */}
-      <div className="grid grid-cols-2 mt-32 text-sm">
+      <div className="grid grid-cols-2 mt-20 text-sm">
         <div>
           <p className="border-t border-dashed w-40 pt-1 text-center">Checked By:</p>
         </div>

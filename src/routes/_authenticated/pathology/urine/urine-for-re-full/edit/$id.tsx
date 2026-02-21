@@ -225,7 +225,7 @@ function EditUrineForReFull() {
   return (
     <>
       {/* HEADER */}
-      <Header>
+      <Header fixed>
         <TopNav
           links={[
             { title: "Overview", href: "dashboard/overview", isActive: true },
