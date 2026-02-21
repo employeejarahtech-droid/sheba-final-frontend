@@ -18,12 +18,11 @@ import { cn } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Check, ChevronDown, ArrowLeft, CircleCheck, PlusCircle, FlaskConical, LayoutTemplate, Activity, DollarSign, Grip } from 'lucide-react'
+import { Check, ChevronDown, ArrowLeft, FlaskConical } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import z from 'zod'
-import { Separator } from '@/components/ui/separator'
 
 export const Route = createFileRoute('/_authenticated/outdoor/master/tests/create/')({
   component: CreateTest,
@@ -171,7 +170,7 @@ function CreateTest() {
     onSuccess: (data) => {
       toast.success("Test created successfully!");
       console.log("API Response:", data);
-      navigate({ to: "/outdoor/master/tests" });
+      navigate({ to: "/outdoor/master/tests", search: { page: 1, limit: 10, search: '' } });
     },
 
     onError: (error: any) => {
@@ -206,9 +205,9 @@ function CreateTest() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-background">
-      <Header>
+      <Header fixed>
+        <Search />
         <div className="ms-auto flex items-center space-x-4">
-          <Search />
           <ThemeSwitch />
           <ConfigDrawer />
           <ProfileDropdown />
@@ -344,7 +343,7 @@ function CreateTest() {
                             <FormLabel>Status</FormLabel>
                             <FormControl>
                               <Select value={field.value} onValueChange={field.onChange}>
-                                <SelectTrigger className="h-10">
+                                <SelectTrigger className="h-10 w-full">
                                   <SelectValue placeholder="Select status" />
                                 </SelectTrigger>
                                 <SelectContent>

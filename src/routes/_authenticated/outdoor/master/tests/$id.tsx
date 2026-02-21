@@ -9,7 +9,7 @@ import { ConfigDrawer } from '@/components/config-drawer'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Edit, FlaskConical, LayoutTemplate, Activity, DollarSign, Calendar, Tag, ShieldCheck, ClipboardList, Info, BarChart3, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Edit, FlaskConical, LayoutTemplate, Activity, DollarSign, Calendar, Tag, ShieldCheck, ClipboardList, Info, TrendingUp } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 
@@ -80,7 +80,7 @@ function TestDetails() {
         return (
             <div className='flex h-screen w-full flex-col items-center justify-center gap-4'>
                 <div className='text-lg font-medium text-destructive'>Error: {(testError as Error).message}</div>
-                <Button onClick={() => navigate({ to: '/outdoor/master/tests' })}>
+                <Button onClick={() => navigate({ to: '/outdoor/master/tests', search: { page: 1, limit: 10, search: '' } })}>
                     <ArrowLeft className='mr-2 h-4 w-4' /> Back to Tests
                 </Button>
             </div>
@@ -106,7 +106,7 @@ function TestDetails() {
                                 variant='ghost'
                                 size='icon'
                                 className='h-8 w-8'
-                                onClick={() => navigate({ to: '/outdoor/master/tests' })}
+                                onClick={() => navigate({ to: '/outdoor/master/tests', search: { page: 1, limit: 10, search: '' } })}
                             >
                                 <ArrowLeft className='h-4 w-4' />
                             </Button>

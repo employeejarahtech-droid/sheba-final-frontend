@@ -1,11 +1,10 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
 import { useState, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
@@ -37,7 +36,7 @@ function TestTables() {
   const limit = 10;
 
   const token = getCookie('accessToken');
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   // Expose edit function to window for onclick handlers
   useEffect(() => {
@@ -128,7 +127,7 @@ function TestTables() {
   ];
 
   return <>
-    <Header>
+    <Header fixed>
       <Search />
       <div className='ms-auto flex items-center space-x-4'>
         <ThemeSwitch />
@@ -138,8 +137,8 @@ function TestTables() {
     </Header>
 
     <Main>
-      <div className="flex flex-wrap items-end justify-between gap-2">
-        <h1 className="text-2xl font-bold tracking-tight mb-4">List of Test Tables</h1>
+      <div className="flex flex-wrap items-end justify-between gap-2 mb-4">
+        <h1 className="text-2xl font-bold tracking-tight">List of Test Tables</h1>
         <CreateTestTableForm refetchTestTables={refetchTestTables} />
       </div>
       <DataTable

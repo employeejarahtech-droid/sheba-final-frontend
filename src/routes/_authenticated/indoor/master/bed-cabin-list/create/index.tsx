@@ -13,7 +13,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { ArrowLeft, CircleCheck, Bed, PlusCircle } from 'lucide-react'; import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft, CircleCheck, Bed } from 'lucide-react'; import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 
 import { useMutation } from '@tanstack/react-query'
@@ -79,7 +79,7 @@ function CreateBedCabin() {
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-background">
-            <Header>
+            <Header fixed>
                 <Search />
                 <div className='ms-auto flex items-center space-x-4'>
                     <ThemeSwitch />

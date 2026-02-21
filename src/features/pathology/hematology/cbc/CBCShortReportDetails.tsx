@@ -102,80 +102,80 @@ export default function CBCShortReportDetails({ cbcData, invoiceData }: CBCShort
             </table>
 
             {/* Test Table */}
-            <table className="w-full text-sm mt-6">
+            <table className="w-full text-sm mt-4">
                 <thead>
                     <tr className="border-t border-b bg-row-blue">
-                        <th className="px-3 py-2 text-left w-[40%]">Test name</th>
-                        <th className="px-3 py-2 text-left w-[30%]">Test Result</th>
-                        <th className="px-3 py-2 text-left w-[30%]">Normal Range</th>
+                        <th className="px-3 py-1 text-left w-[40%]">Test name</th>
+                        <th className="px-3 py-1 text-left w-[30%]">Test Result</th>
+                        <th className="px-3 py-1 text-left w-[30%]">Normal Range</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">Hemoglobin (Hb)</td>
-                        <td className="px-3 py-2">{cbcData?.hemoglobin || 'Pending'} g/dL</td>
-                        <td className="px-3 py-2">Male: 13.5-17.5 g/dL<br/>Female: 12.0-15.5 g/dL</td>
+                        <td className="px-3 py-1">Hemoglobin (Hb)</td>
+                        <td className="px-3 py-1">{cbcData?.hemoglobin || 'Pending'} g/dL</td>
+                        <td className="px-3 py-1">Male: 13.5-17.5 g/dL<br/>Female: 12.0-15.5 g/dL</td>
                     </tr>
                     <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">RBC Count</td>
-                        <td className="px-3 py-2">{cbcData?.rbc_count || 'Pending'} million/cmm</td>
-                        <td className="px-3 py-2">Male: 4.5-5.9 million/cmm<br/>Female: 4.0-5.2 million/cmm</td>
+                        <td className="px-3 py-1">RBC Count</td>
+                        <td className="px-3 py-1">{cbcData?.rbc_count || 'Pending'} million/cmm</td>
+                        <td className="px-3 py-1">Male: 4.5-5.9 million/cmm<br/>Female: 4.0-5.1.5 million/cmm</td>
                     </tr>
                     <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">WBC Count</td>
-                        <td className="px-3 py-2">{cbcData?.wbc_count || 'Pending'} /cmm</td>
-                        <td className="px-3 py-2">4,000-11,000 /cmm</td>
+                        <td className="px-3 py-1">WBC Count</td>
+                        <td className="px-3 py-1">{cbcData?.wbc_count || 'Pending'} /cmm</td>
+                        <td className="px-3 py-1">4,000-11,000 /cmm</td>
                     </tr>
                     <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">Platelets</td>
-                        <td className="px-3 py-2">{cbcData?.platelets || 'Pending'} /cmm</td>
-                        <td className="px-3 py-2">1,50,000-4,50,000 /cmm</td>
+                        <td className="px-3 py-1">Platelets</td>
+                        <td className="px-3 py-1">{cbcData?.platelets || 'Pending'} /cmm</td>
+                        <td className="px-3 py-1">1,50,000-4,50,000 /cmm</td>
                     </tr>
                     <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">Hematocrit (HCT)</td>
-                        <td className="px-3 py-2">{cbcData?.hct || 'Pending'} %</td>
-                        <td className="px-3 py-2">Male: 41-53%<br/>Female: 36-46%</td>
+                        <td className="px-3 py-1">Hematocrit (HCT)</td>
+                        <td className="px-3 py-1">{cbcData?.hct || 'Pending'} %</td>
+                        <td className="px-3 py-1">Male: 41-53%<br/>Female: 36-46%</td>
                     </tr>
                     <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">MCV</td>
-                        <td className="px-3 py-2">{cbcData?.mcv || 'Pending'} fL</td>
-                        <td className="px-3 py-2">80-100 fL</td>
+                        <td className="px-3 py-1">MCV</td>
+                        <td className="px-3 py-1">{cbcData?.mcv || 'Pending'} fL</td>
+                        <td className="px-3 py-1">80-100 fL</td>
                     </tr>
                     <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">MCH</td>
-                        <td className="px-3 py-2">{cbcData?.mch || 'Pending'} pg</td>
-                        <td className="px-3 py-2">27-34 pg</td>
+                        <td className="px-3 py-1">MCH</td>
+                        <td className="px-3 py-1">{cbcData?.mch || 'Pending'} pg</td>
+                        <td className="px-3 py-1">27-34 pg</td>
                     </tr>
                     <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">MCHC</td>
-                        <td className="px-3 py-2">{cbcData?.mchc || 'Pending'} g/dL</td>
-                        <td className="px-3 py-2">32-36 g/dL</td>
+                        <td className="px-3 py-1">MCHC</td>
+                        <td className="px-3 py-1">{cbcData?.mchc || 'Pending'} g/dL</td>
+                        <td className="px-3 py-1">32-36 g/dL</td>
                     </tr>
                     <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">Neutrophils</td>
-                        <td className="px-3 py-2">{cbcData?.neutrophils || 'Pending'} %</td>
-                        <td className="px-3 py-2">40-75 %</td>
+                        <td className="px-3 py-1">Neutrophils</td>
+                        <td className="px-3 py-1">{cbcData?.neutrophils || 'Pending'} %</td>
+                        <td className="px-3 py-1">40-75 %</td>
                     </tr>
                     <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">Lymphocytes</td>
-                        <td className="px-3 py-2">{cbcData?.lymphocytes || 'Pending'} %</td>
-                        <td className="px-3 py-2">20-45 %</td>
+                        <td className="px-3 py-1">Lymphocytes</td>
+                        <td className="px-3 py-1">{cbcData?.lymphocytes || 'Pending'} %</td>
+                        <td className="px-3 py-1">20-45 %</td>
                     </tr>
                     <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">Monocytes</td>
-                        <td className="px-3 py-2">{cbcData?.monocytes || 'Pending'} %</td>
-                        <td className="px-3 py-2">2-10 %</td>
+                        <td className="px-3 py-1">Monocytes</td>
+                        <td className="px-3 py-1">{cbcData?.monocytes || 'Pending'} %</td>
+                        <td className="px-3 py-1">2-10 %</td>
                     </tr>
                     <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">Eosinophils</td>
-                        <td className="px-3 py-2">{cbcData?.eosinophils || 'Pending'} %</td>
-                        <td className="px-3 py-2">0-6 %</td>
+                        <td className="px-3 py-1">Eosinophils</td>
+                        <td className="px-3 py-1">{cbcData?.eosinophils || 'Pending'} %</td>
+                        <td className="px-3 py-1">0-6 %</td>
                     </tr>
                     <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">Basophils</td>
-                        <td className="px-3 py-2">{cbcData?.basophils || 'Pending'} %</td>
-                        <td className="px-3 py-2">0-1 %</td>
+                        <td className="px-3 py-1">Basophils</td>
+                        <td className="px-3 py-1">{cbcData?.basophils || 'Pending'} %</td>
+                        <td className="px-3 py-1">0-1 %</td>
                     </tr>
                 </tbody>
             </table>

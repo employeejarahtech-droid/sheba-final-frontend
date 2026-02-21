@@ -6,7 +6,7 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { DataTable } from '@/components/DataTable'
 import { Button } from "@/components/ui/button";
 import { Link } from '@tanstack/react-router'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { Stethoscope, Award, Globe, MapPin, Plus } from 'lucide-react'

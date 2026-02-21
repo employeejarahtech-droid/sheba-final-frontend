@@ -10,7 +10,7 @@ import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Printer } from "lucide-react";
 import { topNav } from '@/data/data';
 
 export const Route = createFileRoute(
@@ -65,13 +65,17 @@ function BloodForBtctReport() {
                 </div>
             </Header>
             <Main>
-                <div className="mb-4 print:hidden">
+                <div className="print:hidden flex items-center justify-between gap-4">
                     <Link to="/pathology/hematology/blood-for-bt-ct">
                         <Button variant="outline" size="sm">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Blood For BT/CT
                         </Button>
                     </Link>
+                    <Button variant="outline" size="sm" onClick={() => window.print()}>
+                        <Printer className="h-4 w-4" />
+                        Print
+                    </Button>
                 </div>
                 <BloodForBtctReportDetails invoice={invoice} testName="Blood For BT/CT Report" />
             </Main>

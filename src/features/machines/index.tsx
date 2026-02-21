@@ -5,12 +5,11 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
 import { CreateMachineForm } from './components/CreateMachineForm'
 import { EditMachineForm } from './components/EditMachineForm'
 import { useQuery } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
+//import { useNavigate } from '@tanstack/react-router'
 import { getCookie } from '@/lib/cookies'
 import { Card, CardContent } from '@/components/ui/card'
 import { Settings, Activity, Database, TrendingUp } from 'lucide-react'
@@ -31,7 +30,7 @@ export default function Machines() {
 
 
     const token = getCookie('accessToken');
-    const navigate = useNavigate();
+    //const navigate = useNavigate();
 
     const { data } = useQuery({
         queryKey: ["machine", page, search],

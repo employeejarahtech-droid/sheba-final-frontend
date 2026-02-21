@@ -7,15 +7,14 @@ import { ThemeSwitch } from '@/components/theme-switch';
 import { ConfigDrawer } from '@/components/config-drawer';
 import { ProfileDropdown } from '@/components/profile-dropdown';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { ArrowLeft, CircleCheck, Stethoscope } from 'lucide-react'
-import { Separator } from '@/components/ui/separator';
+import { ArrowLeft, Stethoscope } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getCookie } from '@/lib/cookies';
@@ -111,7 +110,7 @@ function CreateService() {
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-background">
-            <Header>
+            <Header fixed>
                 <Search />
                 <div className='ms-auto flex items-center space-x-4'>
                     <ThemeSwitch />

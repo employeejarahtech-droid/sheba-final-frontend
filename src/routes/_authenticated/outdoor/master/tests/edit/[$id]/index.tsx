@@ -173,7 +173,7 @@ function EditTest() {
             queryClient.invalidateQueries({ queryKey: ["tests"] });
             queryClient.invalidateQueries({ queryKey: ["test", id] });
             toast.success("Test updated successfully");
-            navigate({ to: "/outdoor/master/tests" });
+            navigate({ to: "/outdoor/master/tests", search: { page: 1, limit: 10, search: '' } });
         },
         onError: (error: Error) => {
             toast.error(error.message || "Failed to update test");
@@ -218,7 +218,7 @@ function EditTest() {
                 <p className="text-muted-foreground mb-4">Failed to load test data</p>
                 <Button
                     variant="outline"
-                    onClick={() => navigate({ to: "/outdoor/master/tests" })}
+                    onClick={() => navigate({ to: "/outdoor/master/tests", search: { page: 1, limit: 10, search: '' } })}
                 >
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to Tests
@@ -229,7 +229,7 @@ function EditTest() {
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-background">
-            <Header>
+            <Header fixed>
                 <Search />
                 <div className='ms-auto flex items-center space-x-4'>
                     <ThemeSwitch />
@@ -253,7 +253,7 @@ function EditTest() {
                         <Button
                             variant="ghost"
                             className="gap-2"
-                            onClick={() => navigate({ to: '/outdoor/master/tests' })}
+                            onClick={() => navigate({ to: '/outdoor/master/tests', search: { page: 1, limit: 10, search: '' } })}
                         >
                             <ArrowLeft className="h-4 w-4" />
                             Back
@@ -367,7 +367,7 @@ function EditTest() {
                                                         <FormLabel>Status</FormLabel>
                                                         <FormControl>
                                                             <Select value={field.value} onValueChange={field.onChange}>
-                                                                <SelectTrigger className="h-10">
+                                                                <SelectTrigger className="h-10 w-full">
                                                                     <SelectValue placeholder="Select status" />
                                                                 </SelectTrigger>
                                                                 <SelectContent>
@@ -497,7 +497,7 @@ function EditTest() {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => navigate({ to: '/outdoor/master/tests' })}
+                                    onClick={() => navigate({ to: '/outdoor/master/tests', search: { page: 1, limit: 10, search: '' } })}
                                     disabled={updateMutation.isPending}
                                 >
                                     Cancel

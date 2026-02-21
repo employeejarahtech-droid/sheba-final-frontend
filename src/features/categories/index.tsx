@@ -5,13 +5,11 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-
-import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
 import { CreateCategoryForm } from './components/CreateCategoryForm'
 import { EditCategoryForm } from './components/EditCategoryForm'
 import { useQuery } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
+//import { useNavigate } from '@tanstack/react-router'
 import { getCookie } from '@/lib/cookies'
 import { Card, CardContent } from '@/components/ui/card'
 import { Activity, Layers, Database, TrendingUp } from 'lucide-react'
@@ -33,7 +31,7 @@ export default function Categories() {
 
 
     const token = getCookie('accessToken');
-    const navigate = useNavigate();
+    //const navigate = useNavigate();
 
     const { data } = useQuery({
         queryKey: ["category", page, search],

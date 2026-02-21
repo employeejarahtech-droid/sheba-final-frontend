@@ -8,8 +8,6 @@ import { TopNav } from "@/components/layout/top-nav";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useState } from 'react';
 import { EditStoolReducingSubstanceForm } from '@/features/pathology/stool/EditReducingSubstanceForm';
 import { getCookie } from '@/lib/cookies';
@@ -149,7 +147,7 @@ function ReducingSubstance() {
               Edit
             </button>
             <a href="/pathology/stool/reducing-substance/report/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
-              View
+              View Report
             </a>
           </div>
         `;
@@ -169,7 +167,7 @@ function ReducingSubstance() {
 
   return (
     <>
-      <Header>
+      <Header fixed>
         <TopNav links={topNav} />
         <div className='ms-auto flex items-center space-x-4'>
           <Search />
