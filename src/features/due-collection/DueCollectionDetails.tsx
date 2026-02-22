@@ -294,10 +294,10 @@ export default function DueCollectionDetails() {
     // which specific departments/tests the payment was for. The payment might have
     // been for tests in a specific department, so distributing it would be wrong.
     // Only use department-wise payments that were explicitly recorded.
-    const totalGlobalPaid = Math.max(0, totalPaid - totalDeptWisePaid);
+    const _totalGlobalPaid = Math.max(0, totalPaid - totalDeptWisePaid);
 
     // Helper to get department-wise paid amount
-    const getDeptPaidAmount = (deptId: number | undefined, deptBillTotal: number): number => {
+    const getDeptPaidAmount = (deptId: number | undefined, _deptBillTotal: number): number => {
         // Only count department-specific payments from database
         // Do NOT include proportional global payments
         const deptSpecificPaid = invoice.department_payments

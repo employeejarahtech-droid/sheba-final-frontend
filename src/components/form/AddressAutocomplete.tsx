@@ -41,7 +41,7 @@ export function AddressAutocomplete({
     onChange,
 }: AddressAutocompleteProps) {
     const [open, setOpen] = useState(false);
-    const [inputValue, setInputValue] = useState(value || "");
+    const [_inputValue, _setInputValue] = useState(value || "");
 
     // Mock addresses since we don't have a real geocoding API set up yet
     const mockAddresses = [
@@ -91,7 +91,7 @@ export function AddressAutocomplete({
                     <CommandInput
                         placeholder={placeholder}
                         onValueChange={(val) => {
-                            setInputValue(val);
+                            _setInputValue(val);
                             if (onChange) onChange(val);
                         }}
                     />

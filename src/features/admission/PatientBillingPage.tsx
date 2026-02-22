@@ -10,7 +10,7 @@ import { Plus, Trash2, ArrowLeft, Loader2, Save, FileText, Receipt, BedDouble, E
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
@@ -598,7 +598,7 @@ export function PatientBillingPage() {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {operations.map((op, index) => (
+                                                {operations.map((op) => (
                                                     <tr key={op.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
                                                         <td className="p-3">{op.operation_type}</td>
                                                         <td className="p-3">{op.operation_date}</td>
@@ -1385,11 +1385,12 @@ export function PatientBillingPage() {
                                         defaultValue="1"
                                         onChange={(e) => {
                                             const form = e.currentTarget.form
+                                            if (!form) return
                                             const days = Number(e.target.value)
                                             const dailyRate = Number((form.elements.namedItem('daily_rate') as HTMLInputElement)?.value) || 0
                                             const totalAmountInput = form.elements.namedItem('total_amount') as HTMLInputElement
                                             if (totalAmountInput) {
-                                                totalAmountInput.value = String(days * daily_rate)
+                                                totalAmountInput.value = String(days * dailyRate)
                                             }
                                         }}
                                         required
@@ -1407,6 +1408,7 @@ export function PatientBillingPage() {
                                         defaultValue={admissionData?.data?.bedCabin?.price || '0'}
                                         onChange={(e) => {
                                             const form = e.currentTarget.form
+                                            if (!form) return
                                             const dailyRate = Number(e.target.value)
                                             const days = Number((form.elements.namedItem('total_days') as HTMLInputElement)?.value) || 0
                                             const totalAmountInput = form.elements.namedItem('total_amount') as HTMLInputElement

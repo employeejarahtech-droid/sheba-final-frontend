@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 
 import { AppHeader } from '@/components/layout/app-header'

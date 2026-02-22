@@ -15,6 +15,23 @@ import {
   PieChart,
   TrendingUp,
   TrendingDown,
+  FlaskConical,
+  Stethoscope,
+  Recycle,
+  UserPlus,
+  Building2,
+  Receipt,
+  Beaker,
+  Activity,
+  Shield,
+  Droplets,
+  Microscope,
+  Bone,
+  Baby,
+  HeartPulse,
+  Monitor,
+  Wallet,
+  HelpCircle,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -86,7 +103,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Outdoor:Master',
-          icon: Settings,
+          icon: FlaskConical,
           items: [
             {
               title: '- List of Test',
@@ -116,7 +133,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Outdoor:Reception',
-          icon: Settings,
+          icon: Stethoscope,
           items: [
             {
               title: '- Create Invoice',
@@ -134,7 +151,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Indoor:Master',
-          icon: Settings,
+          icon: Recycle,
           items: [
             {
               title: '- Services',
@@ -172,7 +189,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Indoor:Admission',
-          icon: Settings,
+          icon: UserPlus,
           items: [
             {
               title: '- New Admission',
@@ -218,7 +235,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Service Bill',
-          icon: Settings,
+          icon: Receipt,
           items: [
             {
               title: '- Bill Distribute',
@@ -236,7 +253,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Path:Biochemical',
-          icon: Settings,
+          icon: Beaker,
           items: [
             {
               title: '- All Reports',
@@ -250,7 +267,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Path:Hematology',
-          icon: Settings,
+          icon: Activity,
           items: [
             {
               title: '- All Reports',
@@ -292,7 +309,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Path:Immunology',
-          icon: Settings,
+          icon: Shield,
           items: [
             {
               title: '- All Reports',
@@ -318,7 +335,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Path:Urine',
-          icon: Settings,
+          icon: Droplets,
           items: [
             // {
             //   title: '- Urine For R/E Short',
@@ -340,7 +357,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Path:Stool',
-          icon: Settings,
+          icon: Microscope,
           items: [
             {
               title: '- Stool For R/E',
@@ -358,7 +375,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Path:Hormone',
-          icon: Settings,
+          icon: Baby,
           items: [
             {
               title: '- All Reports',
@@ -388,7 +405,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'X-Ray',
-          icon: Settings,
+          icon: Bone,
           items: [
             {
               title: '- All Reports',
@@ -398,7 +415,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Ultrasonogram',
-          icon: Settings,
+          icon: Monitor,
           items: [
             {
               title: '- All Reports',
@@ -408,7 +425,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'ECG',
-          icon: Settings,
+          icon: HeartPulse,
           items: [
             {
               title: '- All Reports',
@@ -508,7 +525,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Banks',
-          icon: Settings,
+          icon: Building2,
           items: [
             {
               title: '- Bank Accounts',
@@ -530,7 +547,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Payroll',
-          icon: Settings,
+          icon: Wallet,
           items: [
             {
               title: '- Overview',
@@ -593,13 +610,13 @@ export const sidebarData: SidebarData = {
             {
               title: 'Report 3',
               url: "#",
-            },
+            }
           ]
         },
         {
           title: 'Help',
           url: '/help',
-          icon: MessagesSquare,
+          icon: HelpCircle,
         },
       ],
     },

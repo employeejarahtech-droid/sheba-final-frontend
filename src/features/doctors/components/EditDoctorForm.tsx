@@ -8,13 +8,6 @@ import { Button } from "@/components/ui/button";
 import { getCookie } from "@/lib/cookies";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 type DoctorItem = {
   id: string;
@@ -59,21 +52,6 @@ export function EditDoctorForm({
 
   // Fetch doctor types
   const { data: doctorTypes = [], isLoading: isLoadingDoctorTypes } = useQuery({
-    queryKey: ["doctor-types"],
-    queryFn: async () => {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/doctor-types`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (!res.ok) throw new Error("Failed to fetch doctor types");
-      const result = await res.json();
-      return result.data || [];
-    },
-    enabled: !!token,
-  });
-  const { data: doctorTypes = [] } = useQuery({
     queryKey: ["doctor-types"],
     queryFn: async () => {
       const res = await fetch(

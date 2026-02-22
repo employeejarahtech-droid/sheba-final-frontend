@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { CalendarIcon, Check, ChevronDown, Trash2Icon, CircleCheck, PenLine, User, Activity, Clock } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/useDebounce";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -287,7 +287,7 @@ export default function HospitalInvoiceForm() {
     },
   });
 
-  const { control, watch, setValue, setError, clearErrors, formState: { errors } } = form;
+  const { watch, setValue, formState: { errors } } = form;
 
   // Log on component mount
   useEffect(() => {
@@ -314,8 +314,6 @@ export default function HospitalInvoiceForm() {
   // Compute derived amounts
   const discountedAmount = totalCharge - (Number(discount) || 0);
   const dueAmount = discountedAmount - (Number(paidAmount) || 0);
-
-  const clampedDueAmount = dueAmount < 0 ? 0 : dueAmount;
 
   // Whenever discount or paidAmount (or totalCharge) changes, update the form values
   useEffect(() => {
@@ -982,7 +980,9 @@ export default function HospitalInvoiceForm() {
                       id="isIndoorPatient"
                       checked={watch('isIndoorPatient')}
                       onCheckedChange={(checked) => {
-                        setValue('isIndoorPatient', checked);
+                        if (typeof checked === 'boolean') {
+                          setValue('isIndoorPatient', checked);
+                        }
                       }}
                     />
                     <div className="flex-1">
@@ -1353,7 +1353,7 @@ export default function HospitalInvoiceForm() {
                             <PopoverContent className="w-auto p-0" align="start">
                               <Calendar
                                 mode="single"
-                                selected={parseDDMMYYYY(field.value)}
+                                selected={field.value ? parseDDMMYYYY(field.value) : undefined}
                                 onSelect={(date) => field.onChange(date ? formatDateToDDMMYYYY(date) : "")}
                                 initialFocus
                               />

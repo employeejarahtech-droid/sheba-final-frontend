@@ -11,6 +11,7 @@ import { getCookie } from '@/lib/cookies'
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,6 +24,11 @@ const profileFormSchema = z.object({
     .string()
     .min(2, 'Company name must be at least 2 characters.')
     .max(30, 'Company name must not be longer than 30 characters.'),
+  currency: z
+    .string()
+    .min(3, 'Currency must be at least 3 characters.')
+    .max(3, 'Currency must be exactly 3 characters.')
+    .optional(),
 })
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
@@ -33,6 +39,7 @@ type ProfileResponse = {
   email: string
   avatar: string | null
   bio?: string | null
+  currency?: string | null
 }
 
 export function ProfileForm() {
@@ -44,6 +51,7 @@ export function ProfileForm() {
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       companyName: '',
+      currency: 'BDT',
     },
     mode: 'onChange',
   })
@@ -75,6 +83,7 @@ export function ProfileForm() {
     if (profileData) {
       form.reset({
         companyName: profileData.companyName || '',
+        currency: profileData.currency || 'BDT',
       })
       setCurrentAvatar(profileData.avatar || null)
     }
@@ -143,7 +152,7 @@ export function ProfileForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className='space-y-8'
+        className='space-y-6'
       >
         {/* Profile Image Uploader */}
         <div className="flex flex-col items-center pb-6 border-b border-gray-200 dark:border-gray-800">
@@ -162,6 +171,23 @@ export function ProfileForm() {
               <FormControl>
                 <Input placeholder='Company Name' {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name='currency'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Currency</FormLabel>
+              <FormControl>
+                <Input placeholder='BDT' {...field} />
+              </FormControl>
+              <FormDescription>
+                Enter your default currency code (e.g., USD, EUR, GBP, BDT).
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

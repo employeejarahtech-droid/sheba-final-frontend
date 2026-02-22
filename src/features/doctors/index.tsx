@@ -50,7 +50,7 @@ export default function Doctors() {
         enabled: !!token,
     });
 
-    const { data, error, isLoading } = useQuery({
+    const { data, isLoading } = useQuery({
         queryKey: ["doctor", page, search],
 
         queryFn: async () => {
