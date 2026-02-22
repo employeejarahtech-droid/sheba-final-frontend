@@ -19,4 +19,42 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  optimizeDeps: {
+    include: ['react', 'react-dom', '@tanstack/react-router', '@tanstack/react-query'],
+    force: false,
+  },
+  server: {
+    fs: {
+      strict: false,
+    },
+    watch: {
+      usePolling: false,
+      interval: 1000,
+    },
+    hmr: {
+      overlay: true,
+    },
+  },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // Split large packages into separate chunks
+          if (id.includes('node_modules')) {
+            if (id.includes('@tanstack')) {
+              return 'tanstack'
+            }
+            if (id.includes('lucide-react')) {
+              return 'icons'
+            }
+            if (id.includes('react')) {
+              return 'react-vendor'
+            }
+            return 'vendor'
+          }
+        },
+      },
+    },
+  },
 })

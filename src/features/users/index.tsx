@@ -115,6 +115,13 @@ function UsersContent() {
       },
     },
     {
+      data: 'created_by',
+      title: 'Created By',
+      render: (data: any) => {
+        return `<span class="text-sm text-muted-foreground">${data || '-'}</span>`
+      },
+    },
+    {
       data: 'created_at',
       title: 'Created At',
       render: (data: any) => {

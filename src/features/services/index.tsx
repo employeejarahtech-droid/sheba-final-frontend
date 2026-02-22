@@ -21,6 +21,7 @@ type ServiceItem = {
     price: number;
     status: string;
     created_at: string;
+    created_by?: string | number | null;
 };
 
 export default function Services() {
@@ -126,6 +127,14 @@ export default function Services() {
                     ? 'bg-green-100 text-green-800'
                     : 'bg-gray-100 text-gray-800';
                 return `<span class="px-2 py-1 rounded-full text-xs font-medium ${badgeClass}">${status}</span>`;
+            },
+        },
+        {
+            data: "created_by",
+            title: "Created By",
+            render: (data: any) => {
+                const value = data || '-';
+                return `<span class="text-sm text-muted-foreground">${value}</span>`;
             },
         },
         {

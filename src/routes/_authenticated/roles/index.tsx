@@ -89,6 +89,13 @@ function ListOfRoles() {
       className: 'text-sm text-muted-foreground',
     },
     {
+      data: 'created_by',
+      title: 'Created By',
+      render: (data: any) => {
+        return `<span class="text-sm text-muted-foreground">${data || '-'}</span>`
+      },
+    },
+    {
       data: 'status',
       title: 'Status',
       render: (data: any) => {

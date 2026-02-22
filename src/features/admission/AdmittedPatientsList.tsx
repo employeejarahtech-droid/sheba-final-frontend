@@ -27,6 +27,7 @@ type AdmissionItem = {
     doctor_id: number | null
     diagnosis: string | null
     created_at: string
+    created_by?: string | number | null
     bedCabin?: {
         id: number
         code: string
@@ -229,6 +230,17 @@ export function AdmittedPatientsList() {
                 return row.doctor?.doctor_name || '-'
             },
             defaultContent: "",
+        },
+        {
+            data: "created_by",
+            title: "Created By",
+            orderable: true,
+            responsivePriority: 5,
+            render: (data: any) => {
+                const value = data || '-';
+                return `<span class="text-sm text-muted-foreground">${value}</span>`;
+            },
+            defaultContent: "-",
         },
         {
             data: null,

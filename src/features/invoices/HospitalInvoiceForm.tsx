@@ -108,6 +108,9 @@ const formSchema = z.object({
   discountedAmount: z.any().optional(),
   dueAmount: z.any().optional(),
   tests: z.array(z.any()).optional(),
+  isIndoorPatient: z.boolean().optional().default(false),
+  admissionNumber: z.string().optional(),
+  bedCabinNumber: z.string().optional(),
 });
 
 export default function HospitalInvoiceForm() {
@@ -278,6 +281,9 @@ export default function HospitalInvoiceForm() {
       discountedAmount: 0,
       dueAmount: 0,
       tests: [],
+      isIndoorPatient: false,
+      admissionNumber: "",
+      bedCabinNumber: "",
     },
   });
 
@@ -563,6 +569,11 @@ export default function HospitalInvoiceForm() {
       doctor_id: Number(ref_doctor) || null,
       total_amount: totalCharge,
       net_amount: totalCharge - totalDeptDiscount, // Net after department discounts
+
+      // Indoor Patient Information
+      is_indoor_patient: watch('isIndoorPatient') || false,
+      admission_number: watch('isIndoorPatient') ? (watch('admissionNumber') || null) : null,
+      bed_cabin_number: watch('isIndoorPatient') ? (watch('bedCabinNumber') || null) : null,
 
       // Selected Tests → outdoor_invoice_items table
       // Backend will auto-create outdoor_invoice_department_wise_bills from this
@@ -941,6 +952,96 @@ export default function HospitalInvoiceForm() {
                           />
                         </PopoverContent>
                       </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Indoor Patient Card */}
+          <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-purple-200 hover:shadow-lg py-0 gap-0">
+            <CardHeader className="p-0 border-b-1 border-purple-100 dark:border-purple-900 gap-0">
+              <div className="bg-gradient-to-r from-purple-50 via-violet-50 to-purple-50 dark:from-purple-950/30 dark:via-violet-950/30 dark:to-purple-950/30 px-6 py-4 flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-purple-600 to-purple-500 rounded-xl shadow-lg shadow-purple-500/30">
+                  <User className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-100">
+                    Indoor Patient
+                  </CardTitle>
+                  <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+                    Link with admitted patient records
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="px-4 md:px-6 py-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+                {/* Is Indoor Patient Checkbox */}
+                <FormItem className="flex flex-col gap-2 md:col-span-2">
+                  <div className="flex items-center space-x-3 p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                    <Checkbox
+                      id="isIndoorPatient"
+                      checked={watch('isIndoorPatient')}
+                      onCheckedChange={(checked) => {
+                        setValue('isIndoorPatient', checked);
+                      }}
+                    />
+                    <div className="flex-1">
+                      <label
+                        htmlFor="isIndoorPatient"
+                        className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer flex items-center gap-2"
+                      >
+                        <span>This is an Indoor Patient</span>
+                      </label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Check if the patient is currently admitted
+                      </p>
+                    </div>
+                  </div>
+                </FormItem>
+
+                {/* Admission Number */}
+                <FormField
+                  control={form.control}
+                  name="admissionNumber"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col gap-2">
+                      <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Admission Number
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter admission number"
+                          disabled={!watch('isIndoorPatient')}
+                          className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-purple-500/20 focus-visible:border-purple-500/50 transition-all shadow-sm disabled:opacity-50"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Bed/Cabin Number */}
+                <FormField
+                  control={form.control}
+                  name="bedCabinNumber"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col gap-2">
+                      <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Bed/Cabin Number
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter bed/cabin number"
+                          disabled={!watch('isIndoorPatient')}
+                          className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-purple-500/20 focus-visible:border-purple-500/50 transition-all shadow-sm disabled:opacity-50"
+                          {...field}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

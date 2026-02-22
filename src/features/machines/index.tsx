@@ -19,6 +19,7 @@ type MachineItem = {
     id: string;
     name: string;
     description: string;
+    created_by?: string;
 };
 
 export default function Machines() {
@@ -150,6 +151,16 @@ export default function Machines() {
             orderable: true,
             responsivePriority: 3,
             defaultContent: "",
+        },
+        {
+            data: "created_by",
+            title: "Created By",
+            orderable: true,
+            responsivePriority: 4,
+            render: (data: any) => {
+                return `<span class="text-sm text-muted-foreground">${data || '-'}</span>`;
+            },
+            defaultContent: "-",
         },
         {
             data: null,

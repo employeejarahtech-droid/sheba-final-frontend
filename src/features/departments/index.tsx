@@ -17,6 +17,7 @@ import { Building2, Layers, Database, TrendingUp } from 'lucide-react'
 type DepartmentItem = {
     id: string;
     name: string;
+    created_by?: string;
 };
 
 export default function Departments() {
@@ -146,6 +147,16 @@ export default function Departments() {
             orderable: true,
             responsivePriority: 1,
             defaultContent: "",
+        },
+        {
+            data: "created_by",
+            title: "Created By",
+            orderable: true,
+            responsivePriority: 2,
+            render: (data: any) => {
+                return `<span class="text-sm text-muted-foreground">${data || '-'}</span>`;
+            },
+            defaultContent: "-",
         },
         {
             data: null,
