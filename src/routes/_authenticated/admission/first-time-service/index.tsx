@@ -23,13 +23,11 @@ import {
 } from "@/components/ui/select";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Header } from '@/components/layout/header';
-import { TopNav } from '@/components/layout/top-nav';
-import { topNav } from '@/data/data';
-import { Search } from '@/components/search';
-import { ThemeSwitch } from '@/components/theme-switch';
-import { ConfigDrawer } from '@/components/config-drawer';
-import { ProfileDropdown } from '@/components/profile-dropdown';
+import { AppHeader } from '@/components/layout/app-header';
+;
+;
+;
+;
 import { Main } from '@/components/layout/main';
 import { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
@@ -141,15 +139,7 @@ export default function FirstTimeServiceProviderForm() {
   return (
     <>
       {/* HEADER AREA (unchanged) */}
-      <Header>
-        <TopNav links={topNav} />
-        <div className="ms-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
 
       <Main>
         <div className="max-w-4xl mx-auto">

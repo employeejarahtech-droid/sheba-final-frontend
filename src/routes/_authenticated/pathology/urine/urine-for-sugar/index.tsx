@@ -1,17 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ConfigDrawer } from "@/components/config-drawer";
 import { DataTable } from "@/components/DataTable";
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
-import { TopNav } from "@/components/layout/top-nav";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
 import { EditUrineForSugarForm } from '@/features/pathology/urine/EditUrineForSugarForm';
-import { topNav } from '@/data/data';
+import { AppHeader } from '@/components/layout/app-header';
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/urine/urine-for-sugar/',
@@ -235,15 +229,7 @@ function UrineForSugar() {
 
   return (
     <>
-      <Header fixed>
-        <TopNav links={topNav} />
-        <div className='ms-auto flex items-center space-x-4'>
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
       <Main>
         <div className="mb-4">
           <h1 className='text-2xl font-bold tracking-tight'>Urine For Sugar</h1>

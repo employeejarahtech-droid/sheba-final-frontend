@@ -16,13 +16,11 @@ import { toast } from "sonner";
 import api from "@/lib/axios";
 
 // Layout
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { TopNav } from '@/components/layout/top-nav'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { topNav } from '@/data/data'
+
+import { AppHeader } from '@/components/layout/app-header'
+
+
+
 
 export const Route = createFileRoute('/_authenticated/accounting/income/')({
   component: IncomesPage,
@@ -263,15 +261,7 @@ function IncomesPage() {
 
   return (
     <>
-      <Header fixed>
-        <TopNav links={topNav} />
-        <div className='ms-auto flex items-center space-x-4'>
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
       <main className='p-6 lg:p-10'>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h1 className="text-2xl font-bold tracking-tight">All Income</h1>

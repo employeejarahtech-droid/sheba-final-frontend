@@ -21,12 +21,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
+
+import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
+
+
+
 import { NewChat } from './components/new-chat'
 import { fetchChatUsers, fetchMessages, sendMessage, type ChatUser as ServiceChatUser, type Message } from '@/services/chat.service'
 // Fake Data (fallback)
@@ -144,14 +144,7 @@ export function Chats() {
   return (
     <>
       {/* ===== Top Heading ===== */}
-      <Header>
-        <Search />
-        <div className='ms-auto flex items-center space-x-4'>
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
 
       <Main fixed>
         <section className='flex h-full gap-6'>

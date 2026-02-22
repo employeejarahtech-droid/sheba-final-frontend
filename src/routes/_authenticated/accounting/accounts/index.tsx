@@ -46,13 +46,7 @@ import {
 } from "@/features/accounting/accountingQueries";
 import { ChartOfAccount } from "@/types/accounting.types";
 import { toast } from "sonner";
-import { TopNav } from "@/components/layout/top-nav";
-import { topNav } from "@/data/data";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Header } from "@/components/layout/header";
+import { AppHeader } from "@/components/layout/app-header";
 
 const accountsSearchSchema = z.object({
     page: z.coerce.number().catch(1),
@@ -332,15 +326,8 @@ function ChartOfAccounts() {
 
     return (
         <div className="space-y-6">
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <Search />
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
+              
             <main className='p-6 lg:p-10'>
                 <div className="flex justify-between items-center mb-6">
                     <div>
@@ -357,7 +344,7 @@ function ChartOfAccounts() {
                                 setEditingAccount(null);
                             }} asChild>
                                 <Button className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-5 py-2.5 font-medium text-white shadow-lg shadow-violet-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-violet-500/40 active:translate-y-0 active:shadow-none">
-                                    <Plus className="mr-2 h-4 w-4" />  Add Account
+                                    <Plus className="h-4 w-4" />  Add Account
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[425px]">

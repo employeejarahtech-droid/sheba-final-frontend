@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { UserCog, Type } from 'lucide-react'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
+
+import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
+
+
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SettingsProfile } from './profile'
 //import { SettingsNotifications } from './notifications'
@@ -18,16 +18,7 @@ export function Settings() {
   return (
     <>
       {/* ===== Top Heading ===== */}
-      <Header fixed>
-        <Search />
-        <div className='ms-auto flex items-center space-x-4'>
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
-
-
+      <AppHeader fixed />
 
       <Main className="p-6 lg:p-10 w-full flex-1 bg-gray-50/50 dark:bg-black/20">
         <div className="space-y-6 max-w-7xl mx-auto">

@@ -9,13 +9,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Trash, Wallet, Clock, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Header } from "@/components/layout/header";
-import { TopNav } from "@/components/layout/top-nav";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { topNav } from "@/data/data";
+import { AppHeader } from '@/components/layout/app-header';
 
 type Allowance = { name: string; amount: number };
 type Deduction = { name: string; amount: number };
@@ -167,15 +161,7 @@ function SalaryPage() {
 
     return (
         <>
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <Search />
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
             <main className="p-6 lg:p-10">
                 <div className="max-w-4xl mx-auto">
                     <div className="flex items-center gap-4 mb-6">

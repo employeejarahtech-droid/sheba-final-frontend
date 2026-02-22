@@ -2,17 +2,12 @@ import PatientInvoiceInfo from '@/components/pathology/PatientInvoiceInfo'
 import { createFileRoute, useRouter, Link } from '@tanstack/react-router'
 import { Button } from "@/components/ui/button";
 import { Main } from '@/components/layout/main';
-import { Header } from '@/components/layout/header';
-import { TopNav } from '@/components/layout/top-nav';
-import { Search } from '@/components/search';
-import { ThemeSwitch } from '@/components/theme-switch';
-import { ConfigDrawer } from '@/components/config-drawer';
-import { ProfileDropdown } from '@/components/profile-dropdown';
 import { Card, CardContent } from '@/components/ui/card';
 import { getCookie } from '@/lib/cookies';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { topNav } from '@/data/data';
 import { useState, useEffect } from 'react';
+import { AppHeader } from '@/components/layout/app-header';
+import { ArrowLeft } from 'lucide-react';
 
 export const Route = createFileRoute(
   '/_authenticated/ultrasonogram/all/edit/$id',
@@ -129,15 +124,7 @@ function EditUltrasonogramReport() {
   if (isLoading) {
     return (
       <>
-        <Header>
-          <TopNav links={topNav} />
-          <div className="ms-auto flex items-center space-x-4">
-            <Search />
-            <ThemeSwitch />
-            <ConfigDrawer />
-            <ProfileDropdown />
-          </div>
-        </Header>
+        <AppHeader fixed />
         <Main>
           <div className="flex justify-center items-center h-64">
             <p className="text-gray-500">Loading...</p>
@@ -153,19 +140,19 @@ function EditUltrasonogramReport() {
   return (
     <>
       {/* Header */}
-      <Header>
-        <TopNav links={topNav} />
-        <div className="ms-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+    <AppHeader fixed />
 
       {/* Main */}
       <Main>
-        <h1 className="text-2xl font-bold tracking-tight mb-6">Edit Report - Ultrasonogram</h1>
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <h1 className="text-2xl font-bold tracking-tight">Edit Report - Ultrasonogram</h1>
+          <Link to="/ultrasonogram/all" className="ms-auto">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="h-4 w-4" />
+              Back to All
+            </Button>
+          </Link>
+        </div>
 
         {invoiceInformation && (
           <Card>

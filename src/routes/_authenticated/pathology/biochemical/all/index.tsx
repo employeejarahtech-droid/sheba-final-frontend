@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
 import { topNav } from '@/data/data';
+import { AppHeader } from '@/components/layout/app-header';
 
 export const Route = createFileRoute('/_authenticated/pathology/biochemical/all/')({
   component: AllReportsBiochemical,
@@ -227,15 +228,7 @@ function AllReportsBiochemical() {
 
   return (
     <>
-      <Header fixed>
-        <TopNav links={topNav} />
-        <div className='ms-auto flex items-center space-x-4'>
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
       <Main>
         <div className="mb-4">
           <h1 className='text-2xl font-bold tracking-tight'>All Reports (Biochemical)</h1>

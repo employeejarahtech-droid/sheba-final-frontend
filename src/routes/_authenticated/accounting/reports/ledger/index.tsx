@@ -27,13 +27,11 @@ import { DataTable } from "@/components/DataTable";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 // Layout
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { TopNav } from '@/components/layout/top-nav'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { topNav } from '@/data/data'
+
+import { AppHeader } from '@/components/layout/app-header'
+
+
+
 
 // Data
 import { useGetAccountingAccountsQuery } from "@/features/accounting/accountingQueries";
@@ -89,15 +87,7 @@ function LedgerReport() {
 
   return (
     <div className="">
-      <Header fixed>
-        <TopNav links={topNav} />
-        <div className='ms-auto flex items-center space-x-4'>
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
       <main className='p-6 lg:p-10 space-y-6'>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -109,7 +99,7 @@ function LedgerReport() {
           </Button>
         </div>
 
-        <Card className="border-t-4 border-emerald-500 shadow-md">
+        <Card className="border-t-4 border-emerald-500 shadow-md py-0">
           <CardContent className="p-6">
             <div className="grid md:grid-cols-3 gap-6 items-end">
               <div className="space-y-2">
@@ -216,11 +206,11 @@ function LedgerReport() {
           </Card>
         </div>
 
-        <Card className="overflow-hidden shadow-lg">
-          <CardHeader className="bg-gray-50 dark:bg-gray-900/50 border-b">
+        <Card className="overflow-hidden shadow-lg py-0 gap-0">
+          <CardHeader className="bg-gray-50 dark:bg-gray-900/50 border-b-1 py-4 gap-0">
             <CardTitle>Transactions</CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent className="py-4 px-6">
             <DataTable
               columns={[
                 {

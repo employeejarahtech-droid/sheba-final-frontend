@@ -1,10 +1,6 @@
-import { useState, useEffect, useMemo } from 'react'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
+import { useState, useEffect } from 'react'
+import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
 import { DataTable } from '@/components/DataTable'
 import { CreateDepartmentForm } from './components/CreateDepartmentForm'
 import { EditDepartmentForm } from './components/EditDepartmentForm'
@@ -258,14 +254,7 @@ export default function Departments() {
     ];
 
     return <>
-        <Header fixed>
-            <Search />
-            <div className='ms-auto flex items-center space-x-4'>
-                <ThemeSwitch />
-                <ConfigDrawer />
-                <ProfileDropdown />
-            </div>
-        </Header>
+        <AppHeader fixed />
 
         <Main className="p-6 lg:p-10">
             <div className="space-y-8">

@@ -1,17 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
-import { Header } from "@/components/layout/header"
 import { Main } from "@/components/layout/main"
-import { TopNav } from "@/components/layout/top-nav"
-import { ProfileDropdown } from "@/components/profile-dropdown"
-import { Search } from "@/components/search"
-import { ThemeSwitch } from "@/components/theme-switch"
-import { ConfigDrawer } from "@/components/config-drawer"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
-import { topNav } from '@/data/data'
+import { ArrowLeft, Printer } from "lucide-react"
 import { useEffect, useRef } from 'react'
+import { AppHeader } from '@/components/layout/app-header'
 
 type LabTest = {
   id: number
@@ -84,15 +78,7 @@ function PrintECGReport() {
   if (isLoading) {
     return (
       <>
-        <Header fixed className="print:hidden">
-          <TopNav links={topNav} />
-          <div className='ms-auto flex items-center space-x-4'>
-            <Search />
-            <ThemeSwitch />
-            <ConfigDrawer />
-            <ProfileDropdown />
-          </div>
-        </Header>
+        <AppHeader fixed />
         <Main>
           <div className="flex justify-center items-center h-64">
             <p className="text-gray-500">Loading...</p>
@@ -112,23 +98,19 @@ function PrintECGReport() {
 
   return (
     <>
-      <Header fixed className="print:hidden">
-        <TopNav links={topNav} />
-        <div className='ms-auto flex items-center space-x-4'>
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
       <Main>
-        <div className="mb-4 print:hidden">
+        <div className="print:hidden flex items-center justify-between gap-4">
           <Link to="/ecg/all">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to ECG Reports
             </Button>
           </Link>
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Printer className="h-4 w-4" />
+            Print
+          </Button>
         </div>
 
         <div className="max-w-4xl w-full mx-auto bg-background pt-10 pb-10 px-5 mt-6 print:w-[850px] print-report">
@@ -194,19 +176,17 @@ function PrintECGReport() {
 
           {/* Test Table */}
           <table className="w-full text-sm mt-6">
-            <thead>
+            {/* <thead>
               <tr className="border-t border-b bg-row-blue">
-                <th className="px-3 py-2 text-left w-[15%]">#</th>
                 <th className="px-3 py-2 text-left w-[85%]">Test Name & Result</th>
               </tr>
-            </thead>
+            </thead> */}
             <tbody>
               {tests.map((test, index) => (
                 <tr key={test.id} className="border-b border-dashed">
-                  <td className="px-3 py-2 align-top">{index + 1}</td>
                   <td className="px-3 py-2">
-                    <div className="mb-2">
-                      <span className="font-semibold">{test.test_name || '-'}</span>
+                    <div className="mb-2 text-center">
+                      <span className="font-semibold text-lg">{test.test_name || '-'}</span>
                     </div>
                     <div
                       className="text-gray-700 whitespace-pre-wrap"

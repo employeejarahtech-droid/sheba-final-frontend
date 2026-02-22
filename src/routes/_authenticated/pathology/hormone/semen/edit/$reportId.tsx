@@ -29,13 +29,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
 
 import { Main } from '@/components/layout/main';
-import { Header } from '@/components/layout/header';
-import { TopNav } from '@/components/layout/top-nav';
-import { Search } from '@/components/search';
-import { ThemeSwitch } from '@/components/theme-switch';
-import { ConfigDrawer } from '@/components/config-drawer';
-import { ProfileDropdown } from '@/components/profile-dropdown';
-import { topNav } from '@/data/data';
+import { AppHeader } from '@/components/layout/app-header';
+import { ArrowLeft } from 'lucide-react';
 
 export const Route = createFileRoute(
   "/_authenticated/pathology/hormone/semen/edit/$reportId"
@@ -135,22 +130,20 @@ function EditSemenReport() {
   };
   return (
     <>
-      <Header fixed>
-        <TopNav links={topNav} />
-        <div className="ms-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
 
       <Main className="px-6 py-8 max-w-5xl mx-auto">
 
         <div className='max-w-[800px] mx-auto'>
           {/* Title */}
-          <div className="mb-6">
+          <div className="mb-6 flex items-center justify-between gap-4">
             <h1 className="text-2xl font-bold tracking-tight">Semen Analysis Report</h1>
+            <Link to="/pathology/hormone/semen">
+              <Button variant="outline">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Semen Tests
+              </Button>
+            </Link>
           </div>
 
           {/* Invoice / Patient info */}

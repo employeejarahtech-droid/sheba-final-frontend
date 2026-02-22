@@ -1,8 +1,8 @@
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
+
+import { AppHeader } from '@/components/layout/app-header'
+
+
+
 import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
 import { useMemo, useEffect } from 'react'
@@ -307,14 +307,7 @@ export default function ListOfTests() {
     ], [page, limit]);
 
     return <>
-        <Header fixed>
-            <Search />
-            <div className='ms-auto flex items-center space-x-4'>
-                <ThemeSwitch />
-                <ConfigDrawer />
-                <ProfileDropdown />
-            </div>
-        </Header>
+        <AppHeader fixed />
 
         <main className='p-6 lg:p-10'>
             <div className="flex flex-wrap items-end justify-between gap-2 mb-6">

@@ -17,16 +17,9 @@ import {
 } from "@/components/ui/popover";
 import { DataTable } from "@/components/DataTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 
 import { useGetBalanceSheetQuery } from "@/features/accounting/accountingQueries";
-import { TopNav } from "@/components/layout/top-nav";
-import { topNav } from "@/data/data";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Header } from "@/components/layout/header";
+import { AppHeader } from "@/components/layout/app-header";
 
 const balanceSheetSearchSchema = z.object({
     date: z.string().optional(),
@@ -88,15 +81,7 @@ function BalanceSheet() {
 
     return (
         <div className="space-y-6">
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <Search />
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
             <main className='p-6 lg:p-10'>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>

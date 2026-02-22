@@ -1,5 +1,4 @@
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -11,21 +10,14 @@ import {
     Clock,
     PieChart,
     PlusCircle,
-    Trash,
     Users,
     XCircle,
 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { DataTable } from "../DataTable";
-import { Header } from "../layout/header";
-import { TopNav } from "../layout/top-nav";
-import { topNav } from "@/data/data";
-import { Search } from "../search";
-import { ThemeSwitch } from "../theme-switch";
-import { ConfigDrawer } from "../config-drawer";
-import { ProfileDropdown } from "../profile-dropdown";
 import { useNavigate } from "@tanstack/react-router";
+import { AppHeader } from "../layout/app-header";
 
 // Dummy types
 type Department = {
@@ -459,15 +451,7 @@ export default function HrPayrollOverview() {
 
     return (
         <>
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <Search />
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
             <main className="p-6 lg:p-10">
                 <div className="w-full">
                     <div className="flex flex-wrap items-center justify-between gap-5 mb-6">

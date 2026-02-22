@@ -1,12 +1,10 @@
-import { ConfigDrawer } from '@/components/config-drawer'
+
 import { DataTable } from '@/components/DataTable'
-import { Header } from '@/components/layout/header'
-import { TopNav } from '@/components/layout/top-nav'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
+import { AppHeader } from '@/components/layout/app-header'
+
+
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { topNav } from '@/data/data'
 import { createFileRoute } from '@tanstack/react-router'
 import { Users, ShieldCheck, XCircle } from 'lucide-react'
 import { useState, useMemo } from 'react'
@@ -120,15 +118,7 @@ function ListOfRoles() {
 
   return (
     <>
-      <Header fixed>
-        <TopNav links={topNav} />
-        <div className="ms-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
 
       <main className="p-6 lg:p-10 space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
+
+import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
+
+
+
 import { DataTable } from '@/components/DataTable'
 import { CreatePatientTypeForm } from './components/CreatePatientTypeForm'
 import { EditPatientTypeForm } from './components/EditPatientTypeForm'
@@ -243,14 +243,7 @@ export default function PatientTypes() {
     }, [navigate, setSelectedPatientTypeId, setOpenEditForm]);
 
     return <>
-        <Header fixed>
-            <Search />
-            <div className='ms-auto flex items-center space-x-4'>
-                <ThemeSwitch />
-                <ConfigDrawer />
-                <ProfileDropdown />
-            </div>
-        </Header>
+        <AppHeader fixed />
 
         <Main className="p-6 lg:p-10">
             <div className="space-y-6">

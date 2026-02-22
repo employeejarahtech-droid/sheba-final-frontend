@@ -1,12 +1,10 @@
 
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { TopNav } from '@/components/layout/top-nav'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
+
+import { AppHeader } from '@/components/layout/app-header'
+
+
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { topNav } from '@/data/data'
 import { AddIncomeModal } from './components/AddIncomeModal'
 import { AddExpenseModal } from './components/AddExpenseModal'
 import { createFileRoute } from '@tanstack/react-router'
@@ -44,15 +42,7 @@ export const Route = createFileRoute('/_authenticated/accounting/')({
 function AccountingLoading() {
     return (
         <>
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <div className='hidden md:block'><Search /></div>
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
             <main className='p-6 lg:p-10'>
                 <div className='flex items-center justify-center min-h-[400px]'>
                     <div className='text-center'>
@@ -69,15 +59,7 @@ function AccountingLoading() {
 function AccountingError({ error }: { error: Error }) {
     return (
         <>
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <div className='hidden md:block'><Search /></div>
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
             <main className='p-6 lg:p-10'>
                 <div className='flex items-center justify-center min-h-[400px]'>
                     <div className='text-center'>
@@ -123,15 +105,7 @@ function AccountingOverview() {
 
     return (
         <>
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <div className='hidden md:block'><Search /></div>
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
             <main className='p-6 lg:p-10'>
                 <div className='mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
                     <div>
@@ -261,7 +235,7 @@ function AccountingOverview() {
                 {/* Charts Row */}
                 <div className='mt-8 grid gap-6 md:grid-cols-2'>
                     {/* Trend Chart (Bar/Line) */}
-                    <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg">
+                    <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0">
                         <CardHeader className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 border-b-1 border-blue-100 dark:border-blue-900 py-3 gap-0">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
@@ -270,7 +244,7 @@ function AccountingOverview() {
                                 <CardTitle>Income vs Expense Trend</CardTitle>
                             </div>
                         </CardHeader>
-                        <CardContent className="pb-6 pt-4">
+                        <CardContent className="pt-4 pb-6">
                             <div className="h-[300px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={chartTrendData}>
@@ -287,7 +261,7 @@ function AccountingOverview() {
                     </Card>
 
                     {/* Expense Breakdown Pie Chart */}
-                    <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-orange-200 hover:shadow-lg">
+                    <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-orange-200 hover:shadow-lg py-0">
                         <CardHeader className="bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 dark:from-orange-950/30 dark:via-amber-950/30 dark:to-orange-950/30 border-b-1 border-orange-100 dark:border-orange-900 py-3 gap-0">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl shadow-lg shadow-orange-500/30">

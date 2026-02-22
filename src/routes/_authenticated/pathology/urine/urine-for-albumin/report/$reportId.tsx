@@ -3,15 +3,9 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from '@/lib/cookies';
 import { ArrowLeft, Loader2, Printer } from 'lucide-react';
-import { Header } from '@/components/layout/header';
-import { TopNav } from '@/components/layout/top-nav';
-import { topNav } from '@/data/data';
-import { Search } from '@/components/search';
-import { ThemeSwitch } from '@/components/theme-switch';
-import { ConfigDrawer } from '@/components/config-drawer';
-import { ProfileDropdown } from '@/components/profile-dropdown';
 import { Main } from '@/components/layout/main';
 import { Button } from '@/components/ui/button';
+import { AppHeader } from '@/components/layout/app-header';
 import { useState } from 'react';
 
 export const Route = createFileRoute(
@@ -82,21 +76,13 @@ function UrineForAlbuminReport() {
 
   return (
     <>
-    <Header fixed className="print:hidden">
-        <TopNav links={topNav} />
-        <div className='ms-auto flex items-center space-x-4'>
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+    <AppHeader fixed />
       <Main>
         <div className="print:hidden flex items-center justify-between gap-4">
-          <Link to="/pathology/urine/urine-for-re-full">
+          <Link to="/pathology/urine/urine-for-albumin">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Urine For Sugar Tests
+              Back to Urine For Albumin Tests
             </Button>
           </Link>
           <div className="flex items-center gap-3">
