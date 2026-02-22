@@ -1,6 +1,12 @@
 import { Button } from "@/components/ui/button";
 
-export default function BloodForBtctReportDetails({ invoice: invoice, testName }: any) {
+interface BloodForBtctReportDetailsProps {
+  invoice?: any;
+  testName?: string;
+  paddingTop?: number;
+}
+
+export default function BloodForBtctReportDetails({ invoice: invoice, testName, paddingTop = 40 }: BloodForBtctReportDetailsProps) {
   // Extract patient info from nested outdoor_invoice object
   const patientInfo = invoice?.outdoor_invoice || {};
   const invoiceDate = patientInfo.invoice_date
@@ -8,7 +14,7 @@ export default function BloodForBtctReportDetails({ invoice: invoice, testName }
     : "N/A";
 
   return (
-    <div className="max-w-4xl w-full mx-auto bg-background pt-40 pb-10 px-5 mt-6 print:w-[850px] print-report">
+    <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
       <style>
         {`
           .bg-row-blue {

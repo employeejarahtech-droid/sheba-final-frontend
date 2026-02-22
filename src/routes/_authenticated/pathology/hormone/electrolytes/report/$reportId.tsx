@@ -6,6 +6,7 @@ import { ArrowLeft, Loader2, Printer } from 'lucide-react';
 import { Main } from '@/components/layout/main';
 import { Button } from '@/components/ui/button';
 import { AppHeader } from '@/components/layout/app-header';
+import { useState } from 'react';
 
 export const Route = createFileRoute(
     '/_authenticated/pathology/hormone/electrolytes/report/$reportId',
@@ -16,6 +17,8 @@ export const Route = createFileRoute(
 function SerumElectrolytesReport() {
     const { reportId } = Route.useParams();
     const token = getCookie('accessToken');
+    const [paddingTop, setPaddingTop] = useState(100);
+    const paddingOptions = Array.from({ length: 39 }, (_, i) => (i + 2) * 5); // [10, 15, 20, ..., 200]
 
     // Fetch electrolytes test data
     const { data: electrolytesData, isLoading: isLoadingElectrolytes, error: electrolytesError } = useQuery({
@@ -80,12 +83,29 @@ function SerumElectrolytesReport() {
                             Back to Electrolytes Tests
                         </Button>
                     </Link>
-                    <Button variant="outline" size="sm" onClick={() => window.print()}>
-                        <Printer className="h-4 w-4" />
-                        Print
-                    </Button>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <label htmlFor="padding-select" className="text-sm font-medium">Padding Top:</label>
+                            <select
+                                id="padding-select"
+                                value={paddingTop}
+                                onChange={(e) => setPaddingTop(Number(e.target.value))}
+                                className="h-8 px-2 text-sm border rounded-md bg-background"
+                            >
+                                {paddingOptions.map((value) => (
+                                    <option key={value} value={value}>
+                                        {value}px
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={() => window.print()}>
+                            <Printer className="h-4 w-4" />
+                            Print
+                        </Button>
+                    </div>
                 </div>
-                <ElectrolytesReportDetails electrolytesData={electrolytesData} invoiceData={invoiceData} />
+                <ElectrolytesReportDetails electrolytesData={electrolytesData} invoiceData={invoiceData} paddingTop={paddingTop} />
             </Main>
         </>
     )

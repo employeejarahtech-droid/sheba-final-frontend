@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSearch, useNavigate } from '@tanstack/react-router'
 import { Users, Activity, CheckCircle, AlertCircle, UserPlus } from 'lucide-react'
@@ -153,12 +153,34 @@ export function AdmittedPatientsList() {
 
     const columns = useMemo(() => [
         {
-            data: null,
-            title: "SL",
-            orderable: false,
-            responsivePriority: 3,
-            render: (_data: any, _type: string, _row: AdmissionItem, meta: any) => {
-                return (page - 1) * limit + meta.row + 1
+            data: "id",
+            title: "ID",
+            orderable: true,
+            responsivePriority: 1,
+            render: (data: any, _type: string, row: AdmissionItem) => {
+                const admissionDate = row.admission_date ? new Date(row.admission_date).toLocaleDateString() : '-';
+                const dischargeDate = row.discharge_date ? new Date(row.discharge_date).toLocaleDateString() : '-';
+                const bedCabinInfo = row.bedCabin ? `${row.bedCabin.code} (${row.bedCabin.type})` : '-';
+                const doctorName = row.doctor?.doctor_name || '-';
+                return `
+                    <div class="flex items-center gap-2">
+                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+                                type="button"
+                                data-id="${data}"
+                                data-patient-name="${(row.patient_name || '-').replace(/"/g, '&quot;')}"
+                                data-age="${row.age || 0}"
+                                data-sex="${row.sex || '-'}"
+                                data-phone="${row.phone || '-'}"
+                                data-admission-date="${admissionDate}"
+                                data-discharge-date="${dischargeDate}"
+                                data-status="${row.status}"
+                                data-bed-cabin="${bedCabinInfo.replace(/"/g, '&quot;')}"
+                                data-doctor="${doctorName.replace(/"/g, '&quot;')}"
+                                data-diagnosis="${(row.diagnosis || '-').replace(/"/g, '&quot;')}"
+                                data-created-by="${String(row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
+                        <span>${data}</span>
+                    </div>
+                `;
             },
             defaultContent: "",
         },
@@ -231,38 +253,101 @@ export function AdmittedPatientsList() {
             },
             defaultContent: "",
         },
-        {
-            data: "created_by",
-            title: "Created By",
-            orderable: true,
-            responsivePriority: 5,
-            render: (data: any) => {
-                const value = data || '-';
-                return `<span class="text-sm text-muted-foreground">${value}</span>`;
-            },
-            defaultContent: "-",
-        },
-        {
-            data: null,
-            title: "Actions",
-            orderable: false,
-            responsivePriority: 1,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
-                return `
-                    <button
-                        onclick="window.location.href='/admission/patients/${row.id}/billing'"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
-                    >
+    ], [page, limit])
+
+    // Handle expand button clicks
+    useEffect(() => {
+        const handleExpandClick = (e: Event) => {
+            const button = (e.target as HTMLElement).closest('.expand-btn')
+            if (!button) return
+
+            const btn = button as HTMLButtonElement
+            const row = btn.closest('tr')
+            if (!row) return
+
+            const isExpanded = row.classList.contains('expanded')
+            const nextRow = row.nextElementSibling
+
+            // Toggle collapse
+            if (nextRow && nextRow.classList.contains('child-row-detail')) {
+                nextRow.remove()
+                row.classList.remove('expanded')
+                btn.textContent = '+'
+                btn.style.backgroundColor = 'black'
+                return
+            }
+
+            // Don't expand if already expanded
+            if (isExpanded) return
+
+            // Get data from attributes
+            const id = btn.dataset.id || ''
+            const patientName = btn.dataset.patientName || '-'
+            const age = btn.dataset.age || '-'
+            const sex = btn.dataset.sex || '-'
+            const phone = btn.dataset.phone || '-'
+            const admissionDate = btn.dataset.admissionDate || '-'
+            const dischargeDate = btn.dataset.dischargeDate || '-'
+            const status = btn.dataset.status || '-'
+            const bedCabin = btn.dataset.bedCabin || '-'
+            const doctor = btn.dataset.doctor || '-'
+            const diagnosis = btn.dataset.diagnosis || '-'
+            const createdBy = btn.dataset.createdBy || '-'
+
+            // Create details HTML
+            const details = document.createElement('ul')
+            details.className = 'grid grid-cols-2 gap-2 text-sm'
+            details.innerHTML = `
+                <li><strong>Admission ID:</strong> ${id}</li>
+                <li><strong>Patient Name:</strong> ${patientName}</li>
+                <li><strong>Age/Sex:</strong> ${age}/${sex}</li>
+                <li><strong>Phone:</strong> ${phone}</li>
+                <li><strong>Admission Date:</strong> ${admissionDate}</li>
+                <li><strong>Discharge Date:</strong> ${dischargeDate}</li>
+                <li><strong>Status:</strong> ${status.charAt(0).toUpperCase() + status.slice(1)}</li>
+                <li><strong>Bed/Cabin:</strong> ${bedCabin}</li>
+                <li><strong>Doctor:</strong> ${doctor}</li>
+                <li><strong>Diagnosis:</strong> ${diagnosis}</li>
+                <li><strong>Created By:</strong> ${createdBy}</li>
+                <li class='col-span-2'><strong>Actions:</strong>
+                    <button onclick="window.location.href='/admission/patients/${id}/billing'" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium shadow-sm hover:shadow-md">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 5v14M5 12h14"/>
                         </svg>
                         Add Billing
                     </button>
-                `;
-            },
-            defaultContent: "",
-        },
-    ], [page, limit])
+                    <button onclick="window.location.href='/admission/patients/${id}/billing'" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium shadow-sm hover:shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        View Details
+                    </button>
+                </li>
+            `
+
+            // Create new row
+            const newRow = document.createElement('tr')
+            newRow.className = 'child-row-detail'
+            const cell = document.createElement('td')
+            cell.className = 'p-4 bg-muted/50'
+            cell.colSpan = 11
+            cell.appendChild(details)
+            newRow.appendChild(cell)
+
+            row.parentNode?.insertBefore(newRow, row.nextSibling)
+            row.classList.add('expanded')
+            btn.textContent = '−'
+            btn.style.backgroundColor = '#dc2626'
+        }
+
+        // Add event listener to document for delegation
+        document.addEventListener('click', handleExpandClick)
+
+        return () => {
+            document.removeEventListener('click', handleExpandClick)
+        }
+    }, [])
 
     return (
         <>

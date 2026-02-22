@@ -109,6 +109,31 @@ function MT() {
       data: 'invoice_id',
       title: 'Invoice ID',
       className: 'font-mono text-sm',
+      render: (data: any, _type: string, row: ReportItem) => {
+        const date = row.created_at ? new Date(row.created_at).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }) : '-';
+        const status = row.status || 'Pending';
+        const rowData = JSON.stringify(row).replace(/"/g, '&quot;');
+        return `
+          <div class="flex items-center gap-2">
+            <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+                    type="button"
+                    data-invoice-id="${data}"
+                    data-patient-name="${(row.patient_name || '-').replace(/"/g, '&quot;')}"
+                    data-date="${date}"
+                    data-test-result="${(row.test_result || '-').replace(/"/g, '&quot;')}"
+                    data-induration="${row.induration_size !== null ? row.induration_size : '-'}"
+                    data-test-carried-out-by="${(row.test_carried_out_by || '-').replace(/"/g, '&quot;')}"
+                    data-status="${status}"
+                    data-report-id="${row.id}"
+                    data-row-data='${rowData}'>+</button>
+            <span>${data}</span>
+          </div>
+        `;
+      },
     },
     {
       data: 'patient_name',
@@ -168,19 +193,82 @@ function MT() {
         return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${color} text-white border-transparent">${status || 'Pending'}</span>`;
       },
     },
-    {
-      data: null,
-      title: 'Actions',
-      orderable: false,
-      render: (_data: any, _type: string, row: ReportItem) => {
-        const rowData = JSON.stringify(row).replace(/"/g, '&quot;');
-        return `
-          <button class="edit-mt-btn inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 mr-2" data-row='${rowData}'>Edit</button>
-          <a href="/pathology/immunology/mt/report/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-info hover:bg-info-foreground h-8 px-3">View Report</a>
-        `;
-      },
-    },
   ];
+
+  // Handle expand button clicks
+  useEffect(() => {
+    const handleExpandClick = (e: Event) => {
+      const button = (e.target as HTMLElement).closest('.expand-btn');
+      if (!button) return;
+
+      const btn = button as HTMLButtonElement;
+      const row = btn.closest('tr');
+      if (!row) return;
+
+      const isExpanded = row.classList.contains('expanded');
+      const nextRow = row.nextElementSibling;
+
+      // Toggle collapse
+      if (nextRow && nextRow.classList.contains('child-row-detail')) {
+        nextRow.remove();
+        row.classList.remove('expanded');
+        btn.textContent = '+';
+        btn.style.backgroundColor = 'black';
+        return;
+      }
+
+      // Don't expand if already expanded
+      if (isExpanded) return;
+
+      // Get data from attributes
+      const invoiceId = btn.dataset.invoiceId || '';
+      const patientName = btn.dataset.patientName || '-';
+      const date = btn.dataset.date || '-';
+      const testResult = btn.dataset.testResult || '-';
+      const induration = btn.dataset.induration || '-';
+      const testCarriedOutBy = btn.dataset.testCarriedOutBy || '-';
+      const status = btn.dataset.status || '-';
+      const reportId = btn.dataset.reportId || '';
+
+      // Create details HTML
+      const details = document.createElement('ul');
+      details.className = 'grid grid-cols-2 gap-2 text-sm';
+      details.innerHTML = `
+        <li><strong>Invoice ID:</strong> ${invoiceId}</li>
+        <li><strong>Patient Name:</strong> ${patientName}</li>
+        <li><strong>Date:</strong> ${date}</li>
+        <li><strong>Test Result:</strong> ${testResult}</li>
+        <li><strong>Induration (mm):</strong> ${induration}</li>
+        <li><strong>Test Carried Out By:</strong> ${testCarriedOutBy}</li>
+        <li><strong>Status:</strong> ${status}</li>
+        <li class='col-span-2'><strong>Actions:</strong>
+          <button class="edit-mt-btn inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 mr-2" data-row='${btn.dataset.rowData}'>Edit</button>
+          <a href="/pathology/immunology/mt/report/${reportId}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-info hover:bg-info-foreground h-8 px-3">View Report</a>
+        </li>
+      `;
+
+      // Create new row
+      const newRow = document.createElement('tr');
+      newRow.className = 'child-row-detail';
+      const cell = document.createElement('td');
+      cell.className = 'p-4 bg-muted/50';
+      cell.colSpan = 10;
+      cell.appendChild(details);
+      newRow.appendChild(cell);
+
+      row.parentNode?.insertBefore(newRow, row.nextSibling);
+      row.classList.add('expanded');
+      btn.textContent = '−';
+      btn.style.backgroundColor = '#dc2626';
+    };
+
+    // Add event listener to document for delegation
+    document.addEventListener('click', handleExpandClick);
+
+    return () => {
+      document.removeEventListener('click', handleExpandClick);
+    };
+  }, []);
 
   // Set up edit button handlers
   useEffect(() => {

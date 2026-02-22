@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 interface UrineForSugarReportDetailsProps {
   report?: any;
   invoice?: any;
+  paddingTop?: number;
 }
 
-export default function UrineForSugarFullReportDetails({ report, invoice }: UrineForSugarReportDetailsProps) {
+export default function UrineForSugarFullReportDetails({ report, invoice, paddingTop = 40 }: UrineForSugarReportDetailsProps) {
   // Format date for display
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
@@ -19,7 +20,7 @@ export default function UrineForSugarFullReportDetails({ report, invoice }: Urin
 
   const borderWidth = 2;
   return (
-    <div className="max-w-4xl w-full mx-auto bg-background pt-40 pb-10 px-5 mt-6 print:w-[850px] print-report">
+    <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
       <style>
         {`
           .bg-row-blue {

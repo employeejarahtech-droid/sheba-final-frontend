@@ -94,10 +94,99 @@ export default function DoctorTypes() {
         },
     ];
 
+    // Handle expand button clicks using event delegation
+    useEffect(() => {
+        const handleExpandClick = (e: Event) => {
+            const button = (e.target as HTMLElement).closest('.expand-btn');
+            if (!button) return;
+
+            const btn = button as HTMLButtonElement;
+            const row = btn.closest('tr');
+            if (!row) return;
+
+            const isExpanded = row.classList.contains('expanded');
+            const nextRow = row.nextElementSibling;
+
+            // Toggle collapse
+            if (nextRow && nextRow.classList.contains('child-row-detail')) {
+                nextRow.remove();
+                row.classList.remove('expanded');
+                btn.textContent = '+';
+                btn.style.backgroundColor = 'black';
+                return;
+            }
+
+            // Don't expand if already expanded
+            if (isExpanded) return;
+
+            // Get data from attributes
+            const id = btn.dataset.id || '';
+            const name = btn.dataset.name || '-';
+            const description = btn.dataset.description || '-';
+            const createdAt = btn.dataset.createdAt || '-';
+            const createdBy = btn.dataset.createdBy || '-';
+
+            // Create details HTML
+            const details = document.createElement('ul');
+            details.className = 'grid grid-cols-2 gap-2 text-sm';
+            details.innerHTML = `
+                <li><strong>Doctor Type ID:</strong> ${id}</li>
+                <li><strong>Type Name:</strong> ${name}</li>
+                <li><strong>Description:</strong> ${description}</li>
+                <li><strong>Created Date:</strong> ${createdAt}</li>
+                <li><strong>Created By:</strong> ${createdBy}</li>
+                <li class='col-span-2'><strong>Actions:</strong>
+                    <button data-action="view" data-id="${id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 mr-2">
+                        View
+                    </button>
+                    <button data-action="edit" data-id="${id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3">
+                        Edit
+                    </button>
+                </li>
+            `;
+
+            // Create new row
+            const newRow = document.createElement('tr');
+            newRow.className = 'child-row-detail';
+            const cell = document.createElement('td');
+            cell.className = 'p-4 bg-muted/50';
+            cell.colSpan = 8;
+            cell.appendChild(details);
+            newRow.appendChild(cell);
+
+            row.parentNode?.insertBefore(newRow, row.nextSibling);
+            row.classList.add('expanded');
+            btn.textContent = '−';
+            btn.style.backgroundColor = '#dc2626';
+        };
+
+        // Add event listener to document for delegation
+        document.addEventListener('click', handleExpandClick);
+
+        return () => {
+            document.removeEventListener('click', handleExpandClick);
+        };
+    }, []);
+
     const columns = [
         {
             data: "id",
             title: "ID",
+            render: (data: any, _type: string, row: DoctorTypeItem) => {
+                const createdAt = row.created_at ? new Date(row.created_at).toLocaleDateString() : '-';
+                return `
+                    <div class="flex items-center gap-2">
+                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+                                type="button"
+                                data-id="${data}"
+                                data-name="${(row.name || '-').replace(/"/g, '&quot;')}"
+                                data-description="${(row.description || '-').replace(/"/g, '&quot;')}"
+                                data-created-at="${createdAt}"
+                                data-created-by="${String(row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
+                        <span>${data}</span>
+                    </div>
+                `;
+            },
         },
         {
             data: "name",
@@ -123,22 +212,6 @@ export default function DoctorTypes() {
             render: (data: any) => {
                 const value = data || '-';
                 return `<span class="text-sm text-muted-foreground">${value}</span>`;
-            },
-        },
-        {
-            data: null,
-            title: "Actions",
-            render: (data: any, type: string, row: DoctorTypeItem) => {
-                return `
-                    <div class="flex gap-2">
-                        <button data-action="view" data-id="${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3">
-                            View
-                        </button>
-                        <button data-action="edit" data-id="${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3">
-                            Edit
-                        </button>
-                    </div>
-                `;
             },
         },
     ];
@@ -167,7 +240,7 @@ export default function DoctorTypes() {
         return () => {
             document.removeEventListener('click', handleTableClick);
         };
-    }, [navigate]);
+    }, [navigate, setSelectedDoctorTypeId, setOpenEditForm]);
 
     return <>
         <AppHeader fixed />

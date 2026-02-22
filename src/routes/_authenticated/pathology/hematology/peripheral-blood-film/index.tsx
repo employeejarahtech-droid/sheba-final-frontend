@@ -77,12 +77,105 @@ function PeripheralBloodFilm() {
     };
   }, [setReportId, setInvoiceId]);
 
+  // Handle expand button clicks
+  useEffect(() => {
+    const handleExpandClick = (e: Event) => {
+      const button = (e.target as HTMLElement).closest('.expand-btn');
+      if (!button) return;
+
+      const btn = button as HTMLButtonElement;
+      const row = btn.closest('tr');
+      if (!row) return;
+
+      const isExpanded = row.classList.contains('expanded');
+      const nextRow = row.nextElementSibling;
+
+      // Toggle collapse
+      if (nextRow && nextRow.classList.contains('child-row-detail')) {
+        nextRow.remove();
+        row.classList.remove('expanded');
+        btn.textContent = '+';
+        btn.style.backgroundColor = 'black';
+        return;
+      }
+
+      // Don't expand if already expanded
+      if (isExpanded) return;
+
+      // Get data from attributes
+      const invoiceId = btn.dataset.invoiceId || '';
+      const patientName = btn.dataset.patientName || '-';
+      const date = btn.dataset.date || '-';
+      const status = btn.dataset.status || '-';
+      const reportId = btn.dataset.reportId || '';
+
+      // Create details HTML
+      const details = document.createElement('ul');
+      details.className = 'grid grid-cols-2 gap-2 text-sm';
+      details.innerHTML = `
+        <li><strong>Invoice ID:</strong> ${invoiceId}</li>
+        <li><strong>Patient Name:</strong> ${patientName}</li>
+        <li><strong>Date:</strong> ${date}</li>
+        <li><strong>Status:</strong> ${status}</li>
+        <li class='col-span-2'><strong>Actions:</strong>
+          <a href="/pathology/hematology/peripheral-blood-film/report/${reportId}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2 mr-2">
+            View Report
+          </a>
+          <button onclick="window.editPeripheralBloodFilm(${reportId}, ${invoiceId})" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+            Edit
+          </button>
+        </li>
+      `;
+
+      // Create new row
+      const newRow = document.createElement('tr');
+      newRow.className = 'child-row-detail';
+      const cell = document.createElement('td');
+      cell.className = 'p-4 bg-muted/50';
+      cell.colSpan = 7;
+      cell.appendChild(details);
+      newRow.appendChild(cell);
+
+      row.parentNode?.insertBefore(newRow, row.nextSibling);
+      row.classList.add('expanded');
+      btn.textContent = '−';
+      btn.style.backgroundColor = '#dc2626';
+    };
+
+    // Add event listener to document for delegation
+    document.addEventListener('click', handleExpandClick);
+
+    return () => {
+      document.removeEventListener('click', handleExpandClick);
+    };
+  }, []);
+
   const columns = [
     {
       data: "invoice_id",
       title: "Invoice ID",
       orderable: true,
       responsivePriority: 2,
+      render: (data: any, _type: string, row: ReportsItem) => {
+        const date = row.created_at ? new Date(row.created_at).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }) : '-';
+        const status = row.status || 'Pending';
+        return `
+          <div class="flex items-center gap-2">
+            <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+                    type="button"
+                    data-invoice-id="${data}"
+                    data-patient-name="${(row.patient_name || '-').replace(/"/g, '&quot;')}"
+                    data-date="${date}"
+                    data-status="${status}"
+                    data-report-id="${row.id}">+</button>
+            <span>${data}</span>
+          </div>
+        `;
+      },
       defaultContent: "",
     },
     {
@@ -126,26 +219,6 @@ function PeripheralBloodFilm() {
               : "bg-yellow-500";
 
         return `<span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status}</span>`;
-      },
-      defaultContent: "",
-    },
-    // Actions Column
-    {
-      data: null,
-      title: "Actions",
-      orderable: false,
-      responsivePriority: 1,
-      render: (_data: any, _type: string, row: ReportsItem) => {
-        return `
-          <div class="flex gap-2">
-            <a href="/pathology/hematology/peripheral-blood-film/report/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
-              View Report
-            </a>
-            <button onclick="window.editPeripheralBloodFilm(${row.id}, ${row.invoice_id})" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
-              Edit
-            </button>
-          </div>
-        `;
       },
       defaultContent: "",
     },

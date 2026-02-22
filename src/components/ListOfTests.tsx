@@ -5,7 +5,7 @@ import { AppHeader } from '@/components/layout/app-header'
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useSearch, useNavigate } from '@tanstack/react-router'
@@ -122,6 +122,79 @@ export default function ListOfTests() {
         ];
     }, [data]);
 
+    // Handle expand button clicks using event delegation
+    useEffect(() => {
+        const handleExpandClick = (e: Event) => {
+            const button = (e.target as HTMLElement).closest('.expand-btn');
+            if (!button) return;
+
+            const btn = button as HTMLButtonElement;
+            const row = btn.closest('tr');
+            if (!row) return;
+
+            const isExpanded = row.classList.contains('expanded');
+            const nextRow = row.nextElementSibling;
+
+            // Toggle collapse
+            if (nextRow && nextRow.classList.contains('child-row-detail')) {
+                nextRow.remove();
+                row.classList.remove('expanded');
+                btn.textContent = '+';
+                btn.style.backgroundColor = 'black';
+                return;
+            }
+
+            // Don't expand if already expanded
+            if (isExpanded) return;
+
+            // Get data from attributes
+            const name = btn.dataset.name || '-';
+            const tableName = btn.dataset.tableName || '-';
+            const category = btn.dataset.category || '-';
+            const department = btn.dataset.department || '-';
+            const price = btn.dataset.price || '0';
+            const createdBy = btn.dataset.createdBy || '-';
+            const id = btn.dataset.id || '';
+
+            // Create details HTML
+            const details = document.createElement('ul');
+            details.className = 'grid grid-cols-2 gap-2 text-sm';
+            details.innerHTML = `
+                <li><strong>Test Name:</strong> ${name}</li>
+                <li><strong>Match Table:</strong> ${tableName}</li>
+                <li><strong>Category:</strong> ${category}</li>
+                <li><strong>Department:</strong> ${department}</li>
+                <li><strong>Price:</strong> ৳${price}</li>
+                <li><strong>Created By:</strong> ${createdBy}</li>
+                <li class='col-span-2'><strong>Actions:</strong>
+                    <a href='/outdoor/master/tests/${id}' class='inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2 mr-2'>View</a>
+                    <a href='/outdoor/master/tests/edit/${id}' class='inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2'>Edit</a>
+                </li>
+            `;
+
+            // Create new row
+            const newRow = document.createElement('tr');
+            newRow.className = 'child-row-detail';
+            const cell = document.createElement('td');
+            cell.className = 'p-4 bg-muted/50';
+            cell.colSpan = 10;
+            cell.appendChild(details);
+            newRow.appendChild(cell);
+
+            row.parentNode?.insertBefore(newRow, row.nextSibling);
+            row.classList.add('expanded');
+            btn.textContent = '−';
+            btn.style.backgroundColor = '#dc2626';
+        };
+
+        // Add event listener to document for delegation
+        document.addEventListener('click', handleExpandClick);
+
+        return () => {
+            document.removeEventListener('click', handleExpandClick);
+        };
+    }, []);
+
     //console.log(data);
 
     const columns = useMemo(() => [
@@ -130,8 +203,26 @@ export default function ListOfTests() {
             title: "SL",
             orderable: false,
             responsivePriority: 3,
-            render: (_data: any, _type: string, _row: TestItem, meta: any) => {
-                return (page - 1) * limit + meta.row + 1;
+            render: (_data: any, _type: string, row: TestItem, meta: any) => {
+                const sl = (page - 1) * limit + meta.row + 1;
+                const tableName = row.match_table_name ? String(row.match_table_name) : 'N/A';
+                const category = row.category?.name || 'N/A';
+                const department = row.category?.department?.name || '-';
+
+                return `
+                    <div class="flex items-center gap-2">
+                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+                                type="button"
+                                data-name="${(row.name || '-').replace(/"/g, '&quot;')}"
+                                data-table-name="${tableName.replace(/"/g, '&quot;')}"
+                                data-category="${category.replace(/"/g, '&quot;')}"
+                                data-department="${department.replace(/"/g, '&quot;')}"
+                                data-price="${Number(row.price || 0).toFixed(2)}"
+                                data-created-by="${(row.creator?.name || '-').replace(/"/g, '&quot;')}"
+                                data-id="${row.id}">+</button>
+                        <span>${sl}</span>
+                    </div>
+                `;
             },
             defaultContent: "",
         },

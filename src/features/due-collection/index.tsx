@@ -1,6 +1,6 @@
 import { AppHeader } from '@/components/layout/app-header'
 import { DataTable } from '@/components/DataTable'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { FileText, DollarSign } from 'lucide-react'
@@ -67,11 +67,116 @@ export default function DueCollection() {
     ];
   }, [data]);
 
+  // Handle expand button clicks using event delegation
+  useEffect(() => {
+    const handleExpandClick = (e: Event) => {
+      const button = (e.target as HTMLElement).closest('.expand-btn');
+      if (!button) return;
+
+      const btn = button as HTMLButtonElement;
+      const row = btn.closest('tr');
+      if (!row) return;
+
+      const isExpanded = row.classList.contains('expanded');
+      const nextRow = row.nextElementSibling;
+
+      // Toggle collapse
+      if (nextRow && nextRow.classList.contains('child-row-detail')) {
+        nextRow.remove();
+        row.classList.remove('expanded');
+        btn.textContent = '+';
+        btn.style.backgroundColor = 'black';
+        return;
+      }
+
+      // Don't expand if already expanded
+      if (isExpanded) return;
+
+      // Get data from attributes
+      const patient = btn.dataset.patient || '-';
+      const phone = btn.dataset.phone || '-';
+      const doctor = btn.dataset.doctor || '-';
+      const total = btn.dataset.total || '0';
+      const discount = btn.dataset.discount || '0';
+      const net = btn.dataset.net || '0';
+      const paid = btn.dataset.paid || '0';
+      const due = btn.dataset.due || '0';
+      const date = btn.dataset.date || '-';
+      const status = btn.dataset.status || '-';
+      const id = btn.dataset.id || '';
+
+      // Create details HTML
+      const details = document.createElement('ul');
+      details.className = 'grid grid-cols-2 gap-2 text-sm';
+      details.innerHTML = `
+        <li><strong>Patient:</strong> ${patient}</li>
+        <li><strong>Phone:</strong> ${phone}</li>
+        <li><strong>Ref Doctor:</strong> ${doctor}</li>
+        <li><strong>Total:</strong> ৳${total}</li>
+        <li><strong>Discount:</strong> ৳${discount}</li>
+        <li><strong>Net:</strong> ৳${net}</li>
+        <li><strong>Paid:</strong> <span class='text-emerald-600'>৳${paid}</span></li>
+        <li><strong>Due:</strong> <span class='text-red-600 font-bold'>৳${due}</span></li>
+        <li><strong>Date:</strong> ${date}</li>
+        <li><strong>Status:</strong> ${status}</li>
+        <li class='col-span-2'><strong>Actions:</strong>
+          <a href='/outdoor/reception/due-collection/${id}' class='inline-flex items-center justify-center rounded-md text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 h-8 px-4 py-2'>Collect Due</a>
+        </li>
+      `;
+
+      // Create new row
+      const newRow = document.createElement('tr');
+      newRow.className = 'child-row-detail';
+      const cell = document.createElement('td');
+      cell.className = 'p-4 bg-muted/50';
+      cell.colSpan = 10;
+      cell.appendChild(details);
+      newRow.appendChild(cell);
+
+      row.parentNode?.insertBefore(newRow, row.nextSibling);
+      row.classList.add('expanded');
+      btn.textContent = '−';
+      btn.style.backgroundColor = '#dc2626';
+    };
+
+    // Add event listener to document for delegation
+    document.addEventListener('click', handleExpandClick);
+
+    return () => {
+      document.removeEventListener('click', handleExpandClick);
+    };
+  }, []);
+
   const columns = [
     {
       data: "id",
       title: "Invoice ID",
       className: "font-mono text-sm",
+      render: (data: any, _type: string, row: InvoiceItem) => {
+        // Store row data as JSON string in data attribute (escaped properly)
+        const discount = (row.discount || 0).toFixed(2);
+        const status = Number(row.due_amount || 0) > 0 ? 'Due' : 'Paid';
+        const dateStr = row.invoice_date ? new Date(row.invoice_date).toLocaleDateString() : '-';
+
+        return `
+          <div class="flex items-center gap-2">
+            <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+                    type="button"
+                    data-patient="${(row.patient_name || '-').replace(/"/g, '&quot;')}"
+                    data-phone="${(row.phone || '-').replace(/"/g, '&quot;')}"
+                    data-doctor="${((row.doctor?.doctor_name || '-')).replace(/"/g, '&quot;')}"
+                    data-total="${row.total_amount || 0}"
+                    data-discount="${discount}"
+                    data-net="${row.net_amount || 0}"
+                    data-paid="${row.total_paid || 0}"
+                    data-due="${row.due_amount || 0}"
+                    data-date="${dateStr}"
+                    data-status="${status}"
+                    data-id="${row.id}">+</button>
+            <span>${data}</span>
+          </div>
+        `;
+      },
     },
     {
       data: "patient_name",

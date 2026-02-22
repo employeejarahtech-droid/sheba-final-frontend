@@ -21,7 +21,12 @@ interface ProthombinTimeData {
     };
 }
 
-export default function ProthomBinTimeReportDetails({ data }: { data: ProthombinTimeData | null }) {
+interface ProthomBinTimeReportDetailsProps {
+    data: ProthombinTimeData | null;
+    paddingTop?: number;
+}
+
+export default function ProthomBinTimeReportDetails({ data, paddingTop = 40 }: ProthomBinTimeReportDetailsProps) {
     const borderWidth = 2;
 
     if (!data) {
@@ -34,7 +39,7 @@ export default function ProthomBinTimeReportDetails({ data }: { data: Prothombin
     };
 
     return (
-        <div className="max-w-4xl w-full mx-auto bg-background pt-40 pb-10 px-5 mt-6 print:w-[850px]">
+        <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px]" style={{ paddingTop: `${paddingTop}px` }}>
             <style>
                 {`
           .bg-row-blue {

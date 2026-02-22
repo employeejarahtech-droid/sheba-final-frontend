@@ -1,6 +1,11 @@
 import { Button } from "@/components/ui/button";
 
-export default function CBCWithPBFReportDetails({ report: invoice }: any) {
+interface CBCWithPBFReportDetailsProps {
+  report?: any;
+  paddingTop?: number;
+}
+
+export default function CBCWithPBFReportDetails({ report: invoice, paddingTop = 40 }: CBCWithPBFReportDetailsProps) {
     // Extract patient info from nested outdoor_invoice object
     const patientInfo = invoice?.outdoor_invoice || {};
     const invoiceDate = patientInfo.invoice_date
@@ -8,7 +13,7 @@ export default function CBCWithPBFReportDetails({ report: invoice }: any) {
         : "N/A";
 
     return (
-        <div className="max-w-4xl w-full mx-auto bg-background pt-20 pb-10 px-5 mt-6 print:w-[850px] print-report">
+        <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
             <style>
                 {`
           .bg-row-blue {
