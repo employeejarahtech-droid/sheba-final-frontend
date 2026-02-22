@@ -234,9 +234,16 @@ table.dataTable td.control:before {
   transition: all 0.2s ease;
 }
 
-table.dataTable tr.parent td.control:before {
-  content: '-';
-  background-color: hsl(var(--destructive));
+/* Expanded state - support both class names DataTables uses */
+table.dataTable tr.parent td.control:before,
+table.dataTable tr.dtr-expanded td.control:before {
+  content: '-' !important;
+  background-color: #dc2626 !important;
+  border: 2px solid hsl(var(--background));
+  color: white !important;
+  font-weight: bold !important;
+  font-size: 1.25rem;
+  line-height: 1.25rem;
 }
 
 table.dataTable td.control:hover:before {
