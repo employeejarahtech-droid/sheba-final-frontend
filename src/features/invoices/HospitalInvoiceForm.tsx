@@ -707,16 +707,14 @@ export default function HospitalInvoiceForm() {
         <form id="hospital-invoice-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Patient Info Card */}
           <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
-            <CardHeader className="p-0 border-b-1 border-blue-100 dark:border-blue-900 gap-0">
-              <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 px-6 py-4 flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
-                  <User className="h-6 w-6 text-white" />
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b-1 dark:border-gray-800 py-2 gap-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-sm">
+                  <User className="h-4 w-4 text-white" />
                 </div>
-                <div className="flex-1">
-                  <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-100">
-                    Patient Information
-                  </CardTitle>
-                  <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+                <div>
+                  <CardTitle className="text-base font-semibold">Patient Information</CardTitle>
+                  <CardDescription className="text-xs mt-0.5">
                     Basic details and registration information
                   </CardDescription>
                 </div>
@@ -962,16 +960,14 @@ export default function HospitalInvoiceForm() {
 
           {/* Indoor Patient Card */}
           <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-purple-200 hover:shadow-lg py-0 gap-0">
-            <CardHeader className="p-0 border-b-1 border-purple-100 dark:border-purple-900 gap-0">
-              <div className="bg-gradient-to-r from-purple-50 via-violet-50 to-purple-50 dark:from-purple-950/30 dark:via-violet-950/30 dark:to-purple-950/30 px-6 py-4 flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-purple-600 to-purple-500 rounded-xl shadow-lg shadow-purple-500/30">
-                  <User className="h-6 w-6 text-white" />
+            <CardHeader className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 border-b-1 dark:border-gray-800 py-2 gap-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-purple-600 to-violet-600 rounded-lg shadow-sm">
+                  <User className="h-4 w-4 text-white" />
                 </div>
-                <div className="flex-1">
-                  <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-100">
-                    Indoor Patient
-                  </CardTitle>
-                  <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+                <div>
+                  <CardTitle className="text-base font-semibold">Indoor Patient</CardTitle>
+                  <CardDescription className="text-xs mt-0.5">
                     Link with admitted patient records
                   </CardDescription>
                 </div>
@@ -1052,16 +1048,14 @@ export default function HospitalInvoiceForm() {
 
           {/* Test Info Card */}
           <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
-            <CardHeader className="p-0 border-b-1 border-blue-100 dark:border-blue-900 gap-0">
-              <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 px-6 py-4 flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
-                  <Activity className="h-6 w-6 text-white" />
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b-1 dark:border-gray-800 py-2 gap-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-sm">
+                  <Activity className="h-4 w-4 text-white" />
                 </div>
-                <div className="flex-1">
-                  <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-100">
-                    Test Selection
-                  </CardTitle>
-                  <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+                <div>
+                  <CardTitle className="text-base font-semibold">Test Selection</CardTitle>
+                  <CardDescription className="text-xs mt-0.5">
                     Select diagnostic tests and view summary
                   </CardDescription>
                 </div>
@@ -1214,22 +1208,20 @@ export default function HospitalInvoiceForm() {
 
           {/* Department Discount Card */}
           <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
-            <CardHeader className="p-0 border-b-1 border-blue-100 dark:border-blue-900 gap-0">
-              <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 px-6 py-4 flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
-                  <PenLine className="h-6 w-6 text-white" />
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b-1 dark:border-gray-800 py-2 gap-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-sm">
+                  <PenLine className="h-4 w-4 text-white" />
                 </div>
                 <div className="flex-1">
-                  <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-100">
-                    Dept. Discounts & Payments
-                  </CardTitle>
-                  <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+                  <CardTitle className="text-base font-semibold">Dept. Discounts & Payments</CardTitle>
+                  <CardDescription className="text-xs mt-0.5">
                     Breakdown of charges and payments per department
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-2 bg-blue-100/50 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg border border-blue-200/50">
-                  <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Total Dept. Discount:</span>
-                  <span className="text-sm font-bold text-blue-800 dark:text-blue-100 font-mono">{totalDeptDiscount.toLocaleString()}</span>
+                <div className="flex items-center gap-2 bg-blue-100/50 dark:bg-blue-900/30 px-3 py-1 rounded-lg border border-blue-200/50">
+                  <span className="text-[10px] font-semibold text-blue-700 dark:text-blue-300">Total Dept. Discount:</span>
+                  <span className="text-xs font-bold text-blue-800 dark:text-blue-100 font-mono">{totalDeptDiscount.toLocaleString()}</span>
                 </div>
               </div>
             </CardHeader>
@@ -1318,15 +1310,13 @@ export default function HospitalInvoiceForm() {
           {/* Billing Summary Card */}
           <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
             <CardHeader className="p-0 border-b-1 border-blue-100 dark:border-blue-900 gap-0">
-              <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 px-6 py-4 flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
-                  <Clock className="h-6 w-6 text-white" />
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 px-4 py-2 flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-sm">
+                  <Clock className="h-4 w-4 text-white" />
                 </div>
-                <div className="flex-1">
-                  <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-100">
-                    Billing & Delivery
-                  </CardTitle>
-                  <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+                <div>
+                  <CardTitle className="text-base font-semibold">Billing & Delivery</CardTitle>
+                  <CardDescription className="text-xs mt-0.5">
                     Final summary, delivery schedule and payment
                   </CardDescription>
                 </div>
