@@ -26,6 +26,7 @@ type TestItem = {
   description: string;
   display_name: string;
   created_at: string;
+  created_by?: string;
 };
 
 function TestTables() {
@@ -104,6 +105,16 @@ function TestTables() {
         return row.table_name || 'N/A';
       },
       defaultContent: "N/A",
+    },
+    {
+      data: "created_by",
+      title: "Created By",
+      orderable: true,
+      responsivePriority: 3,
+      render: (data: any) => {
+        return `<span class="text-sm text-muted-foreground">${data || '-'}</span>`;
+      },
+      defaultContent: "-",
     },
     {
       data: null,

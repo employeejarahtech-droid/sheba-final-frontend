@@ -20,6 +20,7 @@ type CategoryItem = {
     department_id: number;
     department_name: string;
     created_at: string;
+    created_by?: string;
 };
 
 export default function Categories() {
@@ -158,6 +159,16 @@ export default function Categories() {
             orderable: true,
             responsivePriority: 2,
             defaultContent: "",
+        },
+        {
+            data: "created_by",
+            title: "Created By",
+            orderable: true,
+            responsivePriority: 3,
+            render: (data: any) => {
+                return `<span class="text-sm text-muted-foreground">${data || '-'}</span>`;
+            },
+            defaultContent: "-",
         },
         {
             data: null,

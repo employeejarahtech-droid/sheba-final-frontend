@@ -19,6 +19,7 @@ type PatientTypeItem = {
     name: string;
     description: string | null;
     created_at: string;
+    created_by?: string | number | null;
 };
 
 export default function PatientTypes() {
@@ -114,6 +115,14 @@ export default function PatientTypes() {
                 if (!data) return '-';
                 const parsedDate = new Date(data);
                 return isNaN(parsedDate.getTime()) ? '-' : parsedDate.toLocaleDateString();
+            },
+        },
+        {
+            data: "created_by",
+            title: "Created By",
+            render: (data: any) => {
+                const value = data || '-';
+                return `<span class="text-sm text-muted-foreground">${value}</span>`;
             },
         },
         {

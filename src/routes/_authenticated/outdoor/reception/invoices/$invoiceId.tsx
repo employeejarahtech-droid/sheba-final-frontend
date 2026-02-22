@@ -10,6 +10,8 @@ import { amountToWords } from '@/lib/utils'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { ArrowLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute(
     '/_authenticated/outdoor/reception/invoices/$invoiceId',
@@ -59,6 +61,18 @@ function InvoiceDetails() {
                 </div>
             </Header>
             <Main>
+                {/* Back Button */}
+                <div className="max-w-3xl mx-auto w-full px-8 pt-6 print:hidden">
+                    <Button
+                        variant="outline"
+                        className="mb-4"
+                        onClick={() => window.location.href = '/outdoor/reception/invoices/list'}
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back to List
+                    </Button>
+                </div>
+
                 <div className="max-w-3xl mx-auto w-full p-8 bg-white mt-6 print:w-[850px]">
 
                     {/* Header */}

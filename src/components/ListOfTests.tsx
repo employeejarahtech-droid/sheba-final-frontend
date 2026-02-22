@@ -26,6 +26,10 @@ type TestItem = {
             name: string;
         } | null;
     };
+    creator?: {
+        id: number;
+        name: string;
+    };
 };
 
 export default function ListOfTests() {
@@ -132,13 +136,6 @@ export default function ListOfTests() {
             defaultContent: "",
         },
         {
-            data: "id",
-            title: "Test ID",
-            orderable: true,
-            responsivePriority: 4,
-            defaultContent: "",
-        },
-        {
             data: "name",
             title: "Test Name",
             orderable: true,
@@ -186,6 +183,16 @@ export default function ListOfTests() {
                 return price.toFixed(2);
             },
             defaultContent: "0.00",
+        },
+        {
+            data: null,
+            title: "Created By",
+            orderable: true,
+            responsivePriority: 3,
+            render: (_data: any, _type: string, row: TestItem) => {
+                return `<span class="text-sm text-muted-foreground">${row.creator?.name || '-'}</span>`;
+            },
+            defaultContent: "-",
         },
         {
             data: null,

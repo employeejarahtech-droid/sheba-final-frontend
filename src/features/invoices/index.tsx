@@ -36,7 +36,7 @@ type InvoiceItem = {
     total_paid: number;
     due_amount: number;
     created_at: string;
-    created_by: number | null;
+    created_by?: string | number | null;
     status: string | null;
 };
 
@@ -224,6 +224,19 @@ export default function Invoices() {
             defaultContent: "-",
         },
         {
+            data: "created_by",
+            title: "Created By",
+            orderable: true,
+            responsivePriority: 4,
+            render: (data: any) => {
+                // If data is a number (ID), display it as is for now
+                // The backend should return the user's name as a string
+                const value = data || '-';
+                return `<span class="text-sm text-muted-foreground">${value}</span>`;
+            },
+            defaultContent: "-",
+        },
+        {
             data: null, // Computed field
             title: "Status",
             orderable: true,
@@ -246,7 +259,7 @@ export default function Invoices() {
                 return `
                     <div class="flex gap-2">
                         <a href="/outdoor/reception/invoices/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
-                            View
+                            Print
                         </a>
                         <a href="/outdoor/reception/due-collection/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-emerald-600 text-white hover:bg-emerald-700 h-8 px-4 py-2">
                             Pay Now
@@ -280,30 +293,31 @@ export default function Invoices() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 mb-6">
                 {stats.map((item, idx) => (
                     <div
                         key={idx}
-                        className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${item.gradient} p-6 shadow-lg ${item.shadow} transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]`}
+                        className={`relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br ${item.gradient} p-4 md:p-6 shadow-lg ${item.shadow} transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]`}
                     >
                         {/* Background Pattern */}
-                        <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-                        <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+                        <div className="absolute -right-4 md:-right-6 -top-4 md:-top-6 h-16 w-16 md:h-24 md:w-24 rounded-full bg-white/10 blur-2xl" />
+                        <div className="absolute -bottom-4 md:-bottom-6 -left-4 md:-left-6 h-16 w-16 md:h-24 md:w-24 rounded-full bg-black/10 blur-2xl" />
 
-                        <div className="relative flex items-start justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-white/90">{item.label}</p>
-                                <h3 className="mt-2 text-3xl font-bold text-white">
+                        <div className="relative flex items-center justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[0.65rem] md:text-xs lg:text-sm font-medium text-white/90 leading-tight">{item.label}</p>
+                                <h3 className="mt-1 md:mt-2 text-[1.1rem] md:text-xl lg:text-2xl xl:text-3xl font-bold text-white leading-tight break-words">
                                     {item.value || 0}
                                 </h3>
                             </div>
-                            <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                            {/* Icon - hidden on mobile/tablet/laptop, visible only on large desktop (xl+) */}
+                            <div className="hidden xl:block rounded-xl bg-white/20 p-2.5 backdrop-blur-sm flex-shrink-0">
                                 {item.icon}
                             </div>
                         </div>
 
                         {/* Progress/Indicator line */}
-                        <div className="mt-4 h-1 w-full rounded-full bg-black/10">
+                        <div className="mt-3 md:mt-4 h-1 w-full rounded-full bg-black/10">
                             <div className="h-full w-2/3 rounded-full bg-white/40" />
                         </div>
                     </div>

@@ -26,6 +26,7 @@ type DoctorItem = {
     email: string;
     doctor_id?: string;
     sequence?: number;
+    created_by?: string;
 };
 
 export default function Doctors() {
@@ -241,6 +242,16 @@ export default function Doctors() {
             orderable: true,
             responsivePriority: 6,
             defaultContent: "",
+        },
+        {
+            data: "created_by",
+            title: "Created By",
+            orderable: true,
+            responsivePriority: 7,
+            render: (data: any) => {
+                return `<span class="text-sm text-muted-foreground">${data || '-'}</span>`;
+            },
+            defaultContent: "-",
         },
         {
             data: null,

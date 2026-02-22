@@ -135,10 +135,6 @@ export const sidebarData: SidebarData = {
               url: '/outdoor/reception/due-collection',
             },
             {
-              title: '- List of Patients',
-              url: '/outdoor/reception/patients',
-            },
-            {
               title: '- List of Invoices',
               url: '/outdoor/reception/invoices/list',
             },

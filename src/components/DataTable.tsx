@@ -119,7 +119,9 @@ export function DataTable<TData extends Record<string, any>>({
         responsivePriority: _col.responsivePriority || 10000,
         visible: _col.visible !== false,
         defaultContent: _col.defaultContent || "",
+        width: 'auto',
       })),
+      autoWidth: true,
       pageLength: meta?.limit || 10,
       lengthMenu: [10, 25, 50, 100],
       searching: true,
@@ -135,7 +137,8 @@ export function DataTable<TData extends Record<string, any>>({
         {
           className: 'control',
           orderable: false,
-          targets: 0
+          targets: 0,
+          width: '30px',
         }
       ],
       language: {

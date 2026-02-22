@@ -11,6 +11,7 @@ export interface Role {
         dashboard?: string[];
         custom?: Record<string, any>;
     };
+    created_by?: string;
 }
 
 export interface AddRoleRequest {

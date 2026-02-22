@@ -23,6 +23,7 @@ type BedCabinItem = {
     ward: string;
     status: "Available" | "Occupied" | "Maintenance";
     price: number;
+    created_by?: string | number | null;
 };
 
 function BedCabinList() {
@@ -105,6 +106,14 @@ function BedCabinList() {
             render: (data: string) => {
                 const price = parseFloat(data);
                 return `<span class="font-semibold text-gray-700">৳ ${price.toLocaleString()}</span>`;
+            },
+        },
+        {
+            data: 'created_by',
+            title: 'Created By',
+            render: (data: any) => {
+                const value = data || '-';
+                return `<span class="text-sm text-muted-foreground">${value}</span>`;
             },
         },
         {
