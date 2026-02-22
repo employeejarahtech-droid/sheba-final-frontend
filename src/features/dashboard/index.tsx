@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -6,10 +5,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
-import { Analytics } from './components/analytics'
+//import { Analytics } from './components/analytics'
 import { Overview } from './components/overview'
 import { RecentSales } from './components/recent-sales'
 
@@ -21,18 +20,14 @@ export function Dashboard() {
 
       {/* ===== Main ===== */}
       <Main>
-        <div className='mb-2 flex items-center justify-between space-y-2'>
+        <div className='mb-6 flex items-center justify-between gap-4'>
           <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
-          <div className='flex items-center space-x-2'>
-            <Button>Download</Button>
-          </div>
         </div>
         <Tabs
           orientation='vertical'
           defaultValue='overview'
-          className='space-y-4'
         >
-          <div className='w-full overflow-x-auto pb-2'>
+          {/* <div className='w-full overflow-x-auto pb-2'>
             <TabsList>
               <TabsTrigger value='overview'>Overview</TabsTrigger>
               <TabsTrigger value='analytics'>Analytics</TabsTrigger>
@@ -43,7 +38,7 @@ export function Dashboard() {
                 Notifications
               </TabsTrigger>
             </TabsList>
-          </div>
+          </div> */}
           <TabsContent value='overview' className='space-y-4'>
             <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
               <Card>
@@ -170,9 +165,9 @@ export function Dashboard() {
               </Card>
             </div>
           </TabsContent>
-          <TabsContent value='analytics' className='space-y-4'>
+          {/* <TabsContent value='analytics' className='space-y-4'>
             <Analytics />
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </Main>
     </>

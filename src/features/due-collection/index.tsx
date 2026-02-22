@@ -4,7 +4,6 @@ import { useState, useMemo, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { FileText, DollarSign } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
 
 type InvoiceItem = {
   id: number;
