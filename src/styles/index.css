@@ -220,7 +220,7 @@ table.dataTable td.control:before {
   height: 1.25rem;
   margin-top: 0;
   margin-left: 0;
-  background-color: hsl(var(--primary));
+  background-color: black;
   border: 2px solid hsl(var(--background));
   border-radius: 0.375rem;
   display: inline-block;
