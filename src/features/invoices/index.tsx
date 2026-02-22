@@ -1,16 +1,10 @@
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
+import { AppHeader } from '@/components/layout/app-header'
 import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
 import { useState, useMemo } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { TopNav } from '@/components/layout/top-nav'
-import { topNav } from '@/data/data'
 import { FileText, DollarSign, TrendingUp, Calendar, Plus } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
@@ -271,15 +265,7 @@ export default function Invoices() {
         },
     ];
     return <>
-        <Header fixed>
-            <TopNav links={topNav} />
-            <div className='ms-auto flex items-center space-x-4'>
-                <Search />
-                <ThemeSwitch />
-                <ConfigDrawer />
-                <ProfileDropdown />
-            </div>
-        </Header>
+        <AppHeader fixed />
 
         <main className='p-6 lg:p-10'>
             <div className="flex flex-wrap items-center justify-between gap-2 mb-6">

@@ -46,13 +46,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import type { CreateTransactionInput } from "@/types/accounting.types";
 import type { DateRange } from "react-day-picker";
-
-import { TopNav } from "@/components/layout/top-nav";
-import { topNav } from "@/data/data";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Header } from "@/components/layout/header";
+import { AppHeader } from "@/components/layout/app-header";
 
 
 export const Route = createFileRoute('/_authenticated/accounting/transactions/')({
@@ -118,15 +112,7 @@ function Transactions() {
 
     return (
         <div className="space-y-6">
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <div className='hidden md:block'><Search /></div>
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
 
             <main className='p-6 lg:p-10'>
                 {/* Header */}

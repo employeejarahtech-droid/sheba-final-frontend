@@ -1,11 +1,9 @@
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
+
+import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
-import { TopNav } from '@/components/layout/top-nav'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { topNav } from '@/data/data'
+
+
+
 import { amountToWords } from '@/lib/utils'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
@@ -51,15 +49,7 @@ function InvoiceDetails() {
     return (
         <>
             {/* ===== Top Heading ===== */}
-            <Header className='print:hidden' fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <Search />
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
             <Main>
                 {/* Back Button */}
                 <div className="max-w-3xl mx-auto w-full px-8 pt-6 print:hidden">

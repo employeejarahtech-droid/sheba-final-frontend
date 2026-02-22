@@ -1,12 +1,10 @@
 
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { TopNav } from '@/components/layout/top-nav'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
+
+import { AppHeader } from '@/components/layout/app-header'
+
+
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { topNav } from '@/data/data'
 import { AddIncomeModal } from './components/AddIncomeModal'
 import { AddExpenseModal } from './components/AddExpenseModal'
 import { createFileRoute } from '@tanstack/react-router'
@@ -44,15 +42,7 @@ export const Route = createFileRoute('/_authenticated/accounting/')({
 function AccountingLoading() {
     return (
         <>
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <div className='hidden md:block'><Search /></div>
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
             <main className='p-6 lg:p-10'>
                 <div className='flex items-center justify-center min-h-[400px]'>
                     <div className='text-center'>
@@ -69,15 +59,7 @@ function AccountingLoading() {
 function AccountingError({ error }: { error: Error }) {
     return (
         <>
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <div className='hidden md:block'><Search /></div>
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
             <main className='p-6 lg:p-10'>
                 <div className='flex items-center justify-center min-h-[400px]'>
                     <div className='text-center'>
@@ -123,15 +105,7 @@ function AccountingOverview() {
 
     return (
         <>
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <div className='hidden md:block'><Search /></div>
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
             <main className='p-6 lg:p-10'>
                 <div className='mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
                     <div>

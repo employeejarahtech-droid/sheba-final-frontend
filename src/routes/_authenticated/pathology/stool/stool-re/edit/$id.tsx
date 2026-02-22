@@ -18,52 +18,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
-
-import { Header } from "@/components/layout/header";
-import { TopNav } from "@/components/layout/top-nav";
 import { Main } from "@/components/layout/main";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
-import { ProfileDropdown } from "@/components/profile-dropdown";
 import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
+import { AppHeader } from "@/components/layout/app-header";
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/stool/stool-re/edit/$id',
 )({
   component: EditStoolRe,
 })
-
-// --------------------------------------------------
-// TOP NAV (same as your example)
-// --------------------------------------------------
-const topNav = [
-  {
-    title: 'Overview',
-    href: 'dashboard/overview',
-    isActive: true,
-    disabled: false,
-  },
-  {
-    title: 'Customers',
-    href: 'dashboard/customers',
-    isActive: false,
-    disabled: true,
-  },
-  {
-    title: 'Products',
-    href: 'dashboard/products',
-    isActive: false,
-    disabled: true,
-  },
-  {
-    title: 'Settings',
-    href: 'dashboard/settings',
-    isActive: false,
-    disabled: true,
-  },
-]
 
 // --------------------------------------------------
 // ZOD SCHEMA
@@ -169,15 +133,7 @@ function EditStoolRe() {
   return (
     <>
       {/* Header */}
-      <Header fixed>
-        <TopNav links={topNav} />
-        <div className="ms-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+     <AppHeader fixed />
 
       {/* Main */}
       <Main className="px-6 py-8 max-w-4xl mx-auto">

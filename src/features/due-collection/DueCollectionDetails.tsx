@@ -1,13 +1,11 @@
 import { useParams } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
-import { Header } from '@/components/layout/header'
-import { TopNav } from '@/components/layout/top-nav'
-import { topNav } from '@/data/data'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { ProfileDropdown } from '@/components/profile-dropdown'
+import { AppHeader } from '@/components/layout/app-header'
+
+
+
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Badge } from '@/components/ui/badge'
 import { Button } from "@/components/ui/button"
@@ -336,15 +334,7 @@ export default function DueCollectionDetails() {
 
     return (
         <>
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <Search />
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
 
             <main className='p-6 lg:p-10'>
                 <div className="mb-6 flex items-center gap-4">

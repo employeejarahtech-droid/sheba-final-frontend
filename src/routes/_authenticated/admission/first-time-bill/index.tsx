@@ -1,16 +1,14 @@
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
+
+import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
-import { TopNav } from '@/components/layout/top-nav'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
+
+
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { topNav } from '@/data/data'
 import { AddClinicalServicesForm } from '@/features/admission/AddClinicalServicesForm'
 import { AddConsultantForm } from '@/features/admission/AddConsultantForm'
 import { AddOperationTypeForm } from '@/features/admission/AddOperationTypeForm'
@@ -106,15 +104,7 @@ function FirstTimeBill() {
   };
 
   return <>
-    <Header>
-      <TopNav links={topNav} />
-      <div className="ms-auto flex items-center space-x-4">
-        <Search />
-        <ThemeSwitch />
-        <ConfigDrawer />
-        <ProfileDropdown />
-      </div>
-    </Header>
+    <AppHeader fixed />
     <Main>
       <div className="max-w-4xl mx-auto">
         <h2 className="text-2xl font-semibold mb-4">Create First Time Bill</h2>

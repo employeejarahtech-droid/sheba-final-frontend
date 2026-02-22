@@ -1,11 +1,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Button } from "@/components/ui/button";
 import { Main } from '@/components/layout/main';
-import { Header } from '@/components/layout/header';
-import { Search } from '@/components/search';
-import { ThemeSwitch } from '@/components/theme-switch';
-import { ConfigDrawer } from '@/components/config-drawer';
-import { ProfileDropdown } from '@/components/profile-dropdown';
+import { AppHeader } from '@/components/layout/app-header';
+;
+;
+;
+;
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
@@ -56,14 +56,7 @@ function ServiceDetails() {
 
     return (
         <>
-            <Header fixed>
-                <Search />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
 
             <Main className="p-6 lg:p-8 w-full flex-1">
                 <div className="space-y-6 max-w-3xl mx-auto">

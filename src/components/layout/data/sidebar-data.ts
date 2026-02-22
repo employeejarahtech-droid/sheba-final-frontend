@@ -79,14 +79,6 @@ export const sidebarData: SidebarData = {
               url: '/settings',
             },
             {
-              title: '- System Preferences',
-              url: '/settings/appearance',
-            },
-            {
-              title: '- Language Settings',
-              url: '/settings/display',
-            },
-            {
               title: '- Database Browser',
               url: '/database',
             },
@@ -544,22 +536,22 @@ export const sidebarData: SidebarData = {
               title: '- Overview',
               url: '/payroll/overview',
             },
-            {
-              title: '- View Salary Slips',
-              url: '/payroll/view-salary-slips',
-            },
-            {
-              title: '- Create Payroll',
-              url: '#',
-            },
-            {
-              title: '- Manage Deductions',
-              url: '#',
-            },
-            {
-              title: '- Bonuses & Allowances',
-              url: '#',
-            },
+            // {
+            //   title: '- View Salary Slips',
+            //   url: '/payroll/view-salary-slips',
+            // },
+            // {
+            //   title: '- Create Payroll',
+            //   url: '#',
+            // },
+            // {
+            //   title: '- Manage Deductions',
+            //   url: '#',
+            // },
+            // {
+            //   title: '- Bonuses & Allowances',
+            //   url: '#',
+            // },
           ],
         },
         {

@@ -2,17 +2,11 @@ import CBCShortReportDetails from '@/features/pathology/hematology/cbc/CBCShortR
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from '@/lib/cookies';
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
-import { TopNav } from "@/components/layout/top-nav";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Printer } from "lucide-react";
-import { topNav } from '@/data/data';
 import { Loader2 } from 'lucide-react';
+import { AppHeader } from '@/components/layout/app-header';
 
 export const Route = createFileRoute(
     '/_authenticated/pathology/hematology/cbc-short/report/$reportId',
@@ -78,15 +72,7 @@ function CBCShortReport() {
 
     return (
         <>
-            <Header fixed className="print:hidden">
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <Search />
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
             <Main>
                 <div className="print:hidden flex items-center justify-between gap-4">
                     <Link to="/pathology/hematology/cbc-short">
@@ -96,7 +82,7 @@ function CBCShortReport() {
                         </Button>
                     </Link>
                     <Button variant="outline" size="sm" onClick={() => window.print()}>
-                        <Printer className="mr-2 h-4 w-4" />
+                        <Printer className="h-4 w-4" />
                         Print
                     </Button>
                 </div>

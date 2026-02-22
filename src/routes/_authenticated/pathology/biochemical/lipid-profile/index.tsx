@@ -1,20 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { ConfigDrawer } from "@/components/config-drawer";
 import { DataTable } from "@/components/DataTable";
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
-import { TopNav } from "@/components/layout/top-nav";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Activity, Clock, FileText, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from "react";
 import { EditLipidProfileForm } from '@/features/pathology/biochemical/lipid-profile/components/EditLipidProfileForm';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
-import { topNav } from '@/data/data';
+import { AppHeader } from '@/components/layout/app-header';
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/biochemical/lipid-profile/',
@@ -164,15 +156,7 @@ function LipidProfile() {
 
   return (
     <>
-      <Header fixed>
-        <TopNav links={topNav} />
-        <div className='ms-auto flex items-center space-x-4'>
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
       <Main>
         <div className="mb-4">
           <h1 className='text-2xl font-bold tracking-tight'>Lipid Profile</h1>

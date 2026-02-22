@@ -16,20 +16,14 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { Main } from "@/components/layout/main";
-import { Header } from "@/components/layout/header";
-import { TopNav } from "@/components/layout/top-nav";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
-import { ProfileDropdown } from "@/components/profile-dropdown";
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
-import { topNav } from "@/data/data";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { getCookie } from "@/lib/cookies";
 import { toast } from "sonner";
 import { Textarea } from '@/components/ui/textarea';
+import { AppHeader } from '@/components/layout/app-header';
 
 export const Route = createFileRoute(
     '/_authenticated/pathology/hematology/cbc-with-pbf/edit/$id',
@@ -197,15 +191,7 @@ function EditCBCWithPBF() {
     return (
         <>
             {/* Header */}
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className="ms-auto flex items-center space-x-4">
-                    <Search />
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+          <AppHeader fixed />
 
             {/* Main Content */}
             <Main className="px-6 py-8 max-w-5xl mx-auto">

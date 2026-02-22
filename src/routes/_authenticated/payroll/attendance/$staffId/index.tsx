@@ -11,13 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Wallet, CalendarCheck, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Header } from "@/components/layout/header";
-import { TopNav } from "@/components/layout/top-nav";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { topNav } from "@/data/data";
+import { AppHeader } from '@/components/layout/app-header';
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Allowance = { name: string; amount: number };
@@ -129,15 +123,7 @@ function AttendancePage() {
     if (isLoading) {
         return (
             <>
-                <Header fixed>
-                    <TopNav links={topNav} />
-                    <div className='ms-auto flex items-center space-x-4'>
-                        <Search />
-                        <ThemeSwitch />
-                        <ConfigDrawer />
-                        <ProfileDropdown />
-                    </div>
-                </Header>
+                <AppHeader fixed />
                 <main className="p-6 lg:p-10">
                     <Skeleton className="h-8 w-64 mb-6" />
                     <Skeleton className="h-64 w-full" />
@@ -148,15 +134,7 @@ function AttendancePage() {
 
     return (
         <>
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <Search />
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
             <main className="p-6 lg:p-10">
                 <div className="max-w-5xl mx-auto">
                     {/* Header */}

@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { ConfigDrawer } from '@/components/config-drawer';
-import { Header } from '@/components/layout/header';
+;
+import { AppHeader } from '@/components/layout/app-header';
 import { Main } from '@/components/layout/main';
-import { ProfileDropdown } from '@/components/profile-dropdown';
-import { Search } from '@/components/search';
-import { ThemeSwitch } from '@/components/theme-switch';
+;
+;
+;
 import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable';
 import { PlusCircle } from 'lucide-react';
@@ -135,14 +135,7 @@ function BedCabinList() {
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-background">
-            <Header fixed>
-                <Search />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
 
             <Main className="p-6 lg:p-10 w-full flex-1">
                 <div className="space-y-6 max-w-7xl mx-auto">

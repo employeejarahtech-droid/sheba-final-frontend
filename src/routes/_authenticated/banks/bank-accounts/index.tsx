@@ -1,20 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ConfigDrawer } from "@/components/config-drawer";
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
-import { TopNav } from "@/components/layout/top-nav";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { topNav } from '@/data/data';
 import { Building2, CreditCard, DollarSign, TrendingUp, Loader2 } from 'lucide-react';
 import { AddBankAccountModal } from './components/AddBankAccountModal';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
+import { AppHeader } from '@/components/layout/app-header';
 
 export const Route = createFileRoute('/_authenticated/banks/bank-accounts/')({
     component: BankAccountsPage,
@@ -58,15 +52,7 @@ function BankAccountsPage() {
     if (isLoading) {
         return (
             <>
-                <Header fixed>
-                    <TopNav links={topNav} />
-                    <div className='ms-auto flex items-center space-x-4'>
-                        <Search />
-                        <ThemeSwitch />
-                        <ConfigDrawer />
-                        <ProfileDropdown />
-                    </div>
-                </Header>
+                <AppHeader fixed />
                 <Main>
                     <div className="flex items-center justify-center h-64">
                         <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
@@ -78,15 +64,7 @@ function BankAccountsPage() {
 
     return (
         <>
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <Search />
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+           <AppHeader fixed />
             <Main>
                 <div className="space-y-6">
                     <div className='flex items-center justify-between'>

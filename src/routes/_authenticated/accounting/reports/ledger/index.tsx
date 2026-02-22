@@ -27,13 +27,11 @@ import { DataTable } from "@/components/DataTable";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 // Layout
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { TopNav } from '@/components/layout/top-nav'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { topNav } from '@/data/data'
+
+import { AppHeader } from '@/components/layout/app-header'
+
+
+
 
 // Data
 import { useGetAccountingAccountsQuery } from "@/features/accounting/accountingQueries";
@@ -89,15 +87,7 @@ function LedgerReport() {
 
   return (
     <div className="">
-      <Header fixed>
-        <TopNav links={topNav} />
-        <div className='ms-auto flex items-center space-x-4'>
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
       <main className='p-6 lg:p-10 space-y-6'>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>

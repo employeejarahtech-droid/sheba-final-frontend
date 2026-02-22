@@ -2,16 +2,11 @@ import WidalTestReportDetails from '@/features/pathology/immunology/WidalTestRep
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
-import { topNav, widalTestReports } from '@/data/data'
-import { Header } from '@/components/layout/header'
-import { TopNav } from '@/components/layout/top-nav'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { ProfileDropdown } from '@/components/profile-dropdown'
+import { widalTestReports } from '@/data/data'
 import { Main } from '@/components/layout/main'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Printer } from 'lucide-react'
+import { AppHeader } from '@/components/layout/app-header'
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/immunology/widal-test/report/$reportId',
@@ -87,15 +82,7 @@ function WidalTestReport() {
 
   return (
     <>
-      <Header fixed className="print:hidden">
-        <TopNav links={topNav} />
-        <div className='ms-auto flex items-center space-x-4'>
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
       <Main>
         <div className="print:hidden flex items-center justify-between gap-4">
           <Link to="/pathology/immunology/widal-test">

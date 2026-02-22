@@ -6,13 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Main } from '@/components/layout/main';
-import { Header } from '@/components/layout/header';
-import { Search } from '@/components/search';
-import { ThemeSwitch } from '@/components/theme-switch';
-import { ConfigDrawer } from '@/components/config-drawer';
-import { ProfileDropdown } from '@/components/profile-dropdown';
-import { TopNav } from '@/components/layout/top-nav';
-import { topNav } from '@/data/data';
+import { AppHeader } from '@/components/layout/app-header';
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/stool/stool-re/report/$reportId',
@@ -74,15 +68,7 @@ function StoolForREReport() {
 
   return (
     <>
-      <Header fixed className="print:hidden">
-        <TopNav links={topNav} />
-        <div className='ms-auto flex items-center space-x-4'>
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
       <Main>
         <div className="print:hidden flex items-center justify-between gap-4">
           <Link to="/pathology/stool/stool-re">

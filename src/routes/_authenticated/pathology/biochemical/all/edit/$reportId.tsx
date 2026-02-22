@@ -13,6 +13,7 @@ import { getCookie } from '@/lib/cookies';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { topNav } from '@/data/data';
 import { useState, useEffect } from 'react';
+import { AppHeader } from '@/components/layout/app-header';
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/biochemical/all/edit/$reportId',
@@ -152,15 +153,7 @@ function EditBiochemicalReport() {
   return (
     <>
       {/* Header */}
-      <Header fixed>
-        <TopNav links={topNav} />
-        <div className="ms-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
 
       {/* Main */}
       <Main>
@@ -242,4 +235,3 @@ function EditBiochemicalReport() {
     </>
   );
 }
-export default EditBiochemicalReport

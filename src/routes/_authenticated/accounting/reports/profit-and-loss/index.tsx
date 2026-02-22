@@ -19,13 +19,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 
 import { useGetProfitLossQuery } from "@/features/accounting/accountingQueries";
-import { TopNav } from "@/components/layout/top-nav";
-import { topNav } from "@/data/data";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Header } from "@/components/layout/header";
+import { AppHeader } from "@/components/layout/app-header";
 
 const profitLossSearchSchema = z.object({
     from: z.string().optional(),
@@ -84,15 +78,7 @@ function ProfitAndLoss() {
 
     return (
         <div className="space-y-6">
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <Search />
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
             <main className='p-6 lg:p-10'>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>

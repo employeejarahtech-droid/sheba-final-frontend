@@ -5,13 +5,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { toast } from 'sonner'
 import { ArrowLeft, Loader } from 'lucide-react'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { TopNav } from '@/components/layout/top-nav'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { topNav } from '@/data/data'
+
+import { AppHeader } from '@/components/layout/app-header'
+
+
+
 import {
     Card,
     CardContent,
@@ -192,15 +190,7 @@ function EditRolePermissions() {
 
     return (
         <>
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className="ms-auto flex items-center space-x-4">
-                    <Search />
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
 
             <main className="p-6 lg:p-10 space-y-6 max-w-7xl mx-auto w-full">
                 <div className="space-y-6 lg:p-6">

@@ -2,17 +2,11 @@ import PatientInvoiceInfo from '@/components/pathology/PatientInvoiceInfo'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { Button } from "@/components/ui/button";
 import { Main } from '@/components/layout/main';
-import { Header } from '@/components/layout/header';
-import { TopNav } from '@/components/layout/top-nav';
-import { Search } from '@/components/search';
-import { ThemeSwitch } from '@/components/theme-switch';
-import { ConfigDrawer } from '@/components/config-drawer';
-import { ProfileDropdown } from '@/components/profile-dropdown';
 import { Card, CardContent } from '@/components/ui/card';
 import { getCookie } from '@/lib/cookies';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { topNav } from '@/data/data';
 import { useState, useEffect } from 'react';
+import { AppHeader } from '@/components/layout/app-header';
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/hormone/all/edit/$id/',
@@ -128,15 +122,7 @@ function EditReportHormone() {
   if (isLoading) {
     return (
       <>
-        <Header>
-          <TopNav links={topNav} />
-          <div className="ms-auto flex items-center space-x-4">
-            <Search />
-            <ThemeSwitch />
-            <ConfigDrawer />
-            <ProfileDropdown />
-          </div>
-        </Header>
+        <AppHeader fixed />
         <Main>
           <div className="flex justify-center items-center h-64">
             <p className="text-gray-500">Loading...</p>
@@ -152,15 +138,7 @@ function EditReportHormone() {
   return (
     <>
       {/* Header */}
-      <Header>
-        <TopNav links={topNav} />
-        <div className="ms-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+     <AppHeader fixed />
 
       {/* Main */}
       <Main>

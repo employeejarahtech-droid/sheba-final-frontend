@@ -2,11 +2,11 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
 import { Main } from '@/components/layout/main'
-import { Header } from '@/components/layout/header'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { ProfileDropdown } from '@/components/profile-dropdown'
+import { AppHeader } from '@/components/layout/app-header'
+
+
+
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Tag, Activity, Calendar, Info, Layers, List, Database } from 'lucide-react'
@@ -107,14 +107,7 @@ function CategoryDetails() {
 
     return (
         <>
-            <Header fixed>
-                <Search />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
 
             <Main className='bg-muted/10'>
                 <div className='mb-8 flex items-center justify-between'>

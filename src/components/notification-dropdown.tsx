@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Bell } from 'lucide-react'
 import { cn } from '@/lib/utils'
+//import { Link } from '@tanstack/react-router'
 
 export function NotificationDropdown() {
   const unreadCount = 3 // You can make this dynamic based on your state
@@ -36,11 +37,18 @@ export function NotificationDropdown() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-80' align='end' forceMount>
         <DropdownMenuLabel className='font-normal'>
-          <div className='flex flex-col gap-1.5'>
-            <p className='text-sm leading-none font-medium'>Notifications</p>
-            <p className='text-muted-foreground text-xs leading-none'>
-              You have {unreadCount} unread messages
-            </p>
+          <div className='flex items-center justify-between gap-1.5'>
+            <div className='flex flex-col gap-1.5'>
+              <p className='text-sm leading-none font-medium'>Notifications</p>
+              <p className='text-muted-foreground text-xs leading-none'>
+                You have {unreadCount} unread messages
+              </p>
+            </div>
+            {/* <Link to='/' className='flex items-center gap-1'> */}
+              <Button variant='ghost' size='sm' className='h-auto p-0 text-xs'>
+                View all
+              </Button>
+            {/* </Link> */}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -76,9 +84,6 @@ export function NotificationDropdown() {
         <DropdownMenuSeparator />
         <DropdownMenuItem className='cursor-pointer justify-center'>
           Mark all as read
-        </DropdownMenuItem>
-        <DropdownMenuItem className='cursor-pointer justify-center'>
-          View all notifications
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
+
+import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
+
+
+
 import { DataTable } from '@/components/DataTable'
 import { useState, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
@@ -138,14 +138,7 @@ function TestTables() {
   ];
 
   return <>
-    <Header fixed>
-      <Search />
-      <div className='ms-auto flex items-center space-x-4'>
-        <ThemeSwitch />
-        <ConfigDrawer />
-        <ProfileDropdown />
-      </div>
-    </Header>
+    <AppHeader fixed />
 
     <Main>
       <div className="flex flex-wrap items-end justify-between gap-2 mb-4">

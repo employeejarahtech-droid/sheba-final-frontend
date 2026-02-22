@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useFieldArray, useForm, Controller } from "react-hook-form";
-import { Search, Loader2, Plus, Trash2, Check, ChevronsUpDown } from "lucide-react";
+import { Loader2, Plus, Trash2, Check, ChevronsUpDown } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { createFileRoute } from '@tanstack/react-router';
@@ -38,13 +38,7 @@ import { CalendarIcon } from "lucide-react";
 import { useAddJournalEntryMutation, useGetJournalReportQuery, useLazyGetAccountingAccountsQuery } from "@/features/accounting/accountingQueries";
 import { toast } from "sonner";
 import { ChartOfAccount } from "@/types/accounting.types";
-
-import { TopNav } from "@/components/layout/top-nav";
-import { topNav } from "@/data/data";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Header } from "@/components/layout/header";
+import { AppHeader } from "@/components/layout/app-header";
 
 export const Route = createFileRoute('/_authenticated/accounting/reports/journal/')({
   component: JournalReport,
@@ -197,15 +191,7 @@ function JournalReport() {
 
   return (
     <div className="space-y-6">
-      <Header fixed>
-        <TopNav links={topNav} />
-        <div className='ms-auto flex items-center space-x-4'>
-          <div className='hidden md:block'><Search /></div>
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
       <main className='p-6 lg:p-10'>
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

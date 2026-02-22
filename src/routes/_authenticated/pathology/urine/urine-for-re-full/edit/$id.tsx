@@ -15,20 +15,14 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
-
-import { Header } from "@/components/layout/header";
-import { TopNav } from "@/components/layout/top-nav";
 import { Main } from "@/components/layout/main";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
-import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
 import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { AppHeader } from "@/components/layout/app-header";
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/urine/urine-for-re-full/edit/$id',
@@ -225,19 +219,7 @@ function EditUrineForReFull() {
   return (
     <>
       {/* HEADER */}
-      <Header fixed>
-        <TopNav
-          links={[
-            { title: "Overview", href: "dashboard/overview", isActive: true },
-          ]}
-        />
-        <div className="ms-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+   <AppHeader fixed />
 
       {/* MAIN */}
       <Main className="px-6 py-8 max-w-4xl mx-auto">

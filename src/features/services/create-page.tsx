@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
+
+import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
+
+
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -116,14 +116,7 @@ export default function CreateServicePage() {
 
     return (
         <>
-            <Header fixed>
-                <Search />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
+            <AppHeader fixed />
 
             <Main className="p-6 lg:p-10">
                 <div className="max-w-2xl mx-auto space-y-6">
