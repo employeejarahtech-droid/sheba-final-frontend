@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 interface StoolForREReportDetailsProps {
   report?: any;
   invoice?: any;
+  paddingTop?: number;
 }
 
-export default function StoolForREReportDetails({ report, invoice }: StoolForREReportDetailsProps) {
+export default function StoolForREReportDetails({ report, invoice, paddingTop = 40 }: StoolForREReportDetailsProps) {
   const borderWidth = 1;
 
   // Use report data if available, otherwise fall back to invoice
@@ -22,7 +23,7 @@ export default function StoolForREReportDetails({ report, invoice }: StoolForRER
   };
 
   return (
-    <div className="max-w-4xl w-full mx-auto pt-32 pb-10 print:pb-0 bg-background px-5 mt-6 print:w-[850px] print-report">
+    <div className="max-w-4xl w-full mx-auto pb-10 print:pb-0 bg-background px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
       <style>
         {`
           .bg-row-blue {

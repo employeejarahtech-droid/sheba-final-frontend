@@ -20,9 +20,10 @@ interface SemenReportDetailsProps {
         invoice_date: string;
         reference_doctor?: string;
     };
+    paddingTop?: number;
 }
 
-export default function SemenReportDetails({ semenData, invoiceData }: SemenReportDetailsProps) {
+export default function SemenReportDetails({ semenData, invoiceData, paddingTop = 40 }: SemenReportDetailsProps) {
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -30,7 +31,7 @@ export default function SemenReportDetails({ semenData, invoiceData }: SemenRepo
 
     const borderWidth = 2;
     return (
-        <div className="max-w-4xl w-full mx-auto bg-background pt-40 pb-10 px-5 mt-6 print:w-[850px] print-report">
+        <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
             <style>
                 {`
           .bg-row-blue {

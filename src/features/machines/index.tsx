@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -130,12 +130,92 @@ export default function Machines() {
         };
     }, [setSelectedMachineId, setOpenEditForm]);
 
+    // Handle expand button clicks using event delegation
+    useEffect(() => {
+        const handleExpandClick = (e: Event) => {
+            const button = (e.target as HTMLElement).closest('.expand-btn');
+            if (!button) return;
+
+            const btn = button as HTMLButtonElement;
+            const row = btn.closest('tr');
+            if (!row) return;
+
+            const isExpanded = row.classList.contains('expanded');
+            const nextRow = row.nextElementSibling;
+
+            // Toggle collapse
+            if (nextRow && nextRow.classList.contains('child-row-detail')) {
+                nextRow.remove();
+                row.classList.remove('expanded');
+                btn.textContent = '+';
+                btn.style.backgroundColor = 'black';
+                return;
+            }
+
+            // Don't expand if already expanded
+            if (isExpanded) return;
+
+            // Get data from attributes
+            const id = btn.dataset.id || '';
+            const name = btn.dataset.name || '-';
+            const description = btn.dataset.description || '-';
+            const createdBy = btn.dataset.createdBy || '-';
+
+            // Create details HTML
+            const details = document.createElement('ul');
+            details.className = 'grid grid-cols-2 gap-2 text-sm';
+            details.innerHTML = `
+                <li><strong>Machine ID:</strong> ${id}</li>
+                <li><strong>Machine Name:</strong> ${name}</li>
+                <li class='col-span-2'><strong>Description:</strong> ${description}</li>
+                <li><strong>Created By:</strong> ${createdBy}</li>
+                <li class='col-span-2'><strong>Actions:</strong>
+                    <button onclick="window.editMachine('${id}')" class='inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2'>Edit</button>
+                </li>
+            `;
+
+            // Create new row
+            const newRow = document.createElement('tr');
+            newRow.className = 'child-row-detail';
+            const cell = document.createElement('td');
+            cell.className = 'p-4 bg-muted/50';
+            cell.colSpan = 10;
+            cell.appendChild(details);
+            newRow.appendChild(cell);
+
+            row.parentNode?.insertBefore(newRow, row.nextSibling);
+            row.classList.add('expanded');
+            btn.textContent = '−';
+            btn.style.backgroundColor = '#dc2626';
+        };
+
+        // Add event listener to document for delegation
+        document.addEventListener('click', handleExpandClick);
+
+        return () => {
+            document.removeEventListener('click', handleExpandClick);
+        };
+    }, []);
+
     const columns = [
         {
             data: "id",
             title: "Machine ID",
             orderable: true,
             responsivePriority: 2,
+            render: (data: any, _type: string, row: MachineItem) => {
+                return `
+                    <div class="flex items-center gap-2">
+                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+                                type="button"
+                                data-id="${data}"
+                                data-name="${(row.name || '-').replace(/"/g, '&quot;')}"
+                                data-description="${(row.description || '-').replace(/"/g, '&quot;')}"
+                                data-created-by="${String(row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
+                        <span>${data}</span>
+                    </div>
+                `;
+            },
             defaultContent: "",
         },
         {

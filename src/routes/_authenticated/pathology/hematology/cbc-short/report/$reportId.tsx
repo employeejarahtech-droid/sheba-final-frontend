@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Printer } from "lucide-react";
 import { topNav } from '@/data/data';
 import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
 
 export const Route = createFileRoute(
     '/_authenticated/pathology/hematology/cbc-short/report/$reportId',
@@ -23,6 +24,10 @@ export const Route = createFileRoute(
 function CBCShortReport() {
     const { reportId } = Route.useParams()
     const token = getCookie('accessToken');
+    const [paddingTop, setPaddingTop] = useState(100);
+
+    // Generate padding options from 10 to 200 in increments of 5
+    const paddingOptions = Array.from({ length: 39 }, (_, i) => (i + 2) * 5); // [10, 15, 20, ..., 200]
 
     // Fetch CBC test data
     const { data: cbcData, isLoading: isLoadingCBC, error: cbcError } = useQuery({
@@ -95,12 +100,29 @@ function CBCShortReport() {
                             Back to CBC Short
                         </Button>
                     </Link>
-                    <Button variant="outline" size="sm" onClick={() => window.print()}>
-                        <Printer className="mr-2 h-4 w-4" />
-                        Print
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                            <label htmlFor="padding-select" className="text-sm font-medium">Padding Top:</label>
+                            <select
+                                id="padding-select"
+                                value={paddingTop}
+                                onChange={(e) => setPaddingTop(Number(e.target.value))}
+                                className="h-8 px-2 text-sm border rounded-md bg-background"
+                            >
+                                {paddingOptions.map((value) => (
+                                    <option key={value} value={value}>
+                                        {value}px
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={() => window.print()}>
+                            <Printer className="h-4 w-4" />
+                            Print
+                        </Button>
+                    </div>
                 </div>
-                <CBCShortReportDetails cbcData={cbcData} invoiceData={invoiceData} />
+                <CBCShortReportDetails cbcData={cbcData} invoiceData={invoiceData} paddingTop={paddingTop} />
             </Main>
         </>
     )

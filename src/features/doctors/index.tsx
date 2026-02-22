@@ -6,7 +6,7 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { DataTable } from '@/components/DataTable'
 import { Button } from "@/components/ui/button";
 import { Link } from '@tanstack/react-router'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { Stethoscope, Award, Globe, MapPin, Plus } from 'lucide-react'
@@ -155,6 +155,89 @@ export default function Doctors() {
         ];
     }, [data]);
 
+    // Handle expand button clicks using event delegation
+    useEffect(() => {
+        const handleExpandClick = (e: Event) => {
+            const button = (e.target as HTMLElement).closest('.expand-btn');
+            if (!button) return;
+
+            const btn = button as HTMLButtonElement;
+            const row = btn.closest('tr');
+            if (!row) return;
+
+            const isExpanded = row.classList.contains('expanded');
+            const nextRow = row.nextElementSibling;
+
+            // Toggle collapse
+            if (nextRow && nextRow.classList.contains('child-row-detail')) {
+                nextRow.remove();
+                row.classList.remove('expanded');
+                btn.textContent = '+';
+                btn.style.backgroundColor = 'black';
+                return;
+            }
+
+            // Don't expand if already expanded
+            if (isExpanded) return;
+
+            // Get data from attributes
+            const id = btn.dataset.id || '';
+            const doctorId = btn.dataset.doctorId || '';
+            const name = btn.dataset.name || '-';
+            const title = btn.dataset.title || '-';
+            const qualification = btn.dataset.qualification || '-';
+            const speciality = btn.dataset.speciality || '-';
+            const country = btn.dataset.country || '-';
+            const city = btn.dataset.city || '-';
+            const phone = btn.dataset.phone || '-';
+            const mobile = btn.dataset.mobile || '-';
+            const email = btn.dataset.email || '-';
+            const createdBy = btn.dataset.createdBy || '-';
+
+            // Create details HTML
+            const details = document.createElement('ul');
+            details.className = 'grid grid-cols-2 gap-2 text-sm';
+            details.innerHTML = `
+                <li><strong>Doctor ID:</strong> ${doctorId}</li>
+                <li><strong>Name:</strong> ${name}</li>
+                <li><strong>Title:</strong> ${title}</li>
+                <li><strong>Qualification:</strong> ${qualification}</li>
+                <li><strong>Speciality:</strong> ${speciality}</li>
+                <li><strong>Country:</strong> ${country}</li>
+                <li><strong>City:</strong> ${city}</li>
+                <li><strong>Phone:</strong> ${phone}</li>
+                <li><strong>Mobile:</strong> ${mobile}</li>
+                <li><strong>Email:</strong> ${email}</li>
+                <li><strong>Created By:</strong> ${createdBy}</li>
+                <li class='col-span-2'><strong>Actions:</strong>
+                    <a href='/outdoor/master/doctors/${id}' class='inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2 mr-2'>View</a>
+                    <a href='/outdoor/master/doctors/${id}/edit' class='inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2'>Edit</a>
+                </li>
+            `;
+
+            // Create new row
+            const newRow = document.createElement('tr');
+            newRow.className = 'child-row-detail';
+            const cell = document.createElement('td');
+            cell.className = 'p-4 bg-muted/50';
+            cell.colSpan = 10;
+            cell.appendChild(details);
+            newRow.appendChild(cell);
+
+            row.parentNode?.insertBefore(newRow, row.nextSibling);
+            row.classList.add('expanded');
+            btn.textContent = '−';
+            btn.style.backgroundColor = '#dc2626';
+        };
+
+        // Add event listener to document for delegation
+        document.addEventListener('click', handleExpandClick);
+
+        return () => {
+            document.removeEventListener('click', handleExpandClick);
+        };
+    }, []);
+
 
     //console.log(data?.data);
 
@@ -166,17 +249,35 @@ export default function Doctors() {
             orderable: true,
             responsivePriority: 2,
             render: (_data: any, _type: string, row: DoctorItem) => {
-                // If API returns formatted doctor_id, use it
+                // Format the doctor ID for display
+                let formattedId = '';
                 if (row.doctor_id) {
-                    return `<span class="font-mono font-medium">${row.doctor_id}</span>`;
+                    formattedId = row.doctor_id;
+                } else {
+                    const sequence = row.sequence || parseInt(String(row.id).replace(/\D/g, '')) || 0;
+                    const doctorPrefix = settings?.doctorPrefix || 'DOC-{0000}';
+                    formattedId = formatId(doctorPrefix, sequence);
                 }
 
-                // Otherwise, format using prefix settings
-                // Use sequence if available, otherwise use numeric part of id
-                const sequence = row.sequence || parseInt(String(row.id).replace(/\D/g, '')) || 0;
-                const doctorPrefix = settings?.doctorPrefix || 'DOC-{0000}';
-
-                return `<span class="font-mono font-medium">${formatId(doctorPrefix, sequence)}</span>`;
+                return `
+                    <div class="flex items-center gap-2">
+                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+                                type="button"
+                                data-id="${row.id}"
+                                data-doctor-id="${formattedId.replace(/"/g, '&quot;')}"
+                                data-name="${(row.doctor_name || '-').replace(/"/g, '&quot;')}"
+                                data-title="${(row.title || '-').replace(/"/g, '&quot;')}"
+                                data-qualification="${(row.qualification || '-').replace(/"/g, '&quot;')}"
+                                data-speciality="${(row.speciality || '-').replace(/"/g, '&quot;')}"
+                                data-country="${(row.country || '-').replace(/"/g, '&quot;')}"
+                                data-city="${(row.city || '-').replace(/"/g, '&quot;')}"
+                                data-phone="${(row.phone || '-').replace(/"/g, '&quot;')}"
+                                data-mobile="${(row.mobile || '-').replace(/"/g, '&quot;')}"
+                                data-email="${(row.email || '-').replace(/"/g, '&quot;')}"
+                                data-created-by="${String(row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
+                        <span class="font-mono font-medium">${formattedId}</span>
+                    </div>
+                `;
             },
             defaultContent: "",
         },

@@ -8,6 +8,7 @@ import { ThemeSwitch } from '@/components/theme-switch';
 import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable';
 import { PlusCircle } from 'lucide-react';
+import { useEffect } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from '@/lib/cookies';
@@ -64,7 +65,103 @@ function BedCabinList() {
     console.log('Current data state:', data);
     console.log('Loading:', isLoading, 'Error:', error);
 
+    // Handle expand button clicks using event delegation
+    useEffect(() => {
+        const handleExpandClick = (e: Event) => {
+            const button = (e.target as HTMLElement).closest('.expand-btn');
+            if (!button) return;
+
+            const btn = button as HTMLButtonElement;
+            const row = btn.closest('tr');
+            if (!row) return;
+
+            const isExpanded = row.classList.contains('expanded');
+            const nextRow = row.nextElementSibling;
+
+            // Toggle collapse
+            if (nextRow && nextRow.classList.contains('child-row-detail')) {
+                nextRow.remove();
+                row.classList.remove('expanded');
+                btn.textContent = '+';
+                btn.style.backgroundColor = 'black';
+                return;
+            }
+
+            // Don't expand if already expanded
+            if (isExpanded) return;
+
+            // Get data from attributes
+            const id = btn.dataset.id || '';
+            const code = btn.dataset.code || '-';
+            const type = btn.dataset.type || '-';
+            const ward = btn.dataset.ward || '-';
+            const status = btn.dataset.status || '-';
+            const price = btn.dataset.price || '0';
+            const createdBy = btn.dataset.createdBy || '-';
+
+            // Create details HTML
+            const details = document.createElement('ul');
+            details.className = 'grid grid-cols-2 gap-2 text-sm';
+            details.innerHTML = `
+                <li><strong>Bed/Cabin ID:</strong> ${id}</li>
+                <li><strong>Code:</strong> ${code}</li>
+                <li><strong>Type:</strong> ${type}</li>
+                <li><strong>Ward/Department:</strong> ${ward}</li>
+                <li><strong>Status:</strong> ${status}</li>
+                <li><strong>Price/Day:</strong> ৳${price}</li>
+                <li><strong>Created By:</strong> ${createdBy}</li>
+                <li class='col-span-2'><strong>Actions:</strong>
+                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2" onclick="window.editBedCabin('${id}')">Edit</button>
+                </li>
+            `;
+
+            // Create new row
+            const newRow = document.createElement('tr');
+            newRow.className = 'child-row-detail';
+            const cell = document.createElement('td');
+            cell.className = 'p-4 bg-muted/50';
+            cell.colSpan = 9;
+            cell.appendChild(details);
+            newRow.appendChild(cell);
+
+            row.parentNode?.insertBefore(newRow, row.nextSibling);
+            row.classList.add('expanded');
+            btn.textContent = '−';
+            btn.style.backgroundColor = '#dc2626';
+        };
+
+        // Add event listener to document for delegation
+        document.addEventListener('click', handleExpandClick);
+
+        return () => {
+            document.removeEventListener('click', handleExpandClick);
+        };
+    }, []);
+
     const columns = [
+        {
+            data: 'id',
+            title: 'ID',
+            orderable: true,
+            responsivePriority: 2,
+            render: (data: any, _type: string, row: BedCabinItem) => {
+                return `
+                    <div class="flex items-center gap-2">
+                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+                                type="button"
+                                data-id="${data}"
+                                data-code="${(row.code || '-').replace(/"/g, '&quot;')}"
+                                data-type="${(row.type || '-').replace(/"/g, '&quot;')}"
+                                data-ward="${(row.ward || '-').replace(/"/g, '&quot;')}"
+                                data-status="${(row.status || '-').replace(/"/g, '&quot;')}"
+                                data-price="${Number(row.price || 0).toLocaleString()}"
+                                data-created-by="${String(row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
+                        <span>${data}</span>
+                    </div>
+                `;
+            },
+            defaultContent: "",
+        },
         {
             data: 'code',
             title: 'Bed/Cabin Code',
@@ -115,21 +212,6 @@ function BedCabinList() {
                 const value = data || '-';
                 return `<span class="text-sm text-muted-foreground">${value}</span>`;
             },
-        },
-        {
-            data: null,
-            title: 'Actions',
-            render: (data: any, type: string, row: BedCabinItem) => `
-                <div class="flex gap-2">
-                    <button class="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded flex items-center justify-center" onclick="window.editBedCabin('${row.id}')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                    </button>
-                    <button class="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 rounded flex items-center justify-center" onclick="deleteBedCabin(${row.id})">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                    </button>
-                </div>
-            `,
-            orderable: false,
         },
     ];
 
@@ -189,39 +271,14 @@ function BedCabinList() {
     );
 }
 
-// Global delete function for inline button clicks
+// Global edit function for inline button clicks
 declare global {
     interface Window {
-        deleteBedCabin?: (id: number) => void;
         editBedCabin?: (id: string) => void;
     }
 }
 
 if (typeof window !== 'undefined') {
-    window.deleteBedCabin = async (id: number) => {
-        if (!confirm('Are you sure you want to delete this bed/cabin?')) return;
-
-        const token = getCookie('accessToken');
-        try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/bed-cabin/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (res.ok) {
-                alert('Bed/Cabin deleted successfully');
-                window.location.reload();
-            } else {
-                alert('Failed to delete bed/cabin');
-            }
-        } catch (error) {
-            console.error('Delete error:', error);
-            alert('Error deleting bed/cabin');
-        }
-    };
-
     window.editBedCabin = (id: string) => {
         window.location.href = `/indoor/master/bed-cabin-list/${id}`;
     };

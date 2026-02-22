@@ -98,6 +98,25 @@ export default function Services() {
         {
             data: "id",
             title: "ID",
+            orderable: true,
+            responsivePriority: 2,
+            render: (data: any, _type: string, row: ServiceItem) => {
+                return `
+                    <div class="flex items-center gap-2">
+                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+                                type="button"
+                                data-id="${data}"
+                                data-name="${(row.name || '-').replace(/"/g, '&quot;')}"
+                                data-category="${(row.category || '-').replace(/"/g, '&quot;')}"
+                                data-description="${(row.description || '-').replace(/"/g, '&quot;')}"
+                                data-price="${Number(row.price || 0).toFixed(2)}"
+                                data-status="${(row.status || '-').replace(/"/g, '&quot;')}"
+                                data-created-by="${String(row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
+                        <span>${data}</span>
+                    </div>
+                `;
+            },
+            defaultContent: "",
         },
         {
             data: "category",
@@ -154,6 +173,80 @@ export default function Services() {
             },
         },
     ];
+
+    // Handle expand button clicks using event delegation
+    useEffect(() => {
+        const handleExpandClick = (e: Event) => {
+            const button = (e.target as HTMLElement).closest('.expand-btn');
+            if (!button) return;
+
+            const btn = button as HTMLButtonElement;
+            const row = btn.closest('tr');
+            if (!row) return;
+
+            const isExpanded = row.classList.contains('expanded');
+            const nextRow = row.nextElementSibling;
+
+            // Toggle collapse
+            if (nextRow && nextRow.classList.contains('child-row-detail')) {
+                nextRow.remove();
+                row.classList.remove('expanded');
+                btn.textContent = '+';
+                btn.style.backgroundColor = 'black';
+                return;
+            }
+
+            // Don't expand if already expanded
+            if (isExpanded) return;
+
+            // Get data from attributes
+            const id = btn.dataset.id || '';
+            const name = btn.dataset.name || '-';
+            const category = btn.dataset.category || '-';
+            const description = btn.dataset.description || '-';
+            const price = btn.dataset.price || '0';
+            const status = btn.dataset.status || '-';
+            const createdBy = btn.dataset.createdBy || '-';
+
+            // Create details HTML
+            const details = document.createElement('ul');
+            details.className = 'grid grid-cols-2 gap-2 text-sm';
+            details.innerHTML = `
+                <li><strong>Service ID:</strong> ${id}</li>
+                <li><strong>Service Name:</strong> ${name}</li>
+                <li><strong>Category:</strong> ${category}</li>
+                <li><strong>Price:</strong> ৳${price}</li>
+                <li class='col-span-2'><strong>Description:</strong> ${description}</li>
+                <li><strong>Status:</strong> ${status}</li>
+                <li><strong>Created By:</strong> ${createdBy}</li>
+                <li class='col-span-2'><strong>Actions:</strong>
+                    <button data-action="view" data-id="${id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2 mr-2">View</button>
+                    <button data-action="edit" data-id="${id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">Edit</button>
+                </li>
+            `;
+
+            // Create new row
+            const newRow = document.createElement('tr');
+            newRow.className = 'child-row-detail';
+            const cell = document.createElement('td');
+            cell.className = 'p-4 bg-muted/50';
+            cell.colSpan = 10;
+            cell.appendChild(details);
+            newRow.appendChild(cell);
+
+            row.parentNode?.insertBefore(newRow, row.nextSibling);
+            row.classList.add('expanded');
+            btn.textContent = '−';
+            btn.style.backgroundColor = '#dc2626';
+        };
+
+        // Add event listener to document for delegation
+        document.addEventListener('click', handleExpandClick);
+
+        return () => {
+            document.removeEventListener('click', handleExpandClick);
+        };
+    }, []);
 
     // Handle button clicks via event delegation
     useEffect(() => {
