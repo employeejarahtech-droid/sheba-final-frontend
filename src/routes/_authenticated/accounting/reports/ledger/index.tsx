@@ -109,7 +109,7 @@ function LedgerReport() {
           </Button>
         </div>
 
-        <Card className="border-t-4 border-emerald-500 shadow-md">
+        <Card className="border-t-4 border-emerald-500 shadow-md py-0">
           <CardContent className="p-6">
             <div className="grid md:grid-cols-3 gap-6 items-end">
               <div className="space-y-2">
@@ -216,11 +216,11 @@ function LedgerReport() {
           </Card>
         </div>
 
-        <Card className="overflow-hidden shadow-lg">
-          <CardHeader className="bg-gray-50 dark:bg-gray-900/50 border-b">
+        <Card className="overflow-hidden shadow-lg py-0 gap-0">
+          <CardHeader className="bg-gray-50 dark:bg-gray-900/50 border-b-1 py-4 gap-0">
             <CardTitle>Transactions</CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent className="py-4 px-6">
             <DataTable
               columns={[
                 {

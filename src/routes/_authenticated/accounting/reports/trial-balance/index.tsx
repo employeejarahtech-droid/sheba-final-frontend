@@ -130,7 +130,7 @@ function TrialBalance() {
                             </Badge>
                         )}
                     </CardHeader>
-                    <CardContent className="p-0">
+                    <CardContent className="p-0 px-6">
                         <DataTable
                             columns={[
                                 {

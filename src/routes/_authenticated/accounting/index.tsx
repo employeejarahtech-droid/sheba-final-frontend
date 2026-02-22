@@ -261,7 +261,7 @@ function AccountingOverview() {
                 {/* Charts Row */}
                 <div className='mt-8 grid gap-6 md:grid-cols-2'>
                     {/* Trend Chart (Bar/Line) */}
-                    <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg">
+                    <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0">
                         <CardHeader className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 border-b-1 border-blue-100 dark:border-blue-900 py-3 gap-0">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
@@ -270,7 +270,7 @@ function AccountingOverview() {
                                 <CardTitle>Income vs Expense Trend</CardTitle>
                             </div>
                         </CardHeader>
-                        <CardContent className="pb-6 pt-4">
+                        <CardContent className="pt-4 pb-6">
                             <div className="h-[300px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={chartTrendData}>
@@ -287,7 +287,7 @@ function AccountingOverview() {
                     </Card>
 
                     {/* Expense Breakdown Pie Chart */}
-                    <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-orange-200 hover:shadow-lg">
+                    <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-orange-200 hover:shadow-lg py-0">
                         <CardHeader className="bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 dark:from-orange-950/30 dark:via-amber-950/30 dark:to-orange-950/30 border-b-1 border-orange-100 dark:border-orange-900 py-3 gap-0">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl shadow-lg shadow-orange-500/30">

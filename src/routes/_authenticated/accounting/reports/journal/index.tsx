@@ -216,7 +216,7 @@ function JournalReport() {
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                <Plus className="mr-2 h-4 w-4" /> New Journal Entry
+                <Plus className="h-4 w-4" /> New Journal Entry
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[700px]">

@@ -128,20 +128,20 @@ function ProfitAndLoss() {
 
                 <div className="grid gap-6 md:grid-cols-2">
                     {/* INCOME */}
-                    <Card className="border-emerald-100 shadow-sm">
-                        <CardHeader className="bg-emerald-50/30 border-b">
+                    <Card className="border-emerald-100 shadow-sm pt-0">
+                        <CardHeader className="bg-emerald-50/30 border-b-1 py-4 gap-0">
                             <CardTitle className="text-emerald-700 flex items-center gap-2">
                                 <TrendingUp className="w-5 h-5" /> Income
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-0">
+                        <CardContent className="p-0 px-6">
                             <DataTable
                                 columns={columns}
                                 data={income}
                                 isLoading={isLoading}
                                 className="border-0"
                             />
-                            <div className="p-4 bg-emerald-50/50 border-t flex justify-between font-bold text-lg">
+                            <div className="p-4 bg-emerald-50/50 border-t flex justify-between font-bold text-lg mt-2">
                                 <span className="text-emerald-800">Total Income</span>
                                 <span className="text-emerald-700 font-mono">{totalIncome.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                             </div>
@@ -149,20 +149,20 @@ function ProfitAndLoss() {
                     </Card>
 
                     {/* EXPENSE */}
-                    <Card className="border-red-100 shadow-sm">
-                        <CardHeader className="bg-red-50/30 border-b">
+                    <Card className="border-red-100 shadow-sm pt-0">
+                        <CardHeader className="bg-red-50/30 border-b-1 py-4 gap-0">
                             <CardTitle className="text-red-700 flex items-center gap-2">
                                 <TrendingDown className="w-5 h-5" /> Expense
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-0">
+                        <CardContent className="p-0 px-6">
                             <DataTable
                                 columns={columns}
                                 data={expense}
                                 isLoading={isLoading}
                                 className="border-0"
                             />
-                            <div className="p-4 bg-red-50/50 border-t flex justify-between font-bold text-lg">
+                            <div className="p-4 bg-red-50/50 border-t flex justify-between font-bold text-lg mt-2">
                                 <span className="text-red-800">Total Expense</span>
                                 <span className="text-red-700 font-mono">{totalExpense.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                             </div>

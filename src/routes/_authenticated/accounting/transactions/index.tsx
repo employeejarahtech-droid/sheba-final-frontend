@@ -138,7 +138,7 @@ function Transactions() {
                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
                         <DialogTrigger asChild>
                             <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                                <Plus className="mr-2 h-4 w-4" /> New Transaction
+                                <Plus className="h-4 w-4" /> New Transaction
                             </Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[500px]">
@@ -159,7 +159,9 @@ function Transactions() {
                                                 rules={{ required: "Type is required" }}
                                                 render={({ field }) => (
                                                     <Select onValueChange={field.onChange} value={field.value}>
-                                                        <SelectTrigger className={cn(errors.type && "border-red-500")}>
+                                                        <SelectTrigger
+                                                            className={cn("w-full", errors.type && "border-red-500")}
+                                                        >
                                                             <SelectValue placeholder="Select type" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -240,7 +242,7 @@ function Transactions() {
                                                 rules={{ required: "Mode is required" }}
                                                 render={({ field }) => (
                                                     <Select onValueChange={field.onChange} value={field.value}>
-                                                        <SelectTrigger className={cn(errors.payment_mode && "border-red-500")}>
+                                                        <SelectTrigger className={cn("w-full", errors.payment_mode && "border-red-500")}>
                                                             <SelectValue placeholder="Select mode" />
                                                         </SelectTrigger>
                                                         <SelectContent>
