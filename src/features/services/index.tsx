@@ -155,7 +155,7 @@ export default function Services() {
         {
             data: null,
             title: "Actions",
-            render: (data: any, type: string, row: ServiceItem) => {
+            render: (_data: any, _type: string, row: ServiceItem) => {
                 return `
                     <div class="flex gap-2">
                         <button data-action="view" data-id="${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3">

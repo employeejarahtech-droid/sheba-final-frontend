@@ -1,12 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { getCookie } from '@/lib/cookies'
-import { ArrowLeft, Printer, FileText, Calendar, User, Phone, Stethoscope, Activity, Home, IndianRupee, Plus } from 'lucide-react'
+import { ArrowLeft, Printer, FileText, Calendar, User, Phone, Stethoscope, Activity, Home, Plus } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
 
 const API_URL = import.meta.env.VITE_API_URL
 

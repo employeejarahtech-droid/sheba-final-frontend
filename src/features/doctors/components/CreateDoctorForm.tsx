@@ -25,13 +25,6 @@ import { useState } from "react";
 import { getCookie } from "@/lib/cookies";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 const doctorSchema = z.object({
   doctor_name: z.string().min(1, { message: "Required" }),

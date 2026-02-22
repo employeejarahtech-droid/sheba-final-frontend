@@ -125,7 +125,7 @@ export const useUpdatePurchaseOrderMutation = () => {
         mutationFn: async ({ id, body }: { id: number; body: any }) => {
             return await window.electron.invoke('purchase:orders:update', { id, body });
         },
-        onSuccess: (data, variables) => {
+        onSuccess: (_data, variables) => {
             queryClient.invalidateQueries({ queryKey: ['purchaseOrders'] });
             queryClient.invalidateQueries({ queryKey: ['purchaseOrder', variables.id] });
         },

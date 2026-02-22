@@ -20,7 +20,6 @@ import {
   Recycle,
   UserPlus,
   Building2,
-  BedDouble,
   Receipt,
   Beaker,
   Activity,
@@ -30,13 +29,8 @@ import {
   Bone,
   Baby,
   HeartPulse,
-  Scan,
   Monitor,
-  Waves,
-  CreditCard,
-  Banknote,
   Wallet,
-  UserCheck,
   HelpCircle,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
@@ -616,7 +610,7 @@ export const sidebarData: SidebarData = {
             {
               title: 'Report 3',
               url: "#",
-            },
+            }
           ]
         },
         {
