@@ -8,12 +8,13 @@ import { useGetIncomesQuery } from "@/features/accounting/accountingQueries";
 import { Income } from "@/types/accounting.types";
 import { DataTable } from "@/components/DataTable";
 import { Input } from "@/components/ui/input";
-import { AddIncomeModal } from "../components/AddIncomeModal";
+import { AddIncomeModal } from "@/components/accounting/AddIncomeModal";
 import { Button } from "@/components/ui/button";
 import { getCookie } from "@/lib/cookies";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import api from "@/lib/axios";
+import { useCurrency } from '@/hooks/use-currency'
 
 // Layout
 
@@ -27,11 +28,11 @@ export const Route = createFileRoute('/_authenticated/accounting/income/')({
 })
 
 function IncomesPage() {
+  const { currencySymbol } = useCurrency();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
   const [date, setDate] = useState("");
-  const currency = '৳';
   const token = getCookie('accessToken');
   const queryClient = useQueryClient();
 
@@ -57,7 +58,7 @@ function IncomesPage() {
   const stats = [
     {
       label: "Page Income",
-      value: `${currency} ${totalIncome.toLocaleString()}`,
+      value: `${currencySymbol} ${totalIncome.toLocaleString()}`,
       gradient: "from-emerald-600 to-emerald-400",
       shadow: "shadow-emerald-500/30",
       icon: <DollarSign className="w-6 h-6 text-white" />,
@@ -71,7 +72,7 @@ function IncomesPage() {
     },
     {
       label: "Avg. Transaction",
-      value: `${currency} ${avgTransaction.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
+      value: `${currencySymbol} ${avgTransaction.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
       gradient: "from-violet-600 to-violet-400",
       shadow: "shadow-violet-500/30",
       icon: <CreditCard className="w-6 h-6 text-white" />,
@@ -139,7 +140,7 @@ function IncomesPage() {
     },
     {
       data: "amount",
-      title: `Amount (${currency})`,
+      title: `Amount (${currencySymbol})`,
       orderable: true,
       responsivePriority: 2,
       render: (data: any) => {

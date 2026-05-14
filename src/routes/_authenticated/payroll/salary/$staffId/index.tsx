@@ -70,7 +70,6 @@ function SalaryPage() {
 
     // Local state (not using API for now)
     const [staff, setStaff] = useState<Staff>(() => getDummyStaff(staffId));
-    const [isLoading] = useState(false);
 
     // Salary Form State
     const [salaryForm, setSalaryForm] = useState({

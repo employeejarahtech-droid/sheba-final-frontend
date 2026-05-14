@@ -11,6 +11,23 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
+// Helper function to format date
+const formatDate = (dateString: string | null) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    const dateStr = date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    }).replace(/\//g, '-');
+    const timeStr = date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
+    return `${dateStr} ${timeStr}`;
+};
+
 export const Route = createFileRoute(
     '/_authenticated/outdoor/reception/invoices/$invoiceId',
 )({
@@ -20,7 +37,7 @@ export const Route = createFileRoute(
 function InvoiceDetails() {
     const { invoiceId } = Route.useParams();
     const token = getCookie('accessToken')
-    //const queryClient = useQueryClient()
+
     // Fetch existing test data
     const { data: invoice } = useQuery({
         queryKey: ["invoice", invoiceId],
@@ -37,6 +54,29 @@ function InvoiceDetails() {
         },
         enabled: !!token && !!invoiceId,
     });
+
+    // Fetch user profile for company logo and info
+    const { data: userProfile } = useQuery({
+        queryKey: ["user-profile"],
+        queryFn: async () => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/profile`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) throw new Error("Failed to fetch profile");
+            const result = await res.json();
+            return result.data;
+        },
+        enabled: !!token,
+    });
+
+    // Get company logo URL
+    const companyLogo = userProfile?.avatar
+        ? (userProfile.avatar.startsWith('http') || userProfile.avatar.startsWith('data:'))
+            ? userProfile.avatar
+            : `${import.meta.env.VITE_API_URL}${userProfile.avatar}`
+        : null;
+
+    const companyName = userProfile?.companyName || 'SHEBA CLINIC';
 
     //console.log('invoice', invoice)
 
@@ -63,22 +103,24 @@ function InvoiceDetails() {
                     </Button>
                 </div>
 
-                <div className="max-w-3xl mx-auto w-full p-8 bg-white mt-6 print:w-[850px]">
+                <div className="max-w-3xl mx-auto w-full p-8 bg-white print:w-[850px]">
 
                     {/* Header */}
                     <div className="mb-6">
                         <div className='flex justify-center items-center gap-8'>
-                            <img
-                                src="https://i.ibb.co/3R8GSxV/logo.png"
-                                alt="Clinic Logo"
-                                className="w-24 mb-2"
-                            />
+                            {companyLogo ? (
+                                <img
+                                    src={companyLogo}
+                                    alt="Company Logo"
+                                    className="w-24 h-24 object-contain"
+                                />
+                            ) : null}
 
                             <div className="text-center">
-                                <h1 className="text-2xl font-bold">SHEBA CLINIC</h1>
+                                <h1 className="text-2xl font-bold">{companyName}</h1>
                                 <p className="text-sm mt-1 leading-5">
-                                    Ghoshpara, Hospital Road, Kurigram <br />
-                                    Ph: 61450, 61867, Mobile: 01558-309138
+                                    {userProfile?.address1 || 'Ghoshpara, Hospital Road, Kurigram'}
+                                    {userProfile?.address2 ? <><br />{userProfile.address2}</> : null}
                                 </p>
                             </div>
                         </div>
@@ -92,17 +134,17 @@ function InvoiceDetails() {
                     {/* Patient Information */}
                     <div className="grid grid-cols-2 gap-4 text-sm mt-3">
                         <div>
-                            <p>Receipt ID : {invoice?.id}</p>
-                            <p>Patient’s Name : {invoice?.patient_name}</p>
+                            <p>Receipt ID : {invoice?.invoice_prefix || invoice?.id}</p>
+                            <p>Patient's Name : {invoice?.patient_name}</p>
                             <p>Ref. Doctor name : {invoice?.doctor?.name || ''}</p>
                             <p>Contact No : {invoice?.phone || '-'} </p>
-                            <p>Age : {invoice?.age || '-'}</p>
+                            <p>Age : {invoice?.age} {invoice?.age_text || '-'}</p>
                         </div>
 
                         <div className="text-right">
-                            <p>Delivery Date: {invoice?.delivery_date}</p>
-                            <p>Date: {invoice?.created_at}</p>
-                            <p>Sex: {invoice?.sex.toUpperCase()}</p>
+                            <p>Delivery Date: {formatDate(invoice?.delivery_date)}</p>
+                            <p>Date: {formatDate(invoice?.created_at)}</p>
+                            <p>Sex: {invoice?.sex?.toUpperCase() || '-'}</p>
                         </div>
                     </div>
 

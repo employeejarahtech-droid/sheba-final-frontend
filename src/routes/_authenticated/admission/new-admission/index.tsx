@@ -96,7 +96,7 @@ function DoctorSelect({
     doctors,
     value,
     onChange,
-    label,
+    label: _label,
     placeholder,
     disabled = false,
     loading = false
@@ -201,7 +201,7 @@ function BedSelect({
     beds,
     value,
     onChange,
-    label,
+    label: _label,
     placeholder,
     disabled = false,
     loading = false
@@ -299,7 +299,7 @@ function PatientTypeSelect({
     patientTypes,
     value,
     onChange,
-    label,
+    label: _label,
     placeholder,
     disabled = false,
     loading = false
@@ -424,12 +424,12 @@ function IndoorNewAdmission() {
 
     const patientTypes = patientTypesData?.data?.items || [];
 
-    // Fetch beds/cabins
+    // Fetch beds/cabins - only available ones for new admission
     const { data: bedsData } = useQuery({
         queryKey: ['beds-cabins'],
         queryFn: async () => {
             const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/bed-cabin?limit=100&status=Active`,
+                `${import.meta.env.VITE_API_URL}/api/bed-cabin?limit=100&status=Active&available_only=true`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
@@ -477,6 +477,7 @@ function IndoorNewAdmission() {
                 body: JSON.stringify({
                     patient_name: values.patientName,
                     age: parseInt(values.ageValue),
+                    age_unit: values.ageUnit,
                     sex: values.gender,
                     phone: values.mobile_number,
                     admission_date: values.admissionDate,
@@ -519,7 +520,7 @@ function IndoorNewAdmission() {
                     {/* Page Header */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 dark:border-gray-800 pb-6">
                         <div>
-                            <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent uppercase">
+                            <h1 className="text-2xl font-black">
                                 Indoor Patient Admission
                             </h1>
                             <p className="text-muted-foreground mt-1 text-sm font-medium">
@@ -539,7 +540,6 @@ function IndoorNewAdmission() {
                                 type="submit"
                                 form="hospital-admission-form"
                                 disabled={createMutation.isPending}
-                                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 border-none px-6 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] font-bold"
                             >
                                 {createMutation.isPending ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -573,6 +573,19 @@ function IndoorNewAdmission() {
                                 </CardHeader>
                                 <CardContent className="p-4 md:p-6">
                                     <div className="space-y-6">
+                                        {/* Custom Admission ID - Auto-generated */}
+                                        <div className="rounded-lg border-2 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 p-4">
+                                            <FormLabel className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300">Custom Admission ID</FormLabel>
+                                            <Input
+                                                placeholder="Auto-generated from settings (e.g., ADM-20260228-1)"
+                                                disabled
+                                                className="h-11 mt-2 rounded-lg border-blue-300 dark:border-blue-900 bg-white dark:bg-gray-950 text-blue-800 dark:text-blue-200 font-semibold text-sm cursor-not-allowed"
+                                            />
+                                            <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1">
+                                                This ID will be automatically generated when you create the admission, based on your Settings → Prefix configuration
+                                            </p>
+                                        </div>
+
                                         {/* First Row: Patient Name & Father/Husband Name */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <FormField

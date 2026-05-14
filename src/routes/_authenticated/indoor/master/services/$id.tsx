@@ -2,10 +2,6 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Button } from "@/components/ui/button";
 import { Main } from '@/components/layout/main';
 import { AppHeader } from '@/components/layout/app-header';
-;
-;
-;
-;
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
@@ -74,7 +70,8 @@ function ServiceDetails() {
                             <Button
                                 variant="ghost"
                                 className="gap-2"
-                                onClick={() => navigate({ to: `/indoor/master/services/edit/${service.id}` })}
+                                onClick={() => service && navigate({ to: `/indoor/master/services/edit/${service.id}` })}
+                                disabled={!service}
                             >
                                 <Edit className="h-4 w-4" />
                                 Edit
@@ -116,7 +113,7 @@ function ServiceDetails() {
                                     <div className="space-y-2">
                                         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Category</p>
                                         <p className="text-sm font-medium">
-                                            {service.category || 'N/A'}
+                                            {service.category || service.service_category?.name || 'N/A'}
                                         </p>
                                     </div>
                                 )}
@@ -129,7 +126,7 @@ function ServiceDetails() {
                                             <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                                         </div>
                                         <span className="font-bold text-xl text-emerald-900 dark:text-emerald-50">
-                                            ৳{parseFloat(service.price).toFixed(2)}
+                                            ৳{service.price ? parseFloat(service.price).toFixed(2) : '0.00'}
                                         </span>
                                     </div>
                                 </div>
@@ -151,21 +148,21 @@ function ServiceDetails() {
                                         <div className="flex items-center gap-2">
                                             <Calendar className="h-4 w-4 text-muted-foreground" />
                                             <span className="text-sm">
-                                                {new Date(service.created_at).toLocaleDateString('en-GB', {
+                                                {service.createdAt || service.created_at ? new Date(service.createdAt || service.created_at).toLocaleDateString('en-GB', {
                                                     day: 'numeric',
                                                     month: 'short',
                                                     year: 'numeric'
-                                                })}
+                                                }) : 'N/A'}
                                             </span>
                                         </div>
                                     </div>
-                                    {service.updated_at && (
+                                    {(service.updatedAt || service.updated_at) && (
                                         <div className="space-y-2">
                                             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Updated Date</p>
                                             <div className="flex items-center gap-2">
                                                 <Calendar className="h-4 w-4 text-muted-foreground" />
                                                 <span className="text-sm">
-                                                    {new Date(service.updated_at).toLocaleDateString('en-GB', {
+                                                    {new Date(service.updatedAt || service.updated_at).toLocaleDateString('en-GB', {
                                                         day: 'numeric',
                                                         month: 'short',
                                                         year: 'numeric'

@@ -20,6 +20,7 @@ import { ThemeSwitch } from "@/components/theme-switch";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { topNav } from "@/data/data";
 import { useProfitAndLoss } from "@/features/accounting/api/queries";
+import { PageHeader } from '@/components/layout/page-header'
 
 export default function ProfitAndLossPage() {
     const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
@@ -51,13 +52,10 @@ export default function ProfitAndLossPage() {
             </Header>
             <main className="p-6 lg:p-10">
                 <div className="space-y-6">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div>
-                            <h2 className="text-3xl font-bold tracking-tight">Profit & Loss</h2>
-                            <p className="text-muted-foreground">Income Statement (Revenue vs Expense).</p>
-                        </div>
-
-                        <div className="flex items-center gap-2">
+                    <PageHeader
+                        title="Profit & Loss"
+                        description="Income Statement (Revenue vs Expense)."
+                        actions={
                             <div className="flex items-center gap-2">
                                 <Popover>
                                     <PopoverTrigger asChild>
@@ -105,8 +103,9 @@ export default function ProfitAndLossPage() {
                                     </PopoverContent>
                                 </Popover>
                             </div>
-                        </div>
-                    </div>
+                        }
+                        showBackButton={false}
+                    />
 
                     <div className="grid md:grid-cols-2 gap-6">
                         {/* INCOME COLUMN */}

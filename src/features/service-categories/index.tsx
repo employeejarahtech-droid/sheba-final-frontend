@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
-
+import { PageHeader } from '@/components/layout/page-header'
 
 
 import { DataTable } from '@/components/DataTable'
@@ -20,6 +20,7 @@ type ServiceCategoryItem = {
     description: string | null;
     created_at: string;
     created_by?: string | number | null;
+    created_by_name?: string;
 };
 
 export default function ServiceCategories() {
@@ -27,13 +28,13 @@ export default function ServiceCategories() {
     const [selectedServiceCategoryId, setSelectedServiceCategoryId] = useState<number | null>(null);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
-    const limit = 10;
+    const [limit, setLimit] = useState(10);
 
     const token = getCookie('accessToken');
     const navigate = useNavigate();
 
     const { data } = useQuery({
-        queryKey: ["service-categories", page, search],
+        queryKey: ["service-categories", page, limit, search],
         queryFn: async () => {
             const res = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/service-category?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
@@ -111,7 +112,7 @@ export default function ServiceCategories() {
                                 data-name="${(row.name || '-').replace(/"/g, '&quot;')}"
                                 data-description="${(row.description || '-').replace(/"/g, '&quot;')}"
                                 data-created-date="${createdDate.replace(/"/g, '&quot;')}"
-                                data-created-by="${String(row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
+                                data-created-by="${String(row.created_by_name || row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
                         <span>${data}</span>
                     </div>
                 `;
@@ -139,9 +140,9 @@ export default function ServiceCategories() {
         {
             data: "created_by",
             title: "Created By",
-            render: (data: any) => {
-                const value = data || '-';
-                return `<span class="text-sm text-muted-foreground">${value}</span>`;
+            render: (_data: any, _type: string, row: ServiceCategoryItem) => {
+                const name = row.created_by_name || row.created_by || '-';
+                return `<span class="text-sm text-muted-foreground">${name}</span>`;
             },
         },
         {
@@ -194,19 +195,62 @@ export default function ServiceCategories() {
             const createdDate = btn.dataset.createdDate || '-';
             const createdBy = btn.dataset.createdBy || '-';
 
-            // Create details HTML
-            const details = document.createElement('ul');
-            details.className = 'grid grid-cols-2 gap-2 text-sm';
-            details.innerHTML = `
-                <li><strong>Category ID:</strong> ${id}</li>
-                <li><strong>Category Name:</strong> ${name}</li>
-                <li class='col-span-2'><strong>Description:</strong> ${description}</li>
-                <li><strong>Created Date:</strong> ${createdDate}</li>
-                <li><strong>Created By:</strong> ${createdBy}</li>
-                <li class='col-span-2'><strong>Actions:</strong>
-                    <button data-action="view" data-id="${id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2 mr-2">View</button>
-                    <button data-action="edit" data-id="${id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">Edit</button>
-                </li>
+            // Create card HTML
+            const cardContainer = document.createElement('div');
+            cardContainer.className = 'max-w-3xl mx-auto my-4';
+            cardContainer.innerHTML = `
+                <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-pink-600 to-rose-600 px-6 py-4">
+                        <h2 class="text-lg font-semibold text-white">Service Category Information</h2>
+                        <p class="text-pink-100 text-sm">Detailed overview of selected service category</p>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="p-6">
+                        <ul class="grid md:grid-cols-2 gap-6 text-sm">
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Category ID</span>
+                                <span class="font-mono text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">#${id}</span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Category Name</span>
+                                <span class="font-semibold text-gray-800 text-base">${name}</span>
+                            </li>
+
+                            <li class="flex flex-col md:col-span-2">
+                                <span class="text-gray-500">Description</span>
+                                <span class="font-medium text-gray-700 text-sm">${description || 'No description provided'}</span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Created Date</span>
+                                <span class="font-medium text-gray-700">${createdDate}</span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Created By</span>
+                                <span class="font-medium text-gray-700">${createdBy}</span>
+                            </li>
+
+                        </ul>
+
+                        <!-- Actions -->
+                        <div class="mt-8 flex justify-end gap-3 border-t pt-5">
+                            <button data-action="view" data-id="${id}"
+                                    class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 transition h-10 px-5">
+                                View
+                            </button>
+
+                            <button data-action="edit" data-id="${id}"
+                                    class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-pink-600 text-white hover:bg-pink-700 transition h-10 px-5 shadow">
+                                Edit
+                            </button>
+                        </div>
+                    </div>
+                </div>
             `;
 
             // Create new row
@@ -215,7 +259,7 @@ export default function ServiceCategories() {
             const cell = document.createElement('td');
             cell.className = 'p-4 bg-muted/50';
             cell.colSpan = 10;
-            cell.appendChild(details);
+            cell.appendChild(cardContainer);
             newRow.appendChild(cell);
 
             row.parentNode?.insertBefore(newRow, row.nextSibling);
@@ -261,15 +305,15 @@ export default function ServiceCategories() {
     return <>
         <AppHeader fixed />
 
-        <Main className="p-6 lg:p-10">
-            <div className="space-y-6">
+        <main className="p-4">
+            <div className="space-y-4">
                 {/* Statistics Cards */}
                 <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-2'>
                     {statCards.map((card, idx) => (
-                        <Card key={idx} className={`relative overflow-hidden border-none text-white shadow-xl ${card.shadow} bg-gradient-to-br ${card.gradient}`}>
+                        <Card key={idx} className={`p-3 relative overflow-hidden border-none text-white shadow-xl ${card.shadow} bg-gradient-to-br ${card.gradient}`}>
                             <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
                             <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-                            <CardContent className='p-6'>
+                            <CardContent className='p-3'>
                                 <div className='flex items-center justify-between relative z-10'>
                                     <div className='space-y-1'>
                                         <p className='text-sm font-medium text-white/80'>{card.title}</p>
@@ -288,20 +332,24 @@ export default function ServiceCategories() {
                 </div>
 
                 {/* Header & Table */}
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h1 className="text-2xl font-bold tracking-tight">List of Service Categories</h1>
-                    <CreateServiceCategoryForm />
-                </div>
+                <PageHeader
+                    title="List of Service Categories"
+                    actions={<CreateServiceCategoryForm />}
+                />
                 <DataTable
                     columns={columns}
                     data={data?.data?.items || []}
                     meta={data?.data?.meta}
                     onPageChange={setPage}
+                    onLimitChange={(newLimit) => {
+                        setLimit(newLimit);
+                        setPage(1);
+                    }}
                     search={search}
                     onSearchChange={setSearch}
                 />
             </div>
             <EditServiceCategoryForm open={openEditForm} setOpen={setOpenEditForm} serviceCategoryId={selectedServiceCategoryId} />
-        </Main>
+        </main>
     </>
 }

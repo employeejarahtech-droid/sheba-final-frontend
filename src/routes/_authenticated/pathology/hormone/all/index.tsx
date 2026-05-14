@@ -19,6 +19,7 @@ type ReportsItem = {
   PatientName: string | null;
   Date: string | null;
   Tests: string;
+  TestNames: string;
   Status: string;
 };
 
@@ -115,16 +116,16 @@ function AllHormones() {
       defaultContent: '',
     },
     {
-      data: 'Tests',
-      title: 'Hormone Record IDs',
-      render: (data: any) => {
-        const tests = data as string;
-        if (!tests) return '-';
+      data: 'TestNames',
+      title: 'Tests',
+      render: (data: any, _type: string, row: ReportsItem) => {
+        const testNames = data || row.Tests || '';
+        if (!testNames) return '-';
 
-        // Split comma-separated IDs and display as badges
-        const testIds = tests.split(',').filter(id => id.trim() !== '');
-        return testIds.map((id) =>
-          `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 mr-1 mb-1">${id.trim()}</span>`
+        // Split comma-separated test names and display as badges
+        const names = testNames.split(',').filter(name => name.trim() !== '');
+        return names.map((name) =>
+          `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1">${name.trim()}</span>`
         ).join('');
       },
       orderable: false,
@@ -160,7 +161,7 @@ function AllHormones() {
 
   // Handle expand button clicks
   useEffect(() => {
-    const handleExpandClick = (e: Event) => {
+    const handleExpandClick = async (e: Event) => {
       const button = (e.target as HTMLElement).closest('.expand-btn');
       if (!button) return;
 
@@ -192,28 +193,146 @@ function AllHormones() {
       const status = btn.dataset.status || '-';
 
       // Create details HTML
-      const details = document.createElement('ul');
-      details.className = 'grid grid-cols-2 gap-2 text-sm';
-      details.innerHTML = `
-        <li><strong>Receipt ID:</strong> ${reciptId}</li>
-        <li><strong>Patient ID:</strong> ${patientId}</li>
-        <li><strong>Patient Name:</strong> ${patientName}</li>
-        <li><strong>Date:</strong> ${date}</li>
-        <li><strong>Tests:</strong> ${tests}</li>
-        <li><strong>Status:</strong> ${status}</li>
-        <li class='col-span-2'><strong>Actions:</strong>
-          <a href="/pathology/hormone/all/edit/${reciptId}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+      const details = document.createElement('div');
+      details.className = 'max-w-4xl mx-auto bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden';
+
+      // Format date for header
+      const formattedDate = date !== '-' ? date : '';
+
+      // Status badge
+      const statusBadge = status === 'Completed'
+        ? '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Completed</span>'
+        : '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">Pending</span>';
+
+      // Build the HTML content
+      let htmlContent = `
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-violet-600 to-purple-600 text-white px-6 py-5">
+          <div class="flex justify-between items-center">
+            <div>
+              <h2 class="text-xl font-semibold">Hormone Test Receipt</h2>
+              <p class="text-sm opacity-90">Receipt ID #${reciptId} • ${formattedDate}</p>
+            </div>
+            ${statusBadge}
+          </div>
+        </div>
+
+        <!-- Patient Info -->
+        <div class="p-6 border-b">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+            <div>
+              <p class="text-gray-500">Patient ID</p>
+              <p class="font-semibold text-gray-800">${patientId}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Patient Name</p>
+              <p class="font-semibold text-gray-800">${patientName}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Date</p>
+              <p class="font-semibold text-gray-800">${formattedDate}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Department</p>
+              <p class="font-semibold text-gray-800">Hormone</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tests Section -->
+        <div class="p-6">
+          <h3 class="text-lg font-semibold mb-4 text-gray-800">Test Results</h3>
+          <div id="tests-container-${reciptId}" class="space-y-4">
+            <div class="text-gray-500 text-sm">Loading report details...</div>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+          <a href="/pathology/hormone/all/report/${reciptId}"
+             class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
+            View Report
+          </a>
+          <a href="/pathology/hormone/all/edit/${reciptId}"
+             class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-violet-600 text-white hover:bg-violet-700 h-10 px-5 transition shadow-md">
             Edit
           </a>
-        </li>
+        </div>
       `;
+
+      details.innerHTML = htmlContent;
+
+      // Fetch and display test details
+      const testsContainer = details.querySelector(`#tests-container-${reciptId}`);
+      if (testsContainer) {
+        try {
+          const res = await fetch(
+            `${import.meta.env.VITE_API_URL}/api/hormon-all/${reciptId}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          if (res.ok) {
+            const data = await res.json();
+            const invoiceData = data.data;
+            const hormoneTests = invoiceData?.hormon_all_info || [];
+
+            if (hormoneTests.length > 0) {
+              // Build test results table similar to report format
+              let testResultsHTML = `
+                <div class="border rounded-xl p-4 hover:shadow-md transition bg-gray-50">
+                  <div class="flex justify-between items-center mb-3">
+                    <span class="text-sm font-semibold text-gray-700">Receipt ID: ${reciptId}</span>
+                    <span class="text-xs px-3 py-1 rounded-full bg-violet-100 text-violet-700 font-medium">
+                      Hormone Tests
+                    </span>
+                  </div>
+
+                  <!-- Test Results Table -->
+                  <table class="w-full text-sm">
+                    <thead>
+                      <tr class="border-b">
+                        <th class="px-2 py-2 text-left w-[40%]">Test Name</th>
+                        <th class="px-2 py-2 text-left w-[60%]">Test Result</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+              `;
+
+              hormoneTests.forEach((test: any) => {
+                testResultsHTML += `
+                  <tr class="border-b">
+                    <td class="px-2 py-2">${test.test_name || '-'}</td>
+                    <td class="px-2 py-2 font-medium whitespace-pre-wrap">${test.test_result || '-'}</td>
+                  </tr>
+                `;
+              });
+
+              testResultsHTML += `
+                    </tbody>
+                  </table>
+                </div>
+              `;
+
+              testsContainer.innerHTML = testResultsHTML;
+            } else {
+              testsContainer.innerHTML = '<div class="text-gray-500 text-sm">No tests found</div>';
+            }
+          } else {
+            testsContainer.innerHTML = '<div class="text-red-500 text-sm">Failed to load report details</div>';
+          }
+        } catch (error) {
+          testsContainer.innerHTML = '<div class="text-red-500 text-sm">Failed to load report details</div>';
+        }
+      }
 
       // Create new row
       const newRow = document.createElement('tr');
       newRow.className = 'child-row-detail';
       const cell = document.createElement('td');
-      cell.className = 'p-4 bg-muted/50';
-      cell.colSpan = 9;
+      cell.className = 'p-4 bg-gray-50';
+      cell.colSpan = 10;
       cell.appendChild(details);
       newRow.appendChild(cell);
 
@@ -229,7 +348,7 @@ function AllHormones() {
     return () => {
       document.removeEventListener('click', handleExpandClick);
     };
-  }, []);
+  }, [token]);
 
   return (
     <>

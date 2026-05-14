@@ -3,9 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
 import { Main } from '@/components/layout/main'
 import { AppHeader } from '@/components/layout/app-header'
-
-
-
+import { PageHeader } from '@/components/layout/page-header'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -88,28 +86,18 @@ function TestTableDetails() {
             <AppHeader fixed />
 
             <Main>
-                <div className='mb-8 flex items-center justify-between'>
-                    <div className='space-y-1'>
-                        <div className='flex items-center gap-2'>
-                            <Button
-                                variant='ghost'
-                                size='icon'
-                                className='h-8 w-8'
-                                onClick={() => navigate({ to: '/outdoor/master/test-tables' })}
-                            >
-                                <ArrowLeft className='h-4 w-4' />
-                            </Button>
-                            <h1 className='text-3xl font-bold tracking-tight'>Test Table Details</h1>
-                        </div>
-                        <p className='text-muted-foreground ml-10'>
-                            Viewing database configuration for {testTable.display_name}
-                        </p>
-                    </div>
-                    {/* Note: Assuming Edit functionality exists but handled via Sheet in main page */}
-                    <Button variant="outline" onClick={() => navigate({ to: '/outdoor/master/test-tables' })}>
-                        <List className='mr-2 h-4 w-4' /> List of Tables
-                    </Button>
-                </div>
+                <PageHeader
+                    title="Test Table Details"
+                    subtitle={`Viewing database configuration for ${testTable.display_name}`}
+                    backButton={{
+                        onClick: () => navigate({ to: '/outdoor/master/test-tables' }),
+                    }}
+                    actions={
+                        <Button variant="outline" onClick={() => navigate({ to: '/outdoor/master/test-tables' })}>
+                            <List className='mr-2 h-4 w-4' /> List of Tables
+                        </Button>
+                    }
+                />
 
                 <div className='grid gap-6 md:grid-cols-2'>
                     {/* Metadata Card */}

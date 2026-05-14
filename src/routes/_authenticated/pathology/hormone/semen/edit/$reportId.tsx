@@ -119,10 +119,11 @@ function EditSemenReport() {
     console.log("Semen Analysis Report saved:", values);
   };
 
-  const handleReport = () => {
-    // Placeholder for report generation (PDF/view)
-    alert("Generate report (placeholder)");
-  };
+  // TODO: Implement report generation
+  // const handleReport = () => {
+  //   // Placeholder for report generation (PDF/view)
+  //   alert("Generate report (placeholder)");
+  // };
 
   const handleClose = () => {
     // Placeholder for closing dialog / navigating back

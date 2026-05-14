@@ -1,9 +1,8 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import React from "react";
-import { Plus, ChevronsUpDown, Check } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -24,26 +23,25 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import { createFileRoute } from '@tanstack/react-router';
 
-// Helper Components
-import CreateExpenseHeadForm from "./components/CreateExpenseHead";
-import CreateIncomeHeadForm from "./components/CreateIncomeHead";
+import CreateExpenseHeadForm from "@/components/accounting/CreateExpenseHead";
+import CreateIncomeHeadForm from "@/components/accounting/CreateIncomeHead";
+import { NestedAccountSelect } from "@/components/accounting/NestedAccountSelect";
 
 import { DataTable } from "@/components/DataTable";
 import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
-import { cn } from "@/lib/utils";
 
 import {
     useGetAccountingAccountsQuery,
-    useLazyGetAccountingAccountsQuery,
     useAddAccountingAccountMutation,
     useUpdateAccountingAccountMutation,
     useGetTrialBalanceQuery,
 } from "@/features/accounting/accountingQueries";
+import { accountingService } from "@/features/accounting/accountingService";
 import { ChartOfAccount } from "@/types/accounting.types";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/layout/app-header";
@@ -59,11 +57,21 @@ export const Route = createFileRoute('/_authenticated/accounting/accounts/')({
     component: ChartOfAccounts,
 })
 
-type CreateAccountFormValues = {
+type AccountFormValues = {
     name: string;
     code: string;
     type: "ASSET" | "LIABILITY" | "EQUITY" | "INCOME" | "EXPENSE";
     parent_id?: string;
+    description?: string;
+    is_active?: boolean;
+};
+
+const TYPE_CONFIG: Record<string, { label: string; color: string; hint: string }> = {
+    ASSET: { label: "Asset", color: "text-blue-600", hint: "Resources owned: cash, bank, receivables, inventory, fixed assets" },
+    LIABILITY: { label: "Liability", color: "text-orange-600", hint: "Obligations: payables, loans, tax dues, advance received" },
+    EQUITY: { label: "Equity", color: "text-purple-600", hint: "Owner interest: capital, drawings, retained earnings" },
+    INCOME: { label: "Income", color: "text-emerald-600", hint: "Revenue: service fees, outdoor/indoor collections, diagnostics" },
+    EXPENSE: { label: "Expense", color: "text-red-600", hint: "Costs: salaries, utilities, supplies, professional fees" },
 };
 
 function ChartOfAccounts() {
@@ -76,32 +84,23 @@ function ChartOfAccounts() {
     const search = searchParams?.search || "";
 
     const [editingAccount, setEditingAccount] = useState<ChartOfAccount | null>(null);
+    const [autoCode, setAutoCode] = useState<string | null>(null);
+    const [autoType, setAutoType] = useState<string | null>(null);
+    const [selectedParent, setSelectedParent] = useState<ChartOfAccount | null>(null);
 
     const setPage = (newPage: number) => {
-        navigate({
-            to: '.',
-            search: (prev: any) => ({ ...prev, page: newPage }),
-        });
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
     };
-
     const setLimit = (newLimit: number) => {
-        navigate({
-            to: '.',
-            search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }),
-        });
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) });
     };
-
     const setSearch = (newSearch: string) => {
-        navigate({
-            to: '.',
-            search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }),
-        });
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
     };
 
     const { data: accountsData, isFetching } = useGetAccountingAccountsQuery({ page, limit, search });
     const { data: trialBalanceData } = useGetTrialBalanceQuery();
 
-    // Create a map of account balances from trial balance
     const balanceMap = React.useMemo(() => {
         const map = new Map<string, { debit: number; credit: number; balance: number }>();
         const items = trialBalanceData?.data;
@@ -109,130 +108,123 @@ function ChartOfAccounts() {
             items.forEach((item: any) => {
                 const debit = parseFloat(item.debit) || 0;
                 const credit = parseFloat(item.credit) || 0;
-                map.set(item.account, {
-                    debit,
-                    credit,
-                    balance: debit - credit,
-                });
+                map.set(item.account, { debit, credit, balance: debit - credit });
             });
         }
         return map;
     }, [trialBalanceData]);
 
-    // Merge accounts with their balances
     const accountsWithBalances = React.useMemo(() => {
         return accountsData?.data?.map((account) => {
             const balance = balanceMap.get(account.name);
-            return {
-                ...account,
-                debit: balance?.debit,
-                credit: balance?.credit,
-                balance: balance?.balance,
-            };
+            return { ...account, debit: balance?.debit, credit: balance?.credit, balance: balance?.balance };
         }) || [];
     }, [accountsData, balanceMap]);
 
     const { mutateAsync: addAccountingAccount, isPending: isAdding } = useAddAccountingAccountMutation();
     const { mutateAsync: updateAccountingAccount, isPending: isUpdating } = useUpdateAccountingAccountMutation();
-
     const isLoading = isAdding || isUpdating;
 
-    const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<CreateAccountFormValues>({
-        defaultValues: { name: "", code: "", type: undefined, parent_id: undefined },
+    const { control, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<AccountFormValues>({
+        defaultValues: { name: "", code: "", type: undefined, parent_id: undefined, description: "", is_active: true },
     });
 
-    const onSubmit = async (values: CreateAccountFormValues) => {
-        const payload: any = { name: values.name, code: values.code, type: values.type };
+    const watchedType = watch("type");
+    const typeConfig = watchedType ? TYPE_CONFIG[watchedType] : null;
+
+    const onSubmit = async (values: AccountFormValues) => {
+        const payload: any = {
+            name: values.name,
+            code: values.code,
+            type: values.type,
+            description: values.description || null,
+            is_active: values.is_active !== false,
+        };
         if (values.parent_id) payload.parent_id = Number(values.parent_id);
 
         try {
             if (editingAccount) {
                 const res = await updateAccountingAccount({ id: editingAccount.id, body: payload });
-                // We assume the API returns the standard ListResponse or similar structure
-                // Adjust per actual API response if needed. Assuming res.status exists.
-                if ((res as any).status) {
-                    toast.success((res as any).message || "Account updated successfully");
-                }
+                if ((res as any).status) toast.success((res as any).message || "Account updated successfully");
             } else {
                 const res = await addAccountingAccount(payload);
-                if ((res as any).status) {
-                    toast.success((res as any).message || "Account created successfully");
-                }
+                if ((res as any).status) toast.success((res as any).message || "Account created successfully");
             }
             reset();
             setEditingAccount(null);
+            setSelectedParent(null);
+            setAutoCode(null);
+            setAutoType(null);
             setIsOpen(false);
-            // refetch is not strictly needed if invalidation works, but good for safety
-            // refetch(); 
         } catch (error: any) {
             toast.error(error?.response?.data?.message || "Account operation failed");
-            console.error("Account operation failed", error);
         }
     };
 
     const onEdit = (account: ChartOfAccount) => {
         setEditingAccount(account);
+        setAutoCode(null);
+        setAutoType(null);
+        setSelectedParent(null);
         setValue("name", account.name);
         setValue("code", account.code);
         // @ts-ignore
         setValue("type", account.type.toUpperCase() as any);
         setValue("parent_id", account.parent ? String(account.parent) : undefined);
+        setValue("description", (account as any).description || "");
+        setValue("is_active", (account as any).is_active !== false);
         setIsOpen(true);
     };
 
+    const fetchNextCode = async (parentId?: number, type?: string) => {
+        try {
+            const params: { parent_id?: number; type?: string } = {};
+            if (parentId) params.parent_id = parentId;
+            else if (type) params.type = type;
+            else return;
+            const res = await accountingService.getNextAccountCode(params);
+            const code = res?.data?.code || "";
+            setAutoCode(code);
+            setValue("code", code);
+        } catch {
+            setAutoCode(null);
+        }
+    };
 
-    const ParentAccountSelect = ({ control }: { control: any }) => {
-        const [query, setQuery] = useState("");
-        const [searchAccounts, setSearchAccounts] = useState<ChartOfAccount[]>([]);
-        const [open, setOpen] = useState(false);
+    const handleParentSelect = async (id: number | null, account: ChartOfAccount | null) => {
+        if (!id || !account) {
+            setValue("parent_id", undefined);
+            setSelectedParent(null);
+            setAutoType(null);
+            setAutoCode(null);
+            // Re-generate root code if type is set
+            const currentType = watch("type");
+            if (currentType) fetchNextCode(undefined, currentType);
+            return;
+        }
+        setValue("parent_id", String(id));
+        setSelectedParent(account);
+        setAutoType(account.type);
+        setValue("type", account.type.toUpperCase() as any);
+        fetchNextCode(id);
+    };
 
-        // This simulates the lazy query usage. 
-        // In TanStack Query we called useLazy... which returns [trigger, result]
-        const [fetchAccounts] = useLazyGetAccountingAccountsQuery();
+    const handleTypeChange = (type: string) => {
+        setAutoType(null);
+        // If parent is selected, clear it when user manually changes type
+        if (selectedParent) {
+            setValue("parent_id", undefined);
+            setSelectedParent(null);
+        }
+        fetchNextCode(undefined, type);
+    };
 
-        useEffect(() => {
-            const timeout = setTimeout(() => {
-                fetchAccounts({ page: 1, limit: 10, search: query })
-                    .then((res: any) => setSearchAccounts(res?.data || []));
-            }, 300);
-            return () => clearTimeout(timeout);
-        }, [query]);
-
-        return (
-            <Controller
-                name="parent_id"
-                control={control}
-                render={({ field }) => (
-                    <Popover open={open} onOpenChange={setOpen}>
-                        <PopoverTrigger asChild>
-                            <Button variant="outline" role="combobox" className="w-full justify-between">
-                                {field.value ? searchAccounts.find(acc => String(acc.id) === field.value)?.name : (field.value || "Root account")}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                            </Button>
-                        </PopoverTrigger>
-
-                        <PopoverContent className="w-full p-0">
-                            <Command>
-                                <CommandInput placeholder="Search parent account..." value={query} onValueChange={setQuery} />
-                                <CommandEmpty>No account found.</CommandEmpty>
-                                <CommandGroup>
-                                    {searchAccounts.map(acc => (
-                                        <CommandItem
-                                            key={acc.id}
-                                            value={`${acc.code} ${acc.name}`}
-                                            onSelect={() => { setOpen(false); field.onChange(String(acc.id)); }}
-                                        >
-                                            <Check className={cn("mr-2 h-4 w-4", field.value === String(acc.id) ? "opacity-100" : "opacity-0")} />
-                                            {acc.code} — {acc.name}
-                                        </CommandItem>
-                                    ))}
-                                </CommandGroup>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
-                )}
-            />
-        );
+    const openNew = () => {
+        reset();
+        setEditingAccount(null);
+        setSelectedParent(null);
+        setAutoCode(null);
+        setAutoType(null);
     };
 
     const accountColumns = [
@@ -248,18 +240,13 @@ function ChartOfAccounts() {
                 const padding = (row.level || 0) * 20;
                 const prefix = (row.level || 0) > 0 ? `<span class="mr-2 text-muted-foreground">└─</span>` : '';
                 const fontClass = (row.level || 0) === 0 ? "font-semibold" : "";
-                return `
-                    <div class="flex items-center" style="padding-left: ${padding}px">
-                        ${prefix}
-                        <span class="${fontClass}">${row.name}</span>
-                    </div>
-                `;
+                return `<div class="flex items-center" style="padding-left: ${padding}px">${prefix}<span class="${fontClass}">${row.name}</span></div>`;
             },
         },
         {
             data: "type",
             title: "Type",
-            render: (_data: any) => `<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">${_data || ''}</span>`
+            render: (_data: any) => `<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold border-transparent bg-secondary text-secondary-foreground">${_data || ''}</span>`
         },
         {
             data: "debit",
@@ -285,11 +272,7 @@ function ChartOfAccounts() {
             className: "text-right",
             render: (_data: any, _type: string, row: ChartOfAccount) => {
                 const balance = row.balance || 0;
-                const balanceClass = balance > 0
-                    ? "text-emerald-600"
-                    : balance < 0
-                        ? "text-red-600"
-                        : "text-muted-foreground";
+                const balanceClass = balance > 0 ? "text-emerald-600" : balance < 0 ? "text-red-600" : "text-muted-foreground";
                 return `<div class="font-semibold ${balanceClass}">${balance.toFixed(2)}</div>`;
             },
         },
@@ -299,18 +282,11 @@ function ChartOfAccounts() {
             orderable: false,
             className: "text-right",
             render: (_data: any, _type: string, row: ChartOfAccount) => {
-                return `
-                    <div class="flex justify-end gap-2">
-                        <button class="edit-account-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 w-9" data-id="${row.id}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
-                        </button>
-                    </div>
-                `;
+                return `<div class="flex justify-end gap-2"><button class="edit-account-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-9 w-9" data-id="${row.id}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button></div>`;
             },
         },
     ];
 
-    // Effect to handle jQuery delegated clicks for edit button
     useEffect(() => {
         const handleEdit = (e: any) => {
             const btn = (e.target as HTMLElement).closest('.edit-account-btn');
@@ -324,10 +300,13 @@ function ChartOfAccounts() {
         return () => document.removeEventListener('click', handleEdit);
     }, [accountsWithBalances]);
 
+    // Determine if selected parent is bank-related (code starts with 11)
+    const isBankParent = selectedParent?.code?.startsWith("11") && selectedParent?.type?.toUpperCase() === "ASSET";
+
     return (
         <div className="space-y-6">
             <AppHeader fixed />
-              
+
             <main className='p-6 lg:p-10'>
                 <div className="flex justify-between items-center mb-6">
                     <div>
@@ -339,59 +318,183 @@ function ChartOfAccounts() {
                         <CreateExpenseHeadForm />
 
                         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                            <DialogTrigger onClick={() => {
-                                reset();
-                                setEditingAccount(null);
-                            }} asChild>
+                            <DialogTrigger onClick={openNew} asChild>
                                 <Button className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-5 py-2.5 font-medium text-white shadow-lg shadow-violet-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-violet-500/40 active:translate-y-0 active:shadow-none">
-                                    <Plus className="h-4 w-4" />  Add Account
+                                    <Plus className="h-4 w-4" /> Add Account
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
+                            <DialogContent className="sm:max-w-[580px] max-h-[90vh] overflow-y-auto">
                                 <DialogHeader>
                                     <DialogTitle>{editingAccount ? "Edit Account" : "Add New Account"}</DialogTitle>
-                                    <DialogDescription>Create or update an account head.</DialogDescription>
+                                    <DialogDescription>
+                                        {editingAccount ? "Update account details." : "Create a new account in your chart of accounts."}
+                                    </DialogDescription>
                                 </DialogHeader>
-                                <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
-                                    <div className="grid gap-2">
-                                        <Label>Account Name</Label>
-                                        <Controller name="name" control={control} rules={{ required: "Account name is required" }} render={({ field }) => <Input {...field} />} />
-                                        {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+
+                                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 py-4">
+                                    {/* ── Basic Information ── */}
+                                    <div>
+                                        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Basic Information</h4>
+                                        <div className="grid gap-4">
+                                            <div className="grid gap-2">
+                                                <Label>Account Name *</Label>
+                                                <Controller
+                                                    name="name"
+                                                    control={control}
+                                                    rules={{ required: "Account name is required" }}
+                                                    render={({ field }) => (
+                                                        <Input {...field} placeholder="e.g., Dutch Bangla Bank — Main Branch" />
+                                                    )}
+                                                />
+                                                {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="grid gap-2">
+                                                    <Label>Code <span className="text-muted-foreground font-normal">(auto)</span></Label>
+                                                    <Controller
+                                                        name="code"
+                                                        control={control}
+                                                        rules={{ required: "Code is required" }}
+                                                        render={({ field }) => (
+                                                            <Input
+                                                                {...field}
+                                                                readOnly
+                                                                className="bg-muted cursor-not-allowed font-mono"
+                                                                placeholder="Select type or parent..."
+                                                            />
+                                                        )}
+                                                    />
+                                                    {errors.code && <p className="text-sm text-destructive">{errors.code.message}</p>}
+                                                </div>
+                                                <div className="grid gap-2">
+                                                    <Label>Type {autoType && <span className="text-muted-foreground font-normal">(inherited)</span>}</Label>
+                                                    <Controller
+                                                        name="type"
+                                                        control={control}
+                                                        rules={{ required: "Type is required" }}
+                                                        render={({ field }) => (
+                                                            <Select
+                                                                onValueChange={(val) => {
+                                                                    field.onChange(val);
+                                                                    handleTypeChange(val);
+                                                                }}
+                                                                value={field.value}
+                                                                disabled={!!autoType}
+                                                            >
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue placeholder="Select type" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="ASSET">Asset</SelectItem>
+                                                                    <SelectItem value="LIABILITY">Liability</SelectItem>
+                                                                    <SelectItem value="EQUITY">Equity</SelectItem>
+                                                                    <SelectItem value="INCOME">Income</SelectItem>
+                                                                    <SelectItem value="EXPENSE">Expense</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        )}
+                                                    />
+                                                    {errors.type && <p className="text-sm text-destructive">{errors.type.message}</p>}
+                                                </div>
+                                            </div>
+
+                                            {typeConfig && (
+                                                <p className={`text-xs ${typeConfig.color} bg-muted/50 rounded-md px-3 py-2`}>
+                                                    {typeConfig.hint}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="grid gap-2">
-                                            <Label>Code</Label>
-                                            <Controller name="code" control={control} rules={{ required: "Code is required" }} render={({ field }) => <Input {...field} />} />
-                                            {errors.code && <p className="text-sm text-destructive">{errors.code.message}</p>}
-                                        </div>
-                                        <div className="grid gap-2">
-                                            <Label>Type</Label>
-                                            <Controller name="type" control={control} rules={{ required: "Type is required" }} render={({ field }) => (
-                                                <Select onValueChange={field.onChange} value={field.value}>
-                                                    <SelectTrigger className="w-full"><SelectValue placeholder="Select type" /></SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="ASSET">Asset</SelectItem>
-                                                        <SelectItem value="LIABILITY">Liability</SelectItem>
-                                                        <SelectItem value="EQUITY">Equity</SelectItem>
-                                                        <SelectItem value="INCOME">Income</SelectItem>
-                                                        <SelectItem value="EXPENSE">Expense</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            )} />
-                                            {errors.type && <p className="text-sm text-destructive">{errors.type.message}</p>}
-                                        </div>
 
-                                        {/* PARENT ACCOUNT */}
+                                    <Separator />
+
+                                    {/* ── Hierarchy ── */}
+                                    <div>
+                                        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Hierarchy</h4>
                                         <div className="grid gap-2">
-                                            <Label>Parent Account (Optional)</Label>
-                                            <ParentAccountSelect control={control} />
+                                            <Label>Parent Account</Label>
+                                            <NestedAccountSelect
+                                                value={watch("parent_id") ? Number(watch("parent_id")) : null}
+                                                onChange={handleParentSelect}
+                                                placeholder="Select parent account (leave empty for root)..."
+                                            />
+                                            <p className="text-xs text-muted-foreground">
+                                                Selecting a parent auto-fills code &amp; type. Root accounts use 1000/2000/3000/4000/5000 series.
+                                            </p>
                                         </div>
-
-
                                     </div>
-                                    <DialogFooter>
-                                        <Button type="button" variant="outline" onClick={() => { setIsOpen(false); setEditingAccount(null); }}>Cancel</Button>
-                                        <Button type="submit" disabled={isLoading}>{editingAccount ? "Update" : "Create"}</Button>
+
+                                    {/* ── Bank Account Section (conditional) ── */}
+                                    {isBankParent && !editingAccount && (
+                                        <>
+                                            <Separator />
+                                            <div className="rounded-lg border border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/30 p-4 space-y-3">
+                                                <h4 className="text-xs font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-400">
+                                                    Bank Account Details
+                                                </h4>
+                                                <p className="text-xs text-muted-foreground">
+                                                    This account will be under a bank group. You can register the bank account details from the <span className="font-medium">Bank Module</span> after creation.
+                                                </p>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <Separator />
+
+                                    {/* ── Additional Details ── */}
+                                    <div>
+                                        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Additional Details</h4>
+                                        <div className="grid gap-4">
+                                            <div className="grid gap-2">
+                                                <Label>Description</Label>
+                                                <Controller
+                                                    name="description"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <Textarea
+                                                            {...field}
+                                                            placeholder="Optional notes about this account..."
+                                                            rows={2}
+                                                        />
+                                                    )}
+                                                />
+                                            </div>
+                                            <div className="grid gap-2">
+                                                <Label>Status</Label>
+                                                <Controller
+                                                    name="is_active"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <Select
+                                                            onValueChange={(val) => field.onChange(val === "active")}
+                                                            value={field.value !== false ? "active" : "inactive"}
+                                                        >
+                                                            <SelectTrigger>
+                                                                <SelectValue />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="active">Active</SelectItem>
+                                                                <SelectItem value="inactive">Inactive</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    )}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <DialogFooter className="pt-2">
+                                        <Button type="button" variant="ghost" onClick={openNew}>
+                                            Reset
+                                        </Button>
+                                        <div className="flex-1" />
+                                        <Button type="button" variant="outline" onClick={() => { setIsOpen(false); setEditingAccount(null); }}>
+                                            Cancel
+                                        </Button>
+                                        <Button type="submit" disabled={isLoading}>
+                                            {isLoading ? "Saving..." : editingAccount ? "Update Account" : "Create Account"}
+                                        </Button>
                                     </DialogFooter>
                                 </form>
                             </DialogContent>

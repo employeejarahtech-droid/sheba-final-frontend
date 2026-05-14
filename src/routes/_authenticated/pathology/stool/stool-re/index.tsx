@@ -178,7 +178,7 @@ function StoolRe() {
 
   // Handle expand button clicks
   useEffect(() => {
-    const handleExpandClick = (e: Event) => {
+    const handleExpandClick = async (e: Event) => {
       const button = (e.target as HTMLElement).closest('.expand-btn');
       if (!button) return;
 
@@ -211,27 +211,194 @@ function StoolRe() {
       const reportId = btn.dataset.reportId || '';
 
       // Create details HTML
-      const details = document.createElement('ul');
-      details.className = 'grid grid-cols-2 gap-2 text-sm';
-      details.innerHTML = `
-        <li><strong>Invoice ID:</strong> ${invoiceId}</li>
-        <li><strong>Patient Name:</strong> ${patientName}</li>
-        <li><strong>Date:</strong> ${date}</li>
-        <li><strong>Test Result:</strong> ${testResult}</li>
-        <li><strong>Test Carried Out By:</strong> ${testCarriedOutBy}</li>
-        <li><strong>Status:</strong> ${status}</li>
-        <li class='col-span-2'><strong>Actions:</strong>
-          <a href="/pathology/stool/stool-re/edit/${reportId}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 mr-2">Edit</a>
-          <a href="/pathology/stool/stool-re/report/${reportId}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-info hover:bg-info-foreground h-8 px-3">View Report</a>
-        </li>
+      const details = document.createElement('div');
+      details.className = 'max-w-4xl mx-auto bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden';
+
+      // Format date for header
+      const formattedDate = date !== '-' ? date : '';
+
+      // Status badge
+      const statusBadge = status === 'passed'
+        ? '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Passed</span>'
+        : status === 'failed'
+          ? '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Failed</span>'
+          : '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Pending</span>';
+
+      // Build the HTML content
+      let htmlContent = `
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-stone-600 to-amber-700 text-white px-6 py-5">
+          <div class="flex justify-between items-center">
+            <div>
+              <h2 class="text-xl font-semibold">Stool R/E Report</h2>
+              <p class="text-sm opacity-90">Invoice #${invoiceId} • ${formattedDate}</p>
+            </div>
+            ${statusBadge}
+          </div>
+        </div>
+
+        <!-- Patient Info -->
+        <div class="p-6 border-b">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+            <div>
+              <p class="text-gray-500">Invoice ID</p>
+              <p class="font-semibold text-gray-800">${invoiceId}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Patient Name</p>
+              <p class="font-semibold text-gray-800">${patientName}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Date</p>
+              <p class="font-semibold text-gray-800">${formattedDate}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Department</p>
+              <p class="font-semibold text-gray-800">Stool Analysis</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Report Details Section -->
+        <div class="p-6">
+          <h3 class="text-lg font-semibold mb-4 text-gray-800">Test Results</h3>
+          <div id="report-results-${reportId}" class="space-y-4">
+            <div class="text-gray-500 text-sm">Loading report details...</div>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+          <a href="/pathology/stool/stool-re/report/${reportId}"
+             class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
+            View Report
+          </a>
+          <a href="/pathology/stool/stool-re/edit/${reportId}"
+             class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-stone-600 text-white hover:bg-stone-700 h-10 px-5 transition shadow-md">
+            Edit
+          </a>
+        </div>
       `;
+
+      details.innerHTML = htmlContent;
+
+      // Fetch report details
+      const resultsContainer = details.querySelector(`#report-results-${reportId}`);
+      if (resultsContainer) {
+        try {
+          const res = await fetch(
+            `${import.meta.env.VITE_API_URL}/api/stool-re/${reportId}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          if (res.ok) {
+            const data = await res.json();
+            const reportData = data.data;
+
+            // Build test results HTML with all Stool R/E sections
+            let testResultsHTML = `
+              <div class="border rounded-xl p-4 hover:shadow-md transition bg-gray-50">
+                <div class="flex justify-between items-center mb-3">
+                  <span class="text-sm font-semibold text-gray-700">Report ID: ${reportId}</span>
+                  <span class="text-xs px-3 py-1 rounded-full bg-stone-100 text-stone-700 font-medium">
+                    Stool R/E
+                  </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                  <!-- Physical Examination -->
+                  <div>
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2 bg-gray-100 px-2 py-1 rounded">PHYSICAL EXAMINATION</h4>
+                    <table class="w-full">
+                      <tbody>
+                        <tr class="border-b"><td class="px-2 py-1">Color</td><td class="px-2 py-1 font-medium">${reportData.color || reportData.colour || '-'}</td></tr>
+                        <tr class="border-b"><td class="px-2 py-1">Consistency</td><td class="px-2 py-1 font-medium">${reportData.consistency || '-'}</td></tr>
+                        <tr class="border-b"><td class="px-2 py-1">Mucous</td><td class="px-2 py-1 font-medium">${reportData.mucous || '-'}</td></tr>
+                        <tr class="border-b"><td class="px-2 py-1">Blood</td><td class="px-2 py-1 font-medium">${reportData.blood || reportData.occult_blood || '-'}</td></tr>
+                        <tr class="border-b"><td class="px-2 py-1">Helminths</td><td class="px-2 py-1 font-medium">${reportData.helminths || '-'}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- Chemical Examination -->
+                  <div>
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2 bg-gray-100 px-2 py-1 rounded">CHEMICAL EXAMINATION</h4>
+                    <table class="w-full">
+                      <tbody>
+                        <tr class="border-b"><td class="px-2 py-1">Reaction</td><td class="px-2 py-1 font-medium">${reportData.reaction || '-'}</td></tr>
+                        <tr class="border-b"><td class="px-2 py-1">Reducing Substance</td><td class="px-2 py-1 font-medium">${reportData.reducingSubstance || '-'}</td></tr>
+                        <tr class="border-b"><td class="px-2 py-1">Occult Blood</td><td class="px-2 py-1 font-medium">${reportData.occultBlood || '-'}</td></tr>
+                        <tr class="border-b"><td class="px-2 py-1">Bile Pigments</td><td class="px-2 py-1 font-medium">${reportData.bilePigments || '-'}</td></tr>
+                        <tr class="border-b"><td class="px-2 py-1">Bile Salts</td><td class="px-2 py-1 font-medium">${reportData.bileSalts || '-'}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- Microscopic Examination (Full Width) -->
+                  <div class="md:col-span-2">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2 bg-gray-100 px-2 py-1 rounded">MICROSCOPIC EXAMINATION</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                      <table class="w-full">
+                        <tbody>
+                          <tr class="border-b"><td class="px-2 py-1">Ova of</td><td class="px-2 py-1 font-medium">${reportData.ovaOf || '-'}</td></tr>
+                          <tr class="border-b"><td class="px-2 py-1">Cysts of</td><td class="px-2 py-1 font-medium">${reportData.cystsOf || '-'}</td></tr>
+                          <tr class="border-b"><td class="px-2 py-1">Larva of</td><td class="px-2 py-1 font-medium">${reportData.larvaOf || '-'}</td></tr>
+                          <tr class="border-b"><td class="px-2 py-1">Trophozoite of</td><td class="px-2 py-1 font-medium">${reportData.trophozoiteOf || '-'}</td></tr>
+                        </tbody>
+                      </table>
+                      <table class="w-full">
+                        <tbody>
+                          <tr class="border-b"><td class="px-2 py-1">Pus Cells</td><td class="px-2 py-1 font-medium">${reportData.pusCells || reportData.pus_cells || '-'}</td></tr>
+                          <tr class="border-b"><td class="px-2 py-1">Epithelial Cells</td><td class="px-2 py-1 font-medium">${reportData.epithelialCells || reportData.epithelium || '-'}</td></tr>
+                          <tr class="border-b"><td class="px-2 py-1">RBC</td><td class="px-2 py-1 font-medium">${reportData.rbc || '-'}</td></tr>
+                          <tr class="border-b"><td class="px-2 py-1">Macrophage</td><td class="px-2 py-1 font-medium">${reportData.macrophage || '-'}</td></tr>
+                        </tbody>
+                      </table>
+                      <table class="w-full">
+                        <tbody>
+                          <tr class="border-b"><td class="px-2 py-1">Vegetable Cells</td><td class="px-2 py-1 font-medium">${reportData.vegetableCells || '-'}</td></tr>
+                          <tr class="border-b"><td class="px-2 py-1">Undigested Food</td><td class="px-2 py-1 font-medium">${reportData.undigestedFood || '-'}</td></tr>
+                          <tr class="border-b"><td class="px-2 py-1">Fat Globules</td><td class="px-2 py-1 font-medium">${reportData.fatGlobules || '-'}</td></tr>
+                          <tr class="border-b"><td class="px-2 py-1">Others</td><td class="px-2 py-1 font-medium">${reportData.others || '-'}</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                ${reportData.remarks || reportData.comments ? `
+                  <div class="mt-4 pt-4 border-t text-sm">
+                    <span class="text-gray-500">Remarks:</span>
+                    <span class="font-medium text-gray-800 ml-2">${reportData.remarks || reportData.comments}</span>
+                  </div>
+                ` : ''}
+
+                ${reportData.test_carried_out_by ? `
+                  <div class="mt-4 pt-4 border-t text-sm">
+                    <span class="text-gray-500">Test Carried out by:</span>
+                    <span class="font-medium text-gray-800 ml-2">${reportData.test_carried_out_by}</span>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+
+            resultsContainer.innerHTML = testResultsHTML;
+          } else {
+            resultsContainer.innerHTML = '<div class="text-red-500 text-sm">Failed to load report details</div>';
+          }
+        } catch (error) {
+          resultsContainer.innerHTML = '<div class="text-red-500 text-sm">Failed to load report details</div>';
+        }
+      }
 
       // Create new row
       const newRow = document.createElement('tr');
       newRow.className = 'child-row-detail';
       const cell = document.createElement('td');
-      cell.className = 'p-4 bg-muted/50';
-      cell.colSpan = 9;
+      cell.className = 'p-4 bg-gray-50';
+      cell.colSpan = 10;
       cell.appendChild(details);
       newRow.appendChild(cell);
 
@@ -247,7 +414,7 @@ function StoolRe() {
     return () => {
       document.removeEventListener('click', handleExpandClick);
     };
-  }, []);
+  }, [token]);
 
   return (
     <>

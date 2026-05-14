@@ -3,9 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
 import { Main } from '@/components/layout/main'
 import { AppHeader } from '@/components/layout/app-header'
-
-
-
+import { PageHeader } from '@/components/layout/page-header'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -92,29 +90,20 @@ function TestDetails() {
             <AppHeader fixed />
 
             <Main>
-                <div className='mb-8 flex items-center justify-between'>
-                    <div className='space-y-1'>
-                        <div className='flex items-center gap-2'>
-                            <Button
-                                variant='ghost'
-                                size='icon'
-                                className='h-8 w-8'
-                                onClick={() => navigate({ to: '/outdoor/master/tests', search: { page: 1, limit: 10, search: '' } })}
-                            >
-                                <ArrowLeft className='h-4 w-4' />
+                <PageHeader
+                    title="Test Details"
+                    subtitle={`Viewing detailed information for ${test.name}`}
+                    backButton={{
+                        onClick: () => navigate({ to: '/outdoor/master/tests', search: { page: 1, limit: 10, search: '' } }),
+                    }}
+                    actions={
+                        <Link to='/outdoor/master/tests/edit/$id' params={{ id: String(test.id) }}>
+                            <Button>
+                                <Edit className='mr-2 h-4 w-4' /> Edit Test
                             </Button>
-                            <h1 className='text-3xl font-bold tracking-tight'>Test Details</h1>
-                        </div>
-                        <p className='text-muted-foreground ml-10'>
-                            Viewing detailed information for {test.name}
-                        </p>
-                    </div>
-                    <Link to='/outdoor/master/tests/edit/$id' params={{ id: String(test.id) }}>
-                        <Button>
-                            <Edit className='mr-2 h-4 w-4' /> Edit Test
-                        </Button>
-                    </Link>
-                </div>
+                        </Link>
+                    }
+                />
 
                 {/* Top Stats - Quick Glance */}
                 <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>

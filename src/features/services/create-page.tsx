@@ -42,6 +42,7 @@ const serviceSchema = z.object({
     status: z.enum(["Active", "Inactive"]).optional(),
 });
 
+
 type ServiceValues = z.infer<typeof serviceSchema>;
 
 export default function CreateServicePage() {
@@ -52,12 +53,14 @@ export default function CreateServicePage() {
     const form = useForm<ServiceValues>({
         resolver: zodResolver(serviceSchema),
         defaultValues: {
+            serviceCategoryId: "none",
             name: "",
             description: "",
             price: "",
             status: "Active",
         },
     });
+ 
 
     // Fetch service categories for dropdown
     const { data: categoriesData } = useQuery({
@@ -74,6 +77,7 @@ export default function CreateServicePage() {
         },
     });
 
+
     const categories = categoriesData?.data?.items || [];
 
     const createMutation = useMutation({
@@ -85,9 +89,11 @@ export default function CreateServicePage() {
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    ...data,
-                    serviceCategoryId: data.serviceCategoryId ? parseInt(data.serviceCategoryId) : null,
+                    name: data.name,
                     price: data.price ? parseFloat(data.price) : 0,
+                    description: data.description,
+                    status: data.status,
+                    service_category_id: data.serviceCategoryId || null
                 }),
             });
 
@@ -146,14 +152,17 @@ export default function CreateServicePage() {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Category</FormLabel>
-                                                <Select onValueChange={field.onChange} value={field.value}>
+                                                <Select
+                                                    onValueChange={field.onChange}
+                                                    value={field.value || "none"}
+                                                >
                                                     <FormControl>
                                                         <SelectTrigger>
                                                             <SelectValue placeholder="Select category (optional)" />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
-                                                        <SelectItem value="">No Category</SelectItem>
+                                                        <SelectItem value="none">No Category</SelectItem>
                                                         {categories.map((cat: any) => (
                                                             <SelectItem key={cat.id} value={cat.id.toString()}>
                                                                 {cat.name}

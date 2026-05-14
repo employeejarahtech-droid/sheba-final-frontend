@@ -44,10 +44,10 @@ function CreateInvoice() {
           {/* Header Section */}
           <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold ">
                 Create Outdoor Invoice
               </h1>
-              <p className="text-muted-foreground mt-2">Generate a new medical invoice for outpatient services</p>
+              <p className="">Generate a new medical invoice for outpatient services</p>
             </div>
             <div className="flex items-center gap-3">
               <Button

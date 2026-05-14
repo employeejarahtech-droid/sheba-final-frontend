@@ -92,7 +92,7 @@ export function PrefixForm() {
     });
 
     const form = useForm<PrefixFormValues>({
-        resolver: zodResolver(prefixFormSchema),
+        resolver: zodResolver(prefixFormSchema) as any,
         defaultValues,
     });
 
@@ -181,21 +181,24 @@ export function PrefixForm() {
 
                         <Badge variant="secondary" className="font-mono">{'{DD}'}</Badge>
                         <span className="text-muted-foreground text-xs">Day (01-31)</span>
+
+                        <Badge variant="secondary" className="font-mono">{'{ID}'}</Badge>
+                        <span className="text-muted-foreground text-xs">Invoice ID (36)</span>
                     </div>
                     <div className="mt-3 p-3 bg-white dark:bg-zinc-900 rounded-md border text-xs">
-                        <strong className="text-muted-foreground">Example:</strong> <code className="text-blue-600 dark:text-blue-400">INV-{'{year}{MM}'}-{'{0000}'}</code> → <span className="text-green-600 dark:text-green-400">INV-202601-0001</span>
+                        <strong className="text-muted-foreground">Example:</strong> <code className="text-blue-600 dark:text-blue-400">INV-{'{year}{MM}{DD}'}-{'{ID}'}</code> → <span className="text-green-600 dark:text-green-400">INV-20260228-36</span>
                     </div>
                 </CardContent>
             </Card>
 
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <form onSubmit={form.handleSubmit((data) => onSubmit(data)) as any} className="space-y-8">
 
-                    {/* Sales Documents */}
+                    {/* Outdoor Invoice */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Sales Documents</CardTitle>
-                            <CardDescription>Invoice and billing document formats</CardDescription>
+                            <CardTitle>Outdoor Invoice</CardTitle>
+                            <CardDescription>Outdoor invoice and billing document formats</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

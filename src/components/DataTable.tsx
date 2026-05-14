@@ -40,6 +40,7 @@ interface DataTableProps<TData> {
   onSearchChange?: (value: string) => void;
   isLoading?: boolean;
   filterSlot?: React.ReactNode;
+  tableTitle?: string;
 }
 
 export function DataTable<TData extends Record<string, any>>({
@@ -52,6 +53,7 @@ export function DataTable<TData extends Record<string, any>>({
   onSearchChange,
   isLoading,
   filterSlot,
+  tableTitle,
 }: DataTableProps<TData>) {
   const tableRef = useRef<HTMLTableElement>(null);
   const dataTableRef = useRef<any>(null);
@@ -121,7 +123,7 @@ export function DataTable<TData extends Record<string, any>>({
         defaultContent: _col.defaultContent || "",
         width: 'auto',
       })),
-      autoWidth: true,
+      autoWidth: false,
       pageLength: meta?.limit || 10,
       lengthMenu: [10, 25, 50, 100],
       searching: true,
@@ -238,6 +240,9 @@ export function DataTable<TData extends Record<string, any>>({
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
+          {tableTitle && (
+            <h2 className="text-xl font-bold tracking-tight whitespace-nowrap">{tableTitle}</h2>
+          )}
           {/* Search Input */}
           {onSearchChange && (
             <div className="relative w-64">

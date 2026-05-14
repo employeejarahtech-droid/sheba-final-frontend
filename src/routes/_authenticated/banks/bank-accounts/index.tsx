@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Building2, CreditCard, DollarSign, TrendingUp, Loader2 } from 'lucide-react';
-import { AddBankAccountModal } from './components/AddBankAccountModal';
+import { AddBankAccountModal } from '@/components/banks/AddBankAccountModal';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';

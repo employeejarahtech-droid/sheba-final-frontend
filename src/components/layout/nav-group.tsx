@@ -115,7 +115,7 @@ function SidebarMenuSimpleLink({
       >
         <Link to={item.url!} onClick={() => setOpenMobile(false)}>
           {item.icon && <item.icon />}
-          <span>{item.title}</span>
+          <span className={item.bold ? 'font-bold' : ''}>{item.title}</span>
           {item.badge && <NavBadge>{item.badge}</NavBadge>}
         </Link>
       </SidebarMenuButton>
@@ -153,7 +153,7 @@ function SidebarMenuRecursiveCollapsible({
         <CollapsibleTrigger asChild>
           <SidebarMenuButton tooltip={item.title}>
             {item.icon && <item.icon />}
-            <span>{item.title}</span>
+            <span className={item.bold ? 'font-bold' : ''}>{item.title}</span>
             {item.badge && <NavBadge>{item.badge}</NavBadge>}
             <ChevronRight
               className={`ms-auto transition-transform duration-200 ${
@@ -194,7 +194,7 @@ function NavItemRecursiveRenderer({
       <SidebarMenuSubButton asChild isActive={checkIsActive(href, item)}>
         <Link to={item.url!}>
           {item.icon && <item.icon />}
-          <span>{item.title}</span>
+          <span className={item.bold ? 'font-bold' : ''}>{item.title}</span>
         </Link>
       </SidebarMenuSubButton>
     )
@@ -231,7 +231,7 @@ function SidebarMenuCollapsedDropdown({
         </DropdownMenuTrigger>
 
         <DropdownMenuContent side="right" align="start" sideOffset={4}>
-          <DropdownMenuLabel>{item.title}</DropdownMenuLabel>
+          <DropdownMenuLabel className={item.bold ? 'font-bold' : ''}>{item.title}</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
           {item.items!.map((sub) => (
@@ -242,7 +242,7 @@ function SidebarMenuCollapsedDropdown({
             >
               <Link to={sub.url!}>
                 {sub.icon && <sub.icon />}
-                <span>{sub.title}</span>
+                <span className={sub.bold ? 'font-bold' : ''}>{sub.title}</span>
               </Link>
             </DropdownMenuItem>
           ))}

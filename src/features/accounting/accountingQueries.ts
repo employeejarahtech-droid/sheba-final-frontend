@@ -1,6 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { accountingService } from './accountingService';
+import type { CreditHead, DebitHead } from '@/types/accounting.types';
 
 export const ACCOUNTING_KEYS = {
     all: ['accounting'] as const,
@@ -21,6 +22,7 @@ export const ACCOUNTING_KEYS = {
     balanceSheet: () => [...ACCOUNTING_KEYS.all, 'balanceSheet'] as const,
     profitLoss: () => [...ACCOUNTING_KEYS.all, 'profitLoss'] as const,
     transactions: () => [...ACCOUNTING_KEYS.all, 'transactions'] as const,
+    nextCode: (parentId: number) => [...ACCOUNTING_KEYS.all, 'nextCode', parentId] as const,
 };
 
 export const useGetAccountingOverviewQuery = () => {
@@ -233,5 +235,56 @@ export const useGetExpenseHeadsQuery = (params?: { page?: number; limit?: number
     return useQuery({
         queryKey: [...ACCOUNTING_KEYS.expenseHeads(), params],
         queryFn: () => accountingService.getExpenseHeads(params),
+    });
+};
+
+// Update Credit Head
+export const useUpdateCreditHeadMutation = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, body }: { id: number; body: Partial<CreditHead> }) => accountingService.updateCreditHead(id, body),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ACCOUNTING_KEYS.incomeHeads() });
+            queryClient.invalidateQueries({ queryKey: ACCOUNTING_KEYS.accounts() });
+        },
+    });
+};
+
+// Get Single Credit Head
+export const useGetSingleCreditHeadQuery = (id: number, options?: { skip?: boolean }) => {
+    return useQuery({
+        queryKey: [...ACCOUNTING_KEYS.incomeHeads(), 'single', id],
+        queryFn: () => accountingService.getSingleCreditHead(id),
+        enabled: !options?.skip && !!id,
+    });
+};
+
+// Update Debit Head
+export const useUpdateDebitHeadMutation = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, body }: { id: number; body: Partial<DebitHead> }) => accountingService.updateDebitHead(id, body),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ACCOUNTING_KEYS.expenseHeads() });
+            queryClient.invalidateQueries({ queryKey: ACCOUNTING_KEYS.accounts() });
+        },
+    });
+};
+
+// Get Single Debit Head
+export const useGetSingleDebitHeadQuery = (id: number, options?: { skip?: boolean }) => {
+    return useQuery({
+        queryKey: [...ACCOUNTING_KEYS.expenseHeads(), 'single', id],
+        queryFn: () => accountingService.getSingleDebitHead(id),
+        enabled: !options?.skip && !!id,
+    });
+};
+
+// Get Next Account Code
+export const useGetNextAccountCodeQuery = (parentId: number | null) => {
+    return useQuery({
+        queryKey: ACCOUNTING_KEYS.nextCode(parentId!),
+        queryFn: () => accountingService.getNextAccountCode(parentId!),
+        enabled: !!parentId,
     });
 };

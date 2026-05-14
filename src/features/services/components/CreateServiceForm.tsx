@@ -52,6 +52,7 @@ export function CreateServiceForm() {
     const form = useForm<ServiceValues>({
         resolver: zodResolver(serviceSchema),
         defaultValues: {
+            serviceCategoryId: "none",
             name: "",
             description: "",
             price: "",
@@ -86,9 +87,11 @@ export function CreateServiceForm() {
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    ...data,
-                    serviceCategoryId: data.serviceCategoryId ? parseInt(data.serviceCategoryId) : null,
+                    name: data.name,
                     price: data.price ? parseFloat(data.price) : 0,
+                    description: data.description,
+                    status: data.status,
+                    service_category_id: (data.serviceCategoryId && data.serviceCategoryId !== "none") ? parseInt(data.serviceCategoryId) : null,
                 }),
             });
 
@@ -148,14 +151,17 @@ export function CreateServiceForm() {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Category</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            value={field.value || "none"}
+                                        >
                                             <FormControl>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Select category (optional)" />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="">No Category</SelectItem>
+                                                <SelectItem value="none">No Category</SelectItem>
                                                 {categories.map((cat: any) => (
                                                     <SelectItem key={cat.id} value={cat.id.toString()}>
                                                         {cat.name}
@@ -216,7 +222,7 @@ export function CreateServiceForm() {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Status</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <Select onValueChange={field.onChange} value={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Select status" />

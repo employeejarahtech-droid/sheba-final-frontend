@@ -5,11 +5,12 @@ import { AppHeader } from '@/components/layout/app-header'
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
-import { useMemo, useEffect } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
-import { Link, useSearch, useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { FlaskConical, CheckCircle, FolderTree, DollarSign } from 'lucide-react'
+import { useCurrency } from '@/hooks/use-currency'
 
 type TestItem = {
     id: number
@@ -33,33 +34,10 @@ type TestItem = {
 };
 
 export default function ListOfTests() {
-    const searchParams: any = useSearch({ strict: false });
-    const navigate = useNavigate();
-
-    const page = Number(searchParams?.page) || 1;
-    const limit = Number(searchParams?.limit) || 10;
-    const search = searchParams?.search || "";
-
-    const setPage = (newPage: number) => {
-        (navigate as any)({
-            to: '.',
-            search: (prev: any) => ({ ...prev, page: newPage }),
-        });
-    };
-
-    const setLimit = (newLimit: number) => {
-        (navigate as any)({
-            to: '.',
-            search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }),
-        });
-    };
-
-    const setSearch = (newSearch: string) => {
-        (navigate as any)({
-            to: '.',
-            search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }),
-        });
-    };
+    const { currencySymbol } = useCurrency();
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(10);
+    const [search, setSearch] = useState("");
 
     const token = getCookie('accessToken');
 
@@ -107,14 +85,14 @@ export default function ListOfTests() {
             },
             {
                 label: "Avg Price",
-                value: totalTests > 0 ? `৳${(totalRevenue / totalTests).toFixed(0)}` : '৳0',
+                value: totalTests > 0 ? `${currencySymbol}${(totalRevenue / totalTests).toFixed(0)}` : `${currencySymbol}0`,
                 gradient: "from-emerald-600 to-emerald-400",
                 shadow: "shadow-emerald-500/30",
                 icon: <CheckCircle className="w-6 h-6 text-white" />,
             },
             {
                 label: "Total Revenue",
-                value: `৳${totalRevenue.toLocaleString()}`,
+                value: `${currencySymbol}${totalRevenue.toLocaleString()}`,
                 gradient: "from-amber-600 to-amber-400",
                 shadow: "shadow-amber-500/30",
                 icon: <DollarSign className="w-6 h-6 text-white" />,
@@ -155,21 +133,73 @@ export default function ListOfTests() {
             const price = btn.dataset.price || '0';
             const createdBy = btn.dataset.createdBy || '-';
             const id = btn.dataset.id || '';
+            const currency = btn.dataset.currency || '$';
 
-            // Create details HTML
-            const details = document.createElement('ul');
-            details.className = 'grid grid-cols-2 gap-2 text-sm';
-            details.innerHTML = `
-                <li><strong>Test Name:</strong> ${name}</li>
-                <li><strong>Match Table:</strong> ${tableName}</li>
-                <li><strong>Category:</strong> ${category}</li>
-                <li><strong>Department:</strong> ${department}</li>
-                <li><strong>Price:</strong> ৳${price}</li>
-                <li><strong>Created By:</strong> ${createdBy}</li>
-                <li class='col-span-2'><strong>Actions:</strong>
-                    <a href='/outdoor/master/tests/${id}' class='inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2 mr-2'>View</a>
-                    <a href='/outdoor/master/tests/edit/${id}' class='inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2'>Edit</a>
-                </li>
+            // Create card HTML
+            const cardContainer = document.createElement('div');
+            cardContainer.className = 'max-w-3xl mx-auto my-4';
+            cardContainer.innerHTML = `
+                <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                        <h2 class="text-lg font-semibold text-white">Test Information</h2>
+                        <p class="text-blue-100 text-sm">Detailed overview of selected test</p>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="p-6">
+                        <ul class="grid md:grid-cols-2 gap-6 text-sm">
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Test Name</span>
+                                <span class="font-semibold text-gray-800 text-base">${name}</span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Match Table</span>
+                                <span class="font-medium text-gray-700">${tableName}</span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Category</span>
+                                <span class="px-3 py-1 w-fit text-xs font-semibold rounded-full bg-purple-100 text-purple-700">
+                                    ${category}
+                                </span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Department</span>
+                                <span class="px-3 py-1 w-fit text-xs font-semibold rounded-full bg-green-100 text-green-700">
+                                    ${department}
+                                </span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Price</span>
+                                <span class="font-bold text-lg text-blue-600">${currency}${price}</span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Created By</span>
+                                <span class="font-medium text-gray-700">${createdBy}</span>
+                            </li>
+
+                        </ul>
+
+                        <!-- Actions -->
+                        <div class="mt-8 flex justify-end gap-3 border-t pt-5">
+                            <a href="/outdoor/master/tests/${id}"
+                               class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 transition h-10 px-5">
+                                View
+                            </a>
+
+                            <a href="/outdoor/master/tests/edit/${id}"
+                               class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition h-10 px-5 shadow">
+                                Edit
+                            </a>
+                        </div>
+                    </div>
+                </div>
             `;
 
             // Create new row
@@ -178,7 +208,7 @@ export default function ListOfTests() {
             const cell = document.createElement('td');
             cell.className = 'p-4 bg-muted/50';
             cell.colSpan = 10;
-            cell.appendChild(details);
+            cell.appendChild(cardContainer);
             newRow.appendChild(cell);
 
             row.parentNode?.insertBefore(newRow, row.nextSibling);
@@ -193,7 +223,7 @@ export default function ListOfTests() {
         return () => {
             document.removeEventListener('click', handleExpandClick);
         };
-    }, []);
+    }, [currencySymbol]);
 
     //console.log(data);
 
@@ -218,6 +248,7 @@ export default function ListOfTests() {
                                 data-category="${category.replace(/"/g, '&quot;')}"
                                 data-department="${department.replace(/"/g, '&quot;')}"
                                 data-price="${Number(row.price || 0).toFixed(2)}"
+                                data-currency="${currencySymbol}"
                                 data-created-by="${(row.creator?.name || '-').replace(/"/g, '&quot;')}"
                                 data-id="${row.id}">+</button>
                         <span>${sl}</span>
@@ -266,7 +297,7 @@ export default function ListOfTests() {
         },
         {
             data: "price",
-            title: "Price (BDT)",
+            title: `Price (${currencySymbol})`,
             orderable: true,
             responsivePriority: 2,
             render: (data: any) => {
@@ -304,13 +335,13 @@ export default function ListOfTests() {
             },
             defaultContent: "",
         },
-    ], [page, limit]);
+    ], [page, limit, currencySymbol]);
 
     return <>
         <AppHeader fixed />
 
-        <main className='p-6 lg:p-10'>
-            <div className="flex flex-wrap items-end justify-between gap-2 mb-6">
+        <main className='p-4'>
+            <div className="flex flex-wrap items-end justify-between gap-2 mb-3">
                 <h1 className="text-2xl font-bold tracking-tight">List of Tests</h1>
                 <Link to="/outdoor/master/tests/create"><Button>Create New Test</Button></Link>
                 {/* <CreateTestForm /> */}
@@ -351,16 +382,16 @@ export default function ListOfTests() {
                 columns={columns}
                 data={data?.data?.items || []}
                 meta={data?.data?.meta}
-                onPageChange={(newPage) => setPage(newPage)}
+                onPageChange={setPage}
                 onLimitChange={(newLimit) => {
                     setLimit(newLimit);
-                    setPage(1); // reset page when changing page size
+                    setPage(1);
                 }}
                 search={search}
                 isLoading={isFetching}
                 onSearchChange={(value) => {
                     setSearch(value);
-                    setPage(1); // reset page when searching
+                    setPage(1);
                 }}
             />
         </main>

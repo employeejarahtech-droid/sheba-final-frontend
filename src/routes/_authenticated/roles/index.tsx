@@ -1,8 +1,7 @@
 
 import { DataTable } from '@/components/DataTable'
 import { AppHeader } from '@/components/layout/app-header'
-
-
+import { PageHeader } from '@/components/layout/page-header'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createFileRoute } from '@tanstack/react-router'
@@ -68,11 +67,6 @@ function ListOfRoles() {
 
   const columns = [
     {
-      data: 'id',
-      title: 'ID',
-      className: 'font-mono text-sm',
-    },
-    {
       data: 'role',
       title: 'Role',
       className: 'font-medium',
@@ -120,14 +114,12 @@ function ListOfRoles() {
     <>
       <AppHeader fixed />
 
-      <main className="p-6 lg:p-10 space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">System Roles</h1>
-            <p className="text-muted-foreground">Manage user roles and their associated permissions.</p>
-          </div>
-          <AddNewRoleForm open={open} setOpen={setOpen} />
-        </div>
+      <main className="p-4 space-y-6">
+        <PageHeader
+          title="System Roles"
+          description="Manage user roles and their associated permissions."
+          actions={<AddNewRoleForm open={open} setOpen={setOpen} />}
+        />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -154,11 +146,8 @@ function ListOfRoles() {
           ))}
         </div>
 
-        <Card className="border-none shadow-md overflow-hidden">
-          <CardHeader className="bg-muted/50 border-b">
-            <CardTitle>Available Roles</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
+          
+          <div className="pt-6">
             <DataTable
               columns={columns}
               data={roles}
@@ -172,8 +161,7 @@ function ListOfRoles() {
               onSearchChange={setSearch}
             //isFetching={isFetching}
             />
-          </CardContent>
-        </Card>
+          </div>
       </main>
     </>
   )

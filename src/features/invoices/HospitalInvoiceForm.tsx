@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { CalendarIcon, Check, ChevronDown, Trash2Icon, CircleCheck, PenLine, User, Activity, Clock } from "lucide-react";
+import { CalendarIcon, Check, ChevronDown, Trash2Icon, CircleCheck, PenLine, User, Activity, Clock, FlaskConical } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getCookie } from "@/lib/cookies";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -92,6 +92,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
 const formSchema = z.object({
+  invoice_prefix: z.string().optional(),
   patientName: z.string().min(1, "Patient name is required"),
   sex: z.string().min(1, "Sex is required"),
   ageValue: z.string().min(1, "Age is required"),
@@ -113,6 +114,33 @@ const formSchema = z.object({
   bedCabinNumber: z.string().optional(),
 });
 
+type AdmissionItem = {
+  id: number
+  patient_name: string
+  age: number
+  sex: string
+  phone: string
+  admission_date: string
+  status: string
+  bedCabin?: {
+    id: number
+    code: string
+    type: string
+    ward: string
+  }
+}
+
+type AdmissionResponse = {
+  data: {
+    items: AdmissionItem[]
+    meta: {
+      total: number
+      page: number
+      limit: number
+    }
+  }
+}
+
 export default function HospitalInvoiceForm() {
   //const [deliveryDate, setDeliveryDate] = useState(new Date());
   // const [open, setOpen] = useState(false)
@@ -122,7 +150,12 @@ export default function HospitalInvoiceForm() {
   const [deptPayments, setDeptPayments] = useState<Record<string, number>>({});
   const [useDeptDiscount, setUseDeptDiscount] = useState(true);
   const [doctorOpen, setDoctorOpen] = useState(false);
+  const [admissionOpen, setAdmissionOpen] = useState(false);
+  const [admissionSearch, setAdmissionSearch] = useState("");
+  const [selectedAdmission, setSelectedAdmission] = useState<AdmissionItem | null>(null);
+  const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [page] = useState(1);
   const [search, setSearch] = useState("");
@@ -192,6 +225,55 @@ export default function HospitalInvoiceForm() {
     enabled: !!token,
   });
 
+  const { data: admissionsData } = useQuery<AdmissionResponse>({
+    queryKey: ["admissions", "active"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/admission?status=active&limit=100`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch admissions");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+
+  type SampleCollectionRoomItem = {
+    id: number;
+    name: string;
+    location: string;
+    notes?: string;
+    status: 'active' | 'inactive';
+  }
+
+  type SampleCollectionRoomsResponse = {
+    items: SampleCollectionRoomItem[]
+    meta: {
+      page: number
+      total: number
+      limit: number
+    }
+  }
+
+  const { data: roomsData } = useQuery<SampleCollectionRoomsResponse>({
+    queryKey: ["sample-collection-rooms"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/sample-collection-rooms?limit=100`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch sample collection rooms");
+      const result = await res.json();
+      // Return the data part directly
+      return result.data || { items: [], meta: { page: 1, total: 0, limit: 100 } };
+    },
+    enabled: !!token,
+  });
+
   const departmentWiseTests = useMemo(() => {
     const groups: Record<string, { total: number; tests: TestItem[]; departmentId: number | null }> = {};
     const categories = categoriesData?.data?.items || [];
@@ -253,7 +335,38 @@ export default function HospitalInvoiceForm() {
     });
   };
 
+  const handleSelectAdmission = async (admissionId: number) => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/admission/${admissionId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch admission details");
+      const result = await res.json();
+      const admission = result.data;
 
+      setSelectedAdmission(admission);
+
+      // Auto-fill patient details
+      setValue('patientName', admission.patient_name || '');
+      setValue('sex', admission.sex || '');
+      setValue('ageValue', admission.age?.toString() || '');
+      setValue('phone', admission.phone || '');
+      setValue('admissionNumber', admission.id?.toString() || '');
+
+      // Set bed/cabin number if available
+      if (admission.bedCabin) {
+        setValue('bedCabinNumber', `${admission.bedCabin.code} (${admission.bedCabin.type})` || '');
+      }
+
+      setAdmissionOpen(false);
+    } catch (error) {
+      console.error('Error fetching admission details:', error);
+      toast.error('Failed to load admission details');
+    }
+  };
 
   console.log('selectedTests', selectedTests);
 
@@ -265,6 +378,7 @@ export default function HospitalInvoiceForm() {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      invoice_prefix: "",
       patientName: "",
       sex: "",
       ageValue: "",
@@ -287,7 +401,27 @@ export default function HospitalInvoiceForm() {
     },
   });
 
-  const { watch, setValue, formState: { errors } } = form;
+  const { watch, setValue } = form;
+
+  // Fetch app settings for invoice prefix
+  const { data: appSettings } = useQuery({
+    queryKey: ["app-settings"],
+    queryFn: async () => {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/app-settings`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch app settings");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+
+  // Set default invoice prefix from app settings
+  useEffect(() => {
+    if (appSettings?.data?.invoicePrefix) {
+      setValue("invoice_prefix", appSettings.data.invoicePrefix);
+    }
+  }, [appSettings, setValue]);
 
   // Log on component mount
   useEffect(() => {
@@ -346,6 +480,8 @@ export default function HospitalInvoiceForm() {
     const previewPayload = {
       patient_name: watch('patientName') || '',
       sex: watch('sex') || '',
+      age: Number(watch('ageValue')) || null,
+      age_text: watch('ageUnit') === 'Y' ? 'years' : watch('ageUnit') === 'M' ? 'months' : null,
       phone: watch('phone') || '',
       invoice_date: watch('date') || '',
       delivery_date: watch('deliveryDate') || null,
@@ -497,6 +633,8 @@ export default function HospitalInvoiceForm() {
   }, [
     watch('patientName'),
     watch('sex'),
+    watch('ageValue'),
+    watch('ageUnit'),
     watch('phone'),
     watch('date'),
     watch('deliveryDate'),
@@ -544,6 +682,8 @@ export default function HospitalInvoiceForm() {
     const {
       patientName,
       sex,
+      ageValue,
+      ageUnit,
       phone,
       date,
       ref_doctor,
@@ -558,8 +698,11 @@ export default function HospitalInvoiceForm() {
 
     const payload = {
       // Main Invoice Data → outdoor_invoice table
+      invoice_prefix: data.invoice_prefix || null,
       patient_name: patientName,
       sex,
+      age: Number(ageValue) || null, // Age in numeric format (e.g., 25, 5)
+      age_text: ageUnit === 'Y' ? 'years' : ageUnit === 'M' ? 'months' : null, // Age unit only (e.g., "years", "months")
       phone,
       invoice_date: date,
       delivery_date: deliveryDate || null,
@@ -572,6 +715,9 @@ export default function HospitalInvoiceForm() {
       is_indoor_patient: watch('isIndoorPatient') || false,
       admission_number: watch('isIndoorPatient') ? (watch('admissionNumber') || null) : null,
       bed_cabin_number: watch('isIndoorPatient') ? (watch('bedCabinNumber') || null) : null,
+
+      // Sample Collection Rooms
+      sample_collection_rooms: selectedRooms,
 
       // Selected Tests → outdoor_invoice_items table
       // Backend will auto-create outdoor_invoice_department_wise_bills from this
@@ -641,6 +787,8 @@ export default function HospitalInvoiceForm() {
     console.log('═══════════════════════════════════════════════════════════════');
     console.log('📋 Main Invoice (outdoor_invoice):');
     console.log('  - patient_name:', payload.patient_name);
+    console.log('  - sex:', payload.sex);
+    console.log('  - age:', payload.age, payload.age_text ? `(${payload.age_text})` : '');
     console.log('  - phone:', payload.phone);
     console.log('  - invoice_date:', payload.invoice_date);
     console.log('  - delivery_date:', payload.delivery_date || 'Not set');
@@ -690,6 +838,16 @@ export default function HospitalInvoiceForm() {
         setSelectedTests([]);
         setDeptDiscounts({});
         setUseDeptDiscount(false);
+        setSelectedRooms([]);
+
+        // Invalidate all invoice queries to force refetch
+        queryClient.invalidateQueries({
+          predicate: (query) => {
+            // Invalidate any query that starts with "invoices"
+            return query.queryKey[0] === "invoices";
+          },
+        });
+
         navigate({ to: "/outdoor/reception/invoices/list" });
       },
       onError: (error) => {
@@ -720,6 +878,31 @@ export default function HospitalInvoiceForm() {
             </CardHeader>
             <CardContent className="px-4 md:px-6 py-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
+                {/* Invoice Prefix - Auto-generated */}
+                <FormField
+                  control={form.control}
+                  name="invoice_prefix"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col gap-2">
+                      <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Invoice Prefix
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Auto-generated from settings"
+                          disabled
+                          className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                          {...field}
+                        />
+                      </FormControl>
+                      <p className="text-xs text-muted-foreground">
+                        Auto-generated from settings (e.g., INV-0001, INV-0002)
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 {/* Patient Name */}
                 <FormField
                   control={form.control}
@@ -999,29 +1182,117 @@ export default function HospitalInvoiceForm() {
                   </div>
                 </FormItem>
 
-                {/* Admission Number */}
-                <FormField
-                  control={form.control}
-                  name="admissionNumber"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col gap-2">
-                      <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        Admission Number
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter admission number"
-                          disabled={!watch('isIndoorPatient')}
-                          className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-purple-500/20 focus-visible:border-purple-500/50 transition-all shadow-sm disabled:opacity-50"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Admission Number - Searchable Dropdown */}
+                <FormItem className="flex flex-col gap-2">
+                  <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Select Admission
+                  </FormLabel>
+                  <div className="relative">
+                    <Popover
+                      open={admissionOpen}
+                      onOpenChange={(open) => {
+                        setAdmissionOpen(open);
+                        if (!open) setAdmissionSearch(''); // Reset search when closing
+                      }}
+                    >
+                      <PopoverTrigger asChild disabled={!watch('isIndoorPatient')}>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={admissionOpen}
+                          className={cn(
+                            "w-full justify-between h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-purple-500/20 focus:border-purple-500/50 transition-all shadow-sm disabled:opacity-50",
+                            !selectedAdmission && "text-muted-foreground"
+                          )}
+                        >
+                          {selectedAdmission
+                            ? `#${selectedAdmission.id} - ${selectedAdmission.patient_name}`
+                            : "Search and select admission..."}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0" align="start">
+                        <Command
+                          filter={(_value: string, _search: string) => {
+                            // Always return 1 to match everything - manual filtering is done in the map
+                            return 1;
+                          }}
+                        >
+                          <div className="flex items-center border-b px-3">
+                            <User className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                            <CommandInput
+                              placeholder="Search admissions..."
+                              onValueChange={setAdmissionSearch}
+                              className="border-0 focus:ring-0 py-3"
+                            />
+                          </div>
+                          <CommandList>
+                            <CommandEmpty>
+                              {admissionSearch
+                                ? "No admissions found."
+                                : "No active admissions."}
+                            </CommandEmpty>
+                            <CommandGroup>
+                              {admissionsData?.data?.items
+                                ?.filter((admission) => {
+                                  if (!admissionSearch) return true;
+                                  const searchLower = admissionSearch.toLowerCase();
+                                  return (
+                                    admission.patient_name?.toLowerCase().includes(searchLower) ||
+                                    admission.id?.toString().includes(searchLower)
+                                  );
+                                })
+                                .map((admission) => (
+                                  <CommandItem
+                                    key={admission.id}
+                                    value={admission.id.toString()}
+                                    onSelect={() => {
+                                      handleSelectAdmission(admission.id);
+                                      setAdmissionSearch(''); // Reset search after selection
+                                    }}
+                                    className="cursor-pointer"
+                                  >
+                                    <div className="flex items-center gap-2 w-full">
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-semibold">#{admission.id}</span>
+                                          <span className="font-medium">{admission.patient_name}</span>
+                                        </div>
+                                        <div className="text-xs text-muted-foreground flex items-center gap-2">
+                                          <span>{admission.age}Y</span>
+                                          <span>•</span>
+                                          <span>{admission.sex}</span>
+                                          {admission.bedCabin && (
+                                            <>
+                                              <span>•</span>
+                                              <span>{admission.bedCabin.code}</span>
+                                            </>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <CircleCheck className={cn(
+                                        "mr-2 h-4 w-4",
+                                        selectedAdmission?.id === admission.id
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )} />
+                                    </div>
+                                  </CommandItem>
+                                ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <Input
+                      type="hidden"
+                      {...form.register("admissionNumber")}
+                    />
+                  </div>
+                  <FormMessage />
+                </FormItem>
 
-                {/* Bed/Cabin Number */}
+                {/* Bed/Cabin Number - Auto-filled from admission */}
                 <FormField
                   control={form.control}
                   name="bedCabinNumber"
@@ -1032,12 +1303,15 @@ export default function HospitalInvoiceForm() {
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter bed/cabin number"
-                          disabled={!watch('isIndoorPatient')}
-                          className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-purple-500/20 focus-visible:border-purple-500/50 transition-all shadow-sm disabled:opacity-50"
+                          placeholder="Auto-filled from admission"
+                          disabled={true}
+                          className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400"
                           {...field}
                         />
                       </FormControl>
+                      <p className="text-xs text-muted-foreground">
+                        Auto-populated when admission is selected
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -1046,6 +1320,7 @@ export default function HospitalInvoiceForm() {
             </CardContent>
           </Card>
 
+       
           {/* Test Info Card */}
           <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
             <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b-1 dark:border-gray-800 py-2 gap-0">
@@ -1203,6 +1478,92 @@ export default function HospitalInvoiceForm() {
                   )}
                 </table>
               </div>
+            </CardContent>
+          </Card>
+
+   {/* Sample Collection Rooms Card */}
+          <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b-1 dark:border-gray-800 py-2 gap-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-sm">
+                  <FlaskConical className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-base font-semibold">Sample Collection Rooms</CardTitle>
+                  <CardDescription className="text-xs mt-0.5">
+                    Select rooms for sample collection
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 md:p-6">
+              {roomsData?.items && roomsData.items.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {roomsData.items
+                      .filter((room) => room.status === 'active')
+                      .map((room) => {
+                        const roomId = String(room.id);
+                        const isSelected = selectedRooms.includes(roomId);
+                        return (
+                          <div
+                            key={room.id}
+                            className={cn(
+                              "relative flex items-start gap-3 p-4 rounded-lg border-2 transition-all hover:shadow-md",
+                              isSelected
+                                ? "bg-blue-50 dark:bg-blue-950/30 border-blue-500 dark:border-blue-600"
+                                : "bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-700"
+                            )}
+                          >
+                            <Checkbox
+                              id={`room-${room.id}`}
+                              checked={isSelected}
+                              onCheckedChange={(checked) => {
+                                if (typeof checked === 'boolean') {
+                                  setSelectedRooms((prev) =>
+                                    checked
+                                      ? [...prev, roomId]
+                                      : prev.filter((r) => r !== roomId)
+                                  );
+                                }
+                              }}
+                              className="mt-0.5 border-gray-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                            />
+                            <label
+                              htmlFor={`room-${room.id}`}
+                              className="flex-1 cursor-pointer"
+                            >
+                              <div className="flex items-center justify-between">
+                                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                  {room.name}
+                                </h4>
+                                {isSelected && (
+                                  <Check className="h-4 w-4 text-blue-600" />
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">{room.location}</p>
+                              {room.notes && (
+                                <p className="text-xs text-muted-foreground mt-1 italic">{room.notes}</p>
+                              )}
+                            </label>
+                          </div>
+                        );
+                      })}
+                  </div>
+                  {selectedRooms.length > 0 && (
+                    <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                        {selectedRooms.length} room{selectedRooms.length > 1 ? 's' : ''} selected for sample collection
+                      </p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FlaskConical className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No sample collection rooms available</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -1453,6 +1814,7 @@ export default function HospitalInvoiceForm() {
                     setSelectedTests([]);
                     setDeptDiscounts({});
                     setDeptPayments({});
+                    setSelectedRooms([]);
                   }}
                 >
                   Clear Form

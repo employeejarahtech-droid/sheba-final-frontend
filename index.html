@@ -28,39 +28,50 @@
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Primary Meta Tags -->
-    <title>HMS</title>
-    <meta name="title" content="Shadcn Admin" />
+    <!-- Primary Meta Tags - Will be updated by app settings -->
+    <title id="page-title">SHEBA CLINIC</title>
+    <meta name="title" id="meta-title" content="Sheba Clinic - Hospital Management System" />
     <meta
       name="description"
-      content="Admin Dashboard UI built with Shadcn and Vite."
+      id="meta-description"
+      content="Sheba Clinic Hospital Management System - Comprehensive healthcare management solution"
     />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://shadcn-admin.netlify.app" />
-    <meta property="og:title" content="Shadcn Admin" />
+    <meta property="og:url" id="og-url" content="" />
+    <meta property="og:title" id="og-title" content="Sheba Clinic" />
     <meta
       property="og:description"
-      content="Admin Dashboard UI built with Shadcn and Vite."
+      id="og-description"
+      content="Sheba Clinic Hospital Management System"
     />
     <meta
       property="og:image"
-      content="https://shadcn-admin.netlify.app/images/shadcn-admin.png"
+      id="og-image"
+      content="/images/og-image.png"
     />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://shadcn-admin.netlify.app" />
-    <meta property="twitter:title" content="Shadcn Admin" />
+    <meta property="twitter:url" id="twitter-url" content="" />
+    <meta property="twitter:title" id="twitter-title" content="Sheba Clinic" />
     <meta
       property="twitter:description"
-      content="Admin Dashboard UI built with Shadcn and Vite."
+      id="twitter-description"
+      content="Sheba Clinic Hospital Management System"
     />
     <meta
       property="twitter:image"
-      content="https://shadcn-admin.netlify.app/images/shadcn-admin.png"
+      id="twitter-image"
+      content="/images/twitter-image.png"
     />
+
+    <!-- Additional Meta Tags -->
+    <meta name="application-name" id="app-name" content="Sheba Clinic" />
+    <meta name="generator" content="Sheba HMS v1.0" />
+    <meta name="keywords" id="meta-keywords" content="hospital, clinic, management, healthcare, medical" />
+    <meta name="author" content="Sheba Clinic" />
 
     <!-- font family -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -70,7 +81,96 @@
       rel="stylesheet"
     />
 
-    <meta name="theme-color" content="#fff" />
+    <meta name="theme-color" id="theme-color" content="#fff" />
+
+    <!-- App Settings Script -->
+    <script>
+      (function() {
+        // Default settings - used as fallback if API is unavailable
+        const defaultSettings = {
+          app_name: 'Sheba Clinic',
+          hospital_name: 'Sheba Clinic',
+          description: 'Sheba Clinic Hospital Management System - Comprehensive healthcare management solution',
+          version: '1.0.0',
+          theme_color: '#ffffff',
+          timezone: 'Asia/Dhaka',
+          language: 'en'
+        };
+
+        // Get API URL from environment or use default
+        const apiBaseUrl = window.location.hostname === 'localhost'
+          ? 'http://localhost:5000'
+          : 'https://apihms.jarahtech.com';
+
+        // Function to update DOM with app settings
+        function updateAppSettings(settings) {
+          const appName = settings.app_name || settings.hospital_name || defaultSettings.app_name;
+          const description = settings.description || defaultSettings.description;
+          const themeColor = settings.theme_color || defaultSettings.theme_color;
+
+          // Update page title
+          document.title = appName;
+
+          // Update meta tags
+          const metaTitle = document.getElementById('meta-title');
+          if (metaTitle) metaTitle.content = appName;
+
+          const metaDescription = document.getElementById('meta-description');
+          if (metaDescription) metaDescription.content = description;
+
+          const appNameMeta = document.getElementById('app-name');
+          if (appNameMeta) appNameMeta.content = appName;
+
+          // Update Open Graph tags
+          const ogTitle = document.getElementById('og-title');
+          if (ogTitle) ogTitle.content = appName;
+
+          const ogDescription = document.getElementById('og-description');
+          if (ogDescription) ogDescription.content = description;
+
+          const ogUrl = document.getElementById('og-url');
+          if (ogUrl) ogUrl.content = window.location.href;
+
+          // Update Twitter tags
+          const twitterTitle = document.getElementById('twitter-title');
+          if (twitterTitle) twitterTitle.content = appName;
+
+          const twitterDescription = document.getElementById('twitter-description');
+          if (twitterDescription) twitterDescription.content = description;
+
+          const twitterUrl = document.getElementById('twitter-url');
+          if (twitterUrl) twitterUrl.content = window.location.href;
+
+          // Update theme color
+          const themeColorMeta = document.getElementById('theme-color');
+          if (themeColorMeta) themeColorMeta.content = themeColor;
+
+          // Store settings in window for React app to access
+          window.__APP_SETTINGS__ = settings;
+        }
+
+        // Fetch app settings from public API
+        fetch(`${apiBaseUrl}/api/public/app-settings`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch app settings');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data && data.data) {
+              updateAppSettings(data.data);
+            } else {
+              updateAppSettings(defaultSettings);
+            }
+          })
+          .catch(error => {
+            console.warn('Could not load app settings from API, using defaults:', error.message);
+            // Use default settings if API is unavailable
+            updateAppSettings(defaultSettings);
+          });
+      })();
+    </script>
   </head>
 
   <body>

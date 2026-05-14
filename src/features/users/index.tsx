@@ -1,9 +1,6 @@
-import { ConfigDrawer } from '@/components/config-drawer'
 import { DataTable } from '@/components/DataTable'
-import { Header } from '@/components/layout/header'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
+import { AppHeader } from '@/components/layout/app-header'
+import { PageHeader } from '@/components/layout/page-header'
 import { UsersDialogs } from './components/users-dialogs'
 import { UsersPrimaryButtons } from './components/users-primary-buttons'
 import { UsersProvider, useUsers } from './components/users-provider'
@@ -17,7 +14,7 @@ import { useState, useMemo, useEffect } from 'react'
 function UsersContent() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
-  const limit = 10
+  const [limit, setLimit] = useState(10)
   const { setOpen, setCurrentRow } = useUsers() // Now inside provider context
 
   // Fetch users from API
@@ -88,26 +85,36 @@ function UsersContent() {
     },
   ], [totalUsers])
 
-  // Define columns for jQuery DataTable format
+  // Define columns for DataTable format
   const columns = useMemo(() => [
     {
-      data: 'id',
-      title: 'ID',
-      className: 'font-mono text-sm',
+      data: 'avatar',
+      title: 'Avatar',
+      className: 'text-sm',
+      responsivePriority: 2,
+      orderable: false,
+      render: (data: any) => {
+        if (!data) return `<span class="text-sm text-muted-foreground">-</span>`
+        const url = data.startsWith('http') ? data : `${import.meta.env.VITE_API_URL}${data}`
+        return `<img src="${url}" alt="Avatar" class="h-8 w-8 rounded-full object-cover border" />`
+      },
     },
     {
       data: 'name',
       title: 'Name',
       className: 'font-medium',
+      responsivePriority: 3,
     },
     {
       data: 'email',
       title: 'Email',
       className: 'text-sm',
+      responsivePriority: 4,
     },
     {
       data: 'role_id',
       title: 'Role',
+      responsivePriority: 5,
       render: (data: any) => {
         const roleId = data as number
         const role = roleMap[roleId] || { display_name: 'Unknown', color: 'bg-gray-500' }
@@ -115,15 +122,30 @@ function UsersContent() {
       },
     },
     {
+      data: 'address1',
+      title: 'Address',
+      responsivePriority: 8,
+      render: (_data: any, _type: string, row: ApiUser) => {
+        const parts = [row.address1, row.address2].filter(Boolean).join(', ')
+        return `<span class="text-sm">${parts || '-'}</span>`
+      },
+    },
+    {
+      data: 'bio',
+      title: 'Bio',
+      responsivePriority: 9,
+      render: (data: any) => `<span class="text-sm">${data || '-'}</span>`,
+    },
+    {
       data: 'created_by',
       title: 'Created By',
-      render: (data: any) => {
-        return `<span class="text-sm text-muted-foreground">${data || '-'}</span>`
-      },
+      responsivePriority: 10,
+      render: (data: any) => `<span class="text-sm text-muted-foreground">${data || '-'}</span>`,
     },
     {
       data: 'created_at',
       title: 'Created At',
+      responsivePriority: 5,
       render: (data: any) => {
         const date = new Date(data)
         return `<span class="text-sm text-muted-foreground">${date.toLocaleDateString()}</span>`
@@ -133,8 +155,8 @@ function UsersContent() {
       data: null,
       title: 'Actions',
       orderable: false,
+      responsivePriority: 1,
       render: (_data: any, _type: string, row: ApiUser) => {
-        // Store the user data for onclick handler
         const userData = JSON.stringify(row).replace(/"/g, '&quot;')
         return `<button class="edit-user-btn inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3" data-user='${userData}'>Edit</button>`
       },
@@ -150,14 +172,11 @@ function UsersContent() {
         const userData = (button as HTMLElement).getAttribute('data-user')
         if (userData) {
           const user: ApiUser = JSON.parse(userData)
-          const nameParts = user.name.split(' ')
-          const firstName = nameParts[0] || ''
-          const lastName = nameParts.slice(1).join(' ') || ''
 
           setCurrentRow({
             id: user.id.toString(),
-            firstName,
-            lastName,
+            firstName: user.name,
+            lastName: '',
             username: user.email.split('@')[0],
             email: user.email,
             phoneNumber: '',
@@ -165,6 +184,8 @@ function UsersContent() {
             role: (user.role_id?.toString() || '2') as any,
             createdAt: new Date(user.created_at),
             updatedAt: user.updated_at ? new Date(user.updated_at) : new Date(user.created_at),
+            address1: user.address1 || '',
+            address2: user.address2 || '',
           })
           setOpen('edit')
         }
@@ -182,14 +203,7 @@ function UsersContent() {
   if (isError) {
     return (
       <>
-        <Header fixed>
-          <Search />
-          <div className='ms-auto flex items-center space-x-4'>
-            <ThemeSwitch />
-            <ConfigDrawer />
-            <ProfileDropdown />
-          </div>
-        </Header>
+        <AppHeader fixed />
 
         <main className='flex flex-1 flex-col gap-4 sm:gap-6 p-6 lg:p-10'>
           <div className='flex flex-col items-center justify-center h-64 gap-4'>
@@ -203,25 +217,14 @@ function UsersContent() {
 
   return (
     <>
-      <Header fixed>
-        <Search />
-        <div className='ms-auto flex items-center space-x-4'>
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
 
-      <main className='flex flex-1 flex-col gap-4 sm:gap-6 p-6 lg:p-10'>
-        <div className='flex flex-wrap items-end justify-between gap-2'>
-          <div>
-            <h2 className='text-2xl font-bold tracking-tight'>User List</h2>
-            <p className='text-muted-foreground'>
-              Manage your users and their roles here.
-            </p>
-          </div>
-          <UsersPrimaryButtons />
-        </div>
+      <main className='flex flex-1 flex-col gap-4 sm:gap-6 p-4'>
+        <PageHeader
+          title="User List"
+          description="Manage your users and their roles here."
+          actions={<UsersPrimaryButtons />}
+        />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -259,11 +262,8 @@ function UsersContent() {
         </div>
 
         {/* Users Table */}
-        <Card className="border overflow-hidden pt-0 pb-2">
-          <CardHeader className="bg-muted/50 border-b-1 py-4 gap-0">
-            <CardTitle>All Users</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-2">
+          
+          <div className="pt-2">
             {isLoading ? (
               <div className='flex items-center justify-center h-64'>
                 <Loader2 className='h-8 w-8 animate-spin text-primary' />
@@ -274,6 +274,10 @@ function UsersContent() {
                 data={users}
                 meta={data?.data?.meta}
                 onPageChange={(newPage) => setPage(newPage)}
+                onLimitChange={(newLimit) => {
+                  setLimit(newLimit);
+                  setPage(1); // reset page when changing limit
+                }}
                 search={search}
                 onSearchChange={(value) => {
                   setSearch(value);
@@ -281,8 +285,7 @@ function UsersContent() {
                 }}
               />
             )}
-          </CardContent>
-        </Card>
+          </div>
       </main>
 
       <UsersDialogs />

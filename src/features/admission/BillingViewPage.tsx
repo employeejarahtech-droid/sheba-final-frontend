@@ -6,6 +6,7 @@ import { ArrowLeft, Printer, FileText, Calendar, User, Phone, Stethoscope, Activ
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
+import { PageHeader } from '@/components/layout/page-header'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -63,7 +64,7 @@ type AdmissionDetails = {
 }
 
 export function BillingViewPage() {
-    const { billingId } = useParams({ from: '/admission/billing/$billingId' })
+    const { billingId } = useParams({ from: '/_authenticated/admission/billing/$billingId/' })
     const navigate = useNavigate()
     const token = getCookie('accessToken')
 
@@ -137,39 +138,33 @@ export function BillingViewPage() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-background print:bg-white print:dark:bg-white">
             <div className="max-w-5xl mx-auto p-6 print:p-8">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-6 print:hidden">
-                    <div className="flex items-center gap-4">
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => navigate({ to: '/admission/patients' })}
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                        </Button>
-                        <div>
-                            <h1 className="text-3xl font-bold">Bill Details</h1>
-                            <p className="text-muted-foreground">View and manage billing information</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <Button
-                            variant="outline"
-                            onClick={handleAddAnotherBill}
-                            className="flex items-center gap-2"
-                        >
-                            <Plus className="h-4 w-4" />
-                            Add Another Bill
-                        </Button>
-                        <Button
-                            onClick={handlePrint}
-                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-                        >
-                            <Printer className="h-4 w-4" />
-                            Print
-                        </Button>
-                    </div>
-                </div>
+                <PageHeader
+                    title="Bill Details"
+                    subtitle="View and manage billing information"
+                    backButton={{
+                        onClick: () => navigate({ to: '/admission/patients' }),
+                    }}
+                    actions={
+                        <>
+                            <Button
+                                variant="outline"
+                                onClick={handleAddAnotherBill}
+                                className="flex items-center gap-2"
+                            >
+                                <Plus className="h-4 w-4" />
+                                Add Another Bill
+                            </Button>
+                            <Button
+                                onClick={handlePrint}
+                                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                            >
+                                <Printer className="h-4 w-4" />
+                                Print
+                            </Button>
+                        </>
+                    }
+                    className="mb-6 print:hidden"
+                />
 
                 {/* Bill Header */}
                 <Card className="mb-6">

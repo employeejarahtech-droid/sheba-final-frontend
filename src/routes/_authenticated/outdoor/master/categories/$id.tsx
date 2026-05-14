@@ -3,9 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
 import { Main } from '@/components/layout/main'
 import { AppHeader } from '@/components/layout/app-header'
-
-
-
+import { PageHeader } from '@/components/layout/page-header'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -110,34 +108,25 @@ function CategoryDetails() {
             <AppHeader fixed />
 
             <Main className='bg-muted/10'>
-                <div className='mb-8 flex items-center justify-between'>
-                    <div className='space-y-1'>
-                        <div className='flex items-center gap-3'>
-                            <Button
-                                variant='outline'
-                                size='icon'
-                                className='h-9 w-9 rounded-full shadow-sm'
-                                onClick={() => navigate({ to: '/outdoor/master/categories' })}
-                            >
-                                <ArrowLeft className='h-4 w-4' />
+                <PageHeader
+                    title="Category Analytics"
+                    subtitle={`Comprehensive overview for ${category.name}`}
+                    backButton={{
+                        onClick: () => navigate({ to: '/outdoor/master/categories' }),
+                        variant: 'outline',
+                        className: 'h-9 w-9 rounded-full shadow-sm',
+                    }}
+                    actions={
+                        <>
+                            <Badge variant="outline" className="px-3 py-1 bg-background shadow-sm border-primary/20">
+                                ID: {category.id}
+                            </Badge>
+                            <Button size="sm" variant="default" className='shadow-md' onClick={() => navigate({ to: '/outdoor/master/categories' })}>
+                                <List className='mr-2 h-4 w-4' /> Category Index
                             </Button>
-                            <h1 className='text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent'>
-                                Category Analytics
-                            </h1>
-                        </div>
-                        <p className='text-muted-foreground ml-12 text-sm font-medium'>
-                            Comprehensive overview for <span className="text-foreground border-b-2 border-primary/30 font-bold">{category.name}</span>
-                        </p>
-                    </div>
-                    <div className='flex items-center gap-2'>
-                        <Badge variant="outline" className="px-3 py-1 bg-background shadow-sm border-primary/20">
-                            ID: {category.id}
-                        </Badge>
-                        <Button size="sm" variant="default" className='shadow-md' onClick={() => navigate({ to: '/outdoor/master/categories' })}>
-                            <List className='mr-2 h-4 w-4' /> Category Index
-                        </Button>
-                    </div>
-                </div>
+                        </>
+                    }
+                />
 
                 {/* Statistics Grid */}
                 <div className='grid gap-6 md:grid-cols-3 mb-8'>

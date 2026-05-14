@@ -439,7 +439,6 @@ export function Chats() {
           )}
         </section>
         <NewChat
-          users={users}
           onOpenChange={setCreateConversationDialog}
           open={createConversationDialogOpened}
           onSelectUser={(user) => {

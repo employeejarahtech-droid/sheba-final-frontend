@@ -39,6 +39,7 @@ import { useAddJournalEntryMutation, useGetJournalReportQuery, useLazyGetAccount
 import { toast } from "sonner";
 import { ChartOfAccount } from "@/types/accounting.types";
 import { AppHeader } from "@/components/layout/app-header";
+import { PageHeader } from '@/components/layout/page-header'
 
 export const Route = createFileRoute('/_authenticated/accounting/reports/journal/')({
   component: JournalReport,
@@ -193,18 +194,16 @@ function JournalReport() {
     <div className="space-y-6">
       <AppHeader fixed />
       <main className='p-6 lg:p-10'>
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">Journal Entries</h2>
-            <p className="text-muted-foreground">Record and review double-entry bookkeeping records.</p>
-          </div>
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                <Plus className="h-4 w-4" /> New Journal Entry
-              </Button>
-            </DialogTrigger>
+        <PageHeader
+          title="Journal Entries"
+          description="Record and review double-entry bookkeeping records."
+          actions={
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                  <Plus className="h-4 w-4" /> New Journal Entry
+                </Button>
+              </DialogTrigger>
             <DialogContent className="sm:max-w-[700px]">
               <DialogHeader>
                 <DialogTitle>New Journal Entry</DialogTitle>
@@ -306,8 +305,10 @@ function JournalReport() {
                 </DialogFooter>
               </form>
             </DialogContent>
-          </Dialog>
-        </div>
+            </Dialog>
+          }
+          showBackButton={false}
+        />
 
         {/* List */}
         <div className="border rounded-lg bg-card mt-6">

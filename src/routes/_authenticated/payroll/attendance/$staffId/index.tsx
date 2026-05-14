@@ -8,7 +8,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Wallet, CalendarCheck, Users } from "lucide-react";
+import { Wallet } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { AppHeader } from '@/components/layout/app-header';

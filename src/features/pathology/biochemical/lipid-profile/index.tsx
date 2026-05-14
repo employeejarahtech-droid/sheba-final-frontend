@@ -1,10 +1,6 @@
 
 import { DataTable } from "@/components/DataTable";
 import { Main } from "@/components/layout/main";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ColumnDef } from "@tanstack/react-table";
 import { EditLipidProfileForm } from "./components/EditLipidProfileForm";
 import { useState } from "react";
 import { getCookie } from "@/lib/cookies";
@@ -62,90 +58,94 @@ export default function LipidProfile() {
 
   console.log(data?.data);
 
-  const columns: ColumnDef<ReportsItem>[] = [
-    // Row selection
+  const columns = [
     {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) =>
-            table.toggleAllPageRowsSelected(Boolean(value))
-          }
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-
-    {
-      accessorKey: "receiptId",
-      header: "Receipt ID",
-    },
-    {
-      accessorKey: "patientName",
-      header: "Patient Name",
-    },
-
-    // ✅ FIXED Tests column
-    {
-      accessorKey: "tests",
-      header: "Tests",
-      cell: ({ row }) => {
-        const tests = row.getValue("tests") as string[];
-        return tests.join(", ");
+      data: "id",
+      title: "ID",
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return row.id;
       },
+      defaultContent: "",
     },
-
     {
-      accessorKey: "date",
-      header: "Date",
-    },
-
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
-        const color =
-          status === "passed"
-            ? "bg-green-500"
-            : status === "failed"
-              ? "bg-red-500"
-              : "bg-yellow-500";
-
-        return <Badge className={color + " text-white"}>{status}</Badge>;
+      data: "receiptId",
+      title: "Receipt ID",
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return row.receiptId;
       },
+      defaultContent: "",
     },
-    // Actions Column
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => alert("View " + item.id)}>
-              View
-            </Button>
-            <Button size="sm" variant="default" onClick={() => setOpen(true)}>
+      data: "patientName",
+      title: "Patient Name",
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return row.patientName;
+      },
+      defaultContent: "",
+    },
+    {
+      data: "tests",
+      title: "Tests",
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return Array.isArray(row.tests) ? row.tests.join(", ") : row.tests;
+      },
+      defaultContent: "",
+    },
+    {
+      data: "date",
+      title: "Date",
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return row.date;
+      },
+      defaultContent: "",
+    },
+    {
+      data: null,
+      title: "Actions",
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return `
+          <div class="flex gap-2">
+            <button
+              type="button"
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2"
+              onclick="window.editLipidProfile('${row.id}')"
+            >
               Edit
-            </Button>
-            <Button size="sm" variant="destructive" onClick={() => alert("Delete " + item.id)}>
+            </button>
+            <button
+              type="button"
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 h-8 px-4 py-2"
+              onclick="window.deleteLipidProfile('${row.id}')"
+            >
               Delete
-            </Button>
+            </button>
           </div>
-        );
+        `;
       },
+      defaultContent: "",
     },
   ];
+
+  // Expose functions to window for onclick handlers
+  if (typeof window !== 'undefined') {
+    (window as any).editLipidProfile = (id: string) => {
+      console.log('Edit lipid profile:', id);
+      // TODO: Open edit form with reportId and invoiceId
+      setOpen(true);
+    };
+    (window as any).deleteLipidProfile = (id: string) => {
+      if (confirm('Are you sure you want to delete this lipid profile?')) {
+        console.log('Delete lipid profile:', id);
+        // TODO: Implement delete
+      }
+    };
+  }
 
   return (
     <>
@@ -155,10 +155,10 @@ export default function LipidProfile() {
           <h1 className='text-2xl font-bold tracking-tight'>Lipid Profile</h1>
         </div>
         <DataTable columns={columns} data={data?.data?.items || []} meta={data?.data?.meta} onPageChange={setPage} />
-        <EditLipidProfileForm open={open} setOpen={setOpen} />
+        <EditLipidProfileForm open={open} setOpen={setOpen} reportId={0} invoiceId={0} />
       </Main>
     </>
 
   )
-}
 
+}

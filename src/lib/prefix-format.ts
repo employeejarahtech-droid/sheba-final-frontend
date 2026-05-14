@@ -73,7 +73,7 @@ export function generateId(settings: PrefixSettings, offset: number = 0): string
  * @param prefix - The prefix pattern used
  * @returns The sequence number, or null if unable to extract
  */
-export function extractSequence(id: string, prefix: string): number | null {
+export function extractSequence(id: string, _prefix: string): number | null {
   // Remove static parts of the prefix to find the sequence
   // This is a simplified version - for complex patterns with dates,
   // the backend should store and return the sequence number

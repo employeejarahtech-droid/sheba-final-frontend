@@ -1,7 +1,7 @@
 
 import { AppHeader } from '@/components/layout/app-header'
-
-
+import { PageHeader } from '@/components/layout/page-header'
+import { Main } from '@/components/layout/main'
 
 import { DataTable } from '@/components/DataTable'
 import { Button } from "@/components/ui/button";
@@ -27,12 +27,13 @@ type DoctorItem = {
     doctor_id?: string;
     sequence?: number;
     created_by?: string;
+    created_by_name?: string;
 };
 
 export default function Doctors() {
     const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(10);
     const [search, setSearch] = useState("");
-    const limit = 10;
 
     const token = getCookie('accessToken');
 
@@ -51,7 +52,7 @@ export default function Doctors() {
     });
 
     const { data, isLoading } = useQuery({
-        queryKey: ["doctor", page, search],
+        queryKey: ["doctor", page, limit, search],
 
         queryFn: async () => {
             const apiUrl = `${import.meta.env.VITE_API_URL}/api/doctor?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`;
@@ -194,25 +195,89 @@ export default function Doctors() {
             const email = btn.dataset.email || '-';
             const createdBy = btn.dataset.createdBy || '-';
 
-            // Create details HTML
-            const details = document.createElement('ul');
-            details.className = 'grid grid-cols-2 gap-2 text-sm';
-            details.innerHTML = `
-                <li><strong>Doctor ID:</strong> ${doctorId}</li>
-                <li><strong>Name:</strong> ${name}</li>
-                <li><strong>Title:</strong> ${title}</li>
-                <li><strong>Qualification:</strong> ${qualification}</li>
-                <li><strong>Speciality:</strong> ${speciality}</li>
-                <li><strong>Country:</strong> ${country}</li>
-                <li><strong>City:</strong> ${city}</li>
-                <li><strong>Phone:</strong> ${phone}</li>
-                <li><strong>Mobile:</strong> ${mobile}</li>
-                <li><strong>Email:</strong> ${email}</li>
-                <li><strong>Created By:</strong> ${createdBy}</li>
-                <li class='col-span-2'><strong>Actions:</strong>
-                    <a href='/outdoor/master/doctors/${id}' class='inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2 mr-2'>View</a>
-                    <a href='/outdoor/master/doctors/${id}/edit' class='inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2'>Edit</a>
-                </li>
+            // Create card HTML
+            const cardContainer = document.createElement('div');
+            cardContainer.className = 'max-w-3xl mx-auto my-4';
+            cardContainer.innerHTML = `
+                <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-4">
+                        <h2 class="text-lg font-semibold text-white">Doctor Information</h2>
+                        <p class="text-teal-100 text-sm">Detailed overview of selected doctor</p>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="p-6">
+                        <ul class="grid md:grid-cols-2 gap-6 text-sm">
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Doctor ID</span>
+                                <span class="font-mono text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">${doctorId}</span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Name</span>
+                                <span class="font-semibold text-gray-800 text-base">${name}</span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Title</span>
+                                <span class="font-medium text-gray-700">${title}</span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Qualification</span>
+                                <span class="font-medium text-gray-700">${qualification}</span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Speciality</span>
+                                <span class="px-3 py-1 w-fit text-xs font-semibold rounded-full bg-purple-100 text-purple-700">
+                                    ${speciality}
+                                </span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Location</span>
+                                <span class="font-medium text-gray-700">${city}, ${country}</span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Phone</span>
+                                <span class="font-medium text-gray-700">${phone}</span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Mobile</span>
+                                <span class="font-medium text-gray-700">${mobile}</span>
+                            </li>
+
+                            <li class="flex flex-col md:col-span-2">
+                                <span class="text-gray-500">Email</span>
+                                <span class="font-medium text-blue-600">${email}</span>
+                            </li>
+
+                            <li class="flex flex-col md:col-span-2">
+                                <span class="text-gray-500">Created By</span>
+                                <span class="font-medium text-gray-700">${createdBy}</span>
+                            </li>
+
+                        </ul>
+
+                        <!-- Actions -->
+                        <div class="mt-8 flex justify-end gap-3 border-t pt-5">
+                            <a href="/outdoor/master/doctors/${id}"
+                               class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 transition h-10 px-5">
+                                View
+                            </a>
+
+                            <a href="/outdoor/master/doctors/${id}/edit"
+                               class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-teal-600 text-white hover:bg-teal-700 transition h-10 px-5 shadow">
+                                Edit
+                            </a>
+                        </div>
+                    </div>
+                </div>
             `;
 
             // Create new row
@@ -221,7 +286,7 @@ export default function Doctors() {
             const cell = document.createElement('td');
             cell.className = 'p-4 bg-muted/50';
             cell.colSpan = 10;
-            cell.appendChild(details);
+            cell.appendChild(cardContainer);
             newRow.appendChild(cell);
 
             row.parentNode?.insertBefore(newRow, row.nextSibling);
@@ -274,7 +339,7 @@ export default function Doctors() {
                                 data-phone="${(row.phone || '-').replace(/"/g, '&quot;')}"
                                 data-mobile="${(row.mobile || '-').replace(/"/g, '&quot;')}"
                                 data-email="${(row.email || '-').replace(/"/g, '&quot;')}"
-                                data-created-by="${String(row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
+                                data-created-by="${String(row.created_by_name || row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
                         <span class="font-mono font-medium">${formattedId}</span>
                     </div>
                 `;
@@ -349,8 +414,9 @@ export default function Doctors() {
             title: "Created By",
             orderable: true,
             responsivePriority: 7,
-            render: (data: any) => {
-                return `<span class="text-sm text-muted-foreground">${data || '-'}</span>`;
+            render: (_data: any, _type: string, row: DoctorItem) => {
+                const name = row.created_by_name || row.created_by || '-';
+                return `<span class="text-sm text-muted-foreground">${name}</span>`;
             },
             defaultContent: "-",
         },
@@ -377,19 +443,11 @@ export default function Doctors() {
     return <>
         <AppHeader fixed />
 
-        <main className='p-6 lg:p-10'>
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
-                <h1 className="text-2xl font-bold tracking-tight">List of Doctor</h1>
-                <Link to="/outdoor/master/doctors/create">
-                    <Button>
-                        <Plus className="h-4 w-4" />
-                        Add Doctor
-                    </Button>
-                </Link>
-            </div>
-
+        <main className="p-4">
+           
+            <div className="space-y-4">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 ">
                 {stats.map((item, idx) => (
                     <div
                         key={idx}
@@ -419,16 +477,37 @@ export default function Doctors() {
                 ))}
             </div>
 
+              {/* Header & Table */}
+             <PageHeader
+                title="List of Doctor"
+                actions={
+                    <Link to="/outdoor/master/doctors/create">
+                        <Button>
+                            <Plus className="h-4 w-4" />
+                            Add Doctor
+                        </Button>
+                    </Link>
+                }
+            />
+
             <DataTable
                 columns={columns}
                 data={doctorsData}
                 meta={doctorsMeta}
                 onPageChange={setPage}
+                onLimitChange={(newLimit) => {
+                    setLimit(newLimit);
+                    setPage(1);
+                }}
                 search={search}
-                onSearchChange={setSearch}
+                onSearchChange={(value) => {
+                    setSearch(value);
+                    setPage(1);
+                }}
                 isLoading={isLoading}
             />
 
+            </div>
         </main>
     </>
 }

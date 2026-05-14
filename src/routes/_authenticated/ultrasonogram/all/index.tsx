@@ -19,6 +19,7 @@ type ReportsItem = {
   PatientName: string | null;
   Date: string | null;
   Tests: string;
+  TestNames: string;
   Status: string;
 };
 
@@ -103,15 +104,16 @@ function AllUltrasonogramReports() {
       render: (data: any) => data ? new Date(data).toLocaleDateString() : '-',
     },
     {
-      data: "Tests",
-      title: "Ultrasonogram Record IDs",
+      data: "TestNames",
+      title: "Tests",
       orderable: false,
       defaultContent: "",
-      render: (data: any) => {
-        if (!data) return '-';
-        const testIds = data.split(',').filter((id: string) => id.trim() !== '');
-        return testIds.map((id: string) =>
-          `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mr-1">${id.trim()}</span>`
+      render: (data: any, _type: string, row: ReportsItem) => {
+        const testNames = data || row.Tests || '';
+        if (!testNames) return '-';
+        const names = testNames.split(',').filter((name: string) => name.trim() !== '');
+        return names.map((name: string) =>
+          `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1">${name.trim()}</span>`
         ).join('');
       },
     },
@@ -125,25 +127,11 @@ function AllUltrasonogramReports() {
         return `<span class="${statusColor}">${data}</span>`;
       },
     },
-    {
-      data: null,
-      title: "Actions",
-      orderable: false,
-      defaultContent: "",
-      render: (_data: any, _type: string, row: ReportsItem) => {
-        return `
-          <div class="flex gap-2">
-            <a href="/ultrasonogram/all/print/${row.ReciptID}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">View Report</a>
-            <a href="/ultrasonogram/all/edit/${row.ReciptID}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">Edit</a>
-          </div>
-        `;
-      },
-    },
   ], []);
 
   // Handle expand button clicks
   useEffect(() => {
-    const handleExpandClick = (e: Event) => {
+    const handleExpandClick = async (e: Event) => {
       const button = (e.target as HTMLElement).closest('.expand-btn');
       if (!button) return;
 
@@ -168,41 +156,134 @@ function AllUltrasonogramReports() {
 
       // Get data from attributes
       const reciptId = btn.dataset.reciptId || '';
-      const patientId = btn.dataset.patientId || '-';
-      const patientName = btn.dataset.patientName || '-';
-      const date = btn.dataset.date || '-';
-      const tests = btn.dataset.tests || '-';
-      const status = btn.dataset.status || '-';
 
-      // Create details HTML
-      const details = document.createElement('ul');
-      details.className = 'grid grid-cols-2 gap-2 text-sm';
-      details.innerHTML = `
-        <li><strong>Receipt ID:</strong> ${reciptId}</li>
-        <li><strong>Patient ID:</strong> ${patientId}</li>
-        <li><strong>Patient Name:</strong> ${patientName}</li>
-        <li><strong>Date:</strong> ${date}</li>
-        <li><strong>Tests:</strong> ${tests}</li>
-        <li><strong>Status:</strong> ${status}</li>
-        <li class='col-span-2'><strong>Actions:</strong>
-          <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2 mr-2" onclick="alert('View ${reciptId}')">View</button>
-          <a href="/ultrasonogram/all/edit/${reciptId}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">Edit</a>
-        </li>
-      `;
+      // Fetch individual Ultrasonogram test details from API
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/ultrasonogram-all/${reciptId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (!res.ok) throw new Error('Failed to fetch Ultrasonogram details');
 
-      // Create new row
-      const newRow = document.createElement('tr');
-      newRow.className = 'child-row-detail';
-      const cell = document.createElement('td');
-      cell.className = 'p-4 bg-muted/50';
-      cell.colSpan = 6;
-      cell.appendChild(details);
-      newRow.appendChild(cell);
+        const data = await res.json();
+        const ultrasonogramTests = data.data?.ultrasonogram_all_info || [];
 
-      row.parentNode?.insertBefore(newRow, row.nextSibling);
-      row.classList.add('expanded');
-      btn.textContent = '−';
-      btn.style.backgroundColor = '#dc2626';
+        // Create test cards HTML
+        const testCards = ultrasonogramTests.map((test: any) => `
+          <div class="border rounded-xl p-4 hover:shadow-md transition bg-gray-50">
+            <div class="flex justify-between items-start mb-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="text-sm font-semibold text-gray-700">Test ID: ${test.test_id || '-'}</span>
+                  <span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 font-medium">Pending</span>
+                </div>
+                <div class="text-sm">
+                  <p class="text-gray-500">Test Name</p>
+                  <p class="font-medium text-gray-800">${test.test_name || '-'}</p>
+                </div>
+              </div>
+            </div>
+            <div class="text-sm mb-3">
+              <p class="text-gray-500">Test Result</p>
+              <p class="font-medium text-gray-800 whitespace-pre-wrap">${test.test_result || 'Pending...'}</p>
+            </div>
+            <div class="flex gap-2 pt-3 border-t">
+              <a href="/ultrasonogram/all/edit/builder/${test.serial_id || test.id}" class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 h-8 px-4 transition shadow-sm">
+                Edit
+              </a>
+              <a href="/ultrasonogram/all/print/${test.serial_id || test.id}" class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 h-8 px-4 transition shadow-sm">
+                Print
+              </a>
+            </div>
+          </div>
+        `).join('');
+
+        // Extract data for display
+        const invoiceInfo = data.data?.invoice_information || {};
+        const patientId = btn.dataset.patientId || '-';
+        const patientName = invoiceInfo.patient_name || btn.dataset.patientName || '-';
+        const formattedDate = invoiceInfo.invoice_date ? new Date(invoiceInfo.invoice_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : btn.dataset.date || '-';
+        const status = btn.dataset.status || 'Pending';
+        const statusBadge = status === 'Completed'
+          ? '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Completed</span>'
+          : '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">Pending</span>';
+
+        // Create card-style details HTML
+        const details = document.createElement('div');
+        details.className = 'max-w-4xl mx-auto bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden';
+
+        // Build the HTML content
+        let htmlContent = `
+          <!-- Header -->
+          <div class="bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-6 py-5">
+            <div class="flex justify-between items-center">
+              <div>
+                <h2 class="text-xl font-semibold">Ultrasonogram Examination Report</h2>
+                <p class="text-sm opacity-90">Receipt ID #${reciptId} • ${formattedDate}</p>
+              </div>
+              ${statusBadge}
+            </div>
+          </div>
+
+          <!-- Patient Info -->
+          <div class="p-6 border-b">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+              <div>
+                <p class="text-gray-500">Receipt ID</p>
+                <p class="font-semibold text-gray-800">${reciptId}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Patient ID</p>
+                <p class="font-semibold text-gray-800">${patientId}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Patient Name</p>
+                <p class="font-semibold text-gray-800">${patientName}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Date</p>
+                <p class="font-semibold text-gray-800">${formattedDate}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tests Section -->
+          <div class="p-6">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800">Ultrasonogram Examinations</h3>
+            <div class="space-y-4">
+              ${testCards || '<div class="text-gray-500 text-sm">No Ultrasonogram tests found</div>'}
+            </div>
+          </div>
+
+          <!-- Footer Actions -->
+          <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+            <a href="/ultrasonogram/all/edit/${reciptId}"
+               class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-teal-600 text-white hover:bg-teal-700 h-10 px-5 transition shadow-md">
+              Edit All
+            </a>
+          </div>
+        `;
+
+        details.innerHTML = htmlContent;
+
+        // Create new row
+        const newRow = document.createElement('tr');
+        newRow.className = 'child-row-detail';
+        const cell = document.createElement('td');
+        cell.className = 'p-4 bg-gray-50';
+        cell.colSpan = 7;
+        cell.appendChild(details);
+        newRow.appendChild(cell);
+
+        row.parentNode?.insertBefore(newRow, row.nextSibling);
+        row.classList.add('expanded');
+        btn.textContent = '−';
+        btn.style.backgroundColor = '#dc2626';
+      } catch (error) {
+        console.error('Error fetching Ultrasonogram details:', error);
+      }
     };
 
     // Add event listener to document for delegation
@@ -211,7 +292,7 @@ function AllUltrasonogramReports() {
     return () => {
       document.removeEventListener('click', handleExpandClick);
     };
-  }, []);
+  }, [token]);
 
   return (
     <>

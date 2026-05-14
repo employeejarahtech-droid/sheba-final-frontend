@@ -121,10 +121,10 @@ function EditXRayReport() {
     });
   };
 
-  const handlePrint = () => {
-    // Navigate to print page in same tab
-    router.navigate({ to: '/x-ray/all/print/$id', params: { id } });
-  };
+  // const handlePrint = () => {
+  //   // Navigate to print page in same tab
+  //   router.navigate({ to: '/x-ray/all/print/$id', params: { id } });
+  // };
 
   if (isLoading) {
     return (
@@ -165,6 +165,13 @@ function EditXRayReport() {
 
       {/* Main */}
       <Main>
+        <div className="mb-4">
+          <Link to="/x-ray/all">
+            <Button variant="outline" size="sm">
+              ← Back to X-Ray Reports
+            </Button>
+          </Link>
+        </div>
         <h1 className="text-2xl font-bold tracking-tight mb-6">Edit Report - X-Ray</h1>
 
         {invoiceInformation && (
@@ -222,26 +229,24 @@ function EditXRayReport() {
                             rows={3}
                             placeholder="Enter test result..."
                           />
-                          <Link to="/x-ray/all/edit/builder/$id" params={{ id: String(test.id) }}>
-                            <Button type="button" size="sm" variant="secondary" className="w-full">
-                              Update Content
-                            </Button>
-                          </Link>
+                          <div className="flex gap-2">
+                            <Link to="/x-ray/all/edit/builder/$id" params={{ id: String(test.id) }} className="flex-1">
+                              <Button type="button" size="sm" variant="secondary" className="w-full">
+                                Update Content
+                              </Button>
+                            </Link>
+                            <Link to="/x-ray/all/print/$id" params={{ id: String(test.id) }} className="flex-1">
+                              <Button type="button" size="sm" variant="outline" className="w-full">
+                                Print
+                              </Button>
+                            </Link>
+                          </div>
                         </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button type="submit" variant="default" disabled={updateMutation.isPending}>
-                  {updateMutation.isPending ? 'Saving...' : 'Save Report'}
-                </Button>
-
-                <Button type="button" variant="outline" onClick={handlePrint}>
-                  Print
-                </Button>
-              </div>
             </form>
 
           </CardContent>

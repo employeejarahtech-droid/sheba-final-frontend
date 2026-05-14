@@ -245,7 +245,9 @@ table.dataTable tr.dtr-expanded td.control:before {
   font-size: 1.25rem;
   line-height: 1.25rem;
 }
-
+table.dataTable td.control {
+  display: none;
+}
 table.dataTable td.control:hover:before {
   transform: scale(1.1);
   box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);

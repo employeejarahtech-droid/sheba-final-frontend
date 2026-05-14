@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
+import { PageHeader } from '@/components/layout/page-header'
 import { DataTable } from '@/components/DataTable'
 import { CreateMachineForm } from './components/CreateMachineForm'
 import { EditMachineForm } from './components/EditMachineForm'
@@ -16,21 +17,22 @@ type MachineItem = {
     name: string;
     description: string;
     created_by?: string;
+    created_by_name?: string;
 };
 
 export default function Machines() {
     const [openEditForm, setOpenEditForm] = useState<boolean>(false);
     const [selectedMachineId, setSelectedMachineId] = useState<string | null>(null);
     const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(10);
     const [search, setSearch] = useState("");
-    const limit = 10;
 
 
     const token = getCookie('accessToken');
     //const navigate = useNavigate();
 
     const { data } = useQuery({
-        queryKey: ["machine", page, search],
+        queryKey: ["machine", page, limit, search],
 
         queryFn: async () => {
             const res = await fetch(
@@ -157,17 +159,52 @@ export default function Machines() {
             const description = btn.dataset.description || '-';
             const createdBy = btn.dataset.createdBy || '-';
 
-            // Create details HTML
-            const details = document.createElement('ul');
-            details.className = 'grid grid-cols-2 gap-2 text-sm';
-            details.innerHTML = `
-                <li><strong>Machine ID:</strong> ${id}</li>
-                <li><strong>Machine Name:</strong> ${name}</li>
-                <li class='col-span-2'><strong>Description:</strong> ${description}</li>
-                <li><strong>Created By:</strong> ${createdBy}</li>
-                <li class='col-span-2'><strong>Actions:</strong>
-                    <button onclick="window.editMachine('${id}')" class='inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2'>Edit</button>
-                </li>
+            // Create card HTML
+            const cardContainer = document.createElement('div');
+            cardContainer.className = 'max-w-3xl mx-auto my-4';
+            cardContainer.innerHTML = `
+                <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-slate-700 to-zinc-700 px-6 py-4">
+                        <h2 class="text-lg font-semibold text-white">Machine Information</h2>
+                        <p class="text-slate-200 text-sm">Detailed overview of selected machine</p>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="p-6">
+                        <ul class="grid md:grid-cols-2 gap-6 text-sm">
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Machine ID</span>
+                                <span class="font-mono text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">#${id}</span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Machine Name</span>
+                                <span class="font-semibold text-gray-800 text-base">${name}</span>
+                            </li>
+
+                            <li class="flex flex-col md:col-span-2">
+                                <span class="text-gray-500">Description</span>
+                                <span class="font-medium text-gray-700 text-sm">${description || 'No description provided'}</span>
+                            </li>
+
+                            <li class="flex flex-col md:col-span-2">
+                                <span class="text-gray-500">Created By</span>
+                                <span class="font-medium text-gray-700">${createdBy}</span>
+                            </li>
+
+                        </ul>
+
+                        <!-- Actions -->
+                        <div class="mt-8 flex justify-end gap-3 border-t pt-5">
+                            <button onclick="window.editMachine('${id}')"
+                                    class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-slate-700 text-white hover:bg-slate-800 transition h-10 px-5 shadow">
+                                Edit
+                            </button>
+                        </div>
+                    </div>
+                </div>
             `;
 
             // Create new row
@@ -176,7 +213,7 @@ export default function Machines() {
             const cell = document.createElement('td');
             cell.className = 'p-4 bg-muted/50';
             cell.colSpan = 10;
-            cell.appendChild(details);
+            cell.appendChild(cardContainer);
             newRow.appendChild(cell);
 
             row.parentNode?.insertBefore(newRow, row.nextSibling);
@@ -207,7 +244,7 @@ export default function Machines() {
                                 data-id="${data}"
                                 data-name="${(row.name || '-').replace(/"/g, '&quot;')}"
                                 data-description="${(row.description || '-').replace(/"/g, '&quot;')}"
-                                data-created-by="${String(row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
+                                data-created-by="${String(row.created_by_name || row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
                         <span>${data}</span>
                     </div>
                 `;
@@ -233,8 +270,9 @@ export default function Machines() {
             title: "Created By",
             orderable: true,
             responsivePriority: 4,
-            render: (data: any) => {
-                return `<span class="text-sm text-muted-foreground">${data || '-'}</span>`;
+            render: (_data: any, _type: string, row: MachineItem) => {
+                const name = row.created_by_name || row.created_by || '-';
+                return `<span class="text-sm text-muted-foreground">${name}</span>`;
             },
             defaultContent: "-",
         },
@@ -259,15 +297,15 @@ export default function Machines() {
     return <>
         <AppHeader fixed />
 
-        <Main className="p-6 lg:p-10">
-            <div className="space-y-8">
+        <main className="p-4">
+            <div className="space-y-4">
                 {/* Statistics Cards */}
                 <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-4'>
                     {statCards.map((card, idx) => (
-                        <Card key={idx} className={`relative overflow-hidden border-none text-white shadow-xl ${card.shadow} bg-gradient-to-br ${card.gradient}`}>
+                        <Card key={idx} className={`p-3 relative overflow-hidden border-none text-white shadow-xl ${card.shadow} bg-gradient-to-br ${card.gradient}`}>
                             <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
                             <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-                            <CardContent className='p-6'>
+                            <CardContent className='p-3'>
                                 <div className='flex items-center justify-between relative z-10'>
                                     <div className='space-y-1'>
                                         <p className='text-sm font-medium text-white/80'>{card.title}</p>
@@ -286,13 +324,27 @@ export default function Machines() {
                 </div>
 
                 {/* Header & Table */}
-                <div className="flex flex-wrap items-end justify-between gap-2">
-                    <h1 className="text-2xl font-bold tracking-tight">List of Machines</h1>
-                    <CreateMachineForm />
-                </div>
-                <DataTable columns={columns} data={data?.data?.items || []} meta={data?.data?.meta} onPageChange={(newPage) => setPage(newPage)} search={search} onSearchChange={setSearch} />
+                <PageHeader
+                    title="List of Machines"
+                    actions={<CreateMachineForm />}
+                />
+                <DataTable
+                    columns={columns}
+                    data={data?.data?.items || []}
+                    meta={data?.data?.meta}
+                    onPageChange={(newPage) => setPage(newPage)}
+                    onLimitChange={(newLimit) => {
+                        setLimit(newLimit);
+                        setPage(1);
+                    }}
+                    search={search}
+                    onSearchChange={(value) => {
+                        setSearch(value);
+                        setPage(1);
+                    }}
+                />
             </div>
             <EditMachineForm open={openEditForm} setOpen={setOpenEditForm} machineId={selectedMachineId} />
-        </Main>
+        </main>
     </>
 }

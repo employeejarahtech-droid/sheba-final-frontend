@@ -140,20 +140,14 @@ export default function T3T4TSHReportDetails({ t3t4tshData, invoiceData, padding
                     <p className="border-t border-dashed w-40 pt-1 text-center">Checked By:</p>
                 </div>
 
-                <div className="text-right">
+                <div className="text-center">
                     <p className="border-t border-dashed w-56 ml-auto pt-1">
                         Medical Technologist (Lab):
                     </p>
                 </div>
             </div>
 
-            {/* Buttons */}
-            <div className="flex justify-end gap-3 mt-10 print:hidden">
-                <Button variant="outline" onClick={() => window.print()}>
-                    Print
-                </Button>
-                <Button variant="outline">Download</Button>
-            </div>
+           
         </div>
     );
 }

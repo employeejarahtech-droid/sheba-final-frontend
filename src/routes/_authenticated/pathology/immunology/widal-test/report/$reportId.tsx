@@ -24,7 +24,7 @@ function WidalTestReport() {
   const paddingOptions = Array.from({ length: 39 }, (_, i) => (i + 2) * 5); // [10, 15, 20, ..., 200]
 
   // Try to fetch from API first
-  const { data: widalData, isLoading, isError, error } = useQuery({
+  const { data: widalData, isLoading } = useQuery({
     queryKey: ['widal', reportId],
     queryFn: async () => {
       try {
@@ -114,7 +114,7 @@ function WidalTestReport() {
             </div>
             <Button variant="outline" size="sm" onClick={() => window.print()}>
               <Printer className="h-4 w-4" />
-              Print Report
+              Print
             </Button>
           </div>
         </div>

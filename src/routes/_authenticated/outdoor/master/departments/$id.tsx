@@ -3,9 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
 import { Main } from '@/components/layout/main'
 import { AppHeader } from '@/components/layout/app-header'
-
-
-
+import { PageHeader } from '@/components/layout/page-header'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -110,34 +108,25 @@ function DepartmentDetails() {
             <AppHeader fixed />
 
             <Main className='bg-muted/10'>
-                <div className='mb-8 flex items-center justify-between'>
-                    <div className='space-y-1'>
-                        <div className='flex items-center gap-3'>
-                            <Button
-                                variant='outline'
-                                size='icon'
-                                className='h-9 w-9 rounded-full shadow-sm'
-                                onClick={() => navigate({ to: '/outdoor/master/departments' })}
-                            >
-                                <ArrowLeft className='h-4 w-4' />
+                <PageHeader
+                    title="Department Outlook"
+                    subtitle={`Strategic view for ${department.name}`}
+                    backButton={{
+                        onClick: () => navigate({ to: '/outdoor/master/departments' }),
+                        variant: 'outline',
+                        className: 'h-9 w-9 rounded-full shadow-sm',
+                    }}
+                    actions={
+                        <>
+                            <Badge variant="outline" className="px-3 py-1 bg-background shadow-sm border-primary/20">
+                                DEPT ID: {department.id}
+                            </Badge>
+                            <Button size="sm" variant="default" className='shadow-md' onClick={() => navigate({ to: '/outdoor/master/departments' })}>
+                                <List className='mr-2 h-4 w-4' /> Department List
                             </Button>
-                            <h1 className='text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent'>
-                                Department Outlook
-                            </h1>
-                        </div>
-                        <p className='text-muted-foreground ml-12 text-sm font-medium'>
-                            Strategic view for <span className="text-foreground border-b-2 border-primary/30 font-bold">{department.name}</span>
-                        </p>
-                    </div>
-                    <div className='flex items-center gap-2'>
-                        <Badge variant="outline" className="px-3 py-1 bg-background shadow-sm border-primary/20">
-                            DEPT ID: {department.id}
-                        </Badge>
-                        <Button size="sm" variant="default" className='shadow-md' onClick={() => navigate({ to: '/outdoor/master/departments' })}>
-                            <List className='mr-2 h-4 w-4' /> Department List
-                        </Button>
-                    </div>
-                </div>
+                        </>
+                    }
+                />
 
                 {/* Statistics Grid */}
                 <div className='grid gap-6 md:grid-cols-3 mb-8'>

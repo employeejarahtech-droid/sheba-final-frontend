@@ -5,13 +5,14 @@ import { useState } from "react";
 import { createFileRoute } from '@tanstack/react-router';
 import { ColumnDef } from "@tanstack/react-table";
 import { Plus, DollarSign, TrendingDown, CreditCard } from "lucide-react";
-import { AddExpenseModal } from "../components/AddExpenseModal";
+import { AddExpenseModal } from "@/components/accounting/AddExpenseModal";
 
 import { useGetExpensesQuery } from "@/features/accounting/accountingQueries";
 import { Expense } from "@/types/accounting.types";
 import { DataTable } from "@/components/dashboard/components/DataTable";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useCurrency } from '@/hooks/use-currency'
 
 // Layout
 
@@ -25,11 +26,11 @@ export const Route = createFileRoute('/_authenticated/accounting/expenses/')({
 })
 
 function ExpensesPage() {
+    const { currencySymbol } = useCurrency();
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [date, setDate] = useState("");
     const limit = 10;
-    const currency = '৳';
 
     const {
         data: fetchedData,
@@ -57,7 +58,7 @@ function ExpensesPage() {
     const stats = [
         {
             label: "Total Expenses",
-            value: `${currency} ${totalExpense.toLocaleString()}`,
+            value: `${currencySymbol} ${totalExpense.toLocaleString()}`,
             gradient: "from-blue-600 to-blue-400",
             shadow: "shadow-blue-500/30",
             icon: <DollarSign className="w-6 h-6 text-white" />,
@@ -71,7 +72,7 @@ function ExpensesPage() {
         },
         {
             label: "Avg. Transaction",
-            value: `${currency} ${avgTransaction.toLocaleString(undefined, { maximumFractionDigits: 2 })}`,
+            value: `${currencySymbol} ${avgTransaction.toLocaleString(undefined, { maximumFractionDigits: 2 })}`,
             gradient: "from-violet-600 to-violet-400",
             shadow: "shadow-violet-500/30",
             icon: <CreditCard className="w-6 h-6 text-white" />,
@@ -101,7 +102,7 @@ function ExpensesPage() {
         {
             accessorKey: "amount",
             header: () => (
-                <div className="text-right">Amount ({currency})</div>
+                <div className="text-right">Amount ({currencySymbol})</div>
             ),
             cell: ({ row }: { row: any }) => (
                 <div className="text-right">{Number(row.getValue("amount")).toFixed(2)}</div>

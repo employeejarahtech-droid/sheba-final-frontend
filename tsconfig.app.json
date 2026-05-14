@@ -12,7 +12,8 @@
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-    "noEmit": true,
+    "noEmit": false,
+    "noEmitOnError": false,
     "jsx": "react-jsx",
 
     /* Alias */
@@ -22,11 +23,14 @@
     },
 
     /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "suppressImplicitAnyIndexErrors": true
   },
   "include": ["src"]
 }

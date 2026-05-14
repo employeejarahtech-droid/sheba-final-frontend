@@ -67,7 +67,7 @@ function CBCWithPBF() {
 
   // Handle expand button clicks
   useEffect(() => {
-    const handleExpandClick = (e: Event) => {
+    const handleExpandClick = async (e: Event) => {
       const button = (e.target as HTMLElement).closest('.expand-btn');
       if (!button) return;
 
@@ -98,28 +98,218 @@ function CBCWithPBF() {
       const reportId = btn.dataset.reportId || '';
 
       // Create details HTML
-      const details = document.createElement('ul');
-      details.className = 'grid grid-cols-2 gap-2 text-sm';
-      details.innerHTML = `
-        <li><strong>Invoice ID:</strong> ${invoiceId}</li>
-        <li><strong>Patient Name:</strong> ${patientName}</li>
-        <li><strong>Date:</strong> ${date}</li>
-        <li><strong>Status:</strong> ${status}</li>
-        <li class='col-span-2'><strong>Actions:</strong>
-          <a href="/pathology/hematology/cbc-with-pbf/report/${reportId}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2 mr-2">
+      const details = document.createElement('div');
+      details.className = 'max-w-4xl mx-auto bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden';
+
+      // Format date for header
+      const formattedDate = date !== '-' ? date : '';
+
+      // Status badge
+      const statusBadge = status === 'passed'
+        ? '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Passed</span>'
+        : status === 'failed'
+          ? '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Failed</span>'
+          : '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Pending</span>';
+
+      // Build the HTML content
+      let htmlContent = `
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white px-6 py-5">
+          <div class="flex justify-between items-center">
+            <div>
+              <h2 class="text-xl font-semibold">CBC With PBF Report</h2>
+              <p class="text-sm opacity-90">Invoice #${invoiceId} • ${formattedDate}</p>
+            </div>
+            ${statusBadge}
+          </div>
+        </div>
+
+        <!-- Patient Info -->
+        <div class="p-6 border-b">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+            <div>
+              <p class="text-gray-500">Invoice ID</p>
+              <p class="font-semibold text-gray-800">${invoiceId}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Patient Name</p>
+              <p class="font-semibold text-gray-800">${patientName}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Date</p>
+              <p class="font-semibold text-gray-800">${formattedDate}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Department</p>
+              <p class="font-semibold text-gray-800">Hematology</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Report Details Section -->
+        <div class="p-6">
+          <h3 class="text-lg font-semibold mb-4 text-gray-800">Test Results</h3>
+          <div id="report-results-${reportId}" class="space-y-4">
+            <div class="text-gray-500 text-sm">Loading report details...</div>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+          <a href="/pathology/hematology/cbc-with-pbf/report/${reportId}"
+             class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
             View Report
           </a>
-          <a href="/pathology/hematology/cbc-with-pbf/edit/${reportId}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+          <a href="/pathology/hematology/cbc-with-pbf/edit/${reportId}"
+             class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-fuchsia-600 text-white hover:bg-fuchsia-700 h-10 px-5 transition shadow-md">
             Edit
           </a>
-        </li>
+        </div>
       `;
+
+      details.innerHTML = htmlContent;
+
+      // Fetch report details
+      const resultsContainer = details.querySelector(`#report-results-${reportId}`);
+      if (resultsContainer) {
+        try {
+          const res = await fetch(
+            `${import.meta.env.VITE_API_URL}/api/cbc-pbf/${reportId}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          if (res.ok) {
+            const data = await res.json();
+            const reportData = data.data;
+
+            // Build test results HTML with Hematology Indices, RBC Indices, Differential Count, and PBF Findings
+            let testResultsHTML = `
+              <div class="border rounded-xl p-4 hover:shadow-md transition bg-gray-50">
+                <div class="flex justify-between items-center mb-3">
+                  <span class="text-sm font-semibold text-gray-700">Report ID: ${reportId}</span>
+                  <span class="text-xs px-3 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 font-medium">
+                    CBC With PBF
+                  </span>
+                </div>
+
+                <!-- Hematology Indices -->
+                <h4 class="text-sm font-semibold text-gray-700 mb-2 mt-3">Hematology Indices</h4>
+                <table class="w-full text-xs mb-3">
+                  <tbody>
+                    <tr class="border-b">
+                      <td class="px-2 py-1">Hemoglobin</td>
+                      <td class="px-2 py-1 font-medium">${reportData.hemoglobin || 'Pending'} g/dL</td>
+                      <td class="px-2 py-1 text-gray-600 text-xs">13.0-17.0 (M), 11.5-15.5 (F)</td>
+                    </tr>
+                    <tr class="border-b">
+                      <td class="px-2 py-1">RBC Count</td>
+                      <td class="px-2 py-1 font-medium">${reportData.rbc_count || 'Pending'} M/cmm</td>
+                      <td class="px-2 py-1 text-gray-600 text-xs">4.5-5.9 (M), 4.0-5.2 (F)</td>
+                    </tr>
+                    <tr class="border-b">
+                      <td class="px-2 py-1">WBC Count</td>
+                      <td class="px-2 py-1 font-medium">${reportData.wbc_count || 'Pending'}/cmm</td>
+                      <td class="px-2 py-1 text-gray-600 text-xs">4000-11000</td>
+                    </tr>
+                    <tr class="border-b">
+                      <td class="px-2 py-1">Platelets</td>
+                      <td class="px-2 py-1 font-medium">${reportData.platelets || 'Pending'}/cmm</td>
+                      <td class="px-2 py-1 text-gray-600 text-xs">150000-400000</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <!-- RBC Indices -->
+                <h4 class="text-sm font-semibold text-gray-700 mb-2 mt-3">RBC Indices</h4>
+                <table class="w-full text-xs mb-3">
+                  <tbody>
+                    <tr class="border-b">
+                      <td class="px-2 py-1">HCT</td>
+                      <td class="px-2 py-1 font-medium">${reportData.hct || 'Pending'} %</td>
+                      <td class="px-2 py-1 text-gray-600 text-xs">40-50 (M), 36-46 (F)</td>
+                    </tr>
+                    <tr class="border-b">
+                      <td class="px-2 py-1">MCV</td>
+                      <td class="px-2 py-1 font-medium">${reportData.mcv || 'Pending'} fL</td>
+                      <td class="px-2 py-1 text-gray-600 text-xs">80-100</td>
+                    </tr>
+                    <tr class="border-b">
+                      <td class="px-2 py-1">MCH</td>
+                      <td class="px-2 py-1 font-medium">${reportData.mch || 'Pending'} pg</td>
+                      <td class="px-2 py-1 text-gray-600 text-xs">27-33</td>
+                    </tr>
+                    <tr class="border-b">
+                      <td class="px-2 py-1">MCHC</td>
+                      <td class="px-2 py-1 font-medium">${reportData.mchc || 'Pending'} g/dL</td>
+                      <td class="px-2 py-1 text-gray-600 text-xs">32-36</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <!-- Differential Count -->
+                <h4 class="text-sm font-semibold text-gray-700 mb-2 mt-3">Differential Count</h4>
+                <table class="w-full text-xs mb-3">
+                  <tbody>
+                    <tr class="border-b">
+                      <td class="px-2 py-1">Neutrophils</td>
+                      <td class="px-2 py-1 font-medium">${reportData.neutrophils || 'Pending'} %</td>
+                      <td class="px-2 py-1 text-gray-600 text-xs">40-75</td>
+                    </tr>
+                    <tr class="border-b">
+                      <td class="px-2 py-1">Lymphocytes</td>
+                      <td class="px-2 py-1 font-medium">${reportData.lymphocytes || 'Pending'} %</td>
+                      <td class="px-2 py-1 text-gray-600 text-xs">20-45</td>
+                    </tr>
+                    <tr class="border-b">
+                      <td class="px-2 py-1">Monocytes</td>
+                      <td class="px-2 py-1 font-medium">${reportData.monocytes || 'Pending'} %</td>
+                      <td class="px-2 py-1 text-gray-600 text-xs">2-10</td>
+                    </tr>
+                    <tr class="border-b">
+                      <td class="px-2 py-1">Eosinophils</td>
+                      <td class="px-2 py-1 font-medium">${reportData.eosinophils || 'Pending'} %</td>
+                      <td class="px-2 py-1 text-gray-600 text-xs">0-6</td>
+                    </tr>
+                    <tr class="border-b">
+                      <td class="px-2 py-1">Basophils</td>
+                      <td class="px-2 py-1 font-medium">${reportData.basophils || 'Pending'} %</td>
+                      <td class="px-2 py-1 text-gray-600 text-xs">0-2</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                ${reportData.pbf_findings ? `
+                  <div class="mt-3 pt-3 border-t">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2">PBF Findings</h4>
+                    <p class="text-xs px-2 py-2 bg-gray-100 rounded">${reportData.pbf_findings}</p>
+                  </div>
+                ` : ''}
+
+                ${reportData.test_carried_out_by ? `
+                  <div class="mt-4 pt-4 border-t text-sm">
+                    <span class="text-gray-500">Test Carried out by:</span>
+                    <span class="font-medium text-gray-800 ml-2">${reportData.test_carried_out_by}</span>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+
+            resultsContainer.innerHTML = testResultsHTML;
+          } else {
+            resultsContainer.innerHTML = '<div class="text-red-500 text-sm">Failed to load report details</div>';
+          }
+        } catch (error) {
+          resultsContainer.innerHTML = '<div class="text-red-500 text-sm">Failed to load report details</div>';
+        }
+      }
 
       // Create new row
       const newRow = document.createElement('tr');
       newRow.className = 'child-row-detail';
       const cell = document.createElement('td');
-      cell.className = 'p-4 bg-muted/50';
+      cell.className = 'p-4 bg-gray-50';
       cell.colSpan = 7;
       cell.appendChild(details);
       newRow.appendChild(cell);
@@ -136,7 +326,7 @@ function CBCWithPBF() {
     return () => {
       document.removeEventListener('click', handleExpandClick);
     };
-  }, []);
+  }, [token]);
 
   const columns = [
     {

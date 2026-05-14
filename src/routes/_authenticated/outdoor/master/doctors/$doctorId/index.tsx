@@ -14,6 +14,7 @@ import { Main } from "@/components/layout/main";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { PageHeader } from "@/components/layout/page-header";
 
 export const Route = createFileRoute('/_authenticated/outdoor/master/doctors/$doctorId/')({
     component: ViewDoctorPage,

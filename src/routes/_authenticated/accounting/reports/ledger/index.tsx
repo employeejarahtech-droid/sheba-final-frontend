@@ -27,8 +27,8 @@ import { DataTable } from "@/components/DataTable";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 // Layout
-
 import { AppHeader } from '@/components/layout/app-header'
+import { PageHeader } from '@/components/layout/page-header'
 
 
 
@@ -37,6 +37,7 @@ import { AppHeader } from '@/components/layout/app-header'
 import { useGetAccountingAccountsQuery } from "@/features/accounting/accountingQueries";
 import { useLedgerReport } from "@/features/accounting/api/queries";
 import { ChartOfAccount } from "@/types/accounting.types";
+import { useCurrency } from "@/hooks/use-currency";
 
 const ledgerSearchSchema = z.object({
   account_id: z.coerce.number().optional(),
@@ -83,21 +84,22 @@ function LedgerReport() {
   };
   // @ts-ignore
   const accounts: ChartOfAccount[] = accountsData?.data || [];
-  const currency = '৳';
+  const { currencySymbol } = useCurrency();
 
   return (
     <div className="">
       <AppHeader fixed />
       <main className='p-6 lg:p-10 space-y-6'>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">Ledger Report</h2>
-            <p className="text-muted-foreground">View detailed transaction history for a specific account.</p>
-          </div>
-          <Button variant="outline" className="gap-2">
-            <Printer className="h-4 w-4" /> Print Report
-          </Button>
-        </div>
+        <PageHeader
+          title="Ledger Report"
+          description="View detailed transaction history for a specific account."
+          actions={
+            <Button variant="outline" className="gap-2">
+              <Printer className="h-4 w-4" /> Print Report
+            </Button>
+          }
+          showBackButton={false}
+        />
 
         <Card className="border-t-4 border-emerald-500 shadow-md py-0">
           <CardContent className="p-6">

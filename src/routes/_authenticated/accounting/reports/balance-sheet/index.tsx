@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { useGetBalanceSheetQuery } from "@/features/accounting/accountingQueries";
 import { AppHeader } from "@/components/layout/app-header";
+import { PageHeader } from '@/components/layout/page-header'
 
 const balanceSheetSearchSchema = z.object({
     date: z.string().optional(),
@@ -83,38 +84,38 @@ function BalanceSheet() {
         <div className="space-y-6">
             <AppHeader fixed />
             <main className='p-6 lg:p-10'>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <div>
-                        <h2 className="text-3xl font-bold tracking-tight">Balance Sheet</h2>
-                        <p className="text-muted-foreground">Snapshot of assets, liabilities, and equity.</p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">As of:</span>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-[240px] justify-start text-left font-normal",
-                                        !localDate && "text-muted-foreground"
-                                    )}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {localDate ? format(localDate, "PPP") : <span>Pick a date</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="end">
-                                <Calendar
-                                    mode="single"
-                                    selected={localDate}
-                                    onSelect={handleDateChange}
-                                    initialFocus
-                                />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-                </div>
+                <PageHeader
+                    title="Balance Sheet"
+                    description="Snapshot of assets, liabilities, and equity."
+                    actions={
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">As of:</span>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-[240px] justify-start text-left font-normal",
+                                            !localDate && "text-muted-foreground"
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {localDate ? format(localDate, "PPP") : <span>Pick a date</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="end">
+                                    <Calendar
+                                        mode="single"
+                                        selected={localDate}
+                                        onSelect={handleDateChange}
+                                        initialFocus
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                    }
+                    showBackButton={false}
+                />
 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6 font-mono">
                     <Card className="bg-emerald-50/50 border-emerald-100">
@@ -163,7 +164,6 @@ function BalanceSheet() {
                                 columns={columns}
                                 data={assets}
                                 isLoading={isLoading}
-                                className="border-0 shadow-none"
                             />
                             <div className="p-4 bg-muted/30 border-t flex justify-between font-bold text-base">
                                 <span>Total Assets</span>
@@ -184,7 +184,6 @@ function BalanceSheet() {
                                     columns={columns}
                                     data={liabilities}
                                     isLoading={isLoading}
-                                    className="border-0 shadow-none"
                                 />
                                 <div className="p-4 bg-muted/30 border-t flex justify-between font-bold text-base">
                                     <span>Total Liabilities</span>
@@ -204,7 +203,6 @@ function BalanceSheet() {
                                     columns={columns}
                                     data={equity}
                                     isLoading={isLoading}
-                                    className="border-0 shadow-none"
                                 />
                                 <div className="p-4 bg-muted/30 border-t flex justify-between font-bold text-base">
                                     <span>Total Equity</span>

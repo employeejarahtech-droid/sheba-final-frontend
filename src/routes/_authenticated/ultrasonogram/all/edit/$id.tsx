@@ -116,10 +116,10 @@ function EditUltrasonogramReport() {
     });
   };
 
-  const handlePrint = () => {
-    // Navigate to print page in same tab
-    router.navigate({ to: '/ultrasonogram/all/print/$id', params: { id } });
-  };
+  // const handlePrint = () => {
+  //   // Navigate to print page in same tab
+  //   router.navigate({ to: '/ultrasonogram/all/print/$id', params: { id } });
+  // };
 
   if (isLoading) {
     return (
@@ -209,26 +209,24 @@ function EditUltrasonogramReport() {
                             rows={3}
                             placeholder="Enter test result..."
                           />
-                          <Link to="/ultrasonogram/all/edit/builder/$id" params={{ id: String(test.id) }}>
-                            <Button type="button" size="sm" variant="secondary" className="w-full">
-                              Update Content
-                            </Button>
-                          </Link>
+                          <div className="flex gap-2">
+                            <Link to="/ultrasonogram/all/edit/builder/$id" params={{ id: String(test.id) }} className="flex-1">
+                              <Button type="button" size="sm" variant="secondary" className="w-full">
+                                Update Content
+                              </Button>
+                            </Link>
+                            <Link to="/ultrasonogram/all/print/$id" params={{ id: String(test.id) }} className="flex-1">
+                              <Button type="button" size="sm" variant="outline" className="w-full">
+                                Print Report
+                              </Button>
+                            </Link>
+                          </div>
                         </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button type="submit" variant="default" disabled={updateMutation.isPending}>
-                  {updateMutation.isPending ? 'Saving...' : 'Save Report'}
-                </Button>
-
-                <Button type="button" variant="outline" onClick={handlePrint}>
-                  Print
-                </Button>
-              </div>
             </form>
 
           </CardContent>

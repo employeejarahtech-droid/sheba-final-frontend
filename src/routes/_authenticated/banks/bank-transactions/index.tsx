@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { topNav } from '@/data/data';
 import { ArrowDownCircle, ArrowUpCircle, Calendar, DollarSign } from 'lucide-react';
 import { useState } from 'react';
 

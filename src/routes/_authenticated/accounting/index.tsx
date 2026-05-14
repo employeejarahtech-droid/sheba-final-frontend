@@ -1,12 +1,11 @@
 
-
 import { AppHeader } from '@/components/layout/app-header'
-
+import { PageHeader } from '@/components/layout/page-header'
 
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { AddIncomeModal } from './components/AddIncomeModal'
-import { AddExpenseModal } from './components/AddExpenseModal'
+import { AddIncomeModal } from '@/components/accounting/AddIncomeModal'
+import { AddExpenseModal } from '@/components/accounting/AddExpenseModal'
 import { createFileRoute } from '@tanstack/react-router'
 import { useGetAccountingChartDataQuery, useGetAccountingOverviewQuery, useGetExpenseBreakdownQuery, useGetRecentActivityQuery } from '@/features/accounting/accountingQueries'
 import {
@@ -17,7 +16,6 @@ import {
     CalendarDays,
     CalendarRange,
     Plus,
-    Loader2,
 } from 'lucide-react'
 import {
     Bar,
@@ -32,56 +30,17 @@ import {
     Cell,
 } from 'recharts'
 import { Overview } from '@/types/accounting.types'
-import { Suspense } from 'react'
+import { useCurrency } from '@/hooks/use-currency'
 
 export const Route = createFileRoute('/_authenticated/accounting/')({
     component: AccountingOverview,
 })
 
-// Loading component
-function AccountingLoading() {
-    return (
-        <>
-            <AppHeader fixed />
-            <main className='p-6 lg:p-10'>
-                <div className='flex items-center justify-center min-h-[400px]'>
-                    <div className='text-center'>
-                        <Loader2 className='h-8 w-8 animate-spin mx-auto mb-4' />
-                        <p className='text-muted-foreground'>Loading accounting data...</p>
-                    </div>
-                </div>
-            </main>
-        </>
-    )
-}
-
-// Error boundary component
-function AccountingError({ error }: { error: Error }) {
-    return (
-        <>
-            <AppHeader fixed />
-            <main className='p-6 lg:p-10'>
-                <div className='flex items-center justify-center min-h-[400px]'>
-                    <div className='text-center'>
-                        <p className='text-red-500 font-semibold mb-2'>Error loading accounting data</p>
-                        <p className='text-muted-foreground text-sm'>{error.message}</p>
-                        <button
-                            onClick={() => window.location.reload()}
-                            className='mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md'
-                        >
-                            Retry
-                        </button>
-                    </div>
-                </div>
-            </main>
-        </>
-    )
-}
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
 
 function AccountingOverview() {
-    const currency = '৳'
+    const { currencySymbol } = useCurrency()
 
     // Queries
     const { data: accountingOverview } = useGetAccountingOverviewQuery();
@@ -107,26 +66,24 @@ function AccountingOverview() {
         <>
             <AppHeader fixed />
             <main className='p-6 lg:p-10'>
-                <div className='mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
-                    <div>
-                        <h2 className='text-3xl font-bold tracking-tight'>Accounting Overview</h2>
-                        <p className='text-muted-foreground'>
-                            Track financial trends and manage transactions.
-                        </p>
-                    </div>
-                    <div className='flex gap-3'>
-                        <AddIncomeModal>
-                            <button className='flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 font-medium text-white shadow-lg shadow-emerald-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-emerald-500/40 active:translate-y-0 active:shadow-none'>
-                                <Plus size={18} /> Add Income
-                            </button>
-                        </AddIncomeModal>
-                        <AddExpenseModal>
-                            <button className='flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 px-5 py-2.5 font-medium text-white shadow-lg shadow-rose-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-rose-500/40 active:translate-y-0 active:shadow-none'>
-                                <Plus size={18} /> Add Expense
-                            </button>
-                        </AddExpenseModal>
-                    </div>
-                </div>
+                <PageHeader
+                    title="Accounting Overview"
+                    description="Track financial trends and manage transactions."
+                    actions={
+                        <>
+                            <AddIncomeModal>
+                                <button className='flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 font-medium text-white shadow-lg shadow-emerald-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-emerald-500/40 active:translate-y-0 active:shadow-none'>
+                                    <Plus size={18} /> Add Income
+                                </button>
+                            </AddIncomeModal>
+                            <AddExpenseModal>
+                                <button className='flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 px-5 py-2.5 font-medium text-white shadow-lg shadow-rose-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-rose-500/40 active:translate-y-0 active:shadow-none'>
+                                    <Plus size={18} /> Add Expense
+                                </button>
+                            </AddExpenseModal>
+                        </>
+                    }
+                />
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -201,7 +158,7 @@ function AccountingOverview() {
                                     <div>
                                         <p className="text-sm font-medium text-white/90 uppercase tracking-widest">{periodLabel}</p>
                                         <h3 className="mt-2 text-2xl font-bold text-white">
-                                            Net: {currency} {netProfit.toLocaleString()}
+                                            Net: {currencySymbol} {netProfit.toLocaleString()}
                                         </h3>
                                     </div>
                                     <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
@@ -212,7 +169,7 @@ function AccountingOverview() {
                                 <div className="relative space-y-2">
                                     <div className="flex justify-between text-white/90 text-sm">
                                         <span>Income</span>
-                                        <span className="font-semibold">{currency} {data.income.toLocaleString()}</span>
+                                        <span className="font-semibold">{currencySymbol} {data.income.toLocaleString()}</span>
                                     </div>
                                     <div className="w-full bg-black/20 rounded-full h-1.5 mb-1">
                                         <div className="bg-white/80 h-1.5 rounded-full" style={{ width: `${incomePercent}%` }}></div>
@@ -220,7 +177,7 @@ function AccountingOverview() {
 
                                     <div className="flex justify-between text-white/90 text-sm pt-1">
                                         <span>Expense</span>
-                                        <span className="font-semibold">{currency} {data.expense.toLocaleString()}</span>
+                                        <span className="font-semibold">{currencySymbol} {data.expense.toLocaleString()}</span>
                                     </div>
                                     <div className="w-full bg-black/20 rounded-full h-1.5">
                                         <div className="bg-white/40 h-1.5 rounded-full" style={{ width: `${expensePercent}%` }}></div>

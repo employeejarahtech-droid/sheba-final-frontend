@@ -1,7 +1,7 @@
 import { Logo } from '@/assets/logo'
 import { cn } from '@/lib/utils'
-import dashboardDark from './assets/dashboard-dark.png'
-import dashboardLight from './assets/dashboard-light.png'
+import dashboardDark from './assets/Sheba-Background.jpg'
+import dashboardLight from './assets/Sheba-Background.jpg'
 import { UserAuthForm } from './components/user-auth-form'
 
 export function SignIn2() {
@@ -11,7 +11,7 @@ export function SignIn2() {
         <div className='mx-auto flex w-full flex-col justify-center space-y-2 py-8 sm:w-[480px] sm:p-8'>
           <div className='mb-4 flex items-center justify-center'>
             <Logo className='me-2' />
-            <h1 className='text-xl font-medium'>Shadcn Admin</h1>
+            <h1 className='text-xl font-medium'>SHEBA CLINIC</h1>
           </div>
         </div>
         <div className='mx-auto flex w-full max-w-sm flex-col justify-center space-y-2'>
@@ -46,7 +46,7 @@ export function SignIn2() {
       <div
         className={cn(
           'bg-muted relative h-full overflow-hidden max-lg:hidden',
-          '[&>img]:absolute [&>img]:top-[15%] [&>img]:left-20 [&>img]:h-full [&>img]:w-full [&>img]:object-cover [&>img]:object-top-left [&>img]:select-none'
+          '[&>img]:absolute [&>img]:h-full [&>img]:w-full [&>img]:object-cover [&>img]:object-top-left [&>img]:select-none'
         )}
       >
         <img

@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
-
-
+import { PageHeader } from '@/components/layout/page-header'
 
 import { DataTable } from '@/components/DataTable'
 import { CreateCategoryForm } from './components/CreateCategoryForm'
@@ -21,21 +20,22 @@ type CategoryItem = {
     department_name: string;
     created_at: string;
     created_by?: string;
+    created_by_name?: string;
 };
 
 export default function Categories() {
     const [openEditForm, setOpenEditForm] = useState<boolean>(false);
     const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
     const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(10);
     const [search, setSearch] = useState("");
-    const limit = 10;
 
 
     const token = getCookie('accessToken');
     //const navigate = useNavigate();
 
     const { data } = useQuery({
-        queryKey: ["category", page, search],
+        queryKey: ["category", page, limit, search],
 
         queryFn: async () => {
             const res = await fetch(
@@ -162,18 +162,59 @@ export default function Categories() {
             const department = btn.dataset.department || '-';
             const createdBy = btn.dataset.createdBy || '-';
 
-            // Create details HTML
-            const details = document.createElement('ul');
-            details.className = 'grid grid-cols-2 gap-2 text-sm';
-            details.innerHTML = `
-                <li><strong>Category ID:</strong> ${id}</li>
-                <li><strong>Category Name:</strong> ${name}</li>
-                <li><strong>Department:</strong> ${department}</li>
-                <li><strong>Created By:</strong> ${createdBy}</li>
-                <li class='col-span-2'><strong>Actions:</strong>
-                    <a href='/outdoor/master/categories/${id}' class='inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2 mr-2'>View</a>
-                    <button onclick="window.editCategory(${id})" class='inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2'>Edit</button>
-                </li>
+            // Create card HTML
+            const cardContainer = document.createElement('div');
+            cardContainer.className = 'max-w-3xl mx-auto my-4';
+            cardContainer.innerHTML = `
+                <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-orange-600 to-rose-600 px-6 py-4">
+                        <h2 class="text-lg font-semibold text-white">Category Information</h2>
+                        <p class="text-orange-100 text-sm">Detailed overview of selected category</p>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="p-6">
+                        <ul class="grid md:grid-cols-2 gap-6 text-sm">
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Category ID</span>
+                                <span class="font-mono text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">#${id}</span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Category Name</span>
+                                <span class="font-semibold text-gray-800 text-base">${name}</span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Department</span>
+                                <span class="px-3 py-1 w-fit text-xs font-semibold rounded-full bg-green-100 text-green-700">
+                                    ${department}
+                                </span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Created By</span>
+                                <span class="font-medium text-gray-700">${createdBy}</span>
+                            </li>
+
+                        </ul>
+
+                        <!-- Actions -->
+                        <div class="mt-8 flex justify-end gap-3 border-t pt-5">
+                            <a href="/outdoor/master/categories/${id}"
+                               class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 transition h-10 px-5">
+                                View
+                            </a>
+
+                            <button onclick="window.editCategory(${id})"
+                                    class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-orange-600 text-white hover:bg-orange-700 transition h-10 px-5 shadow">
+                                Edit
+                            </button>
+                        </div>
+                    </div>
+                </div>
             `;
 
             // Create new row
@@ -182,7 +223,7 @@ export default function Categories() {
             const cell = document.createElement('td');
             cell.className = 'p-4 bg-muted/50';
             cell.colSpan = 10;
-            cell.appendChild(details);
+            cell.appendChild(cardContainer);
             newRow.appendChild(cell);
 
             row.parentNode?.insertBefore(newRow, row.nextSibling);
@@ -220,7 +261,7 @@ export default function Categories() {
                                 data-id="${data}"
                                 data-name="${(row.name || '-').replace(/"/g, '&quot;')}"
                                 data-department="${(row.department_name || '-').replace(/"/g, '&quot;')}"
-                                data-created-by="${String(row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
+                                data-created-by="${String(row.created_by_name || row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
                         <span>${data}</span>
                     </div>
                 `;
@@ -246,8 +287,9 @@ export default function Categories() {
             title: "Created By",
             orderable: true,
             responsivePriority: 3,
-            render: (data: any) => {
-                return `<span class="text-sm text-muted-foreground">${data || '-'}</span>`;
+            render: (_data: any, _type: string, row: CategoryItem) => {
+                const name = row.created_by_name || row.created_by || '-';
+                return `<span class="text-sm text-muted-foreground">${name}</span>`;
             },
             defaultContent: "-",
         },
@@ -275,15 +317,15 @@ export default function Categories() {
     return <>
         <AppHeader fixed />
 
-        <Main className="p-6 lg:p-10">
-            <div className="space-y-8">
+        <main className="p-4">
+            <div className="space-y-4">
                 {/* Statistics Cards */}
                 <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-4'>
                     {statCards.map((card, idx) => (
-                        <Card key={idx} className={`relative overflow-hidden border-none text-white shadow-xl ${card.shadow} bg-gradient-to-br ${card.gradient}`}>
+                        <Card key={idx} className={`p-3 relative overflow-hidden border-none text-white shadow-xl ${card.shadow} bg-gradient-to-br ${card.gradient}`}>
                             <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
                             <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-                            <CardContent className='p-6'>
+                            <CardContent className='p-3'>
                                 <div className='flex items-center justify-between relative z-10'>
                                     <div className='space-y-1'>
                                         <p className='text-sm font-medium text-white/80'>{card.title}</p>
@@ -302,13 +344,27 @@ export default function Categories() {
                 </div>
 
                 {/* Header & Table */}
-                <div className="flex flex-wrap items-end justify-between gap-2">
-                    <h1 className="text-2xl font-bold tracking-tight">List of Categories</h1>
-                    <CreateCategoryForm />
-                </div>
-                <DataTable columns={columns} data={data?.data?.items || []} meta={data?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
+                <PageHeader
+                    title="List of Categories"
+                    actions={<CreateCategoryForm />}
+                />
+                <DataTable
+                    columns={columns}
+                    data={data?.data?.items || []}
+                    meta={data?.data?.meta}
+                    onPageChange={setPage}
+                    onLimitChange={(newLimit) => {
+                        setLimit(newLimit);
+                        setPage(1);
+                    }}
+                    search={search}
+                    onSearchChange={(value) => {
+                        setSearch(value);
+                        setPage(1);
+                    }}
+                />
                 <EditCategoryForm open={openEditForm} setOpen={setOpenEditForm} categoryId={selectedCategoryId} />
             </div>
-        </Main>
+        </main>
     </>
 }

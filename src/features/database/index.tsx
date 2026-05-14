@@ -3,7 +3,7 @@ import { AppHeader } from '@/components/layout/app-header'
 
 
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { DataTable } from '@/components/DataTable'
 import { useState, useMemo } from 'react'
 import { getCookie } from '@/lib/cookies'
@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button"
 export default function DatabaseBrowser() {
     const [selectedTable, setSelectedTable] = useState<string>("");
     const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(10);
     const [open, setOpen] = useState(false);
     const token = getCookie('accessToken');
 
@@ -48,10 +49,10 @@ export default function DatabaseBrowser() {
 
     // Fetch Table Data
     const { data: tableData, isLoading: isLoadingData } = useQuery({
-        queryKey: ["db-table-data", selectedTable, page],
+        queryKey: ["db-table-data", selectedTable, page, limit],
         queryFn: async () => {
-            if (!selectedTable) return { data: { items: [], meta: { total: 0, page: 1, limit: 10 } } };
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/database/tables/${selectedTable}?page=${page}&limit=10`, {
+            if (!selectedTable) return { data: { items: [], meta: { total: 0, page: 1, limit } } };
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/database/tables/${selectedTable}?page=${page}&limit=${limit}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (!res.ok) throw new Error("Failed to fetch table data");
@@ -86,7 +87,7 @@ export default function DatabaseBrowser() {
         <>
             <AppHeader fixed />
 
-            <main className='p-6 lg:p-10'>
+            <main className='p-4'>
                 <div className="flex items-center gap-4 mb-6">
                     <div className="p-2 bg-primary/10 rounded-lg">
                         <Database className="w-6 h-6 text-primary" />
@@ -98,86 +99,88 @@ export default function DatabaseBrowser() {
                 </div>
 
                 <Card className="mb-6">
-                    <CardHeader>
-                        <CardTitle>Select Table</CardTitle>
-                        <CardDescription>Choose a table to view its records</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="max-w-md">
-                            <Popover open={open} onOpenChange={setOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        role="combobox"
-                                        aria-expanded={open}
-                                        className="w-full justify-between"
-                                    >
-                                        {selectedTable
-                                            ? tables.find((t: string) => t === selectedTable)
-                                            : "Select table..."}
-                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                                    <Command>
-                                        <CommandInput placeholder="Search table..." />
-                                        <CommandList>
-                                            <CommandEmpty>No table found.</CommandEmpty>
-                                            <CommandGroup>
-                                                {isLoadingTables ? (
-                                                    <div className="p-2 flex justify-center"><Loader2 className="animate-spin h-4 w-4" /></div>
-                                                ) : (
-                                                    tables.map((table: string) => (
-                                                        <CommandItem
-                                                            key={table}
-                                                            value={table}
-                                                            onSelect={(currentValue) => {
-                                                                setSelectedTable(currentValue === selectedTable ? "" : currentValue)
-                                                                setOpen(false)
-                                                                setPage(1) // Reset page on table change
-                                                            }}
-                                                        >
-                                                            <Check
-                                                                className={cn(
-                                                                    "mr-2 h-4 w-4",
-                                                                    selectedTable === table ? "opacity-100" : "opacity-0"
-                                                                )}
-                                                            />
-                                                            {table}
-                                                        </CommandItem>
-                                                    ))
-                                                )}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
+                    <CardContent className="pt-0">
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="max-w-md w-full">
+                                <Popover open={open} onOpenChange={setOpen}>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            role="combobox"
+                                            aria-expanded={open}
+                                            className="w-full justify-between"
+                                        >
+                                            {selectedTable
+                                                ? tables.find((t: string) => t === selectedTable)
+                                                : "Select table..."}
+                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                                        <Command>
+                                            <CommandInput placeholder="Search table..." />
+                                            <CommandList>
+                                                <CommandEmpty>No table found.</CommandEmpty>
+                                                <CommandGroup>
+                                                    {isLoadingTables ? (
+                                                        <div className="p-2 flex justify-center"><Loader2 className="animate-spin h-4 w-4" /></div>
+                                                    ) : (
+                                                        tables.map((table: string) => (
+                                                            <CommandItem
+                                                                key={table}
+                                                                value={table}
+                                                                onSelect={(currentValue) => {
+                                                                    setSelectedTable(currentValue === selectedTable ? "" : currentValue)
+                                                                    setOpen(false)
+                                                                    setPage(1)
+                                                                }}
+                                                            >
+                                                                <Check
+                                                                    className={cn(
+                                                                        "mr-2 h-4 w-4",
+                                                                        selectedTable === table ? "opacity-100" : "opacity-0"
+                                                                    )}
+                                                                />
+                                                                {table}
+                                                            </CommandItem>
+                                                        ))
+                                                    )}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                            <Button variant="outline">
+                                <Database className="mr-2 h-4 w-4" />
+                                Backup Database
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>
 
                 {selectedTable && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Data: {selectedTable}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
+                    <div>
+                        <CardContent className="p-0">
                             {isLoadingData ? (
                                 <div className="flex justify-center p-10"><Loader2 className="animate-spin" /></div>
                             ) : (
-                                <div className="rounded-md border">
-                                    <DataTable
-                                        columns={columns}
-                                        data={rows}
-                                        meta={meta}
-                                        onPageChange={setPage}
-                                        search=""
-                                        onSearchChange={() => { }}
-                                    />
-                                </div>
+                                <DataTable
+                                    columns={columns}
+                                    data={rows}
+                                    meta={meta}
+                                    onPageChange={setPage}
+                                    onLimitChange={(newLimit) => {
+                                        setLimit(newLimit);
+                                        setPage(1);
+                                    }}
+                                    search=""
+                                    onSearchChange={() => { }}
+                                    filterSlot={<h3 className="text-sm font-medium">Data: {selectedTable}</h3>}
+                                />
                             )}
                         </CardContent>
-                    </Card>
+                    </div>
                 )}
             </main>
         </>

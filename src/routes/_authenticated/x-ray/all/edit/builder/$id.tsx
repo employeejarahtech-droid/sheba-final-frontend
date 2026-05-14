@@ -12,6 +12,7 @@ import { getCookie } from '@/lib/cookies';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { topNav } from '@/data/data';
 import { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 
 export const Route = createFileRoute(
   '/_authenticated/x-ray/all/edit/builder/$id',
@@ -180,11 +181,11 @@ function XRayBuilder() {
       queryClient.invalidateQueries({ queryKey: ["xray-record", id] });
       queryClient.invalidateQueries({ queryKey: ["xray-invoice"] });
       queryClient.invalidateQueries({ queryKey: ["xray-all"] });
-      alert('Content updated successfully!');
+      toast.success('Content updated successfully!');
     },
     onError: (error: Error) => {
       console.error('Update error:', error);
-      alert(`Error updating content: ${error.message}`);
+      toast.error(`Error updating content: ${error.message}`);
     },
   });
 

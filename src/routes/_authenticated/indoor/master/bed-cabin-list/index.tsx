@@ -1,17 +1,12 @@
+import { useState, useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-;
 import { AppHeader } from '@/components/layout/app-header';
-import { Main } from '@/components/layout/main';
-;
-;
-;
-import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable';
 import { PlusCircle } from 'lucide-react';
-import { useEffect } from 'react';
-
+import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from '@/lib/cookies';
+import { PageHeader } from '@/components/layout/page-header';
 
 export const Route = createFileRoute('/_authenticated/indoor/master/bed-cabin-list/')({
     component: BedCabinList,
@@ -25,118 +20,44 @@ type BedCabinItem = {
     status: "Available" | "Occupied" | "Maintenance";
     price: number;
     created_by?: string | number | null;
+    created_by_name?: string;
 };
 
 function BedCabinList() {
     const navigate = useNavigate();
     const token = getCookie('accessToken');
+    const [page, setPage] = useState(1);
+    const [search, setSearch] = useState("");
+    const [limit, setLimit] = useState(10);
 
     const { data, isLoading, error } = useQuery({
-        queryKey: ['bed-cabin-list'],
+        queryKey: ['bed-cabin-list', page, limit, search],
         queryFn: async () => {
-            console.log('Fetching bed/cabin list from:', `${import.meta.env.VITE_API_URL}/api/bed-cabin?limit=100`);
-            console.log('Token exists:', !!token);
-
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/bed-cabin?limit=100`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/bed-cabin?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 }
-            });
-
-            console.log('Response status:', res.status, res.statusText);
-
+            );
             if (!res.ok) {
                 const errorText = await res.text();
-                console.error('API Error:', res.status, errorText);
                 throw new Error(`Failed to fetch bed/cabin list: ${res.status} - ${errorText}`);
             }
-
-            const result = await res.json();
-            console.log('Full API Response:', JSON.stringify(result, null, 2));
-
-            // Return the full result, not just items - we'll access .data?.items in the render
-            return result;
+            return res.json();
         },
         enabled: !!token,
-        placeholderData: (prev) => prev || { data: { items: [], meta: { total: 0, page: 1, limit: 100 } } }
+        placeholderData: (prev) =>
+            prev
+                ? prev
+                : {
+                    data: {
+                        items: [],
+                        meta: { page, limit, total: 0 },
+                    },
+                },
     });
-
-    // Log current data state
-    console.log('Current data state:', data);
-    console.log('Loading:', isLoading, 'Error:', error);
-
-    // Handle expand button clicks using event delegation
-    useEffect(() => {
-        const handleExpandClick = (e: Event) => {
-            const button = (e.target as HTMLElement).closest('.expand-btn');
-            if (!button) return;
-
-            const btn = button as HTMLButtonElement;
-            const row = btn.closest('tr');
-            if (!row) return;
-
-            const isExpanded = row.classList.contains('expanded');
-            const nextRow = row.nextElementSibling;
-
-            // Toggle collapse
-            if (nextRow && nextRow.classList.contains('child-row-detail')) {
-                nextRow.remove();
-                row.classList.remove('expanded');
-                btn.textContent = '+';
-                btn.style.backgroundColor = 'black';
-                return;
-            }
-
-            // Don't expand if already expanded
-            if (isExpanded) return;
-
-            // Get data from attributes
-            const id = btn.dataset.id || '';
-            const code = btn.dataset.code || '-';
-            const type = btn.dataset.type || '-';
-            const ward = btn.dataset.ward || '-';
-            const status = btn.dataset.status || '-';
-            const price = btn.dataset.price || '0';
-            const createdBy = btn.dataset.createdBy || '-';
-
-            // Create details HTML
-            const details = document.createElement('ul');
-            details.className = 'grid grid-cols-2 gap-2 text-sm';
-            details.innerHTML = `
-                <li><strong>Bed/Cabin ID:</strong> ${id}</li>
-                <li><strong>Code:</strong> ${code}</li>
-                <li><strong>Type:</strong> ${type}</li>
-                <li><strong>Ward/Department:</strong> ${ward}</li>
-                <li><strong>Status:</strong> ${status}</li>
-                <li><strong>Price/Day:</strong> ৳${price}</li>
-                <li><strong>Created By:</strong> ${createdBy}</li>
-                <li class='col-span-2'><strong>Actions:</strong>
-                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2" onclick="window.editBedCabin('${id}')">Edit</button>
-                </li>
-            `;
-
-            // Create new row
-            const newRow = document.createElement('tr');
-            newRow.className = 'child-row-detail';
-            const cell = document.createElement('td');
-            cell.className = 'p-4 bg-muted/50';
-            cell.colSpan = 9;
-            cell.appendChild(details);
-            newRow.appendChild(cell);
-
-            row.parentNode?.insertBefore(newRow, row.nextSibling);
-            row.classList.add('expanded');
-            btn.textContent = '−';
-            btn.style.backgroundColor = '#dc2626';
-        };
-
-        // Add event listener to document for delegation
-        document.addEventListener('click', handleExpandClick);
-
-        return () => {
-            document.removeEventListener('click', handleExpandClick);
-        };
-    }, []);
 
     const columns = [
         {
@@ -155,7 +76,7 @@ function BedCabinList() {
                                 data-ward="${(row.ward || '-').replace(/"/g, '&quot;')}"
                                 data-status="${(row.status || '-').replace(/"/g, '&quot;')}"
                                 data-price="${Number(row.price || 0).toLocaleString()}"
-                                data-created-by="${String(row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
+                                data-created-by="${String(row.created_by_name || row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
                         <span>${data}</span>
                     </div>
                 `;
@@ -208,71 +129,209 @@ function BedCabinList() {
         {
             data: 'created_by',
             title: 'Created By',
-            render: (data: any) => {
-                const value = data || '-';
-                return `<span class="text-sm text-muted-foreground">${value}</span>`;
+            render: (_data: any, _type: string, row: BedCabinItem) => {
+                const name = row.created_by_name || row.created_by || '-';
+                return `<span class="text-sm text-muted-foreground">${name}</span>`;
+            },
+        },
+        {
+            data: null,
+            title: 'Actions',
+            render: (_data: any, _type: string, row: BedCabinItem) => {
+                return `
+                    <div class="flex gap-2">
+                        <button data-action="edit" data-id="${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3">
+                            Edit
+                        </button>
+                    </div>
+                `;
             },
         },
     ];
 
-    return (
-        <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-background">
-            <AppHeader fixed />
+    // Handle expand button clicks using event delegation
+    useEffect(() => {
+        const handleExpandClick = (e: Event) => {
+            const button = (e.target as HTMLElement).closest('.expand-btn');
+            if (!button) return;
 
-            <Main className="p-6 lg:p-10 w-full flex-1">
-                <div className="space-y-6 max-w-7xl mx-auto">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 dark:border-gray-800 pb-6">
-                        <div>
-                            <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent uppercase flex items-center gap-3">
-                                Bed & Cabin Management
-                            </h1>
-                            <p className="text-muted-foreground mt-1 text-sm font-medium">
-                                Manage hospital rooms, beds, and allocation pricing
-                            </p>
+            const btn = button as HTMLButtonElement;
+            const row = btn.closest('tr');
+            if (!row) return;
+
+            const isExpanded = row.classList.contains('expanded');
+            const nextRow = row.nextElementSibling;
+
+            // Toggle collapse
+            if (nextRow && nextRow.classList.contains('child-row-detail')) {
+                nextRow.remove();
+                row.classList.remove('expanded');
+                btn.textContent = '+';
+                btn.style.backgroundColor = 'black';
+                return;
+            }
+
+            // Don't expand if already expanded
+            if (isExpanded) return;
+
+            // Get data from attributes
+            const id = btn.dataset.id || '';
+            const code = btn.dataset.code || '-';
+            const type = btn.dataset.type || '-';
+            const ward = btn.dataset.ward || '-';
+            const status = btn.dataset.status || '-';
+            const price = btn.dataset.price || '0';
+            const createdBy = btn.dataset.createdBy || '-';
+
+            // Status badge color
+            const statusBadgeClass = status === 'Available'
+                ? 'bg-emerald-100 text-emerald-700'
+                : status === 'Occupied'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-amber-100 text-amber-700';
+
+            // Type badge color
+            const typeBadgeClass = type === 'Bed'
+                ? 'bg-blue-100 text-blue-700'
+                : type === 'Cabin'
+                    ? 'bg-purple-100 text-purple-700'
+                    : 'bg-amber-100 text-amber-700';
+
+            // Create card HTML
+            const cardContainer = document.createElement('div');
+            cardContainer.className = 'max-w-3xl mx-auto my-4';
+            cardContainer.innerHTML = `
+                <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                    <div class="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
+                        <h2 class="text-lg font-semibold text-white">Bed/Cabin Information</h2>
+                        <p class="text-blue-100 text-sm">Detailed overview of selected room/bed</p>
+                    </div>
+
+                    <div class="p-6">
+                        <ul class="grid md:grid-cols-2 gap-6 text-sm">
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Bed/Cabin ID</span>
+                                <span class="font-mono text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">#${id}</span>
+                            </li>
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Code</span>
+                                <span class="font-bold text-blue-600 text-base">${code}</span>
+                            </li>
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Type</span>
+                                <span class="px-3 py-1 w-fit text-xs font-semibold rounded-full ${typeBadgeClass}">${type}</span>
+                            </li>
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Ward/Department</span>
+                                <span class="font-medium text-gray-700">${ward}</span>
+                            </li>
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Status</span>
+                                <span class="px-3 py-1 w-fit text-xs font-semibold rounded-full ${statusBadgeClass}">${status}</span>
+                            </li>
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Price/Day</span>
+                                <span class="font-bold text-lg text-blue-600">৳${price}</span>
+                            </li>
+                            <li class="flex flex-col md:col-span-2">
+                                <span class="text-gray-500">Created By</span>
+                                <span class="font-medium text-gray-700">${createdBy}</span>
+                            </li>
+                        </ul>
+
+                        <div class="mt-8 flex justify-end gap-3 border-t pt-5">
+                            <button data-action="edit" data-id="${id}"
+                                    class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition h-10 px-5 shadow">
+                                Edit
+                            </button>
                         </div>
-                        <div className="flex items-center gap-3">
+                    </div>
+                </div>
+            `;
+
+            // Create new row
+            const newRow = document.createElement('tr');
+            newRow.className = 'child-row-detail';
+            const cell = document.createElement('td');
+            cell.className = 'p-4 bg-muted/50';
+            cell.colSpan = 10;
+            cell.appendChild(cardContainer);
+            newRow.appendChild(cell);
+
+            row.parentNode?.insertBefore(newRow, row.nextSibling);
+            row.classList.add('expanded');
+            btn.textContent = '−';
+            btn.style.backgroundColor = '#dc2626';
+        };
+
+        document.addEventListener('click', handleExpandClick);
+        return () => {
+            document.removeEventListener('click', handleExpandClick);
+        };
+    }, []);
+
+    // Handle button clicks via event delegation
+    useEffect(() => {
+        const handleTableClick = (e: Event) => {
+            const target = e.target as HTMLElement;
+            const button = target.closest('button[data-action]');
+            if (!button) return;
+
+            const action = button.getAttribute('data-action');
+            const id = button.getAttribute('data-id');
+
+            if (action === 'edit' && id) {
+                navigate({ to: `/indoor/master/bed-cabin-list/${id}` });
+            }
+        };
+
+        document.addEventListener('click', handleTableClick);
+        return () => {
+            document.removeEventListener('click', handleTableClick);
+        };
+    }, [navigate]);
+
+    return (
+        <>
+            <AppHeader fixed />
+            <main className="p-4">
+                <div className="space-y-4">
+                    <PageHeader
+                        title="Bed & Cabin Management"
+                        actions={
                             <Button
-                                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 border-none px-6 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] font-bold"
                                 onClick={() => navigate({ to: '/indoor/master/bed-cabin-list/create' })}
                             >
                                 <PlusCircle className="h-4 w-4" />
                                 Add New Room/Bed
                             </Button>
+                        }
+                    />
+                    {isLoading ? (
+                        <div className="p-20 text-center text-muted-foreground animate-pulse">
+                            Loading Bed & Cabin data...
                         </div>
-                    </div>
-
-                    <div className="">
-                        {isLoading ? (
-                            <div className="p-20 text-center text-muted-foreground animate-pulse">
-                                Loading Bed & Cabin data...
-                            </div>
-                        ) : error ? (
-                            <div className="p-10 text-center">
-                                <div className="text-red-500 font-semibold mb-2">Error loading data</div>
-                                <div className="text-sm text-muted-foreground">{(error as Error).message}</div>
-                                <div className="text-xs text-muted-foreground mt-2">
-                                    Please check browser console for details
-                                </div>
-                            </div>
-                        ) : (
-                            <DataTable columns={columns} data={data?.data?.items || []} meta={data?.data?.meta} />
-                        )}
-                    </div>
+                    ) : error ? (
+                        <div className="p-10 text-center">
+                            <div className="text-red-500 font-semibold mb-2">Error loading data</div>
+                            <div className="text-sm text-muted-foreground">{(error as Error).message}</div>
+                        </div>
+                    ) : (
+                        <DataTable
+                            columns={columns}
+                            data={data?.data?.items || []}
+                            meta={data?.data?.meta}
+                            onPageChange={setPage}
+                            onLimitChange={(newLimit) => {
+                                setLimit(newLimit);
+                                setPage(1);
+                            }}
+                            search={search}
+                            onSearchChange={setSearch}
+                        />
+                    )}
                 </div>
-            </Main>
-        </div>
+            </main>
+        </>
     );
-}
-
-// Global edit function for inline button clicks
-declare global {
-    interface Window {
-        editBedCabin?: (id: string) => void;
-    }
-}
-
-if (typeof window !== 'undefined') {
-    window.editBedCabin = (id: string) => {
-        window.location.href = `/indoor/master/bed-cabin-list/${id}`;
-    };
 }

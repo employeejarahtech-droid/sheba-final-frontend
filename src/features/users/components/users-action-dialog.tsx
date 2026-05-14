@@ -31,13 +31,12 @@ import { Loader2 } from 'lucide-react'
 
 const formSchema = z
   .object({
-    firstName: z.string().min(1, 'First Name is required.'),
-    lastName: z.string().min(1, 'Last Name is required.'),
-    username: z.string().min(1, 'Username is required.'),
-    phoneNumber: z.string().min(1, 'Phone number is required.'),
+    name: z.string().min(1, 'Name is required.'),
     email: z.email({
       error: (iss) => (iss.input === '' ? 'Email is required.' : undefined),
     }),
+    address1: z.string().optional(),
+    address2: z.string().optional(),
     password: z.string().transform((pwd) => pwd.trim()),
     role: z.string().min(1, 'Role is required.'),
     confirmPassword: z.string().transform((pwd) => pwd.trim()),
@@ -118,18 +117,21 @@ export function UsersActionDialog({
     resolver: zodResolver(formSchema),
     defaultValues: isEdit
       ? {
-        ...currentRow,
+        name: currentRow?.firstName ? `${currentRow.firstName} ${currentRow.lastName}`.trim() : '',
+        email: currentRow?.email || '',
+        address1: currentRow?.address1 || '',
+        address2: currentRow?.address2 || '',
+        role: currentRow?.role || '',
         password: '',
         confirmPassword: '',
         isEdit,
       }
       : {
-        firstName: '',
-        lastName: '',
-        username: '',
+        name: '',
         email: '',
+        address1: '',
+        address2: '',
         role: '',
-        phoneNumber: '',
         password: '',
         confirmPassword: '',
         isEdit,
@@ -138,21 +140,17 @@ export function UsersActionDialog({
 
   const onSubmit = async (values: UserForm) => {
     try {
-      // Transform form data to API format
-      const name = `${values.firstName} ${values.lastName}`.trim()
-
-      // Role is now the ID from API (as string), convert to number
       const role_id = parseInt(values.role)
 
       if (isEdit && currentRow) {
-        // Update existing user
         const updateData: any = {
-          name,
+          name: values.name,
           email: values.email,
           role_id,
+          address1: values.address1,
+          address2: values.address2,
         }
 
-        // Only include password if it was changed
         if (values.password) {
           updateData.password = values.password
         }
@@ -168,12 +166,13 @@ export function UsersActionDialog({
           onOpenChange(false)
         }
       } else {
-        // Create new user
         const res = await addUser({
-          name,
+          name: values.name,
           email: values.email,
           password: values.password,
           role_id,
+          address1: values.address1,
+          address2: values.address2,
         })
 
         if (res.status) {
@@ -215,56 +214,17 @@ export function UsersActionDialog({
             >
               <FormField
                 control={form.control}
-                name='firstName'
+                name='name'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
                     <FormLabel className='col-span-2 text-end'>
-                      First Name
+                      Name
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder='John'
+                        placeholder='John Doe'
                         className='col-span-4'
                         autoComplete='off'
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='lastName'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>
-                      Last Name
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder='Doe'
-                        className='col-span-4'
-                        autoComplete='off'
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='username'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>
-                      Username
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder='john_doe'
-                        className='col-span-4'
                         {...field}
                       />
                     </FormControl>
@@ -291,15 +251,34 @@ export function UsersActionDialog({
               />
               <FormField
                 control={form.control}
-                name='phoneNumber'
+                name='address1'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
                     <FormLabel className='col-span-2 text-end'>
-                      Phone Number
+                      Address Line 1
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder='+123456789'
+                        placeholder='Street address, area'
+                        className='col-span-4'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className='col-span-4 col-start-3' />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='address2'
+                render={({ field }) => (
+                  <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
+                    <FormLabel className='col-span-2 text-end'>
+                      Address Line 2
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='City, state, postal code'
                         className='col-span-4'
                         {...field}
                       />

@@ -1,27 +1,81 @@
-
 import { AppHeader } from '@/components/layout/app-header';
 import { Main } from '@/components/layout/main';
 import { Button } from '@/components/ui/button';
-import { outdoorInvoices } from '@/data/data';
-import BiochemistryReport from '@/routes/_authenticated/pathology/biochemical/all/report/ReportDetails'
+import BiochemistryReport from '@/components/pathology/ReportDetails'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeft, Printer } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { getCookie } from '@/lib/cookies';
+import { useState } from 'react';
 
 export const Route = createFileRoute(
     '/_authenticated/pathology/biochemical/all/report/$reportId',
 )({
-    component: ReportDetails,
+    component: BiochemistryReportPage,
 })
 
 
-function ReportDetails() {
+function BiochemistryReportPage() {
     const { reportId } = Route.useParams();
-    const invoice = outdoorInvoices.find((item) => item.id === parseInt(reportId!));
+    const token = getCookie('accessToken');
+    const [paddingTop, setPaddingTop] = useState(100);
 
-    console.log(invoice)
+    // Generate padding options from 10 to 200 in increments of 5
+    const paddingOptions = Array.from({ length: 39 }, (_, i) => (i + 2) * 5); // [10, 15, 20, ..., 200]
+
+    const { data: reportData, isLoading, error } = useQuery({
+        queryKey: ["biochemistry-report", reportId],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/biochemical-all/${reportId}`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch biochemistry report");
+            return res.json();
+        },
+        enabled: !!token && !!reportId,
+    });
+
+    if (isLoading) {
+        return (
+            <>
+                <AppHeader fixed />
+                <Main>
+                    <div className="flex items-center justify-center min-h-screen">Loading...</div>
+                </Main>
+            </>
+        );
+    }
+
+    if (error) {
+        return (
+            <>
+                <AppHeader fixed />
+                <Main>
+                    <div className="flex items-center justify-center min-h-screen text-red-500">Error loading report</div>
+                </Main>
+            </>
+        );
+    }
+
+    const invoice = reportData?.data;
+
+    if (!invoice) {
+        return (
+            <>
+                <AppHeader fixed />
+                <Main>
+                    <div className="flex items-center justify-center min-h-screen">Report not found</div>
+                </Main>
+            </>
+        );
+    }
+
     return (
         <>
-            <AppHeader fixed/>
+            <AppHeader fixed />
 
             <Main>
                 <div className="print:hidden flex items-center justify-between gap-4">
@@ -31,12 +85,29 @@ function ReportDetails() {
                             Back to All Reports
                         </Button>
                     </Link>
-                    <Button variant="outline" size="sm" onClick={() => window.print()}>
-                        <Printer className="mr-2 h-4 w-4" />
-                        Print
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                            <label htmlFor="padding-select" className="text-sm font-medium">Padding Top:</label>
+                            <select
+                                id="padding-select"
+                                value={paddingTop}
+                                onChange={(e) => setPaddingTop(Number(e.target.value))}
+                                className="h-8 px-2 text-sm border rounded-md bg-background"
+                            >
+                                {paddingOptions.map((value) => (
+                                    <option key={value} value={value}>
+                                        {value}px
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={() => window.print()}>
+                            <Printer className="h-4 w-4" />
+                            Print
+                        </Button>
+                    </div>
                 </div>
-                <BiochemistryReport invoice={invoice!} />
+                <BiochemistryReport invoice={invoice} testName="Biochemistry Report" paddingTop={paddingTop} />
             </Main>
         </>
     )

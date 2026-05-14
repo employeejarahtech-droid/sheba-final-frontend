@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useRouter, Link } from '@tanstack/react-router'
 import { Button } from "@/components/ui/button";
 import { Main } from '@/components/layout/main';
 import { Header } from '@/components/layout/header';
@@ -12,6 +12,8 @@ import { getCookie } from '@/lib/cookies';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { topNav } from '@/data/data';
 import { useState, useEffect, useRef } from 'react';
+import { Printer } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const Route = createFileRoute(
   '/_authenticated/ecg/all/edit/builder/$id',
@@ -180,11 +182,11 @@ function ECGBuilder() {
       queryClient.invalidateQueries({ queryKey: ["ecg-record", id] });
       queryClient.invalidateQueries({ queryKey: ["ecg-invoice"] });
       queryClient.invalidateQueries({ queryKey: ["ecg-all"] });
-      alert('Content updated successfully!');
+      toast.success('Content updated successfully!');
     },
     onError: (error: Error) => {
       console.error('Update error:', error);
-      alert(`Error updating content: ${error.message}`);
+      toast.error(`Error updating content: ${error.message}`);
     },
   });
 
@@ -261,6 +263,15 @@ function ECGBuilder() {
             <Button variant="outline" onClick={handleBack}>
               Back
             </Button>
+            <Link to="/ecg/all/print/$id" params={{ id }}>
+              <Button variant="outline" onClick={(e) => {
+                e.preventDefault();
+                router.navigate({ to: '/ecg/all/print/$id', params: { id } });
+              }}>
+                <Printer className="h-4 w-4 mr-2" />
+                Print
+              </Button>
+            </Link>
             <Button variant="default" onClick={handleSave} disabled={updateMutation.isPending}>
               {updateMutation.isPending ? 'Saving...' : 'Save Content'}
             </Button>

@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 
 import { useGetProfitLossQuery } from "@/features/accounting/accountingQueries";
 import { AppHeader } from "@/components/layout/app-header";
+import { PageHeader } from '@/components/layout/page-header'
 
 const profitLossSearchSchema = z.object({
     from: z.string().optional(),
@@ -80,37 +81,38 @@ function ProfitAndLoss() {
         <div className="space-y-6">
             <AppHeader fixed />
             <main className='p-6 lg:p-10'>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <div>
-                        <h2 className="text-3xl font-bold tracking-tight">Profit & Loss</h2>
-                        <p className="text-muted-foreground">Financial performance for the selected period.</p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-[160px] justify-start text-left font-normal">
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {from ? format(from, "PP") : "Start Date"}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="end">
-                                <Calendar mode="single" selected={from} onSelect={(d) => { setFrom(d); updateFilters(d, to); }} initialFocus />
-                            </PopoverContent>
-                        </Popover>
-                        <span className="text-muted-foreground">-</span>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-[160px] justify-start text-left font-normal">
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {to ? format(to, "PP") : "End Date"}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="end">
-                                <Calendar mode="single" selected={to} onSelect={(d) => { setTo(d); updateFilters(from, d); }} initialFocus />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-                </div>
+                <PageHeader
+                    title="Profit & Loss"
+                    description="Financial performance for the selected period."
+                    actions={
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" className="w-[160px] justify-start text-left font-normal">
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {from ? format(from, "PP") : "Start Date"}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="end">
+                                    <Calendar mode="single" selected={from} onSelect={(d) => { setFrom(d); updateFilters(d, to); }} initialFocus />
+                                </PopoverContent>
+                            </Popover>
+                            <span className="text-muted-foreground">-</span>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" className="w-[160px] justify-start text-left font-normal">
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {to ? format(to, "PP") : "End Date"}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="end">
+                                    <Calendar mode="single" selected={to} onSelect={(d) => { setTo(d); updateFilters(from, d); }} initialFocus />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                    }
+                    showBackButton={false}
+                />
 
                 <div className="grid gap-6 md:grid-cols-2">
                     {/* INCOME */}
@@ -125,7 +127,6 @@ function ProfitAndLoss() {
                                 columns={columns}
                                 data={income}
                                 isLoading={isLoading}
-                                className="border-0"
                             />
                             <div className="p-4 bg-emerald-50/50 border-t flex justify-between font-bold text-lg mt-2">
                                 <span className="text-emerald-800">Total Income</span>
@@ -146,7 +147,6 @@ function ProfitAndLoss() {
                                 columns={columns}
                                 data={expense}
                                 isLoading={isLoading}
-                                className="border-0"
                             />
                             <div className="p-4 bg-red-50/50 border-t flex justify-between font-bold text-lg mt-2">
                                 <span className="text-red-800">Total Expense</span>

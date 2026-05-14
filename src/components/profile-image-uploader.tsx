@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Camera, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -6,41 +6,44 @@ import { cn } from '@/lib/utils'
 interface ProfileImageUploaderProps {
   currentImage?: string
   onImageChange: (file: File | null) => void
+  onImageRemove?: () => void
   className?: string
 }
 
 export function ProfileImageUploader({
   currentImage,
   onImageChange,
+  onImageRemove,
   className
 }: ProfileImageUploaderProps) {
   const [preview, setPreview] = useState<string | undefined>(currentImage)
   const [isDragging, setIsDragging] = useState(false)
+  const [removed, setRemoved] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleFileSelect = (file: File | null) => {
-    if (!file) {
-      setPreview(undefined)
-      onImageChange(null)
-      return
-    }
+  // Only sync from prop when it actually changes (new saved image from server)
+  useEffect(() => {
+    setRemoved(false)
+    setPreview(currentImage)
+  }, [currentImage])
 
-    // Validate file type
+  const handleFileSelect = (file: File | null) => {
+    if (!file) return
+
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file')
       return
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert('Image size must be less than 5MB')
       return
     }
 
-    // Create preview
     const reader = new FileReader()
     reader.onloadend = () => {
       setPreview(reader.result as string)
+      setRemoved(false)
       onImageChange(file)
     }
     reader.readAsDataURL(file)
@@ -49,7 +52,6 @@ export function ProfileImageUploader({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
-
     const file = e.dataTransfer.files[0]
     handleFileSelect(file)
   }
@@ -65,12 +67,14 @@ export function ProfileImageUploader({
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null
-    handleFileSelect(file)
+    if (file) handleFileSelect(file)
   }
 
   const handleRemove = () => {
     setPreview(undefined)
+    setRemoved(true)
     onImageChange(null)
+    if (onImageRemove) onImageRemove()
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -86,7 +90,13 @@ export function ProfileImageUploader({
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        onClick={() => fileInputRef.current?.click()}
+        onClick={(e) => {
+          e.preventDefault()
+          fileInputRef.current?.click()
+        }}
+        onKeyDown={(e) => e.preventDefault()}
+        role="button"
+        tabIndex={0}
       >
         {/* Image Container */}
         <div
@@ -123,9 +133,11 @@ export function ProfileImageUploader({
             type="button"
             onClick={(e) => {
               e.stopPropagation()
+              e.preventDefault()
               handleRemove()
             }}
-            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors"
+            onMouseDown={(e) => e.stopPropagation()}
+            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors z-10"
           >
             <X className="w-4 h-4" />
           </button>
@@ -147,7 +159,10 @@ export function ProfileImageUploader({
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => fileInputRef.current?.click()}
+          onClick={(e) => {
+            e.preventDefault()
+            fileInputRef.current?.click()
+          }}
         >
           <Upload className="w-4 h-4 mr-2" />
           Choose File
@@ -157,7 +172,10 @@ export function ProfileImageUploader({
             type="button"
             variant="outline"
             size="sm"
-            onClick={handleRemove}
+            onClick={(e) => {
+              e.preventDefault()
+              handleRemove()
+            }}
           >
             <X className="w-4 h-4 mr-2" />
             Remove

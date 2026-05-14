@@ -191,6 +191,12 @@ export const accountingService = {
         return response.data;
     },
 
+    // GET NEXT ACCOUNT CODE
+    getNextAccountCode: async (params: { parent_id?: number; type?: string }) => {
+        const response = await api.get<{ status: boolean; data: { code: string } }>('/accounting/accounts/next-code', { params });
+        return response.data;
+    },
+
     // ADD ACCOUNTING ACCOUNT
     addAccountingAccount: async (body: Partial<ChartOfAccount>) => {
         const response = await api.post<ListResponse<ChartOfAccount>>('/accounting/accounts', body);

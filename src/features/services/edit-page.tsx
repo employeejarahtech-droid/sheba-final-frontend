@@ -1,25 +1,24 @@
-import { useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { Button } from "@/components/ui/button";
 import { Main } from '@/components/layout/main';
 import { AppHeader } from '@/components/layout/app-header';
-;
-;
-;
-;
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { ArrowLeft, Stethoscope } from 'lucide-react'
+import { ArrowLeft, Stethoscope, ChevronDown, Check } from 'lucide-react'
+import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getCookie } from '@/lib/cookies';
 import { Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const serviceSchema = z.object({
     serviceCategoryId: z.string().optional(),
@@ -39,32 +38,59 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const token = getCookie('accessToken');
+    const [catOpen, setCatOpen] = useState(false);
 
-    const form = useForm<ServiceValues>({
-        resolver: zodResolver(serviceSchema) as any,
-        defaultValues: {
-            serviceCategoryId: "none",
-            name: "",
-            price: 0,
-            description: "",
-            status: "Active",
+    // Fetch service data
+    const { data: serviceData, isLoading, error } = useQuery({
+        queryKey: ['service', serviceId],
+        queryFn: async () => {
+            if (!serviceId) return null
+            try {
+                const res = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/service/${serviceId}`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                )
+                if (!res.ok) {
+                    console.error('Failed to fetch service:', res.status);
+                    throw new Error('Failed to fetch service')
+                }
+                const result = await res.json()
+                console.log('API Response - Full result:', result)
+                console.log('API Response - Service data:', result.data)
+                return result.data
+            } catch (error) {
+                console.error('Error fetching service:', error);
+                throw error;
+            }
         },
+        enabled: !!serviceId && !!token,
     })
 
     // Fetch service categories for dropdown
     const { data: categoriesData } = useQuery({
         queryKey: ['service-categories'],
         queryFn: async () => {
-            const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/service-category?limit=100`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
+            try {
+                const res = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/service-category?limit=100`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                );
+                if (!res.ok) {
+                    console.error('Failed to fetch categories:', res.status);
+                    return { data: { items: [] } };
                 }
-            );
-            if (!res.ok) {
+                const result = await res.json();
+                console.log('Categories API Response:', result);
+                console.log('Categories items:', result.data?.items);
+                return result;
+            } catch (error) {
+                console.error('Error fetching categories:', error);
                 return { data: { items: [] } };
             }
-            return res.json();
         },
         enabled: !!token,
         retry: false,
@@ -72,32 +98,31 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
 
     const categories = categoriesData?.data?.items || [];
 
-    // Fetch service data
-    const { data: serviceData, isLoading } = useQuery({
-        queryKey: ['service', serviceId],
-        queryFn: async () => {
-            if (!serviceId) return null
-            const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/service/${serviceId}`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            )
-            if (!res.ok) throw new Error('Failed to fetch service')
-            const result = await res.json()
-            return result.data
+    // Initialize form with default values - will be updated by useEffect when data loads
+    const form = useForm<ServiceValues>({
+        resolver: zodResolver(serviceSchema) as any,
+        defaultValues: {
+            serviceCategoryId: "none",
+            name: "",
+            description: "",
+            price: 0,
+            status: "Active",
         },
-        enabled: !!serviceId && !!token,
     })
 
-    // Populate form when data is loaded
+    // Update form when service data loads
     useEffect(() => {
         if (serviceData) {
+            const categoryId = serviceData.service_category_id
+                ? serviceData.service_category_id.toString()
+                : "none";
+            console.log('Edit Service - service_category_id:', serviceData.service_category_id);
+            console.log('Edit Service - setting serviceCategoryId to:', categoryId);
             form.reset({
-                serviceCategoryId: serviceData.service_category_id?.toString() || "none",
+                serviceCategoryId: categoryId,
                 name: serviceData.name || "",
-                price: serviceData.price || 0,
                 description: serviceData.description || "",
+                price: serviceData.price ? Number(serviceData.price) : 0,
                 status: serviceData.status || "Active",
             })
         }
@@ -114,8 +139,11 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    ...data,
-                    serviceCategoryId: (data.serviceCategoryId && data.serviceCategoryId !== "none") ? parseInt(data.serviceCategoryId) : null,
+                    name: data.name,
+                    price: data.price,
+                    description: data.description,
+                    status: data.status,
+                    service_category_id: (data.serviceCategoryId && data.serviceCategoryId !== "none") ? parseInt(data.serviceCategoryId) : null,
                 }),
             })
 
@@ -142,10 +170,35 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
         updateMutation.mutate(data);
     };
 
+    // Don't render form until service data is loaded
+    if (!serviceData) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        )
+    }
+
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <p className="text-red-500 mb-4">Failed to load service data</p>
+                    <Button
+                        variant="outline"
+                        onClick={() => navigate({ to: '/indoor/master/services' })}
+                    >
+                        Back to Services
+                    </Button>
+                </div>
             </div>
         )
     }
@@ -177,11 +230,11 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
                     </div>
 
                     <Form {...form}>
-                        <form id="edit-service-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                            <Card className="border dark:border-gray-800 overflow-hidden py-0 gap-0">
-                                <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border-b-1 dark:border-gray-800 py-4 gap-0">
+                        <form id="edit-service-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" key={serviceData?.id || 'edit-form'}>
+                            <Card className="border dark:border-gray-800 overflow-hidden pt-0">
+                                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b-1 dark:border-gray-800 py-2 gap-0">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-lg shadow-sm">
+                                        <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-sm">
                                             <Stethoscope className="h-4 w-4 text-white" />
                                         </div>
                                         <div>
@@ -198,27 +251,77 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
                                         <FormField
                                             control={form.control}
                                             name="serviceCategoryId"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Category</FormLabel>
-                                                    <Select onValueChange={field.onChange} value={field.value}>
-                                                        <FormControl>
-                                                            <SelectTrigger className="h-10">
-                                                                <SelectValue placeholder="Select category (optional)" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            <SelectItem value="none">No Category</SelectItem>
-                                                            {categories.map((cat: any) => (
-                                                                <SelectItem key={cat.id} value={cat.id.toString()}>
-                                                                    {cat.name}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
+                                            render={({ field }) => {
+                                                const selectedCategory = categories?.find(
+                                                    (cat: any) => cat.id.toString() === field.value
+                                                );
+                                                console.log('Category field value:', field.value);
+                                                console.log('Categories available:', categories);
+                                                console.log('Selected category:', selectedCategory);
+                                                return (
+                                                    <FormItem>
+                                                        <FormLabel>Category</FormLabel>
+                                                        <Popover open={catOpen} onOpenChange={setCatOpen}>
+                                                            <PopoverTrigger asChild>
+                                                                <FormControl>
+                                                                    <button
+                                                                        type="button"
+                                                                        className={cn(
+                                                                            "w-full flex justify-between items-center px-3 py-2 border border-input rounded-md h-10 bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-sm",
+                                                                            !field.value && "text-muted-foreground"
+                                                                        )}
+                                                                    >
+                                                                        {selectedCategory?.name || (field.value === "none" ? "No Category" : "Select category")}
+                                                                        <ChevronDown className="h-4 w-4 opacity-50" />
+                                                                    </button>
+                                                                </FormControl>
+                                                            </PopoverTrigger>
+                                                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                                                                <Command>
+                                                                    <CommandInput placeholder="Search category..." className="h-10" />
+                                                                    <CommandList className="max-h-[250px]">
+                                                                        <CommandEmpty>No category found.</CommandEmpty>
+                                                                        <CommandGroup>
+                                                                            <CommandItem
+                                                                                onSelect={() => {
+                                                                                    field.onChange("none");
+                                                                                    setCatOpen(false);
+                                                                                }}
+                                                                            >
+                                                                                No Category
+                                                                                <Check
+                                                                                    className={cn(
+                                                                                        "h-4 w-4 ml-auto",
+                                                                                        field.value === "none" ? "opacity-100" : "opacity-0"
+                                                                                    )}
+                                                                                />
+                                                                            </CommandItem>
+                                                                            {categories?.map((cat: any) => (
+                                                                                <CommandItem
+                                                                                    key={cat.id}
+                                                                                    onSelect={() => {
+                                                                                        field.onChange(cat.id.toString());
+                                                                                        setCatOpen(false);
+                                                                                    }}
+                                                                                >
+                                                                                    {cat.name}
+                                                                                    <Check
+                                                                                        className={cn(
+                                                                                            "h-4 w-4 ml-auto",
+                                                                                            cat.id.toString() === field.value ? "opacity-100" : "opacity-0"
+                                                                                        )}
+                                                                                    />
+                                                                                </CommandItem>
+                                                                            ))}
+                                                                        </CommandGroup>
+                                                                    </CommandList>
+                                                                </Command>
+                                                            </PopoverContent>
+                                                        </Popover>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                );
+                                            }}
                                         />
 
                                         {/* Service Name */}
@@ -227,7 +330,7 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
                                             name="name"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Service Name</FormLabel>
+                                                    <FormLabel>Service Name <span className="text-red-500">*</span></FormLabel>
                                                     <FormControl>
                                                         <Input
                                                             placeholder="e.g. General Checkup, X-Ray"
@@ -247,7 +350,7 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
                                                 name="price"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Price (৳)</FormLabel>
+                                                        <FormLabel>Price (৳) <span className="text-red-500">*</span></FormLabel>
                                                         <FormControl>
                                                             <div className="relative">
                                                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">৳</span>
@@ -273,7 +376,7 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
                                                     <FormItem>
                                                         <FormLabel>Status</FormLabel>
                                                         <FormControl>
-                                                            <Select value={field.value} onValueChange={field.onChange}>
+                                                            <Select onValueChange={field.onChange} value={field.value}>
                                                                 <SelectTrigger className="h-10 w-full !h-auto">
                                                                     <SelectValue placeholder="Select status" />
                                                                 </SelectTrigger>
@@ -303,6 +406,9 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
                                                             {...field}
                                                         />
                                                     </FormControl>
+                                                    <FormDescription className="text-xs">
+                                                        Enter any additional information about this service (optional)
+                                                    </FormDescription>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
@@ -328,7 +434,7 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
                                     {updateMutation.isPending ? (
                                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
                                     ) : null}
-                                    {updateMutation.isPending ? "Updating..." : "Update Service"}
+                                    {updateMutation.isPending ? "Saving..." : "Save Changes"}
                                 </Button>
                             </div>
                         </form>

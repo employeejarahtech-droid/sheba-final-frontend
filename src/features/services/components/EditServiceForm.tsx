@@ -57,6 +57,7 @@ export function EditServiceForm({ open, setOpen, serviceId }: EditServiceFormPro
     const form = useForm<ServiceValues>({
         resolver: zodResolver(serviceSchema),
         defaultValues: {
+            serviceCategoryId: "none",
             name: "",
             description: "",
             price: "",
@@ -106,9 +107,9 @@ export function EditServiceForm({ open, setOpen, serviceId }: EditServiceFormPro
             form.reset({
                 name: data.name || "",
                 description: data.description || "",
-                price: data.price?.toString() || "",
+                price: typeof data.price === 'string' ? parseFloat(data.price) : (data.price || 0),
                 status: data.status || "Active",
-                serviceCategoryId: data.service_category_id?.toString() || "",
+                serviceCategoryId: data.serviceCategoryId?.toString() || "none",
             });
         }
     }, [data, form]);
@@ -125,9 +126,11 @@ export function EditServiceForm({ open, setOpen, serviceId }: EditServiceFormPro
                         Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify({
-                        ...values,
-                        serviceCategoryId: values.serviceCategoryId ? parseInt(values.serviceCategoryId) : null,
+                        name: values.name,
                         price: values.price ? parseFloat(values.price) : 0,
+                        description: values.description,
+                        status: values.status,
+                        service_category_id: (values.serviceCategoryId && values.serviceCategoryId !== "none") ? parseInt(values.serviceCategoryId) : null,
                     }),
                 }
             );
@@ -172,14 +175,17 @@ export function EditServiceForm({ open, setOpen, serviceId }: EditServiceFormPro
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Category</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value || "none"}
+                                    >
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select category (optional)" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="">No Category</SelectItem>
+                                            <SelectItem value="none">No Category</SelectItem>
                                             {categories.map((cat: any) => (
                                                 <SelectItem key={cat.id} value={cat.id.toString()}>
                                                     {cat.name}

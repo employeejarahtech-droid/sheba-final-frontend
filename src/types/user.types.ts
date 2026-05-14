@@ -8,6 +8,13 @@ export interface User {
         name: string;
         display_name: string;
     };
+    companyName?: string | null;
+    avatar?: string | null;
+    bio?: string | null;
+    currency?: string | null;
+    address1?: string | null;
+    address2?: string | null;
+    company_logo?: string | null;
     created_at: string;
     updated_at?: string;
     created_by?: string;

@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useRouter, Link } from '@tanstack/react-router'
 import { Button } from "@/components/ui/button";
 import { Main } from '@/components/layout/main';
 import { Header } from '@/components/layout/header';
@@ -12,6 +12,8 @@ import { getCookie } from '@/lib/cookies';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { topNav } from '@/data/data';
 import { useState, useEffect, useRef } from 'react';
+import { Printer } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const Route = createFileRoute(
   '/_authenticated/ultrasonogram/all/edit/builder/$id',
@@ -75,8 +77,11 @@ function UltrasonogramBuilder() {
   const { data: ultrasonogramData, isLoading } = useQuery({
     queryKey: ["ultrasonogram-record", id],
     queryFn: async () => {
+      const numericId = parseInt(id, 10);
+      console.log('Fetching Ultrasonogram data for ID:', numericId, 'Type:', typeof numericId);
+
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/ultrasonogram-all/builder/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/ultrasonogram-all/builder/${numericId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -87,6 +92,7 @@ function UltrasonogramBuilder() {
       }
 
       const json = await res.json();
+      console.log('Fetched Ultrasonogram data:', json.data);
       return json.data;
     },
     enabled: !!token,
@@ -146,11 +152,14 @@ function UltrasonogramBuilder() {
 
   const updateMutation = useMutation({
     mutationFn: async (newContent: string) => {
-      console.log('Saving content for ID:', id);
+      console.log('Saving content for ID:', id, 'Type:', typeof id);
       console.log('Content length:', newContent?.length || 0);
 
+      const numericId = parseInt(id, 10);
+      console.log('Numeric ID:', numericId, 'Type:', typeof numericId);
+
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/ultrasonogram-all/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/ultrasonogram-all/${numericId}`,
         {
           method: 'PUT',
           headers: {
@@ -180,19 +189,39 @@ function UltrasonogramBuilder() {
       queryClient.invalidateQueries({ queryKey: ["ultrasonogram-record", id] });
       queryClient.invalidateQueries({ queryKey: ["ultrasonogram-invoice"] });
       queryClient.invalidateQueries({ queryKey: ["ultrasonogram-all"] });
-      alert('Content updated successfully!');
+      toast.success('Content updated successfully!');
     },
     onError: (error: Error) => {
       console.error('Update error:', error);
-      alert(`Error updating content: ${error.message}`);
+      toast.error(`Error updating content: ${error.message}`);
     },
   });
 
   const handleSave = () => {
     const $ = (window as any).$;
-    if ($ && editorRef.current) {
-      const content = $(editorRef.current).summernote('code');
-      updateMutation.mutate(content);
+    console.log('handleSave called');
+    console.log('jQuery available:', !!$);
+    console.log('editorRef.current:', editorRef.current);
+
+    if ($) {
+      console.log('jQuery is available');
+      if (editorRef.current) {
+        console.log('editorRef.current exists');
+        try {
+          const content = $(editorRef.current).summernote('code');
+          console.log('Content retrieved:', content?.substring(0, 100));
+          updateMutation.mutate(content);
+        } catch (error) {
+          console.error('Error getting content from Summernote:', error);
+          toast.error('Error getting content from editor. Please try again.');
+        }
+      } else {
+        console.error('editorRef.current is null');
+        toast.error('Editor not ready. Please wait a moment and try again.');
+      }
+    } else {
+      console.error('jQuery not available');
+      toast.error('Editor not loaded properly. Please refresh the page.');
     }
   };
 
@@ -261,6 +290,15 @@ function UltrasonogramBuilder() {
             <Button variant="outline" onClick={handleBack}>
               Back
             </Button>
+            <Link to="/ultrasonogram/all/print/$id" params={{ id }}>
+              <Button variant="outline" onClick={(e) => {
+                e.preventDefault();
+                router.navigate({ to: '/ultrasonogram/all/print/$id', params: { id } });
+              }}>
+                <Printer className="h-4 w-4 mr-2" />
+                Print
+              </Button>
+            </Link>
             <Button variant="default" onClick={handleSave} disabled={updateMutation.isPending}>
               {updateMutation.isPending ? 'Saving...' : 'Save Content'}
             </Button>
@@ -326,7 +364,7 @@ function UltrasonogramBuilder() {
 
         {/* HTML Editor Card */}
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-2">
             {/* Summernote Editor */}
             <div className="border border-gray-300 rounded-lg overflow-hidden">
               <div

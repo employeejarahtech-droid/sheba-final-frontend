@@ -11,7 +11,9 @@ export default defineConfig({
       target: 'react',
       autoCodeSplitting: true,
     }),
-    react(),
+    react({
+      tsconfigRoot: './tsconfig.app.json',
+    }),
     tailwindcss(),
   ],
   resolve: {
@@ -20,7 +22,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', '@tanstack/react-router', '@tanstack/react-query'],
+    include: [],
     force: false,
   },
   server: {
@@ -37,24 +39,5 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 1000,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          // Split large packages into separate chunks
-          if (id.includes('node_modules')) {
-            if (id.includes('@tanstack')) {
-              return 'tanstack'
-            }
-            if (id.includes('lucide-react')) {
-              return 'icons'
-            }
-            if (id.includes('react')) {
-              return 'react-vendor'
-            }
-            return 'vendor'
-          }
-        },
-      },
-    },
   },
 })

@@ -1,5 +1,5 @@
 import PatientInvoiceInfo from '@/components/pathology/PatientInvoiceInfo'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useRouter, Link } from '@tanstack/react-router'
 import { Button } from "@/components/ui/button";
 import { Main } from '@/components/layout/main';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,6 +7,7 @@ import { getCookie } from '@/lib/cookies';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { AppHeader } from '@/components/layout/app-header';
+import { ArrowLeft } from 'lucide-react';
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/hormone/all/edit/$id/',
@@ -142,7 +143,15 @@ function EditReportHormone() {
 
       {/* Main */}
       <Main>
-        <h1 className="text-2xl font-bold tracking-tight mb-6">Edit Report - Hormone</h1>
+        <div className="flex items-center gap-4 mb-6">
+          <Link to="/pathology/hormone/all">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to All Reports
+            </Button>
+          </Link>
+          <h1 className="text-2xl font-bold tracking-tight">Edit Report - Hormone</h1>
+        </div>
 
         {invoiceInformation && (
           <Card>

@@ -1,5 +1,5 @@
 import PatientInvoiceInfo from '@/components/pathology/PatientInvoiceInfo'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useRouter, Link } from '@tanstack/react-router'
 import { Button } from "@/components/ui/button";
 import { Main } from '@/components/layout/main';
 import { Header } from '@/components/layout/header';
@@ -14,6 +14,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { topNav } from '@/data/data';
 import { useState, useEffect } from 'react';
 import { AppHeader } from '@/components/layout/app-header';
+import { ArrowLeft } from 'lucide-react';
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/biochemical/all/edit/$reportId',
@@ -157,7 +158,15 @@ function EditBiochemicalReport() {
 
       {/* Main */}
       <Main>
-        <h1 className="text-2xl font-bold tracking-tight mb-6">Edit Report - Biochemical</h1>
+        <div className="flex items-center gap-4 mb-6">
+          <Link to="/pathology/biochemical/all">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to All Reports
+            </Button>
+          </Link>
+          <h1 className="text-2xl font-bold tracking-tight">Edit Report - Biochemical</h1>
+        </div>
 
         {invoiceInformation && (
           <Card>

@@ -4,31 +4,8 @@ import { useQuery } from '@tanstack/react-query'
 import { Main } from "@/components/layout/main"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Printer } from "lucide-react"
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
-
-type LabTest = {
-  id: number
-  invoice_id: number
-  test_id: number | null
-  test_name: string | null
-  test_result: string | null
-  created_at: string | null
-  updated_at: string | null
-}
-
-type InvoiceData = {
-  invoice_information: {
-    id: number
-    patient_name: string
-    age: string
-    age_text?: string
-    sex: string
-    invoice_date: string
-    phone: string
-  } | null
-  ultrasonogram_all_info: LabTest[]
-}
 
 export const Route = createFileRoute('/_authenticated/ultrasonogram/all/print/$id')({
   component: PrintUltrasonogramReport,
@@ -38,12 +15,16 @@ function PrintUltrasonogramReport() {
   const { id } = Route.useParams()
   const token = getCookie('accessToken')
   const hasPrinted = useRef(false)
+  const [paddingTop, setPaddingTop] = useState(100)
 
-  const { data: invoiceData, isLoading } = useQuery({
-    queryKey: ["ultrasonogram-invoice", id],
-    queryFn: async (): Promise<InvoiceData> => {
+  // Generate padding options from 10 to 200 in increments of 5
+  const paddingOptions = Array.from({ length: 39 }, (_, i) => (i + 2) * 5); // [10, 15, 20, ..., 200]
+
+  const { data: ultrasonogramData, isLoading } = useQuery({
+    queryKey: ["ultrasonogram-record", id],
+    queryFn: async () => {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/ultrasonogram-all/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/ultrasonogram-all/builder/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -54,6 +35,7 @@ function PrintUltrasonogramReport() {
       }
 
       const json = await res.json()
+      console.log('API Response:', json)
       return json.data
     },
     enabled: !!token,
@@ -61,7 +43,7 @@ function PrintUltrasonogramReport() {
 
   // Auto-print only on initial load, not on refresh
   useEffect(() => {
-    if (invoiceData && !hasPrinted.current) {
+    if (ultrasonogramData && !hasPrinted.current) {
       const printKey = `ultrasonogram-print-${id}`
       const alreadyPrinted = sessionStorage.getItem(printKey)
 
@@ -73,7 +55,7 @@ function PrintUltrasonogramReport() {
         }, 500)
       }
     }
-  }, [invoiceData, id])
+  }, [ultrasonogramData, id])
 
   if (isLoading) {
     return (
@@ -88,9 +70,9 @@ function PrintUltrasonogramReport() {
     )
   }
 
-  const invoice = invoiceData
-  const patientInfo = invoice?.invoice_information
-  const tests = invoice?.ultrasonogram_all_info || []
+  const patientInfo = ultrasonogramData?.invoice_information
+  const testName = ultrasonogramData?.test_name
+  const testResult = ultrasonogramData?.test_result
 
   const invoiceDate = patientInfo?.invoice_date
     ? new Date(patientInfo.invoice_date).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })
@@ -101,19 +83,36 @@ function PrintUltrasonogramReport() {
       <AppHeader fixed />
       <Main>
         <div className="print:hidden flex items-center justify-between gap-4">
-          <Link to="/ultrasonogram/all">
+          <Link to="/ultrasonogram/all/edit/$id" params={{ id: String(ultrasonogramData?.invoice_id) }}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Ultrasonogram Reports
+              Back to Edit
             </Button>
           </Link>
-          <Button variant="outline" size="sm" onClick={() => window.print()}>
-            <Printer className="h-4 w-4" />
-            Print
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <label htmlFor="padding-select" className="text-sm font-medium">Margin Top:</label>
+              <select
+                id="padding-select"
+                value={paddingTop}
+                onChange={(e) => setPaddingTop(Number(e.target.value))}
+                className="h-8 px-2 text-sm border rounded-md bg-background"
+              >
+                {paddingOptions.map((value) => (
+                  <option key={value} value={value}>
+                    {value}px
+                  </option>
+                ))}
+              </select>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
+              <Printer className="h-4 w-4" />
+              Print
+            </Button>
+          </div>
         </div>
 
-        <div className="max-w-4xl w-full mx-auto bg-background pt-10 pb-10 px-5 mt-6 print:w-[850px] print-report">
+        <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
           <style>
             {`
               .bg-row-blue {
@@ -175,23 +174,21 @@ function PrintUltrasonogramReport() {
           </table>
 
           {/* Test Table */}
-          <table className="w-full text-sm print:text-xs mt-6">
+          <table className="w-full text-sm mt-6">
             <tbody>
-              {tests.map((test, index) => (
-                <tr key={test.id} className="border-b border-dashed">
-                  <td className="px-3 py-2">
-                    <div className="mb-2 text-center">
-                      <span className="font-semibold text-lg">{test.test_name || '-'}</span>
-                    </div>
-                    <div
-                      className="text-gray-700 whitespace-pre-wrap"
-                      dangerouslySetInnerHTML={{
-                        __html: test.test_result || '<em>Pending...</em>'
-                      }}
-                    />
-                  </td>
-                </tr>
-              ))}
+              <tr className="">
+                <td className="px-3 py-2">
+                  <div className="mb-2 text-center">
+                    <span className="font-semibold text-lg">{testName || '-'}</span>
+                  </div>
+                  <div
+                    className="text-gray-700 whitespace-pre-wrap"
+                    dangerouslySetInnerHTML={{
+                      __html: testResult || '<em>Pending...</em>'
+                    }}
+                  />
+                </td>
+              </tr>
             </tbody>
           </table>
 
@@ -200,17 +197,13 @@ function PrintUltrasonogramReport() {
             <div>
               <p className="border-t border-dashed w-40 pt-1 text-center">Checked By:</p>
             </div>
-            <div className="text-right">
+            <div className="text-center">
               <p className="border-t border-dashed w-56 ml-auto pt-1">Radiologist:</p>
             </div>
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-end gap-3 mt-10 print:hidden">
-            <Button variant="outline" onClick={() => window.print()}>
-              Print
-            </Button>
-          </div>
+
         </div>
       </Main>
     </>

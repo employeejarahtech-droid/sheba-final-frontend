@@ -7,26 +7,27 @@ export function useLogin() {
   const setAuth = useAuthStore((s) => s.setAuth);
 
   return useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) =>
+    mutationFn: ({ email, password, remember }: { email: string; password: string; remember?: boolean }) =>
       loginApi(email, password),
 
     onMutate: () => {
       toast.loading("Signing in...", { id: "login-toast" });
     },
 
-    onSuccess: (res) => {
+    onSuccess: (res, variables) => {
       // Handle nested data structure: { status, message, data: { user, accessToken } }
       const data = res.data || res;
       const token = data.accessToken || data.token;
       const user = data.user;
+      const remember = variables.remember || false;
 
       if (!token || !user) {
         toast.error("Invalid response from server", { id: "login-toast" });
         throw new Error("Invalid response from server");
       }
 
-      // Save token & user
-      setAuth(user, token);
+      // Save token & user with remember preference
+      setAuth(user, token, remember);
       toast.success("Login successful!", { id: "login-toast" });
     },
 

@@ -5,7 +5,7 @@ import {
   useNavigate,
   useRouter,
 } from '@tanstack/react-router'
-import { SignedIn, useAuth, UserButton } from '@clerk/clerk-react'
+import { SignedIn, useAuth } from '@clerk/clerk-react'
 import { ExternalLink, Loader2 } from 'lucide-react'
 import { ClerkLogo } from '@/assets/clerk-logo'
 import { Button } from '@/components/ui/button'

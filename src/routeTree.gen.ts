@@ -28,15 +28,16 @@ import { Route as ClerkauthRouteRouteImport } from './routes/clerk/(auth)/route'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks/index'
-import { Route as AuthenticatedSuppliersIndexRouteImport } from './routes/_authenticated/suppliers/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedRolesIndexRouteImport } from './routes/_authenticated/roles/index'
-import { Route as AuthenticatedProductsIndexRouteImport } from './routes/_authenticated/products/index'
+import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications/index'
+import { Route as AuthenticatedMyAccountIndexRouteImport } from './routes/_authenticated/my-account/index'
 import { Route as AuthenticatedHelpIndexRouteImport } from './routes/_authenticated/help/index'
 import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_authenticated/help-center/index'
 import { Route as AuthenticatedDatabaseIndexRouteImport } from './routes/_authenticated/database/index'
-import { Route as AuthenticatedCustomersIndexRouteImport } from './routes/_authenticated/customers/index'
 import { Route as AuthenticatedChatsIndexRouteImport } from './routes/_authenticated/chats/index'
+import { Route as AuthenticatedBackupsIndexRouteImport } from './routes/_authenticated/backups/index'
+import { Route as AuthenticatedBackupSettingsIndexRouteImport } from './routes/_authenticated/backup-settings/index'
 import { Route as AuthenticatedAppsIndexRouteImport } from './routes/_authenticated/apps/index'
 import { Route as AuthenticatedAccountingIndexRouteImport } from './routes/_authenticated/accounting/index'
 import { Route as ClerkAuthenticatedUserManagementRouteImport } from './routes/clerk/_authenticated/user-management'
@@ -47,26 +48,14 @@ import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes
 import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_authenticated/settings/display'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
+import { Route as AuthenticatedNotificationsIdRouteImport } from './routes/_authenticated/notifications/$id'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
 import { Route as AuthenticatedXRayAllIndexRouteImport } from './routes/_authenticated/x-ray/all/index'
 import { Route as AuthenticatedUltrasonogramAllIndexRouteImport } from './routes/_authenticated/ultrasonogram/all/index'
-import { Route as AuthenticatedSuppliersCreateIndexRouteImport } from './routes/_authenticated/suppliers/create/index'
-import { Route as AuthenticatedSuppliersIdIndexRouteImport } from './routes/_authenticated/suppliers/$id/index'
-import { Route as AuthenticatedSalesOrdersIndexRouteImport } from './routes/_authenticated/sales/orders/index'
 import { Route as AuthenticatedRolesCreateIndexRouteImport } from './routes/_authenticated/roles/create/index'
-import { Route as AuthenticatedPurchasePaymentsIndexRouteImport } from './routes/_authenticated/purchase/payments/index'
-import { Route as AuthenticatedPurchaseOrderIndexRouteImport } from './routes/_authenticated/purchase/order/index'
-import { Route as AuthenticatedPurchaseInvoicesIndexRouteImport } from './routes/_authenticated/purchase/invoices/index'
-import { Route as AuthenticatedProductsUnitsIndexRouteImport } from './routes/_authenticated/products/units/index'
-import { Route as AuthenticatedProductsCreateIndexRouteImport } from './routes/_authenticated/products/create/index'
-import { Route as AuthenticatedProductsCategoriesIndexRouteImport } from './routes/_authenticated/products/categories/index'
-import { Route as AuthenticatedProductsProductIdIndexRouteImport } from './routes/_authenticated/products/$productId/index'
 import { Route as AuthenticatedPayrollOverviewIndexRouteImport } from './routes/_authenticated/payroll/overview/index'
 import { Route as AuthenticatedPayrollEmployeesIndexRouteImport } from './routes/_authenticated/payroll/employees/index'
-import { Route as AuthenticatedInventoryStocksIndexRouteImport } from './routes/_authenticated/inventory/stocks/index'
 import { Route as AuthenticatedEcgAllIndexRouteImport } from './routes/_authenticated/ecg/all/index'
-import { Route as AuthenticatedCustomersCreateIndexRouteImport } from './routes/_authenticated/customers/create/index'
-import { Route as AuthenticatedCustomersIdIndexRouteImport } from './routes/_authenticated/customers/$id/index'
 import { Route as AuthenticatedBanksBankWithdrawalsIndexRouteImport } from './routes/_authenticated/banks/bank-withdrawals/index'
 import { Route as AuthenticatedBanksBankTransactionsIndexRouteImport } from './routes/_authenticated/banks/bank-transactions/index'
 import { Route as AuthenticatedBanksBankDepositsIndexRouteImport } from './routes/_authenticated/banks/bank-deposits/index'
@@ -78,6 +67,7 @@ import { Route as AuthenticatedAdmissionInvoiceIndexRouteImport } from './routes
 import { Route as AuthenticatedAdmissionFirstTimeServiceIndexRouteImport } from './routes/_authenticated/admission/first-time-service/index'
 import { Route as AuthenticatedAdmissionFirstTimeBillIndexRouteImport } from './routes/_authenticated/admission/first-time-bill/index'
 import { Route as AuthenticatedAdmissionFinaliseServicesIndexRouteImport } from './routes/_authenticated/admission/finalise-services/index'
+import { Route as AuthenticatedAdmissionFinalBillsIndexRouteImport } from './routes/_authenticated/admission/final-bills/index'
 import { Route as AuthenticatedAdmissionDueCollectionIndexRouteImport } from './routes/_authenticated/admission/due-collection/index'
 import { Route as AuthenticatedAdmissionBedCabinChargeIndexRouteImport } from './routes/_authenticated/admission/bed-cabin-charge/index'
 import { Route as AuthenticatedAdmissionAdvancePaymentIndexRouteImport } from './routes/_authenticated/admission/advance-payment/index'
@@ -94,13 +84,6 @@ import { Route as AuthenticatedAccountingExpensesIndexRouteImport } from './rout
 import { Route as AuthenticatedAccountingExpenseIndexRouteImport } from './routes/_authenticated/accounting/expense/index'
 import { Route as AuthenticatedAccountingAccountsIndexRouteImport } from './routes/_authenticated/accounting/accounts/index'
 import { Route as AuthenticatedRolesEditIdRouteImport } from './routes/_authenticated/roles/edit/$id'
-import { Route as AuthenticatedPurchaseOrderCreateRouteImport } from './routes/_authenticated/purchase/order/create'
-import { Route as AuthenticatedProductsProductIdEditRouteImport } from './routes/_authenticated/products/$productId/edit'
-import { Route as AuthenticatedSuppliersIdEditIndexRouteImport } from './routes/_authenticated/suppliers/$id/edit/index'
-import { Route as AuthenticatedPurchasePaymentsCreateIndexRouteImport } from './routes/_authenticated/purchase/payments/create/index'
-import { Route as AuthenticatedPurchasePaymentsIdIndexRouteImport } from './routes/_authenticated/purchase/payments/$id/index'
-import { Route as AuthenticatedPurchaseOrderIdIndexRouteImport } from './routes/_authenticated/purchase/order/$id/index'
-import { Route as AuthenticatedPurchaseInvoicesIdIndexRouteImport } from './routes/_authenticated/purchase/invoices/$id/index'
 import { Route as AuthenticatedPayrollSalaryStaffIdIndexRouteImport } from './routes/_authenticated/payroll/salary/$staffId/index'
 import { Route as AuthenticatedPayrollAttendanceStaffIdIndexRouteImport } from './routes/_authenticated/payroll/attendance/$staffId/index'
 import { Route as AuthenticatedPathologyUrineUrineForSugarIndexRouteImport } from './routes/_authenticated/pathology/urine/urine-for-sugar/index'
@@ -129,10 +112,14 @@ import { Route as AuthenticatedPathologyHematologyBloodForBtCtIndexRouteImport }
 import { Route as AuthenticatedPathologyHematologyAllIndexRouteImport } from './routes/_authenticated/pathology/hematology/all/index'
 import { Route as AuthenticatedPathologyBiochemicalLipidProfileIndexRouteImport } from './routes/_authenticated/pathology/biochemical/lipid-profile/index'
 import { Route as AuthenticatedPathologyBiochemicalAllIndexRouteImport } from './routes/_authenticated/pathology/biochemical/all/index'
+import { Route as AuthenticatedOutdoorReceptionUserInvoicesIndexRouteImport } from './routes/_authenticated/outdoor/reception/user-invoices/index'
 import { Route as AuthenticatedOutdoorReceptionPatientsIndexRouteImport } from './routes/_authenticated/outdoor/reception/patients/index'
+import { Route as AuthenticatedOutdoorReceptionPaidInvoicesIndexRouteImport } from './routes/_authenticated/outdoor/reception/paid-invoices/index'
+import { Route as AuthenticatedOutdoorReceptionMyInvoicesIndexRouteImport } from './routes/_authenticated/outdoor/reception/my-invoices/index'
 import { Route as AuthenticatedOutdoorReceptionDueCollectionIndexRouteImport } from './routes/_authenticated/outdoor/reception/due-collection/index'
 import { Route as AuthenticatedOutdoorMasterTestsIndexRouteImport } from './routes/_authenticated/outdoor/master/tests/index'
 import { Route as AuthenticatedOutdoorMasterTestTablesIndexRouteImport } from './routes/_authenticated/outdoor/master/test-tables/index'
+import { Route as AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRouteImport } from './routes/_authenticated/outdoor/master/sample-collection-rooms/index'
 import { Route as AuthenticatedOutdoorMasterMachinesIndexRouteImport } from './routes/_authenticated/outdoor/master/machines/index'
 import { Route as AuthenticatedOutdoorMasterDoctorsIndexRouteImport } from './routes/_authenticated/outdoor/master/doctors/index'
 import { Route as AuthenticatedOutdoorMasterDepartmentsIndexRouteImport } from './routes/_authenticated/outdoor/master/departments/index'
@@ -145,9 +132,19 @@ import { Route as AuthenticatedIndoorMasterOperationTypesIndexRouteImport } from
 import { Route as AuthenticatedIndoorMasterDoctorTypesIndexRouteImport } from './routes/_authenticated/indoor/master/doctor-types/index'
 import { Route as AuthenticatedIndoorMasterBedCabinListIndexRouteImport } from './routes/_authenticated/indoor/master/bed-cabin-list/index'
 import { Route as AuthenticatedIndoorMasterAnasthesiaTypesIndexRouteImport } from './routes/_authenticated/indoor/master/anasthesia-types/index'
-import { Route as AuthenticatedCustomersIdEditIndexRouteImport } from './routes/_authenticated/customers/$id/edit/index'
+import { Route as AuthenticatedIndoorManagementDoctorReferredIndexRouteImport } from './routes/_authenticated/indoor/management/doctor-referred/index'
+import { Route as AuthenticatedIndoorManagementDistributionsIndexRouteImport } from './routes/_authenticated/indoor/management/distributions/index'
+import { Route as AuthenticatedAdmissionPatientsPaymentCompletedListIndexRouteImport } from './routes/_authenticated/admission/patients/payment-completed-list/index'
+import { Route as AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRouteImport } from './routes/_authenticated/admission/patients/final-bill-created-list/index'
+import { Route as AuthenticatedAdmissionPatientsDischargedIndexRouteImport } from './routes/_authenticated/admission/patients/discharged/index'
+import { Route as AuthenticatedAdmissionPatientsDischargedListIndexRouteImport } from './routes/_authenticated/admission/patients/discharged-list/index'
+import { Route as AuthenticatedAdmissionPatientsBillDistributedListIndexRouteImport } from './routes/_authenticated/admission/patients/bill-distributed-list/index'
+import { Route as AuthenticatedAdmissionPatientsBillCreatedListIndexRouteImport } from './routes/_authenticated/admission/patients/bill-created-list/index'
+import { Route as AuthenticatedAdmissionPatientsBalanceDistributedListIndexRouteImport } from './routes/_authenticated/admission/patients/balance-distributed-list/index'
+import { Route as AuthenticatedAdmissionPatientsActiveIndexRouteImport } from './routes/_authenticated/admission/patients/active/index'
 import { Route as AuthenticatedAdmissionInvoiceListIndexRouteImport } from './routes/_authenticated/admission/invoice/list/index'
 import { Route as AuthenticatedAdmissionInvoiceCreateIndexRouteImport } from './routes/_authenticated/admission/invoice/create/index'
+import { Route as AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRouteImport } from './routes/_authenticated/admission/discharged-patients/bill-does-not-created/index'
 import { Route as AuthenticatedAdmissionBillingBillingIdIndexRouteImport } from './routes/_authenticated/admission/billing/$billingId/index'
 import { Route as AuthenticatedAccountingReportsTrialBalanceIndexRouteImport } from './routes/_authenticated/accounting/reports/trial-balance/index'
 import { Route as AuthenticatedAccountingReportsProfitLossIndexRouteImport } from './routes/_authenticated/accounting/reports/profit-loss/index'
@@ -160,7 +157,6 @@ import { Route as AuthenticatedXRayAllEditIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedUltrasonogramAllPrintIdRouteImport } from './routes/_authenticated/ultrasonogram/all/print/$id'
 import { Route as AuthenticatedUltrasonogramAllEditIdRouteImport } from './routes/_authenticated/ultrasonogram/all/edit/$id'
 import { Route as AuthenticatedRolesPermissionsRoleIdEditRouteImport } from './routes/_authenticated/roles/permissions/$roleId/edit'
-import { Route as AuthenticatedPurchaseOrderIdEditRouteImport } from './routes/_authenticated/purchase/order/$id/edit'
 import { Route as AuthenticatedOutdoorReceptionInvoicesInvoiceIdRouteImport } from './routes/_authenticated/outdoor/reception/invoices/$invoiceId'
 import { Route as AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRouteImport } from './routes/_authenticated/outdoor/reception/due-collection/$invoiceId'
 import { Route as AuthenticatedOutdoorMasterTestsIdRouteImport } from './routes/_authenticated/outdoor/master/tests/$id'
@@ -172,14 +168,22 @@ import { Route as AuthenticatedIndoorMasterServicesIdRouteImport } from './route
 import { Route as AuthenticatedIndoorMasterBedCabinListIdRouteImport } from './routes/_authenticated/indoor/master/bed-cabin-list/$id'
 import { Route as AuthenticatedEcgAllPrintIdRouteImport } from './routes/_authenticated/ecg/all/print/$id'
 import { Route as AuthenticatedEcgAllEditIdRouteImport } from './routes/_authenticated/ecg/all/edit/$id'
-import { Route as AuthenticatedPurchaseInvoicesIdPreviewIndexRouteImport } from './routes/_authenticated/purchase/invoices/$id/preview/index'
+import { Route as AuthenticatedReportsMyOutdoorTodayCollectionIndexRouteImport } from './routes/_authenticated/reports/my/outdoor/today-collection/index'
+import { Route as AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRouteImport } from './routes/_authenticated/reports/my/outdoor/date-wise-collection/index'
 import { Route as AuthenticatedOutdoorReceptionInvoicesListIndexRouteImport } from './routes/_authenticated/outdoor/reception/invoices/list/index'
 import { Route as AuthenticatedOutdoorReceptionInvoicesCreateIndexRouteImport } from './routes/_authenticated/outdoor/reception/invoices/create/index'
 import { Route as AuthenticatedOutdoorMasterTestsCreateIndexRouteImport } from './routes/_authenticated/outdoor/master/tests/create/index'
 import { Route as AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRouteImport } from './routes/_authenticated/outdoor/master/doctors/$doctorId/index'
 import { Route as AuthenticatedIndoorMasterServicesCreateIndexRouteImport } from './routes/_authenticated/indoor/master/services/create/index'
 import { Route as AuthenticatedIndoorMasterBedCabinListCreateIndexRouteImport } from './routes/_authenticated/indoor/master/bed-cabin-list/create/index'
+import { Route as AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/print/index'
+import { Route as AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/final-bill/index'
+import { Route as AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/final-bill-print/index'
+import { Route as AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/distribute-bill/index'
+import { Route as AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/confirm-balance/index'
 import { Route as AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/billing/index'
+import { Route as AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/billing-print/index'
+import { Route as AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/bill-created/index'
 import { Route as AuthenticatedXRayAllEditBuilderIdRouteImport } from './routes/_authenticated/x-ray/all/edit/builder/$id'
 import { Route as AuthenticatedUltrasonogramAllEditBuilderIdRouteImport } from './routes/_authenticated/ultrasonogram/all/edit/builder/$id'
 import { Route as AuthenticatedPathologyUrineUrineForSugarReportReportIdRouteImport } from './routes/_authenticated/pathology/urine/urine-for-sugar/report/$reportId'
@@ -194,12 +198,14 @@ import { Route as AuthenticatedPathologyImmunologyWidalTestReportReportIdRouteIm
 import { Route as AuthenticatedPathologyImmunologyMtReportReportIdRouteImport } from './routes/_authenticated/pathology/immunology/mt/report/$reportId'
 import { Route as AuthenticatedPathologyImmunologyBloodGroupReportReportIdRouteImport } from './routes/_authenticated/pathology/immunology/blood-group/report/$reportId'
 import { Route as AuthenticatedPathologyImmunologyBetaHcgReportReportIdRouteImport } from './routes/_authenticated/pathology/immunology/beta-hcg/report/$reportId'
+import { Route as AuthenticatedPathologyImmunologyAllReportReportIdRouteImport } from './routes/_authenticated/pathology/immunology/all/report/$reportId'
 import { Route as AuthenticatedPathologyHormoneT3t4tshReportReportIdRouteImport } from './routes/_authenticated/pathology/hormone/t3t4tsh/report/$reportId'
 import { Route as AuthenticatedPathologyHormoneSputumReportReportIdRouteImport } from './routes/_authenticated/pathology/hormone/sputum/report/$reportId'
 import { Route as AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRouteImport } from './routes/_authenticated/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
 import { Route as AuthenticatedPathologyHormoneSemenReportReportIdRouteImport } from './routes/_authenticated/pathology/hormone/semen/report/$reportId'
 import { Route as AuthenticatedPathologyHormoneSemenEditReportIdRouteImport } from './routes/_authenticated/pathology/hormone/semen/edit/$reportId'
 import { Route as AuthenticatedPathologyHormoneElectrolytesReportReportIdRouteImport } from './routes/_authenticated/pathology/hormone/electrolytes/report/$reportId'
+import { Route as AuthenticatedPathologyHormoneAllReportReportIdRouteImport } from './routes/_authenticated/pathology/hormone/all/report/$reportId'
 import { Route as AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRouteImport } from './routes/_authenticated/pathology/hematology/prothom-bin-time-full/report/$reportId'
 import { Route as AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRouteImport } from './routes/_authenticated/pathology/hematology/peripheral-blood-film/report/$reportId'
 import { Route as AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRouteImport } from './routes/_authenticated/pathology/hematology/cbc-with-pbf/report/$reportId'
@@ -215,6 +221,7 @@ import { Route as AuthenticatedPathologyBiochemicalAllEditReportIdRouteImport } 
 import { Route as AuthenticatedOutdoorMasterDoctorsDoctorIdEditRouteImport } from './routes/_authenticated/outdoor/master/doctors/$doctorId/edit'
 import { Route as AuthenticatedIndoorMasterServicesEditIdRouteImport } from './routes/_authenticated/indoor/master/services/edit/$id'
 import { Route as AuthenticatedEcgAllEditBuilderIdRouteImport } from './routes/_authenticated/ecg/all/edit/builder/$id'
+import { Route as AuthenticatedAdmissionPatientsAdmissionIdPrintStepRouteImport } from './routes/_authenticated/admission/patients/$admissionId/print/$step'
 import { Route as AuthenticatedPathologyImmunologyAllEditIdIndexRouteImport } from './routes/_authenticated/pathology/immunology/all/edit/[$id]/index'
 import { Route as AuthenticatedPathologyHormoneAllEditIdIndexRouteImport } from './routes/_authenticated/pathology/hormone/all/edit/[$id]/index'
 import { Route as AuthenticatedPathologyHematologyAllEditIdIndexRouteImport } from './routes/_authenticated/pathology/hematology/all/edit/[$id]/index'
@@ -314,12 +321,6 @@ const AuthenticatedTasksIndexRoute = AuthenticatedTasksIndexRouteImport.update({
   path: '/tasks/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSuppliersIndexRoute =
-  AuthenticatedSuppliersIndexRouteImport.update({
-    id: '/suppliers/',
-    path: '/suppliers/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedSettingsIndexRoute =
   AuthenticatedSettingsIndexRouteImport.update({
     id: '/',
@@ -331,10 +332,16 @@ const AuthenticatedRolesIndexRoute = AuthenticatedRolesIndexRouteImport.update({
   path: '/roles/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedProductsIndexRoute =
-  AuthenticatedProductsIndexRouteImport.update({
-    id: '/products/',
-    path: '/products/',
+const AuthenticatedNotificationsIndexRoute =
+  AuthenticatedNotificationsIndexRouteImport.update({
+    id: '/notifications/',
+    path: '/notifications/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMyAccountIndexRoute =
+  AuthenticatedMyAccountIndexRouteImport.update({
+    id: '/my-account/',
+    path: '/my-account/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedHelpIndexRoute = AuthenticatedHelpIndexRouteImport.update({
@@ -354,17 +361,23 @@ const AuthenticatedDatabaseIndexRoute =
     path: '/database/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedCustomersIndexRoute =
-  AuthenticatedCustomersIndexRouteImport.update({
-    id: '/customers/',
-    path: '/customers/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedChatsIndexRoute = AuthenticatedChatsIndexRouteImport.update({
   id: '/chats/',
   path: '/chats/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBackupsIndexRoute =
+  AuthenticatedBackupsIndexRouteImport.update({
+    id: '/backups/',
+    path: '/backups/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedBackupSettingsIndexRoute =
+  AuthenticatedBackupSettingsIndexRouteImport.update({
+    id: '/backup-settings/',
+    path: '/backup-settings/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAppsIndexRoute = AuthenticatedAppsIndexRouteImport.update({
   id: '/apps/',
   path: '/apps/',
@@ -422,6 +435,12 @@ const AuthenticatedSettingsAccountRoute =
     path: '/account',
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any)
+const AuthenticatedNotificationsIdRoute =
+  AuthenticatedNotificationsIdRouteImport.update({
+    id: '/notifications/$id',
+    path: '/notifications/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedErrorsErrorRoute =
   AuthenticatedErrorsErrorRouteImport.update({
     id: '/errors/$error',
@@ -440,70 +459,10 @@ const AuthenticatedUltrasonogramAllIndexRoute =
     path: '/ultrasonogram/all/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedSuppliersCreateIndexRoute =
-  AuthenticatedSuppliersCreateIndexRouteImport.update({
-    id: '/suppliers/create/',
-    path: '/suppliers/create/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSuppliersIdIndexRoute =
-  AuthenticatedSuppliersIdIndexRouteImport.update({
-    id: '/suppliers/$id/',
-    path: '/suppliers/$id/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSalesOrdersIndexRoute =
-  AuthenticatedSalesOrdersIndexRouteImport.update({
-    id: '/sales/orders/',
-    path: '/sales/orders/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedRolesCreateIndexRoute =
   AuthenticatedRolesCreateIndexRouteImport.update({
     id: '/roles/create/',
     path: '/roles/create/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPurchasePaymentsIndexRoute =
-  AuthenticatedPurchasePaymentsIndexRouteImport.update({
-    id: '/purchase/payments/',
-    path: '/purchase/payments/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPurchaseOrderIndexRoute =
-  AuthenticatedPurchaseOrderIndexRouteImport.update({
-    id: '/purchase/order/',
-    path: '/purchase/order/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPurchaseInvoicesIndexRoute =
-  AuthenticatedPurchaseInvoicesIndexRouteImport.update({
-    id: '/purchase/invoices/',
-    path: '/purchase/invoices/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedProductsUnitsIndexRoute =
-  AuthenticatedProductsUnitsIndexRouteImport.update({
-    id: '/products/units/',
-    path: '/products/units/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedProductsCreateIndexRoute =
-  AuthenticatedProductsCreateIndexRouteImport.update({
-    id: '/products/create/',
-    path: '/products/create/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedProductsCategoriesIndexRoute =
-  AuthenticatedProductsCategoriesIndexRouteImport.update({
-    id: '/products/categories/',
-    path: '/products/categories/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedProductsProductIdIndexRoute =
-  AuthenticatedProductsProductIdIndexRouteImport.update({
-    id: '/products/$productId/',
-    path: '/products/$productId/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedPayrollOverviewIndexRoute =
@@ -518,28 +477,10 @@ const AuthenticatedPayrollEmployeesIndexRoute =
     path: '/payroll/employees/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedInventoryStocksIndexRoute =
-  AuthenticatedInventoryStocksIndexRouteImport.update({
-    id: '/inventory/stocks/',
-    path: '/inventory/stocks/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedEcgAllIndexRoute =
   AuthenticatedEcgAllIndexRouteImport.update({
     id: '/ecg/all/',
     path: '/ecg/all/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedCustomersCreateIndexRoute =
-  AuthenticatedCustomersCreateIndexRouteImport.update({
-    id: '/customers/create/',
-    path: '/customers/create/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedCustomersIdIndexRoute =
-  AuthenticatedCustomersIdIndexRouteImport.update({
-    id: '/customers/$id/',
-    path: '/customers/$id/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedBanksBankWithdrawalsIndexRoute =
@@ -606,6 +547,12 @@ const AuthenticatedAdmissionFinaliseServicesIndexRoute =
   AuthenticatedAdmissionFinaliseServicesIndexRouteImport.update({
     id: '/admission/finalise-services/',
     path: '/admission/finalise-services/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdmissionFinalBillsIndexRoute =
+  AuthenticatedAdmissionFinalBillsIndexRouteImport.update({
+    id: '/admission/final-bills/',
+    path: '/admission/final-bills/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdmissionDueCollectionIndexRoute =
@@ -702,48 +649,6 @@ const AuthenticatedRolesEditIdRoute =
   AuthenticatedRolesEditIdRouteImport.update({
     id: '/roles/edit/$id',
     path: '/roles/edit/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPurchaseOrderCreateRoute =
-  AuthenticatedPurchaseOrderCreateRouteImport.update({
-    id: '/purchase/order/create',
-    path: '/purchase/order/create',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedProductsProductIdEditRoute =
-  AuthenticatedProductsProductIdEditRouteImport.update({
-    id: '/products/$productId/edit',
-    path: '/products/$productId/edit',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSuppliersIdEditIndexRoute =
-  AuthenticatedSuppliersIdEditIndexRouteImport.update({
-    id: '/suppliers/$id/edit/',
-    path: '/suppliers/$id/edit/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPurchasePaymentsCreateIndexRoute =
-  AuthenticatedPurchasePaymentsCreateIndexRouteImport.update({
-    id: '/purchase/payments/create/',
-    path: '/purchase/payments/create/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPurchasePaymentsIdIndexRoute =
-  AuthenticatedPurchasePaymentsIdIndexRouteImport.update({
-    id: '/purchase/payments/$id/',
-    path: '/purchase/payments/$id/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPurchaseOrderIdIndexRoute =
-  AuthenticatedPurchaseOrderIdIndexRouteImport.update({
-    id: '/purchase/order/$id/',
-    path: '/purchase/order/$id/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPurchaseInvoicesIdIndexRoute =
-  AuthenticatedPurchaseInvoicesIdIndexRouteImport.update({
-    id: '/purchase/invoices/$id/',
-    path: '/purchase/invoices/$id/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedPayrollSalaryStaffIdIndexRoute =
@@ -914,10 +819,28 @@ const AuthenticatedPathologyBiochemicalAllIndexRoute =
     path: '/pathology/biochemical/all/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOutdoorReceptionUserInvoicesIndexRoute =
+  AuthenticatedOutdoorReceptionUserInvoicesIndexRouteImport.update({
+    id: '/outdoor/reception/user-invoices/',
+    path: '/outdoor/reception/user-invoices/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOutdoorReceptionPatientsIndexRoute =
   AuthenticatedOutdoorReceptionPatientsIndexRouteImport.update({
     id: '/outdoor/reception/patients/',
     path: '/outdoor/reception/patients/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute =
+  AuthenticatedOutdoorReceptionPaidInvoicesIndexRouteImport.update({
+    id: '/outdoor/reception/paid-invoices/',
+    path: '/outdoor/reception/paid-invoices/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOutdoorReceptionMyInvoicesIndexRoute =
+  AuthenticatedOutdoorReceptionMyInvoicesIndexRouteImport.update({
+    id: '/outdoor/reception/my-invoices/',
+    path: '/outdoor/reception/my-invoices/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedOutdoorReceptionDueCollectionIndexRoute =
@@ -936,6 +859,12 @@ const AuthenticatedOutdoorMasterTestTablesIndexRoute =
   AuthenticatedOutdoorMasterTestTablesIndexRouteImport.update({
     id: '/outdoor/master/test-tables/',
     path: '/outdoor/master/test-tables/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute =
+  AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRouteImport.update({
+    id: '/outdoor/master/sample-collection-rooms/',
+    path: '/outdoor/master/sample-collection-rooms/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedOutdoorMasterMachinesIndexRoute =
@@ -1010,10 +939,64 @@ const AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute =
     path: '/indoor/master/anasthesia-types/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedCustomersIdEditIndexRoute =
-  AuthenticatedCustomersIdEditIndexRouteImport.update({
-    id: '/customers/$id/edit/',
-    path: '/customers/$id/edit/',
+const AuthenticatedIndoorManagementDoctorReferredIndexRoute =
+  AuthenticatedIndoorManagementDoctorReferredIndexRouteImport.update({
+    id: '/indoor/management/doctor-referred/',
+    path: '/indoor/management/doctor-referred/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIndoorManagementDistributionsIndexRoute =
+  AuthenticatedIndoorManagementDistributionsIndexRouteImport.update({
+    id: '/indoor/management/distributions/',
+    path: '/indoor/management/distributions/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute =
+  AuthenticatedAdmissionPatientsPaymentCompletedListIndexRouteImport.update({
+    id: '/admission/patients/payment-completed-list/',
+    path: '/admission/patients/payment-completed-list/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute =
+  AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRouteImport.update({
+    id: '/admission/patients/final-bill-created-list/',
+    path: '/admission/patients/final-bill-created-list/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdmissionPatientsDischargedIndexRoute =
+  AuthenticatedAdmissionPatientsDischargedIndexRouteImport.update({
+    id: '/admission/patients/discharged/',
+    path: '/admission/patients/discharged/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdmissionPatientsDischargedListIndexRoute =
+  AuthenticatedAdmissionPatientsDischargedListIndexRouteImport.update({
+    id: '/admission/patients/discharged-list/',
+    path: '/admission/patients/discharged-list/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdmissionPatientsBillDistributedListIndexRoute =
+  AuthenticatedAdmissionPatientsBillDistributedListIndexRouteImport.update({
+    id: '/admission/patients/bill-distributed-list/',
+    path: '/admission/patients/bill-distributed-list/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdmissionPatientsBillCreatedListIndexRoute =
+  AuthenticatedAdmissionPatientsBillCreatedListIndexRouteImport.update({
+    id: '/admission/patients/bill-created-list/',
+    path: '/admission/patients/bill-created-list/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute =
+  AuthenticatedAdmissionPatientsBalanceDistributedListIndexRouteImport.update({
+    id: '/admission/patients/balance-distributed-list/',
+    path: '/admission/patients/balance-distributed-list/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdmissionPatientsActiveIndexRoute =
+  AuthenticatedAdmissionPatientsActiveIndexRouteImport.update({
+    id: '/admission/patients/active/',
+    path: '/admission/patients/active/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdmissionInvoiceListIndexRoute =
@@ -1028,6 +1011,14 @@ const AuthenticatedAdmissionInvoiceCreateIndexRoute =
     path: '/admission/invoice/create/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute =
+  AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRouteImport.update(
+    {
+      id: '/admission/discharged-patients/bill-does-not-created/',
+      path: '/admission/discharged-patients/bill-does-not-created/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedAdmissionBillingBillingIdIndexRoute =
   AuthenticatedAdmissionBillingBillingIdIndexRouteImport.update({
     id: '/admission/billing/$billingId/',
@@ -1100,12 +1091,6 @@ const AuthenticatedRolesPermissionsRoleIdEditRoute =
     path: '/roles/permissions/$roleId/edit',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPurchaseOrderIdEditRoute =
-  AuthenticatedPurchaseOrderIdEditRouteImport.update({
-    id: '/purchase/order/$id/edit',
-    path: '/purchase/order/$id/edit',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute =
   AuthenticatedOutdoorReceptionInvoicesInvoiceIdRouteImport.update({
     id: '/outdoor/reception/invoices/$invoiceId',
@@ -1172,10 +1157,16 @@ const AuthenticatedEcgAllEditIdRoute =
     path: '/ecg/all/edit/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPurchaseInvoicesIdPreviewIndexRoute =
-  AuthenticatedPurchaseInvoicesIdPreviewIndexRouteImport.update({
-    id: '/purchase/invoices/$id/preview/',
-    path: '/purchase/invoices/$id/preview/',
+const AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute =
+  AuthenticatedReportsMyOutdoorTodayCollectionIndexRouteImport.update({
+    id: '/reports/my/outdoor/today-collection/',
+    path: '/reports/my/outdoor/today-collection/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute =
+  AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRouteImport.update({
+    id: '/reports/my/outdoor/date-wise-collection/',
+    path: '/reports/my/outdoor/date-wise-collection/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedOutdoorReceptionInvoicesListIndexRoute =
@@ -1214,10 +1205,58 @@ const AuthenticatedIndoorMasterBedCabinListCreateIndexRoute =
     path: '/indoor/master/bed-cabin-list/create/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute =
+  AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRouteImport.update({
+    id: '/admission/patients/$admissionId/print/',
+    path: '/admission/patients/$admissionId/print/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute =
+  AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRouteImport.update({
+    id: '/admission/patients/$admissionId/final-bill/',
+    path: '/admission/patients/$admissionId/final-bill/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute =
+  AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRouteImport.update(
+    {
+      id: '/admission/patients/$admissionId/final-bill-print/',
+      path: '/admission/patients/$admissionId/final-bill-print/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute =
+  AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRouteImport.update(
+    {
+      id: '/admission/patients/$admissionId/distribute-bill/',
+      path: '/admission/patients/$admissionId/distribute-bill/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute =
+  AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRouteImport.update(
+    {
+      id: '/admission/patients/$admissionId/confirm-balance/',
+      path: '/admission/patients/$admissionId/confirm-balance/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute =
   AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRouteImport.update({
     id: '/admission/patients/$admissionId/billing/',
     path: '/admission/patients/$admissionId/billing/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute =
+  AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRouteImport.update({
+    id: '/admission/patients/$admissionId/billing-print/',
+    path: '/admission/patients/$admissionId/billing-print/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute =
+  AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRouteImport.update({
+    id: '/admission/patients/$admissionId/bill-created/',
+    path: '/admission/patients/$admissionId/bill-created/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedXRayAllEditBuilderIdRoute =
@@ -1304,6 +1343,12 @@ const AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute =
     path: '/pathology/immunology/beta-hcg/report/$reportId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPathologyImmunologyAllReportReportIdRoute =
+  AuthenticatedPathologyImmunologyAllReportReportIdRouteImport.update({
+    id: '/pathology/immunology/all/report/$reportId',
+    path: '/pathology/immunology/all/report/$reportId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute =
   AuthenticatedPathologyHormoneT3t4tshReportReportIdRouteImport.update({
     id: '/pathology/hormone/t3t4tsh/report/$reportId',
@@ -1340,6 +1385,12 @@ const AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute =
   AuthenticatedPathologyHormoneElectrolytesReportReportIdRouteImport.update({
     id: '/pathology/hormone/electrolytes/report/$reportId',
     path: '/pathology/hormone/electrolytes/report/$reportId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPathologyHormoneAllReportReportIdRoute =
+  AuthenticatedPathologyHormoneAllReportReportIdRouteImport.update({
+    id: '/pathology/hormone/all/report/$reportId',
+    path: '/pathology/hormone/all/report/$reportId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute =
@@ -1438,6 +1489,12 @@ const AuthenticatedEcgAllEditBuilderIdRoute =
     path: '/ecg/all/edit/builder/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute =
+  AuthenticatedAdmissionPatientsAdmissionIdPrintStepRouteImport.update({
+    id: '/admission/patients/$admissionId/print/$step',
+    path: '/admission/patients/$admissionId/print/$step',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPathologyImmunologyAllEditIdIndexRoute =
   AuthenticatedPathologyImmunologyAllEditIdIndexRouteImport.update({
     id: '/pathology/immunology/all/edit/$id/',
@@ -1485,6 +1542,7 @@ export interface FileRoutesByFullPath {
   '/503': typeof errors503Route
   '/': typeof AuthenticatedIndexRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
+  '/notifications/$id': typeof AuthenticatedNotificationsIdRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
@@ -1495,19 +1553,18 @@ export interface FileRoutesByFullPath {
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
   '/accounting': typeof AuthenticatedAccountingIndexRoute
   '/apps': typeof AuthenticatedAppsIndexRoute
+  '/backup-settings': typeof AuthenticatedBackupSettingsIndexRoute
+  '/backups': typeof AuthenticatedBackupsIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
-  '/customers': typeof AuthenticatedCustomersIndexRoute
   '/database': typeof AuthenticatedDatabaseIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/help': typeof AuthenticatedHelpIndexRoute
-  '/products': typeof AuthenticatedProductsIndexRoute
+  '/my-account': typeof AuthenticatedMyAccountIndexRoute
+  '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/roles': typeof AuthenticatedRolesIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
-  '/suppliers': typeof AuthenticatedSuppliersIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
-  '/products/$productId/edit': typeof AuthenticatedProductsProductIdEditRoute
-  '/purchase/order/create': typeof AuthenticatedPurchaseOrderCreateRoute
   '/roles/edit/$id': typeof AuthenticatedRolesEditIdRoute
   '/accounting/accounts': typeof AuthenticatedAccountingAccountsIndexRoute
   '/accounting/expense': typeof AuthenticatedAccountingExpenseIndexRoute
@@ -1524,6 +1581,7 @@ export interface FileRoutesByFullPath {
   '/admission/advance-payment': typeof AuthenticatedAdmissionAdvancePaymentIndexRoute
   '/admission/bed-cabin-charge': typeof AuthenticatedAdmissionBedCabinChargeIndexRoute
   '/admission/due-collection': typeof AuthenticatedAdmissionDueCollectionIndexRoute
+  '/admission/final-bills': typeof AuthenticatedAdmissionFinalBillsIndexRoute
   '/admission/finalise-services': typeof AuthenticatedAdmissionFinaliseServicesIndexRoute
   '/admission/first-time-bill': typeof AuthenticatedAdmissionFirstTimeBillIndexRoute
   '/admission/first-time-service': typeof AuthenticatedAdmissionFirstTimeServiceIndexRoute
@@ -1535,23 +1593,10 @@ export interface FileRoutesByFullPath {
   '/banks/bank-deposits': typeof AuthenticatedBanksBankDepositsIndexRoute
   '/banks/bank-transactions': typeof AuthenticatedBanksBankTransactionsIndexRoute
   '/banks/bank-withdrawals': typeof AuthenticatedBanksBankWithdrawalsIndexRoute
-  '/customers/$id': typeof AuthenticatedCustomersIdIndexRoute
-  '/customers/create': typeof AuthenticatedCustomersCreateIndexRoute
   '/ecg/all': typeof AuthenticatedEcgAllIndexRoute
-  '/inventory/stocks': typeof AuthenticatedInventoryStocksIndexRoute
   '/payroll/employees': typeof AuthenticatedPayrollEmployeesIndexRoute
   '/payroll/overview': typeof AuthenticatedPayrollOverviewIndexRoute
-  '/products/$productId': typeof AuthenticatedProductsProductIdIndexRoute
-  '/products/categories': typeof AuthenticatedProductsCategoriesIndexRoute
-  '/products/create': typeof AuthenticatedProductsCreateIndexRoute
-  '/products/units': typeof AuthenticatedProductsUnitsIndexRoute
-  '/purchase/invoices': typeof AuthenticatedPurchaseInvoicesIndexRoute
-  '/purchase/order': typeof AuthenticatedPurchaseOrderIndexRoute
-  '/purchase/payments': typeof AuthenticatedPurchasePaymentsIndexRoute
   '/roles/create': typeof AuthenticatedRolesCreateIndexRoute
-  '/sales/orders': typeof AuthenticatedSalesOrdersIndexRoute
-  '/suppliers/$id': typeof AuthenticatedSuppliersIdIndexRoute
-  '/suppliers/create': typeof AuthenticatedSuppliersCreateIndexRoute
   '/ultrasonogram/all': typeof AuthenticatedUltrasonogramAllIndexRoute
   '/x-ray/all': typeof AuthenticatedXRayAllIndexRoute
   '/ecg/all/edit/$id': typeof AuthenticatedEcgAllEditIdRoute
@@ -1565,7 +1610,6 @@ export interface FileRoutesByFullPath {
   '/outdoor/master/tests/$id': typeof AuthenticatedOutdoorMasterTestsIdRoute
   '/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRoute
   '/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute
-  '/purchase/order/$id/edit': typeof AuthenticatedPurchaseOrderIdEditRoute
   '/roles/permissions/$roleId/edit': typeof AuthenticatedRolesPermissionsRoleIdEditRoute
   '/ultrasonogram/all/edit/$id': typeof AuthenticatedUltrasonogramAllEditIdRoute
   '/ultrasonogram/all/print/$id': typeof AuthenticatedUltrasonogramAllPrintIdRoute
@@ -1578,9 +1622,19 @@ export interface FileRoutesByFullPath {
   '/accounting/reports/profit-loss': typeof AuthenticatedAccountingReportsProfitLossIndexRoute
   '/accounting/reports/trial-balance': typeof AuthenticatedAccountingReportsTrialBalanceIndexRoute
   '/admission/billing/$billingId': typeof AuthenticatedAdmissionBillingBillingIdIndexRoute
+  '/admission/discharged-patients/bill-does-not-created': typeof AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
   '/admission/invoice/create': typeof AuthenticatedAdmissionInvoiceCreateIndexRoute
   '/admission/invoice/list': typeof AuthenticatedAdmissionInvoiceListIndexRoute
-  '/customers/$id/edit': typeof AuthenticatedCustomersIdEditIndexRoute
+  '/admission/patients/active': typeof AuthenticatedAdmissionPatientsActiveIndexRoute
+  '/admission/patients/balance-distributed-list': typeof AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute
+  '/admission/patients/bill-created-list': typeof AuthenticatedAdmissionPatientsBillCreatedListIndexRoute
+  '/admission/patients/bill-distributed-list': typeof AuthenticatedAdmissionPatientsBillDistributedListIndexRoute
+  '/admission/patients/discharged-list': typeof AuthenticatedAdmissionPatientsDischargedListIndexRoute
+  '/admission/patients/discharged': typeof AuthenticatedAdmissionPatientsDischargedIndexRoute
+  '/admission/patients/final-bill-created-list': typeof AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute
+  '/admission/patients/payment-completed-list': typeof AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute
+  '/indoor/management/distributions': typeof AuthenticatedIndoorManagementDistributionsIndexRoute
+  '/indoor/management/doctor-referred': typeof AuthenticatedIndoorManagementDoctorReferredIndexRoute
   '/indoor/master/anasthesia-types': typeof AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute
   '/indoor/master/bed-cabin-list': typeof AuthenticatedIndoorMasterBedCabinListIndexRoute
   '/indoor/master/doctor-types': typeof AuthenticatedIndoorMasterDoctorTypesIndexRoute
@@ -1593,10 +1647,14 @@ export interface FileRoutesByFullPath {
   '/outdoor/master/departments': typeof AuthenticatedOutdoorMasterDepartmentsIndexRoute
   '/outdoor/master/doctors': typeof AuthenticatedOutdoorMasterDoctorsIndexRoute
   '/outdoor/master/machines': typeof AuthenticatedOutdoorMasterMachinesIndexRoute
+  '/outdoor/master/sample-collection-rooms': typeof AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute
   '/outdoor/master/test-tables': typeof AuthenticatedOutdoorMasterTestTablesIndexRoute
   '/outdoor/master/tests': typeof AuthenticatedOutdoorMasterTestsIndexRoute
   '/outdoor/reception/due-collection': typeof AuthenticatedOutdoorReceptionDueCollectionIndexRoute
+  '/outdoor/reception/my-invoices': typeof AuthenticatedOutdoorReceptionMyInvoicesIndexRoute
+  '/outdoor/reception/paid-invoices': typeof AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute
   '/outdoor/reception/patients': typeof AuthenticatedOutdoorReceptionPatientsIndexRoute
+  '/outdoor/reception/user-invoices': typeof AuthenticatedOutdoorReceptionUserInvoicesIndexRoute
   '/pathology/biochemical/all': typeof AuthenticatedPathologyBiochemicalAllIndexRoute
   '/pathology/biochemical/lipid-profile': typeof AuthenticatedPathologyBiochemicalLipidProfileIndexRoute
   '/pathology/hematology/all': typeof AuthenticatedPathologyHematologyAllIndexRoute
@@ -1625,11 +1683,7 @@ export interface FileRoutesByFullPath {
   '/pathology/urine/urine-for-sugar': typeof AuthenticatedPathologyUrineUrineForSugarIndexRoute
   '/payroll/attendance/$staffId': typeof AuthenticatedPayrollAttendanceStaffIdIndexRoute
   '/payroll/salary/$staffId': typeof AuthenticatedPayrollSalaryStaffIdIndexRoute
-  '/purchase/invoices/$id': typeof AuthenticatedPurchaseInvoicesIdIndexRoute
-  '/purchase/order/$id': typeof AuthenticatedPurchaseOrderIdIndexRoute
-  '/purchase/payments/$id': typeof AuthenticatedPurchasePaymentsIdIndexRoute
-  '/purchase/payments/create': typeof AuthenticatedPurchasePaymentsCreateIndexRoute
-  '/suppliers/$id/edit': typeof AuthenticatedSuppliersIdEditIndexRoute
+  '/admission/patients/$admissionId/print/$step': typeof AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute
   '/ecg/all/edit/builder/$id': typeof AuthenticatedEcgAllEditBuilderIdRoute
   '/indoor/master/services/edit/$id': typeof AuthenticatedIndoorMasterServicesEditIdRoute
   '/outdoor/master/doctors/$doctorId/edit': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute
@@ -1645,12 +1699,14 @@ export interface FileRoutesByFullPath {
   '/pathology/hematology/cbc-with-pbf/report/$reportId': typeof AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRoute
   '/pathology/hematology/peripheral-blood-film/report/$reportId': typeof AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRoute
   '/pathology/hematology/prothom-bin-time-full/report/$reportId': typeof AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute
+  '/pathology/hormone/all/report/$reportId': typeof AuthenticatedPathologyHormoneAllReportReportIdRoute
   '/pathology/hormone/electrolytes/report/$reportId': typeof AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute
   '/pathology/hormone/semen/edit/$reportId': typeof AuthenticatedPathologyHormoneSemenEditReportIdRoute
   '/pathology/hormone/semen/report/$reportId': typeof AuthenticatedPathologyHormoneSemenReportReportIdRoute
   '/pathology/hormone/skin-scrapping-for-fungus/report/$reportId': typeof AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRoute
   '/pathology/hormone/sputum/report/$reportId': typeof AuthenticatedPathologyHormoneSputumReportReportIdRoute
   '/pathology/hormone/t3t4tsh/report/$reportId': typeof AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute
+  '/pathology/immunology/all/report/$reportId': typeof AuthenticatedPathologyImmunologyAllReportReportIdRoute
   '/pathology/immunology/beta-hcg/report/$reportId': typeof AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute
   '/pathology/immunology/blood-group/report/$reportId': typeof AuthenticatedPathologyImmunologyBloodGroupReportReportIdRoute
   '/pathology/immunology/mt/report/$reportId': typeof AuthenticatedPathologyImmunologyMtReportReportIdRoute
@@ -1665,14 +1721,22 @@ export interface FileRoutesByFullPath {
   '/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
   '/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
   '/x-ray/all/edit/builder/$id': typeof AuthenticatedXRayAllEditBuilderIdRoute
+  '/admission/patients/$admissionId/bill-created': typeof AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute
+  '/admission/patients/$admissionId/billing-print': typeof AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute
   '/admission/patients/$admissionId/billing': typeof AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute
+  '/admission/patients/$admissionId/confirm-balance': typeof AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
+  '/admission/patients/$admissionId/distribute-bill': typeof AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute
+  '/admission/patients/$admissionId/final-bill-print': typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
+  '/admission/patients/$admissionId/final-bill': typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute
+  '/admission/patients/$admissionId/print': typeof AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute
   '/indoor/master/bed-cabin-list/create': typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
   '/indoor/master/services/create': typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
   '/outdoor/master/doctors/$doctorId': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
   '/outdoor/master/tests/create': typeof AuthenticatedOutdoorMasterTestsCreateIndexRoute
   '/outdoor/reception/invoices/create': typeof AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute
   '/outdoor/reception/invoices/list': typeof AuthenticatedOutdoorReceptionInvoicesListIndexRoute
-  '/purchase/invoices/$id/preview': typeof AuthenticatedPurchaseInvoicesIdPreviewIndexRoute
+  '/reports/my/outdoor/date-wise-collection': typeof AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute
+  '/reports/my/outdoor/today-collection': typeof AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute
   '/outdoor/master/tests/edit/$id': typeof AuthenticatedOutdoorMasterTestsEditIdIndexRoute
   '/outdoor/reception/invoices/edit/$invoiceId': typeof AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
   '/pathology/hematology/all/edit/$id': typeof AuthenticatedPathologyHematologyAllEditIdIndexRoute
@@ -1694,6 +1758,7 @@ export interface FileRoutesByTo {
   '/503': typeof errors503Route
   '/': typeof AuthenticatedIndexRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
+  '/notifications/$id': typeof AuthenticatedNotificationsIdRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
@@ -1704,19 +1769,18 @@ export interface FileRoutesByTo {
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
   '/accounting': typeof AuthenticatedAccountingIndexRoute
   '/apps': typeof AuthenticatedAppsIndexRoute
+  '/backup-settings': typeof AuthenticatedBackupSettingsIndexRoute
+  '/backups': typeof AuthenticatedBackupsIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
-  '/customers': typeof AuthenticatedCustomersIndexRoute
   '/database': typeof AuthenticatedDatabaseIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/help': typeof AuthenticatedHelpIndexRoute
-  '/products': typeof AuthenticatedProductsIndexRoute
+  '/my-account': typeof AuthenticatedMyAccountIndexRoute
+  '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/roles': typeof AuthenticatedRolesIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
-  '/suppliers': typeof AuthenticatedSuppliersIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
-  '/products/$productId/edit': typeof AuthenticatedProductsProductIdEditRoute
-  '/purchase/order/create': typeof AuthenticatedPurchaseOrderCreateRoute
   '/roles/edit/$id': typeof AuthenticatedRolesEditIdRoute
   '/accounting/accounts': typeof AuthenticatedAccountingAccountsIndexRoute
   '/accounting/expense': typeof AuthenticatedAccountingExpenseIndexRoute
@@ -1733,6 +1797,7 @@ export interface FileRoutesByTo {
   '/admission/advance-payment': typeof AuthenticatedAdmissionAdvancePaymentIndexRoute
   '/admission/bed-cabin-charge': typeof AuthenticatedAdmissionBedCabinChargeIndexRoute
   '/admission/due-collection': typeof AuthenticatedAdmissionDueCollectionIndexRoute
+  '/admission/final-bills': typeof AuthenticatedAdmissionFinalBillsIndexRoute
   '/admission/finalise-services': typeof AuthenticatedAdmissionFinaliseServicesIndexRoute
   '/admission/first-time-bill': typeof AuthenticatedAdmissionFirstTimeBillIndexRoute
   '/admission/first-time-service': typeof AuthenticatedAdmissionFirstTimeServiceIndexRoute
@@ -1744,23 +1809,10 @@ export interface FileRoutesByTo {
   '/banks/bank-deposits': typeof AuthenticatedBanksBankDepositsIndexRoute
   '/banks/bank-transactions': typeof AuthenticatedBanksBankTransactionsIndexRoute
   '/banks/bank-withdrawals': typeof AuthenticatedBanksBankWithdrawalsIndexRoute
-  '/customers/$id': typeof AuthenticatedCustomersIdIndexRoute
-  '/customers/create': typeof AuthenticatedCustomersCreateIndexRoute
   '/ecg/all': typeof AuthenticatedEcgAllIndexRoute
-  '/inventory/stocks': typeof AuthenticatedInventoryStocksIndexRoute
   '/payroll/employees': typeof AuthenticatedPayrollEmployeesIndexRoute
   '/payroll/overview': typeof AuthenticatedPayrollOverviewIndexRoute
-  '/products/$productId': typeof AuthenticatedProductsProductIdIndexRoute
-  '/products/categories': typeof AuthenticatedProductsCategoriesIndexRoute
-  '/products/create': typeof AuthenticatedProductsCreateIndexRoute
-  '/products/units': typeof AuthenticatedProductsUnitsIndexRoute
-  '/purchase/invoices': typeof AuthenticatedPurchaseInvoicesIndexRoute
-  '/purchase/order': typeof AuthenticatedPurchaseOrderIndexRoute
-  '/purchase/payments': typeof AuthenticatedPurchasePaymentsIndexRoute
   '/roles/create': typeof AuthenticatedRolesCreateIndexRoute
-  '/sales/orders': typeof AuthenticatedSalesOrdersIndexRoute
-  '/suppliers/$id': typeof AuthenticatedSuppliersIdIndexRoute
-  '/suppliers/create': typeof AuthenticatedSuppliersCreateIndexRoute
   '/ultrasonogram/all': typeof AuthenticatedUltrasonogramAllIndexRoute
   '/x-ray/all': typeof AuthenticatedXRayAllIndexRoute
   '/ecg/all/edit/$id': typeof AuthenticatedEcgAllEditIdRoute
@@ -1774,7 +1826,6 @@ export interface FileRoutesByTo {
   '/outdoor/master/tests/$id': typeof AuthenticatedOutdoorMasterTestsIdRoute
   '/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRoute
   '/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute
-  '/purchase/order/$id/edit': typeof AuthenticatedPurchaseOrderIdEditRoute
   '/roles/permissions/$roleId/edit': typeof AuthenticatedRolesPermissionsRoleIdEditRoute
   '/ultrasonogram/all/edit/$id': typeof AuthenticatedUltrasonogramAllEditIdRoute
   '/ultrasonogram/all/print/$id': typeof AuthenticatedUltrasonogramAllPrintIdRoute
@@ -1787,9 +1838,19 @@ export interface FileRoutesByTo {
   '/accounting/reports/profit-loss': typeof AuthenticatedAccountingReportsProfitLossIndexRoute
   '/accounting/reports/trial-balance': typeof AuthenticatedAccountingReportsTrialBalanceIndexRoute
   '/admission/billing/$billingId': typeof AuthenticatedAdmissionBillingBillingIdIndexRoute
+  '/admission/discharged-patients/bill-does-not-created': typeof AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
   '/admission/invoice/create': typeof AuthenticatedAdmissionInvoiceCreateIndexRoute
   '/admission/invoice/list': typeof AuthenticatedAdmissionInvoiceListIndexRoute
-  '/customers/$id/edit': typeof AuthenticatedCustomersIdEditIndexRoute
+  '/admission/patients/active': typeof AuthenticatedAdmissionPatientsActiveIndexRoute
+  '/admission/patients/balance-distributed-list': typeof AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute
+  '/admission/patients/bill-created-list': typeof AuthenticatedAdmissionPatientsBillCreatedListIndexRoute
+  '/admission/patients/bill-distributed-list': typeof AuthenticatedAdmissionPatientsBillDistributedListIndexRoute
+  '/admission/patients/discharged-list': typeof AuthenticatedAdmissionPatientsDischargedListIndexRoute
+  '/admission/patients/discharged': typeof AuthenticatedAdmissionPatientsDischargedIndexRoute
+  '/admission/patients/final-bill-created-list': typeof AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute
+  '/admission/patients/payment-completed-list': typeof AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute
+  '/indoor/management/distributions': typeof AuthenticatedIndoorManagementDistributionsIndexRoute
+  '/indoor/management/doctor-referred': typeof AuthenticatedIndoorManagementDoctorReferredIndexRoute
   '/indoor/master/anasthesia-types': typeof AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute
   '/indoor/master/bed-cabin-list': typeof AuthenticatedIndoorMasterBedCabinListIndexRoute
   '/indoor/master/doctor-types': typeof AuthenticatedIndoorMasterDoctorTypesIndexRoute
@@ -1802,10 +1863,14 @@ export interface FileRoutesByTo {
   '/outdoor/master/departments': typeof AuthenticatedOutdoorMasterDepartmentsIndexRoute
   '/outdoor/master/doctors': typeof AuthenticatedOutdoorMasterDoctorsIndexRoute
   '/outdoor/master/machines': typeof AuthenticatedOutdoorMasterMachinesIndexRoute
+  '/outdoor/master/sample-collection-rooms': typeof AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute
   '/outdoor/master/test-tables': typeof AuthenticatedOutdoorMasterTestTablesIndexRoute
   '/outdoor/master/tests': typeof AuthenticatedOutdoorMasterTestsIndexRoute
   '/outdoor/reception/due-collection': typeof AuthenticatedOutdoorReceptionDueCollectionIndexRoute
+  '/outdoor/reception/my-invoices': typeof AuthenticatedOutdoorReceptionMyInvoicesIndexRoute
+  '/outdoor/reception/paid-invoices': typeof AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute
   '/outdoor/reception/patients': typeof AuthenticatedOutdoorReceptionPatientsIndexRoute
+  '/outdoor/reception/user-invoices': typeof AuthenticatedOutdoorReceptionUserInvoicesIndexRoute
   '/pathology/biochemical/all': typeof AuthenticatedPathologyBiochemicalAllIndexRoute
   '/pathology/biochemical/lipid-profile': typeof AuthenticatedPathologyBiochemicalLipidProfileIndexRoute
   '/pathology/hematology/all': typeof AuthenticatedPathologyHematologyAllIndexRoute
@@ -1834,11 +1899,7 @@ export interface FileRoutesByTo {
   '/pathology/urine/urine-for-sugar': typeof AuthenticatedPathologyUrineUrineForSugarIndexRoute
   '/payroll/attendance/$staffId': typeof AuthenticatedPayrollAttendanceStaffIdIndexRoute
   '/payroll/salary/$staffId': typeof AuthenticatedPayrollSalaryStaffIdIndexRoute
-  '/purchase/invoices/$id': typeof AuthenticatedPurchaseInvoicesIdIndexRoute
-  '/purchase/order/$id': typeof AuthenticatedPurchaseOrderIdIndexRoute
-  '/purchase/payments/$id': typeof AuthenticatedPurchasePaymentsIdIndexRoute
-  '/purchase/payments/create': typeof AuthenticatedPurchasePaymentsCreateIndexRoute
-  '/suppliers/$id/edit': typeof AuthenticatedSuppliersIdEditIndexRoute
+  '/admission/patients/$admissionId/print/$step': typeof AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute
   '/ecg/all/edit/builder/$id': typeof AuthenticatedEcgAllEditBuilderIdRoute
   '/indoor/master/services/edit/$id': typeof AuthenticatedIndoorMasterServicesEditIdRoute
   '/outdoor/master/doctors/$doctorId/edit': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute
@@ -1854,12 +1915,14 @@ export interface FileRoutesByTo {
   '/pathology/hematology/cbc-with-pbf/report/$reportId': typeof AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRoute
   '/pathology/hematology/peripheral-blood-film/report/$reportId': typeof AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRoute
   '/pathology/hematology/prothom-bin-time-full/report/$reportId': typeof AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute
+  '/pathology/hormone/all/report/$reportId': typeof AuthenticatedPathologyHormoneAllReportReportIdRoute
   '/pathology/hormone/electrolytes/report/$reportId': typeof AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute
   '/pathology/hormone/semen/edit/$reportId': typeof AuthenticatedPathologyHormoneSemenEditReportIdRoute
   '/pathology/hormone/semen/report/$reportId': typeof AuthenticatedPathologyHormoneSemenReportReportIdRoute
   '/pathology/hormone/skin-scrapping-for-fungus/report/$reportId': typeof AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRoute
   '/pathology/hormone/sputum/report/$reportId': typeof AuthenticatedPathologyHormoneSputumReportReportIdRoute
   '/pathology/hormone/t3t4tsh/report/$reportId': typeof AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute
+  '/pathology/immunology/all/report/$reportId': typeof AuthenticatedPathologyImmunologyAllReportReportIdRoute
   '/pathology/immunology/beta-hcg/report/$reportId': typeof AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute
   '/pathology/immunology/blood-group/report/$reportId': typeof AuthenticatedPathologyImmunologyBloodGroupReportReportIdRoute
   '/pathology/immunology/mt/report/$reportId': typeof AuthenticatedPathologyImmunologyMtReportReportIdRoute
@@ -1874,14 +1937,22 @@ export interface FileRoutesByTo {
   '/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
   '/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
   '/x-ray/all/edit/builder/$id': typeof AuthenticatedXRayAllEditBuilderIdRoute
+  '/admission/patients/$admissionId/bill-created': typeof AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute
+  '/admission/patients/$admissionId/billing-print': typeof AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute
   '/admission/patients/$admissionId/billing': typeof AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute
+  '/admission/patients/$admissionId/confirm-balance': typeof AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
+  '/admission/patients/$admissionId/distribute-bill': typeof AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute
+  '/admission/patients/$admissionId/final-bill-print': typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
+  '/admission/patients/$admissionId/final-bill': typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute
+  '/admission/patients/$admissionId/print': typeof AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute
   '/indoor/master/bed-cabin-list/create': typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
   '/indoor/master/services/create': typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
   '/outdoor/master/doctors/$doctorId': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
   '/outdoor/master/tests/create': typeof AuthenticatedOutdoorMasterTestsCreateIndexRoute
   '/outdoor/reception/invoices/create': typeof AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute
   '/outdoor/reception/invoices/list': typeof AuthenticatedOutdoorReceptionInvoicesListIndexRoute
-  '/purchase/invoices/$id/preview': typeof AuthenticatedPurchaseInvoicesIdPreviewIndexRoute
+  '/reports/my/outdoor/date-wise-collection': typeof AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute
+  '/reports/my/outdoor/today-collection': typeof AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute
   '/outdoor/master/tests/edit/$id': typeof AuthenticatedOutdoorMasterTestsEditIdIndexRoute
   '/outdoor/reception/invoices/edit/$invoiceId': typeof AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
   '/pathology/hematology/all/edit/$id': typeof AuthenticatedPathologyHematologyAllEditIdIndexRoute
@@ -1908,6 +1979,7 @@ export interface FileRoutesById {
   '/(errors)/503': typeof errors503Route
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
+  '/_authenticated/notifications/$id': typeof AuthenticatedNotificationsIdRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
@@ -1918,19 +1990,18 @@ export interface FileRoutesById {
   '/clerk/_authenticated/user-management': typeof ClerkAuthenticatedUserManagementRoute
   '/_authenticated/accounting/': typeof AuthenticatedAccountingIndexRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexRoute
+  '/_authenticated/backup-settings/': typeof AuthenticatedBackupSettingsIndexRoute
+  '/_authenticated/backups/': typeof AuthenticatedBackupsIndexRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexRoute
-  '/_authenticated/customers/': typeof AuthenticatedCustomersIndexRoute
   '/_authenticated/database/': typeof AuthenticatedDatabaseIndexRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
   '/_authenticated/help/': typeof AuthenticatedHelpIndexRoute
-  '/_authenticated/products/': typeof AuthenticatedProductsIndexRoute
+  '/_authenticated/my-account/': typeof AuthenticatedMyAccountIndexRoute
+  '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/_authenticated/roles/': typeof AuthenticatedRolesIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
-  '/_authenticated/suppliers/': typeof AuthenticatedSuppliersIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
-  '/_authenticated/products/$productId/edit': typeof AuthenticatedProductsProductIdEditRoute
-  '/_authenticated/purchase/order/create': typeof AuthenticatedPurchaseOrderCreateRoute
   '/_authenticated/roles/edit/$id': typeof AuthenticatedRolesEditIdRoute
   '/_authenticated/accounting/accounts/': typeof AuthenticatedAccountingAccountsIndexRoute
   '/_authenticated/accounting/expense/': typeof AuthenticatedAccountingExpenseIndexRoute
@@ -1947,6 +2018,7 @@ export interface FileRoutesById {
   '/_authenticated/admission/advance-payment/': typeof AuthenticatedAdmissionAdvancePaymentIndexRoute
   '/_authenticated/admission/bed-cabin-charge/': typeof AuthenticatedAdmissionBedCabinChargeIndexRoute
   '/_authenticated/admission/due-collection/': typeof AuthenticatedAdmissionDueCollectionIndexRoute
+  '/_authenticated/admission/final-bills/': typeof AuthenticatedAdmissionFinalBillsIndexRoute
   '/_authenticated/admission/finalise-services/': typeof AuthenticatedAdmissionFinaliseServicesIndexRoute
   '/_authenticated/admission/first-time-bill/': typeof AuthenticatedAdmissionFirstTimeBillIndexRoute
   '/_authenticated/admission/first-time-service/': typeof AuthenticatedAdmissionFirstTimeServiceIndexRoute
@@ -1958,23 +2030,10 @@ export interface FileRoutesById {
   '/_authenticated/banks/bank-deposits/': typeof AuthenticatedBanksBankDepositsIndexRoute
   '/_authenticated/banks/bank-transactions/': typeof AuthenticatedBanksBankTransactionsIndexRoute
   '/_authenticated/banks/bank-withdrawals/': typeof AuthenticatedBanksBankWithdrawalsIndexRoute
-  '/_authenticated/customers/$id/': typeof AuthenticatedCustomersIdIndexRoute
-  '/_authenticated/customers/create/': typeof AuthenticatedCustomersCreateIndexRoute
   '/_authenticated/ecg/all/': typeof AuthenticatedEcgAllIndexRoute
-  '/_authenticated/inventory/stocks/': typeof AuthenticatedInventoryStocksIndexRoute
   '/_authenticated/payroll/employees/': typeof AuthenticatedPayrollEmployeesIndexRoute
   '/_authenticated/payroll/overview/': typeof AuthenticatedPayrollOverviewIndexRoute
-  '/_authenticated/products/$productId/': typeof AuthenticatedProductsProductIdIndexRoute
-  '/_authenticated/products/categories/': typeof AuthenticatedProductsCategoriesIndexRoute
-  '/_authenticated/products/create/': typeof AuthenticatedProductsCreateIndexRoute
-  '/_authenticated/products/units/': typeof AuthenticatedProductsUnitsIndexRoute
-  '/_authenticated/purchase/invoices/': typeof AuthenticatedPurchaseInvoicesIndexRoute
-  '/_authenticated/purchase/order/': typeof AuthenticatedPurchaseOrderIndexRoute
-  '/_authenticated/purchase/payments/': typeof AuthenticatedPurchasePaymentsIndexRoute
   '/_authenticated/roles/create/': typeof AuthenticatedRolesCreateIndexRoute
-  '/_authenticated/sales/orders/': typeof AuthenticatedSalesOrdersIndexRoute
-  '/_authenticated/suppliers/$id/': typeof AuthenticatedSuppliersIdIndexRoute
-  '/_authenticated/suppliers/create/': typeof AuthenticatedSuppliersCreateIndexRoute
   '/_authenticated/ultrasonogram/all/': typeof AuthenticatedUltrasonogramAllIndexRoute
   '/_authenticated/x-ray/all/': typeof AuthenticatedXRayAllIndexRoute
   '/_authenticated/ecg/all/edit/$id': typeof AuthenticatedEcgAllEditIdRoute
@@ -1988,7 +2047,6 @@ export interface FileRoutesById {
   '/_authenticated/outdoor/master/tests/$id': typeof AuthenticatedOutdoorMasterTestsIdRoute
   '/_authenticated/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRoute
   '/_authenticated/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute
-  '/_authenticated/purchase/order/$id/edit': typeof AuthenticatedPurchaseOrderIdEditRoute
   '/_authenticated/roles/permissions/$roleId/edit': typeof AuthenticatedRolesPermissionsRoleIdEditRoute
   '/_authenticated/ultrasonogram/all/edit/$id': typeof AuthenticatedUltrasonogramAllEditIdRoute
   '/_authenticated/ultrasonogram/all/print/$id': typeof AuthenticatedUltrasonogramAllPrintIdRoute
@@ -2001,9 +2059,19 @@ export interface FileRoutesById {
   '/_authenticated/accounting/reports/profit-loss/': typeof AuthenticatedAccountingReportsProfitLossIndexRoute
   '/_authenticated/accounting/reports/trial-balance/': typeof AuthenticatedAccountingReportsTrialBalanceIndexRoute
   '/_authenticated/admission/billing/$billingId/': typeof AuthenticatedAdmissionBillingBillingIdIndexRoute
+  '/_authenticated/admission/discharged-patients/bill-does-not-created/': typeof AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
   '/_authenticated/admission/invoice/create/': typeof AuthenticatedAdmissionInvoiceCreateIndexRoute
   '/_authenticated/admission/invoice/list/': typeof AuthenticatedAdmissionInvoiceListIndexRoute
-  '/_authenticated/customers/$id/edit/': typeof AuthenticatedCustomersIdEditIndexRoute
+  '/_authenticated/admission/patients/active/': typeof AuthenticatedAdmissionPatientsActiveIndexRoute
+  '/_authenticated/admission/patients/balance-distributed-list/': typeof AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute
+  '/_authenticated/admission/patients/bill-created-list/': typeof AuthenticatedAdmissionPatientsBillCreatedListIndexRoute
+  '/_authenticated/admission/patients/bill-distributed-list/': typeof AuthenticatedAdmissionPatientsBillDistributedListIndexRoute
+  '/_authenticated/admission/patients/discharged-list/': typeof AuthenticatedAdmissionPatientsDischargedListIndexRoute
+  '/_authenticated/admission/patients/discharged/': typeof AuthenticatedAdmissionPatientsDischargedIndexRoute
+  '/_authenticated/admission/patients/final-bill-created-list/': typeof AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute
+  '/_authenticated/admission/patients/payment-completed-list/': typeof AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute
+  '/_authenticated/indoor/management/distributions/': typeof AuthenticatedIndoorManagementDistributionsIndexRoute
+  '/_authenticated/indoor/management/doctor-referred/': typeof AuthenticatedIndoorManagementDoctorReferredIndexRoute
   '/_authenticated/indoor/master/anasthesia-types/': typeof AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute
   '/_authenticated/indoor/master/bed-cabin-list/': typeof AuthenticatedIndoorMasterBedCabinListIndexRoute
   '/_authenticated/indoor/master/doctor-types/': typeof AuthenticatedIndoorMasterDoctorTypesIndexRoute
@@ -2016,10 +2084,14 @@ export interface FileRoutesById {
   '/_authenticated/outdoor/master/departments/': typeof AuthenticatedOutdoorMasterDepartmentsIndexRoute
   '/_authenticated/outdoor/master/doctors/': typeof AuthenticatedOutdoorMasterDoctorsIndexRoute
   '/_authenticated/outdoor/master/machines/': typeof AuthenticatedOutdoorMasterMachinesIndexRoute
+  '/_authenticated/outdoor/master/sample-collection-rooms/': typeof AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute
   '/_authenticated/outdoor/master/test-tables/': typeof AuthenticatedOutdoorMasterTestTablesIndexRoute
   '/_authenticated/outdoor/master/tests/': typeof AuthenticatedOutdoorMasterTestsIndexRoute
   '/_authenticated/outdoor/reception/due-collection/': typeof AuthenticatedOutdoorReceptionDueCollectionIndexRoute
+  '/_authenticated/outdoor/reception/my-invoices/': typeof AuthenticatedOutdoorReceptionMyInvoicesIndexRoute
+  '/_authenticated/outdoor/reception/paid-invoices/': typeof AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute
   '/_authenticated/outdoor/reception/patients/': typeof AuthenticatedOutdoorReceptionPatientsIndexRoute
+  '/_authenticated/outdoor/reception/user-invoices/': typeof AuthenticatedOutdoorReceptionUserInvoicesIndexRoute
   '/_authenticated/pathology/biochemical/all/': typeof AuthenticatedPathologyBiochemicalAllIndexRoute
   '/_authenticated/pathology/biochemical/lipid-profile/': typeof AuthenticatedPathologyBiochemicalLipidProfileIndexRoute
   '/_authenticated/pathology/hematology/all/': typeof AuthenticatedPathologyHematologyAllIndexRoute
@@ -2048,11 +2120,7 @@ export interface FileRoutesById {
   '/_authenticated/pathology/urine/urine-for-sugar/': typeof AuthenticatedPathologyUrineUrineForSugarIndexRoute
   '/_authenticated/payroll/attendance/$staffId/': typeof AuthenticatedPayrollAttendanceStaffIdIndexRoute
   '/_authenticated/payroll/salary/$staffId/': typeof AuthenticatedPayrollSalaryStaffIdIndexRoute
-  '/_authenticated/purchase/invoices/$id/': typeof AuthenticatedPurchaseInvoicesIdIndexRoute
-  '/_authenticated/purchase/order/$id/': typeof AuthenticatedPurchaseOrderIdIndexRoute
-  '/_authenticated/purchase/payments/$id/': typeof AuthenticatedPurchasePaymentsIdIndexRoute
-  '/_authenticated/purchase/payments/create/': typeof AuthenticatedPurchasePaymentsCreateIndexRoute
-  '/_authenticated/suppliers/$id/edit/': typeof AuthenticatedSuppliersIdEditIndexRoute
+  '/_authenticated/admission/patients/$admissionId/print/$step': typeof AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute
   '/_authenticated/ecg/all/edit/builder/$id': typeof AuthenticatedEcgAllEditBuilderIdRoute
   '/_authenticated/indoor/master/services/edit/$id': typeof AuthenticatedIndoorMasterServicesEditIdRoute
   '/_authenticated/outdoor/master/doctors/$doctorId/edit': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute
@@ -2068,12 +2136,14 @@ export interface FileRoutesById {
   '/_authenticated/pathology/hematology/cbc-with-pbf/report/$reportId': typeof AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRoute
   '/_authenticated/pathology/hematology/peripheral-blood-film/report/$reportId': typeof AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRoute
   '/_authenticated/pathology/hematology/prothom-bin-time-full/report/$reportId': typeof AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute
+  '/_authenticated/pathology/hormone/all/report/$reportId': typeof AuthenticatedPathologyHormoneAllReportReportIdRoute
   '/_authenticated/pathology/hormone/electrolytes/report/$reportId': typeof AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute
   '/_authenticated/pathology/hormone/semen/edit/$reportId': typeof AuthenticatedPathologyHormoneSemenEditReportIdRoute
   '/_authenticated/pathology/hormone/semen/report/$reportId': typeof AuthenticatedPathologyHormoneSemenReportReportIdRoute
   '/_authenticated/pathology/hormone/skin-scrapping-for-fungus/report/$reportId': typeof AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRoute
   '/_authenticated/pathology/hormone/sputum/report/$reportId': typeof AuthenticatedPathologyHormoneSputumReportReportIdRoute
   '/_authenticated/pathology/hormone/t3t4tsh/report/$reportId': typeof AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute
+  '/_authenticated/pathology/immunology/all/report/$reportId': typeof AuthenticatedPathologyImmunologyAllReportReportIdRoute
   '/_authenticated/pathology/immunology/beta-hcg/report/$reportId': typeof AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute
   '/_authenticated/pathology/immunology/blood-group/report/$reportId': typeof AuthenticatedPathologyImmunologyBloodGroupReportReportIdRoute
   '/_authenticated/pathology/immunology/mt/report/$reportId': typeof AuthenticatedPathologyImmunologyMtReportReportIdRoute
@@ -2088,14 +2158,22 @@ export interface FileRoutesById {
   '/_authenticated/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
   '/_authenticated/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
   '/_authenticated/x-ray/all/edit/builder/$id': typeof AuthenticatedXRayAllEditBuilderIdRoute
+  '/_authenticated/admission/patients/$admissionId/bill-created/': typeof AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute
+  '/_authenticated/admission/patients/$admissionId/billing-print/': typeof AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute
   '/_authenticated/admission/patients/$admissionId/billing/': typeof AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute
+  '/_authenticated/admission/patients/$admissionId/confirm-balance/': typeof AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
+  '/_authenticated/admission/patients/$admissionId/distribute-bill/': typeof AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute
+  '/_authenticated/admission/patients/$admissionId/final-bill-print/': typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
+  '/_authenticated/admission/patients/$admissionId/final-bill/': typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute
+  '/_authenticated/admission/patients/$admissionId/print/': typeof AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute
   '/_authenticated/indoor/master/bed-cabin-list/create/': typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
   '/_authenticated/indoor/master/services/create/': typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
   '/_authenticated/outdoor/master/doctors/$doctorId/': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
   '/_authenticated/outdoor/master/tests/create/': typeof AuthenticatedOutdoorMasterTestsCreateIndexRoute
   '/_authenticated/outdoor/reception/invoices/create/': typeof AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute
   '/_authenticated/outdoor/reception/invoices/list/': typeof AuthenticatedOutdoorReceptionInvoicesListIndexRoute
-  '/_authenticated/purchase/invoices/$id/preview/': typeof AuthenticatedPurchaseInvoicesIdPreviewIndexRoute
+  '/_authenticated/reports/my/outdoor/date-wise-collection/': typeof AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute
+  '/_authenticated/reports/my/outdoor/today-collection/': typeof AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute
   '/_authenticated/outdoor/master/tests/edit/$id/': typeof AuthenticatedOutdoorMasterTestsEditIdIndexRoute
   '/_authenticated/outdoor/reception/invoices/edit/$invoiceId/': typeof AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
   '/_authenticated/pathology/hematology/all/edit/$id/': typeof AuthenticatedPathologyHematologyAllEditIdIndexRoute
@@ -2120,6 +2198,7 @@ export interface FileRouteTypes {
     | '/503'
     | '/'
     | '/errors/$error'
+    | '/notifications/$id'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
@@ -2130,19 +2209,18 @@ export interface FileRouteTypes {
     | '/clerk/user-management'
     | '/accounting'
     | '/apps'
+    | '/backup-settings'
+    | '/backups'
     | '/chats'
-    | '/customers'
     | '/database'
     | '/help-center'
     | '/help'
-    | '/products'
+    | '/my-account'
+    | '/notifications'
     | '/roles'
     | '/settings/'
-    | '/suppliers'
     | '/tasks'
     | '/users'
-    | '/products/$productId/edit'
-    | '/purchase/order/create'
     | '/roles/edit/$id'
     | '/accounting/accounts'
     | '/accounting/expense'
@@ -2159,6 +2237,7 @@ export interface FileRouteTypes {
     | '/admission/advance-payment'
     | '/admission/bed-cabin-charge'
     | '/admission/due-collection'
+    | '/admission/final-bills'
     | '/admission/finalise-services'
     | '/admission/first-time-bill'
     | '/admission/first-time-service'
@@ -2170,23 +2249,10 @@ export interface FileRouteTypes {
     | '/banks/bank-deposits'
     | '/banks/bank-transactions'
     | '/banks/bank-withdrawals'
-    | '/customers/$id'
-    | '/customers/create'
     | '/ecg/all'
-    | '/inventory/stocks'
     | '/payroll/employees'
     | '/payroll/overview'
-    | '/products/$productId'
-    | '/products/categories'
-    | '/products/create'
-    | '/products/units'
-    | '/purchase/invoices'
-    | '/purchase/order'
-    | '/purchase/payments'
     | '/roles/create'
-    | '/sales/orders'
-    | '/suppliers/$id'
-    | '/suppliers/create'
     | '/ultrasonogram/all'
     | '/x-ray/all'
     | '/ecg/all/edit/$id'
@@ -2200,7 +2266,6 @@ export interface FileRouteTypes {
     | '/outdoor/master/tests/$id'
     | '/outdoor/reception/due-collection/$invoiceId'
     | '/outdoor/reception/invoices/$invoiceId'
-    | '/purchase/order/$id/edit'
     | '/roles/permissions/$roleId/edit'
     | '/ultrasonogram/all/edit/$id'
     | '/ultrasonogram/all/print/$id'
@@ -2213,9 +2278,19 @@ export interface FileRouteTypes {
     | '/accounting/reports/profit-loss'
     | '/accounting/reports/trial-balance'
     | '/admission/billing/$billingId'
+    | '/admission/discharged-patients/bill-does-not-created'
     | '/admission/invoice/create'
     | '/admission/invoice/list'
-    | '/customers/$id/edit'
+    | '/admission/patients/active'
+    | '/admission/patients/balance-distributed-list'
+    | '/admission/patients/bill-created-list'
+    | '/admission/patients/bill-distributed-list'
+    | '/admission/patients/discharged-list'
+    | '/admission/patients/discharged'
+    | '/admission/patients/final-bill-created-list'
+    | '/admission/patients/payment-completed-list'
+    | '/indoor/management/distributions'
+    | '/indoor/management/doctor-referred'
     | '/indoor/master/anasthesia-types'
     | '/indoor/master/bed-cabin-list'
     | '/indoor/master/doctor-types'
@@ -2228,10 +2303,14 @@ export interface FileRouteTypes {
     | '/outdoor/master/departments'
     | '/outdoor/master/doctors'
     | '/outdoor/master/machines'
+    | '/outdoor/master/sample-collection-rooms'
     | '/outdoor/master/test-tables'
     | '/outdoor/master/tests'
     | '/outdoor/reception/due-collection'
+    | '/outdoor/reception/my-invoices'
+    | '/outdoor/reception/paid-invoices'
     | '/outdoor/reception/patients'
+    | '/outdoor/reception/user-invoices'
     | '/pathology/biochemical/all'
     | '/pathology/biochemical/lipid-profile'
     | '/pathology/hematology/all'
@@ -2260,11 +2339,7 @@ export interface FileRouteTypes {
     | '/pathology/urine/urine-for-sugar'
     | '/payroll/attendance/$staffId'
     | '/payroll/salary/$staffId'
-    | '/purchase/invoices/$id'
-    | '/purchase/order/$id'
-    | '/purchase/payments/$id'
-    | '/purchase/payments/create'
-    | '/suppliers/$id/edit'
+    | '/admission/patients/$admissionId/print/$step'
     | '/ecg/all/edit/builder/$id'
     | '/indoor/master/services/edit/$id'
     | '/outdoor/master/doctors/$doctorId/edit'
@@ -2280,12 +2355,14 @@ export interface FileRouteTypes {
     | '/pathology/hematology/cbc-with-pbf/report/$reportId'
     | '/pathology/hematology/peripheral-blood-film/report/$reportId'
     | '/pathology/hematology/prothom-bin-time-full/report/$reportId'
+    | '/pathology/hormone/all/report/$reportId'
     | '/pathology/hormone/electrolytes/report/$reportId'
     | '/pathology/hormone/semen/edit/$reportId'
     | '/pathology/hormone/semen/report/$reportId'
     | '/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
     | '/pathology/hormone/sputum/report/$reportId'
     | '/pathology/hormone/t3t4tsh/report/$reportId'
+    | '/pathology/immunology/all/report/$reportId'
     | '/pathology/immunology/beta-hcg/report/$reportId'
     | '/pathology/immunology/blood-group/report/$reportId'
     | '/pathology/immunology/mt/report/$reportId'
@@ -2300,14 +2377,22 @@ export interface FileRouteTypes {
     | '/pathology/urine/urine-for-sugar/report/$reportId'
     | '/ultrasonogram/all/edit/builder/$id'
     | '/x-ray/all/edit/builder/$id'
+    | '/admission/patients/$admissionId/bill-created'
+    | '/admission/patients/$admissionId/billing-print'
     | '/admission/patients/$admissionId/billing'
+    | '/admission/patients/$admissionId/confirm-balance'
+    | '/admission/patients/$admissionId/distribute-bill'
+    | '/admission/patients/$admissionId/final-bill-print'
+    | '/admission/patients/$admissionId/final-bill'
+    | '/admission/patients/$admissionId/print'
     | '/indoor/master/bed-cabin-list/create'
     | '/indoor/master/services/create'
     | '/outdoor/master/doctors/$doctorId'
     | '/outdoor/master/tests/create'
     | '/outdoor/reception/invoices/create'
     | '/outdoor/reception/invoices/list'
-    | '/purchase/invoices/$id/preview'
+    | '/reports/my/outdoor/date-wise-collection'
+    | '/reports/my/outdoor/today-collection'
     | '/outdoor/master/tests/edit/$id'
     | '/outdoor/reception/invoices/edit/$invoiceId'
     | '/pathology/hematology/all/edit/$id'
@@ -2329,6 +2414,7 @@ export interface FileRouteTypes {
     | '/503'
     | '/'
     | '/errors/$error'
+    | '/notifications/$id'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
@@ -2339,19 +2425,18 @@ export interface FileRouteTypes {
     | '/clerk/user-management'
     | '/accounting'
     | '/apps'
+    | '/backup-settings'
+    | '/backups'
     | '/chats'
-    | '/customers'
     | '/database'
     | '/help-center'
     | '/help'
-    | '/products'
+    | '/my-account'
+    | '/notifications'
     | '/roles'
     | '/settings'
-    | '/suppliers'
     | '/tasks'
     | '/users'
-    | '/products/$productId/edit'
-    | '/purchase/order/create'
     | '/roles/edit/$id'
     | '/accounting/accounts'
     | '/accounting/expense'
@@ -2368,6 +2453,7 @@ export interface FileRouteTypes {
     | '/admission/advance-payment'
     | '/admission/bed-cabin-charge'
     | '/admission/due-collection'
+    | '/admission/final-bills'
     | '/admission/finalise-services'
     | '/admission/first-time-bill'
     | '/admission/first-time-service'
@@ -2379,23 +2465,10 @@ export interface FileRouteTypes {
     | '/banks/bank-deposits'
     | '/banks/bank-transactions'
     | '/banks/bank-withdrawals'
-    | '/customers/$id'
-    | '/customers/create'
     | '/ecg/all'
-    | '/inventory/stocks'
     | '/payroll/employees'
     | '/payroll/overview'
-    | '/products/$productId'
-    | '/products/categories'
-    | '/products/create'
-    | '/products/units'
-    | '/purchase/invoices'
-    | '/purchase/order'
-    | '/purchase/payments'
     | '/roles/create'
-    | '/sales/orders'
-    | '/suppliers/$id'
-    | '/suppliers/create'
     | '/ultrasonogram/all'
     | '/x-ray/all'
     | '/ecg/all/edit/$id'
@@ -2409,7 +2482,6 @@ export interface FileRouteTypes {
     | '/outdoor/master/tests/$id'
     | '/outdoor/reception/due-collection/$invoiceId'
     | '/outdoor/reception/invoices/$invoiceId'
-    | '/purchase/order/$id/edit'
     | '/roles/permissions/$roleId/edit'
     | '/ultrasonogram/all/edit/$id'
     | '/ultrasonogram/all/print/$id'
@@ -2422,9 +2494,19 @@ export interface FileRouteTypes {
     | '/accounting/reports/profit-loss'
     | '/accounting/reports/trial-balance'
     | '/admission/billing/$billingId'
+    | '/admission/discharged-patients/bill-does-not-created'
     | '/admission/invoice/create'
     | '/admission/invoice/list'
-    | '/customers/$id/edit'
+    | '/admission/patients/active'
+    | '/admission/patients/balance-distributed-list'
+    | '/admission/patients/bill-created-list'
+    | '/admission/patients/bill-distributed-list'
+    | '/admission/patients/discharged-list'
+    | '/admission/patients/discharged'
+    | '/admission/patients/final-bill-created-list'
+    | '/admission/patients/payment-completed-list'
+    | '/indoor/management/distributions'
+    | '/indoor/management/doctor-referred'
     | '/indoor/master/anasthesia-types'
     | '/indoor/master/bed-cabin-list'
     | '/indoor/master/doctor-types'
@@ -2437,10 +2519,14 @@ export interface FileRouteTypes {
     | '/outdoor/master/departments'
     | '/outdoor/master/doctors'
     | '/outdoor/master/machines'
+    | '/outdoor/master/sample-collection-rooms'
     | '/outdoor/master/test-tables'
     | '/outdoor/master/tests'
     | '/outdoor/reception/due-collection'
+    | '/outdoor/reception/my-invoices'
+    | '/outdoor/reception/paid-invoices'
     | '/outdoor/reception/patients'
+    | '/outdoor/reception/user-invoices'
     | '/pathology/biochemical/all'
     | '/pathology/biochemical/lipid-profile'
     | '/pathology/hematology/all'
@@ -2469,11 +2555,7 @@ export interface FileRouteTypes {
     | '/pathology/urine/urine-for-sugar'
     | '/payroll/attendance/$staffId'
     | '/payroll/salary/$staffId'
-    | '/purchase/invoices/$id'
-    | '/purchase/order/$id'
-    | '/purchase/payments/$id'
-    | '/purchase/payments/create'
-    | '/suppliers/$id/edit'
+    | '/admission/patients/$admissionId/print/$step'
     | '/ecg/all/edit/builder/$id'
     | '/indoor/master/services/edit/$id'
     | '/outdoor/master/doctors/$doctorId/edit'
@@ -2489,12 +2571,14 @@ export interface FileRouteTypes {
     | '/pathology/hematology/cbc-with-pbf/report/$reportId'
     | '/pathology/hematology/peripheral-blood-film/report/$reportId'
     | '/pathology/hematology/prothom-bin-time-full/report/$reportId'
+    | '/pathology/hormone/all/report/$reportId'
     | '/pathology/hormone/electrolytes/report/$reportId'
     | '/pathology/hormone/semen/edit/$reportId'
     | '/pathology/hormone/semen/report/$reportId'
     | '/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
     | '/pathology/hormone/sputum/report/$reportId'
     | '/pathology/hormone/t3t4tsh/report/$reportId'
+    | '/pathology/immunology/all/report/$reportId'
     | '/pathology/immunology/beta-hcg/report/$reportId'
     | '/pathology/immunology/blood-group/report/$reportId'
     | '/pathology/immunology/mt/report/$reportId'
@@ -2509,14 +2593,22 @@ export interface FileRouteTypes {
     | '/pathology/urine/urine-for-sugar/report/$reportId'
     | '/ultrasonogram/all/edit/builder/$id'
     | '/x-ray/all/edit/builder/$id'
+    | '/admission/patients/$admissionId/bill-created'
+    | '/admission/patients/$admissionId/billing-print'
     | '/admission/patients/$admissionId/billing'
+    | '/admission/patients/$admissionId/confirm-balance'
+    | '/admission/patients/$admissionId/distribute-bill'
+    | '/admission/patients/$admissionId/final-bill-print'
+    | '/admission/patients/$admissionId/final-bill'
+    | '/admission/patients/$admissionId/print'
     | '/indoor/master/bed-cabin-list/create'
     | '/indoor/master/services/create'
     | '/outdoor/master/doctors/$doctorId'
     | '/outdoor/master/tests/create'
     | '/outdoor/reception/invoices/create'
     | '/outdoor/reception/invoices/list'
-    | '/purchase/invoices/$id/preview'
+    | '/reports/my/outdoor/date-wise-collection'
+    | '/reports/my/outdoor/today-collection'
     | '/outdoor/master/tests/edit/$id'
     | '/outdoor/reception/invoices/edit/$invoiceId'
     | '/pathology/hematology/all/edit/$id'
@@ -2542,6 +2634,7 @@ export interface FileRouteTypes {
     | '/(errors)/503'
     | '/_authenticated/'
     | '/_authenticated/errors/$error'
+    | '/_authenticated/notifications/$id'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
@@ -2552,19 +2645,18 @@ export interface FileRouteTypes {
     | '/clerk/_authenticated/user-management'
     | '/_authenticated/accounting/'
     | '/_authenticated/apps/'
+    | '/_authenticated/backup-settings/'
+    | '/_authenticated/backups/'
     | '/_authenticated/chats/'
-    | '/_authenticated/customers/'
     | '/_authenticated/database/'
     | '/_authenticated/help-center/'
     | '/_authenticated/help/'
-    | '/_authenticated/products/'
+    | '/_authenticated/my-account/'
+    | '/_authenticated/notifications/'
     | '/_authenticated/roles/'
     | '/_authenticated/settings/'
-    | '/_authenticated/suppliers/'
     | '/_authenticated/tasks/'
     | '/_authenticated/users/'
-    | '/_authenticated/products/$productId/edit'
-    | '/_authenticated/purchase/order/create'
     | '/_authenticated/roles/edit/$id'
     | '/_authenticated/accounting/accounts/'
     | '/_authenticated/accounting/expense/'
@@ -2581,6 +2673,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admission/advance-payment/'
     | '/_authenticated/admission/bed-cabin-charge/'
     | '/_authenticated/admission/due-collection/'
+    | '/_authenticated/admission/final-bills/'
     | '/_authenticated/admission/finalise-services/'
     | '/_authenticated/admission/first-time-bill/'
     | '/_authenticated/admission/first-time-service/'
@@ -2592,23 +2685,10 @@ export interface FileRouteTypes {
     | '/_authenticated/banks/bank-deposits/'
     | '/_authenticated/banks/bank-transactions/'
     | '/_authenticated/banks/bank-withdrawals/'
-    | '/_authenticated/customers/$id/'
-    | '/_authenticated/customers/create/'
     | '/_authenticated/ecg/all/'
-    | '/_authenticated/inventory/stocks/'
     | '/_authenticated/payroll/employees/'
     | '/_authenticated/payroll/overview/'
-    | '/_authenticated/products/$productId/'
-    | '/_authenticated/products/categories/'
-    | '/_authenticated/products/create/'
-    | '/_authenticated/products/units/'
-    | '/_authenticated/purchase/invoices/'
-    | '/_authenticated/purchase/order/'
-    | '/_authenticated/purchase/payments/'
     | '/_authenticated/roles/create/'
-    | '/_authenticated/sales/orders/'
-    | '/_authenticated/suppliers/$id/'
-    | '/_authenticated/suppliers/create/'
     | '/_authenticated/ultrasonogram/all/'
     | '/_authenticated/x-ray/all/'
     | '/_authenticated/ecg/all/edit/$id'
@@ -2622,7 +2702,6 @@ export interface FileRouteTypes {
     | '/_authenticated/outdoor/master/tests/$id'
     | '/_authenticated/outdoor/reception/due-collection/$invoiceId'
     | '/_authenticated/outdoor/reception/invoices/$invoiceId'
-    | '/_authenticated/purchase/order/$id/edit'
     | '/_authenticated/roles/permissions/$roleId/edit'
     | '/_authenticated/ultrasonogram/all/edit/$id'
     | '/_authenticated/ultrasonogram/all/print/$id'
@@ -2635,9 +2714,19 @@ export interface FileRouteTypes {
     | '/_authenticated/accounting/reports/profit-loss/'
     | '/_authenticated/accounting/reports/trial-balance/'
     | '/_authenticated/admission/billing/$billingId/'
+    | '/_authenticated/admission/discharged-patients/bill-does-not-created/'
     | '/_authenticated/admission/invoice/create/'
     | '/_authenticated/admission/invoice/list/'
-    | '/_authenticated/customers/$id/edit/'
+    | '/_authenticated/admission/patients/active/'
+    | '/_authenticated/admission/patients/balance-distributed-list/'
+    | '/_authenticated/admission/patients/bill-created-list/'
+    | '/_authenticated/admission/patients/bill-distributed-list/'
+    | '/_authenticated/admission/patients/discharged-list/'
+    | '/_authenticated/admission/patients/discharged/'
+    | '/_authenticated/admission/patients/final-bill-created-list/'
+    | '/_authenticated/admission/patients/payment-completed-list/'
+    | '/_authenticated/indoor/management/distributions/'
+    | '/_authenticated/indoor/management/doctor-referred/'
     | '/_authenticated/indoor/master/anasthesia-types/'
     | '/_authenticated/indoor/master/bed-cabin-list/'
     | '/_authenticated/indoor/master/doctor-types/'
@@ -2650,10 +2739,14 @@ export interface FileRouteTypes {
     | '/_authenticated/outdoor/master/departments/'
     | '/_authenticated/outdoor/master/doctors/'
     | '/_authenticated/outdoor/master/machines/'
+    | '/_authenticated/outdoor/master/sample-collection-rooms/'
     | '/_authenticated/outdoor/master/test-tables/'
     | '/_authenticated/outdoor/master/tests/'
     | '/_authenticated/outdoor/reception/due-collection/'
+    | '/_authenticated/outdoor/reception/my-invoices/'
+    | '/_authenticated/outdoor/reception/paid-invoices/'
     | '/_authenticated/outdoor/reception/patients/'
+    | '/_authenticated/outdoor/reception/user-invoices/'
     | '/_authenticated/pathology/biochemical/all/'
     | '/_authenticated/pathology/biochemical/lipid-profile/'
     | '/_authenticated/pathology/hematology/all/'
@@ -2682,11 +2775,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pathology/urine/urine-for-sugar/'
     | '/_authenticated/payroll/attendance/$staffId/'
     | '/_authenticated/payroll/salary/$staffId/'
-    | '/_authenticated/purchase/invoices/$id/'
-    | '/_authenticated/purchase/order/$id/'
-    | '/_authenticated/purchase/payments/$id/'
-    | '/_authenticated/purchase/payments/create/'
-    | '/_authenticated/suppliers/$id/edit/'
+    | '/_authenticated/admission/patients/$admissionId/print/$step'
     | '/_authenticated/ecg/all/edit/builder/$id'
     | '/_authenticated/indoor/master/services/edit/$id'
     | '/_authenticated/outdoor/master/doctors/$doctorId/edit'
@@ -2702,12 +2791,14 @@ export interface FileRouteTypes {
     | '/_authenticated/pathology/hematology/cbc-with-pbf/report/$reportId'
     | '/_authenticated/pathology/hematology/peripheral-blood-film/report/$reportId'
     | '/_authenticated/pathology/hematology/prothom-bin-time-full/report/$reportId'
+    | '/_authenticated/pathology/hormone/all/report/$reportId'
     | '/_authenticated/pathology/hormone/electrolytes/report/$reportId'
     | '/_authenticated/pathology/hormone/semen/edit/$reportId'
     | '/_authenticated/pathology/hormone/semen/report/$reportId'
     | '/_authenticated/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
     | '/_authenticated/pathology/hormone/sputum/report/$reportId'
     | '/_authenticated/pathology/hormone/t3t4tsh/report/$reportId'
+    | '/_authenticated/pathology/immunology/all/report/$reportId'
     | '/_authenticated/pathology/immunology/beta-hcg/report/$reportId'
     | '/_authenticated/pathology/immunology/blood-group/report/$reportId'
     | '/_authenticated/pathology/immunology/mt/report/$reportId'
@@ -2722,14 +2813,22 @@ export interface FileRouteTypes {
     | '/_authenticated/pathology/urine/urine-for-sugar/report/$reportId'
     | '/_authenticated/ultrasonogram/all/edit/builder/$id'
     | '/_authenticated/x-ray/all/edit/builder/$id'
+    | '/_authenticated/admission/patients/$admissionId/bill-created/'
+    | '/_authenticated/admission/patients/$admissionId/billing-print/'
     | '/_authenticated/admission/patients/$admissionId/billing/'
+    | '/_authenticated/admission/patients/$admissionId/confirm-balance/'
+    | '/_authenticated/admission/patients/$admissionId/distribute-bill/'
+    | '/_authenticated/admission/patients/$admissionId/final-bill-print/'
+    | '/_authenticated/admission/patients/$admissionId/final-bill/'
+    | '/_authenticated/admission/patients/$admissionId/print/'
     | '/_authenticated/indoor/master/bed-cabin-list/create/'
     | '/_authenticated/indoor/master/services/create/'
     | '/_authenticated/outdoor/master/doctors/$doctorId/'
     | '/_authenticated/outdoor/master/tests/create/'
     | '/_authenticated/outdoor/reception/invoices/create/'
     | '/_authenticated/outdoor/reception/invoices/list/'
-    | '/_authenticated/purchase/invoices/$id/preview/'
+    | '/_authenticated/reports/my/outdoor/date-wise-collection/'
+    | '/_authenticated/reports/my/outdoor/today-collection/'
     | '/_authenticated/outdoor/master/tests/edit/$id/'
     | '/_authenticated/outdoor/reception/invoices/edit/$invoiceId/'
     | '/_authenticated/pathology/hematology/all/edit/$id/'
@@ -2888,13 +2987,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTasksIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/suppliers/': {
-      id: '/_authenticated/suppliers/'
-      path: '/suppliers'
-      fullPath: '/suppliers'
-      preLoaderRoute: typeof AuthenticatedSuppliersIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/settings/': {
       id: '/_authenticated/settings/'
       path: '/'
@@ -2909,11 +3001,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRolesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/products/': {
-      id: '/_authenticated/products/'
-      path: '/products'
-      fullPath: '/products'
-      preLoaderRoute: typeof AuthenticatedProductsIndexRouteImport
+    '/_authenticated/notifications/': {
+      id: '/_authenticated/notifications/'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/my-account/': {
+      id: '/_authenticated/my-account/'
+      path: '/my-account'
+      fullPath: '/my-account'
+      preLoaderRoute: typeof AuthenticatedMyAccountIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/help/': {
@@ -2937,18 +3036,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDatabaseIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/customers/': {
-      id: '/_authenticated/customers/'
-      path: '/customers'
-      fullPath: '/customers'
-      preLoaderRoute: typeof AuthenticatedCustomersIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/chats/': {
       id: '/_authenticated/chats/'
       path: '/chats'
       fullPath: '/chats'
       preLoaderRoute: typeof AuthenticatedChatsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/backups/': {
+      id: '/_authenticated/backups/'
+      path: '/backups'
+      fullPath: '/backups'
+      preLoaderRoute: typeof AuthenticatedBackupsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/backup-settings/': {
+      id: '/_authenticated/backup-settings/'
+      path: '/backup-settings'
+      fullPath: '/backup-settings'
+      preLoaderRoute: typeof AuthenticatedBackupSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/apps/': {
@@ -3021,6 +3127,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsAccountRouteImport
       parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
+    '/_authenticated/notifications/$id': {
+      id: '/_authenticated/notifications/$id'
+      path: '/notifications/$id'
+      fullPath: '/notifications/$id'
+      preLoaderRoute: typeof AuthenticatedNotificationsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/errors/$error': {
       id: '/_authenticated/errors/$error'
       path: '/errors/$error'
@@ -3042,81 +3155,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUltrasonogramAllIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/suppliers/create/': {
-      id: '/_authenticated/suppliers/create/'
-      path: '/suppliers/create'
-      fullPath: '/suppliers/create'
-      preLoaderRoute: typeof AuthenticatedSuppliersCreateIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/suppliers/$id/': {
-      id: '/_authenticated/suppliers/$id/'
-      path: '/suppliers/$id'
-      fullPath: '/suppliers/$id'
-      preLoaderRoute: typeof AuthenticatedSuppliersIdIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/sales/orders/': {
-      id: '/_authenticated/sales/orders/'
-      path: '/sales/orders'
-      fullPath: '/sales/orders'
-      preLoaderRoute: typeof AuthenticatedSalesOrdersIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/roles/create/': {
       id: '/_authenticated/roles/create/'
       path: '/roles/create'
       fullPath: '/roles/create'
       preLoaderRoute: typeof AuthenticatedRolesCreateIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/purchase/payments/': {
-      id: '/_authenticated/purchase/payments/'
-      path: '/purchase/payments'
-      fullPath: '/purchase/payments'
-      preLoaderRoute: typeof AuthenticatedPurchasePaymentsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/purchase/order/': {
-      id: '/_authenticated/purchase/order/'
-      path: '/purchase/order'
-      fullPath: '/purchase/order'
-      preLoaderRoute: typeof AuthenticatedPurchaseOrderIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/purchase/invoices/': {
-      id: '/_authenticated/purchase/invoices/'
-      path: '/purchase/invoices'
-      fullPath: '/purchase/invoices'
-      preLoaderRoute: typeof AuthenticatedPurchaseInvoicesIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/products/units/': {
-      id: '/_authenticated/products/units/'
-      path: '/products/units'
-      fullPath: '/products/units'
-      preLoaderRoute: typeof AuthenticatedProductsUnitsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/products/create/': {
-      id: '/_authenticated/products/create/'
-      path: '/products/create'
-      fullPath: '/products/create'
-      preLoaderRoute: typeof AuthenticatedProductsCreateIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/products/categories/': {
-      id: '/_authenticated/products/categories/'
-      path: '/products/categories'
-      fullPath: '/products/categories'
-      preLoaderRoute: typeof AuthenticatedProductsCategoriesIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/products/$productId/': {
-      id: '/_authenticated/products/$productId/'
-      path: '/products/$productId'
-      fullPath: '/products/$productId'
-      preLoaderRoute: typeof AuthenticatedProductsProductIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/payroll/overview/': {
@@ -3133,32 +3176,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPayrollEmployeesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/inventory/stocks/': {
-      id: '/_authenticated/inventory/stocks/'
-      path: '/inventory/stocks'
-      fullPath: '/inventory/stocks'
-      preLoaderRoute: typeof AuthenticatedInventoryStocksIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/ecg/all/': {
       id: '/_authenticated/ecg/all/'
       path: '/ecg/all'
       fullPath: '/ecg/all'
       preLoaderRoute: typeof AuthenticatedEcgAllIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/customers/create/': {
-      id: '/_authenticated/customers/create/'
-      path: '/customers/create'
-      fullPath: '/customers/create'
-      preLoaderRoute: typeof AuthenticatedCustomersCreateIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/customers/$id/': {
-      id: '/_authenticated/customers/$id/'
-      path: '/customers/$id'
-      fullPath: '/customers/$id'
-      preLoaderRoute: typeof AuthenticatedCustomersIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/banks/bank-withdrawals/': {
@@ -3236,6 +3258,13 @@ declare module '@tanstack/react-router' {
       path: '/admission/finalise-services'
       fullPath: '/admission/finalise-services'
       preLoaderRoute: typeof AuthenticatedAdmissionFinaliseServicesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/final-bills/': {
+      id: '/_authenticated/admission/final-bills/'
+      path: '/admission/final-bills'
+      fullPath: '/admission/final-bills'
+      preLoaderRoute: typeof AuthenticatedAdmissionFinalBillsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admission/due-collection/': {
@@ -3348,55 +3377,6 @@ declare module '@tanstack/react-router' {
       path: '/roles/edit/$id'
       fullPath: '/roles/edit/$id'
       preLoaderRoute: typeof AuthenticatedRolesEditIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/purchase/order/create': {
-      id: '/_authenticated/purchase/order/create'
-      path: '/purchase/order/create'
-      fullPath: '/purchase/order/create'
-      preLoaderRoute: typeof AuthenticatedPurchaseOrderCreateRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/products/$productId/edit': {
-      id: '/_authenticated/products/$productId/edit'
-      path: '/products/$productId/edit'
-      fullPath: '/products/$productId/edit'
-      preLoaderRoute: typeof AuthenticatedProductsProductIdEditRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/suppliers/$id/edit/': {
-      id: '/_authenticated/suppliers/$id/edit/'
-      path: '/suppliers/$id/edit'
-      fullPath: '/suppliers/$id/edit'
-      preLoaderRoute: typeof AuthenticatedSuppliersIdEditIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/purchase/payments/create/': {
-      id: '/_authenticated/purchase/payments/create/'
-      path: '/purchase/payments/create'
-      fullPath: '/purchase/payments/create'
-      preLoaderRoute: typeof AuthenticatedPurchasePaymentsCreateIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/purchase/payments/$id/': {
-      id: '/_authenticated/purchase/payments/$id/'
-      path: '/purchase/payments/$id'
-      fullPath: '/purchase/payments/$id'
-      preLoaderRoute: typeof AuthenticatedPurchasePaymentsIdIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/purchase/order/$id/': {
-      id: '/_authenticated/purchase/order/$id/'
-      path: '/purchase/order/$id'
-      fullPath: '/purchase/order/$id'
-      preLoaderRoute: typeof AuthenticatedPurchaseOrderIdIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/purchase/invoices/$id/': {
-      id: '/_authenticated/purchase/invoices/$id/'
-      path: '/purchase/invoices/$id'
-      fullPath: '/purchase/invoices/$id'
-      preLoaderRoute: typeof AuthenticatedPurchaseInvoicesIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/payroll/salary/$staffId/': {
@@ -3595,11 +3575,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPathologyBiochemicalAllIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/outdoor/reception/user-invoices/': {
+      id: '/_authenticated/outdoor/reception/user-invoices/'
+      path: '/outdoor/reception/user-invoices'
+      fullPath: '/outdoor/reception/user-invoices'
+      preLoaderRoute: typeof AuthenticatedOutdoorReceptionUserInvoicesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/outdoor/reception/patients/': {
       id: '/_authenticated/outdoor/reception/patients/'
       path: '/outdoor/reception/patients'
       fullPath: '/outdoor/reception/patients'
       preLoaderRoute: typeof AuthenticatedOutdoorReceptionPatientsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/outdoor/reception/paid-invoices/': {
+      id: '/_authenticated/outdoor/reception/paid-invoices/'
+      path: '/outdoor/reception/paid-invoices'
+      fullPath: '/outdoor/reception/paid-invoices'
+      preLoaderRoute: typeof AuthenticatedOutdoorReceptionPaidInvoicesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/outdoor/reception/my-invoices/': {
+      id: '/_authenticated/outdoor/reception/my-invoices/'
+      path: '/outdoor/reception/my-invoices'
+      fullPath: '/outdoor/reception/my-invoices'
+      preLoaderRoute: typeof AuthenticatedOutdoorReceptionMyInvoicesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/outdoor/reception/due-collection/': {
@@ -3621,6 +3622,13 @@ declare module '@tanstack/react-router' {
       path: '/outdoor/master/test-tables'
       fullPath: '/outdoor/master/test-tables'
       preLoaderRoute: typeof AuthenticatedOutdoorMasterTestTablesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/outdoor/master/sample-collection-rooms/': {
+      id: '/_authenticated/outdoor/master/sample-collection-rooms/'
+      path: '/outdoor/master/sample-collection-rooms'
+      fullPath: '/outdoor/master/sample-collection-rooms'
+      preLoaderRoute: typeof AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/outdoor/master/machines/': {
@@ -3707,11 +3715,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndoorMasterAnasthesiaTypesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/customers/$id/edit/': {
-      id: '/_authenticated/customers/$id/edit/'
-      path: '/customers/$id/edit'
-      fullPath: '/customers/$id/edit'
-      preLoaderRoute: typeof AuthenticatedCustomersIdEditIndexRouteImport
+    '/_authenticated/indoor/management/doctor-referred/': {
+      id: '/_authenticated/indoor/management/doctor-referred/'
+      path: '/indoor/management/doctor-referred'
+      fullPath: '/indoor/management/doctor-referred'
+      preLoaderRoute: typeof AuthenticatedIndoorManagementDoctorReferredIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/indoor/management/distributions/': {
+      id: '/_authenticated/indoor/management/distributions/'
+      path: '/indoor/management/distributions'
+      fullPath: '/indoor/management/distributions'
+      preLoaderRoute: typeof AuthenticatedIndoorManagementDistributionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/patients/payment-completed-list/': {
+      id: '/_authenticated/admission/patients/payment-completed-list/'
+      path: '/admission/patients/payment-completed-list'
+      fullPath: '/admission/patients/payment-completed-list'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsPaymentCompletedListIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/patients/final-bill-created-list/': {
+      id: '/_authenticated/admission/patients/final-bill-created-list/'
+      path: '/admission/patients/final-bill-created-list'
+      fullPath: '/admission/patients/final-bill-created-list'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/patients/discharged/': {
+      id: '/_authenticated/admission/patients/discharged/'
+      path: '/admission/patients/discharged'
+      fullPath: '/admission/patients/discharged'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsDischargedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/patients/discharged-list/': {
+      id: '/_authenticated/admission/patients/discharged-list/'
+      path: '/admission/patients/discharged-list'
+      fullPath: '/admission/patients/discharged-list'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsDischargedListIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/patients/bill-distributed-list/': {
+      id: '/_authenticated/admission/patients/bill-distributed-list/'
+      path: '/admission/patients/bill-distributed-list'
+      fullPath: '/admission/patients/bill-distributed-list'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsBillDistributedListIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/patients/bill-created-list/': {
+      id: '/_authenticated/admission/patients/bill-created-list/'
+      path: '/admission/patients/bill-created-list'
+      fullPath: '/admission/patients/bill-created-list'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsBillCreatedListIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/patients/balance-distributed-list/': {
+      id: '/_authenticated/admission/patients/balance-distributed-list/'
+      path: '/admission/patients/balance-distributed-list'
+      fullPath: '/admission/patients/balance-distributed-list'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsBalanceDistributedListIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/patients/active/': {
+      id: '/_authenticated/admission/patients/active/'
+      path: '/admission/patients/active'
+      fullPath: '/admission/patients/active'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsActiveIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admission/invoice/list/': {
@@ -3726,6 +3797,13 @@ declare module '@tanstack/react-router' {
       path: '/admission/invoice/create'
       fullPath: '/admission/invoice/create'
       preLoaderRoute: typeof AuthenticatedAdmissionInvoiceCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/discharged-patients/bill-does-not-created/': {
+      id: '/_authenticated/admission/discharged-patients/bill-does-not-created/'
+      path: '/admission/discharged-patients/bill-does-not-created'
+      fullPath: '/admission/discharged-patients/bill-does-not-created'
+      preLoaderRoute: typeof AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admission/billing/$billingId/': {
@@ -3812,13 +3890,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRolesPermissionsRoleIdEditRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/purchase/order/$id/edit': {
-      id: '/_authenticated/purchase/order/$id/edit'
-      path: '/purchase/order/$id/edit'
-      fullPath: '/purchase/order/$id/edit'
-      preLoaderRoute: typeof AuthenticatedPurchaseOrderIdEditRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/outdoor/reception/invoices/$invoiceId': {
       id: '/_authenticated/outdoor/reception/invoices/$invoiceId'
       path: '/outdoor/reception/invoices/$invoiceId'
@@ -3896,11 +3967,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEcgAllEditIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/purchase/invoices/$id/preview/': {
-      id: '/_authenticated/purchase/invoices/$id/preview/'
-      path: '/purchase/invoices/$id/preview'
-      fullPath: '/purchase/invoices/$id/preview'
-      preLoaderRoute: typeof AuthenticatedPurchaseInvoicesIdPreviewIndexRouteImport
+    '/_authenticated/reports/my/outdoor/today-collection/': {
+      id: '/_authenticated/reports/my/outdoor/today-collection/'
+      path: '/reports/my/outdoor/today-collection'
+      fullPath: '/reports/my/outdoor/today-collection'
+      preLoaderRoute: typeof AuthenticatedReportsMyOutdoorTodayCollectionIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reports/my/outdoor/date-wise-collection/': {
+      id: '/_authenticated/reports/my/outdoor/date-wise-collection/'
+      path: '/reports/my/outdoor/date-wise-collection'
+      fullPath: '/reports/my/outdoor/date-wise-collection'
+      preLoaderRoute: typeof AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/outdoor/reception/invoices/list/': {
@@ -3945,11 +4023,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admission/patients/$admissionId/print/': {
+      id: '/_authenticated/admission/patients/$admissionId/print/'
+      path: '/admission/patients/$admissionId/print'
+      fullPath: '/admission/patients/$admissionId/print'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/patients/$admissionId/final-bill/': {
+      id: '/_authenticated/admission/patients/$admissionId/final-bill/'
+      path: '/admission/patients/$admissionId/final-bill'
+      fullPath: '/admission/patients/$admissionId/final-bill'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/patients/$admissionId/final-bill-print/': {
+      id: '/_authenticated/admission/patients/$admissionId/final-bill-print/'
+      path: '/admission/patients/$admissionId/final-bill-print'
+      fullPath: '/admission/patients/$admissionId/final-bill-print'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/patients/$admissionId/distribute-bill/': {
+      id: '/_authenticated/admission/patients/$admissionId/distribute-bill/'
+      path: '/admission/patients/$admissionId/distribute-bill'
+      fullPath: '/admission/patients/$admissionId/distribute-bill'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/patients/$admissionId/confirm-balance/': {
+      id: '/_authenticated/admission/patients/$admissionId/confirm-balance/'
+      path: '/admission/patients/$admissionId/confirm-balance'
+      fullPath: '/admission/patients/$admissionId/confirm-balance'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admission/patients/$admissionId/billing/': {
       id: '/_authenticated/admission/patients/$admissionId/billing/'
       path: '/admission/patients/$admissionId/billing'
       fullPath: '/admission/patients/$admissionId/billing'
       preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/patients/$admissionId/billing-print/': {
+      id: '/_authenticated/admission/patients/$admissionId/billing-print/'
+      path: '/admission/patients/$admissionId/billing-print'
+      fullPath: '/admission/patients/$admissionId/billing-print'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admission/patients/$admissionId/bill-created/': {
+      id: '/_authenticated/admission/patients/$admissionId/bill-created/'
+      path: '/admission/patients/$admissionId/bill-created'
+      fullPath: '/admission/patients/$admissionId/bill-created'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/x-ray/all/edit/builder/$id': {
@@ -4050,6 +4177,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPathologyImmunologyBetaHcgReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/pathology/immunology/all/report/$reportId': {
+      id: '/_authenticated/pathology/immunology/all/report/$reportId'
+      path: '/pathology/immunology/all/report/$reportId'
+      fullPath: '/pathology/immunology/all/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedPathologyImmunologyAllReportReportIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/pathology/hormone/t3t4tsh/report/$reportId': {
       id: '/_authenticated/pathology/hormone/t3t4tsh/report/$reportId'
       path: '/pathology/hormone/t3t4tsh/report/$reportId'
@@ -4090,6 +4224,13 @@ declare module '@tanstack/react-router' {
       path: '/pathology/hormone/electrolytes/report/$reportId'
       fullPath: '/pathology/hormone/electrolytes/report/$reportId'
       preLoaderRoute: typeof AuthenticatedPathologyHormoneElectrolytesReportReportIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pathology/hormone/all/report/$reportId': {
+      id: '/_authenticated/pathology/hormone/all/report/$reportId'
+      path: '/pathology/hormone/all/report/$reportId'
+      fullPath: '/pathology/hormone/all/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedPathologyHormoneAllReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/pathology/hematology/prothom-bin-time-full/report/$reportId': {
@@ -4197,6 +4338,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEcgAllEditBuilderIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admission/patients/$admissionId/print/$step': {
+      id: '/_authenticated/admission/patients/$admissionId/print/$step'
+      path: '/admission/patients/$admissionId/print/$step'
+      fullPath: '/admission/patients/$admissionId/print/$step'
+      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdPrintStepRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/pathology/immunology/all/edit/$id/': {
       id: '/_authenticated/pathology/immunology/all/edit/$id/'
       path: '/pathology/immunology/all/edit/$id'
@@ -4264,20 +4412,20 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
+  AuthenticatedNotificationsIdRoute: typeof AuthenticatedNotificationsIdRoute
   AuthenticatedAccountingIndexRoute: typeof AuthenticatedAccountingIndexRoute
   AuthenticatedAppsIndexRoute: typeof AuthenticatedAppsIndexRoute
+  AuthenticatedBackupSettingsIndexRoute: typeof AuthenticatedBackupSettingsIndexRoute
+  AuthenticatedBackupsIndexRoute: typeof AuthenticatedBackupsIndexRoute
   AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
-  AuthenticatedCustomersIndexRoute: typeof AuthenticatedCustomersIndexRoute
   AuthenticatedDatabaseIndexRoute: typeof AuthenticatedDatabaseIndexRoute
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
   AuthenticatedHelpIndexRoute: typeof AuthenticatedHelpIndexRoute
-  AuthenticatedProductsIndexRoute: typeof AuthenticatedProductsIndexRoute
+  AuthenticatedMyAccountIndexRoute: typeof AuthenticatedMyAccountIndexRoute
+  AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedRolesIndexRoute: typeof AuthenticatedRolesIndexRoute
-  AuthenticatedSuppliersIndexRoute: typeof AuthenticatedSuppliersIndexRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
-  AuthenticatedProductsProductIdEditRoute: typeof AuthenticatedProductsProductIdEditRoute
-  AuthenticatedPurchaseOrderCreateRoute: typeof AuthenticatedPurchaseOrderCreateRoute
   AuthenticatedRolesEditIdRoute: typeof AuthenticatedRolesEditIdRoute
   AuthenticatedAccountingAccountsIndexRoute: typeof AuthenticatedAccountingAccountsIndexRoute
   AuthenticatedAccountingExpenseIndexRoute: typeof AuthenticatedAccountingExpenseIndexRoute
@@ -4294,6 +4442,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdmissionAdvancePaymentIndexRoute: typeof AuthenticatedAdmissionAdvancePaymentIndexRoute
   AuthenticatedAdmissionBedCabinChargeIndexRoute: typeof AuthenticatedAdmissionBedCabinChargeIndexRoute
   AuthenticatedAdmissionDueCollectionIndexRoute: typeof AuthenticatedAdmissionDueCollectionIndexRoute
+  AuthenticatedAdmissionFinalBillsIndexRoute: typeof AuthenticatedAdmissionFinalBillsIndexRoute
   AuthenticatedAdmissionFinaliseServicesIndexRoute: typeof AuthenticatedAdmissionFinaliseServicesIndexRoute
   AuthenticatedAdmissionFirstTimeBillIndexRoute: typeof AuthenticatedAdmissionFirstTimeBillIndexRoute
   AuthenticatedAdmissionFirstTimeServiceIndexRoute: typeof AuthenticatedAdmissionFirstTimeServiceIndexRoute
@@ -4305,23 +4454,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBanksBankDepositsIndexRoute: typeof AuthenticatedBanksBankDepositsIndexRoute
   AuthenticatedBanksBankTransactionsIndexRoute: typeof AuthenticatedBanksBankTransactionsIndexRoute
   AuthenticatedBanksBankWithdrawalsIndexRoute: typeof AuthenticatedBanksBankWithdrawalsIndexRoute
-  AuthenticatedCustomersIdIndexRoute: typeof AuthenticatedCustomersIdIndexRoute
-  AuthenticatedCustomersCreateIndexRoute: typeof AuthenticatedCustomersCreateIndexRoute
   AuthenticatedEcgAllIndexRoute: typeof AuthenticatedEcgAllIndexRoute
-  AuthenticatedInventoryStocksIndexRoute: typeof AuthenticatedInventoryStocksIndexRoute
   AuthenticatedPayrollEmployeesIndexRoute: typeof AuthenticatedPayrollEmployeesIndexRoute
   AuthenticatedPayrollOverviewIndexRoute: typeof AuthenticatedPayrollOverviewIndexRoute
-  AuthenticatedProductsProductIdIndexRoute: typeof AuthenticatedProductsProductIdIndexRoute
-  AuthenticatedProductsCategoriesIndexRoute: typeof AuthenticatedProductsCategoriesIndexRoute
-  AuthenticatedProductsCreateIndexRoute: typeof AuthenticatedProductsCreateIndexRoute
-  AuthenticatedProductsUnitsIndexRoute: typeof AuthenticatedProductsUnitsIndexRoute
-  AuthenticatedPurchaseInvoicesIndexRoute: typeof AuthenticatedPurchaseInvoicesIndexRoute
-  AuthenticatedPurchaseOrderIndexRoute: typeof AuthenticatedPurchaseOrderIndexRoute
-  AuthenticatedPurchasePaymentsIndexRoute: typeof AuthenticatedPurchasePaymentsIndexRoute
   AuthenticatedRolesCreateIndexRoute: typeof AuthenticatedRolesCreateIndexRoute
-  AuthenticatedSalesOrdersIndexRoute: typeof AuthenticatedSalesOrdersIndexRoute
-  AuthenticatedSuppliersIdIndexRoute: typeof AuthenticatedSuppliersIdIndexRoute
-  AuthenticatedSuppliersCreateIndexRoute: typeof AuthenticatedSuppliersCreateIndexRoute
   AuthenticatedUltrasonogramAllIndexRoute: typeof AuthenticatedUltrasonogramAllIndexRoute
   AuthenticatedXRayAllIndexRoute: typeof AuthenticatedXRayAllIndexRoute
   AuthenticatedEcgAllEditIdRoute: typeof AuthenticatedEcgAllEditIdRoute
@@ -4335,7 +4471,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOutdoorMasterTestsIdRoute: typeof AuthenticatedOutdoorMasterTestsIdRoute
   AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRoute: typeof AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRoute
   AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute: typeof AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute
-  AuthenticatedPurchaseOrderIdEditRoute: typeof AuthenticatedPurchaseOrderIdEditRoute
   AuthenticatedRolesPermissionsRoleIdEditRoute: typeof AuthenticatedRolesPermissionsRoleIdEditRoute
   AuthenticatedUltrasonogramAllEditIdRoute: typeof AuthenticatedUltrasonogramAllEditIdRoute
   AuthenticatedUltrasonogramAllPrintIdRoute: typeof AuthenticatedUltrasonogramAllPrintIdRoute
@@ -4348,9 +4483,19 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountingReportsProfitLossIndexRoute: typeof AuthenticatedAccountingReportsProfitLossIndexRoute
   AuthenticatedAccountingReportsTrialBalanceIndexRoute: typeof AuthenticatedAccountingReportsTrialBalanceIndexRoute
   AuthenticatedAdmissionBillingBillingIdIndexRoute: typeof AuthenticatedAdmissionBillingBillingIdIndexRoute
+  AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute: typeof AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
   AuthenticatedAdmissionInvoiceCreateIndexRoute: typeof AuthenticatedAdmissionInvoiceCreateIndexRoute
   AuthenticatedAdmissionInvoiceListIndexRoute: typeof AuthenticatedAdmissionInvoiceListIndexRoute
-  AuthenticatedCustomersIdEditIndexRoute: typeof AuthenticatedCustomersIdEditIndexRoute
+  AuthenticatedAdmissionPatientsActiveIndexRoute: typeof AuthenticatedAdmissionPatientsActiveIndexRoute
+  AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute: typeof AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute
+  AuthenticatedAdmissionPatientsBillCreatedListIndexRoute: typeof AuthenticatedAdmissionPatientsBillCreatedListIndexRoute
+  AuthenticatedAdmissionPatientsBillDistributedListIndexRoute: typeof AuthenticatedAdmissionPatientsBillDistributedListIndexRoute
+  AuthenticatedAdmissionPatientsDischargedListIndexRoute: typeof AuthenticatedAdmissionPatientsDischargedListIndexRoute
+  AuthenticatedAdmissionPatientsDischargedIndexRoute: typeof AuthenticatedAdmissionPatientsDischargedIndexRoute
+  AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute: typeof AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute
+  AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute: typeof AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute
+  AuthenticatedIndoorManagementDistributionsIndexRoute: typeof AuthenticatedIndoorManagementDistributionsIndexRoute
+  AuthenticatedIndoorManagementDoctorReferredIndexRoute: typeof AuthenticatedIndoorManagementDoctorReferredIndexRoute
   AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute: typeof AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute
   AuthenticatedIndoorMasterBedCabinListIndexRoute: typeof AuthenticatedIndoorMasterBedCabinListIndexRoute
   AuthenticatedIndoorMasterDoctorTypesIndexRoute: typeof AuthenticatedIndoorMasterDoctorTypesIndexRoute
@@ -4363,10 +4508,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOutdoorMasterDepartmentsIndexRoute: typeof AuthenticatedOutdoorMasterDepartmentsIndexRoute
   AuthenticatedOutdoorMasterDoctorsIndexRoute: typeof AuthenticatedOutdoorMasterDoctorsIndexRoute
   AuthenticatedOutdoorMasterMachinesIndexRoute: typeof AuthenticatedOutdoorMasterMachinesIndexRoute
+  AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute: typeof AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute
   AuthenticatedOutdoorMasterTestTablesIndexRoute: typeof AuthenticatedOutdoorMasterTestTablesIndexRoute
   AuthenticatedOutdoorMasterTestsIndexRoute: typeof AuthenticatedOutdoorMasterTestsIndexRoute
   AuthenticatedOutdoorReceptionDueCollectionIndexRoute: typeof AuthenticatedOutdoorReceptionDueCollectionIndexRoute
+  AuthenticatedOutdoorReceptionMyInvoicesIndexRoute: typeof AuthenticatedOutdoorReceptionMyInvoicesIndexRoute
+  AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute: typeof AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute
   AuthenticatedOutdoorReceptionPatientsIndexRoute: typeof AuthenticatedOutdoorReceptionPatientsIndexRoute
+  AuthenticatedOutdoorReceptionUserInvoicesIndexRoute: typeof AuthenticatedOutdoorReceptionUserInvoicesIndexRoute
   AuthenticatedPathologyBiochemicalAllIndexRoute: typeof AuthenticatedPathologyBiochemicalAllIndexRoute
   AuthenticatedPathologyBiochemicalLipidProfileIndexRoute: typeof AuthenticatedPathologyBiochemicalLipidProfileIndexRoute
   AuthenticatedPathologyHematologyAllIndexRoute: typeof AuthenticatedPathologyHematologyAllIndexRoute
@@ -4395,11 +4544,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPathologyUrineUrineForSugarIndexRoute: typeof AuthenticatedPathologyUrineUrineForSugarIndexRoute
   AuthenticatedPayrollAttendanceStaffIdIndexRoute: typeof AuthenticatedPayrollAttendanceStaffIdIndexRoute
   AuthenticatedPayrollSalaryStaffIdIndexRoute: typeof AuthenticatedPayrollSalaryStaffIdIndexRoute
-  AuthenticatedPurchaseInvoicesIdIndexRoute: typeof AuthenticatedPurchaseInvoicesIdIndexRoute
-  AuthenticatedPurchaseOrderIdIndexRoute: typeof AuthenticatedPurchaseOrderIdIndexRoute
-  AuthenticatedPurchasePaymentsIdIndexRoute: typeof AuthenticatedPurchasePaymentsIdIndexRoute
-  AuthenticatedPurchasePaymentsCreateIndexRoute: typeof AuthenticatedPurchasePaymentsCreateIndexRoute
-  AuthenticatedSuppliersIdEditIndexRoute: typeof AuthenticatedSuppliersIdEditIndexRoute
+  AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute
   AuthenticatedEcgAllEditBuilderIdRoute: typeof AuthenticatedEcgAllEditBuilderIdRoute
   AuthenticatedIndoorMasterServicesEditIdRoute: typeof AuthenticatedIndoorMasterServicesEditIdRoute
   AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute: typeof AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute
@@ -4415,12 +4560,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRoute: typeof AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRoute
   AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRoute: typeof AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRoute
   AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute: typeof AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute
+  AuthenticatedPathologyHormoneAllReportReportIdRoute: typeof AuthenticatedPathologyHormoneAllReportReportIdRoute
   AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute: typeof AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute
   AuthenticatedPathologyHormoneSemenEditReportIdRoute: typeof AuthenticatedPathologyHormoneSemenEditReportIdRoute
   AuthenticatedPathologyHormoneSemenReportReportIdRoute: typeof AuthenticatedPathologyHormoneSemenReportReportIdRoute
   AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRoute: typeof AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRoute
   AuthenticatedPathologyHormoneSputumReportReportIdRoute: typeof AuthenticatedPathologyHormoneSputumReportReportIdRoute
   AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute: typeof AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute
+  AuthenticatedPathologyImmunologyAllReportReportIdRoute: typeof AuthenticatedPathologyImmunologyAllReportReportIdRoute
   AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute: typeof AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute
   AuthenticatedPathologyImmunologyBloodGroupReportReportIdRoute: typeof AuthenticatedPathologyImmunologyBloodGroupReportReportIdRoute
   AuthenticatedPathologyImmunologyMtReportReportIdRoute: typeof AuthenticatedPathologyImmunologyMtReportReportIdRoute
@@ -4435,14 +4582,22 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute: typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
   AuthenticatedUltrasonogramAllEditBuilderIdRoute: typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
   AuthenticatedXRayAllEditBuilderIdRoute: typeof AuthenticatedXRayAllEditBuilderIdRoute
+  AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute
+  AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute
   AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute
+  AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
+  AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute
+  AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
+  AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute
+  AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute
   AuthenticatedIndoorMasterBedCabinListCreateIndexRoute: typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
   AuthenticatedIndoorMasterServicesCreateIndexRoute: typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
   AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute: typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
   AuthenticatedOutdoorMasterTestsCreateIndexRoute: typeof AuthenticatedOutdoorMasterTestsCreateIndexRoute
   AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute: typeof AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute
   AuthenticatedOutdoorReceptionInvoicesListIndexRoute: typeof AuthenticatedOutdoorReceptionInvoicesListIndexRoute
-  AuthenticatedPurchaseInvoicesIdPreviewIndexRoute: typeof AuthenticatedPurchaseInvoicesIdPreviewIndexRoute
+  AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute: typeof AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute
+  AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute: typeof AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute
   AuthenticatedOutdoorMasterTestsEditIdIndexRoute: typeof AuthenticatedOutdoorMasterTestsEditIdIndexRoute
   AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRoute: typeof AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
   AuthenticatedPathologyHematologyAllEditIdIndexRoute: typeof AuthenticatedPathologyHematologyAllEditIdIndexRoute
@@ -4454,21 +4609,20 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
+  AuthenticatedNotificationsIdRoute: AuthenticatedNotificationsIdRoute,
   AuthenticatedAccountingIndexRoute: AuthenticatedAccountingIndexRoute,
   AuthenticatedAppsIndexRoute: AuthenticatedAppsIndexRoute,
+  AuthenticatedBackupSettingsIndexRoute: AuthenticatedBackupSettingsIndexRoute,
+  AuthenticatedBackupsIndexRoute: AuthenticatedBackupsIndexRoute,
   AuthenticatedChatsIndexRoute: AuthenticatedChatsIndexRoute,
-  AuthenticatedCustomersIndexRoute: AuthenticatedCustomersIndexRoute,
   AuthenticatedDatabaseIndexRoute: AuthenticatedDatabaseIndexRoute,
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
   AuthenticatedHelpIndexRoute: AuthenticatedHelpIndexRoute,
-  AuthenticatedProductsIndexRoute: AuthenticatedProductsIndexRoute,
+  AuthenticatedMyAccountIndexRoute: AuthenticatedMyAccountIndexRoute,
+  AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedRolesIndexRoute: AuthenticatedRolesIndexRoute,
-  AuthenticatedSuppliersIndexRoute: AuthenticatedSuppliersIndexRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
-  AuthenticatedProductsProductIdEditRoute:
-    AuthenticatedProductsProductIdEditRoute,
-  AuthenticatedPurchaseOrderCreateRoute: AuthenticatedPurchaseOrderCreateRoute,
   AuthenticatedRolesEditIdRoute: AuthenticatedRolesEditIdRoute,
   AuthenticatedAccountingAccountsIndexRoute:
     AuthenticatedAccountingAccountsIndexRoute,
@@ -4500,6 +4654,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdmissionBedCabinChargeIndexRoute,
   AuthenticatedAdmissionDueCollectionIndexRoute:
     AuthenticatedAdmissionDueCollectionIndexRoute,
+  AuthenticatedAdmissionFinalBillsIndexRoute:
+    AuthenticatedAdmissionFinalBillsIndexRoute,
   AuthenticatedAdmissionFinaliseServicesIndexRoute:
     AuthenticatedAdmissionFinaliseServicesIndexRoute,
   AuthenticatedAdmissionFirstTimeBillIndexRoute:
@@ -4522,32 +4678,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedBanksBankTransactionsIndexRoute,
   AuthenticatedBanksBankWithdrawalsIndexRoute:
     AuthenticatedBanksBankWithdrawalsIndexRoute,
-  AuthenticatedCustomersIdIndexRoute: AuthenticatedCustomersIdIndexRoute,
-  AuthenticatedCustomersCreateIndexRoute:
-    AuthenticatedCustomersCreateIndexRoute,
   AuthenticatedEcgAllIndexRoute: AuthenticatedEcgAllIndexRoute,
-  AuthenticatedInventoryStocksIndexRoute:
-    AuthenticatedInventoryStocksIndexRoute,
   AuthenticatedPayrollEmployeesIndexRoute:
     AuthenticatedPayrollEmployeesIndexRoute,
   AuthenticatedPayrollOverviewIndexRoute:
     AuthenticatedPayrollOverviewIndexRoute,
-  AuthenticatedProductsProductIdIndexRoute:
-    AuthenticatedProductsProductIdIndexRoute,
-  AuthenticatedProductsCategoriesIndexRoute:
-    AuthenticatedProductsCategoriesIndexRoute,
-  AuthenticatedProductsCreateIndexRoute: AuthenticatedProductsCreateIndexRoute,
-  AuthenticatedProductsUnitsIndexRoute: AuthenticatedProductsUnitsIndexRoute,
-  AuthenticatedPurchaseInvoicesIndexRoute:
-    AuthenticatedPurchaseInvoicesIndexRoute,
-  AuthenticatedPurchaseOrderIndexRoute: AuthenticatedPurchaseOrderIndexRoute,
-  AuthenticatedPurchasePaymentsIndexRoute:
-    AuthenticatedPurchasePaymentsIndexRoute,
   AuthenticatedRolesCreateIndexRoute: AuthenticatedRolesCreateIndexRoute,
-  AuthenticatedSalesOrdersIndexRoute: AuthenticatedSalesOrdersIndexRoute,
-  AuthenticatedSuppliersIdIndexRoute: AuthenticatedSuppliersIdIndexRoute,
-  AuthenticatedSuppliersCreateIndexRoute:
-    AuthenticatedSuppliersCreateIndexRoute,
   AuthenticatedUltrasonogramAllIndexRoute:
     AuthenticatedUltrasonogramAllIndexRoute,
   AuthenticatedXRayAllIndexRoute: AuthenticatedXRayAllIndexRoute,
@@ -4571,7 +4707,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRoute,
   AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute:
     AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute,
-  AuthenticatedPurchaseOrderIdEditRoute: AuthenticatedPurchaseOrderIdEditRoute,
   AuthenticatedRolesPermissionsRoleIdEditRoute:
     AuthenticatedRolesPermissionsRoleIdEditRoute,
   AuthenticatedUltrasonogramAllEditIdRoute:
@@ -4594,12 +4729,32 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAccountingReportsTrialBalanceIndexRoute,
   AuthenticatedAdmissionBillingBillingIdIndexRoute:
     AuthenticatedAdmissionBillingBillingIdIndexRoute,
+  AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute:
+    AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute,
   AuthenticatedAdmissionInvoiceCreateIndexRoute:
     AuthenticatedAdmissionInvoiceCreateIndexRoute,
   AuthenticatedAdmissionInvoiceListIndexRoute:
     AuthenticatedAdmissionInvoiceListIndexRoute,
-  AuthenticatedCustomersIdEditIndexRoute:
-    AuthenticatedCustomersIdEditIndexRoute,
+  AuthenticatedAdmissionPatientsActiveIndexRoute:
+    AuthenticatedAdmissionPatientsActiveIndexRoute,
+  AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute:
+    AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute,
+  AuthenticatedAdmissionPatientsBillCreatedListIndexRoute:
+    AuthenticatedAdmissionPatientsBillCreatedListIndexRoute,
+  AuthenticatedAdmissionPatientsBillDistributedListIndexRoute:
+    AuthenticatedAdmissionPatientsBillDistributedListIndexRoute,
+  AuthenticatedAdmissionPatientsDischargedListIndexRoute:
+    AuthenticatedAdmissionPatientsDischargedListIndexRoute,
+  AuthenticatedAdmissionPatientsDischargedIndexRoute:
+    AuthenticatedAdmissionPatientsDischargedIndexRoute,
+  AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute:
+    AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute,
+  AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute:
+    AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute,
+  AuthenticatedIndoorManagementDistributionsIndexRoute:
+    AuthenticatedIndoorManagementDistributionsIndexRoute,
+  AuthenticatedIndoorManagementDoctorReferredIndexRoute:
+    AuthenticatedIndoorManagementDoctorReferredIndexRoute,
   AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute:
     AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute,
   AuthenticatedIndoorMasterBedCabinListIndexRoute:
@@ -4624,14 +4779,22 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedOutdoorMasterDoctorsIndexRoute,
   AuthenticatedOutdoorMasterMachinesIndexRoute:
     AuthenticatedOutdoorMasterMachinesIndexRoute,
+  AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute:
+    AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute,
   AuthenticatedOutdoorMasterTestTablesIndexRoute:
     AuthenticatedOutdoorMasterTestTablesIndexRoute,
   AuthenticatedOutdoorMasterTestsIndexRoute:
     AuthenticatedOutdoorMasterTestsIndexRoute,
   AuthenticatedOutdoorReceptionDueCollectionIndexRoute:
     AuthenticatedOutdoorReceptionDueCollectionIndexRoute,
+  AuthenticatedOutdoorReceptionMyInvoicesIndexRoute:
+    AuthenticatedOutdoorReceptionMyInvoicesIndexRoute,
+  AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute:
+    AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute,
   AuthenticatedOutdoorReceptionPatientsIndexRoute:
     AuthenticatedOutdoorReceptionPatientsIndexRoute,
+  AuthenticatedOutdoorReceptionUserInvoicesIndexRoute:
+    AuthenticatedOutdoorReceptionUserInvoicesIndexRoute,
   AuthenticatedPathologyBiochemicalAllIndexRoute:
     AuthenticatedPathologyBiochemicalAllIndexRoute,
   AuthenticatedPathologyBiochemicalLipidProfileIndexRoute:
@@ -4688,16 +4851,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedPayrollAttendanceStaffIdIndexRoute,
   AuthenticatedPayrollSalaryStaffIdIndexRoute:
     AuthenticatedPayrollSalaryStaffIdIndexRoute,
-  AuthenticatedPurchaseInvoicesIdIndexRoute:
-    AuthenticatedPurchaseInvoicesIdIndexRoute,
-  AuthenticatedPurchaseOrderIdIndexRoute:
-    AuthenticatedPurchaseOrderIdIndexRoute,
-  AuthenticatedPurchasePaymentsIdIndexRoute:
-    AuthenticatedPurchasePaymentsIdIndexRoute,
-  AuthenticatedPurchasePaymentsCreateIndexRoute:
-    AuthenticatedPurchasePaymentsCreateIndexRoute,
-  AuthenticatedSuppliersIdEditIndexRoute:
-    AuthenticatedSuppliersIdEditIndexRoute,
+  AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute:
+    AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute,
   AuthenticatedEcgAllEditBuilderIdRoute: AuthenticatedEcgAllEditBuilderIdRoute,
   AuthenticatedIndoorMasterServicesEditIdRoute:
     AuthenticatedIndoorMasterServicesEditIdRoute,
@@ -4727,6 +4882,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRoute,
   AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute:
     AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute,
+  AuthenticatedPathologyHormoneAllReportReportIdRoute:
+    AuthenticatedPathologyHormoneAllReportReportIdRoute,
   AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute:
     AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute,
   AuthenticatedPathologyHormoneSemenEditReportIdRoute:
@@ -4739,6 +4896,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedPathologyHormoneSputumReportReportIdRoute,
   AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute:
     AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute,
+  AuthenticatedPathologyImmunologyAllReportReportIdRoute:
+    AuthenticatedPathologyImmunologyAllReportReportIdRoute,
   AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute:
     AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute,
   AuthenticatedPathologyImmunologyBloodGroupReportReportIdRoute:
@@ -4767,8 +4926,22 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedUltrasonogramAllEditBuilderIdRoute,
   AuthenticatedXRayAllEditBuilderIdRoute:
     AuthenticatedXRayAllEditBuilderIdRoute,
+  AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute:
+    AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute,
+  AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute:
+    AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute,
   AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute:
     AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute,
+  AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute:
+    AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute,
+  AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute:
+    AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute,
+  AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute:
+    AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute,
+  AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute:
+    AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute,
+  AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute:
+    AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute,
   AuthenticatedIndoorMasterBedCabinListCreateIndexRoute:
     AuthenticatedIndoorMasterBedCabinListCreateIndexRoute,
   AuthenticatedIndoorMasterServicesCreateIndexRoute:
@@ -4781,8 +4954,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute,
   AuthenticatedOutdoorReceptionInvoicesListIndexRoute:
     AuthenticatedOutdoorReceptionInvoicesListIndexRoute,
-  AuthenticatedPurchaseInvoicesIdPreviewIndexRoute:
-    AuthenticatedPurchaseInvoicesIdPreviewIndexRoute,
+  AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute:
+    AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute,
+  AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute:
+    AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute,
   AuthenticatedOutdoorMasterTestsEditIdIndexRoute:
     AuthenticatedOutdoorMasterTestsEditIdIndexRoute,
   AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRoute:

@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { useGetTrialBalanceQuery } from "@/features/accounting/accountingQueries";
 import { AppHeader } from "@/components/layout/app-header";
+import { PageHeader } from '@/components/layout/page-header'
 
 const trialBalanceSearchSchema = z.object({
     date: z.string().optional(),
@@ -68,38 +69,38 @@ function TrialBalance() {
         <div className="space-y-6">
             <AppHeader fixed />
             <main className='p-6 lg:p-10'>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h2 className="text-3xl font-bold tracking-tight">Trial Balance</h2>
-                        <p className="text-muted-foreground">Summary of all ledger account balances.</p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">As of:</span>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-[240px] justify-start text-left font-normal",
-                                        !localDate && "text-muted-foreground"
-                                    )}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {localDate ? format(localDate, "PPP") : <span>Pick a date</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="end">
-                                <Calendar
-                                    mode="single"
-                                    selected={localDate}
-                                    onSelect={handleDateChange}
-                                    initialFocus
-                                />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-                </div>
+                <PageHeader
+                    title="Trial Balance"
+                    description="Summary of all ledger account balances."
+                    actions={
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">As of:</span>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-[240px] justify-start text-left font-normal",
+                                            !localDate && "text-muted-foreground"
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {localDate ? format(localDate, "PPP") : <span>Pick a date</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="end">
+                                    <Calendar
+                                        mode="single"
+                                        selected={localDate}
+                                        onSelect={handleDateChange}
+                                        initialFocus
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                    }
+                    showBackButton={false}
+                />
 
                 <Card className="py-6 mt-6">
                     <CardHeader className="flex flex-row items-center justify-between">

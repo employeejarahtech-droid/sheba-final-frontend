@@ -287,14 +287,11 @@ export default function DueCollectionDetails() {
     // Calculate total bill across all departments
     const totalBill = Object.values(deptTotals).reduce((sum, val) => sum + val, 0);
 
-    // Calculate total department-wise payments already recorded
-    const totalDeptWisePaid = invoice.department_payments?.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0) || 0;
-
     // NOTE: We DON'T distribute global payments proportionally because we don't know
     // which specific departments/tests the payment was for. The payment might have
     // been for tests in a specific department, so distributing it would be wrong.
     // Only use department-wise payments that were explicitly recorded.
-    const _totalGlobalPaid = Math.max(0, totalPaid - totalDeptWisePaid);
+    // const _totalGlobalPaid = Math.max(0, totalPaid - totalDeptWisePaid);
 
     // Helper to get department-wise paid amount
     const getDeptPaidAmount = (deptId: number | undefined, _deptBillTotal: number): number => {

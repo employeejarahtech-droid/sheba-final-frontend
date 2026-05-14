@@ -6,11 +6,7 @@ import { TopNav } from "@/components/layout/top-nav";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { reportsData } from "@/data/data";
-import { ColumnDef } from "@tanstack/react-table";
 
 const topNav = [
   {
@@ -45,97 +41,100 @@ type ReportsItem = {
   patientName: string;
   tests: string[];
   date: string;
+  status?: string;
 };
 
 const reports: ReportsItem[] = reportsData;
 
 export default function BloodForTcdc() {
-  const columns: ColumnDef<ReportsItem>[] = [
-    // Row selection
+  const columns = [
     {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) =>
-            table.toggleAllPageRowsSelected(Boolean(value))
-          }
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-
-    {
-      accessorKey: "receiptId",
-      header: "Receipt ID",
-    },
-    {
-      accessorKey: "patientName",
-      header: "Patient Name",
-    },
-
-    // ✅ FIXED Tests column
-    {
-      accessorKey: "tests",
-      header: "Tests",
-      cell: ({ row }) => {
-        const tests = row.getValue("tests") as string[];
-        return tests.join(", ");
+      data: "id",
+      title: "ID",
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return row.id;
       },
+      defaultContent: "",
     },
-
     {
-      accessorKey: "date",
-      header: "Date",
+      data: "receiptId",
+      title: "Receipt ID",
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return row.receiptId;
+      },
+      defaultContent: "",
     },
-
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
+      data: "patientName",
+      title: "Patient Name",
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return row.patientName;
+      },
+      defaultContent: "",
+    },
+    {
+      data: "tests",
+      title: "Tests",
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return Array.isArray(row.tests) ? row.tests.join(", ") : row.tests;
+      },
+      defaultContent: "",
+    },
+    {
+      data: "date",
+      title: "Date",
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return row.date;
+      },
+      defaultContent: "",
+    },
+    {
+      data: "status",
+      title: "Status",
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const status = row.status || "pending";
         const color =
           status === "passed"
             ? "bg-green-500"
             : status === "failed"
               ? "bg-red-500"
               : "bg-yellow-500";
-
-        return <Badge className={color + " text-white"}>{status}</Badge>;
+        return `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium text-white ${color}">${status}</span>`;
       },
+      defaultContent: "",
     },
-    // Actions Column
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => alert("View " + item.id)}>
+      data: null,
+      title: "Actions",
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return `
+          <div class="flex gap-2">
+            <button
+              type="button"
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2"
+              onclick="alert('View ${row.id}')"
+            >
               View
-            </Button>
-{/* 
-            <Link to={editReportRoute} params={{ id: item.id }}>
-              <Button size="sm" variant="default">Edit</Button>
-            </Link> */}
-
-            <Button size="sm" variant="destructive" onClick={() => alert("Delete " + item.id)}>
+            </button>
+            <button
+              type="button"
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 h-8 px-4 py-2"
+              onclick="alert('Delete ${row.id}')"
+            >
               Delete
-            </Button>
+            </button>
           </div>
-        );
+        `;
       },
+      defaultContent: "",
     },
-
   ];
 
   return (
@@ -151,7 +150,7 @@ export default function BloodForTcdc() {
       </Header>
       <Main>
         <div className="mb-4">
-          <h1 className='text-2xl font-bold tracking-tight'>Blood For TCDC</h1>
+          <h1 className='text-2xl font-bold tracking-tight'>Blood for TCDC</h1>
         </div>
         <DataTable columns={columns} data={reports} />
       </Main>

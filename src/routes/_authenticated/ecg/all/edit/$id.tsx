@@ -13,7 +13,6 @@ import { getCookie } from '@/lib/cookies';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { topNav } from '@/data/data';
 import { useState, useEffect } from 'react';
-import { json } from 'zod';
 
 export const Route = createFileRoute(
   '/_authenticated/ecg/all/edit/$id',
@@ -69,8 +68,7 @@ function EditECGReport() {
         throw new Error(`Failed to fetch ECG data (${res.status}: ${res.statusText})`);
       }
 
-      const json = await res.json();
-      return json.data;
+      return (await res.json()).data;
     },
     enabled: !!token,
   });
@@ -122,10 +120,10 @@ function EditECGReport() {
     });
   };
 
-  const handlePrint = () => {
-    // Navigate to print page in same tab
-    router.navigate({ to: '/ecg/all/print/$id', params: { id } });
-  };
+  // const handlePrint = () => {
+  //   // Navigate to print page in same tab
+  //   router.navigate({ to: '/ecg/all/print/$id', params: { id } });
+  // };
 
   if (isLoading) {
     return (
@@ -166,6 +164,13 @@ function EditECGReport() {
 
       {/* Main */}
       <Main>
+        <div className="mb-4">
+          <Link to="/ecg/all">
+            <Button variant="outline" size="sm">
+              ← Back to ECG Reports
+            </Button>
+          </Link>
+        </div>
         <h1 className="text-2xl font-bold tracking-tight mb-6">Edit Report - ECG</h1>
 
         {invoiceInformation && (
@@ -223,26 +228,24 @@ function EditECGReport() {
                             rows={3}
                             placeholder="Enter test result..."
                           />
-                          <Link to="/ecg/all/edit/builder/$id" params={{ id: String(test.id) }}>
-                            <Button type="button" size="sm" variant="secondary" className="w-full">
-                              Update Content
-                            </Button>
-                          </Link>
+                          <div className="flex gap-2">
+                            <Link to="/ecg/all/edit/builder/$id" params={{ id: String(test.id) }} className="flex-1">
+                              <Button type="button" size="sm" variant="secondary" className="w-full">
+                                Update Content
+                              </Button>
+                            </Link>
+                            <Link to="/ecg/all/print/$id" params={{ id: String(test.id) }} className="flex-1">
+                              <Button type="button" size="sm" variant="outline" className="w-full">
+                                Print
+                              </Button>
+                            </Link>
+                          </div>
                         </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button type="submit" variant="default" disabled={updateMutation.isPending}>
-                  {updateMutation.isPending ? 'Saving...' : 'Save Report'}
-                </Button>
-
-                <Button type="button" variant="outline" onClick={handlePrint}>
-                  Print
-                </Button>
-              </div>
             </form>
 
           </CardContent>

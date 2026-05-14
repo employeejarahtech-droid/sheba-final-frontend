@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
+import { Checkbox } from '@/components/ui/checkbox'
 import { useLogin } from '@/hooks/useLogin'
 
 const formSchema = z.object({
@@ -29,6 +30,7 @@ const formSchema = z.object({
     .string()
     .min(1, 'Please enter your password')
     .min(7, 'Password must be at least 7 characters long'),
+  remember: z.boolean().optional(),
 })
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> {
@@ -41,7 +43,7 @@ export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormPr
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: "", password: "", remember: false },
   })
 
   function onSubmit(data: z.infer<typeof formSchema>) {
@@ -110,6 +112,24 @@ export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormPr
               >
                 Forgot password?
               </Link>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="remember"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <FormLabel className="text-sm font-normal">
+                Remember me
+              </FormLabel>
             </FormItem>
           )}
         />

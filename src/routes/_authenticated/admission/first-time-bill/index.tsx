@@ -45,6 +45,16 @@ function FirstTimeBill() {
   const [openAddServiceForm, setOpenAddServiceForm] = useState(false);
   const [openAddClinicalServicesForm, setOpenAddClinicalServicesForm] = useState(false);
 
+  // Placeholder handlers for form components
+  const handleAddOperationType = () => {};
+  const handleAddConsultant = () => {};
+  const handleAddService = () => {};
+  const handleAddClinicalService = () => {};
+
+  // Placeholder data
+  const doctors: any[] = [];
+  const services: any[] = [];
+
   const form = useForm({
     defaultValues: {
       invoiceId: "",
@@ -248,7 +258,7 @@ function FirstTimeBill() {
                         <div className="flex justify-between items-center gap-5 mb-5">
                           <h3 className="text-xl font-semibold tracking-tight">List of Operation Types</h3>
                           <Button onClick={() => setOpen(true)}>Add Operation Type</Button>
-                          <AddOperationTypeForm open={open} setOpen={setOpen} />
+                          <AddOperationTypeForm open={open} setOpen={setOpen} onAdd={handleAddOperationType} admissionId="" />
                         </div>
                         <div className="overflow-x-auto">
                           <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
@@ -286,7 +296,7 @@ function FirstTimeBill() {
                                     <Plus className="w-4 h-4" />
                                     Service
                                   </Button>
-                                  <AddServiceForm open={openAddServiceForm} setOpen={setOpenAddServiceForm} />
+                                  <AddServiceForm open={openAddServiceForm} setOpen={setOpenAddServiceForm} onAdd={handleAddService} services={services} />
                                 </td>
                               </tr>
                             </tbody>
@@ -304,7 +314,7 @@ function FirstTimeBill() {
                         <div className="flex justify-between items-center gap-5 mb-5">
                           <h3 className="text-xl font-semibold tracking-tight">List of Consultants</h3>
                           <Button onClick={() => setOpenConsultantForm(true)}>Add Consultant</Button>
-                          <AddConsultantForm open={openConsultantForm} setOpen={setOpenConsultantForm} />
+                          <AddConsultantForm open={openConsultantForm} setOpen={setOpenConsultantForm} onAdd={handleAddConsultant} doctors={doctors} />
                         </div>
                         <div className="overflow-x-auto">
                           <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
@@ -350,7 +360,7 @@ function FirstTimeBill() {
                     <div className="flex justify-between items-center gap-5 mb-5">
                       <h3 className="text-xl font-semibold tracking-tight">List of Services</h3>
                       <Button onClick={() => { setOpenAddClinicalServicesForm(true) }}>Add Service</Button>
-                      <AddClinicalServicesForm open={openAddClinicalServicesForm} setOpen={setOpenAddClinicalServicesForm} />
+                      <AddClinicalServicesForm open={openAddClinicalServicesForm} setOpen={setOpenAddClinicalServicesForm} onAdd={handleAddClinicalService} services={services} />
                     </div>
                     <div className="overflow-x-auto">
                       <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
