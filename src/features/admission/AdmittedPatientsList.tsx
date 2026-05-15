@@ -161,12 +161,45 @@ export function AdmittedPatientsList() {
         amount: string
         notes: string
         paymentMethod: string
+        debitAccountId: string
+        creditAccountId: string
+        narration: string
     }>({
         open: false,
         admissionId: null,
         amount: '',
         notes: '',
         paymentMethod: 'cash',
+        debitAccountId: '',
+        creditAccountId: '',
+        narration: '',
+    })
+
+    // Fetch accounts for journal entry dropdowns
+    const [accountSearch, setAccountSearch] = useState('')
+    const { data: accountsData } = useQuery({
+        queryKey: ['accounts-for-journal', accountSearch],
+        queryFn: async () => {
+            const response = await fetch(`${API_URL}/api/accounting/accounts?limit=100&search=${accountSearch}`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            })
+            if (!response.ok) throw new Error('Failed to fetch accounts')
+            return response.json()
+        },
+        enabled: advancePaymentModal.open,
+    })
+    const accounts: { id: number; name: string; code: string }[] = accountsData?.data?.items || accountsData?.data || []
+
+    // Fetch payment account mappings for pre-filling modal
+    const { data: paymentMappingsData } = useQuery({
+        queryKey: ['payment-mappings'],
+        queryFn: async () => {
+            const response = await fetch(`${API_URL}/api/app-settings/payment-mappings`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            })
+            if (!response.ok) throw new Error('Failed to fetch payment mappings')
+            return response.json()
+        },
     })
 
     const setPage = (newPage: number) => {
@@ -194,12 +227,16 @@ export function AdmittedPatientsList() {
 
     // Advance payment mutation
     const advancePaymentMutation = useMutation({
-        mutationFn: async ({ admissionId, amount, notes, paymentMethod }: {
+        mutationFn: async ({ admissionId, amount, notes, paymentMethod, debitAccountId, creditAccountId, narration }: {
             admissionId: string
             amount: string
             notes: string
             paymentMethod: string
+            debitAccountId: string
+            creditAccountId: string
+            narration: string
         }) => {
+            // Record the advance payment
             const response = await fetch(`${API_URL}/api/admission/${admissionId}/advance-payment`, {
                 method: 'POST',
                 headers: {
@@ -216,6 +253,30 @@ export function AdmittedPatientsList() {
                 const errorData = await response.json()
                 throw new Error(errorData.message || 'Failed to record advance payment')
             }
+
+            // Create journal entry if accounts are selected
+            if (debitAccountId && creditAccountId) {
+                const journalResponse = await fetch(`${API_URL}/api/accounting/journal-entry`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        date: new Date().toISOString().split('T')[0],
+                        narration: narration || `Advance payment for admission #${admissionId}`,
+                        entries: [
+                            { account_id: Number(debitAccountId), debit: parseFloat(amount), credit: 0 },
+                            { account_id: Number(creditAccountId), debit: 0, credit: parseFloat(amount) },
+                        ],
+                    }),
+                })
+                if (!journalResponse.ok) {
+                    const errorData = await journalResponse.json()
+                    console.error('Journal entry failed:', errorData)
+                }
+            }
+
             return response.json()
         },
         onSuccess: () => {
@@ -226,6 +287,9 @@ export function AdmittedPatientsList() {
                 amount: '',
                 notes: '',
                 paymentMethod: 'cash',
+                debitAccountId: '',
+                creditAccountId: '',
+                narration: '',
             })
             // Refetch admissions to show updated advance payment info
             window.location.reload()
@@ -314,6 +378,44 @@ export function AdmittedPatientsList() {
             icon: <AlertCircle className="w-6 h-6 text-white" />,
         },
     ], [stats])
+
+    const formatDateShort = (dateStr: string | null | undefined) => {
+        if (!dateStr) return ''
+        const d = new Date(dateStr)
+        if (isNaN(d.getTime())) return ''
+        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+    }
+
+    const createdRow = useMemo(() => (row: Node, data: AdmissionItem[]) => {
+        const item = data[0] as unknown as AdmissionItem
+        if (!item) return
+
+        const makeBadge = (label: string, done: boolean, date: string | null) => {
+            const bg = done ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800'
+            const txt = done ? 'text-green-700 dark:text-green-300' : 'text-red-600 dark:text-red-400'
+            const yesNo = done ? 'Yes' : 'No'
+            const datePart = done && date ? ` <span class="opacity-60">${formatDateShort(date)}</span>` : ''
+            return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium border ${bg} ${txt}">${label}: ${yesNo}${datePart}</span>`
+        }
+
+        const html = `
+            <div class="flex flex-wrap items-center gap-2 px-4 py-1.5 bg-slate-50 dark:bg-slate-900/40 border-t border-slate-100 dark:border-slate-800 text-xs">
+                ${makeBadge('Bill Created', (item as any).bill_created === 1, (item as any).bill_created_date || null)}
+                ${makeBadge('Final Bill', (item as any).final_bill_created === 1, (item as any).final_bill_created_date || null)}
+                ${makeBadge('Bill Distributed', (item as any).bills_distributed === 1, (item as any).bills_distributed_date || null)}
+                ${makeBadge('Discharged', (item as any).discharged === 1, (item as any).discharged_date || null)}
+            </div>
+        `
+
+        const subRow = document.createElement('tr')
+        subRow.className = 'status-sub-row'
+        const cell = document.createElement('td')
+        cell.colSpan = 20
+        cell.className = 'p-0'
+        cell.innerHTML = html
+        subRow.appendChild(cell)
+        ;(row as HTMLElement).after(subRow)
+    }, [])
 
     const columns = useMemo(() => [
         {
@@ -1010,12 +1112,23 @@ export function AdmittedPatientsList() {
     // Make handleAdvancePayment and printAdmissionForm available globally
     useEffect(() => {
         const handleAdvancePayment = (admissionId: string) => {
+            // Pre-fill from payment mappings settings
+            const mappings = (paymentMappingsData as any)?.data || {}
+            const advanceMapping = mappings.indoor_advance_payment || {}
+            const methods: { name: string; account_id: number }[] = advanceMapping.methods || []
+            const firstMethod = methods[0] || { name: 'Cash', account_id: null }
+
             setAdvancePaymentModal({
                 open: true,
                 admissionId,
                 amount: '',
                 notes: '',
-                paymentMethod: 'cash',
+                paymentMethod: firstMethod.name,
+                debitAccountId: firstMethod.account_id ? String(firstMethod.account_id) : '',
+                creditAccountId: advanceMapping.credit_account_id ? String(advanceMapping.credit_account_id) : '',
+                narration: advanceMapping.narration_template
+                    ? advanceMapping.narration_template.replace('{admission_id}', admissionId)
+                    : `Advance payment for admission #${admissionId}`,
             })
         }
 
@@ -1150,7 +1263,29 @@ export function AdmittedPatientsList() {
             delete (window as any).handleAdvancePayment
             delete (window as any).printAdmissionForm
         }
-    }, [])
+    }, [paymentMappingsData])
+
+    // Auto-update debit account when payment method changes in the modal
+    useEffect(() => {
+        if (!advancePaymentModal.open || !advancePaymentModal.paymentMethod) return
+        const mappings = (paymentMappingsData as any)?.data || {}
+        const advanceMapping = mappings.indoor_advance_payment || {}
+        const methods: { name: string; account_id: number }[] = advanceMapping.methods || []
+        const matched = methods.find((m: any) => m.name.toLowerCase() === advancePaymentModal.paymentMethod.toLowerCase())
+        if (matched?.account_id) {
+            setAdvancePaymentModal(prev => ({
+                ...prev,
+                debitAccountId: String(matched.account_id),
+            }))
+        }
+    }, [advancePaymentModal.paymentMethod, advancePaymentModal.open, paymentMappingsData])
+
+    // Get available payment methods from settings for the dropdown
+    const getPaymentMethodOptions = (): { name: string }[] => {
+        const mappings = (paymentMappingsData as any)?.data || {}
+        const advanceMapping = mappings.indoor_advance_payment || {}
+        return advanceMapping.methods || []
+    }
 
     const handleAdvancePaymentSubmit = () => {
         if (!advancePaymentModal.admissionId || !advancePaymentModal.amount) {
@@ -1162,6 +1297,9 @@ export function AdmittedPatientsList() {
             amount: advancePaymentModal.amount,
             notes: advancePaymentModal.notes,
             paymentMethod: advancePaymentModal.paymentMethod,
+            debitAccountId: advancePaymentModal.debitAccountId,
+            creditAccountId: advancePaymentModal.creditAccountId,
+            narration: advancePaymentModal.narration,
         })
     }
 
@@ -1170,7 +1308,7 @@ export function AdmittedPatientsList() {
             {/* Advance Payment Modal */}
             {advancePaymentModal.open && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-md p-6 m-4">
+                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-lg p-6 m-4 max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
@@ -1208,11 +1346,9 @@ export function AdmittedPatientsList() {
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-800"
                                 >
                                     <option value="">Select method</option>
-                                    <option value="cash">Cash</option>
-                                    <option value="card">Card</option>
-                                    <option value="bank_transfer">Bank Transfer</option>
-                                    <option value="mobile_banking">Mobile Banking</option>
-                                    <option value="check">Check</option>
+                                    {getPaymentMethodOptions().map((m, i) => (
+                                        <option key={i} value={m.name}>{m.name}</option>
+                                    ))}
                                 </select>
                             </div>
 
@@ -1223,8 +1359,126 @@ export function AdmittedPatientsList() {
                                     onChange={(e) => setAdvancePaymentModal({ ...advancePaymentModal, notes: e.target.value })}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-800"
                                     placeholder="Add notes (optional)"
-                                    rows={3}
+                                    rows={2}
                                 />
+                            </div>
+
+                            {/* Journal Entry Details - Double Entry View */}
+                            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5">
+                                    <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                                        Double Entry
+                                    </h3>
+                                </div>
+
+                                <div className="p-4 space-y-3">
+                                    <div>
+                                        <label className="block text-xs font-medium mb-1 text-gray-500 dark:text-gray-400">Narration</label>
+                                        <input
+                                            type="text"
+                                            value={advancePaymentModal.narration}
+                                            onChange={(e) => setAdvancePaymentModal({ ...advancePaymentModal, narration: e.target.value })}
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 text-sm"
+                                            placeholder={`Advance payment for admission #${advancePaymentModal.admissionId || ''}`}
+                                        />
+                                    </div>
+
+                                    {/* Double Entry Table */}
+                                    <table className="w-full text-sm border-collapse">
+                                        <thead>
+                                            <tr className="bg-gray-50 dark:bg-gray-800">
+                                                <th className="text-left px-3 py-2 font-semibold text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 w-[40%]">Account</th>
+                                                <th className="text-right px-3 py-2 font-semibold text-green-600 dark:text-green-400 border-b border-gray-200 dark:border-gray-700">Debit</th>
+                                                <th className="text-right px-3 py-2 font-semibold text-red-500 border-b border-gray-200 dark:border-gray-700">Credit</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {/* Debit Row */}
+                                            <tr className="border-b border-gray-100 dark:border-gray-800">
+                                                <td className="px-1 py-2">
+                                                    <select
+                                                        value={advancePaymentModal.debitAccountId}
+                                                        onChange={(e) => setAdvancePaymentModal({ ...advancePaymentModal, debitAccountId: e.target.value })}
+                                                        className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-700 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 text-xs"
+                                                    >
+                                                        <option value="">Select debit account</option>
+                                                        {accounts.map((acc: any) => (
+                                                            <option key={acc.id} value={acc.id}>{acc.code} - {acc.name}</option>
+                                                        ))}
+                                                    </select>
+                                                </td>
+                                                <td className="px-3 py-2 text-right">
+                                                    {advancePaymentModal.amount && parseFloat(advancePaymentModal.amount) > 0 ? (
+                                                        <span className="font-semibold text-green-600 dark:text-green-400">{format(parseFloat(advancePaymentModal.amount))}</span>
+                                                    ) : (
+                                                        <span className="text-gray-400">-</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-3 py-2 text-right text-gray-400">-</td>
+                                            </tr>
+                                            {/* Credit Row */}
+                                            <tr className="border-b border-gray-100 dark:border-gray-800">
+                                                <td className="px-1 py-2">
+                                                    <select
+                                                        value={advancePaymentModal.creditAccountId}
+                                                        onChange={(e) => setAdvancePaymentModal({ ...advancePaymentModal, creditAccountId: e.target.value })}
+                                                        className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-700 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 text-xs"
+                                                    >
+                                                        <option value="">Select credit account</option>
+                                                        {accounts.map((acc: any) => (
+                                                            <option key={acc.id} value={acc.id}>{acc.code} - {acc.name}</option>
+                                                        ))}
+                                                    </select>
+                                                </td>
+                                                <td className="px-3 py-2 text-right text-gray-400">-</td>
+                                                <td className="px-3 py-2 text-right">
+                                                    {advancePaymentModal.amount && parseFloat(advancePaymentModal.amount) > 0 ? (
+                                                        <span className="font-semibold text-red-500">{format(parseFloat(advancePaymentModal.amount))}</span>
+                                                    ) : (
+                                                        <span className="text-gray-400">-</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr className="bg-gray-50 dark:bg-gray-800 font-semibold">
+                                                <td className="px-3 py-2">Total</td>
+                                                <td className="px-3 py-2 text-right text-green-600 dark:text-green-400">
+                                                    {advancePaymentModal.amount && parseFloat(advancePaymentModal.amount) > 0
+                                                        ? format(parseFloat(advancePaymentModal.amount))
+                                                        : format(0)}
+                                                </td>
+                                                <td className="px-3 py-2 text-right text-red-500">
+                                                    {advancePaymentModal.amount && parseFloat(advancePaymentModal.amount) > 0
+                                                        ? format(parseFloat(advancePaymentModal.amount))
+                                                        : format(0)}
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+
+                                    {/* Balance indicator */}
+                                    {advancePaymentModal.amount && parseFloat(advancePaymentModal.amount) > 0 && (
+                                        <div className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium ${
+                                            advancePaymentModal.debitAccountId && advancePaymentModal.creditAccountId
+                                                ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+                                                : 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+                                        }`}>
+                                            {advancePaymentModal.debitAccountId && advancePaymentModal.creditAccountId ? (
+                                                <>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                                    Balanced - Entry is valid
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                                                    Select both accounts to complete the entry
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="flex gap-3 pt-2">
@@ -1260,6 +1514,12 @@ export function AdmittedPatientsList() {
             <AppHeader fixed />
 
             <Main fluid className="p-4 w-full flex-1 dark:bg-black/20">
+                <style>{`
+                    .status-sub-row td { border: none !important; }
+                    .status-sub-row:hover td { background: transparent !important; }
+                    tr.status-sub-row { pointer-events: none; }
+                    tr.status-sub-row span { pointer-events: auto; }
+                `}</style>
                 <div className="space-y-4 mx-auto">
                     {/* Header */}
                     <div className="flex flex-wrap justify-between items-start gap-4">
@@ -1318,6 +1578,7 @@ export function AdmittedPatientsList() {
                         search={search}
                         isLoading={isFetching}
                         onSearchChange={setSearch}
+                        createdRow={createdRow}
                         filterSlot={
                             <Popover open={openFilter} onOpenChange={setOpenFilter}>
                                 <PopoverTrigger asChild>

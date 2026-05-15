@@ -41,6 +41,7 @@ interface DataTableProps<TData> {
   isLoading?: boolean;
   filterSlot?: React.ReactNode;
   tableTitle?: string;
+  createdRow?: (row: Node, data: TData[], dataIndex: number) => void;
 }
 
 export function DataTable<TData extends Record<string, any>>({
@@ -54,6 +55,7 @@ export function DataTable<TData extends Record<string, any>>({
   isLoading,
   filterSlot,
   tableTitle,
+  createdRow,
 }: DataTableProps<TData>) {
   const tableRef = useRef<HTMLTableElement>(null);
   const dataTableRef = useRef<any>(null);
@@ -155,6 +157,7 @@ export function DataTable<TData extends Record<string, any>>({
         },
         emptyTable: "No data available",
       },
+      ...(createdRow ? { createdRow } : {}),
       dom: '<"top"rt><"clear">', // Removed 'i' and 'p'
       paging: true, // Keep paging logic for internal page() API consumption
     });

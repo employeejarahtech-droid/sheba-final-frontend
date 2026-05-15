@@ -11,13 +11,15 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from "sonner"
 import { Loader2, ArrowLeft, Check, ChevronsUpDown, Printer } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { cn } from "@/lib/utils"
+
+const API_URL = import.meta.env.VITE_API_URL
 
 type TestItem = {
     id: number;
@@ -55,9 +57,9 @@ type InvoiceDetails = {
         created_at: string;
         payment_date?: string;
     }[];
-    discounts: { amount: string }[];
+    discounts: { id: number; amount: string; reason?: string }[];
     department_payments?: { department_id: number; amount: string }[];
-    department_discounts?: { department_id: number; discount: string }[];
+    department_discounts?: { id: number; department_id: number; discount: string; created_at?: string }[];
 };
 
 export default function DueCollectionDetails() {
@@ -67,13 +69,35 @@ export default function DueCollectionDetails() {
     const navigate = useNavigate();
 
 
-    const [paymentMethod, setPaymentMethod] = useState<string>("Cash");
+    const [paymentMethod, setPaymentMethod] = useState<string>("");
     const [openPaymentMethod, setOpenPaymentMethod] = useState(false);
     const [discountReason, setDiscountReason] = useState<string>("");
     const [paymentDate, setPaymentDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
     // Department-wise inputs
     const [deptInputs, setDeptInputs] = useState<Record<string, { discount: string; payment: string }>>({});
+
+    // Fetch payment methods from settings
+    const { data: paymentMappings } = useQuery({
+        queryKey: ['payment-mappings'],
+        queryFn: async () => {
+            const res = await fetch(`${API_URL}/api/app-settings/payment-mappings`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (!res.ok) throw new Error('Failed to fetch payment mappings')
+            const json = await res.json()
+            return json.data || {}
+        },
+        enabled: !!token,
+    })
+
+    const paymentMethodOptions: string[] = paymentMappings?.outdoor_test_payment?.methods?.map((m: any) => m.name).filter(Boolean) || ["Cash", "Card", "Mobile Banking"]
+
+    useEffect(() => {
+        if (paymentMethodOptions.length > 0 && !paymentMethod) {
+            setPaymentMethod(paymentMethodOptions[0])
+        }
+    }, [paymentMethodOptions])
 
     const { data: invoice, isLoading, error } = useQuery<InvoiceDetails>({
         queryKey: ["invoice", invoiceId],
@@ -413,6 +437,79 @@ export default function DueCollectionDetails() {
 
                         <Card>
                             <CardHeader>
+                                <CardTitle>Discount History</CardTitle>
+                                <CardDescription>All discounts applied to this invoice</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                {(() => {
+                                    const globalDiscounts = invoice.discounts?.filter(d => parseFloat(d.amount) > 0) || [];
+                                    const deptDiscounts = invoice.department_discounts?.filter(d => parseFloat(d.discount) > 0) || [];
+                                    const hasDiscounts = globalDiscounts.length > 0 || deptDiscounts.length > 0;
+
+                                    if (!hasDiscounts) {
+                                        return <p className="text-sm text-muted-foreground text-center py-4">No discounts recorded</p>;
+                                    }
+
+                                    return (
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between font-medium border-b pb-2 text-xs text-muted-foreground">
+                                                <span className="w-1/3">Date</span>
+                                                <span className="w-1/3">Reason / Dept</span>
+                                                <span className="w-1/3 text-right">Amount</span>
+                                            </div>
+
+                                            {/* Global discounts */}
+                                            {globalDiscounts.map((d, idx) => (
+                                                <div key={`g-${idx}`} className="flex justify-between items-center text-sm py-1 border-b last:border-0">
+                                                    <span className="w-1/3 text-xs text-muted-foreground">-</span>
+                                                    <span className="w-1/3 text-xs">
+                                                        <Badge variant="outline" className="text-xs px-1">{d.reason || 'General'}</Badge>
+                                                    </span>
+                                                    <span className="w-1/3 text-right font-mono font-semibold text-orange-600">
+                                                        -৳{parseFloat(d.amount).toFixed(2)}
+                                                    </span>
+                                                </div>
+                                            ))}
+
+                                            {/* Department discounts */}
+                                            {deptDiscounts.map((d, idx) => {
+                                                const deptName = Object.entries(testsByDept).find(([dept]) => {
+                                                    const tests = testsByDept[dept];
+                                                    return tests?.[0]?.test?.category?.department?.id === d.department_id;
+                                                })?.[0] || `Dept #${d.department_id}`;
+
+                                                return (
+                                                    <div key={`d-${idx}`} className="flex justify-between items-center text-sm py-1 border-b last:border-0">
+                                                        <span className="w-1/3 text-xs text-muted-foreground">
+                                                            {d.created_at ? new Date(d.created_at).toLocaleDateString('en-GB') : '-'}
+                                                        </span>
+                                                        <span className="w-1/3 text-xs">
+                                                            <Badge variant="outline" className="text-xs px-1">{deptName}</Badge>
+                                                        </span>
+                                                        <span className="w-1/3 text-right font-mono font-semibold text-orange-600">
+                                                            -৳{parseFloat(d.discount).toFixed(2)}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })}
+
+                                            <div className="flex justify-between font-bold border-t pt-2 mt-2">
+                                                <span className="w-1/2">Total Discount</span>
+                                                <span className="w-1/2 text-right font-mono text-orange-600">
+                                                    -৳{(
+                                                        globalDiscounts.reduce((s, d) => s + parseFloat(d.amount), 0) +
+                                                        deptDiscounts.reduce((s, d) => s + parseFloat(d.discount), 0)
+                                                    ).toFixed(2)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
                                 <CardTitle>Payment History</CardTitle>
                                 <CardDescription>All payments received for this invoice</CardDescription>
                             </CardHeader>
@@ -630,7 +727,7 @@ export default function DueCollectionDetails() {
                                                     className="w-full justify-between"
                                                 >
                                                     {paymentMethod
-                                                        ? ["Cash", "Card", "Mobile Banking"].find((method) => method === paymentMethod) || paymentMethod
+                                                        ? paymentMethodOptions.find((method) => method === paymentMethod) || paymentMethod
                                                         : "Select method..."}
                                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                 </Button>
@@ -641,7 +738,7 @@ export default function DueCollectionDetails() {
                                                     <CommandList>
                                                         <CommandEmpty>No method found.</CommandEmpty>
                                                         <CommandGroup>
-                                                            {["Cash", "Card", "Mobile Banking"].map((method) => (
+                                                            {paymentMethodOptions.map((method) => (
                                                                 <CommandItem
                                                                     key={method}
                                                                     value={method}

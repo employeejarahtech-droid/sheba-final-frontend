@@ -44,6 +44,7 @@ import { Route as ClerkAuthenticatedUserManagementRouteImport } from './routes/c
 import { Route as ClerkauthSignUpRouteImport } from './routes/clerk/(auth)/sign-up'
 import { Route as ClerkauthSignInRouteImport } from './routes/clerk/(auth)/sign-in'
 import { Route as AuthenticatedSettingsPrefixRouteImport } from './routes/_authenticated/settings/prefix'
+import { Route as AuthenticatedSettingsPaymentAccountsRouteImport } from './routes/_authenticated/settings/payment-accounts'
 import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
 import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_authenticated/settings/display'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
@@ -409,6 +410,12 @@ const AuthenticatedSettingsPrefixRoute =
   AuthenticatedSettingsPrefixRouteImport.update({
     id: '/prefix',
     path: '/prefix',
+    getParentRoute: () => AuthenticatedSettingsRouteRoute,
+  } as any)
+const AuthenticatedSettingsPaymentAccountsRoute =
+  AuthenticatedSettingsPaymentAccountsRouteImport.update({
+    id: '/payment-accounts',
+    path: '/payment-accounts',
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any)
 const AuthenticatedSettingsNotificationsRoute =
@@ -1547,6 +1554,7 @@ export interface FileRoutesByFullPath {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/settings/payment-accounts': typeof AuthenticatedSettingsPaymentAccountsRoute
   '/settings/prefix': typeof AuthenticatedSettingsPrefixRoute
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
@@ -1763,6 +1771,7 @@ export interface FileRoutesByTo {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/settings/payment-accounts': typeof AuthenticatedSettingsPaymentAccountsRoute
   '/settings/prefix': typeof AuthenticatedSettingsPrefixRoute
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
@@ -1984,6 +1993,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/_authenticated/settings/payment-accounts': typeof AuthenticatedSettingsPaymentAccountsRoute
   '/_authenticated/settings/prefix': typeof AuthenticatedSettingsPrefixRoute
   '/clerk/(auth)/sign-in': typeof ClerkauthSignInRoute
   '/clerk/(auth)/sign-up': typeof ClerkauthSignUpRoute
@@ -2203,6 +2213,7 @@ export interface FileRouteTypes {
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/settings/payment-accounts'
     | '/settings/prefix'
     | '/clerk/sign-in'
     | '/clerk/sign-up'
@@ -2419,6 +2430,7 @@ export interface FileRouteTypes {
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/settings/payment-accounts'
     | '/settings/prefix'
     | '/clerk/sign-in'
     | '/clerk/sign-up'
@@ -2639,6 +2651,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
+    | '/_authenticated/settings/payment-accounts'
     | '/_authenticated/settings/prefix'
     | '/clerk/(auth)/sign-in'
     | '/clerk/(auth)/sign-up'
@@ -3097,6 +3110,13 @@ declare module '@tanstack/react-router' {
       path: '/prefix'
       fullPath: '/settings/prefix'
       preLoaderRoute: typeof AuthenticatedSettingsPrefixRouteImport
+      parentRoute: typeof AuthenticatedSettingsRouteRoute
+    }
+    '/_authenticated/settings/payment-accounts': {
+      id: '/_authenticated/settings/payment-accounts'
+      path: '/payment-accounts'
+      fullPath: '/settings/payment-accounts'
+      preLoaderRoute: typeof AuthenticatedSettingsPaymentAccountsRouteImport
       parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
     '/_authenticated/settings/notifications': {
@@ -4388,6 +4408,7 @@ interface AuthenticatedSettingsRouteRouteChildren {
   AuthenticatedSettingsAppearanceRoute: typeof AuthenticatedSettingsAppearanceRoute
   AuthenticatedSettingsDisplayRoute: typeof AuthenticatedSettingsDisplayRoute
   AuthenticatedSettingsNotificationsRoute: typeof AuthenticatedSettingsNotificationsRoute
+  AuthenticatedSettingsPaymentAccountsRoute: typeof AuthenticatedSettingsPaymentAccountsRoute
   AuthenticatedSettingsPrefixRoute: typeof AuthenticatedSettingsPrefixRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
 }
@@ -4399,6 +4420,8 @@ const AuthenticatedSettingsRouteRouteChildren: AuthenticatedSettingsRouteRouteCh
     AuthenticatedSettingsDisplayRoute: AuthenticatedSettingsDisplayRoute,
     AuthenticatedSettingsNotificationsRoute:
       AuthenticatedSettingsNotificationsRoute,
+    AuthenticatedSettingsPaymentAccountsRoute:
+      AuthenticatedSettingsPaymentAccountsRoute,
     AuthenticatedSettingsPrefixRoute: AuthenticatedSettingsPrefixRoute,
     AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
   }

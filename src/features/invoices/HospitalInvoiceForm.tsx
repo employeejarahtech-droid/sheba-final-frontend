@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { CalendarIcon, Check, ChevronDown, Trash2Icon, CircleCheck, PenLine, User, Activity, Clock, FlaskConical } from "lucide-react";
+import { CalendarIcon, Check, ChevronDown, Trash2Icon, CircleCheck, PenLine, User, Activity, Clock, FlaskConical, ChevronsUpDown, ArrowLeft } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getCookie } from "@/lib/cookies";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -95,8 +95,8 @@ const formSchema = z.object({
   invoice_prefix: z.string().optional(),
   patientName: z.string().min(1, "Patient name is required"),
   sex: z.string().min(1, "Sex is required"),
-  ageValue: z.string().min(1, "Age is required"),
-  ageUnit: z.string().default("Y"),
+  ageYears: z.string().optional(),
+  ageMonths: z.string().optional(),
   phone: z.string().min(1, "Phone is required"),
   date: z.string().min(1, "Date is required"),
   ref_doctor: z.string().min(1, "Reference doctor is required"),
@@ -151,6 +151,9 @@ export default function HospitalInvoiceForm() {
   const [useDeptDiscount, setUseDeptDiscount] = useState(true);
   const [doctorOpen, setDoctorOpen] = useState(false);
   const [admissionOpen, setAdmissionOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<string>("");
+  const [openPaymentMethod, setOpenPaymentMethod] = useState(false);
+  const [discountReason, setDiscountReason] = useState<string>("");
   const [admissionSearch, setAdmissionSearch] = useState("");
   const [selectedAdmission, setSelectedAdmission] = useState<AdmissionItem | null>(null);
   const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
@@ -274,6 +277,29 @@ export default function HospitalInvoiceForm() {
     enabled: !!token,
   });
 
+  // Fetch payment methods from settings
+  const { data: paymentMappings } = useQuery({
+    queryKey: ['payment-mappings'],
+    queryFn: async () => {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/app-settings/payment-mappings`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) throw new Error('Failed to fetch payment mappings')
+      const json = await res.json()
+      return json.data || {}
+    },
+    enabled: !!token,
+  })
+
+  const paymentMethodOptions: string[] = paymentMappings?.outdoor_test_payment?.methods?.map((m: any) => m.name).filter(Boolean) || ["Cash", "Card", "Mobile Banking"]
+
+  // Auto-select first payment method
+  useEffect(() => {
+    if (paymentMethodOptions.length > 0 && !paymentMethod) {
+      setPaymentMethod(paymentMethodOptions[0])
+    }
+  }, [paymentMethodOptions])
+
   const departmentWiseTests = useMemo(() => {
     const groups: Record<string, { total: number; tests: TestItem[]; departmentId: number | null }> = {};
     const categories = categoriesData?.data?.items || [];
@@ -352,7 +378,7 @@ export default function HospitalInvoiceForm() {
       // Auto-fill patient details
       setValue('patientName', admission.patient_name || '');
       setValue('sex', admission.sex || '');
-      setValue('ageValue', admission.age?.toString() || '');
+      setValue('ageYears', admission.age?.toString() || '');
       setValue('phone', admission.phone || '');
       setValue('admissionNumber', admission.id?.toString() || '');
 
@@ -381,8 +407,8 @@ export default function HospitalInvoiceForm() {
       invoice_prefix: "",
       patientName: "",
       sex: "",
-      ageValue: "",
-      ageUnit: "Y",
+      ageYears: "",
+      ageMonths: "",
       phone: "",
       date: formatDateToDDMMYYYY(new Date()),
       ref_doctor: "",
@@ -480,8 +506,8 @@ export default function HospitalInvoiceForm() {
     const previewPayload = {
       patient_name: watch('patientName') || '',
       sex: watch('sex') || '',
-      age: Number(watch('ageValue')) || null,
-      age_text: watch('ageUnit') === 'Y' ? 'years' : watch('ageUnit') === 'M' ? 'months' : null,
+      age: Number(watch('ageYears')) || Number(watch('ageMonths')) || null,
+      age_text: [watch('ageYears'), watch('ageMonths')].some(v => v) ? `${watch('ageYears') || 0}Y ${watch('ageMonths') || 0}M` : null,
       phone: watch('phone') || '',
       invoice_date: watch('date') || '',
       delivery_date: watch('deliveryDate') || null,
@@ -504,7 +530,7 @@ export default function HospitalInvoiceForm() {
           return {
             department_id: deptId,
             amount: amount,
-            method: 'Cash'
+            method: paymentMethod || 'Cash'
           };
         })
         .filter((p): p is { department_id: number; amount: number; method: string } => p !== null),
@@ -523,12 +549,12 @@ export default function HospitalInvoiceForm() {
         .filter((d): d is { department_id: number; discount: number } => d !== null),
       payments: {
         amount: Number(paidAmount) || 0,
-        method: 'Cash',
+        method: paymentMethod || 'Cash',
         payment_date: watch('date') || ''
       },
       discounts: {
         amount: Number(discount) || 0,
-        reason: 'Department wise discount'
+        reason: discountReason || 'Department wise discount'
       }
     };
 
@@ -633,8 +659,8 @@ export default function HospitalInvoiceForm() {
   }, [
     watch('patientName'),
     watch('sex'),
-    watch('ageValue'),
-    watch('ageUnit'),
+    watch('ageYears'),
+    watch('ageMonths'),
     watch('phone'),
     watch('date'),
     watch('deliveryDate'),
@@ -682,8 +708,8 @@ export default function HospitalInvoiceForm() {
     const {
       patientName,
       sex,
-      ageValue,
-      ageUnit,
+      ageYears,
+      ageMonths,
       phone,
       date,
       ref_doctor,
@@ -701,12 +727,12 @@ export default function HospitalInvoiceForm() {
       invoice_prefix: data.invoice_prefix || null,
       patient_name: patientName,
       sex,
-      age: Number(ageValue) || null, // Age in numeric format (e.g., 25, 5)
-      age_text: ageUnit === 'Y' ? 'years' : ageUnit === 'M' ? 'months' : null, // Age unit only (e.g., "years", "months")
+      age: Number(ageYears) || Number(ageMonths) || null,
+      age_text: [ageYears, ageMonths].some(v => v) ? `${ageYears || 0}Y ${ageMonths || 0}M` : null,
       phone,
       invoice_date: date,
-      delivery_date: deliveryDate || null,
-      delivery_time: deliveryTime || null,
+      delivery_date: deliveryDate || '',
+      delivery_time: deliveryTime || '',
       doctor_id: Number(ref_doctor) || null,
       total_amount: totalCharge,
       net_amount: totalCharge - totalDeptDiscount, // Net after department discounts
@@ -742,7 +768,7 @@ export default function HospitalInvoiceForm() {
           return {
             department_id: deptId,
             amount: amount,
-            method: 'Cash'
+            method: paymentMethod || 'Cash'
           };
         })
         .filter((p): p is { department_id: number; amount: number; method: string } => p !== null),
@@ -769,7 +795,7 @@ export default function HospitalInvoiceForm() {
       // Global Payment → outdoor_invoice_payments table
       payments: {
         amount: Number(paidAmount) || 0,
-        method: 'Cash',
+        method: paymentMethod || 'Cash',
         payment_date: date
       },
 
@@ -777,7 +803,7 @@ export default function HospitalInvoiceForm() {
       // Note: Backend only saves this if NO department_discounts exist (avoid double entry)
       discounts: {
         amount: Number(discount) || 0,
-        reason: 'Department wise discount'
+        reason: discountReason || 'Department wise discount'
       }
     };
 
@@ -955,17 +981,18 @@ export default function HospitalInvoiceForm() {
                   <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                     Age
                   </FormLabel>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
                     <FormField
                       control={form.control}
-                      name="ageValue"
+                      name="ageYears"
                       render={({ field }) => (
-                        <FormItem className="flex-1">
+                        <FormItem>
                           <FormControl>
                             <Input
                               type="number"
-                              placeholder="Value"
-                              className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all shadow-sm"
+                              min="0"
+                              placeholder="0"
+                              className="h-10 w-20 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all shadow-sm"
                               {...field}
                             />
                           </FormControl>
@@ -973,27 +1000,27 @@ export default function HospitalInvoiceForm() {
                         </FormItem>
                       )}
                     />
+                    <span className="text-xs text-muted-foreground">Yr</span>
                     <FormField
                       control={form.control}
-                      name="ageUnit"
+                      name="ageMonths"
                       render={({ field }) => (
-                        <FormItem className="w-28">
+                        <FormItem>
                           <FormControl>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <SelectTrigger className="w-full !h-auto h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all shadow-sm">
-                                <SelectValue placeholder="Unit" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Y">Years</SelectItem>
-                                <SelectItem value="M">Months</SelectItem>
-                                <SelectItem value="D">Days</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <Input
+                              type="number"
+                              min="0"
+                              max="11"
+                              placeholder="0"
+                              className="h-10 w-20 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all shadow-sm"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+                    <span className="text-xs text-muted-foreground">Mo</span>
                   </div>
                 </FormItem>
 
@@ -1165,6 +1192,11 @@ export default function HospitalInvoiceForm() {
                       onCheckedChange={(checked) => {
                         if (typeof checked === 'boolean') {
                           setValue('isIndoorPatient', checked);
+                          if (!checked) {
+                            setSelectedAdmission(null);
+                            setValue('admissionNumber', '');
+                            setValue('bedCabinNumber', '');
+                          }
                         }
                       }}
                     />
@@ -1749,6 +1781,69 @@ export default function HospitalInvoiceForm() {
                     />
                   </div>
 
+                  {/* Payment Method */}
+                  <div className="space-y-2">
+                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Payment Method
+                    </FormLabel>
+                    <Popover open={openPaymentMethod} onOpenChange={setOpenPaymentMethod}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={openPaymentMethod}
+                          className="w-full justify-between h-10 border-gray-200 dark:border-gray-800 bg-transparent shadow-sm"
+                        >
+                          {paymentMethod
+                            ? paymentMethodOptions.find((m) => m === paymentMethod) || paymentMethod
+                            : "Select method..."}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[200px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Search method..." />
+                          <CommandList>
+                            <CommandEmpty>No method found.</CommandEmpty>
+                            <CommandGroup>
+                              {paymentMethodOptions.map((method) => (
+                                <CommandItem
+                                  key={method}
+                                  value={method}
+                                  onSelect={(currentValue) => {
+                                    setPaymentMethod(currentValue === paymentMethod ? "" : currentValue)
+                                    setOpenPaymentMethod(false)
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      paymentMethod === method ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {method}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* Reason / Note */}
+                  <div className="space-y-2">
+                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Reason / Note
+                    </FormLabel>
+                    <Input
+                      value={discountReason}
+                      onChange={(e) => setDiscountReason(e.target.value)}
+                      placeholder="Reason for discount (optional)"
+                      className="h-10 border-gray-200 dark:border-gray-800 bg-transparent shadow-sm"
+                    />
+                  </div>
+
                   <div className="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/50">
                     <h4 className="text-sm font-bold text-blue-900 dark:text-blue-300 mb-2 flex items-center gap-2">
                       <Activity className="h-4 w-4" />
@@ -1777,6 +1872,11 @@ export default function HospitalInvoiceForm() {
                     </div>
                     <span className="text-lg font-mono font-semibold text-green-600">
                       - {totalDeptDiscount.toLocaleString()}
+                      {totalCharge > 0 && (
+                        <span className="text-xs text-green-500 ml-1">
+                          ({((totalDeptDiscount / totalCharge) * 100).toFixed(1)}%)
+                        </span>
+                      )}
                     </span>
                   </div>
 
@@ -1804,29 +1904,37 @@ export default function HospitalInvoiceForm() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-center gap-6 mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+              <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
                 <Button
                   variant="outline"
                   type="button"
-                  className="px-10 h-14 text-lg rounded-xl border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-all font-semibold"
-                  onClick={() => {
-                    form.reset();
-                    setSelectedTests([]);
-                    setDeptDiscounts({});
-                    setDeptPayments({});
-                    setSelectedRooms([]);
-                  }}
+                  onClick={() => navigate({ to: "/outdoor/reception/invoices/list" })}
                 >
-                  Clear Form
+                  <ArrowLeft className="size-4" />
+                  Back to List
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={totalCharge === 0}
-                  className="px-12 h-14 text-lg rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 font-bold text-white shadow-xl shadow-blue-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/40 active:translate-y-0 disabled:opacity-50 disabled:grayscale"
-                >
-                  <CircleCheck className="mr-2 h-6 w-6" />
-                  Generate Invoice
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => {
+                      form.reset();
+                      setSelectedTests([]);
+                      setDeptDiscounts({});
+                      setDeptPayments({});
+                      setSelectedRooms([]);
+                    }}
+                  >
+                    Clear Form
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={totalCharge === 0}
+                  >
+                    <CircleCheck className="size-4" />
+                    Create Invoice
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -206,16 +206,37 @@ export type ListResponse<T> = {
     };
 };
 
+export type JournalLine = {
+    id: number;
+    account_id: number;
+    debit: number;
+    credit: number;
+    account: {
+        code: string;
+        name: string;
+    };
+};
+
 export type JournalEntry = {
     id: number;
     date: string;
     narration: string;
-    debit: number;
-    credit: number;
+    reference_type?: string;
+    reference_id?: number;
+    entries: JournalLine[];
+    created_at?: string;
+    total_debit?: number;
+    total_credit?: number;
 };
 
 export type JournalReportResponse = {
     data: JournalEntry[];
+    pagination?: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPage: number;
+    };
 };
 
 export type TrialBalanceItem = {

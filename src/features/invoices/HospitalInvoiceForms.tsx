@@ -42,8 +42,8 @@ type TestsResponse = {
 interface InvoiceFormValues {
   patientName: string;
   sex: string;
-  ageValue: string;
-  ageUnit: string;
+  ageYears: string;
+  ageMonths: string;
   phone: string;
   date: string;
   ref_doctor: string;
@@ -123,8 +123,8 @@ export default function HospitalInvoiceForm() {
     defaultValues: {
       patientName: "",
       sex: "",
-      ageValue: "",
-      ageUnit: "years",
+      ageYears: "",
+      ageMonths: "",
       phone: "",
       date: "",
       ref_doctor: "",
@@ -185,6 +185,8 @@ export default function HospitalInvoiceForm() {
     const {
       patientName,
       sex,
+      ageYears,
+      ageMonths,
       phone,
       date,
       ref_doctor,
@@ -203,7 +205,7 @@ export default function HospitalInvoiceForm() {
     const payload = {
       patient_name: patientName,
       sex,
-      //age: `${ageValue} ${ageUnit}`,
+      age: [ageYears, ageMonths].some(v => v) ? `${ageYears || 0}Y ${ageMonths || 0}M` : '',
       phone,
       invoice_date: date,
       reference_doctor: ref_doctor,
@@ -282,37 +284,29 @@ export default function HospitalInvoiceForm() {
                 <FormItem>
                   <FormLabel>Age</FormLabel>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
 
-                    {/* Age value */}
                     <FormField
                       control={form.control}
-                      name="ageValue"
+                      name="ageYears"
                       render={({ field }: { field: any }) => (
                         <FormControl>
-                          <Input type="number" placeholder="Age" {...field} />
+                          <Input type="number" min="0" placeholder="0" {...field} className="w-20" />
                         </FormControl>
                       )}
                     />
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">Yr</span>
 
-                    {/* Age unit (Y/M) */}
                     <FormField
                       control={form.control}
-                      name="ageUnit"
+                      name="ageMonths"
                       render={({ field }: { field: any }) => (
                         <FormControl>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <SelectTrigger className="w-24">
-                              <SelectValue placeholder="Unit" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Y">Years</SelectItem>
-                              <SelectItem value="M">Months</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <Input type="number" min="0" max="11" placeholder="0" {...field} className="w-20" />
                         </FormControl>
                       )}
                     />
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">Mo</span>
 
                   </div>
 

@@ -194,7 +194,7 @@ export default function Invoices() {
             newRow.className = 'child-row-detail';
             const cell = document.createElement('td');
             cell.className = 'p-4 bg-gray-50';
-            cell.colSpan = 11;
+            cell.colSpan = row.cells.length;
             cell.appendChild(details);
             newRow.appendChild(cell);
 

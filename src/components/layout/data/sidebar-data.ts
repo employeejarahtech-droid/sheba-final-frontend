@@ -96,6 +96,10 @@ export const sidebarData: SidebarData = {
               url: '/settings',
             },
             {
+              title: '- Payment Account Mapping',
+              url: '/settings/payment-accounts',
+            },
+            {
               title: '- Database Browser',
               url: '/database',
             },
