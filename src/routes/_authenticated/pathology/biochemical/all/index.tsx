@@ -1,13 +1,22 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
 import { Main } from "@/components/layout/main";
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
+import { FileText, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+
+const biochemicalSearchSchema = z.object({
+    page: z.coerce.number().catch(1),
+    limit: z.coerce.number().catch(10),
+    search: z.string().catch(''),
+})
 
 export const Route = createFileRoute('/_authenticated/pathology/biochemical/all/')({
-  component: AllReportsBiochemical,
+    validateSearch: (search) => biochemicalSearchSchema.parse(search),
+    component: AllReportsBiochemical,
 })
 
 
@@ -23,12 +32,26 @@ type ReportsItem = {
 
 function AllReportsBiochemical() {
 
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const limit = 10;
+  const searchParams: any = Route.useSearch();
+  const navigate: any = Route.useNavigate();
+
+  const page = Number(searchParams?.page) || 1;
+  const limit = Number(searchParams?.limit) || 10;
+  const search = searchParams?.search || "";
+
+  const setPage = (newPage: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
+  };
+  const setSearch = (newSearch: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
+  };
+  const setLimit = (newLimit: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) });
+  };
+
   const token = getCookie('accessToken');
 
-  const { data: biochemicalAllReports } = useQuery({
+  const { data: biochemicalAllReports, isFetching } = useQuery({
     queryKey: ["biochemical-all", page, search],
     queryFn: async () => {
       const res = await fetch(
@@ -340,12 +363,102 @@ function AllReportsBiochemical() {
   return (
     <>
       <AppHeader fixed />
-      <Main>
-        <div className="mb-4">
+      <main>
+        <div className="p-4 space-y-3">
           <h1 className='text-2xl font-bold tracking-tight'>All Reports (Biochemical)</h1>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Total Reports */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-blue-400 p-6 shadow-lg shadow-blue-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Reports</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{biochemicalAllReports?.data?.meta?.total || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>All Time</span>
+                <span className="font-semibold">Records</span>
+              </div>
+            </div>
+
+            {/* Completed */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-400 p-6 shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Completed</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{biochemicalAllReports?.data?.items?.filter((i: any) => i.Status === 'Completed').length || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <CheckCircle className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Status</span>
+                <span className="font-semibold">Done</span>
+              </div>
+            </div>
+
+            {/* Pending */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-600 to-amber-400 p-6 shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Pending</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{biochemicalAllReports?.data?.items?.filter((i: any) => !i.Status || i.Status === 'Pending').length || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <Clock className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Status</span>
+                <span className="font-semibold">Awaiting</span>
+              </div>
+            </div>
+
+            {/* Patients */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-400 p-6 shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Patients</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{new Set(biochemicalAllReports?.data?.items?.map((i: any) => i.PatientId)).size || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <AlertCircle className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Unique</span>
+                <span className="font-semibold">Patients</span>
+              </div>
+            </div>
+          </div>
+
+          <DataTable
+              tableTitle="All Reports (Biochemical)"
+              columns={columns}
+              data={biochemicalAllReports?.data?.items || []}
+              meta={biochemicalAllReports?.data?.meta}
+              onPageChange={setPage}
+              onLimitChange={setLimit}
+              search={search}
+              onSearchChange={setSearch}
+              isLoading={isFetching}
+          />
         </div>
-        <DataTable columns={columns} data={biochemicalAllReports?.data?.items || []} meta={biochemicalAllReports?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
-      </Main>
+      </main>
     </>
 
   )

@@ -215,6 +215,12 @@ export const accountingService = {
         return response.data;
     },
 
+    // GET LEDGER REPORT
+    getLedgerReport: async (accountId: number, params?: { from?: string; to?: string }) => {
+        const response = await api.get(`/accounting/reports/ledger/${accountId}`, { params });
+        return response.data?.data || response.data;
+    },
+
     // GET JOURNAL REPORT
     getJournalReport: async (params?: { page?: number; limit?: number; search?: string; from?: string; to?: string }) => {
         const response = await api.get<JournalReportResponse>('/accounting/reports/journal', { params });

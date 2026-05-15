@@ -23,12 +23,18 @@ type DoctorTypeItem = {
     created_by_name?: string;
 };
 
-export default function DoctorTypes() {
+interface DoctorTypesProps {
+    page: number;
+    limit: number;
+    search: string;
+    setPage: (page: number) => void;
+    setLimit: (limit: number) => void;
+    setSearch: (search: string) => void;
+}
+
+export default function DoctorTypes({ page, limit, search, setPage, setLimit, setSearch }: DoctorTypesProps) {
     const [openEditForm, setOpenEditForm] = useState<boolean>(false);
     const [selectedDoctorTypeId, setSelectedDoctorTypeId] = useState<number | null>(null);
-    const [page, setPage] = useState(1);
-    const [search, setSearch] = useState("");
-    const [limit, setLimit] = useState(10);
 
     const token = getCookie('accessToken');
     const navigate = useNavigate();
@@ -321,10 +327,7 @@ export default function DoctorTypes() {
                     data={data?.data?.items || []}
                     meta={data?.data?.meta}
                     onPageChange={setPage}
-                    onLimitChange={(newLimit) => {
-                        setLimit(newLimit);
-                        setPage(1);
-                    }}
+                    onLimitChange={setLimit}
                     search={search}
                     onSearchChange={setSearch}
                 />

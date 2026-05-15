@@ -1867,16 +1867,17 @@ export default function HospitalInvoiceForm() {
 
                   <div className="flex justify-between items-center py-2 border-t border-dashed border-gray-200">
                     <div className="flex flex-col">
-                      <span className="text-gray-600 dark:text-gray-400 font-medium">Total Discount</span>
+                      <span className="text-gray-600 dark:text-gray-400 font-medium">Total Discount
+                        {totalCharge > 0 && (
+                          <span className="text-xs text-green-500 ml-1">
+                            ({((totalDeptDiscount / totalCharge) * 100).toFixed(1)}%)
+                          </span>
+                        )}
+                      </span>
                       <span className="text-[10px] text-muted-foreground">(Department-wise)</span>
                     </div>
                     <span className="text-lg font-mono font-semibold text-green-600">
                       - {totalDeptDiscount.toLocaleString()}
-                      {totalCharge > 0 && (
-                        <span className="text-xs text-green-500 ml-1">
-                          ({((totalDeptDiscount / totalCharge) * 100).toFixed(1)}%)
-                        </span>
-                      )}
                     </span>
                   </div>
 

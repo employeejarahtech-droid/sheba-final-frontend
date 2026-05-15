@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { accountingService } from '@/features/accounting/accountingService';
 
 export interface HeadWiseTransactionData {
     type: 'INCOME' | 'EXPENSE';
@@ -183,7 +184,7 @@ export const useCreateHeadWiseTransaction = () => {
 export const useLedgerReport = (params: { account_id: number; from?: string; to?: string }) => {
     return useQuery({
         queryKey: ["accounting", "ledger", params],
-        queryFn: () => window.electron.invoke("accounting:getLedger", params),
+        queryFn: () => accountingService.getLedgerReport(params.account_id, { from: params.from, to: params.to }),
         enabled: !!params.account_id,
     });
 };

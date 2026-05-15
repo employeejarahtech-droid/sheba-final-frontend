@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, FileText, Printer } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,15 +16,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { DataTable } from "@/components/DataTable";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { NestedAccountSelect } from "@/components/accounting/NestedAccountSelect";
 
 // Layout
 import { AppHeader } from '@/components/layout/app-header'
@@ -34,9 +28,7 @@ import { PageHeader } from '@/components/layout/page-header'
 
 
 // Data
-import { useGetAccountingAccountsQuery } from "@/features/accounting/accountingQueries";
 import { useLedgerReport } from "@/features/accounting/api/queries";
-import { ChartOfAccount } from "@/types/accounting.types";
 import { useCurrency } from "@/hooks/use-currency";
 
 const ledgerSearchSchema = z.object({
@@ -59,12 +51,11 @@ function LedgerReport() {
   const accountId = searchParams.account_id ? String(searchParams.account_id) : "";
   const fromDate = searchParams.from || format(new Date(), "yyyy-MM-dd");
   const toDate = searchParams.to || format(new Date(), "yyyy-MM-dd");
+  const [search, setSearch] = useState("");
 
-  const [localAccountId, setLocalAccountId] = useState(accountId);
+  const [localAccountId, setLocalAccountId] = useState<number | null>(accountId ? Number(accountId) : null);
   const [localFrom, setLocalFrom] = useState<Date | undefined>(searchParams.from ? new Date(searchParams.from) : new Date());
   const [localTo, setLocalTo] = useState<Date | undefined>(searchParams.to ? new Date(searchParams.to) : new Date());
-
-  const { data: accountsData } = useGetAccountingAccountsQuery({ limit: 1000 });
 
   const { data: ledgerResponse, isLoading: isLedgerLoading } = useLedgerReport({
     account_id: Number(accountId),
@@ -76,20 +67,30 @@ function LedgerReport() {
     navigate({
       search: (prev: any) => ({
         ...prev,
-        account_id: localAccountId ? Number(localAccountId) : undefined,
+        account_id: localAccountId || undefined,
         from: localFrom ? format(localFrom, "yyyy-MM-dd") : undefined,
         to: localTo ? format(localTo, "yyyy-MM-dd") : undefined,
       })
     });
   };
-  // @ts-ignore
-  const accounts: ChartOfAccount[] = accountsData?.data || [];
   const { currencySymbol } = useCurrency();
+
+  const filteredTransactions = useMemo(() => {
+    const txns = ledgerResponse?.transactions || [];
+    if (!search) return txns;
+    const q = search.toLowerCase();
+    return txns.filter((t: any) =>
+      (t.narration || "").toLowerCase().includes(q) ||
+      (t.date || "").toLowerCase().includes(q) ||
+      String(t.debit || "").includes(q) ||
+      String(t.credit || "").includes(q)
+    );
+  }, [ledgerResponse?.transactions, search]);
 
   return (
     <div className="">
       <AppHeader fixed />
-      <main className='p-6 lg:p-10 space-y-6'>
+      <main className='p-4 space-y-4'>
         <PageHeader
           title="Ledger Report"
           description="View detailed transaction history for a specific account."
@@ -102,22 +103,15 @@ function LedgerReport() {
         />
 
         <Card className="border-t-4 border-emerald-500 shadow-md py-0">
-          <CardContent className="p-6">
+          <CardContent className="p-3">
             <div className="grid md:grid-cols-3 gap-6 items-end">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Select Account</label>
-                <Select value={localAccountId} onValueChange={setLocalAccountId}>
-                  <SelectTrigger className="md:w-full">
-                    <SelectValue placeholder="Select account" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {accounts.map((acc) => (
-                      <SelectItem key={acc.id} value={String(acc.id)}>
-                        {acc.name} ({acc.code})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <NestedAccountSelect
+                  value={localAccountId}
+                  onChange={(id: number | null) => setLocalAccountId(id)}
+                  placeholder="Select account"
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Date From</label>
@@ -181,14 +175,14 @@ function LedgerReport() {
           <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardDescription>Opening Balance</CardDescription>
-              <CardTitle className="text-2xl">{currency} {ledgerResponse?.opening_balance?.toFixed(2) || "0.00"}</CardTitle>
+              <CardTitle className="text-2xl">{currencySymbol} {ledgerResponse?.opening_balance?.toFixed(2) || "0.00"}</CardTitle>
             </CardHeader>
           </Card>
           <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardDescription>Total Debit</CardDescription>
               <CardTitle className="text-2xl text-emerald-600">
-                {currency} {ledgerResponse?.transactions?.reduce((sum: number, t: any) => sum + (t.debit || 0), 0).toFixed(2) || "0.00"}
+                {currencySymbol} {ledgerResponse?.transactions?.reduce((sum: number, t: any) => sum + (t.debit || 0), 0).toFixed(2) || "0.00"}
               </CardTitle>
             </CardHeader>
           </Card>
@@ -196,24 +190,22 @@ function LedgerReport() {
             <CardHeader className="pb-2">
               <CardDescription>Total Credit</CardDescription>
               <CardTitle className="text-2xl text-red-600">
-                {currency} {ledgerResponse?.transactions?.reduce((sum: number, t: any) => sum + (t.credit || 0), 0).toFixed(2) || "0.00"}
+                {currencySymbol} {ledgerResponse?.transactions?.reduce((sum: number, t: any) => sum + (t.credit || 0), 0).toFixed(2) || "0.00"}
               </CardTitle>
             </CardHeader>
           </Card>
           <Card className="bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardDescription className="text-emerald-700 dark:text-emerald-400">Closing Balance</CardDescription>
-              <CardTitle className="text-2xl text-emerald-700 dark:text-emerald-400">{currency} {ledgerResponse?.closing_balance?.toFixed(2) || "0.00"}</CardTitle>
+              <CardTitle className="text-2xl text-emerald-700 dark:text-emerald-400">{currencySymbol} {ledgerResponse?.closing_balance?.toFixed(2) || "0.00"}</CardTitle>
             </CardHeader>
           </Card>
         </div>
 
-        <Card className="overflow-hidden shadow-lg py-0 gap-0">
-          <CardHeader className="bg-gray-50 dark:bg-gray-900/50 border-b-1 py-4 gap-0">
-            <CardTitle>Transactions</CardTitle>
-          </CardHeader>
-          <CardContent className="py-4 px-6">
+        <div className="py-0 gap-0">
+         
             <DataTable
+              tableTitle="Ledger Transactions"
               columns={[
                 {
                   data: "date",
@@ -223,31 +215,29 @@ function LedgerReport() {
                 { data: "narration", title: "Particulars" },
                 {
                   data: "debit",
-                  title: `Debit (${currency})`,
+                  title: `Debit (${currencySymbol})`,
                   className: "text-right text-emerald-600",
                   render: (data: any) => (Number(data) || 0).toFixed(2)
                 },
                 {
                   data: "credit",
-                  title: `Credit (${currency})`,
+                  title: `Credit (${currencySymbol})`,
                   className: "text-right text-red-600",
                   render: (data: any) => (Number(data) || 0).toFixed(2)
                 },
                 {
                   data: "balance",
-                  title: `Balance (${currency})`,
+                  title: `Balance (${currencySymbol})`,
                   className: "text-right font-bold",
                   render: (data: any) => (Number(data) || 0).toFixed(2)
                 },
               ]}
-              data={ledgerResponse?.transactions || []}
+              data={filteredTransactions}
               isLoading={isLedgerLoading}
-            // Ledger reports usually aren't paginated the same way list views are,
-            // but we can provide meta if the API eventually supports it.
-            // For now, we show all transactions returned for the range.
+              search={search}
+              onSearchChange={setSearch}
             />
-          </CardContent>
-        </Card>
+        </div>
       </main>
     </div>
   );

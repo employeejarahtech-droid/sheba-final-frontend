@@ -5,7 +5,7 @@ import { AppHeader } from '@/components/layout/app-header'
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from '@/components/DataTable'
-import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
@@ -33,11 +33,17 @@ type TestItem = {
     };
 };
 
-export default function ListOfTests() {
+interface ListOfTestsProps {
+    page: number;
+    limit: number;
+    search: string;
+    setPage: (page: number) => void;
+    setLimit: (limit: number) => void;
+    setSearch: (search: string) => void;
+}
+
+export default function ListOfTests({ page, limit, search, setPage, setLimit, setSearch }: ListOfTestsProps) {
     const { currencySymbol } = useCurrency();
-    const [page, setPage] = useState(1);
-    const [limit, setLimit] = useState(10);
-    const [search, setSearch] = useState("");
 
     const token = getCookie('accessToken');
 
@@ -383,16 +389,10 @@ export default function ListOfTests() {
                 data={data?.data?.items || []}
                 meta={data?.data?.meta}
                 onPageChange={setPage}
-                onLimitChange={(newLimit) => {
-                    setLimit(newLimit);
-                    setPage(1);
-                }}
+                onLimitChange={setLimit}
                 search={search}
                 isLoading={isFetching}
-                onSearchChange={(value) => {
-                    setSearch(value);
-                    setPage(1);
-                }}
+                onSearchChange={setSearch}
             />
         </main>
     </>

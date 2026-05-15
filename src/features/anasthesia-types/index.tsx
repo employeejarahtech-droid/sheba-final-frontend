@@ -23,12 +23,18 @@ type AnasthesiaTypeItem = {
     created_by_name?: string;
 };
 
-export default function AnasthesiaTypes() {
+interface AnasthesiaTypesProps {
+    page: number;
+    limit: number;
+    search: string;
+    setPage: (page: number) => void;
+    setLimit: (limit: number) => void;
+    setSearch: (search: string) => void;
+}
+
+export default function AnasthesiaTypes({ page, limit, search, setPage, setLimit, setSearch }: AnasthesiaTypesProps) {
     const [openEditForm, setOpenEditForm] = useState<boolean>(false);
     const [selectedAnasthesiaTypeId, setSelectedAnasthesiaTypeId] = useState<number | null>(null);
-    const [page, setPage] = useState(1);
-    const [search, setSearch] = useState("");
-    const [limit, setLimit] = useState(10);
 
     const token = getCookie('accessToken');
     const navigate = useNavigate();
@@ -341,10 +347,7 @@ export default function AnasthesiaTypes() {
                     data={data?.data?.items || []}
                     meta={data?.data?.meta}
                     onPageChange={setPage}
-                    onLimitChange={(newLimit) => {
-                        setLimit(newLimit);
-                        setPage(1);
-                    }}
+                    onLimitChange={setLimit}
                     search={search}
                     onSearchChange={setSearch}
                 />

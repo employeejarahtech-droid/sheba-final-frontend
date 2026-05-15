@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { Loader2, Plus, Trash2, ChevronDown, ChevronRight, Search, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createFileRoute } from '@tanstack/react-router';
@@ -172,13 +172,13 @@ function JournalReport() {
             description="Record and review double-entry bookkeeping records."
             showBackButton={false}
             actions={
-              <Dialog open={isOpen} onOpenChange={setIsOpen}>
+              <Dialog open={isOpen} onOpenChange={setIsOpen} modal={false}>
                 <DialogTrigger asChild>
                   <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
                     <Plus className="h-4 w-4 mr-1" /> New Journal Entry
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[750px]">
+                <DialogContent className="sm:max-w-[750px] max-h-[90vh]">
                   <DialogHeader>
                     <DialogTitle>New Journal Entry</DialogTitle>
                     <DialogDescription>Enter debit and credit entries for your transaction</DialogDescription>
@@ -377,7 +377,7 @@ function JournalReport() {
                         const badge = refTypeBadge[entry.reference_type] || { label: entry.reference_type || '-', color: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300" };
 
                         return (
-                          <>
+                          <Fragment key={entry.id}>
                             <TableRow
                               key={entry.id}
                               className="cursor-pointer hover:bg-muted/50"
@@ -448,7 +448,7 @@ function JournalReport() {
                                 </TableCell>
                               </TableRow>
                             )}
-                          </>
+                          </Fragment>
                         );
                       })
                     )}

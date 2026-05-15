@@ -114,13 +114,19 @@ type AdmissionItem = {
     }
 }
 
-export function FinalBillCreatedListPage() {
+interface FinalBillCreatedListPageProps {
+    page: number;
+    limit: number;
+    search: string;
+    setPage: (page: number) => void;
+    setLimit: (limit: number) => void;
+    setSearch: (search: string) => void;
+}
+
+export function FinalBillCreatedListPage({ page, limit, search, setPage, setSearch }: FinalBillCreatedListPageProps) {
     const navigate = useNavigate()
     const token = getCookie('accessToken')
     const { format } = useCurrency()
-    const [page, setPage] = useState(1)
-    const [limit] = useState(10)
-    const [search, setSearch] = useState('')
     const [statusFilter, setStatusFilter] = useState<string>('all')
     const [paymentFilter, setPaymentFilter] = useState<string>('all')
 
@@ -651,8 +657,9 @@ export function FinalBillCreatedListPage() {
     return (
         <>
             <AppHeader />
-            <Main fluid>
-                <div className="flex-1 space-y-8 px-4 py-6 overflow-auto w-full">
+            
+            <main fluid>
+                <div className="p-4 flex-1 space-y-3 overflow-auto w-full">
                 <PageHeader
                     title="Final Bills List"
                     description="Patients with final bills created"
@@ -762,7 +769,7 @@ export function FinalBillCreatedListPage() {
                     }
                 />
             </div>
-        </Main>
+        </main>
         </>
     )
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { z } from 'zod'
 import { AppHeader } from '@/components/layout/app-header';
 import { DataTable } from '@/components/DataTable';
 import { PlusCircle } from 'lucide-react';
@@ -8,7 +9,14 @@ import { useQuery } from '@tanstack/react-query';
 import { getCookie } from '@/lib/cookies';
 import { PageHeader } from '@/components/layout/page-header';
 
+const bedCabinSearchSchema = z.object({
+    page: z.coerce.number().catch(1),
+    limit: z.coerce.number().catch(10),
+    search: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/indoor/master/bed-cabin-list/')({
+    validateSearch: (search) => bedCabinSearchSchema.parse(search),
     component: BedCabinList,
 })
 
@@ -25,10 +33,23 @@ type BedCabinItem = {
 
 function BedCabinList() {
     const navigate = useNavigate();
+    const searchParams: any = Route.useSearch();
+    const routeNavigate = Route.useNavigate();
     const token = getCookie('accessToken');
-    const [page, setPage] = useState(1);
-    const [search, setSearch] = useState("");
-    const [limit, setLimit] = useState(10);
+
+    const page = Number(searchParams?.page) || 1;
+    const limit = Number(searchParams?.limit) || 10;
+    const search = searchParams?.search || "";
+
+    const setPage = (newPage: number) => {
+        routeNavigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
+    };
+    const setLimit = (newLimit: number) => {
+        routeNavigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) });
+    };
+    const setSearch = (newSearch: string) => {
+        routeNavigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
+    };
 
     const { data, isLoading, error } = useQuery({
         queryKey: ['bed-cabin-list', page, limit, search],
@@ -322,10 +343,7 @@ function BedCabinList() {
                             data={data?.data?.items || []}
                             meta={data?.data?.meta}
                             onPageChange={setPage}
-                            onLimitChange={(newLimit) => {
-                                setLimit(newLimit);
-                                setPage(1);
-                            }}
+                            onLimitChange={setLimit}
                             search={search}
                             onSearchChange={setSearch}
                         />

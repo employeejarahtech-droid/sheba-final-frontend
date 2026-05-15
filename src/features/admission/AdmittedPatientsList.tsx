@@ -1,6 +1,6 @@
 import { useMemo, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useSearch, useNavigate, useLocation } from '@tanstack/react-router'
+import { useNavigate, useLocation } from '@tanstack/react-router'
 import { Users, Activity, CheckCircle, AlertCircle, UserPlus, X, DollarSign, Filter } from 'lucide-react'
 
 import { AppHeader } from '@/components/layout/app-header'
@@ -126,21 +126,25 @@ type AdmissionItem = {
     }
 }
 
-export function AdmittedPatientsList() {
+interface AdmittedPatientsListProps {
+    page: number;
+    limit: number;
+    search: string;
+    setPage: (page: number) => void;
+    setLimit: (limit: number) => void;
+    setSearch: (search: string) => void;
+}
+
+export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, setSearch }: AdmittedPatientsListProps) {
     const { currencySymbol, format } = useCurrency()
-    const searchParams: any = useSearch({ strict: false })
     const navigate = useNavigate()
     const location = useLocation()
 
-    // Detect status from URL path (/active or /discharged) or query param
+    // Detect status from URL path (/active or /discharged)
     const pathStatus = location.pathname.endsWith('/active') ? 'active'
         : location.pathname.endsWith('/discharged') ? 'discharged'
         : ''
-    const urlStatus = searchParams?.status || pathStatus || ""
-
-    const page = Number(searchParams?.page) || 1
-    const limit = Number(searchParams?.limit) || 10
-    const search = searchParams?.search || ""
+    const urlStatus = pathStatus || ""
     const validStatuses = ["active", "discharged", "critical"]
     const [statusFilter, setStatusFilter] = useState<string>(urlStatus && validStatuses.includes(urlStatus) ? urlStatus : "all")
     const [openFilter, setOpenFilter] = useState(false)
@@ -201,27 +205,6 @@ export function AdmittedPatientsList() {
             return response.json()
         },
     })
-
-    const setPage = (newPage: number) => {
-        (navigate as any)({
-            to: '.',
-            search: (prev: any) => ({ ...prev, page: newPage }),
-        })
-    }
-
-    const setLimit = (newLimit: number) => {
-        (navigate as any)({
-            to: '.',
-            search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }),
-        })
-    }
-
-    const setSearch = (newSearch: string) => {
-        (navigate as any)({
-            to: '.',
-            search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }),
-        })
-    }
 
     const token = getCookie('accessToken')
 

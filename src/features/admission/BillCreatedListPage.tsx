@@ -137,13 +137,19 @@ type AdmissionItem = {
     }
 }
 
-export function BillCreatedListPage() {
+interface BillCreatedListPageProps {
+    page: number;
+    limit: number;
+    search: string;
+    setPage: (page: number) => void;
+    setLimit: (limit: number) => void;
+    setSearch: (search: string) => void;
+}
+
+export function BillCreatedListPage({ page, limit, search, setPage, setSearch }: BillCreatedListPageProps) {
     const navigate = useNavigate()
     const token = getCookie('accessToken')
     const { format } = useCurrency()
-    const [page, setPage] = useState(1)
-    const [limit] = useState(10)
-    const [search, setSearch] = useState('')
     const [statusFilter, setStatusFilter] = useState<string>('all')
     const [paymentFilter, setPaymentFilter] = useState<string>('all')
 

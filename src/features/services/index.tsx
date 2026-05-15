@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
 import { PageHeader } from '@/components/layout/page-header'
@@ -22,10 +22,16 @@ type ServiceItem = {
     created_by_name?: string;
 };
 
-export default function Services() {
-    const [page, setPage] = useState(1);
-    const [search, setSearch] = useState("");
-    const [limit, setLimit] = useState(10);
+interface ServicesProps {
+    page: number;
+    limit: number;
+    search: string;
+    setPage: (page: number) => void;
+    setLimit: (limit: number) => void;
+    setSearch: (search: string) => void;
+}
+
+export default function Services({ page, limit, search, setPage, setLimit, setSearch }: ServicesProps) {
 
     const token = getCookie('accessToken');
     const navigate = useNavigate();
@@ -378,10 +384,7 @@ export default function Services() {
                     data={data?.data?.items || []}
                     meta={data?.data?.meta}
                     onPageChange={setPage}
-                    onLimitChange={(newLimit) => {
-                        setLimit(newLimit);
-                        setPage(1);
-                    }}
+                    onLimitChange={setLimit}
                     search={search}
                     onSearchChange={setSearch}
                 />
