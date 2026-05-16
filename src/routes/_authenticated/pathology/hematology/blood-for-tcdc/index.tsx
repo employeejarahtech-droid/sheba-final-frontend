@@ -1,15 +1,23 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
-import { Main } from "@/components/layout/main";
 import { EditBloodForTcDcForm } from '@/features/pathology/hematology/blood-for-tcdc/EditBloodForTcDcForm';
 import { useState, useEffect } from 'react';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
+import { FileText, Droplets, Clock, Users } from 'lucide-react';
+
+const tcdcSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+})
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/hematology/blood-for-tcdc/',
 )({
+  validateSearch: (search) => tcdcSearchSchema.parse(search),
   component: BloodForTcdc,
 })
 
@@ -25,17 +33,30 @@ function BloodForTcdc() {
   const [open, setOpen] = useState<boolean>(false);
   const [reportId, setReportId] = useState<number>(0);
   const [invoiceId, setInvoiceId] = useState<number>(0);
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const limit = 10;
+
+  const searchParams: any = Route.useSearch();
+  const navigate: any = Route.useNavigate();
+
+  const page = Number(searchParams?.page) || 1;
+  const limit = Number(searchParams?.limit) || 10;
+  const search = searchParams?.search || "";
+
+  const setPage = (newPage: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
+  };
+  const setSearch = (newSearch: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
+  };
+  const setLimit = (newLimit: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) });
+  };
 
   const token = getCookie('accessToken');
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["tcdc", page, search],
+  const { data, isFetching } = useQuery({
+    queryKey: ["tcdc", page, limit, search],
 
     queryFn: async () => {
-      console.log('Fetching TCDC data...', { page, limit, search });
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/tcdc?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
         {
@@ -43,16 +64,12 @@ function BloodForTcdc() {
         }
       );
 
-      console.log('TCDC Response status:', res.status);
       if (!res.ok) throw new Error("Failed to fetch blood for TCDC reports");
-      const json = await res.json();
-      console.log('TCDC Response JSON:', json);
-      return json; // MUST match placeholderData
+      return res.json();
     },
 
     enabled: !!token,
 
-    // ⭐ Perfect smooth pagination
     placeholderData: (prev) =>
       prev
         ? prev
@@ -67,8 +84,6 @@ function BloodForTcdc() {
           },
         },
   });
-
-  console.log('TCDC Data State:', { data, isLoading, error });
 
   // Expose edit function to window
   useEffect(() => {
@@ -124,7 +139,7 @@ function BloodForTcdc() {
           <div class="flex justify-between items-center">
             <div>
               <h2 class="text-xl font-semibold">Blood For TCDC Report</h2>
-              <p class="text-sm opacity-90">Invoice #${invoiceId} • ${formattedDate}</p>
+              <p class="text-sm opacity-90">Invoice #${invoiceId} &bull; ${formattedDate}</p>
             </div>
             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white">
               Hematology
@@ -342,7 +357,7 @@ function BloodForTcdc() {
           day: "numeric",
         });
 
-        return `<div>${formatted}</div>`; // Example: Nov 23, 2025
+        return `<div>${formatted}</div>`;
       },
       defaultContent: "",
     },
@@ -351,19 +366,109 @@ function BloodForTcdc() {
   return (
     <>
       <AppHeader fixed />
-      <Main>
-        <div className="mb-4">
-          <h1 className='text-2xl font-bold tracking-tight'>Blood For TCDC</h1>
+      <main>
+        <div className="p-4 space-y-3">
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Total Reports */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-600 to-teal-400 p-6 shadow-lg shadow-teal-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Reports</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{data?.data?.meta?.total || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>All Time</span>
+                <span className="font-semibold">Records</span>
+              </div>
+            </div>
+
+            {/* Blood Tests */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-600 to-cyan-400 p-6 shadow-lg shadow-cyan-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Blood Tests</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{data?.data?.items?.length || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <Droplets className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Current</span>
+                <span className="font-semibold">Page</span>
+              </div>
+            </div>
+
+            {/* Recent */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-600 to-amber-400 p-6 shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Recent</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">
+                    {data?.data?.items?.filter((i: any) => {
+                      if (!i.created_at) return false;
+                      const d = new Date(i.created_at);
+                      const now = new Date();
+                      return d.toDateString() === now.toDateString();
+                    }).length || 0}
+                  </h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <Clock className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Today</span>
+                <span className="font-semibold">Added</span>
+              </div>
+            </div>
+
+            {/* Patients */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-400 p-6 shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Patients</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{new Set(data?.data?.items?.map((i: any) => i.patient_name)).size || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Unique</span>
+                <span className="font-semibold">Patients</span>
+              </div>
+            </div>
+          </div>
+
+          <DataTable
+            tableTitle="Blood For TCDC"
+            columns={columns}
+            data={data?.data?.items || []}
+            meta={data?.data?.meta}
+            onPageChange={setPage}
+            onLimitChange={setLimit}
+            search={search}
+            onSearchChange={setSearch}
+            isLoading={isFetching}
+          />
         </div>
-        {(() => {
-          const items = data?.data?.items || [];
-          const meta = data?.data?.meta;
-          console.log('Passing to DataTable:', { items, meta });
-          return null;
-        })()}
-        <DataTable columns={columns} data={data?.data?.items || []} meta={data?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
         <EditBloodForTcDcForm open={open} setOpen={setOpen} reportId={reportId} invoiceId={invoiceId} />
-      </Main>
+      </main>
     </>
 
   )

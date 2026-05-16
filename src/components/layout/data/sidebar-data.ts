@@ -536,6 +536,11 @@ export const sidebarData: SidebarData = {
               icon: FileText,
             },
             {
+              title: "Daily Summary",
+              url: "/accounting/reports/daily-summary",
+              icon: Activity,
+            },
+            {
               title: "Ledger Report",
               url: "/accounting/reports/ledger",
               icon: FileText,

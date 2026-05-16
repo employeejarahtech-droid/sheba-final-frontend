@@ -63,7 +63,7 @@ export default function CreateExpenseHeadForm() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8">
+        <Button className="bg-rose-600 hover:bg-rose-700 text-white shadow-xs">
           Add Expense Head
         </Button>
       </DialogTrigger>

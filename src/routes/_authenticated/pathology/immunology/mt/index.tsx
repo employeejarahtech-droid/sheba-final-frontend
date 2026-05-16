@@ -1,15 +1,23 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
-import { Main } from "@/components/layout/main";
 import { useState, useEffect } from 'react';
 import { EditMTForm } from '@/features/pathology/immunology/EditMTForm';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
+import { FileText, Syringe, Clock, Users } from 'lucide-react';
+
+const searchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+})
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/immunology/mt/',
 )({
+  validateSearch: (search) => searchSchema.parse(search),
   component: MT,
 })
 
@@ -30,59 +38,42 @@ function MT() {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [reportId, setReportId] = useState<number>(0);
   const [invoiceId, setInvoiceId] = useState<number>(0);
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const limit = 10;
+
+  const searchParams: any = Route.useSearch();
+  const navigate: any = Route.useNavigate();
+
+  const page = Number(searchParams?.page) || 1;
+  const limit = Number(searchParams?.limit) || 10;
+  const search = searchParams?.search || "";
+
+  const setPage = (newPage: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
+  };
+  const setSearch = (newSearch: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
+  };
+  const setLimit = (newLimit: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) });
+  };
 
   const token = getCookie('accessToken');
 
-  const { data } = useQuery({
-    queryKey: ["mt", page, search],
+  const { data, isFetching } = useQuery({
+    queryKey: ["mt", page, limit, search],
 
     queryFn: async () => {
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/mt?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (!res.ok) {
-          console.error('API Response:', res.status, res.statusText);
-          // Return empty structure instead of throwing
-          return {
-            data: {
-              items: [],
-              meta: {
-                page,
-                limit,
-                total: 0,
-              },
-            },
-          };
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/mt?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
         }
-        const jsonData = await res.json();
-        console.log('MT API response:', jsonData);
-        return jsonData;
-      } catch (err) {
-        console.error('Error fetching MT reports:', err);
-        // Return empty structure instead of throwing
-        return {
-          data: {
-            items: [],
-            meta: {
-              page,
-              limit,
-              total: 0,
-            },
-          },
-        };
-      }
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch MT reports");
+      return res.json();
     },
 
     enabled: !!token,
-    retry: 0, // Don't retry on failure, use fallback immediately
 
     placeholderData: (prev) =>
       prev
@@ -98,10 +89,6 @@ function MT() {
           },
         },
   });
-
-  // Use only API data (no fallback)
-  const items = data?.data?.items || [];
-  const meta = data?.data?.meta || { page, limit, total: 0 };
 
   // Define columns for jQuery DataTable format
   const columns = [
@@ -251,7 +238,7 @@ function MT() {
           <div class="flex justify-between items-center">
             <div>
               <h2 class="text-xl font-semibold">Mantoux Test (MT) Report</h2>
-              <p class="text-sm opacity-90">Invoice #${invoiceId} • ${formattedDate}</p>
+              <p class="text-sm opacity-90">Invoice #${invoiceId} &bull; ${formattedDate}</p>
             </div>
             ${statusBadge}
           </div>
@@ -422,13 +409,109 @@ function MT() {
   return (
     <>
       <AppHeader fixed />
-      <Main>
-        <div className="mb-4">
-          <h1 className='text-2xl font-bold tracking-tight'>Tuberculin (MT)</h1>
+      <main>
+        <div className="p-4 space-y-3">
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Total Reports */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-400 p-6 shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Reports</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{data?.data?.meta?.total || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>All Time</span>
+                <span className="font-semibold">Records</span>
+              </div>
+            </div>
+
+            {/* MT Tests */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600 to-purple-400 p-6 shadow-lg shadow-purple-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">MT Tests</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{data?.data?.items?.length || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <Syringe className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Current</span>
+                <span className="font-semibold">Page</span>
+              </div>
+            </div>
+
+            {/* Recent */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-600 to-teal-400 p-6 shadow-lg shadow-teal-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Recent</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">
+                    {data?.data?.items?.filter((i: any) => {
+                      if (!i.created_at) return false;
+                      const d = new Date(i.created_at);
+                      const now = new Date();
+                      return d.toDateString() === now.toDateString();
+                    }).length || 0}
+                  </h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <Clock className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Today</span>
+                <span className="font-semibold">Added</span>
+              </div>
+            </div>
+
+            {/* Patients */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-blue-400 p-6 shadow-lg shadow-blue-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Patients</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{new Set(data?.data?.items?.map((i: any) => i.patient_name)).size || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Unique</span>
+                <span className="font-semibold">Patients</span>
+              </div>
+            </div>
+          </div>
+
+          <DataTable
+            tableTitle="Tuberculin (MT)"
+            columns={columns}
+            data={data?.data?.items || []}
+            meta={data?.data?.meta}
+            onPageChange={setPage}
+            onLimitChange={setLimit}
+            search={search}
+            onSearchChange={setSearch}
+            isLoading={isFetching}
+          />
         </div>
-        <DataTable columns={columns} data={items} meta={meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
         <EditMTForm open={isDrawerOpen} setOpen={setIsDrawerOpen} reportId={reportId} invoiceId={invoiceId} />
-      </Main>
+      </main>
     </>
 
   )

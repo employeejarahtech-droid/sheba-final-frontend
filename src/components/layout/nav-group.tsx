@@ -256,12 +256,18 @@ function SidebarMenuCollapsedDropdown({
   ACTIVE STATE CHECK
 -------------------------------------------- */
 function checkIsActive(href: string, item: NavItem, mainNav = false) {
+  const cleanHref = href.split("?")[0].replace(/\/+$/, "");
+  const cleanUrl = item.url?.replace(/\/+$/, "") || "";
+
   return (
-    href === item.url ||
-    href.split("?")[0] === item.url ||
-    item.items?.some((i) => i.url === href) ||
+    (cleanUrl && cleanHref === cleanUrl) ||
+    item.items?.some((i) => {
+      if (!i.url) return false;
+      return cleanHref === i.url.replace(/\/+$/, "");
+    }) ||
     (mainNav &&
-      href.split("/")[1] !== "" &&
-      href.split("/")[1] === item?.url?.split("/")[1])
+      cleanUrl &&
+      cleanHref.split("/")[1] !== "" &&
+      cleanHref.split("/")[1] === cleanUrl.split("/")[1])
   );
 }

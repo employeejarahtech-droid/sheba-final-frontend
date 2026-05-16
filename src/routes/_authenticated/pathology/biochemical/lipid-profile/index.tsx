@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
 import { Main } from "@/components/layout/main";
 import { Activity, Clock, FileText, AlertCircle } from 'lucide-react';
@@ -8,9 +9,16 @@ import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
 
+const lipidProfileSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+})
+
 export const Route = createFileRoute(
   '/_authenticated/pathology/biochemical/lipid-profile/',
 )({
+  validateSearch: (search) => lipidProfileSearchSchema.parse(search),
   component: LipidProfile,
 })
 
@@ -26,13 +34,27 @@ function LipidProfile() {
   const [open, setOpen] = useState<boolean>(false);
   const [reportId, setReportId] = useState<number>(1);
   const [invoiceId, setInvoiceId] = useState<number>(1);
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const limit = 10;
+
+  const searchParams: any = Route.useSearch();
+  const navigate: any = Route.useNavigate();
+
+  const page = Number(searchParams?.page) || 1;
+  const limit = Number(searchParams?.limit) || 10;
+  const search = searchParams?.search || "";
+
+  const setPage = (newPage: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
+  };
+  const setSearch = (newSearch: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
+  };
+  const setLimit = (newLimit: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) });
+  };
 
   const token = getCookie('accessToken');
 
-  const { data } = useQuery({
+  const { data, isFetching } = useQuery({
     queryKey: ["lipid-profile", page, limit, search],
 
     queryFn: async () => {
@@ -44,12 +66,11 @@ function LipidProfile() {
       );
 
       if (!res.ok) throw new Error("Failed to fetch lipid profiles");
-      return res.json(); // MUST match placeholderData
+      return res.json();
     },
 
     enabled: !!token,
 
-    // ⭐ Perfect smooth pagination
     placeholderData: (prev) =>
       prev
         ? prev
@@ -65,8 +86,6 @@ function LipidProfile() {
         },
   });
 
-
-  //console.log(data?.data);
 
   // Expose edit function to window for onclick handlers
   useEffect(() => {
@@ -130,7 +149,7 @@ function LipidProfile() {
           <div class="flex justify-between items-center">
             <div>
               <h2 class="text-xl font-semibold">Lipid Profile Report</h2>
-              <p class="text-sm opacity-90">Invoice #${invoiceId} • ${formattedDate}</p>
+              <p class="text-sm opacity-90">Invoice #${invoiceId} &bull; ${formattedDate}</p>
             </div>
             ${statusBadge}
           </div>
@@ -340,7 +359,7 @@ function LipidProfile() {
           day: "numeric",
         });
 
-        return `<div>${formatted}</div>`; // Example: Nov 23, 2025
+        return `<div>${formatted}</div>`;
       },
       defaultContent: "",
     },
@@ -368,7 +387,7 @@ function LipidProfile() {
   return (
     <>
       <AppHeader fixed />
-      <Main>
+      <Main fluid>
         <div className="mb-4">
           <h1 className='text-2xl font-bold tracking-tight'>Lipid Profile</h1>
         </div>
@@ -452,11 +471,20 @@ function LipidProfile() {
           </div>
         </div>
 
-        <DataTable columns={columns} data={data?.data?.items || []} meta={data?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
+        <DataTable
+          tableTitle="Lipid Profile"
+          columns={columns}
+          data={data?.data?.items || []}
+          meta={data?.data?.meta}
+          onPageChange={setPage}
+          onLimitChange={setLimit}
+          search={search}
+          onSearchChange={setSearch}
+          isLoading={isFetching}
+        />
         <EditLipidProfileForm open={open} setOpen={setOpen} reportId={reportId} invoiceId={invoiceId} />
       </Main>
     </>
 
   )
 }
-

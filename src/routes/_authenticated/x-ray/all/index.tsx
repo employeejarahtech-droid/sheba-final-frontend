@@ -1,12 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
-import { Main } from "@/components/layout/main";
-import { useState, useMemo, useEffect } from 'react';
+import { useMemo, useEffect } from 'react';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
+import { FileText, Clock, Users, Activity, Scan } from 'lucide-react';
+
+const searchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+})
 
 export const Route = createFileRoute('/_authenticated/x-ray/all/')({
+  validateSearch: (search) => searchSchema.parse(search),
   component: AllXRayReports,
 })
 
@@ -22,14 +30,27 @@ type ReportsItem = {
 };
 
 function AllXRayReports() {
+  const searchParams: any = Route.useSearch();
+  const navigate: any = Route.useNavigate();
 
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const limit = 10;
+  const page = Number(searchParams?.page) || 1;
+  const limit = Number(searchParams?.limit) || 10;
+  const search = searchParams?.search || "";
+
+  const setPage = (newPage: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
+  };
+  const setSearch = (newSearch: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
+  };
+  const setLimit = (newLimit: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) });
+  };
+
   const token = getCookie('accessToken');
 
-  const { data: xrayAllReports } = useQuery({
-    queryKey: ["xray-all", page, search],
+  const { data: xrayAllReports, isFetching } = useQuery({
+    queryKey: ["xray-all", page, limit, search],
     queryFn: async () => {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/xray-all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
@@ -280,7 +301,7 @@ function AllXRayReports() {
         btn.textContent = '−';
         btn.style.backgroundColor = '#dc2626';
       } catch (error) {
-        console.error('Error fetching X-Ray details:', error);
+        // silently handle error
       }
     };
 
@@ -295,17 +316,110 @@ function AllXRayReports() {
   return (
     <>
       <AppHeader fixed />
-      <Main>
-        <div className="mb-4">
-          <h1 className='text-2xl font-bold tracking-tight'>All Reports (X-Ray)</h1>
+      <main>
+        <div className="p-4 space-y-3">
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Total Reports */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-600 to-slate-400 p-6 shadow-lg shadow-slate-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Reports</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{xrayAllReports?.data?.meta?.total || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>All Time</span>
+                <span className="font-semibold">Records</span>
+              </div>
+            </div>
+
+            {/* X-Ray Tests */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-600 to-gray-400 p-6 shadow-lg shadow-gray-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">X-Ray</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{xrayAllReports?.data?.items?.length || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <Scan className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Current</span>
+                <span className="font-semibold">Page</span>
+              </div>
+            </div>
+
+            {/* Recent */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-500 to-slate-400 p-6 shadow-lg shadow-slate-400/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Recent</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">
+                    {xrayAllReports?.data?.items?.filter((i: any) => {
+                      if (!i.Date) return false;
+                      const d = new Date(i.Date);
+                      const now = new Date();
+                      return d.toDateString() === now.toDateString();
+                    }).length || 0}
+                  </h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <Clock className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Today</span>
+                <span className="font-semibold">Added</span>
+              </div>
+            </div>
+
+            {/* Patients */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-500 to-gray-400 p-6 shadow-lg shadow-gray-400/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Patients</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{new Set(xrayAllReports?.data?.items?.map((i: any) => i.PatientName)).size || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Unique</span>
+                <span className="font-semibold">Patients</span>
+              </div>
+            </div>
+          </div>
+
+          <DataTable
+            tableTitle="All Reports (X-Ray)"
+            columns={columns}
+            data={xrayAllReports?.data?.items || []}
+            meta={{ page, limit, total: xrayAllReports?.data?.meta?.total || 0 }}
+            onPageChange={setPage}
+            onLimitChange={setLimit}
+            search={search}
+            onSearchChange={setSearch}
+            isLoading={isFetching}
+          />
         </div>
-        <DataTable columns={columns} data={xrayAllReports?.data?.items || []} meta={{ page, limit, total: xrayAllReports?.data?.meta?.total || 0 }} onPageChange={setPage} search={search} onSearchChange={setSearch} />
-      </Main>
+      </main>
     </>
 
   )
 
 }
-
-
-

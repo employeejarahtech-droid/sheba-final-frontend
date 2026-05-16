@@ -1,15 +1,23 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod';
 import { DataTable } from "@/components/DataTable";
-import { Main } from "@/components/layout/main";
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
+import { FileText, FlaskConical, Clock, Users } from 'lucide-react';
+
+const searchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+});
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/hormone/semen/',
 )({
   component: Semen,
+  validateSearch: (search) => searchSchema.parse(search),
 })
 
 
@@ -22,14 +30,19 @@ type ReportsItem = {
 
 function Semen() {
 
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const limit = 10;
+  const searchParams: any = Route.useSearch();
+  const navigate: any = Route.useNavigate();
+  const page = Number(searchParams?.page) || 1;
+  const limit = Number(searchParams?.limit) || 10;
+  const search = searchParams?.search || "";
+  const setPage = (newPage: number) => { navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) }); };
+  const setSearch = (newSearch: string) => { navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) }); };
+  const setLimit = (newLimit: number) => { navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) }); };
 
   const token = getCookie('accessToken');
 
-  const { data: semenReports } = useQuery({
-    queryKey: ["semen", page, search],
+  const { data: semenReports, isFetching } = useQuery({
+    queryKey: ["semen", page, limit, search],
     queryFn: async () => {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/semen?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
@@ -317,12 +330,85 @@ function Semen() {
   return (
     <>
       <AppHeader fixed />
-      <Main>
-        <div className="mb-4">
-          <h1 className='text-2xl font-bold tracking-tight'>Semen Analysis</h1>
+      <main>
+        <div className="p-4 space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Total Reports */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 p-6 shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Reports</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{semenReports?.data?.meta?.total || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>All Time</span>
+                <span className="font-semibold">Records</span>
+              </div>
+            </div>
+            {/* Current Page */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 p-6 shadow-lg shadow-violet-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Current Page</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{items.length}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <FlaskConical className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Page {page}</span>
+                <span className="font-semibold">Showing</span>
+              </div>
+            </div>
+            {/* Recent Today */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-500 p-6 shadow-lg shadow-indigo-600/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Recent Today</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{items.filter((item: ReportsItem) => { const d = item.created_at ? new Date(item.created_at) : null; if (!d) return false; const today = new Date(); return d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate(); }).length}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <Clock className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Today</span>
+                <span className="font-semibold">Reports</span>
+              </div>
+            </div>
+            {/* Unique Patients */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-500 p-6 shadow-lg shadow-violet-600/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Unique Patients</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{new Set(items.map((item: ReportsItem) => item.patient_name).filter(Boolean)).size}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>This Page</span>
+                <span className="font-semibold">Patients</span>
+              </div>
+            </div>
+          </div>
+          <DataTable columns={columns} data={items} meta={meta} onPageChange={setPage} search={search} onSearchChange={setSearch} tableTitle="Semen Analysis" onLimitChange={setLimit} isLoading={isFetching} />
         </div>
-        <DataTable columns={columns} data={items} meta={meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
-      </Main>
+      </main>
     </>
 
   )

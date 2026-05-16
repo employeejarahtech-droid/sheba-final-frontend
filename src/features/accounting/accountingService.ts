@@ -227,6 +227,12 @@ export const accountingService = {
         return response.data;
     },
 
+    // GET DAILY SUMMARY
+    getDailySummary: async (params?: { date?: string }) => {
+        const response = await api.get('/accounting/reports/daily-summary', { params });
+        return response.data;
+    },
+
     // GET TRIAL BALANCE
     getTrialBalance: async (params?: { date?: string }) => {
         const response = await api.get<TrialBalanceResponse>('/accounting/reports/trial-balance', { params });

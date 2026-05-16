@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import React from "react";
-import { Plus } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -22,7 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { createFileRoute } from '@tanstack/react-router';
@@ -44,6 +44,7 @@ import {
 import { accountingService } from "@/features/accounting/accountingService";
 import { ChartOfAccount } from "@/types/accounting.types";
 import { toast } from "sonner";
+import { useCurrency } from "@/hooks/use-currency";
 import { AppHeader } from "@/components/layout/app-header";
 
 const accountsSearchSchema = z.object({
@@ -78,6 +79,7 @@ function ChartOfAccounts() {
     const searchParams: any = Route.useSearch();
     const navigate = Route.useNavigate();
     const [isOpen, setIsOpen] = useState(false);
+    const { currencySymbol } = useCurrency();
 
     const page = Number(searchParams?.page) || 1;
     const limit = Number(searchParams?.limit) || 10;
@@ -103,12 +105,14 @@ function ChartOfAccounts() {
 
     const balanceMap = React.useMemo(() => {
         const map = new Map<string, { debit: number; credit: number; balance: number }>();
-        const items = trialBalanceData?.data;
+        const items = trialBalanceData?.data?.trial_balance;
         if (Array.isArray(items)) {
             items.forEach((item: any) => {
                 const debit = parseFloat(item.debit) || 0;
                 const credit = parseFloat(item.credit) || 0;
-                map.set(item.account, { debit, credit, balance: debit - credit });
+                const isDebitNature = ['ASSET', 'EXPENSE'].includes(item.type);
+                const balance = isDebitNature ? (debit - credit) : (credit - debit);
+                map.set(item.account, { debit, credit, balance });
             });
         }
         return map;
@@ -304,11 +308,11 @@ function ChartOfAccounts() {
     const isBankParent = selectedParent?.code?.startsWith("11") && selectedParent?.type?.toUpperCase() === "ASSET";
 
     return (
-        <div className="space-y-6">
+        <>
             <AppHeader fixed />
 
-            <main className='p-6 lg:p-10'>
-                <div className="flex justify-between items-center mb-6">
+            <main className='p-4'>
+                <div className="flex justify-between items-center mb-3">
                     <div>
                         <h2 className="text-3xl font-bold tracking-tight">Chart of Accounts</h2>
                         <p className="text-muted-foreground">Manage your financial head hierarchy.</p>
@@ -319,7 +323,7 @@ function ChartOfAccounts() {
 
                         <Dialog open={isOpen} onOpenChange={setIsOpen}>
                             <DialogTrigger onClick={openNew} asChild>
-                                <Button className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-5 py-2.5 font-medium text-white shadow-lg shadow-violet-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-violet-500/40 active:translate-y-0 active:shadow-none">
+                                <Button className="bg-violet-600 hover:bg-violet-700 text-white shadow-xs">
                                     <Plus className="h-4 w-4" /> Add Account
                                 </Button>
                             </DialogTrigger>
@@ -502,9 +506,73 @@ function ChartOfAccounts() {
                     </div>
                 </div>
 
-                <Card className="py-6">
-                    <CardHeader><CardTitle>Accounts List</CardTitle></CardHeader>
-                    <CardContent>
+                {/* Stat Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Total Debit */}
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-400 p-6 shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+                        <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+                        <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+                        <div className="relative flex items-start justify-between mb-4">
+                            <div>
+                                <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Debit</p>
+                                <h3 className="mt-2 text-2xl font-bold text-white">
+                                    {currencySymbol} {(trialBalanceData?.data?.total_debit ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </h3>
+                            </div>
+                            <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                                <TrendingUp className="w-6 h-6 text-white" />
+                            </div>
+                        </div>
+                        <div className="relative flex justify-between text-white/90 text-sm">
+                            <span>Sum of all</span>
+                            <span className="font-semibold">Debit Balances</span>
+                        </div>
+                    </div>
+
+                    {/* Total Credit */}
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-600 to-rose-400 p-6 shadow-lg shadow-rose-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+                        <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+                        <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+                        <div className="relative flex items-start justify-between mb-4">
+                            <div>
+                                <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Credit</p>
+                                <h3 className="mt-2 text-2xl font-bold text-white">
+                                    {currencySymbol} {(trialBalanceData?.data?.total_credit ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </h3>
+                            </div>
+                            <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                                <TrendingDown className="w-6 h-6 text-white" />
+                            </div>
+                        </div>
+                        <div className="relative flex justify-between text-white/90 text-sm">
+                            <span>Sum of all</span>
+                            <span className="font-semibold">Credit Balances</span>
+                        </div>
+                    </div>
+
+                    {/* Net Balance */}
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 to-violet-400 p-6 shadow-lg shadow-violet-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+                        <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+                        <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+                        <div className="relative flex items-start justify-between mb-4">
+                            <div>
+                                <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Net Balance</p>
+                                <h3 className="mt-2 text-2xl font-bold text-white">
+                                    {currencySymbol} {((trialBalanceData?.data?.total_debit ?? 0) - (trialBalanceData?.data?.total_credit ?? 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </h3>
+                            </div>
+                            <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                                <Scale className="w-6 h-6 text-white" />
+                            </div>
+                        </div>
+                        <div className="relative flex justify-between text-white/90 text-sm">
+                            <span>Debit - Credit</span>
+                            <span className="font-semibold">Balance</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="">
                         <DataTable
                             columns={accountColumns}
                             data={accountsWithBalances}
@@ -519,9 +587,8 @@ function ChartOfAccounts() {
                             search={search}
                             isLoading={isFetching}
                         />
-                    </CardContent>
-                </Card>
+                </div>
             </main>
-        </div>
+        </>
     );
 }

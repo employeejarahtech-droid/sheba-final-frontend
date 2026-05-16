@@ -99,7 +99,7 @@ function JournalReport() {
   };
 
   const updateRow = (id: string, field: keyof FormRow, value: any) => {
-    setRows(rows.map(r => r.id === id ? { ...r, [field]: value } : r));
+    setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
   };
 
   const calcTotals = () => {
@@ -165,14 +165,14 @@ function JournalReport() {
   return (
     <>
       <AppHeader fixed />
-      <Main className="p-6 lg:p-10">
-        <div className="space-y-6">
+      <main className="p-4">
+        <div className="space-y-3">
           <PageHeader
             title="Journal Entries"
             description="Record and review double-entry bookkeeping records."
             showBackButton={false}
             actions={
-              <Dialog open={isOpen} onOpenChange={setIsOpen} modal={false}>
+              <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogTrigger asChild>
                   <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
                     <Plus className="h-4 w-4 mr-1" /> New Journal Entry
@@ -475,7 +475,7 @@ function JournalReport() {
             </CardContent>
           </Card>
         </div>
-      </Main>
+      </main>
     </>
   );
 }

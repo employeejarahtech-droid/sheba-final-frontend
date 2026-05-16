@@ -1,15 +1,23 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
-import { Main } from "@/components/layout/main";
 import { useEffect, useState } from 'react';
 import { EditOccultBloodTestForm } from '@/features/pathology/stool/EditOcultBloodTestForm';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
+import { FileText, FlaskConical, Clock, Users } from 'lucide-react';
+
+const occultBloodSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+})
 
 export const Route = createFileRoute(
   '/_authenticated/pathology/stool/ocult-blood-test/',
 )({
+  validateSearch: (search) => occultBloodSearchSchema.parse(search),
   component: OcultBloodTest,
 })
 
@@ -27,14 +35,28 @@ function OcultBloodTest() {
   const [open, setOpen] = useState<boolean>(false);
   const [reportId, setReportId] = useState<number>(0);
   const [invoiceId, setInvoiceId] = useState<number>(0);
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const limit = 10;
+
+  const searchParams: any = Route.useSearch();
+  const navigate: any = Route.useNavigate();
+
+  const page = Number(searchParams?.page) || 1;
+  const limit = Number(searchParams?.limit) || 10;
+  const search = searchParams?.search || "";
+
+  const setPage = (newPage: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
+  };
+  const setSearch = (newSearch: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
+  };
+  const setLimit = (newLimit: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) });
+  };
 
   const token = getCookie('accessToken');
 
-  const { data } = useQuery({
-    queryKey: ["occult-blood", page, search],
+  const { data, isFetching } = useQuery({
+    queryKey: ["occult-blood", page, limit, search],
 
     queryFn: async () => {
       const res = await fetch(
@@ -45,12 +67,11 @@ function OcultBloodTest() {
       );
 
       if (!res.ok) throw new Error("Failed to fetch blood for tcdc reports");
-      return res.json(); // MUST match placeholderData
+      return res.json();
     },
 
     enabled: !!token,
 
-    // ⭐ Perfect smooth pagination
     placeholderData: (prev) =>
       prev
         ? prev
@@ -65,9 +86,6 @@ function OcultBloodTest() {
           },
         },
   });
-
-
-  //console.log(data?.data);
 
   // Initialize DataTable after data is loaded
   const items = data?.data?.items || [];
@@ -211,7 +229,7 @@ function OcultBloodTest() {
           <div class="flex justify-between items-center">
             <div>
               <h2 class="text-xl font-semibold">Occult Blood Test (O.B.T) Report</h2>
-              <p class="text-sm opacity-90">Invoice #${invoiceId} • ${formattedDate}</p>
+              <p class="text-sm opacity-90">Invoice #${invoiceId} &bull; ${formattedDate}</p>
             </div>
             ${statusBadge}
           </div>
@@ -364,15 +382,110 @@ function OcultBloodTest() {
   return (
     <>
       <AppHeader fixed />
-      <Main>
-        <div className="mb-4">
-          <h1 className='text-2xl font-bold tracking-tight'>Ocult Blood Test(O.B.T)</h1>
+      <main>
+        <div className="p-4 space-y-3">
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Total Reports */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-600 to-rose-500 p-6 shadow-lg shadow-red-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Reports</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{data?.data?.meta?.total || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>All Time</span>
+                <span className="font-semibold">Records</span>
+              </div>
+            </div>
+
+            {/* Page Items */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-600 to-red-400 p-6 shadow-lg shadow-rose-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Page Items</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{data?.data?.items?.length || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <FlaskConical className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Current</span>
+                <span className="font-semibold">Page</span>
+              </div>
+            </div>
+
+            {/* Recent */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-500 to-rose-400 p-6 shadow-lg shadow-red-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Recent</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">
+                    {data?.data?.items?.filter((i: any) => {
+                      if (!i.created_at) return false;
+                      const d = new Date(i.created_at);
+                      const now = new Date();
+                      return d.toDateString() === now.toDateString();
+                    }).length || 0}
+                  </h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <Clock className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Today</span>
+                <span className="font-semibold">Added</span>
+              </div>
+            </div>
+
+            {/* Patients */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-700 to-red-500 p-6 shadow-lg shadow-rose-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Patients</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{new Set(data?.data?.items?.map((i: any) => i.patient_name)).size || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Unique</span>
+                <span className="font-semibold">Patients</span>
+              </div>
+            </div>
+          </div>
+
+          <DataTable
+            tableTitle="Occult Blood Test (O.B.T)"
+            columns={columns}
+            data={items}
+            meta={meta}
+            onPageChange={setPage}
+            onLimitChange={setLimit}
+            search={search}
+            onSearchChange={setSearch}
+            isLoading={isFetching}
+          />
         </div>
-        <DataTable columns={columns} data={items} meta={meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
         <EditOccultBloodTestForm open={open} setOpen={setOpen} reportId={reportId} invoiceId={invoiceId} />
-      </Main>
+      </main>
     </>
 
   )
 }
-

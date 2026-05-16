@@ -74,6 +74,16 @@ const SCENARIO_META: Record<string, { color: string; description: string; isMone
         description: 'When refunding an indoor patient (overpaid or returned)',
         isMoneyIn: false,
     },
+    general_income: {
+        color: 'from-emerald-600 to-green-500',
+        description: 'When General Income Happen',
+        isMoneyIn: true,
+    },
+    general_expense: {
+        color: 'from-indigo-600 to-blue-500',
+        description: 'When General Expense Happen',
+        isMoneyIn: false,
+    },
 }
 
 export function PaymentAccountSettings() {

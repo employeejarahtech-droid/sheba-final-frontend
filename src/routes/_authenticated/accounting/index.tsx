@@ -65,19 +65,19 @@ function AccountingOverview() {
     return (
         <>
             <AppHeader fixed />
-            <main className='p-6 lg:p-10'>
+            <main className='p-4 space-y-4'>
                 <PageHeader
                     title="Accounting Overview"
                     description="Track financial trends and manage transactions."
                     actions={
                         <>
                             <AddIncomeModal>
-                                <button className='flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 font-medium text-white shadow-lg shadow-emerald-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-emerald-500/40 active:translate-y-0 active:shadow-none'>
+                                <button className='inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] bg-emerald-600 text-white shadow-xs hover:bg-emerald-700 h-9 px-4 py-2'>
                                     <Plus size={18} /> Add Income
                                 </button>
                             </AddIncomeModal>
                             <AddExpenseModal>
-                                <button className='flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 px-5 py-2.5 font-medium text-white shadow-lg shadow-rose-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-rose-500/40 active:translate-y-0 active:shadow-none'>
+                                <button className='inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] bg-rose-600 text-white shadow-xs hover:bg-rose-700 h-9 px-4 py-2'>
                                     <Plus size={18} /> Add Expense
                                 </button>
                             </AddExpenseModal>

@@ -1,12 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
-import { Main } from "@/components/layout/main";
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { getCookie } from '@/lib/cookies';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
+import { FileText, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+
+const hematologySearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+})
 
 export const Route = createFileRoute('/_authenticated/pathology/hematology/all/')({
+  validateSearch: (search) => hematologySearchSchema.parse(search),
   component: AllReportsHematology,
 })
 
@@ -23,13 +31,27 @@ type ReportsItem = {
 
 function AllReportsHematology() {
 
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const limit = 10;
+  const searchParams: any = Route.useSearch();
+  const navigate: any = Route.useNavigate();
+
+  const page = Number(searchParams?.page) || 1;
+  const limit = Number(searchParams?.limit) || 10;
+  const search = searchParams?.search || "";
+
+  const setPage = (newPage: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
+  };
+  const setSearch = (newSearch: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
+  };
+  const setLimit = (newLimit: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) });
+  };
+
   const token = getCookie('accessToken');
 
-  const { data: hematologyAllReports } = useQuery({
-    queryKey: ["hematology-all", page, search],
+  const { data: hematologyAllReports, isFetching } = useQuery({
+    queryKey: ["hematology-all", page, limit, search],
     queryFn: async () => {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/hematology-all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
@@ -47,7 +69,11 @@ function AllReportsHematology() {
         : {
           data: {
             items: [],
-            total: 0,
+            meta: {
+              page,
+              limit,
+              total: 0,
+            },
           },
         },
   });
@@ -105,7 +131,7 @@ function AllReportsHematology() {
           <div class="flex justify-between items-center">
             <div>
               <h2 class="text-xl font-semibold">Hematology Test Receipt</h2>
-              <p class="text-sm opacity-90">Receipt ID #${reciptId} • ${formattedDate}</p>
+              <p class="text-sm opacity-90">Receipt ID #${reciptId} &bull; ${formattedDate}</p>
             </div>
             ${statusBadge}
           </div>
@@ -173,7 +199,6 @@ function AllReportsHematology() {
             const hematologyTests = invoiceData?.hematology_all_info || [];
 
             if (hematologyTests.length > 0) {
-              // Build test results table similar to report format
               let testResultsHTML = `
                 <div class="border rounded-xl p-4 hover:shadow-md transition bg-gray-50">
                   <div class="flex justify-between items-center mb-3">
@@ -278,8 +303,7 @@ function AllReportsHematology() {
       title: "Patient Name",
       orderable: true,
       render: (_data: any, _type: string, row: ReportsItem) => {
-        const patientName = row.PatientName;
-        return patientName || '-';
+        return row.PatientName || '-';
       },
       defaultContent: "",
     },
@@ -288,8 +312,7 @@ function AllReportsHematology() {
       title: "Date",
       orderable: true,
       render: (_data: any, _type: string, row: ReportsItem) => {
-        const date = row.Date;
-        return date ? new Date(date).toLocaleDateString() : '-';
+        return row.Date ? new Date(row.Date).toLocaleDateString() : '-';
       },
       defaultContent: "",
     },
@@ -301,13 +324,10 @@ function AllReportsHematology() {
         const testNames = row.TestNames || row.Tests || '';
         if (!testNames) return '-';
 
-        // Split comma-separated test names and display as badges
-        const names = testNames.split(',').filter(name => name.trim() !== '');
-        const badges = names.map(name =>
+        const names = testNames.split(',').filter((name: string) => name.trim() !== '');
+        return names.map((name: string) =>
           `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1">${name.trim()}</span>`
         ).join('');
-
-        return badges;
       },
       defaultContent: "",
     },
@@ -316,9 +336,9 @@ function AllReportsHematology() {
       title: "Status",
       orderable: true,
       render: (_data: any, _type: string, row: ReportsItem) => {
-        const status = row.Status;
-        const statusColor = status === 'Completed' ? 'text-green-600' : 'text-yellow-600';
-        return `<span class="${statusColor}">${status}</span>`;
+        const status = row.Status || 'Pending';
+        const color = status === 'Completed' ? 'bg-green-500' : 'bg-yellow-500';
+        return `<span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status}</span>`;
       },
       defaultContent: "",
     },
@@ -327,12 +347,101 @@ function AllReportsHematology() {
   return (
     <>
       <AppHeader fixed />
-      <Main>
-        <div className="mb-4">
-          <h1 className='text-2xl font-bold tracking-tight'>All Reports (Hematology)</h1>
+      <main>
+        <div className="p-4 space-y-3">
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Total Reports */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-blue-400 p-6 shadow-lg shadow-blue-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Reports</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{hematologyAllReports?.data?.meta?.total || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>All Time</span>
+                <span className="font-semibold">Records</span>
+              </div>
+            </div>
+
+            {/* Completed */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-400 p-6 shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Completed</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{hematologyAllReports?.data?.items?.filter((i: any) => i.Status === 'Completed').length || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <CheckCircle className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Status</span>
+                <span className="font-semibold">Done</span>
+              </div>
+            </div>
+
+            {/* Pending */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-600 to-amber-400 p-6 shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Pending</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{hematologyAllReports?.data?.items?.filter((i: any) => !i.Status || i.Status === 'Pending').length || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <Clock className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Status</span>
+                <span className="font-semibold">Awaiting</span>
+              </div>
+            </div>
+
+            {/* Patients */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-600 to-rose-400 p-6 shadow-lg shadow-rose-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+              <div className="relative flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Patients</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">{new Set(hematologyAllReports?.data?.items?.map((i: any) => i.PatientId)).size || 0}</h3>
+                </div>
+                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                  <AlertCircle className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div className="relative flex justify-between text-white/90 text-sm">
+                <span>Unique</span>
+                <span className="font-semibold">Patients</span>
+              </div>
+            </div>
+          </div>
+
+          <DataTable
+            tableTitle="All Reports (Hematology)"
+            columns={columns}
+            data={hematologyAllReports?.data?.items || []}
+            meta={hematologyAllReports?.data?.meta}
+            onPageChange={setPage}
+            onLimitChange={setLimit}
+            search={search}
+            onSearchChange={setSearch}
+            isLoading={isFetching}
+          />
         </div>
-        <DataTable columns={columns} data={hematologyAllReports?.data?.items || []} meta={hematologyAllReports?.data?.meta} onPageChange={setPage} search={search} onSearchChange={setSearch} />
-      </Main>
+      </main>
     </>
 
   )

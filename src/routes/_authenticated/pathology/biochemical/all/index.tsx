@@ -365,7 +365,6 @@ function AllReportsBiochemical() {
       <AppHeader fixed />
       <main>
         <div className="p-4 space-y-3">
-          <h1 className='text-2xl font-bold tracking-tight'>All Reports (Biochemical)</h1>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

@@ -362,7 +362,7 @@ export function DataTable<TData extends Record<string, any>>({
                       <Button
                         variant={page === p ? "default" : "outline"}
                         size="sm"
-                        className="w-9 h-9 p-0"
+                        className="h-8 w-8 p-0"
                         onClick={() => onPageChange?.(Number(p))}
                       >
                         {p}

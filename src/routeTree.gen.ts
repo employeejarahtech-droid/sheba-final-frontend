@@ -152,6 +152,7 @@ import { Route as AuthenticatedAccountingReportsProfitLossIndexRouteImport } fro
 import { Route as AuthenticatedAccountingReportsProfitAndLossIndexRouteImport } from './routes/_authenticated/accounting/reports/profit-and-loss/index'
 import { Route as AuthenticatedAccountingReportsLedgerIndexRouteImport } from './routes/_authenticated/accounting/reports/ledger/index'
 import { Route as AuthenticatedAccountingReportsJournalIndexRouteImport } from './routes/_authenticated/accounting/reports/journal/index'
+import { Route as AuthenticatedAccountingReportsDailySummaryIndexRouteImport } from './routes/_authenticated/accounting/reports/daily-summary/index'
 import { Route as AuthenticatedAccountingReportsBalanceSheetIndexRouteImport } from './routes/_authenticated/accounting/reports/balance-sheet/index'
 import { Route as AuthenticatedXRayAllPrintIdRouteImport } from './routes/_authenticated/x-ray/all/print/$id'
 import { Route as AuthenticatedXRayAllEditIdRouteImport } from './routes/_authenticated/x-ray/all/edit/$id'
@@ -169,6 +170,7 @@ import { Route as AuthenticatedIndoorMasterServicesIdRouteImport } from './route
 import { Route as AuthenticatedIndoorMasterBedCabinListIdRouteImport } from './routes/_authenticated/indoor/master/bed-cabin-list/$id'
 import { Route as AuthenticatedEcgAllPrintIdRouteImport } from './routes/_authenticated/ecg/all/print/$id'
 import { Route as AuthenticatedEcgAllEditIdRouteImport } from './routes/_authenticated/ecg/all/edit/$id'
+import { Route as AuthenticatedAccountingReportsLedgerPrintRouteImport } from './routes/_authenticated/accounting/reports/ledger/print'
 import { Route as AuthenticatedReportsMyOutdoorTodayCollectionIndexRouteImport } from './routes/_authenticated/reports/my/outdoor/today-collection/index'
 import { Route as AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRouteImport } from './routes/_authenticated/reports/my/outdoor/date-wise-collection/index'
 import { Route as AuthenticatedOutdoorReceptionInvoicesListIndexRouteImport } from './routes/_authenticated/outdoor/reception/invoices/list/index'
@@ -1062,6 +1064,12 @@ const AuthenticatedAccountingReportsJournalIndexRoute =
     path: '/accounting/reports/journal/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAccountingReportsDailySummaryIndexRoute =
+  AuthenticatedAccountingReportsDailySummaryIndexRouteImport.update({
+    id: '/accounting/reports/daily-summary/',
+    path: '/accounting/reports/daily-summary/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAccountingReportsBalanceSheetIndexRoute =
   AuthenticatedAccountingReportsBalanceSheetIndexRouteImport.update({
     id: '/accounting/reports/balance-sheet/',
@@ -1162,6 +1170,12 @@ const AuthenticatedEcgAllEditIdRoute =
   AuthenticatedEcgAllEditIdRouteImport.update({
     id: '/ecg/all/edit/$id',
     path: '/ecg/all/edit/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAccountingReportsLedgerPrintRoute =
+  AuthenticatedAccountingReportsLedgerPrintRouteImport.update({
+    id: '/accounting/reports/ledger/print',
+    path: '/accounting/reports/ledger/print',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute =
@@ -1607,6 +1621,7 @@ export interface FileRoutesByFullPath {
   '/roles/create': typeof AuthenticatedRolesCreateIndexRoute
   '/ultrasonogram/all': typeof AuthenticatedUltrasonogramAllIndexRoute
   '/x-ray/all': typeof AuthenticatedXRayAllIndexRoute
+  '/accounting/reports/ledger/print': typeof AuthenticatedAccountingReportsLedgerPrintRoute
   '/ecg/all/edit/$id': typeof AuthenticatedEcgAllEditIdRoute
   '/ecg/all/print/$id': typeof AuthenticatedEcgAllPrintIdRoute
   '/indoor/master/bed-cabin-list/$id': typeof AuthenticatedIndoorMasterBedCabinListIdRoute
@@ -1624,6 +1639,7 @@ export interface FileRoutesByFullPath {
   '/x-ray/all/edit/$id': typeof AuthenticatedXRayAllEditIdRoute
   '/x-ray/all/print/$id': typeof AuthenticatedXRayAllPrintIdRoute
   '/accounting/reports/balance-sheet': typeof AuthenticatedAccountingReportsBalanceSheetIndexRoute
+  '/accounting/reports/daily-summary': typeof AuthenticatedAccountingReportsDailySummaryIndexRoute
   '/accounting/reports/journal': typeof AuthenticatedAccountingReportsJournalIndexRoute
   '/accounting/reports/ledger': typeof AuthenticatedAccountingReportsLedgerIndexRoute
   '/accounting/reports/profit-and-loss': typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
@@ -1824,6 +1840,7 @@ export interface FileRoutesByTo {
   '/roles/create': typeof AuthenticatedRolesCreateIndexRoute
   '/ultrasonogram/all': typeof AuthenticatedUltrasonogramAllIndexRoute
   '/x-ray/all': typeof AuthenticatedXRayAllIndexRoute
+  '/accounting/reports/ledger/print': typeof AuthenticatedAccountingReportsLedgerPrintRoute
   '/ecg/all/edit/$id': typeof AuthenticatedEcgAllEditIdRoute
   '/ecg/all/print/$id': typeof AuthenticatedEcgAllPrintIdRoute
   '/indoor/master/bed-cabin-list/$id': typeof AuthenticatedIndoorMasterBedCabinListIdRoute
@@ -1841,6 +1858,7 @@ export interface FileRoutesByTo {
   '/x-ray/all/edit/$id': typeof AuthenticatedXRayAllEditIdRoute
   '/x-ray/all/print/$id': typeof AuthenticatedXRayAllPrintIdRoute
   '/accounting/reports/balance-sheet': typeof AuthenticatedAccountingReportsBalanceSheetIndexRoute
+  '/accounting/reports/daily-summary': typeof AuthenticatedAccountingReportsDailySummaryIndexRoute
   '/accounting/reports/journal': typeof AuthenticatedAccountingReportsJournalIndexRoute
   '/accounting/reports/ledger': typeof AuthenticatedAccountingReportsLedgerIndexRoute
   '/accounting/reports/profit-and-loss': typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
@@ -2046,6 +2064,7 @@ export interface FileRoutesById {
   '/_authenticated/roles/create/': typeof AuthenticatedRolesCreateIndexRoute
   '/_authenticated/ultrasonogram/all/': typeof AuthenticatedUltrasonogramAllIndexRoute
   '/_authenticated/x-ray/all/': typeof AuthenticatedXRayAllIndexRoute
+  '/_authenticated/accounting/reports/ledger/print': typeof AuthenticatedAccountingReportsLedgerPrintRoute
   '/_authenticated/ecg/all/edit/$id': typeof AuthenticatedEcgAllEditIdRoute
   '/_authenticated/ecg/all/print/$id': typeof AuthenticatedEcgAllPrintIdRoute
   '/_authenticated/indoor/master/bed-cabin-list/$id': typeof AuthenticatedIndoorMasterBedCabinListIdRoute
@@ -2063,6 +2082,7 @@ export interface FileRoutesById {
   '/_authenticated/x-ray/all/edit/$id': typeof AuthenticatedXRayAllEditIdRoute
   '/_authenticated/x-ray/all/print/$id': typeof AuthenticatedXRayAllPrintIdRoute
   '/_authenticated/accounting/reports/balance-sheet/': typeof AuthenticatedAccountingReportsBalanceSheetIndexRoute
+  '/_authenticated/accounting/reports/daily-summary/': typeof AuthenticatedAccountingReportsDailySummaryIndexRoute
   '/_authenticated/accounting/reports/journal/': typeof AuthenticatedAccountingReportsJournalIndexRoute
   '/_authenticated/accounting/reports/ledger/': typeof AuthenticatedAccountingReportsLedgerIndexRoute
   '/_authenticated/accounting/reports/profit-and-loss/': typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
@@ -2266,6 +2286,7 @@ export interface FileRouteTypes {
     | '/roles/create'
     | '/ultrasonogram/all'
     | '/x-ray/all'
+    | '/accounting/reports/ledger/print'
     | '/ecg/all/edit/$id'
     | '/ecg/all/print/$id'
     | '/indoor/master/bed-cabin-list/$id'
@@ -2283,6 +2304,7 @@ export interface FileRouteTypes {
     | '/x-ray/all/edit/$id'
     | '/x-ray/all/print/$id'
     | '/accounting/reports/balance-sheet'
+    | '/accounting/reports/daily-summary'
     | '/accounting/reports/journal'
     | '/accounting/reports/ledger'
     | '/accounting/reports/profit-and-loss'
@@ -2483,6 +2505,7 @@ export interface FileRouteTypes {
     | '/roles/create'
     | '/ultrasonogram/all'
     | '/x-ray/all'
+    | '/accounting/reports/ledger/print'
     | '/ecg/all/edit/$id'
     | '/ecg/all/print/$id'
     | '/indoor/master/bed-cabin-list/$id'
@@ -2500,6 +2523,7 @@ export interface FileRouteTypes {
     | '/x-ray/all/edit/$id'
     | '/x-ray/all/print/$id'
     | '/accounting/reports/balance-sheet'
+    | '/accounting/reports/daily-summary'
     | '/accounting/reports/journal'
     | '/accounting/reports/ledger'
     | '/accounting/reports/profit-and-loss'
@@ -2704,6 +2728,7 @@ export interface FileRouteTypes {
     | '/_authenticated/roles/create/'
     | '/_authenticated/ultrasonogram/all/'
     | '/_authenticated/x-ray/all/'
+    | '/_authenticated/accounting/reports/ledger/print'
     | '/_authenticated/ecg/all/edit/$id'
     | '/_authenticated/ecg/all/print/$id'
     | '/_authenticated/indoor/master/bed-cabin-list/$id'
@@ -2721,6 +2746,7 @@ export interface FileRouteTypes {
     | '/_authenticated/x-ray/all/edit/$id'
     | '/_authenticated/x-ray/all/print/$id'
     | '/_authenticated/accounting/reports/balance-sheet/'
+    | '/_authenticated/accounting/reports/daily-summary/'
     | '/_authenticated/accounting/reports/journal/'
     | '/_authenticated/accounting/reports/ledger/'
     | '/_authenticated/accounting/reports/profit-and-loss/'
@@ -3868,6 +3894,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccountingReportsJournalIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/accounting/reports/daily-summary/': {
+      id: '/_authenticated/accounting/reports/daily-summary/'
+      path: '/accounting/reports/daily-summary'
+      fullPath: '/accounting/reports/daily-summary'
+      preLoaderRoute: typeof AuthenticatedAccountingReportsDailySummaryIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/accounting/reports/balance-sheet/': {
       id: '/_authenticated/accounting/reports/balance-sheet/'
       path: '/accounting/reports/balance-sheet'
@@ -3985,6 +4018,13 @@ declare module '@tanstack/react-router' {
       path: '/ecg/all/edit/$id'
       fullPath: '/ecg/all/edit/$id'
       preLoaderRoute: typeof AuthenticatedEcgAllEditIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/accounting/reports/ledger/print': {
+      id: '/_authenticated/accounting/reports/ledger/print'
+      path: '/accounting/reports/ledger/print'
+      fullPath: '/accounting/reports/ledger/print'
+      preLoaderRoute: typeof AuthenticatedAccountingReportsLedgerPrintRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/reports/my/outdoor/today-collection/': {
@@ -4483,6 +4523,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRolesCreateIndexRoute: typeof AuthenticatedRolesCreateIndexRoute
   AuthenticatedUltrasonogramAllIndexRoute: typeof AuthenticatedUltrasonogramAllIndexRoute
   AuthenticatedXRayAllIndexRoute: typeof AuthenticatedXRayAllIndexRoute
+  AuthenticatedAccountingReportsLedgerPrintRoute: typeof AuthenticatedAccountingReportsLedgerPrintRoute
   AuthenticatedEcgAllEditIdRoute: typeof AuthenticatedEcgAllEditIdRoute
   AuthenticatedEcgAllPrintIdRoute: typeof AuthenticatedEcgAllPrintIdRoute
   AuthenticatedIndoorMasterBedCabinListIdRoute: typeof AuthenticatedIndoorMasterBedCabinListIdRoute
@@ -4500,6 +4541,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedXRayAllEditIdRoute: typeof AuthenticatedXRayAllEditIdRoute
   AuthenticatedXRayAllPrintIdRoute: typeof AuthenticatedXRayAllPrintIdRoute
   AuthenticatedAccountingReportsBalanceSheetIndexRoute: typeof AuthenticatedAccountingReportsBalanceSheetIndexRoute
+  AuthenticatedAccountingReportsDailySummaryIndexRoute: typeof AuthenticatedAccountingReportsDailySummaryIndexRoute
   AuthenticatedAccountingReportsJournalIndexRoute: typeof AuthenticatedAccountingReportsJournalIndexRoute
   AuthenticatedAccountingReportsLedgerIndexRoute: typeof AuthenticatedAccountingReportsLedgerIndexRoute
   AuthenticatedAccountingReportsProfitAndLossIndexRoute: typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
@@ -4710,6 +4752,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUltrasonogramAllIndexRoute:
     AuthenticatedUltrasonogramAllIndexRoute,
   AuthenticatedXRayAllIndexRoute: AuthenticatedXRayAllIndexRoute,
+  AuthenticatedAccountingReportsLedgerPrintRoute:
+    AuthenticatedAccountingReportsLedgerPrintRoute,
   AuthenticatedEcgAllEditIdRoute: AuthenticatedEcgAllEditIdRoute,
   AuthenticatedEcgAllPrintIdRoute: AuthenticatedEcgAllPrintIdRoute,
   AuthenticatedIndoorMasterBedCabinListIdRoute:
@@ -4740,6 +4784,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedXRayAllPrintIdRoute: AuthenticatedXRayAllPrintIdRoute,
   AuthenticatedAccountingReportsBalanceSheetIndexRoute:
     AuthenticatedAccountingReportsBalanceSheetIndexRoute,
+  AuthenticatedAccountingReportsDailySummaryIndexRoute:
+    AuthenticatedAccountingReportsDailySummaryIndexRoute,
   AuthenticatedAccountingReportsJournalIndexRoute:
     AuthenticatedAccountingReportsJournalIndexRoute,
   AuthenticatedAccountingReportsLedgerIndexRoute:

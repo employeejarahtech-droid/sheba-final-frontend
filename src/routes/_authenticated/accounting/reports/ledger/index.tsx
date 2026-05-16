@@ -5,7 +5,7 @@ import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, FileText, Printer } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from "zod";
 
 // UI Components
@@ -47,6 +47,7 @@ export const Route = createFileRoute('/_authenticated/accounting/reports/ledger/
 function LedgerReport() {
   const searchParams = Route.useSearch();
   const navigate = Route.useNavigate();
+  const goToPrint = useNavigate();
 
   const accountId = searchParams.account_id ? String(searchParams.account_id) : "";
   const fromDate = searchParams.from || format(new Date(), "yyyy-MM-dd");
@@ -95,7 +96,11 @@ function LedgerReport() {
           title="Ledger Report"
           description="View detailed transaction history for a specific account."
           actions={
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" disabled={!accountId}
+              onClick={() => goToPrint({
+                to: '/accounting/reports/ledger/print' as any,
+                search: { account_id: Number(accountId), from: fromDate, to: toDate } as any,
+              })}>
               <Printer className="h-4 w-4" /> Print Report
             </Button>
           }
@@ -175,14 +180,14 @@ function LedgerReport() {
           <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardDescription>Opening Balance</CardDescription>
-              <CardTitle className="text-2xl">{currencySymbol} {ledgerResponse?.opening_balance?.toFixed(2) || "0.00"}</CardTitle>
+              <CardTitle className="text-2xl">{currencySymbol} {(ledgerResponse?.opening_balance ?? 0).toFixed(2)}</CardTitle>
             </CardHeader>
           </Card>
           <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardDescription>Total Debit</CardDescription>
               <CardTitle className="text-2xl text-emerald-600">
-                {currencySymbol} {ledgerResponse?.transactions?.reduce((sum: number, t: any) => sum + (t.debit || 0), 0).toFixed(2) || "0.00"}
+                {currencySymbol} {(ledgerResponse?.transactions?.reduce((sum: number, t: any) => sum + (t.debit || 0), 0) || 0).toFixed(2)}
               </CardTitle>
             </CardHeader>
           </Card>
@@ -190,14 +195,14 @@ function LedgerReport() {
             <CardHeader className="pb-2">
               <CardDescription>Total Credit</CardDescription>
               <CardTitle className="text-2xl text-red-600">
-                {currencySymbol} {ledgerResponse?.transactions?.reduce((sum: number, t: any) => sum + (t.credit || 0), 0).toFixed(2) || "0.00"}
+                {currencySymbol} {(ledgerResponse?.transactions?.reduce((sum: number, t: any) => sum + (t.credit || 0), 0) || 0).toFixed(2)}
               </CardTitle>
             </CardHeader>
           </Card>
           <Card className="bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardDescription className="text-emerald-700 dark:text-emerald-400">Closing Balance</CardDescription>
-              <CardTitle className="text-2xl text-emerald-700 dark:text-emerald-400">{currencySymbol} {ledgerResponse?.closing_balance?.toFixed(2) || "0.00"}</CardTitle>
+              <CardTitle className="text-2xl text-emerald-700 dark:text-emerald-400">{currencySymbol} {(ledgerResponse?.closing_balance ?? 0).toFixed(2)}</CardTitle>
             </CardHeader>
           </Card>
         </div>

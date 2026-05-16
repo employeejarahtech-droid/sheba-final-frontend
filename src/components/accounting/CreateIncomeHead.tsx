@@ -63,7 +63,7 @@ export default function CreateIncomeHeadForm() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8">
+        <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs">
           Add Income Head
         </Button>
       </DialogTrigger>

@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import 'animate.css';
 @import './theme.css';
 
 @custom-variant dark (&:is(.dark *));
@@ -15,6 +16,10 @@
   }
   body {
     @apply bg-background text-foreground has-[div[data-variant='inset']]:bg-sidebar min-h-svh w-full;
+  }
+
+  main {
+    animation: zoomIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   /* Override Radix scroll locking for sticky headers */
@@ -75,6 +80,50 @@
   to {
     height: var(--radix-collapsible-content-height);
   }
+}
+
+/* Fold/Unfold animation */
+@keyframes foldOpen {
+  0% {
+    opacity: 0;
+    transform: perspective(800px) rotateX(-60deg);
+    transform-origin: top center;
+  }
+  60% {
+    opacity: 1;
+    transform: perspective(800px) rotateX(8deg);
+  }
+  80% {
+    transform: perspective(800px) rotateX(-3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(800px) rotateX(0deg);
+  }
+}
+
+@keyframes foldClose {
+  0% {
+    opacity: 1;
+    transform: perspective(800px) rotateX(0deg);
+    transform-origin: top center;
+  }
+  100% {
+    opacity: 0;
+    transform: perspective(800px) rotateX(-60deg);
+  }
+}
+
+.animate-fold-open {
+  animation: foldOpen 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: top center;
+  backface-visibility: hidden;
+}
+
+.animate-fold-close {
+  animation: foldClose 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top center;
+  backface-visibility: hidden;
 }
 
 @keyframes slideUp {
@@ -399,6 +448,38 @@ table.dataTable > tbody > tr.child {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes scale-up-ver-center {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.animate-scale-up-ver-center {
+  animation: scale-up-ver-center 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: center center;
+}
+
+@keyframes scale-down-ver-center {
+  0% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+}
+
+.animate-scale-down-ver-center {
+  animation: scale-down-ver-center 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center center;
 }
 
 /* Responsive breakpoint indicators */

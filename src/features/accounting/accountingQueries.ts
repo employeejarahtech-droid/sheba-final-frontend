@@ -21,6 +21,7 @@ export const ACCOUNTING_KEYS = {
     trialBalance: () => [...ACCOUNTING_KEYS.all, 'trialBalance'] as const,
     balanceSheet: () => [...ACCOUNTING_KEYS.all, 'balanceSheet'] as const,
     profitLoss: () => [...ACCOUNTING_KEYS.all, 'profitLoss'] as const,
+    dailySummary: () => [...ACCOUNTING_KEYS.all, 'dailySummary'] as const,
     transactions: () => [...ACCOUNTING_KEYS.all, 'transactions'] as const,
     nextCode: (parentId: number) => [...ACCOUNTING_KEYS.all, 'nextCode', parentId] as const,
 };
@@ -167,6 +168,13 @@ export const useGetTrialBalanceQuery = (params?: { date?: string }) => {
     return useQuery({
         queryKey: [...ACCOUNTING_KEYS.trialBalance(), params],
         queryFn: () => accountingService.getTrialBalance(params),
+    });
+};
+
+export const useGetDailySummaryQuery = (params?: { date?: string }) => {
+    return useQuery({
+        queryKey: [...ACCOUNTING_KEYS.dailySummary(), params],
+        queryFn: () => accountingService.getDailySummary(params),
     });
 };
 
