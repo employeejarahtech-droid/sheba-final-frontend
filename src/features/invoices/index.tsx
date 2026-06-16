@@ -756,13 +756,34 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
         },
         {
             data: "delivery_date",
-            title: "Delivery Date",
+            title: "Delivery Date & Time",
             orderable: true,
             responsivePriority: 3,
-            render: (data: any) => {
+            render: (data: any, _type: string, row: InvoiceItem) => {
                 if (!data) return "-";
                 const date = new Date(data);
-                return fmtDate(date);
+                if (Number.isNaN(date.getTime())) return "-";
+                const dateStr = fmtDate(date);
+                let timeStr = "";
+                if (row.delivery_time) {
+                    const cleanTime = row.delivery_time.trim();
+                    if (/am|pm/i.test(cleanTime)) {
+                        timeStr = cleanTime;
+                    } else {
+                        const match = cleanTime.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+                        if (match) {
+                            let hours = parseInt(match[1], 10);
+                            const minutes = match[2];
+                            const ampm = hours >= 12 ? 'PM' : 'AM';
+                            hours = hours % 12;
+                            hours = hours ? hours : 12; // the hour '0' should be '12'
+                            timeStr = `${hours}:${minutes} ${ampm}`;
+                        } else {
+                            timeStr = cleanTime;
+                        }
+                    }
+                }
+                return timeStr ? `${dateStr} ${timeStr}` : dateStr;
             },
             defaultContent: "-",
         },

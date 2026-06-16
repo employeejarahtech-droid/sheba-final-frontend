@@ -101,6 +101,24 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
         enabled: !!token,
     });
 
+    // Fetch test tables list to resolve match_table_name to display_name
+    const { data: testTablesData } = useQuery({
+        queryKey: ["test-tables-list"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/test-tables?limit=1000`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch test tables");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const testTables = testTablesData?.data?.items || [];
+
     // Calculate stats
     const stats = useMemo(() => {
         const tests = data?.data?.items || [];
@@ -273,7 +291,11 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
             orderable: true,
             responsivePriority: 3,
             render: (_data: any, _type: string, row: TestItem, meta: any) => {
-                const tableName = row.match_table_name ? String(row.match_table_name) : 'N/A';
+                const rawTableName = row.match_table_name ? String(row.match_table_name) : '';
+                const matchedTable = testTables.find(
+                    (t: any) => t.table_name === rawTableName || t.display_name === rawTableName
+                );
+                const tableName = matchedTable ? matchedTable.display_name : (rawTableName || 'N/A');
                 const category = row.category?.name || 'N/A';
                 const department = row.category?.department?.name || '-';
                 const room = row.sampleCollectionRoom
@@ -314,7 +336,15 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
             responsivePriority: 5,
             render: (_data: any, _type: string, row: TestItem) => {
                 const value = row.match_table_name;
-                return value ? String(value) : '<span class="text-red-500 font-semibold">N/A</span>';
+                if (!value) return '<span class="text-red-500 font-semibold">N/A</span>';
+                
+                const matchedTable = testTables.find(
+                    (t: any) => t.table_name === String(value) || t.display_name === String(value)
+                );
+                
+                return matchedTable
+                    ? `<span class="font-medium text-blue-600 dark:text-blue-400">${matchedTable.display_name}</span>`
+                    : `<span>${String(value)}</span>`;
             },
             defaultContent: "",
         },
@@ -385,7 +415,7 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
             },
             defaultContent: "",
         },
-    ], [page, limit, currencySymbol]);
+    ], [page, limit, currencySymbol, testTables]);
 
     return <>
         <AppHeader fixed />
