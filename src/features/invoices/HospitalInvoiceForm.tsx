@@ -1086,23 +1086,32 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                         <Popover open={doctorOpen} onOpenChange={setDoctorOpen}>
                           <PopoverTrigger asChild>
                             <FormControl>
-                              <button
+                              <Button
                                 type="button"
+                                variant="outline"
+                                role="combobox"
                                 className={cn(
-                                  "w-full flex justify-between items-center px-3 py-1 border border-gray-200 dark:border-gray-800 rounded-md h-10 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-all shadow-sm text-sm",
+                                  "w-full justify-between h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-all shadow-sm text-sm",
                                   !field.value && "text-muted-foreground"
                                 )}
                               >
-                                <div className="flex flex-col items-start">
-                                  <span className="font-medium">{selectedDoctor?.doctor_name || "Select doctor..."}</span>
-                                  {selectedDoctor && (selectedDoctor.title || selectedDoctor.speciality) && (
-                                    <span className="text-xs text-muted-foreground">
-                                      {[selectedDoctor.title, selectedDoctor.speciality].filter(Boolean).join(" • ")}
+                                {selectedDoctor ? (
+                                  <div className="flex flex-col items-start">
+                                    <span className="font-medium">
+                                      Dr. {selectedDoctor.doctor_name}
+                                      {(selectedDoctor.qualification || selectedDoctor.title) && ` (${selectedDoctor.qualification || selectedDoctor.title})`}
                                     </span>
-                                  )}
-                                </div>
-                                <ChevronDown className="h-4 w-4 opacity-50" />
-                              </button>
+                                    {selectedDoctor.speciality && (
+                                      <span className="text-xs text-muted-foreground">
+                                        {selectedDoctor.speciality}
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  "Select doctor..."
+                                )}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
                             </FormControl>
                           </PopoverTrigger>
                           <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
@@ -1113,37 +1122,48 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                               }}
                               className="border border-gray-100 dark:border-gray-800"
                             >
-                              <CommandInput placeholder="Search doctor..." className="h-10" value={doctorSearch} onValueChange={setDoctorSearch} />
+                              <CommandInput placeholder="Search doctor by name, qualification, or specialty..." className="h-10" value={doctorSearch} onValueChange={setDoctorSearch} />
                               <CommandList className="max-h-[300px]">
                                 <CommandEmpty>No doctor found.</CommandEmpty>
                                 <CommandGroup>
-                                  {doctorsData?.data?.items?.map((doctor) => (
-                                    <CommandItem
-                                      key={doctor.id}
-                                      value={`${doctor.doctor_name} ${doctor.title || ''} ${doctor.speciality || ''}`}
-                                      className="py-2.5 px-4 flex flex-col items-start gap-0.5"
-                                      onSelect={() => {
-                                        field.onChange(String(doctor.id));
-                                        setDoctorOpen(false);
-                                      }}
-                                    >
-                                      <div className="flex items-center justify-between w-full">
-                                        <span className="font-medium">{doctor.doctor_name}</span>
-                                        <Check
-                                          className={cn(
-                                            "ml-auto h-4 w-4",
-                                            String(doctor.id) === String(field.value)
-                                              ? "opacity-100"
-                                              : "opacity-0"
-                                          )}
-                                        />
-                                      </div>
-                                      <div className="text-xs text-muted-foreground flex gap-2">
-                                        {doctor.title && <span>{doctor.title}</span>}
-                                        {doctor.speciality && <span>• {doctor.speciality}</span>}
-                                      </div>
-                                    </CommandItem>
-                                  ))}
+                                  {doctorsData?.data?.items?.map((doctor) => {
+                                    const displayName = `Dr. ${doctor.doctor_name}`;
+                                    const subtitle = [
+                                      doctor.qualification || doctor.title,
+                                      doctor.speciality
+                                    ].filter(Boolean).join(" - ");
+
+                                    return (
+                                      <CommandItem
+                                        key={doctor.id}
+                                        value={`${doctor.doctor_name} ${doctor.qualification || doctor.title || ''} ${doctor.speciality || ''} ${doctor.id}`}
+                                        className="py-2.5 px-4 cursor-pointer"
+                                        onSelect={() => {
+                                          field.onChange(String(doctor.id));
+                                          setDoctorOpen(false);
+                                        }}
+                                      >
+                                        <div className="flex items-center gap-2 w-full">
+                                          <Check
+                                            className={cn(
+                                              "h-4 w-4 shrink-0",
+                                              String(doctor.id) === String(field.value)
+                                                ? "opacity-100"
+                                                : "opacity-0"
+                                            )}
+                                          />
+                                          <div className="flex flex-col">
+                                            <span className="font-medium">{displayName}</span>
+                                            {subtitle && (
+                                              <span className="text-xs text-muted-foreground">
+                                                {subtitle}
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </CommandItem>
+                                    );
+                                  })}
                                 </CommandGroup>
                               </CommandList>
                             </Command>

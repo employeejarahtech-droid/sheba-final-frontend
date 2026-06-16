@@ -11,11 +11,12 @@ import {
     Bed,
     ClipboardList,
     Check,
-    ChevronDown
+    ChevronDown,
+    CalendarIcon
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 import {
@@ -28,6 +29,8 @@ import {
     FormDescription,
 } from "@/components/ui/form";
 
+import { Calendar } from "@/components/ui/calendar";
+import { useDateFormat } from "@/hooks/use-date-format";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -387,6 +390,10 @@ function IndoorNewAdmission() {
     const token = getCookie('accessToken');
     const queryClient = useQueryClient();
 
+    // Tenant date format from settings
+    const { dateFormat, formatHint, formatDate, parseDate, toISODate } = useDateFormat();
+    const dateTouchedRef = useRef(false);
+
     // Fetch doctors list
     const { data: doctorsData, isLoading: doctorsLoading } = useQuery({
         queryKey: ['doctors-list'],
@@ -456,13 +463,19 @@ function IndoorNewAdmission() {
             referredBy: "",
             attendingDoctor: "",
             admittedBy: "",
-            admissionDate: new Date().toISOString().split('T')[0],
+            admissionDate: formatDate(new Date()),
             admissionTime: new Date().toTimeString().slice(0, 5),
             ward: "",
             bedNumber: "",
             reason: "",
         },
     });
+
+    // Re-format admissionDate once settings are loaded
+    useEffect(() => {
+        if (dateTouchedRef.current) return;
+        form.setValue("admissionDate", formatDate(new Date()), { shouldValidate: true });
+    }, [dateFormat, formatDate, form]);
 
     // Create admission mutation
     const createMutation = useMutation({
@@ -479,7 +492,7 @@ function IndoorNewAdmission() {
                     age_unit: values.ageUnit,
                     sex: values.gender,
                     phone: values.mobile_number,
-                    admission_date: values.admissionDate,
+                    admission_date: toISODate(parseDate(values.admissionDate) || new Date()),
                     admission_time: values.admissionTime,
                     bed_cabin_id: parseInt(values.bedNumber),
                     doctor_id: values.underConsultant ? parseInt(values.underConsultant) : null,
@@ -795,14 +808,42 @@ function IndoorNewAdmission() {
                                             name="admissionDate"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Admission Date</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            type="date"
-                                                            className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
+                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                                        Admission Date <span className="text-xs font-normal text-muted-foreground">({formatHint})</span>
+                                                    </FormLabel>
+                                                    <Popover>
+                                                        <PopoverTrigger asChild>
+                                                            <FormControl>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    className={cn(
+                                                                        "h-10 justify-start text-left font-normal border-gray-200 bg-transparent shadow-sm",
+                                                                        !field.value && "text-muted-foreground"
+                                                                    )}
+                                                                >
+                                                                    <CalendarIcon className="mr-2 h-4 w-4 text-blue-500" />
+                                                                    {field.value || formatDate(new Date())}
+                                                                </Button>
+                                                            </FormControl>
+                                                        </PopoverTrigger>
+                                                        <PopoverContent className="w-auto p-0" align="start">
+                                                            <Calendar
+                                                                mode="single"
+                                                                selected={field.value ? parseDate(field.value) : undefined}
+                                                                onSelect={(date) => {
+                                                                    dateTouchedRef.current = true;
+                                                                    field.onChange(date ? formatDate(date) : "");
+                                                                }}
+                                                                disabled={(date) => {
+                                                                    const today = new Date();
+                                                                    today.setHours(0, 0, 0, 0);
+                                                                    return date < today;
+                                                                }}
+                                                                initialFocus
+                                                            />
+                                                        </PopoverContent>
+                                                    </Popover>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
