@@ -85,8 +85,8 @@ const formSchema = z.object({
   date: z.string().min(1, "Date is required"),
   ref_doctor: z.string().min(1, "Reference doctor is required"),
   test_name: z.string().optional(),
-  deliveryDate: z.string().optional(),
-  deliveryTime: z.string().optional(),
+  deliveryDate: z.string().min(1, "Delivery date is required"),
+  deliveryTime: z.string().min(1, "Delivery time is required"),
   discount: z.any().optional(),
   totalCharge: z.any().optional(),
   paidAmount: z.any().optional(),
@@ -96,6 +96,15 @@ const formSchema = z.object({
   isIndoorPatient: z.boolean().optional().default(false),
   admissionNumber: z.string().optional(),
   bedCabinNumber: z.string().optional(),
+  paymentMethod: z.string().min(1, "Payment method is required"),
+  sample_collection_rooms: z.array(z.string()).min(1, "At least one sample collection room must be selected"),
+}).refine((data) => {
+  const hasYears = data.ageYears && data.ageYears.trim() !== "";
+  const hasMonths = data.ageMonths && data.ageMonths.trim() !== "";
+  return hasYears || hasMonths;
+}, {
+  message: "Either Age in Years or Months is required",
+  path: ["ageYears"],
 });
 
 type AdmissionItem = {
@@ -136,12 +145,10 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
   const [doctorOpen, setDoctorOpen] = useState(false);
   const [doctorSearch, setDoctorSearch] = useState("");
   const [admissionOpen, setAdmissionOpen] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [openPaymentMethod, setOpenPaymentMethod] = useState(false);
   const [discountReason, setDiscountReason] = useState<string>("");
   const [admissionSearch, setAdmissionSearch] = useState("");
   const [selectedAdmission, setSelectedAdmission] = useState<AdmissionItem | null>(null);
-  const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -285,12 +292,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
 
   const paymentMethodOptions: string[] = paymentMappings?.outdoor_test_payment?.methods?.map((m: any) => m.name).filter(Boolean) || ["Cash", "Card", "Mobile Banking"]
 
-  // Auto-select first payment method
-  useEffect(() => {
-    if (paymentMethodOptions.length > 0 && !paymentMethod) {
-      setPaymentMethod(paymentMethodOptions[0])
-    }
-  }, [paymentMethodOptions])
+  // Auto-select first payment method is handled after form initialization
 
   const departmentWiseTests = useMemo(() => {
     const groups: Record<string, { total: number; tests: TestItem[]; departmentId: number | null }> = {};
@@ -416,10 +418,22 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
       isIndoorPatient: false,
       admissionNumber: "",
       bedCabinNumber: "",
+      paymentMethod: "",
+      sample_collection_rooms: [],
     },
   });
 
   const { watch, setValue } = form;
+
+  const paymentMethod = watch("paymentMethod") || "";
+  const selectedRooms = watch("sample_collection_rooms") || [];
+
+  // Auto-select first payment method
+  useEffect(() => {
+    if (paymentMethodOptions.length > 0 && !paymentMethod) {
+      setValue("paymentMethod", paymentMethodOptions[0], { shouldValidate: true });
+    }
+  }, [paymentMethodOptions, paymentMethod, setValue]);
 
   // Fetch app settings for invoice prefix
   const { data: appSettings } = useQuery({
@@ -875,7 +889,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
         setSelectedTests([]);
         setDeptDiscounts({});
         setUseDeptDiscount(false);
-        setSelectedRooms([]);
+        setValue("sample_collection_rooms", []);
 
         // Invalidate all invoice queries to force refetch
         queryClient.invalidateQueries({
@@ -1002,7 +1016,6 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                               {...field}
                             />
                           </FormControl>
-                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -1022,12 +1035,16 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                               {...field}
                             />
                           </FormControl>
-                          <FormMessage />
                         </FormItem>
                       )}
                     />
                     <span className="text-xs text-muted-foreground">Mo</span>
                   </div>
+                  {form.formState.errors.ageYears && (
+                    <p className="text-xs font-medium text-destructive">
+                      {form.formState.errors.ageYears.message as string}
+                    </p>
+                  )}
                 </FormItem>
 
                 {/* Phone */}
@@ -1151,6 +1168,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
+                              type="button"
                               variant="outline"
                               className={cn(
                                 "h-10 justify-start text-left font-normal border-gray-200 bg-transparent shadow-sm",
@@ -1243,6 +1261,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                     >
                       <PopoverTrigger asChild disabled={!watch('isIndoorPatient')}>
                         <Button
+                          type="button"
                           variant="outline"
                           role="combobox"
                           aria-expanded={admissionOpen}
@@ -1568,11 +1587,10 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                               checked={isSelected}
                               onCheckedChange={(checked) => {
                                 if (typeof checked === 'boolean') {
-                                  setSelectedRooms((prev) =>
-                                    checked
-                                      ? [...prev, roomId]
-                                      : prev.filter((r) => r !== roomId)
-                                  );
+                                  const updatedRooms = checked
+                                    ? [...selectedRooms, roomId]
+                                    : selectedRooms.filter((r) => r !== roomId);
+                                  setValue("sample_collection_rooms", updatedRooms, { shouldValidate: true });
                                 }
                               }}
                               className="mt-0.5 border-gray-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
@@ -1604,6 +1622,12 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                         {selectedRooms.length} room{selectedRooms.length > 1 ? 's' : ''} selected for sample collection
                       </p>
                     </div>
+                  )}
+                  {form.formState.errors.sample_collection_rooms && (
+                    <p className="text-sm font-semibold text-red-500 mt-3 flex items-center gap-1.5">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500" />
+                      {form.formState.errors.sample_collection_rooms.message as string}
+                    </p>
                   )}
                 </>
               ) : (
@@ -1744,6 +1768,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
+                                  type="button"
                                   variant="outline"
                                   className={cn(
                                     "h-10 justify-start text-left font-normal border-gray-200 bg-transparent shadow-sm",
@@ -1762,6 +1787,11 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                                 onSelect={(date) => {
                                   dateTouchedRef.current = true;
                                   field.onChange(date ? formatDate(date) : "");
+                                }}
+                                disabled={(date) => {
+                                  const today = new Date();
+                                  today.setHours(0, 0, 0, 0);
+                                  return date < today;
                                 }}
                                 initialFocus
                               />
@@ -1797,54 +1827,64 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                   </div>
 
                   {/* Payment Method */}
-                  <div className="space-y-2">
-                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      Payment Method
-                    </FormLabel>
-                    <Popover open={openPaymentMethod} onOpenChange={setOpenPaymentMethod}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={openPaymentMethod}
-                          className="w-full justify-between h-10 border-gray-200 dark:border-gray-800 bg-transparent shadow-sm"
-                        >
-                          {paymentMethod
-                            ? paymentMethodOptions.find((m) => m === paymentMethod) || paymentMethod
-                            : "Select method..."}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[200px] p-0">
-                        <Command>
-                          <CommandInput placeholder="Search method..." />
-                          <CommandList>
-                            <CommandEmpty>No method found.</CommandEmpty>
-                            <CommandGroup>
-                              {paymentMethodOptions.map((method) => (
-                                <CommandItem
-                                  key={method}
-                                  value={method}
-                                  onSelect={(currentValue) => {
-                                    setPaymentMethod(currentValue === paymentMethod ? "" : currentValue)
-                                    setOpenPaymentMethod(false)
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      paymentMethod === method ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                  {method}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="paymentMethod"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-2">
+                        <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                          Payment Method
+                        </FormLabel>
+                        <Popover open={openPaymentMethod} onOpenChange={setOpenPaymentMethod}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={openPaymentMethod}
+                                className="w-full justify-between h-10 border-gray-200 dark:border-gray-800 bg-transparent shadow-sm"
+                              >
+                                {field.value
+                                  ? paymentMethodOptions.find((m) => m === field.value) || field.value
+                                  : "Select method..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[200px] p-0">
+                            <Command>
+                              <CommandInput placeholder="Search method..." />
+                              <CommandList>
+                                <CommandEmpty>No method found.</CommandEmpty>
+                                <CommandGroup>
+                                  {paymentMethodOptions.map((method) => (
+                                    <CommandItem
+                                      key={method}
+                                      value={method}
+                                      onSelect={(currentValue) => {
+                                        field.onChange(currentValue === field.value ? "" : currentValue);
+                                        setOpenPaymentMethod(false);
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          field.value === method ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                      {method}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   {/* Reason / Note */}
                   <div className="space-y-2">
@@ -1938,7 +1978,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       setSelectedTests([]);
                       setDeptDiscounts({});
                       setDeptPayments({});
-                      setSelectedRooms([]);
+                      setValue("sample_collection_rooms", []);
                     }}
                   >
                     Clear Form
