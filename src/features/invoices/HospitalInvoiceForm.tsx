@@ -25,6 +25,7 @@ type TestItem = {
   price: string     // since API sends "1000.00"
   category_id: number
   created_at: string
+  sample_collection_room_id?: number | null
 }
 
 type TestsResponse = {
@@ -1460,6 +1461,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                     <tr className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-800">
                       <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 w-16">#</th>
                       <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Test Name</th>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Room No</th>
                       <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Department</th>
                       <th className="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300 w-32">Price</th>
                       <th className="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 w-16">Action</th>
@@ -1470,10 +1472,15 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       const category = categoriesData?.data?.items?.find(c => c.id === test.category_id);
                       const department = category?.department_name || 'N/A';
 
+                      const nestedRoomName = (test as any).sampleCollectionRoom?.name || (test as any).sample_collection_room?.name;
+                      const matchedRoom = roomsData?.items?.find((r) => Number(r.id) === Number(test.sample_collection_room_id));
+                      const roomName = nestedRoomName || matchedRoom?.name || '-';
+
                       return (
                         <tr key={test.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
                           <td className="px-4 py-3 text-gray-500 font-mono">{index + 1}</td>
                           <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{test.name}</td>
+                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{roomName}</td>
                           <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{department}</td>
                           <td className="px-4 py-3 text-right font-mono text-blue-600 dark:text-blue-400 font-semibold">
                             {Number(test.price).toLocaleString()}
@@ -1496,7 +1503,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       <tr>
                         <td
                           className="px-4 py-12 text-center text-muted-foreground italic bg-gray-50/30 dark:bg-transparent"
-                          colSpan={5}
+                          colSpan={6}
                         >
                           <div className="flex flex-col items-center gap-2">
                             <Activity className="h-8 w-8 opacity-20" />
@@ -1509,7 +1516,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                   {selectedTests.length > 0 && (
                     <tfoot>
                       <tr className="bg-blue-50/30 dark:bg-blue-950/20 border-t border-blue-100 dark:border-blue-900">
-                        <td colSpan={3} className="px-4 py-3 font-bold text-gray-800 dark:text-gray-200 text-right">
+                        <td colSpan={4} className="px-4 py-3 font-bold text-gray-800 dark:text-gray-200 text-right">
                           Subtotal:
                         </td>
                         <td className="px-4 py-3 text-right font-mono font-bold text-blue-700 dark:text-blue-300 text-lg">
