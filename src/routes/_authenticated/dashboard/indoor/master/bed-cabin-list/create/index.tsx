@@ -40,6 +40,7 @@ function CreateBedCabin() {
     const navigate = useNavigate()
     const token = getCookie('accessToken');
     const [typeOpen, setTypeOpen] = useState(false);
+    const [wardOpen, setWardOpen] = useState(false);
 
     const { data: resourceTypesData } = useQuery({
         queryKey: ['bed-resource-types-list'],
@@ -56,6 +57,21 @@ function CreateBedCabin() {
         enabled: !!token,
     });
 
+    const { data: wardsData } = useQuery({
+        queryKey: ['bed-wards-list'],
+        queryFn: async () => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/bed-ward?limit=100`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!res.ok) throw new Error('Failed to fetch wards');
+            const result = await res.json();
+            return result.data?.items || [];
+        },
+        enabled: !!token,
+    });
+
     const defaultOptions = [
         { name: "Bed", value: "Bed" },
         { name: "Cabin", value: "Cabin" },
@@ -65,6 +81,10 @@ function CreateBedCabin() {
     const options = resourceTypesData && resourceTypesData.length > 0
         ? resourceTypesData.map((t: any) => ({ name: t.name, value: t.name }))
         : defaultOptions;
+
+    const wardOptions = wardsData && wardsData.length > 0
+        ? wardsData.map((w: any) => ({ name: w.name, value: w.name }))
+        : [];
 
     const form = useForm<BedCabinValues>({
         resolver: zodResolver(bedCabinSchema) as any,
@@ -241,21 +261,61 @@ function CreateBedCabin() {
                                         <FormField
                                             control={form.control}
                                             name="ward"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Ward / Department</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            placeholder="e.g. VIP Ward, General Ward 2"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormDescription className="text-xs">
-                                                        The location within the hospital.
-                                                    </FormDescription>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
+                                            render={({ field }) => {
+                                                const selectedOption = wardOptions.find(opt => opt.value === field.value);
+                                                return (
+                                                    <FormItem>
+                                                        <FormLabel>Ward / Department</FormLabel>
+                                                        <Popover open={wardOpen} onOpenChange={setWardOpen}>
+                                                            <PopoverTrigger asChild>
+                                                                <FormControl>
+                                                                    <button
+                                                                        type="button"
+                                                                        className={cn(
+                                                                            "w-full flex justify-between items-center px-3 py-1 border rounded-md h-9 text-sm bg-transparent border-gray-200 dark:border-gray-800",
+                                                                            !field.value && "text-muted-foreground"
+                                                                        )}
+                                                                    >
+                                                                        {selectedOption?.name || field.value || "Select Ward / Department"}
+                                                                        <ChevronDown className="h-4 w-4 opacity-50" />
+                                                                    </button>
+                                                                </FormControl>
+                                                            </PopoverTrigger>
+                                                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                                                                <Command>
+                                                                    <CommandInput placeholder="Search ward..." />
+                                                                    <CommandList>
+                                                                        <CommandEmpty>No ward found. Please create one first.</CommandEmpty>
+                                                                        <CommandGroup>
+                                                                            {wardOptions.map((opt) => (
+                                                                                <CommandItem
+                                                                                    key={opt.value}
+                                                                                    onSelect={() => {
+                                                                                        field.onChange(opt.value);
+                                                                                        setWardOpen(false);
+                                                                                    }}
+                                                                                >
+                                                                                    {opt.name}
+                                                                                    <Check
+                                                                                        className={cn(
+                                                                                            "h-4 w-4 ml-auto",
+                                                                                            opt.value === field.value ? "opacity-100" : "opacity-0"
+                                                                                        )}
+                                                                                    />
+                                                                                </CommandItem>
+                                                                            ))}
+                                                                        </CommandGroup>
+                                                                    </CommandList>
+                                                                </Command>
+                                                            </PopoverContent>
+                                                        </Popover>
+                                                        <FormDescription className="text-xs">
+                                                            The location within the hospital.
+                                                        </FormDescription>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                );
+                                            }}
                                         />
 
                                         {/* Price */}

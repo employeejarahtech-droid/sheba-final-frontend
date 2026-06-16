@@ -107,7 +107,7 @@ function BedCabinList() {
         {
             data: 'code',
             title: 'Bed/Cabin Code',
-            render: (data: string) => <span class="font-bold text-blue-600">${data}</span>,
+            render: (data: string) => `<span class="font-bold text-blue-600">${data}</span>`,
         },
         {
             data: 'type',
@@ -119,7 +119,7 @@ function BedCabinList() {
                     'Special': 'bg-amber-100 text-amber-700 border-amber-200',
                 };
                 const colorClass = colors[data] || 'bg-gray-100 text-gray-700 border-gray-200';
-                return <span class="px-2 py-1 rounded-md text-xs font-medium border ${colorClass}">${data}</span>;
+                return `<span class="px-2 py-1 rounded-md text-xs font-medium border ${colorClass}">${data}</span>`;
             },
         },
         {
@@ -136,7 +136,7 @@ function BedCabinList() {
                     'Maintenance': 'bg-amber-500',
                 };
                 const colorClass = colors[data] || 'bg-gray-500';
-                return <span class="px-2 py-1 rounded-md text-xs font-medium text-white ${colorClass}">${data}</span>;
+                return `<span class="px-2 py-1 rounded-md text-xs font-medium text-white ${colorClass}">${data}</span>`;
             },
         },
         {
@@ -144,7 +144,7 @@ function BedCabinList() {
             title: 'Price/Day',
             render: (data: string) => {
                 const price = parseFloat(data);
-                return <span class="font-semibold text-gray-700">৳ ${price.toLocaleString()}</span>;
+                return `<span class="font-semibold text-gray-700">৳ ${price.toLocaleString()}</span>`;
             },
         },
         {
@@ -152,7 +152,7 @@ function BedCabinList() {
             title: 'Created By',
             render: (_data: any, _type: string, row: BedCabinItem) => {
                 const name = row.created_by_name || row.created_by || '-';
-                return <span class="text-sm text-muted-foreground">${name}</span>;
+                return `<span class="text-sm text-muted-foreground">${name}</span>`;
             },
         },
         {

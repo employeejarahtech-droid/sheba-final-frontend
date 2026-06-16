@@ -149,6 +149,7 @@ export const sidebarData: SidebarData = {
             { title: 'Operation Types', url: '/dashboard/indoor/master/operation-types' },
             { title: 'Anesthesia Types', url: '/dashboard/indoor/master/anasthesia-types' },
             { title: 'Resource Types', url: '/dashboard/indoor/master/bed-resource-types' },
+            { title: 'Wards & Departments', url: '/dashboard/indoor/master/bed-wards' },
             { title: 'Beds & Cabins', url: '/dashboard/indoor/master/bed-cabin-list' },
             { title: 'Doctor Types', url: '/dashboard/indoor/master/doctor-types' },
             { title: 'Patient Types', url: '/dashboard/indoor/master/patient-types' },

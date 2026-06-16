@@ -151,6 +151,7 @@ import { Route as AuthenticatedDashboardIndoorMasterServiceCategoriesIndexRouteI
 import { Route as AuthenticatedDashboardIndoorMasterPatientTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/patient-types/index'
 import { Route as AuthenticatedDashboardIndoorMasterOperationTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/operation-types/index'
 import { Route as AuthenticatedDashboardIndoorMasterDoctorTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/doctor-types/index'
+import { Route as AuthenticatedDashboardIndoorMasterBedWardsIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/bed-wards/index'
 import { Route as AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/bed-resource-types/index'
 import { Route as AuthenticatedDashboardIndoorMasterBedCabinListIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/bed-cabin-list/index'
 import { Route as AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/anasthesia-types/index'
@@ -1080,6 +1081,12 @@ const AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute =
     path: '/dashboard/indoor/master/doctor-types/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardIndoorMasterBedWardsIndexRoute =
+  AuthenticatedDashboardIndoorMasterBedWardsIndexRouteImport.update({
+    id: '/dashboard/indoor/master/bed-wards/',
+    path: '/dashboard/indoor/master/bed-wards/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute =
   AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRouteImport.update({
     id: '/dashboard/indoor/master/bed-resource-types/',
@@ -1910,6 +1917,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/indoor/master/anasthesia-types': typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   '/dashboard/indoor/master/bed-cabin-list': typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
   '/dashboard/indoor/master/bed-resource-types': typeof AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute
+  '/dashboard/indoor/master/bed-wards': typeof AuthenticatedDashboardIndoorMasterBedWardsIndexRoute
   '/dashboard/indoor/master/doctor-types': typeof AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute
   '/dashboard/indoor/master/operation-types': typeof AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute
   '/dashboard/indoor/master/patient-types': typeof AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute
@@ -2151,6 +2159,7 @@ export interface FileRoutesByTo {
   '/dashboard/indoor/master/anasthesia-types': typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   '/dashboard/indoor/master/bed-cabin-list': typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
   '/dashboard/indoor/master/bed-resource-types': typeof AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute
+  '/dashboard/indoor/master/bed-wards': typeof AuthenticatedDashboardIndoorMasterBedWardsIndexRoute
   '/dashboard/indoor/master/doctor-types': typeof AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute
   '/dashboard/indoor/master/operation-types': typeof AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute
   '/dashboard/indoor/master/patient-types': typeof AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute
@@ -2399,6 +2408,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/indoor/master/anasthesia-types/': typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   '/_authenticated/dashboard/indoor/master/bed-cabin-list/': typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
   '/_authenticated/dashboard/indoor/master/bed-resource-types/': typeof AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute
+  '/_authenticated/dashboard/indoor/master/bed-wards/': typeof AuthenticatedDashboardIndoorMasterBedWardsIndexRoute
   '/_authenticated/dashboard/indoor/master/doctor-types/': typeof AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute
   '/_authenticated/dashboard/indoor/master/operation-types/': typeof AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute
   '/_authenticated/dashboard/indoor/master/patient-types/': typeof AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute
@@ -2644,6 +2654,7 @@ export interface FileRouteTypes {
     | '/dashboard/indoor/master/anasthesia-types'
     | '/dashboard/indoor/master/bed-cabin-list'
     | '/dashboard/indoor/master/bed-resource-types'
+    | '/dashboard/indoor/master/bed-wards'
     | '/dashboard/indoor/master/doctor-types'
     | '/dashboard/indoor/master/operation-types'
     | '/dashboard/indoor/master/patient-types'
@@ -2885,6 +2896,7 @@ export interface FileRouteTypes {
     | '/dashboard/indoor/master/anasthesia-types'
     | '/dashboard/indoor/master/bed-cabin-list'
     | '/dashboard/indoor/master/bed-resource-types'
+    | '/dashboard/indoor/master/bed-wards'
     | '/dashboard/indoor/master/doctor-types'
     | '/dashboard/indoor/master/operation-types'
     | '/dashboard/indoor/master/patient-types'
@@ -3132,6 +3144,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/indoor/master/anasthesia-types/'
     | '/_authenticated/dashboard/indoor/master/bed-cabin-list/'
     | '/_authenticated/dashboard/indoor/master/bed-resource-types/'
+    | '/_authenticated/dashboard/indoor/master/bed-wards/'
     | '/_authenticated/dashboard/indoor/master/doctor-types/'
     | '/_authenticated/dashboard/indoor/master/operation-types/'
     | '/_authenticated/dashboard/indoor/master/patient-types/'
@@ -4257,6 +4270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterDoctorTypesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/indoor/master/bed-wards/': {
+      id: '/_authenticated/dashboard/indoor/master/bed-wards/'
+      path: '/dashboard/indoor/master/bed-wards'
+      fullPath: '/dashboard/indoor/master/bed-wards'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterBedWardsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/indoor/master/bed-resource-types/': {
       id: '/_authenticated/dashboard/indoor/master/bed-resource-types/'
       path: '/dashboard/indoor/master/bed-resource-types'
@@ -5116,6 +5136,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
   AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute
+  AuthenticatedDashboardIndoorMasterBedWardsIndexRoute: typeof AuthenticatedDashboardIndoorMasterBedWardsIndexRoute
   AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute
   AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute
   AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute
@@ -5413,6 +5434,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute,
   AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute:
     AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute,
+  AuthenticatedDashboardIndoorMasterBedWardsIndexRoute:
+    AuthenticatedDashboardIndoorMasterBedWardsIndexRoute,
   AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute:
     AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute,
   AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute:
