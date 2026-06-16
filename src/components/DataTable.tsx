@@ -42,6 +42,7 @@ interface DataTableProps<TData> {
   tableTitle?: string;
   hideExport?: boolean;
   createdRow?: (row: Node, data: TData[], dataIndex: number) => void;
+  defaultOrder?: [number, 'asc' | 'desc'][];
 }
 
 export function DataTable<TData extends Record<string, any>>({
@@ -57,6 +58,7 @@ export function DataTable<TData extends Record<string, any>>({
   tableTitle,
   hideExport,
   createdRow,
+  defaultOrder,
 }: DataTableProps<TData>) {
   const tableRef = useRef<HTMLTableElement>(null);
   const dataTableRef = useRef<any>(null);
@@ -158,6 +160,7 @@ export function DataTable<TData extends Record<string, any>>({
       lengthMenu: [10, 25, 50, 100],
       searching: true,
       ordering: true,
+      order: defaultOrder || [[0, 'desc']],
       info: true,
       responsive: false,
       // Sticky first column

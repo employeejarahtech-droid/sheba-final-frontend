@@ -302,7 +302,7 @@ function BedCabinList() {
             const id = button.getAttribute('data-id');
 
             if (action === 'edit' && id) {
-                navigate({ to: `/dashboard/master/bed-cabin-list/${id}` });
+                navigate({ to: `/dashboard/indoor/master/bed-cabin-list/${id}` });
             }
         };
 

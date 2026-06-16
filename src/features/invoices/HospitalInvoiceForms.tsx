@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Controller, useForm } from "react-hook-form";
 //import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { CalendarIcon, Trash2Icon } from "lucide-react";
+import { CalendarIcon, Trash2Icon, Check, ChevronDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getCookie } from "@/lib/cookies";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -18,6 +18,14 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Link } from "@tanstack/react-router";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 type TestItem = {
   id: number
@@ -56,6 +64,105 @@ interface InvoiceFormValues {
   discountedAmount: number;
   dueAmount: number;
   tests: number[];
+}
+
+interface DoctorSelectProps {
+  doctors: any[];
+  value: string;
+  onChange: (value: string) => void;
+  label: string;
+  placeholder: string;
+  disabled?: boolean;
+  loading?: boolean;
+}
+
+function DoctorSelect({
+  doctors,
+  value,
+  onChange,
+  label: _label,
+  placeholder,
+  disabled = false,
+  loading = false
+}: DoctorSelectProps) {
+  const [open, setOpen] = useState(false);
+
+  const selectedDoctor = doctors.find((d: any) => String(d.id) === value);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <FormControl>
+          <Button
+            variant="outline"
+            role="combobox"
+            className={cn(
+              "w-full justify-between h-9 rounded-md border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm",
+              !value && "text-muted-foreground"
+            )}
+            disabled={disabled || loading}
+          >
+            {selectedDoctor ? (
+              <div className="flex flex-col items-start overflow-hidden text-left">
+                <span className="font-medium text-xs truncate max-w-[200px]">
+                  Dr. {selectedDoctor.doctor_name}
+                  {selectedDoctor.qualification && ` (${selectedDoctor.qualification})`}
+                </span>
+              </div>
+            ) : (
+              placeholder
+            )}
+            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </FormControl>
+      </PopoverTrigger>
+      <PopoverContent className="w-[400px] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Search doctor by name, qualification, or specialty..." />
+          <CommandList>
+            <CommandEmpty>
+              {loading ? "Loading doctors..." : "No doctor found."}
+            </CommandEmpty>
+            <CommandGroup>
+              {doctors.map((doctor: any) => {
+                const displayName = `Dr. ${doctor.doctor_name}`;
+                const subtitle = [
+                  doctor.qualification,
+                  doctor.speciality
+                ].filter(Boolean).join(" - ");
+
+                return (
+                  <CommandItem
+                    key={doctor.id}
+                    value={`${doctor.doctor_name} ${doctor.qualification || ''} ${doctor.speciality || ''} ${doctor.id}`}
+                    onSelect={() => {
+                      onChange(String(doctor.id));
+                      setOpen(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === String(doctor.id) ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    <div className="flex flex-col">
+                      <span className="font-medium text-sm">{displayName}</span>
+                      {subtitle && (
+                        <span className="text-[11px] text-muted-foreground">
+                          {subtitle}
+                        </span>
+                      )}
+                    </div>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 export default function HospitalInvoiceForm() {
@@ -101,6 +208,24 @@ export default function HospitalInvoiceForm() {
         },
       },
   });
+
+  // Fetch doctors list
+  const { data: doctorsData, isLoading: doctorsLoading } = useQuery({
+    queryKey: ['doctors-list'],
+    queryFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/doctor?limit=1000`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch doctors");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+
+  const doctors = doctorsData?.data?.rows || doctorsData?.data?.items || [];
 
   console.log(data);
 
@@ -208,7 +333,7 @@ export default function HospitalInvoiceForm() {
       age: [ageYears, ageMonths].some(v => v) ? `${ageYears || 0}Y ${ageMonths || 0}M` : '',
       phone,
       invoice_date: date,
-      reference_doctor: ref_doctor,
+      doctor_id: ref_doctor ? parseInt(ref_doctor, 10) : null,
       //delivery_date: deliveryDate,
       //discounts: discount,
       total_amount: totalCharge,
@@ -334,17 +459,15 @@ export default function HospitalInvoiceForm() {
                     render={({ field }: { field: any }) => (
                       <FormItem>
                         <FormLabel>Ref. Doctor</FormLabel>
-                        <FormControl>
-                          <Select value={field.value} onValueChange={field.onChange}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select doctor" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="dr1">Dr. A</SelectItem>
-                              <SelectItem value="dr2">Dr. B</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
+                        <DoctorSelect
+                          doctors={doctors}
+                          value={field.value}
+                          onChange={field.onChange}
+                          label="Ref. Doctor"
+                          placeholder="Select doctor"
+                          disabled={doctorsLoading}
+                          loading={doctorsLoading}
+                        />
                       </FormItem>
                     )}
                   />

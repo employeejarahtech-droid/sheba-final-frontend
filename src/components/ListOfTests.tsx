@@ -268,12 +268,11 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
 
     const columns = useMemo(() => [
         {
-            data: null,
-            title: "SL",
-            orderable: false,
+            data: "id",
+            title: "ID",
+            orderable: true,
             responsivePriority: 3,
             render: (_data: any, _type: string, row: TestItem, meta: any) => {
-                const sl = (page - 1) * limit + meta.row + 1;
                 const tableName = row.match_table_name ? String(row.match_table_name) : 'N/A';
                 const category = row.category?.name || 'N/A';
                 const department = row.category?.department?.name || '-';
@@ -295,7 +294,7 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
                                 data-price="${Number(row.price || 0).toFixed(2)}"
                                 data-currency="${currencySymbol}"
                                 data-id="${row.id}">+</button>
-                        <span>${sl}</span>
+                        <span>${row.id}</span>
                     </div>
                 `;
             },

@@ -28,6 +28,7 @@ type DoctorItem = {
     sequence?: number;
     created_by?: string;
     created_by_name?: string;
+    doctor_type_ids?: string | number[];
 };
 
 type DoctorsProps = {
@@ -55,6 +56,24 @@ export default function Doctors({ page, limit, search, setPage, setLimit, setSea
         },
         enabled: !!token,
     });
+
+    // Fetch doctor types
+    const { data: doctorTypesData } = useQuery({
+        queryKey: ["doctor-types"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/doctor-type?limit=100`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch doctor types");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const doctorTypes = doctorTypesData?.data?.items || doctorTypesData?.data || [];
 
     const { data, isFetching } = useQuery({
         queryKey: ["doctor", page, limit, search],
@@ -193,6 +212,7 @@ export default function Doctors({ page, limit, search, setPage, setLimit, setSea
             const title = btn.dataset.title || '-';
             const qualification = btn.dataset.qualification || '-';
             const speciality = btn.dataset.speciality || '-';
+            const doctorTypesStr = btn.dataset.doctorTypes || '-';
             const country = btn.dataset.country || '-';
             const city = btn.dataset.city || '-';
             const phone = btn.dataset.phone || '-';
@@ -240,6 +260,11 @@ export default function Doctors({ page, limit, search, setPage, setLimit, setSea
                                 <span class="px-3 py-1 w-fit text-xs font-semibold rounded-full bg-purple-100 text-purple-700">
                                     ${speciality}
                                 </span>
+                            </li>
+
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Doctor Types</span>
+                                <span class="font-medium text-gray-700">${doctorTypesStr}</span>
                             </li>
 
                             <li class="flex flex-col">
@@ -329,6 +354,25 @@ export default function Doctors({ page, limit, search, setPage, setLimit, setSea
                     formattedId = formatId(doctorPrefix, sequence);
                 }
 
+                // Resolve doctor types
+                let typesStr = '-';
+                if (row.doctor_type_ids) {
+                    const ids = (typeof row.doctor_type_ids === 'string'
+                        ? row.doctor_type_ids.split(',')
+                        : Array.isArray(row.doctor_type_ids)
+                        ? row.doctor_type_ids.map(String)
+                        : []
+                    ).map((id: string) => id.trim()).filter(Boolean);
+
+                    const names = ids.map((id: string) => {
+                        const matched = doctorTypes.find((t: any) => String(t.id) === id);
+                        return matched ? matched.name : null;
+                    }).filter(Boolean);
+                    if (names.length > 0) {
+                        typesStr = names.join(', ');
+                    }
+                }
+
                 return `
                     <div class="flex items-center gap-2">
                         <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
@@ -339,6 +383,7 @@ export default function Doctors({ page, limit, search, setPage, setLimit, setSea
                                 data-title="${(row.title || '-').replace(/"/g, '&quot;')}"
                                 data-qualification="${(row.qualification || '-').replace(/"/g, '&quot;')}"
                                 data-speciality="${(row.speciality || '-').replace(/"/g, '&quot;')}"
+                                data-doctor-types="${typesStr.replace(/"/g, '&quot;')}"
                                 data-country="${(row.country || '-').replace(/"/g, '&quot;')}"
                                 data-city="${(row.city || '-').replace(/"/g, '&quot;')}"
                                 data-phone="${(row.phone || '-').replace(/"/g, '&quot;')}"
@@ -378,6 +423,35 @@ export default function Doctors({ page, limit, search, setPage, setLimit, setSea
             orderable: true,
             responsivePriority: 3,
             defaultContent: "",
+        },
+        {
+            data: "doctor_type_ids",
+            title: "Types",
+            orderable: false,
+            responsivePriority: 3,
+            render: (_data: any, _type: string, row: DoctorItem) => {
+                if (!row.doctor_type_ids) return `<span class="text-sm text-muted-foreground">-</span>`;
+                const ids = (typeof row.doctor_type_ids === 'string'
+                    ? row.doctor_type_ids.split(',')
+                    : Array.isArray(row.doctor_type_ids)
+                    ? row.doctor_type_ids.map(String)
+                    : []
+                ).map((id: string) => id.trim()).filter(Boolean);
+
+                const names = ids.map((id: string) => {
+                    const matched = doctorTypes.find((t: any) => String(t.id) === id);
+                    return matched ? matched.name : null;
+                }).filter(Boolean);
+
+                if (names.length === 0) return `<span class="text-sm text-muted-foreground">-</span>`;
+
+                return names.map((name: string) => `
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
+                        ${name}
+                    </span>
+                `).join(' ');
+            },
+            defaultContent: "-",
         },
         {
             data: "country",

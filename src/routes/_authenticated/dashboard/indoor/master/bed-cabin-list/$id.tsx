@@ -223,7 +223,7 @@ function EditBedCabin() {
     }
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-background">
+        <div className="flex flex-col min-h-screen ">
             <AppHeader fixed />
 
             <Main className="flex flex-1 flex-col gap-6">

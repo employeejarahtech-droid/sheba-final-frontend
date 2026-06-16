@@ -206,12 +206,11 @@ function TestTables() {
 
   const columns = [
     {
-      data: null,
-      title: "SL",
-      orderable: false,
+      data: "id",
+      title: "ID",
+      orderable: true,
       responsivePriority: 3,
       render: (_data: any, _type: string, row: TestItem, meta: any) => {
-        const sl = (page - 1) * limit + meta.row + 1;
         const displayName = row.display_name || row.name || 'N/A';
         const tableName = row.table_name || 'N/A';
         const description = row.description || '-';
@@ -224,7 +223,7 @@ function TestTables() {
                     data-table-name="${tableName.replace(/"/g, '&quot;')}"
                     data-description="${description.replace(/"/g, '&quot;')}"
                     data-id="${row.id}">+</button>
-            <span>${sl}</span>
+            <span>${row.id}</span>
           </div>
         `;
       },
