@@ -120,6 +120,7 @@ export type ChartOfAccount = {
     type: string;
     parent_id: number | null;
     is_active: boolean;
+    is_protected?: boolean;
     parent?: {
         id: number;
         name: string;

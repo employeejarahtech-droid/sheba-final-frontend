@@ -70,7 +70,7 @@ export function BillCreatedPage() {
                 title="Bill Created"
                 subtitle={`Billing details for admission #${admissionId}`}
                 backButton={{
-                    onClick: () => navigate({ to: '/admission/patients' }),
+                    onClick: () => navigate({ to: '/dashboard/admission/patients' }),
                     label: 'Back to Patients',
                 }}
                 actions={
@@ -317,20 +317,20 @@ export function BillCreatedPage() {
             {/* Action Buttons */}
             <div className="mt-6 flex gap-4">
                 <Button
-                    onClick={() => navigate({ to: `/admission/patients/${admissionId}/billing` })}
+                    onClick={() => navigate({ to: `/dashboard/admission/patients/${admissionId}/billing` })}
                     className="flex-1"
                 >
                     Add More Items
                 </Button>
                 <Button
-                    onClick={() => navigate({ to: `/admission/patients/${admissionId}/final-bill` })}
+                    onClick={() => navigate({ to: `/dashboard/admission/patients/${admissionId}/final-bill` })}
                     variant="default"
                     className="flex-1 bg-green-600 hover:bg-green-700"
                 >
                     Finalise Bill
                 </Button>
                 <Button
-                    onClick={() => navigate({ to: `/admission/patients/${admissionId}/print` })}
+                    onClick={() => navigate({ to: `/dashboard/admission/patients/${admissionId}/print` })}
                     variant="outline"
                     className="flex-1"
                 >

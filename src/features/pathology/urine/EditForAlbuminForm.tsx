@@ -121,7 +121,7 @@ export function EditUrineForAlbuminForm({ open, setOpen, reportId, invoiceId }: 
         onSuccess: (data) => {
             toast.success(data.message || "Test created successfully!");
             console.log("API Response:", data);
-            navigate({ to: "/pathology/urine/urine-for-albumin" });
+            navigate({ to: "/dashboard/pathology/urine/urine-for-albumin" });
             queryClient.invalidateQueries({
                 queryKey: ["urine-albumin", reportId],
             });

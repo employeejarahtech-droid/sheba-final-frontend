@@ -209,6 +209,13 @@ export const accountingService = {
         return response.data;
     },
 
+    // DELETE ACCOUNTING ACCOUNT
+    // Soft-deletes (is_active=false) if the account has postings; hard-deletes otherwise.
+    deleteAccountingAccount: async (id: number) => {
+        const response = await api.delete(`/accounting/accounts/${id}`);
+        return response.data;
+    },
+
     // ADD JOURNAL ENTRY
     addJournalEntry: async (body: { date: string; narration: string; entries: { account_id: number; debit: number; credit: number }[] }) => {
         const response = await api.post<JournalReportResponse>('/accounting/journal-entry', body);
@@ -218,6 +225,24 @@ export const accountingService = {
     // GET LEDGER REPORT
     getLedgerReport: async (accountId: number, params?: { from?: string; to?: string }) => {
         const response = await api.get(`/accounting/reports/ledger/${accountId}`, { params });
+        return response.data?.data || response.data;
+    },
+
+    // GET MULTI-LEDGER REPORT
+    getMultiLedgerReport: async (params: { account_ids: number[]; from?: string; to?: string }) => {
+        const response = await api.get('/accounting/reports/multi-ledger', {
+            params: {
+                account_ids: params.account_ids.join(','),
+                from: params.from,
+                to: params.to,
+            },
+        });
+        return response.data?.data || response.data;
+    },
+
+    // GET ROOT ACCOUNTS (top-level chart of accounts)
+    getRootAccounts: async () => {
+        const response = await api.get('/accounting/accounts/root-accounts');
         return response.data?.data || response.data;
     },
 

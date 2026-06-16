@@ -6,18 +6,20 @@ import { AppHeader } from '@/components/layout/app-header'
 
 
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Badge } from '@/components/ui/badge'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { toast } from "sonner"
-import { Loader2, ArrowLeft, Check, ChevronsUpDown, Printer } from 'lucide-react'
+import { Loader2, ArrowLeft, Check, ChevronsUpDown, Printer, User, FlaskConical, Tag, Wallet, PenLine } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { cn } from "@/lib/utils"
+import { useCurrency } from '@/hooks/use-currency'
+import { useDateFormat } from '@/hooks/use-date-format'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -56,17 +58,22 @@ type InvoiceDetails = {
         method: string;
         created_at: string;
         payment_date?: string;
+        creator?: { id: number; name: string } | null;
     }[];
-    discounts: { id: number; amount: string; reason?: string }[];
+    discounts: { id: number; amount: string; reason?: string; created_at?: string; creator?: { id: number; name: string } | null }[];
     department_payments?: { department_id: number; amount: string }[];
-    department_discounts?: { id: number; department_id: number; discount: string; created_at?: string }[];
+    department_discounts?: { id: number; department_id: number; discount: string; created_at?: string; creator?: { id: number; name: string } | null }[];
 };
 
 export default function DueCollectionDetails() {
-    const { invoiceId } = useParams({ from: '/_authenticated/outdoor/reception/due-collection/$invoiceId' });
+    const { invoiceId } = useParams({ from: '/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId' });
     const token = getCookie('accessToken');
     const queryClient = useQueryClient();
     const navigate = useNavigate();
+    const { currencySymbol, format } = useCurrency();
+    const { formatDate: fmtDate } = useDateFormat();
+    // Settings date format + 12h time, for entry/payment timestamps
+    const fmtDateTime = (d: Date) => `${fmtDate(d)} ${d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
 
 
     const [paymentMethod, setPaymentMethod] = useState<string>("");
@@ -76,6 +83,9 @@ export default function DueCollectionDetails() {
 
     // Department-wise inputs
     const [deptInputs, setDeptInputs] = useState<Record<string, { discount: string; payment: string }>>({});
+
+    // Ref for drag-to-scroll on the department collection table wrapper
+    const tableScrollRef = useRef<HTMLDivElement>(null);
 
     // Fetch payment methods from settings
     const { data: paymentMappings } = useQuery({
@@ -111,6 +121,51 @@ export default function DueCollectionDetails() {
         },
         enabled: !!invoiceId && !!token
     });
+
+    // ── Drag-to-scroll on hover for the department collection table ──────────
+    useEffect(() => {
+        const el = tableScrollRef.current;
+        if (!el) return;
+
+        let isDown = false;
+        let startX = 0;
+        let scrollL = 0;
+
+        const onDown = (e: MouseEvent) => {
+            // Don't hijack clicks on interactive elements (inputs, buttons)
+            if ((e.target as HTMLElement).closest('a, button, input, select, textarea')) return;
+            isDown = true;
+            startX = e.pageX - el.offsetLeft;
+            scrollL = el.scrollLeft;
+            el.style.cursor = 'grabbing';
+            el.style.userSelect = 'none';
+        };
+
+        const onMove = (e: MouseEvent) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - el.offsetLeft;
+            const walk = (x - startX) * 1.5;
+            el.scrollLeft = scrollL - walk;
+        };
+
+        const onUp = () => {
+            isDown = false;
+            el.style.cursor = 'grab';
+            el.style.userSelect = '';
+        };
+
+        el.addEventListener('mousedown', onDown);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+        el.style.cursor = 'grab';
+
+        return () => {
+            el.removeEventListener('mousedown', onDown);
+            window.removeEventListener('mousemove', onMove);
+            window.removeEventListener('mouseup', onUp);
+        };
+    }, [invoice]);
 
     const collectMutation = useMutation({
         mutationFn: async (payload: {
@@ -177,14 +232,14 @@ export default function DueCollectionDetails() {
 
         // Validate discount doesn't exceed current due
         if (field === 'discount' && discountAmt > currentDue) {
-            toast.error(`Discount cannot exceed current due (৳${currentDue.toFixed(0)}) for ${dept}`);
+            toast.error(`Discount cannot exceed current due (${format(currentDue)}) for ${dept}`);
             return;
         }
 
         // Validate payment doesn't exceed current due minus discount
         const maxPayment = Math.max(0, currentDue - discountAmt);
         if (field === 'payment' && paymentAmt > maxPayment) {
-            toast.error(`Payment cannot exceed due amount (৳${maxPayment.toFixed(0)}) for ${dept}`);
+            toast.error(`Payment cannot exceed due amount (${format(maxPayment)}) for ${dept}`);
             return;
         }
 
@@ -261,7 +316,7 @@ export default function DueCollectionDetails() {
             const totalReduction = discountAmt + paymentAmt;
 
             if (totalReduction > currentDue) {
-                toast.error(`${deptName}: Total (৳${totalReduction}) exceeds due amount (৳${currentDue})`);
+                toast.error(`${deptName}: Total (${format(totalReduction)}) exceeds due amount (${format(currentDue)})`);
                 hasInvalidAmount = true;
             }
         });
@@ -357,36 +412,37 @@ export default function DueCollectionDetails() {
         <>
             <AppHeader fixed />
 
-            <main className='p-6 lg:p-10'>
-                <div className="mb-6 flex items-center gap-4">
-                    <Button variant="ghost" onClick={() => navigate({ to: '/outdoor/reception/due-collection' })}>
+            <main className='space-y-3'>
+                <div className=" flex items-center gap-4">
+                    <Button variant="ghost" onClick={() => navigate({ to: '/dashboard/outdoor/reception/due-collection' })}>
                         <ArrowLeft className="mr-2 h-4 w-4" /> Back to List
                     </Button>
                     <Button
                         variant="outline"
-                        onClick={() => window.open(`/outdoor/reception/invoices/${invoiceId}`, '_blank')}
+                        onClick={() => navigate({ to: '/dashboard/outdoor/reception/invoices/$invoiceId', params: { invoiceId: String(invoiceId) } })}
                         className="ml-auto"
                     >
                         <Printer className="mr-2 h-4 w-4" /> Print Invoice
                     </Button>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* LEFT COLUMN: Invoice Info */}
-                    <div className="lg:col-span-4 space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <CardTitle className="text-2xl">Invoice #{invoice.id}</CardTitle>
-                                        <CardDescription>{new Date(invoice.created_at).toLocaleString()}</CardDescription>
+                <div className="space-y-6">
+                        <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                        <User className="w-4 h-4 text-white" />
                                     </div>
-                                    <Badge variant={dueAmount > 0 ? "destructive" : "default"} className="text-lg px-4 py-1">
+                                    <div className="flex-1">
+                                        <CardTitle className="text-lg font-bold">Invoice #{invoice.id}</CardTitle>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400">{fmtDateTime(new Date(invoice.created_at))}</p>
+                                    </div>
+                                    <Badge variant={dueAmount > 0 ? "destructive" : "default"} className="text-sm px-3 py-1">
                                         {dueAmount > 0 ? "UNPAID" : "PAID"}
                                     </Badge>
                                 </div>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className='p-2'>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
                                         <p className="text-muted-foreground">Patient Name</p>
@@ -410,11 +466,18 @@ export default function DueCollectionDetails() {
 
 
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Test Details</CardTitle>
+                        <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                            <CardHeader className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 border-b py-1.5 px-4 gap-0">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="p-2 bg-gradient-to-br from-purple-500 to-violet-500 rounded-lg shadow-lg">
+                                        <FlaskConical className="w-4 h-4 text-white" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-lg font-bold">Test Details</CardTitle>
+                                    </div>
+                                </div>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className='p-2'>
                                 {Object.entries(testsByDept).map(([dept, tests]) => (
                                     <div key={dept} className="mb-6 last:mb-0">
                                         <h3 className="font-semibold text-primary mb-2 border-b pb-1">{dept}</h3>
@@ -422,7 +485,7 @@ export default function DueCollectionDetails() {
                                             {tests.map((t, idx) => (
                                                 <div key={idx} className="flex justify-between items-center text-sm">
                                                     <span>{t.test?.name}</span>
-                                                    <span className="font-mono">৳{parseFloat(t.price).toFixed(2)}</span>
+                                                    <span className="font-mono">{format(parseFloat(t.price))}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -430,20 +493,46 @@ export default function DueCollectionDetails() {
                                 ))}
                                 <div className="border-t pt-2 mt-4 flex justify-between items-center font-bold text-lg">
                                     <span>Total Bill</span>
-                                    <span>৳{Number(invoice.total_amount).toFixed(2)}</span>
+                                    <span>{format(Number(invoice.total_amount))}</span>
                                 </div>
                             </CardContent>
                         </Card>
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Discount History</CardTitle>
-                                <CardDescription>All discounts applied to this invoice</CardDescription>
+                        <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                            <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-b py-1.5 px-4 gap-0">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg shadow-lg">
+                                        <Tag className="w-4 h-4 text-white" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-lg font-bold">Discount History</CardTitle>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400">All discounts applied to this invoice</p>
+                                    </div>
+                                </div>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="p-2">
                                 {(() => {
-                                    const globalDiscounts = invoice.discounts?.filter(d => parseFloat(d.amount) > 0) || [];
+                                    const rawGlobal = invoice.discounts?.filter(d => parseFloat(d.amount) > 0) || [];
                                     const deptDiscounts = invoice.department_discounts?.filter(d => parseFloat(d.discount) > 0) || [];
+
+                                    // De-duplicate due-collection "rollup" rows.
+                                    // Each due collection writes the SAME discount to two tables: a single
+                                    // global row (the total) AND per-department rows. Showing both double-counts.
+                                    // They are created in the same DB transaction, so their created_at timestamps
+                                    // coincide (within ~1s). A global discount whose created_at is within ±2s of
+                                    // any department discount is a redundant rollup → exclude it. Standalone
+                                    // creation-time discounts (no matching dept rows at that moment) stay.
+                                    const msOf = (d: { created_at?: string } | undefined) =>
+                                        d?.created_at ? new Date(d.created_at).getTime() : NaN;
+                                    const globalDiscounts = rawGlobal.filter(g => {
+                                        const gMs = msOf(g);
+                                        if (isNaN(gMs)) return true; // no timestamp → keep (safe default)
+                                        return !deptDiscounts.some(d => {
+                                            const dMs = msOf(d);
+                                            return !isNaN(dMs) && Math.abs(gMs - dMs) <= 2000;
+                                        });
+                                    });
+
                                     const hasDiscounts = globalDiscounts.length > 0 || deptDiscounts.length > 0;
 
                                     if (!hasDiscounts) {
@@ -453,20 +542,26 @@ export default function DueCollectionDetails() {
                                     return (
                                         <div className="space-y-4">
                                             <div className="flex justify-between font-medium border-b pb-2 text-xs text-muted-foreground">
-                                                <span className="w-1/3">Date</span>
-                                                <span className="w-1/3">Reason / Dept</span>
-                                                <span className="w-1/3 text-right">Amount</span>
+                                                <span className="w-1/4">Entry Date</span>
+                                                <span className="w-1/4">Reason / Dept</span>
+                                                <span className="w-1/4">Discounted by</span>
+                                                <span className="w-1/4 text-right">Amount</span>
                                             </div>
 
                                             {/* Global discounts */}
                                             {globalDiscounts.map((d, idx) => (
                                                 <div key={`g-${idx}`} className="flex justify-between items-center text-sm py-1 border-b last:border-0">
-                                                    <span className="w-1/3 text-xs text-muted-foreground">-</span>
-                                                    <span className="w-1/3 text-xs">
+                                                    <span className="w-1/4 text-xs text-muted-foreground">
+                                                        {d.created_at ? fmtDateTime(new Date(d.created_at)) : '-'}
+                                                    </span>
+                                                    <span className="w-1/4 text-xs">
                                                         <Badge variant="outline" className="text-xs px-1">{d.reason || 'General'}</Badge>
                                                     </span>
-                                                    <span className="w-1/3 text-right font-mono font-semibold text-orange-600">
-                                                        -৳{parseFloat(d.amount).toFixed(2)}
+                                                    <span className="w-1/4 text-xs text-muted-foreground">
+                                                        {d.creator?.name || '-'}
+                                                    </span>
+                                                    <span className="w-1/4 text-right font-mono font-semibold text-orange-600">
+                                                        -{format(parseFloat(d.amount))}
                                                     </span>
                                                 </div>
                                             ))}
@@ -480,14 +575,17 @@ export default function DueCollectionDetails() {
 
                                                 return (
                                                     <div key={`d-${idx}`} className="flex justify-between items-center text-sm py-1 border-b last:border-0">
-                                                        <span className="w-1/3 text-xs text-muted-foreground">
-                                                            {d.created_at ? new Date(d.created_at).toLocaleDateString('en-GB') : '-'}
+                                                        <span className="w-1/4 text-xs text-muted-foreground">
+                                                            {d.created_at ? fmtDateTime(new Date(d.created_at)) : '-'}
                                                         </span>
-                                                        <span className="w-1/3 text-xs">
+                                                        <span className="w-1/4 text-xs">
                                                             <Badge variant="outline" className="text-xs px-1">{deptName}</Badge>
                                                         </span>
-                                                        <span className="w-1/3 text-right font-mono font-semibold text-orange-600">
-                                                            -৳{parseFloat(d.discount).toFixed(2)}
+                                                        <span className="w-1/4 text-xs text-muted-foreground">
+                                                            {d.creator?.name || '-'}
+                                                        </span>
+                                                        <span className="w-1/4 text-right font-mono font-semibold text-orange-600">
+                                                            -{format(parseFloat(d.discount))}
                                                         </span>
                                                     </div>
                                                 );
@@ -496,10 +594,10 @@ export default function DueCollectionDetails() {
                                             <div className="flex justify-between font-bold border-t pt-2 mt-2">
                                                 <span className="w-1/2">Total Discount</span>
                                                 <span className="w-1/2 text-right font-mono text-orange-600">
-                                                    -৳{(
+                                                    -{format(
                                                         globalDiscounts.reduce((s, d) => s + parseFloat(d.amount), 0) +
                                                         deptDiscounts.reduce((s, d) => s + parseFloat(d.discount), 0)
-                                                    ).toFixed(2)}
+                                                    )}
                                                 </span>
                                             </div>
                                         </div>
@@ -508,49 +606,53 @@ export default function DueCollectionDetails() {
                             </CardContent>
                         </Card>
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Payment History</CardTitle>
-                                <CardDescription>All payments received for this invoice</CardDescription>
+                        <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                            <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 border-b py-1.5 px-4 gap-0">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="p-2 bg-gradient-to-br from-emerald-500 to-green-500 rounded-lg shadow-lg">
+                                        <Wallet className="w-4 h-4 text-white" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-lg font-bold">Payment History</CardTitle>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400">All payments received for this invoice</p>
+                                    </div>
+                                </div>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="p-2">
                                 {invoice.payments && invoice.payments.length > 0 ? (
                                     <div className="space-y-4">
                                         <div className="flex justify-between font-medium border-b pb-2 text-xs text-muted-foreground">
-                                            <span className="w-1/4">Pay Date</span>
-                                            <span className="w-1/4">Entry Date</span>
-                                            <span className="w-1/4">Method</span>
-                                            <span className="w-1/4 text-right">Amount</span>
+                                            <span className="w-1/5">Pay Date</span>
+                                            <span className="w-1/5">Entry Date</span>
+                                            <span className="w-1/5">Method</span>
+                                            <span className="w-1/5">Paid by</span>
+                                            <span className="w-1/5 text-right">Amount</span>
                                         </div>
                                         {invoice.payments.map((payment, idx) => (
                                             <div key={idx} className="flex justify-between items-center text-sm py-1 border-b last:border-0">
-                                                <span className="w-1/4 text-xs text-muted-foreground">
+                                                <span className="w-1/5 text-xs text-muted-foreground">
                                                     {payment.payment_date
-                                                        ? new Date(payment.payment_date).toLocaleDateString('en-GB')
-                                                        : (payment.created_at ? new Date(payment.created_at).toLocaleDateString('en-GB') : '-')}
+                                                        ? fmtDate(new Date(payment.payment_date))
+                                                        : (payment.created_at ? fmtDate(new Date(payment.created_at)) : '-')}
                                                 </span>
-                                                <span className="w-1/4 text-xs text-muted-foreground">
-                                                    {payment.created_at ? new Date(payment.created_at).toLocaleString('en-GB', {
-                                                        day: '2-digit',
-                                                        month: '2-digit',
-                                                        year: 'numeric',
-                                                        hour: 'numeric',
-                                                        minute: '2-digit',
-                                                        hour12: true
-                                                    }).replace(',', '') : 'N/A'}
+                                                <span className="w-1/5 text-xs text-muted-foreground">
+                                                    {payment.created_at ? fmtDateTime(new Date(payment.created_at)) : 'N/A'}
                                                 </span>
-                                                <span className="w-1/4 text-xs">
+                                                <span className="w-1/5 text-xs">
                                                     <Badge variant="outline" className="text-xs px-1">{payment.method || 'Cash'}</Badge>
                                                 </span>
-                                                <span className="w-1/4 text-right font-mono font-semibold text-green-600">
-                                                    ৳{parseFloat(payment.amount).toFixed(2)}
+                                                <span className="w-1/5 text-xs text-muted-foreground">
+                                                    {payment.creator?.name || '-'}
+                                                </span>
+                                                <span className="w-1/5 text-right font-mono font-semibold text-green-600">
+                                                    {format(parseFloat(payment.amount))}
                                                 </span>
                                             </div>
                                         ))}
 
                                         <div className="flex justify-between font-bold border-t pt-2 mt-2">
                                             <span className="w-1/2">Total Paid</span>
-                                            <span className="w-1/2 text-right font-mono text-green-600">৳{totalPaid.toFixed(2)}</span>
+                                            <span className="w-1/2 text-right font-mono text-green-600">{format(totalPaid)}</span>
                                         </div>
                                     </div>
                                 ) : (
@@ -558,29 +660,33 @@ export default function DueCollectionDetails() {
                                 )}
                             </CardContent>
                         </Card>
-                    </div>
-
-                    {/* RIGHT COLUMN: Payment Action */}
-                    <div className="lg:col-span-8 space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Department-wise Collection</CardTitle>
-                                <CardDescription>Manage discounts and payments per department</CardDescription>
+                    {/* Department-wise Collection (moved below the 4 cards) */}
+                        <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                        <PenLine className="w-4 h-4 text-white" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-lg font-bold">Department-wise Collection</CardTitle>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400">Manage discounts and payments per department</p>
+                                    </div>
+                                </div>
                             </CardHeader>
-                            <CardContent>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-sm border-collapse">
+                            <CardContent className='p-2'>
+                                <div ref={tableScrollRef} className="overflow-x-auto">
+                                    <table className="w-full text-sm border-collapse" style={{ minWidth: '800px' }}>
                                         <thead>
                                             <tr className="bg-muted text-muted-foreground text-xs uppercase text-right">
                                                 <th className="p-2 text-left w-32">Dept<br /><span className="text-[10px] normal-case">(Department Name)</span></th>
-                                                <th className="p-2 w-20">Bill (৳)<br /><span className="text-[10px] normal-case">(All Bill Amount)</span></th>
-                                                <th className="p-2 w-16">Disc (৳)<br /><span className="text-[10px] normal-case">(Past Discounts)</span></th>
-                                                <th className="p-2 w-24">Disc'd (৳)<br /><span className="text-[10px] normal-case">(Discounted Total)</span></th>
-                                                <th className="p-2 w-24">Paid Total (৳)<br /><span className="text-[10px] normal-case">(Already Paid)</span></th>
-                                                <th className="p-2 w-24">Due (৳)<br /><span className="text-[10px] normal-case">(Current Due)</span></th>
-                                                <th className="p-2 w-24">Discount Now (৳)<br /><span className="text-[10px] normal-case">(New Discount)</span></th>
-                                                <th className="p-2 w-24">Pay Now (৳)<br /><span className="text-[10px] normal-case">(New Payment)</span></th>
-                                                <th className="p-2 w-24">Final Due (৳)<br /><span className="text-[10px] normal-case">(After Payment)</span></th>
+                                                <th className="p-2 w-20">Bill ({currencySymbol})<br /><span className="text-[10px] normal-case">(All Bill Amount)</span></th>
+                                                <th className="p-2 w-16">Disc ({currencySymbol})<br /><span className="text-[10px] normal-case">(Past Discounts)</span></th>
+                                                <th className="p-2 w-24">Disc'd ({currencySymbol})<br /><span className="text-[10px] normal-case">(Discounted Total)</span></th>
+                                                <th className="p-2 w-24">Paid Total ({currencySymbol})<br /><span className="text-[10px] normal-case">(Already Paid)</span></th>
+                                                <th className="p-2 w-24">Due ({currencySymbol})<br /><span className="text-[10px] normal-case">(Current Due)</span></th>
+                                                <th className="p-2 w-24">Discount Now ({currencySymbol})<br /><span className="text-[10px] normal-case">(New Discount)</span></th>
+                                                <th className="p-2 w-24">Pay Now ({currencySymbol})<br /><span className="text-[10px] normal-case">(New Payment)</span></th>
+                                                <th className="p-2 w-24">Final Due ({currencySymbol})<br /><span className="text-[10px] normal-case">(After Payment)</span></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -780,7 +886,7 @@ export default function DueCollectionDetails() {
                                     </div>
                                 </div>
                             </CardContent>
-                            <CardFooter>
+                            <CardFooter className="pb-4">
                                 <Button
                                     className="w-full"
                                     size="lg"
@@ -796,7 +902,6 @@ export default function DueCollectionDetails() {
                                 )}
                             </CardFooter>
                         </Card>
-                    </div>
                 </div>
             </main >
         </>

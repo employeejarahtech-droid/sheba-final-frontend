@@ -133,7 +133,7 @@ export function ConfirmBalancePage({ admissionId }: ConfirmBalancePageProps) {
         onSuccess: () => {
             toast.success('Billing cycle confirmed as complete!')
             setOpenConfirmDialog(false)
-            navigate({ to: '/admission/patients' })
+            navigate({ to: '/dashboard/admission/patients' })
         },
         onError: () => {
             toast.error('Failed to confirm completion')
@@ -178,7 +178,7 @@ export function ConfirmBalancePage({ admissionId }: ConfirmBalancePageProps) {
                 title="Confirm Balance & Complete Process"
                 subtitle={`Final review of all payments • ${admission?.patient_name}`}
                 backButton={{
-                    onClick: () => navigate({ to: '/admission/patients/$admissionId/distribute-bill', params: { admissionId: String(admissionId) } }),
+                    onClick: () => navigate({ to: '/dashboard/admission/patients/$admissionId/distribute-bill', params: { admissionId: String(admissionId) } }),
                 }}
             />
 
@@ -477,7 +477,7 @@ export function ConfirmBalancePage({ admissionId }: ConfirmBalancePageProps) {
             <div className="flex justify-between">
                 <Button
                     variant="outline"
-                    onClick={() => navigate({ to: '/admission/patients/$admissionId/distribute-bill', params: { admissionId: String(admissionId) } })}
+                    onClick={() => navigate({ to: '/dashboard/admission/patients/$admissionId/distribute-bill', params: { admissionId: String(admissionId) } })}
                 >
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back to Distributions

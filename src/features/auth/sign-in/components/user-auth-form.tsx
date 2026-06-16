@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useLogin } from '@/hooks/useLogin'
+import { getBaseDomain } from '@/lib/subdomain'
 
 const formSchema = z.object({
   email: z.email({
@@ -47,32 +48,37 @@ export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormPr
   })
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    //console.log("Submitted Data", data?.email, data?.password);
     login.mutate(data, {
-      onSuccess: () => {
-        navigate({ to: redirectTo || "/", replace: true });
+      onSuccess: (res) => {
+        // Backend returns: { data: { user: { subdomain, ... }, token } }
+        const responseData = res.data || res
+        const subdomain = responseData.user?.subdomain
+
+        if (subdomain) {
+          const baseDomain = getBaseDomain()
+          const currentHost = window.location.hostname
+          const tenantHost = `${subdomain}.${baseDomain}`
+
+          // If already on the correct subdomain, do a client-side navigate
+          if (currentHost === tenantHost) {
+            navigate({ to: redirectTo || '/dashboard', replace: true })
+          } else {
+            // Cross-subdomain redirect via auth-callback
+            // Pass token & user in URL params so the callback page can
+            // set cookies locally on the target subdomain
+            const port = window.location.port
+            const portStr = port ? `:${port}` : ''
+            const token = responseData.accessToken || responseData.token
+            const user = responseData.user
+            const callbackUrl = `${window.location.protocol}//${tenantHost}${portStr}/auth-callback?token=${encodeURIComponent(token)}&user=${encodeURIComponent(JSON.stringify(user))}`
+            window.location.href = callbackUrl
+          }
+        } else {
+          // No subdomain — navigate locally
+          navigate({ to: redirectTo || '/dashboard', replace: true })
+        }
       },
-    });
-    // login.mutate(
-    //   { email: data.email, password: data.password },
-    //   {
-    //     onSuccess: (res) => {
-    //       const user = res.user || res.data || res.profile;
-
-    //       if (!user) {
-    //         toast.error("Server did not return a valid user object");
-    //         return;
-    //       }
-
-    //       toast.success(`Welcome back, ${user.email}!`);
-    //       navigate({ to: redirectTo || "/", replace: true });
-    //     },
-    //     onError: (err) => {
-    //       toast.error(err.message || "Login failed");
-    //     },
-    //   }
-    // );
-
+    })
   }
 
   return (

@@ -294,7 +294,7 @@ export default function ServiceCategories({ page, limit, search, setPage, setLim
             const id = button.getAttribute('data-id');
 
             if (action === 'view' && id) {
-                navigate({ to: `/indoor/master/service-categories/${id}` });
+                navigate({ to: `/dashboard/indoor/master/service-categories/${id}` });
             } else if (action === 'edit' && id) {
                 setSelectedServiceCategoryId(Number(id));
                 setOpenEditForm(true);

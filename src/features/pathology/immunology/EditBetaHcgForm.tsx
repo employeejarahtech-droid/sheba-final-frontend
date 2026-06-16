@@ -125,7 +125,7 @@ export function EditBetaHCGTestForm({ open, setOpen, reportId, invoiceId }: HCGT
         onSuccess: (data) => {
             toast.success(data.message || "Test created successfully!");
             console.log("API Response:", data);
-            navigate({ to: "/pathology/immunology/beta-hcg" });
+            navigate({ to: "/dashboard/pathology/immunology/beta-hcg" });
             queryClient.invalidateQueries({
                 queryKey: ["hcg", reportId],
             });

@@ -1,6 +1,8 @@
 import { type ReactNode } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
+import { useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
+import { useState, useEffect } from 'react'
 
 import {
   Collapsible,
@@ -41,7 +43,9 @@ export function NavGroup({ title, items }: NavGroupProps) {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>{title}</SidebarGroupLabel>
+      <SidebarGroupLabel className="font-bold text-xs tracking-wider">
+        {title}
+      </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <NavItemRenderer
@@ -65,6 +69,22 @@ function NavBadge({ children }: { children: ReactNode }) {
 }
 
 /* -------------------------------------------
+  REFRESH-ON-SAME-PAGE
+  Clicking a sidebar link for the page you're already on does not remount the
+  route, so React Query would keep showing cached data. When that happens,
+  invalidate the query cache so any active (mounted) queries refetch — i.e.
+  re-clicking a nav item refreshes its data. Only triggers on same-page
+  re-navigation; navigating to a different page refetches on mount anyway.
+-------------------------------------------- */
+function refreshIfSamePage(queryClient: QueryClient, url: string | undefined, href: string) {
+  if (!url) return;
+  const currentPath = href.split('?')[0];
+  if (currentPath === url) {
+    queryClient.invalidateQueries();
+  }
+}
+
+/* -------------------------------------------
   RECURSIVE ITEM RENDERER
 -------------------------------------------- */
 function NavItemRenderer({
@@ -78,19 +98,14 @@ function NavItemRenderer({
   isRoot?: boolean;
   isCollapsed?: boolean;
 }) {
-  // Simple link (leaf)
   if (!item.items || item.items.length === 0) {
     return <SidebarMenuSimpleLink item={item} href={href} />;
   }
 
-  // COLLAPSED → DROPDOWN for root-level only
   if (isRoot && isCollapsed) {
-    return (
-      <SidebarMenuCollapsedDropdown item={item} href={href} />
-    );
+    return <SidebarMenuCollapsedDropdown item={item} href={href} />;
   }
 
-  // COLLAPSIBLE (normal nested open/close)
   return <SidebarMenuRecursiveCollapsible item={item} href={href} />;
 }
 
@@ -105,6 +120,7 @@ function SidebarMenuSimpleLink({
   href: string;
 }) {
   const { setOpenMobile } = useSidebar();
+  const queryClient = useQueryClient();
 
   return (
     <SidebarMenuItem>
@@ -113,9 +129,9 @@ function SidebarMenuSimpleLink({
         isActive={checkIsActive(href, item)}
         tooltip={item.title}
       >
-        <Link to={item.url!} onClick={() => setOpenMobile(false)}>
+        <Link to={item.url!} onClick={() => { refreshIfSamePage(queryClient, item.url, href); setOpenMobile(false); }}>
           {item.icon && <item.icon />}
-          <span className={item.bold ? 'font-bold' : ''}>{item.title}</span>
+          <span>{item.title}</span>
           {item.badge && <NavBadge>{item.badge}</NavBadge>}
         </Link>
       </SidebarMenuButton>
@@ -126,34 +142,31 @@ function SidebarMenuSimpleLink({
 /* -------------------------------------------
   RECURSIVE COLLAPSIBLE (supports unlimited depth)
 -------------------------------------------- */
-import { useState } from 'react'
-
 function SidebarMenuRecursiveCollapsible({
   item,
   href,
   depth = 1,
 }: {
-  item: NavItem
-  href: string
-  depth?: number
+  item: NavItem;
+  href: string;
+  depth?: number;
 }) {
-  
-  // const { setOpenMobile } = useSidebar()
-  const isDefaultOpen = checkIsActive(href, item, true)
-  const [open, setOpen] = useState(isDefaultOpen) // track open state locally
+  const [open, setOpen] = useState(true);
+
+  // Auto-expand when navigating to a child item
+  useEffect(() => {
+    if (checkIsActive(href, item, true) && !open) {
+      setOpen(true);
+    }
+  }, [href]);
 
   return (
-    <Collapsible
-      asChild
-      defaultOpen={isDefaultOpen}
-      onOpenChange={(state) => setOpen(state)}
-      className="collapsible"
-    >
+    <Collapsible asChild open={open} onOpenChange={setOpen}>
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
           <SidebarMenuButton tooltip={item.title}>
             {item.icon && <item.icon />}
-            <span className={item.bold ? 'font-bold' : ''}>{item.title}</span>
+            <span>{item.title}</span>
             {item.badge && <NavBadge>{item.badge}</NavBadge>}
             <ChevronRight
               className={`ms-auto transition-transform duration-200 ${
@@ -174,7 +187,7 @@ function SidebarMenuRecursiveCollapsible({
         </CollapsibleContent>
       </SidebarMenuItem>
     </Collapsible>
-  )
+  );
 }
 
 /* -------------------------------------------
@@ -185,25 +198,25 @@ function NavItemRecursiveRenderer({
   href,
   depth = 2,
 }: {
-  item: NavItem
-  href: string
-  depth?: number
+  item: NavItem;
+  href: string;
+  depth?: number;
 }) {
+  const queryClient = useQueryClient();
+
   if (!item.items) {
     return (
       <SidebarMenuSubButton asChild isActive={checkIsActive(href, item)}>
-        <Link to={item.url!}>
+        <Link to={item.url!} onClick={() => refreshIfSamePage(queryClient, item.url, href)}>
           {item.icon && <item.icon />}
-          <span className={item.bold ? 'font-bold' : ''}>{item.title}</span>
+          <span>{item.title}</span>
         </Link>
       </SidebarMenuSubButton>
-    )
+    );
   }
 
-  return <SidebarMenuRecursiveCollapsible item={item} href={href} depth={depth} />
+  return <SidebarMenuRecursiveCollapsible item={item} href={href} depth={depth} />;
 }
-
-
 
 /* -------------------------------------------
   COLLAPSED MODE (root level only)
@@ -215,6 +228,8 @@ function SidebarMenuCollapsedDropdown({
   item: NavItem;
   href: string;
 }) {
+  const queryClient = useQueryClient();
+
   return (
     <SidebarMenuItem>
       <DropdownMenu>
@@ -231,7 +246,7 @@ function SidebarMenuCollapsedDropdown({
         </DropdownMenuTrigger>
 
         <DropdownMenuContent side="right" align="start" sideOffset={4}>
-          <DropdownMenuLabel className={item.bold ? 'font-bold' : ''}>{item.title}</DropdownMenuLabel>
+          <DropdownMenuLabel>{item.title}</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
           {item.items!.map((sub) => (
@@ -240,9 +255,9 @@ function SidebarMenuCollapsedDropdown({
               asChild
               className={`${checkIsActive(href, sub) ? "bg-secondary" : ""}`}
             >
-              <Link to={sub.url!}>
+              <Link to={sub.url!} onClick={() => refreshIfSamePage(queryClient, sub.url, href)}>
                 {sub.icon && <sub.icon />}
-                <span className={sub.bold ? 'font-bold' : ''}>{sub.title}</span>
+                <span>{sub.title}</span>
               </Link>
             </DropdownMenuItem>
           ))}
@@ -256,18 +271,12 @@ function SidebarMenuCollapsedDropdown({
   ACTIVE STATE CHECK
 -------------------------------------------- */
 function checkIsActive(href: string, item: NavItem, mainNav = false) {
-  const cleanHref = href.split("?")[0].replace(/\/+$/, "");
-  const cleanUrl = item.url?.replace(/\/+$/, "") || "";
-
   return (
-    (cleanUrl && cleanHref === cleanUrl) ||
-    item.items?.some((i) => {
-      if (!i.url) return false;
-      return cleanHref === i.url.replace(/\/+$/, "");
-    }) ||
+    href === item.url ||
+    href.split("?")[0] === item.url ||
+    item.items?.some((i) => i.url === href) ||
     (mainNav &&
-      cleanUrl &&
-      cleanHref.split("/")[1] !== "" &&
-      cleanHref.split("/")[1] === cleanUrl.split("/")[1])
+      href.split("/")[1] !== "" &&
+      href.split("/")[1] === item?.url?.split("/")[1])
   );
 }

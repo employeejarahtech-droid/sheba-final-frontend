@@ -127,7 +127,7 @@ export function EditMTForm({ open, setOpen, reportId, invoiceId }: TuberculinTes
         onSuccess: (data) => {
             toast.success(data.message || "Test created successfully!");
             console.log("API Response:", data);
-            navigate({ to: "/pathology/immunology/mt" });
+            navigate({ to: "/dashboard/pathology/immunology/mt" });
             // optional:
             // form.reset();
             queryClient.invalidateQueries({

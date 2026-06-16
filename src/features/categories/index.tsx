@@ -12,6 +12,13 @@ import { useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
 import { Card, CardContent } from '@/components/ui/card'
 import { Activity, Layers, Database, TrendingUp } from 'lucide-react'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 
 type CategoryItem = {
     id: number;
@@ -23,23 +30,38 @@ type CategoryItem = {
     created_by_name?: string;
 };
 
-export default function Categories() {
+type CategoriesProps = {
+    page: number;
+    limit: number;
+    search: string;
+    departmentId: string;
+    setPage: (page: number) => void;
+    setLimit: (limit: number) => void;
+    setSearch: (search: string) => void;
+    setDepartmentId: (department: string) => void;
+};
+
+export default function Categories({ page, limit, search, departmentId, setPage, setLimit, setSearch, setDepartmentId }: CategoriesProps) {
     const [openEditForm, setOpenEditForm] = useState<boolean>(false);
     const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
-    const [page, setPage] = useState(1);
-    const [limit, setLimit] = useState(10);
-    const [search, setSearch] = useState("");
 
 
     const token = getCookie('accessToken');
     //const navigate = useNavigate();
 
-    const { data } = useQuery({
-        queryKey: ["category", page, limit, search],
+    const { data, isFetching } = useQuery({
+        queryKey: ["category", page, limit, search, departmentId],
 
         queryFn: async () => {
+            const params = new URLSearchParams({
+                page: String(page),
+                limit: String(limit),
+                search: search,
+            });
+            if (departmentId && departmentId !== 'all') params.set('department_id', departmentId);
+
             const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/test-category?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
+                `${import.meta.env.VITE_API_URL}/api/test-category?${params.toString()}`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
@@ -85,6 +107,23 @@ export default function Categories() {
     });
 
     const stats = statsData || { totalCategories: 0, totalTests: 0, totalReports: 0, totalRevenue: 0 };
+
+    // Fetch departments for filter dropdown
+    const { data: departmentsData } = useQuery({
+        queryKey: ["departments"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/department?limit=100`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch departments");
+            const result = await res.json();
+            return result.data?.rows || result.data?.items || result.data || [];
+        },
+        enabled: !!token,
+    });
 
     const statCards = [
         {
@@ -203,7 +242,7 @@ export default function Categories() {
 
                         <!-- Actions -->
                         <div class="mt-8 flex justify-end gap-3 border-t pt-5">
-                            <a href="/outdoor/master/categories/${id}"
+                            <a href="/dashboard/outdoor/master/categories/${id}"
                                class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 transition h-10 px-5">
                                 View
                             </a>
@@ -301,7 +340,7 @@ export default function Categories() {
             render: (_data: any, _type: string, row: CategoryItem) => {
                 return `
                     <div class="flex gap-2">
-                        <a href="/outdoor/master/categories/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+                        <a href="/dashboard/outdoor/master/categories/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
                             View
                         </a>
                         <button onclick="window.editCategory(${row.id})" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
@@ -353,15 +392,28 @@ export default function Categories() {
                     data={data?.data?.items || []}
                     meta={data?.data?.meta}
                     onPageChange={setPage}
-                    onLimitChange={(newLimit) => {
-                        setLimit(newLimit);
-                        setPage(1);
-                    }}
+                    onLimitChange={setLimit}
                     search={search}
-                    onSearchChange={(value) => {
-                        setSearch(value);
-                        setPage(1);
-                    }}
+                    onSearchChange={setSearch}
+                    isLoading={isFetching}
+                    filterSlot={
+                        <Select
+                            value={departmentId}
+                            onValueChange={setDepartmentId}
+                        >
+                            <SelectTrigger className="w-[180px] h-9">
+                                <SelectValue placeholder="All Departments" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Departments</SelectItem>
+                                {departmentsData?.map((dept: any) => (
+                                    <SelectItem key={dept.id} value={String(dept.id)}>
+                                        {dept.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    }
                 />
                 <EditCategoryForm open={openEditForm} setOpen={setOpenEditForm} categoryId={selectedCategoryId} />
             </div>

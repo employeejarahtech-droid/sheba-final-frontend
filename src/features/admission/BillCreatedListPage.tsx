@@ -529,7 +529,7 @@ export function BillCreatedListPage({ page, limit, search, setPage, setSearch }:
                 const hasFinalBill = !!row.finalBill
 
                 let buttons = `
-                    <button onclick="window.location.href='/admission/patients/${row.id}'"
+                    <button onclick="window.location.href='/dashboard/admission/patients/${row.id}'"
                             class="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         View
@@ -538,7 +538,7 @@ export function BillCreatedListPage({ page, limit, search, setPage, setSearch }:
 
                 if (!hasFinalBill) {
                     buttons += `
-                        <button onclick="window.location.href='/admission/patients/${row.id}/final-bill'"
+                        <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/final-bill'"
                                 class="inline-flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium shadow transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" x2="12" y1="18" y2="12"/><line x1="9" x2="15" y1="15" y2="15"/></svg>
                             Create Final Bill
@@ -854,10 +854,10 @@ export function BillCreatedListPage({ page, limit, search, setPage, setSearch }:
 
                             <!-- ACTION BUTTONS -->
                             <div class='flex flex-row flex-wrap gap-3 pt-4 w-full max-w-full box-border'>
-                                <a href="/admission/patients/${id}/print" class='flex-1 min-w-[140px] text-center px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-lg text-sm font-medium shadow transition no-underline box-border'>
+                                <a href="/dashboard/admission/patients/${id}/print" class='flex-1 min-w-[140px] text-center px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-lg text-sm font-medium shadow transition no-underline box-border'>
                                     Print Details
                                 </a>
-                                <button onclick="window.location.href='/admission/patients/${id}/final-bill'" class='flex-1 min-w-[140px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium shadow transition box-border'>
+                                <button onclick="window.location.href='/dashboard/admission/patients/${id}/final-bill'" class='flex-1 min-w-[140px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium shadow transition box-border'>
                                     Create Final Bill
                                 </button>
                             </div>

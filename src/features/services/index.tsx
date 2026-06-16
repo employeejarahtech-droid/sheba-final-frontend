@@ -49,6 +49,10 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
             return res.json();
         },
         enabled: !!token,
+        // Global default is refetchOnMount: false; override so the list refetches
+        // when remounting with stale data (e.g. after creating/editing a service,
+        // which invalidates this query before navigating back).
+        refetchOnMount: true,
         placeholderData: (prev) =>
             prev
                 ? prev
@@ -75,6 +79,7 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
             return result.data || { totalServices: 0, activeServices: 0 };
         },
         enabled: !!token,
+        refetchOnMount: true,
     });
 
     const stats = statsData || { totalServices: 0, activeServices: 0 };
@@ -123,13 +128,13 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
             defaultContent: "",
         },
         {
+            data: "name",
+            title: "Service Name",
+        },
+        {
             data: "category",
             title: "Category",
             render: (data: any) => data || '-',
-        },
-        {
-            data: "name",
-            title: "Service Name",
         },
         {
             data: "description",
@@ -323,9 +328,9 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
             const id = button.getAttribute('data-id');
 
             if (action === 'view' && id) {
-                navigate({ to: `/indoor/master/services/${id}` });
+                navigate({ to: `/dashboard/indoor/master/services/${id}` });
             } else if (action === 'edit' && id) {
-                navigate({ to: `/indoor/master/services/edit/${id}` });
+                navigate({ to: `/dashboard/indoor/master/services/edit/${id}` });
             }
         };
 
@@ -371,7 +376,7 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
                     title="List of Services"
                     actions={
                         <Button
-                            onClick={() => navigate({ to: '/indoor/master/services/create' })}
+                            onClick={() => navigate({ to: '/dashboard/indoor/master/services/create' })}
                             className="bg-blue-600 hover:bg-blue-700"
                         >
                             <Plus className="h-4 w-4 mr-2" />

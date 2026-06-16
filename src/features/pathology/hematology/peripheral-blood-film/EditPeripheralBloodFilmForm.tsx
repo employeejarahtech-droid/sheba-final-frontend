@@ -143,7 +143,7 @@ export function EditPeripheralBloodFilmForm({ open, setOpen, reportId, invoiceId
             console.log("Peripheral Blood Film Updated API Response:", data);
             queryClient.invalidateQueries({ queryKey: ["peripheral-blood", reportId] });
             toast.success("Peripheral Blood Film updated successfully");
-            navigate({ to: "/pathology/hematology/peripheral-blood-film" });
+            navigate({ to: "/dashboard/pathology/hematology/peripheral-blood-film" });
         },
         onError: (error: Error) => {
             toast.error(error.message || "Failed to update Peripheral Blood Film");

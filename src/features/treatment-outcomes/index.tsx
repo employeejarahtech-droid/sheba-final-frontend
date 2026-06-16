@@ -293,7 +293,7 @@ export default function TreatmentOutcomes({ page, limit, search, setPage, setLim
             const id = button.getAttribute('data-id');
 
             if (action === 'view' && id) {
-                navigate({ to: `/indoor/master/treatment-outcomes/${id}` });
+                navigate({ to: `/dashboard/indoor/master/treatment-outcomes/${id}` });
             } else if (action === 'edit' && id) {
                 setSelectedTreatmentOutcomeId(Number(id));
                 setOpenEditForm(true);

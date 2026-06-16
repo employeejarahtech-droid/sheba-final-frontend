@@ -4,11 +4,30 @@ import { DataTable } from '@/components/DataTable'
 import { useState, useMemo, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
+import { useCurrency } from '@/hooks/use-currency'
 import { FileText, DollarSign, Calendar, Plus, Filter } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Check } from 'lucide-react'
 import { cn } from "@/lib/utils"
+import { DateField } from "@/components/date-field"
+import { useDateFormat } from "@/hooks/use-date-format"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+type MyInvoicesProps = {
+    page: number;
+    limit: number;
+    search: string;
+    statusFilter: string;
+    from: string;
+    to: string;
+    setPage: (page: number) => void;
+    setLimit: (limit: number) => void;
+    setSearch: (search: string) => void;
+    setStatusFilter: (status: string) => void;
+    setFrom: (from: string) => void;
+    setTo: (to: string) => void;
+};
 
 type InvoiceItem = {
     id: number;
@@ -37,22 +56,23 @@ type InvoiceItem = {
     status: string | null;
 };
 
-export default function MyInvoices() {
-    const [page, setPage] = useState(1);
-    const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState<string>("all");
+export default function MyInvoices({ page, limit, search, statusFilter, from, to, setPage, setLimit, setSearch, setStatusFilter, setFrom, setTo }: MyInvoicesProps) {
     const [openFilter, setOpenFilter] = useState(false);
-    const [limit, setLimit] = useState(10);
 
     const token = getCookie('accessToken');
+    const { currency, currencySymbol, format } = useCurrency();
+    const fmtNum = (v: any) => Number(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const { dateFormat, formatDate: fmtDate } = useDateFormat();
 
-    const { data } = useQuery({
-        queryKey: ["my-invoices", page, limit, search, statusFilter],
+    const { data, isFetching } = useQuery({
+        queryKey: ["my-invoices", page, limit, search, statusFilter, from, to],
 
         queryFn: async () => {
             const statusParam = statusFilter !== "all" ? `&status=${statusFilter}` : "";
+            const fromParam = from ? `&from=${encodeURIComponent(from)}` : "";
+            const toParam = to ? `&to=${encodeURIComponent(to)}` : "";
             const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/outdoor-invoice/my-invoices?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}`,
+                `${import.meta.env.VITE_API_URL}/api/outdoor-invoice/my-invoices?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
@@ -99,28 +119,63 @@ export default function MyInvoices() {
                 icon: <FileText className="w-6 h-6 text-white" />,
             },
             {
-                label: "Total Bill",
-                value: `৳${(serverStats.total_bill || 0).toLocaleString()}`,
+                label: `Total Bill (${currency})`,
+                value: fmtNum(serverStats.total_bill || 0),
                 gradient: "from-emerald-600 to-emerald-400",
                 shadow: "shadow-emerald-500/30",
                 icon: <DollarSign className="w-6 h-6 text-white" />,
             },
             {
-                label: "Total Paid",
-                value: `৳${(serverStats.total_paid || 0).toLocaleString()}`,
+                label: `Total Paid (${currency})`,
+                value: fmtNum(serverStats.total_paid || 0),
                 gradient: "from-amber-600 to-amber-400",
                 shadow: "shadow-amber-500/30",
                 icon: <Calendar className="w-6 h-6 text-white" />,
             },
             {
-                label: "Total Due",
-                value: `৳${(serverStats.total_due || 0).toLocaleString()}`,
+                label: `Total Due (${currency})`,
+                value: fmtNum(serverStats.total_due || 0),
                 gradient: "from-red-600 to-red-400",
                 shadow: "shadow-red-500/30",
                 icon: <Calendar className="w-6 h-6 text-white" />,
             },
         ];
-    }, [data]);
+    }, [data, currencySymbol]);
+
+    // ---- Date filter presets (Filter By) ----
+    const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+    // Format as LOCAL YYYY-MM-DD. Do NOT use toISOString() — it converts to UTC and
+    // shifts the date back one day in timezones east of UTC (e.g. UTC+6 → off-by-one).
+    const toYMD = (d: Date) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    };
+    const datePresets = useMemo(() => ({
+        today: { label: 'Today', from: toYMD(today()), to: toYMD(today()) },
+        yesterday: (() => { const d = today(); d.setDate(d.getDate() - 1); return { label: 'Yesterday', from: toYMD(d), to: toYMD(d) }; })(),
+        last7: { label: 'Last 7 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 6); return d; })()), to: toYMD(today()) },
+        last15: { label: 'Last 15 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 14); return d; })()), to: toYMD(today()) },
+        last30: { label: 'Last 30 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 29); return d; })()), to: toYMD(today()) },
+        last45: { label: 'Last 45 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 44); return d; })()), to: toYMD(today()) },
+        last60: { label: 'Last 60 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 59); return d; })()), to: toYMD(today()) },
+        last90: { label: 'Last 90 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 89); return d; })()), to: toYMD(today()) },
+        last180: { label: 'Last 180 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 179); return d; })()), to: toYMD(today()) },
+        last365: { label: 'Last 365 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 364); return d; })()), to: toYMD(today()) },
+    }), []);
+    // Detect which preset (if any) currently matches the from/to in the URL
+    const activePreset = useMemo(() => {
+        if (!from || !to) return 'custom';
+        const match = Object.entries(datePresets).find(([, v]) => v.from === from && v.to === to);
+        return match ? match[0] : 'custom';
+    }, [from, to, datePresets]);
+    const [presetOpen, setPresetOpen] = useState(false);
+    const applyPreset = (key: string) => {
+        const p = (datePresets as any)[key];
+        if (p) { setFrom(p.from); setTo(p.to); }
+        setPresetOpen(false);
+    };
 
     // Handle expand button clicks using event delegation
     useEffect(() => {
@@ -268,7 +323,7 @@ export default function MyInvoices() {
                 const isPaid = dueAmount === 0;
                 const statusBadge = isPaid
                     ? '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-600">Paid</span>'
-                    : '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-600">Unpaid</span>';
+                    : '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-600">Due</span>';
 
                 // Build tests table HTML
                 const testsTableHTML = invoice.selected_tests?.map((test: any, index: number) => `
@@ -289,10 +344,11 @@ export default function MyInvoices() {
                     <tr class="border-b">
                         <td class="py-2 px-3">${formatDate(paymentDate)}</td>
                         <td class="py-2 px-3">${method}</td>
+                        <td class="py-2 px-3">${payment.creator?.name || '-'}</td>
                         <td class="py-2 px-3 text-right text-emerald-600 font-medium">${Number(payment.amount).toFixed(2)}</td>
                     </tr>
                     `;
-                }).join('') || '<tr><td colspan="3" class="py-4 text-center text-gray-500">No payments made yet</td></tr>';
+                }).join('') || '<tr><td colspan="4" class="py-4 text-center text-gray-500">No payments made yet</td></tr>';
 
                 // Build discounts table HTML
                 const discountsTableHTML = invoice.department_discounts?.map((discount: any) => {
@@ -305,6 +361,7 @@ export default function MyInvoices() {
                     return `
                     <tr class="border-b">
                         <td class="py-2 px-3">${deptName}</td>
+                        <td class="py-2 px-3">${discount.creator?.name || '-'}</td>
                         <td class="py-2 px-3 text-right text-orange-600 font-medium">${Number(discount.discount).toFixed(2)}</td>
                     </tr>
                     `;
@@ -429,6 +486,7 @@ export default function MyInvoices() {
                                     <thead>
                                         <tr class="bg-gray-50">
                                             <th class="py-2 border text-left px-3">Department</th>
+                                            <th class="py-2 border text-left px-3">Discounted by</th>
                                             <th class="py-2 border text-right px-3 w-24">Discount</th>
                                         </tr>
                                     </thead>
@@ -446,6 +504,7 @@ export default function MyInvoices() {
                                         <tr class="bg-gray-50">
                                             <th class="py-2 border text-left px-3">Date</th>
                                             <th class="py-2 border text-left px-3">Method</th>
+                                            <th class="py-2 border text-left px-3">Paid by</th>
                                             <th class="py-2 border text-right px-3 w-24">Amount</th>
                                         </tr>
                                     </thead>
@@ -462,35 +521,35 @@ export default function MyInvoices() {
                             <div class="space-y-3 text-sm">
                                 <div class="flex justify-between items-center">
                                     <span class="text-gray-600">Gross Total:</span>
-                                    <span class="font-semibold text-gray-800">৳${Number(invoice.total_amount || 0).toFixed(2)}</span>
+                                    <span class="font-semibold text-gray-800">${format(Number(invoice.total_amount || 0))}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-gray-600">Total Discount:</span>
-                                    <span class="font-semibold text-orange-600">- ৳${totalDiscounts.toFixed(2)}</span>
+                                    <span class="font-semibold text-orange-600">- ${format(totalDiscounts)}</span>
                                 </div>
                                 <div class="flex justify-between items-center border-t border-gray-300 pt-2">
                                     <span class="text-gray-700 font-medium">Net Payable:</span>
-                                    <span class="font-bold text-lg text-gray-900">৳${Number(invoice.net_amount || 0).toFixed(2)}</span>
+                                    <span class="font-bold text-lg text-gray-900">${format(Number(invoice.net_amount || 0))}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-gray-600">Paid Amount:</span>
-                                    <span class="font-semibold text-emerald-600">৳${totalPayments.toFixed(2)}</span>
+                                    <span class="font-semibold text-emerald-600">${format(totalPayments)}</span>
                                 </div>
                                 <div class="flex justify-between items-center border-t-2 border-gray-400 pt-3 mt-2">
                                     <span class="text-gray-800 font-bold text-base">Balance Due:</span>
-                                    <span class="font-bold text-2xl ${dueAmount > 0 ? 'text-red-600' : 'text-emerald-600'}">৳${dueAmount.toFixed(2)}</span>
+                                    <span class="font-bold text-2xl ${dueAmount > 0 ? 'text-red-600' : 'text-emerald-600'}">${format(dueAmount)}</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Actions -->
                         <div class="flex justify-end gap-3 pt-4 border-t">
-                            <a href="/outdoor/reception/invoices/${id}"
+                            <a href="/dashboard/outdoor/reception/invoices/${id}"
                                class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
                                 Print Invoice
                             </a>
                             ${!isPaid ? `
-                            <a href="/outdoor/reception/due-collection/${id}"
+                            <a href="/dashboard/outdoor/reception/due-collection/${id}"
                                class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 h-10 px-5 transition shadow-md">
                                 Pay Now
                             </a>
@@ -523,7 +582,7 @@ export default function MyInvoices() {
         return () => {
             document.removeEventListener('click', handleExpandClick);
         };
-    }, [token]);
+    }, [token, currencySymbol]);
 
 
     const columns = [
@@ -594,7 +653,7 @@ export default function MyInvoices() {
         },
         {
             data: "total_paid",
-            title: "Paid (৳)",
+            title: `Paid (${currencySymbol})`,
             orderable: true,
             responsivePriority: 2,
             render: (data: any) => `<span class="text-emerald-600 font-medium">${data ?? 0}</span>`,
@@ -602,25 +661,38 @@ export default function MyInvoices() {
         },
         {
             data: "due_amount",
-            title: "Due (৳)",
+            title: `Due (${currencySymbol})`,
             orderable: true,
             responsivePriority: 2,
             render: (data: any) => `<span class="text-red-600 font-bold">${data ?? 0}</span>`,
             defaultContent: "0",
         },
         {
-            data: "created_at",
-            title: "Date",
+            data: null,
+            title: "Inv. Date and Time",
+            orderable: true,
+            responsivePriority: 3,
+            render: (_data: any, _type: string, row: InvoiceItem) => {
+                const invDate = row.invoice_date ? new Date(row.invoice_date) : null;
+                const created = row.created_at ? new Date(row.created_at) : null;
+                if (!invDate && !created) return "-";
+                const dateStr = invDate ? fmtDate(invDate) : (created ? fmtDate(created) : "-");
+                const timeStr = created
+                    ? created.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+                    : "";
+                return timeStr ? `${dateStr} ${timeStr}` : dateStr;
+            },
+            defaultContent: "-",
+        },
+        {
+            data: "delivery_date",
+            title: "Delivery Date",
             orderable: true,
             responsivePriority: 3,
             render: (data: any) => {
                 if (!data) return "-";
                 const date = new Date(data);
-                return date.toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                });
+                return fmtDate(date);
             },
             defaultContent: "-",
         },
@@ -648,7 +720,7 @@ export default function MyInvoices() {
             render: (_data: any, _type: string, row: InvoiceItem) => {
                 const dueAmount = Number(row.due_amount || 0);
                 const isPaid = dueAmount === 0;
-                const status = isPaid ? "paid" : "unpaid";
+                const status = isPaid ? "paid" : "due";
                 const bgColor = isPaid ? "bg-emerald-500" : "bg-red-500";
                 return `<span class="${bgColor} text-white px-2 py-1 rounded text-xs font-semibold">${status.toUpperCase()}</span>`;
             },
@@ -662,10 +734,10 @@ export default function MyInvoices() {
             render: (_data: any, _type: string, row: InvoiceItem) => {
                 return `
                     <div class="flex gap-2">
-                        <a href="/outdoor/reception/invoices/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+                        <a href="/dashboard/outdoor/reception/invoices/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
                             Print
                         </a>
-                        <a href="/outdoor/reception/due-collection/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 h-8 px-4 py-2">
+                        <a href="/dashboard/outdoor/reception/due-collection/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 h-8 px-4 py-2">
                             Pay Now
                         </a>
                     </div>
@@ -704,10 +776,6 @@ export default function MyInvoices() {
                                     {item.value || 0}
                                 </h3>
                             </div>
-                            {/* Icon - hidden on mobile/tablet/laptop, visible only on large desktop (xl+) */}
-                            <div className="hidden xl:block rounded-xl bg-white/20 p-2.5 backdrop-blur-sm flex-shrink-0">
-                                {item.icon}
-                            </div>
                         </div>
 
                         {/* Progress/Indicator line */}
@@ -719,54 +787,96 @@ export default function MyInvoices() {
             </div>
 
             <DataTable
+                key={dateFormat}
                 tableTitle="My Invoices"
                 columns={columns}
                 data={data?.data?.items || []}
                 meta={data?.data?.meta}
                 onPageChange={setPage}
-                onLimitChange={(newLimit) => {
-                    setLimit(newLimit);
-                    setPage(1);
-                }}
+                onLimitChange={setLimit}
                 search={search}
                 onSearchChange={setSearch}
+                isLoading={isFetching}
+                hideExport
                 filterSlot={
-                    <Popover open={openFilter} onOpenChange={setOpenFilter}>
-                        <PopoverTrigger asChild>
-                            <Button variant="outline" size="sm">
-                                <Filter className="mr-2 h-4 w-4" />
-                                {statusFilter !== "all" ? `Status: ${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}` : "Filter Status"}
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[200px] p-0">
-                            <Command>
-                                <CommandInput placeholder="Search status..." />
-                                <CommandList>
-                                    <CommandEmpty>No status found.</CommandEmpty>
-                                    <CommandGroup>
-                                        {["all", "paid", "unpaid"].map((status) => (
-                                            <CommandItem
-                                                key={status}
-                                                value={status}
-                                                onSelect={(currentValue) => {
-                                                    setStatusFilter(currentValue === statusFilter ? "all" : currentValue)
-                                                    setOpenFilter(false)
-                                                }}
-                                            >
-                                                <Check
-                                                    className={cn(
-                                                        "mr-2 h-4 w-4",
-                                                        statusFilter === status ? "opacity-100" : "opacity-0"
-                                                    )}
-                                                />
-                                                {status === "all" ? "All Status" : status.charAt(0).toUpperCase() + status.slice(1)}
-                                            </CommandItem>
-                                        ))}
-                                    </CommandGroup>
-                                </CommandList>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
+                    <>
+                        <Popover open={openFilter} onOpenChange={setOpenFilter}>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                    <Filter className="mr-2 h-4 w-4" />
+                                    {statusFilter !== "all" ? `Status: ${statusFilter === "unpaid" ? "Due" : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}` : "Filter Status"}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[200px] p-0">
+                                <Command>
+                                    <CommandInput placeholder="Search status..." />
+                                    <CommandList>
+                                        <CommandEmpty>No status found.</CommandEmpty>
+                                        <CommandGroup>
+                                            {["all", "paid", "unpaid"].map((status) => (
+                                                <CommandItem
+                                                    key={status}
+                                                    value={status}
+                                                    onSelect={(currentValue) => {
+                                                        setStatusFilter(currentValue === statusFilter ? "all" : currentValue)
+                                                        setOpenFilter(false)
+                                                    }}
+                                                >
+                                                    <Check
+                                                        className={cn(
+                                                            "mr-2 h-4 w-4",
+                                                            statusFilter === status ? "opacity-100" : "opacity-0"
+                                                        )}
+                                                    />
+                                                    {status === "all" ? "All Status" : status === "unpaid" ? "Due" : status.charAt(0).toUpperCase() + status.slice(1)}
+                                                </CommandItem>
+                                            ))}
+                                        </CommandGroup>
+                                    </CommandList>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
+                        <div className="flex items-center gap-1.5">
+                            <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>
+                                <SelectTrigger className="w-[140px] h-9 rounded-md border-gray-200 dark:border-gray-700 bg-transparent text-sm">
+                                    <SelectValue placeholder="Filter by" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="today">Today</SelectItem>
+                                    <SelectItem value="yesterday">Yesterday</SelectItem>
+                                    <SelectItem value="last7">Last 7 days</SelectItem>
+                                    <SelectItem value="last15">Last 15 days</SelectItem>
+                                    <SelectItem value="last30">Last 30 days</SelectItem>
+                                    <SelectItem value="last45">Last 45 days</SelectItem>
+                                    <SelectItem value="last60">Last 60 days</SelectItem>
+                                    <SelectItem value="last90">Last 90 days</SelectItem>
+                                    <SelectItem value="last180">Last 180 days</SelectItem>
+                                    <SelectItem value="last365">Last 365 days</SelectItem>
+                                    <SelectItem value="custom">Custom range</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <DateField
+                                value={from}
+                                onChange={(v: string) => { setFrom(v); setPresetOpen(false); }}
+                                placeholder="From"
+                            />
+                            <span className="text-xs text-muted-foreground">to</span>
+                            <DateField
+                                value={to}
+                                onChange={(v: string) => { setTo(v); setPresetOpen(false); }}
+                                placeholder="To"
+                            />
+                            {(from || to) && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => { setFrom(""); setTo(""); }}
+                                >
+                                    Clear
+                                </Button>
+                            )}
+                        </div>
+                    </>
                 }
             />
         </main>

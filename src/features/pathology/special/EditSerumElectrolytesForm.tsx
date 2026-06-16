@@ -158,7 +158,7 @@ export function EditSerumElectrolytesForm({ open, setOpen, reportId, invoiceId }
         onSuccess: (data) => {
             toast.success(data.message || "Test created successfully!");
             console.log("API Response:", data);
-            navigate({ to: "/pathology/hormone/electrolytes" });
+            navigate({ to: "/dashboard/pathology/hormone/electrolytes" });
             // optional:
             // form.reset();
             queryClient.invalidateQueries({

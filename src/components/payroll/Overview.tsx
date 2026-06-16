@@ -295,14 +295,14 @@ export default function HrPayrollOverview() {
     // ATTENDANCE HANDLER - Navigate to attendance page
     // -----------------------
     const handleAttendanceClick = (staff: Staff) => {
-        navigate({ to: `/payroll/attendance/${staff.id}` });
+        navigate({ to: `/dashboard/payroll/attendance/${staff.id}` });
     };
 
     // -----------------------
     // SALARY MANAGE HANDLER - Navigate to salary page
     // -----------------------
     const handleSalaryClick = (staff: Staff) => {
-        navigate({ to: `/payroll/salary/${staff.id}` });
+        navigate({ to: `/dashboard/payroll/salary/${staff.id}` });
     };
 
     // -----------------------

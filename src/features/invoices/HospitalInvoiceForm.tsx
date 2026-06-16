@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,28 +13,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useDateFormat } from "@/hooks/use-date-format";
 import { useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-
-// Helper function to format date as dd/mm/yyyy
-const formatDateToDDMMYYYY = (date: Date | undefined): string => {
-  if (!date) return '';
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-};
-
-// Helper function to parse dd/mm/yyyy to Date
-const parseDDMMYYYY = (dateString: string): Date | undefined => {
-  if (!dateString) return undefined;
-  const parts = dateString.split('/');
-  if (parts.length !== 3) return undefined;
-  const [day, month, year] = parts;
-  return new Date(Number(year), Number(month) - 1, Number(day));
-};
 
 type TestItem = {
   id: number
@@ -141,7 +124,7 @@ type AdmissionResponse = {
   }
 }
 
-export default function HospitalInvoiceForm() {
+export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmittingChange?: (submitting: boolean) => void }) {
   //const [deliveryDate, setDeliveryDate] = useState(new Date());
   // const [open, setOpen] = useState(false)
   // const [date, setDate] = useState<Date | undefined>(undefined)
@@ -150,6 +133,7 @@ export default function HospitalInvoiceForm() {
   const [deptPayments, setDeptPayments] = useState<Record<string, number>>({});
   const [useDeptDiscount, setUseDeptDiscount] = useState(true);
   const [doctorOpen, setDoctorOpen] = useState(false);
+  const [doctorSearch, setDoctorSearch] = useState("");
   const [admissionOpen, setAdmissionOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [openPaymentMethod, setOpenPaymentMethod] = useState(false);
@@ -160,6 +144,12 @@ export default function HospitalInvoiceForm() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  // Tenant date format from company settings (display in this format; submit ISO).
+  const { dateFormat, formatHint, formatDate, parseDate, toISODate } = useDateFormat();
+  // Tracks whether the user manually picked a date, so we don't clobber their
+  // selection when the date format loads/reloads from settings.
+  const dateTouchedRef = useRef(false);
+
   const [page] = useState(1);
   const [search, setSearch] = useState("");
   const limit = 10;
@@ -167,6 +157,7 @@ export default function HospitalInvoiceForm() {
   const token = getCookie('accessToken');
 
   const debouncedSearch = useDebounce(search, 400);
+  const debouncedDoctorSearch = useDebounce(doctorSearch, 400);
 
   const { data } = useQuery<TestsResponse>({
     queryKey: ["tests", page, debouncedSearch],
@@ -214,10 +205,10 @@ export default function HospitalInvoiceForm() {
   });
 
   const { data: doctorsData } = useQuery<DoctorResponse>({
-    queryKey: ["doctors"],
+    queryKey: ["doctors", debouncedDoctorSearch],
     queryFn: async () => {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/doctor?limit=100`,
+        `${import.meta.env.VITE_API_URL}/api/doctor?limit=100&search=${encodeURIComponent(debouncedDoctorSearch)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -410,10 +401,10 @@ export default function HospitalInvoiceForm() {
       ageYears: "",
       ageMonths: "",
       phone: "",
-      date: formatDateToDDMMYYYY(new Date()),
+      date: formatDate(new Date()),
       ref_doctor: "",
       test_name: "",
-      deliveryDate: "",
+      deliveryDate: formatDate(new Date()),
       deliveryTime: "",
       discount: 0,
       totalCharge: 0,
@@ -448,6 +439,15 @@ export default function HospitalInvoiceForm() {
       setValue("invoice_prefix", appSettings.data.invoicePrefix);
     }
   }, [appSettings, setValue]);
+
+  // Re-format the auto-seeded date fields once the tenant date format is known,
+  // unless the user has already picked a date manually.
+  useEffect(() => {
+    if (dateTouchedRef.current) return;
+    setValue("date", formatDate(new Date()), { shouldValidate: true });
+    setValue("deliveryDate", formatDate(new Date()), { shouldValidate: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateFormat]);
 
   // Log on component mount
   useEffect(() => {
@@ -700,7 +700,12 @@ export default function HospitalInvoiceForm() {
     });
   };
 
-  const { mutate: createInvoice } = useCreateOutdoorInvoice();
+  const { mutate: createInvoice, isPending: isCreating } = useCreateOutdoorInvoice();
+
+  // Report submission state to parent (e.g. to disable the header submit button)
+  useEffect(() => {
+    onSubmittingChange?.(isCreating);
+  }, [isCreating, onSubmittingChange]);
 
   const onSubmit = (data: any) => {
     console.log(data);
@@ -722,6 +727,11 @@ export default function HospitalInvoiceForm() {
     const totalDeptDiscount = Object.values(deptDiscounts).reduce((sum, d) => sum + (d || 0), 0);
     const totalDeptPaid = Object.values(deptPayments).reduce((sum, p) => sum + (p || 0), 0);
 
+    // Dates are displayed in the tenant's format but submitted as canonical ISO
+    // (YYYY-MM-DD) so the backend parses them correctly regardless of format.
+    const isoInvoiceDate = toISODate(parseDate(date) || new Date());
+    const isoDeliveryDate = deliveryDate ? toISODate(parseDate(deliveryDate) || new Date()) : '';
+
     const payload = {
       // Main Invoice Data → outdoor_invoice table
       invoice_prefix: data.invoice_prefix || null,
@@ -730,8 +740,8 @@ export default function HospitalInvoiceForm() {
       age: Number(ageYears) || Number(ageMonths) || null,
       age_text: [ageYears, ageMonths].some(v => v) ? `${ageYears || 0}Y ${ageMonths || 0}M` : null,
       phone,
-      invoice_date: date,
-      delivery_date: deliveryDate || '',
+      invoice_date: isoInvoiceDate,
+      delivery_date: isoDeliveryDate,
       delivery_time: deliveryTime || '',
       doctor_id: Number(ref_doctor) || null,
       total_amount: totalCharge,
@@ -796,7 +806,7 @@ export default function HospitalInvoiceForm() {
       payments: {
         amount: Number(paidAmount) || 0,
         method: paymentMethod || 'Cash',
-        payment_date: date
+        payment_date: isoInvoiceDate
       },
 
       // Global Discount → outdoor_invoice_discounts table
@@ -874,7 +884,7 @@ export default function HospitalInvoiceForm() {
           },
         });
 
-        navigate({ to: "/outdoor/reception/invoices/list" });
+        navigate({ to: "/dashboard/outdoor/reception/invoices/list" });
       },
       onError: (error) => {
         console.error("Error creating invoice:", error);
@@ -888,17 +898,15 @@ export default function HospitalInvoiceForm() {
       <Form {...form}>
         <form id="hospital-invoice-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Patient Info Card */}
-          <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b-1 dark:border-gray-800 py-2 gap-0">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-sm">
-                  <User className="h-4 w-4 text-white" />
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                  <User className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-semibold">Patient Information</CardTitle>
-                  <CardDescription className="text-xs mt-0.5">
-                    Basic details and registration information
-                  </CardDescription>
+                  <CardTitle className="text-lg font-bold">Patient Information</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Basic details and registration information</p>
                 </div>
               </div>
             </CardHeader>
@@ -921,9 +929,6 @@ export default function HospitalInvoiceForm() {
                           {...field}
                         />
                       </FormControl>
-                      <p className="text-xs text-muted-foreground">
-                        Auto-generated from settings (e.g., INV-0001, INV-0002)
-                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -1083,14 +1088,21 @@ export default function HospitalInvoiceForm() {
                             </FormControl>
                           </PopoverTrigger>
                           <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-                            <Command className="border border-gray-100 dark:border-gray-800">
-                              <CommandInput placeholder="Search doctor..." className="h-10" />
+                            <Command
+                              filter={(value, search) => {
+                                if (!search) return 1;
+                                return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+                              }}
+                              className="border border-gray-100 dark:border-gray-800"
+                            >
+                              <CommandInput placeholder="Search doctor..." className="h-10" value={doctorSearch} onValueChange={setDoctorSearch} />
                               <CommandList className="max-h-[300px]">
                                 <CommandEmpty>No doctor found.</CommandEmpty>
                                 <CommandGroup>
                                   {doctorsData?.data?.items?.map((doctor) => (
                                     <CommandItem
                                       key={doctor.id}
+                                      value={`${doctor.doctor_name} ${doctor.title || ''} ${doctor.speciality || ''}`}
                                       className="py-2.5 px-4 flex flex-col items-start gap-0.5"
                                       onSelect={() => {
                                         field.onChange(String(doctor.id));
@@ -1132,7 +1144,7 @@ export default function HospitalInvoiceForm() {
                   render={({ field }) => (
                     <FormItem className="flex flex-col gap-2">
                       <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        Invoice Date <span className="text-xs font-normal text-muted-foreground">(dd/mm/yyyy)</span>
+                        Invoice Date <span className="text-xs font-normal text-muted-foreground">({formatHint})</span>
                       </FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
@@ -1145,15 +1157,18 @@ export default function HospitalInvoiceForm() {
                               )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4 text-blue-500" />
-                              {field.value || formatDateToDDMMYYYY(new Date())}
+                              {field.value || formatDate(new Date())}
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={parseDDMMYYYY(field.value)}
-                            onSelect={(date) => field.onChange(date ? formatDateToDDMMYYYY(date) : "")}
+                            selected={parseDate(field.value)}
+                            onSelect={(date) => {
+                              dateTouchedRef.current = true;
+                              field.onChange(date ? formatDate(date) : "");
+                            }}
                             initialFocus
                           />
                         </PopoverContent>
@@ -1167,17 +1182,15 @@ export default function HospitalInvoiceForm() {
           </Card>
 
           {/* Indoor Patient Card */}
-          <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-purple-200 hover:shadow-lg py-0 gap-0">
-            <CardHeader className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 border-b-1 dark:border-gray-800 py-2 gap-0">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-purple-600 to-violet-600 rounded-lg shadow-sm">
-                  <User className="h-4 w-4 text-white" />
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+            <CardHeader className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-purple-500 to-violet-500 rounded-lg shadow-lg">
+                  <User className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-semibold">Indoor Patient</CardTitle>
-                  <CardDescription className="text-xs mt-0.5">
-                    Link with admitted patient records
-                  </CardDescription>
+                  <CardTitle className="text-lg font-bold">Indoor Patient</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Link with admitted patient records</p>
                 </div>
               </div>
             </CardHeader>
@@ -1354,17 +1367,15 @@ export default function HospitalInvoiceForm() {
 
        
           {/* Test Info Card */}
-          <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b-1 dark:border-gray-800 py-2 gap-0">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-sm">
-                  <Activity className="h-4 w-4 text-white" />
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                  <Activity className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-semibold">Test Selection</CardTitle>
-                  <CardDescription className="text-xs mt-0.5">
-                    Select diagnostic tests and view summary
-                  </CardDescription>
+                  <CardTitle className="text-lg font-bold">Test Selection</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Select diagnostic tests and view summary</p>
                 </div>
               </div>
             </CardHeader>
@@ -1514,17 +1525,15 @@ export default function HospitalInvoiceForm() {
           </Card>
 
    {/* Sample Collection Rooms Card */}
-          <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b-1 dark:border-gray-800 py-2 gap-0">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-sm">
-                  <FlaskConical className="h-4 w-4 text-white" />
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+            <CardHeader className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg shadow-lg">
+                  <FlaskConical className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-semibold">Sample Collection Rooms</CardTitle>
-                  <CardDescription className="text-xs mt-0.5">
-                    Select rooms for sample collection
-                  </CardDescription>
+                  <CardTitle className="text-lg font-bold">Sample Collection Rooms</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Select rooms for sample collection</p>
                 </div>
               </div>
             </CardHeader>
@@ -1600,17 +1609,15 @@ export default function HospitalInvoiceForm() {
           </Card>
 
           {/* Department Discount Card */}
-          <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b-1 dark:border-gray-800 py-2 gap-0">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-sm">
-                  <PenLine className="h-4 w-4 text-white" />
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+            <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg shadow-lg">
+                  <PenLine className="w-4 h-4 text-white" />
                 </div>
                 <div className="flex-1">
-                  <CardTitle className="text-base font-semibold">Dept. Discounts & Payments</CardTitle>
-                  <CardDescription className="text-xs mt-0.5">
-                    Breakdown of charges and payments per department
-                  </CardDescription>
+                  <CardTitle className="text-lg font-bold">Dept. Discounts & Payments</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Breakdown of charges and payments per department</p>
                 </div>
                 <div className="flex items-center gap-2 bg-blue-100/50 dark:bg-blue-900/30 px-3 py-1 rounded-lg border border-blue-200/50">
                   <span className="text-[10px] font-semibold text-blue-700 dark:text-blue-300">Total Dept. Discount:</span>
@@ -1701,17 +1708,15 @@ export default function HospitalInvoiceForm() {
           </Card>
 
           {/* Billing Summary Card */}
-          <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
-            <CardHeader className="p-0 border-b-1 border-blue-100 dark:border-blue-900 gap-0">
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 px-4 py-2 flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-sm">
-                  <Clock className="h-4 w-4 text-white" />
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+            <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-emerald-500 to-green-500 rounded-lg shadow-lg">
+                  <Clock className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-semibold">Billing & Delivery</CardTitle>
-                  <CardDescription className="text-xs mt-0.5">
-                    Final summary, delivery schedule and payment
-                  </CardDescription>
+                  <CardTitle className="text-lg font-bold">Billing & Delivery</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Final summary, delivery schedule and payment</p>
                 </div>
               </div>
             </CardHeader>
@@ -1726,7 +1731,7 @@ export default function HospitalInvoiceForm() {
                       render={({ field }) => (
                         <FormItem className="flex flex-col gap-2">
                           <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                            Delivery Date <span className="text-xs font-normal text-muted-foreground">(dd/mm/yyyy)</span>
+                            Delivery Date <span className="text-xs font-normal text-muted-foreground">({formatHint})</span>
                           </FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
@@ -1746,8 +1751,11 @@ export default function HospitalInvoiceForm() {
                             <PopoverContent className="w-auto p-0" align="start">
                               <Calendar
                                 mode="single"
-                                selected={field.value ? parseDDMMYYYY(field.value) : undefined}
-                                onSelect={(date) => field.onChange(date ? formatDateToDDMMYYYY(date) : "")}
+                                selected={field.value ? parseDate(field.value) : undefined}
+                                onSelect={(date) => {
+                                  dateTouchedRef.current = true;
+                                  field.onChange(date ? formatDate(date) : "");
+                                }}
                                 initialFocus
                               />
                             </PopoverContent>
@@ -1909,7 +1917,7 @@ export default function HospitalInvoiceForm() {
                 <Button
                   variant="outline"
                   type="button"
-                  onClick={() => navigate({ to: "/outdoor/reception/invoices/list" })}
+                  onClick={() => navigate({ to: "/dashboard/outdoor/reception/invoices/list" })}
                 >
                   <ArrowLeft className="size-4" />
                   Back to List
@@ -1930,10 +1938,10 @@ export default function HospitalInvoiceForm() {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={totalCharge === 0}
+                    disabled={totalCharge === 0 || isCreating}
                   >
                     <CircleCheck className="size-4" />
-                    Create Invoice
+                    {isCreating ? "Creating..." : "Create Invoice"}
                   </Button>
                 </div>
               </div>

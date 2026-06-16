@@ -30,11 +30,16 @@ type DoctorItem = {
     created_by_name?: string;
 };
 
-export default function Doctors() {
-    const [page, setPage] = useState(1);
-    const [limit, setLimit] = useState(10);
-    const [search, setSearch] = useState("");
+type DoctorsProps = {
+    page: number;
+    limit: number;
+    search: string;
+    setPage: (page: number) => void;
+    setLimit: (limit: number) => void;
+    setSearch: (search: string) => void;
+};
 
+export default function Doctors({ page, limit, search, setPage, setLimit, setSearch }: DoctorsProps) {
     const token = getCookie('accessToken');
 
     // Fetch app settings for doctor prefix format
@@ -51,7 +56,7 @@ export default function Doctors() {
         enabled: !!token,
     });
 
-    const { data, isLoading } = useQuery({
+    const { data, isFetching } = useQuery({
         queryKey: ["doctor", page, limit, search],
 
         queryFn: async () => {
@@ -266,12 +271,12 @@ export default function Doctors() {
 
                         <!-- Actions -->
                         <div class="mt-8 flex justify-end gap-3 border-t pt-5">
-                            <a href="/outdoor/master/doctors/${id}"
+                            <a href="/dashboard/outdoor/master/doctors/${id}"
                                class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 transition h-10 px-5">
                                 View
                             </a>
 
-                            <a href="/outdoor/master/doctors/${id}/edit"
+                            <a href="/dashboard/outdoor/master/doctors/${id}/edit"
                                class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-teal-600 text-white hover:bg-teal-700 transition h-10 px-5 shadow">
                                 Edit
                             </a>
@@ -285,7 +290,7 @@ export default function Doctors() {
             newRow.className = 'child-row-detail';
             const cell = document.createElement('td');
             cell.className = 'p-4 bg-muted/50';
-            cell.colSpan = 10;
+            cell.colSpan = 12;
             cell.appendChild(cardContainer);
             newRow.appendChild(cell);
 
@@ -428,10 +433,10 @@ export default function Doctors() {
             render: (_data: any, _type: string, row: DoctorItem) => {
                 return `
                     <div class="flex gap-2">
-                        <a href="/outdoor/master/doctors/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+                        <a href="/dashboard/outdoor/master/doctors/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
                             View
                         </a>
-                        <a href="/outdoor/master/doctors/${row.id}/edit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+                        <a href="/dashboard/outdoor/master/doctors/${row.id}/edit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
                             Edit
                         </a>
                     </div>
@@ -443,15 +448,14 @@ export default function Doctors() {
     return <>
         <AppHeader fixed />
 
-        <main className="p-4">
-           
+        <Main>
             <div className="space-y-4">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 ">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {stats.map((item, idx) => (
                     <div
                         key={idx}
-                        className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${item.gradient} p-6 shadow-lg ${item.shadow} transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]`}
+                        className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${item.gradient} p-4 md:p-6 shadow-lg ${item.shadow} transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]`}
                     >
                         {/* Background Pattern */}
                         <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
@@ -459,12 +463,12 @@ export default function Doctors() {
 
                         <div className="relative flex items-start justify-between">
                             <div>
-                                <p className="text-sm font-medium text-white/90">{item.label}</p>
-                                <h3 className="mt-2 text-3xl font-bold text-white">
+                                <p className="text-xs md:text-sm font-medium text-white/90">{item.label}</p>
+                                <h3 className="mt-1 md:mt-2 text-2xl md:text-3xl font-bold text-white">
                                     {item.value || 0}
                                 </h3>
                             </div>
-                            <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                            <div className="rounded-xl bg-white/20 p-2 md:p-2.5 backdrop-blur-sm">
                                 {item.icon}
                             </div>
                         </div>
@@ -481,7 +485,7 @@ export default function Doctors() {
              <PageHeader
                 title="List of Doctor"
                 actions={
-                    <Link to="/outdoor/master/doctors/create">
+                    <Link to="/dashboard/outdoor/master/doctors/create">
                         <Button>
                             <Plus className="h-4 w-4" />
                             Add Doctor
@@ -495,19 +499,13 @@ export default function Doctors() {
                 data={doctorsData}
                 meta={doctorsMeta}
                 onPageChange={setPage}
-                onLimitChange={(newLimit) => {
-                    setLimit(newLimit);
-                    setPage(1);
-                }}
+                onLimitChange={setLimit}
                 search={search}
-                onSearchChange={(value) => {
-                    setSearch(value);
-                    setPage(1);
-                }}
-                isLoading={isLoading}
+                onSearchChange={setSearch}
+                isLoading={isFetching}
             />
 
             </div>
-        </main>
+        </Main>
     </>
 }

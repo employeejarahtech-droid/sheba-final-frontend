@@ -98,7 +98,7 @@ export default function AddExpensePage() {
       await addExpense.mutateAsync(payload);
       toast.success("Expense added successfully");
       reset(); // Clear form
-      navigate({ to: "/accounting/reports/journal" }); // Redirect
+      navigate({ to: "/dashboard/accounting/reports/journal" }); // Redirect
     } catch (err) {
       console.error(err);
       toast.error("An error occurred while adding expense");

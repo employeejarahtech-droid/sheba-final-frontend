@@ -150,7 +150,7 @@ export function EditBloodForTcDcForm({ open, setOpen, reportId, invoiceId }: Blo
         onSuccess: (data) => {
             toast.success("Test created successfully!");
             console.log("API Response:", data);
-            navigate({ to: "/pathology/hematology/blood-for-tcdc" });
+            navigate({ to: "/dashboard/pathology/hematology/blood-for-tcdc" });
             // optional:
             queryClient.invalidateQueries({ queryKey: ["tcdc", reportId]});
         },
@@ -274,7 +274,7 @@ export function EditBloodForTcDcForm({ open, setOpen, reportId, invoiceId }: Blo
                                 {form.formState.isSubmitting ? "Saving..." : "Save"}
                             </Button>
 
-                            <Link to="/pathology/hematology/blood-for-tcdc/report/$reportId" params={{ reportId: reportId.toString() }}>
+                            <Link to="/dashboard/pathology/hematology/blood-for-tcdc/report/$reportId" params={{ reportId: reportId.toString() }}>
                                 <Button type="button" variant="warning">
                                     Print Preview
                                 </Button>

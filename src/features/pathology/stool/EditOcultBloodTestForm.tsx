@@ -146,7 +146,7 @@ export function EditOccultBloodTestForm({ open, setOpen, reportId, invoiceId }: 
         onSuccess: (data) => {
             toast.success(data.message || "Test created successfully!");
             console.log("API Response:", data);
-            navigate({ to: "/pathology/stool/ocult-blood-test" });
+            navigate({ to: "/dashboard/pathology/stool/ocult-blood-test" });
             // optional:
             // form.reset();
             queryClient.invalidateQueries({
@@ -269,7 +269,7 @@ export function EditOccultBloodTestForm({ open, setOpen, reportId, invoiceId }: 
                                 {form.formState.isSubmitting ? "Saving..." : "Save"}
                             </Button>
 
-                            <Link to="/pathology/stool/ocult-blood-test/report/$reportId" params={{ reportId: reportId.toString() }}>
+                            <Link to="/dashboard/pathology/stool/ocult-blood-test/report/$reportId" params={{ reportId: reportId.toString() }}>
                                 <Button type="button" variant="warning">
                                     Print Preview
                                 </Button>

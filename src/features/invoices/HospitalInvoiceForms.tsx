@@ -684,7 +684,7 @@ export default function HospitalInvoiceForm() {
                     </div>
                   </div>
                   <div className="flex items-center justify-center gap-4">
-                    <Link to="/outdoor/reception/invoices/create">
+                    <Link to="/dashboard/outdoor/reception/invoices/create">
                       <Button variant="default" className="px-10 py-6 text-lg" type="button">New</Button>
                     </Link>
                     <Button variant="default" className="px-10 py-6 text-lg" type="submit" disabled={!!(errors && Object.keys(errors).length > 0) || totalCharge === 0}>Save</Button>

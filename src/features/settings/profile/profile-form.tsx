@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Check, ChevronsUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ProfileImageUploader } from '@/components/profile-image-uploader'
 import api from '@/lib/axios'
@@ -18,14 +18,36 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { CURRENCIES, getCurrencyByCode } from '@/lib/currencies'
 import { useAppDispatch } from '@/store/store'
 import { setCurrency } from '@/store/currencySlice'
+
+// Available date formats. `value` is stored in company_settings.date_format.
+const DATE_FORMATS = [
+  { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY', sample: '06/14/2026' },
+  { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY', sample: '14/06/2026' },
+  { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD', sample: '2026-06-14' },
+  { value: 'DD-MM-YYYY', label: 'DD-MM-YYYY', sample: '14-06-2026' },
+  { value: 'MM-DD-YYYY', label: 'MM-DD-YYYY', sample: '06-14-2026' },
+  { value: 'DD MMM YYYY', label: 'DD MMM YYYY', sample: '14 Jun 2026' },
+  { value: 'MMM DD, YYYY', label: 'MMM DD, YYYY', sample: 'Jun 14, 2026' },
+] as const
 
 const profileFormSchema = z.object({
   company_name: z.string().optional(),
   address1: z.string().optional(),
   address2: z.string().optional(),
   currency: z.string().optional(),
+  date_format: z.string().optional(),
 })
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
@@ -37,12 +59,14 @@ type SettingsResponse = {
   address1?: string | null
   address2?: string | null
   currency?: string | null
+  date_format?: string | null
 }
 
 export function ProfileForm() {
   const [companyImage, setCompanyImage] = useState<File | null>(null)
   const [logoRemoved, setLogoRemoved] = useState(false)
   const [currentLogo, setCurrentLogo] = useState<string | null>(null)
+  const [openCurrency, setOpenCurrency] = useState(false)
   const queryClient = useQueryClient()
   const dispatch = useAppDispatch()
 
@@ -53,6 +77,7 @@ export function ProfileForm() {
       address1: '',
       address2: '',
       currency: 'BDT',
+      date_format: 'MM/DD/YYYY',
     },
     mode: 'onChange',
   })
@@ -72,6 +97,7 @@ export function ProfileForm() {
         address1: settingsData.address1 || '',
         address2: settingsData.address2 || '',
         currency: settingsData.currency || 'BDT',
+        date_format: settingsData.date_format || 'MM/DD/YYYY',
       })
       setLogoRemoved(false)
 
@@ -94,6 +120,7 @@ export function ProfileForm() {
       if (data.address1?.trim()) formData.append('address1', data.address1)
       if (data.address2?.trim()) formData.append('address2', data.address2)
       if (data.currency?.trim()) formData.append('currency', data.currency)
+      if (data.date_format?.trim()) formData.append('date_format', data.date_format)
 
       if (data.companyImage) {
         formData.append('company_logo', data.companyImage)
@@ -188,18 +215,92 @@ export function ProfileForm() {
         <FormField
           control={form.control}
           name='currency'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Currency</FormLabel>
-              <FormControl>
-                <Input placeholder='BDT' {...field} />
-              </FormControl>
-              <FormDescription>
-                Enter your default currency code (e.g., USD, EUR, GBP, BDT).
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
+          render={({ field }) => {
+            const selected = field.value ? getCurrencyByCode(field.value) : undefined
+            return (
+              <FormItem>
+                <FormLabel>Currency</FormLabel>
+                <Popover open={openCurrency} onOpenChange={setOpenCurrency}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button variant="outline" role="combobox" aria-expanded={openCurrency} className="w-full justify-between font-normal">
+                        {selected ? `${selected.code} — ${selected.name}` : 'Select currency'}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[280px] p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Search country or currency..." />
+                      <CommandList>
+                        <CommandEmpty>No currency found.</CommandEmpty>
+                        <CommandGroup>
+                          {CURRENCIES.map((c) => (
+                            <CommandItem
+                              key={`${c.country}-${c.code}`}
+                              value={`${c.country} ${c.code} ${c.name}`}
+                              onSelect={() => {
+                                field.onChange(c.code)
+                                setOpenCurrency(false)
+                              }}
+                            >
+                              <Check
+                                className={`mr-2 h-4 w-4 ${field.value === c.code ? 'opacity-100' : 'opacity-0'}`}
+                              />
+                              <span className="flex-1">{c.country} — {c.name}</span>
+                              <span className="ml-2 text-xs text-muted-foreground">{c.code}</span>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormDescription>
+                  Select your default currency. This is used across invoices and reports.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )
+          }}
+        />
+
+        <FormField
+          control={form.control}
+          name='date_format'
+          render={({ field }) => {
+            const selected = DATE_FORMATS.find((f) => f.value === field.value)
+            return (
+              <FormItem>
+                <FormLabel>Date Format</FormLabel>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select date format" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {DATE_FORMATS.map((f) => (
+                      <SelectItem key={f.value} value={f.value}>
+                        <span className="flex items-center gap-2">
+                          <span>{f.label}</span>
+                          <span className="text-xs text-muted-foreground">— {f.sample}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Choose how dates are displayed across the app.
+                  {selected ? ` Example: ${selected.sample}` : ''}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )
+          }}
         />
 
         <Button type='submit' disabled={updateMutation.isPending}>

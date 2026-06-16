@@ -18,17 +18,23 @@ type DepartmentItem = {
     creator?: { id: number; name: string };
 };
 
-export default function Departments() {
+type DepartmentsProps = {
+    page: number;
+    limit: number;
+    search: string;
+    setPage: (page: number) => void;
+    setLimit: (limit: number) => void;
+    setSearch: (search: string) => void;
+};
+
+export default function Departments({ page, limit, search, setPage, setLimit, setSearch }: DepartmentsProps) {
     const [openEditForm, setOpenEditForm] = useState<boolean>(false);
     const [selectedDepartmentId, setSelectedDepartmentId] = useState<string | null>(null);
-    const [page, setPage] = useState(1);
-    const [limit, setLimit] = useState(10);
-    const [search, setSearch] = useState("");
 
 
     const token = getCookie('accessToken');
 
-    const { data } = useQuery({
+    const { data, isFetching } = useQuery({
         queryKey: ["deparmtent", page, limit, search],
 
         queryFn: async () => {
@@ -197,7 +203,7 @@ export default function Departments() {
 
                         <!-- Actions -->
                         <div class="mt-8 flex justify-end gap-3 border-t pt-5">
-                            <a href="/outdoor/master/departments/${id}"
+                            <a href="/dashboard/outdoor/master/departments/${id}"
                                class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 transition h-10 px-5">
                                 View
                             </a>
@@ -280,7 +286,7 @@ export default function Departments() {
             render: (_data: any, _type: string, row: DepartmentItem) => {
                 return `
                     <div class="flex gap-2">
-                        <a href="/outdoor/master/departments/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+                        <a href="/dashboard/outdoor/master/departments/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
                             View
                         </a>
                         <button onclick="window.editDepartment('${row.id}')" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
@@ -331,16 +337,11 @@ export default function Departments() {
                     columns={columns}
                     data={data?.data?.items || []}
                     meta={data?.data?.meta}
-                    onPageChange={(newPage) => setPage(newPage)}
-                    onLimitChange={(newLimit) => {
-                        setLimit(newLimit);
-                        setPage(1);
-                    }}
+                    onPageChange={setPage}
+                    onLimitChange={setLimit}
                     search={search}
-                    onSearchChange={(value) => {
-                        setSearch(value);
-                        setPage(1);
-                    }}
+                    onSearchChange={setSearch}
+                    isLoading={isFetching}
                 />
             </div>
             <EditDepartmentForm open={openEditForm} setOpen={setOpenEditForm} departmentId={selectedDepartmentId} />

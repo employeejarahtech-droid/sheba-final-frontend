@@ -21,17 +21,23 @@ type SampleCollectionRoomItem = {
     created_by_name?: string;
 };
 
-export default function SampleCollectionRooms() {
+type SampleCollectionRoomsProps = {
+    page: number;
+    limit: number;
+    search: string;
+    setPage: (page: number) => void;
+    setLimit: (limit: number) => void;
+    setSearch: (search: string) => void;
+};
+
+export default function SampleCollectionRooms({ page, limit, search, setPage, setLimit, setSearch }: SampleCollectionRoomsProps) {
     const [openEditForm, setOpenEditForm] = useState<boolean>(false);
     const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
-    const [page, setPage] = useState(1);
-    const [search, setSearch] = useState("");
-    const [limit, setLimit] = useState(10);
 
 
     const token = getCookie('accessToken');
 
-    const { data } = useQuery({
+    const { data, isFetching } = useQuery({
         queryKey: ["sample-collection-rooms", page, limit, search],
 
         queryFn: async () => {
@@ -372,16 +378,11 @@ export default function SampleCollectionRooms() {
                     columns={columns}
                     data={data?.data?.items || []}
                     meta={data?.data?.meta}
-                    onPageChange={(newPage) => setPage(newPage)}
-                    onLimitChange={(newLimit) => {
-                        setLimit(newLimit);
-                        setPage(1);
-                    }}
+                    onPageChange={setPage}
+                    onLimitChange={setLimit}
                     search={search}
-                    onSearchChange={(value) => {
-                        setSearch(value);
-                        setPage(1);
-                    }}
+                    onSearchChange={setSearch}
+                    isLoading={isFetching}
                 />
             </div>
             <EditSampleCollectionRoomForm open={openEditForm} setOpen={setOpenEditForm} roomId={selectedRoomId} />

@@ -125,7 +125,7 @@ export function EditUrineForSugarForm({ open, setOpen, reportId, invoiceId }: Ur
         onSuccess: (data) => {
             toast.success(data.message || "Test created successfully!");
             console.log("API Response:", data);
-            navigate({ to: "/pathology/urine/urine-for-sugar" });
+            navigate({ to: "/dashboard/pathology/urine/urine-for-sugar" });
             // optional:
             // form.reset();
             queryClient.invalidateQueries({

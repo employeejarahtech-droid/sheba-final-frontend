@@ -1036,16 +1036,16 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
 
                             <!-- ACTION BUTTONS -->
                             <div class='flex flex-row flex-wrap gap-3 pt-4 w-full max-w-full box-border'>
-                                <a href="/admission/patients/${id}/print" class='flex-1 min-w-[140px] text-center px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-lg text-sm font-medium shadow transition no-underline box-border'>
+                                <a href="/dashboard/admission/patients/${id}/print" class='flex-1 min-w-[140px] text-center px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-lg text-sm font-medium shadow transition no-underline box-border'>
                                     Print Details
                                 </a>
 
                                 ${statusData.bill_created === 1 ? `
-                                    <button onclick="window.location.href='/admission/patients/${id}/billing'" class='flex-1 min-w-[140px] px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium shadow transition box-border'>
+                                    <button onclick="window.location.href='/dashboard/admission/patients/${id}/billing'" class='flex-1 min-w-[140px] px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium shadow transition box-border'>
                                         View Billing
                                     </button>
                                 ` : `
-                                    <button onclick="window.location.href='/admission/patients/${id}/billing'" class='flex-1 min-w-[140px] px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow transition box-border'>
+                                    <button onclick="window.location.href='/dashboard/admission/patients/${id}/billing'" class='flex-1 min-w-[140px] px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow transition box-border'>
                                         Add Billing
                                     </button>
                                 `}

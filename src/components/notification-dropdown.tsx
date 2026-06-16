@@ -73,7 +73,7 @@ export function NotificationDropdown() {
                 {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
               </p>
             </div>
-            <Link to='/notifications'>
+            <Link to='/dashboard/notifications'>
               <Button variant='ghost' size='sm' className='h-auto p-0 text-xs'>
                 View all
               </Button>
@@ -95,7 +95,7 @@ export function NotificationDropdown() {
                   asChild
                   className={cn('flex flex-col items-start gap-1 py-3 cursor-pointer', !n.is_read && 'bg-muted/50')}
                 >
-                  <Link to='/notifications/$id' params={{ id: String(n.id) }}>
+                  <Link to='/dashboard/notifications/$id' params={{ id: String(n.id) }}>
                     <div className='flex items-center gap-2 w-full'>
                       <span className={cn('text-[10px] font-semibold px-1.5 py-0.5 rounded', style.bg)}>
                         {style.label}

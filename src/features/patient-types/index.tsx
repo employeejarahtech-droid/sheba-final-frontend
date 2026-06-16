@@ -273,7 +273,7 @@ export default function PatientTypes({ page, limit, search, setPage, setLimit, s
             const id = button.getAttribute('data-id');
 
             if (action === 'view' && id) {
-                navigate({ to: `/indoor/master/patient-types/${id}` });
+                navigate({ to: `/dashboard/indoor/master/patient-types/${id}` });
             } else if (action === 'edit' && id) {
                 setSelectedPatientTypeId(Number(id));
                 setOpenEditForm(true);

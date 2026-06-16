@@ -147,7 +147,7 @@ export function EditLipidProfileForm({ open, setOpen, reportId, invoiceId }: Edi
             console.log("Updated API Response:", data);
             queryClient.invalidateQueries({ queryKey: ["lipid-profile", reportId] });
             toast.success(data.message || "lipid-profile created successfully!");
-            navigate({ to: "/pathology/biochemical/lipid-profile" });
+            navigate({ to: "/dashboard/pathology/biochemical/lipid-profile" });
         },
 
         onError: (error: any) => {
@@ -339,7 +339,7 @@ export function EditLipidProfileForm({ open, setOpen, reportId, invoiceId }: Edi
                                 {form.formState.isSubmitting ? "Saving..." : "Save"}
                             </Button>
 
-                            <Link to="/pathology/biochemical/lipid-profile/report/$reportId" params={{ reportId: String(reportId) }}>
+                            <Link to="/dashboard/pathology/biochemical/lipid-profile/report/$reportId" params={{ reportId: String(reportId) }}>
                                 <Button type="button" variant="warning">
                                     Print Preview
                                 </Button>

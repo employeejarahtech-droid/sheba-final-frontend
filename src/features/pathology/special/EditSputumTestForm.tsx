@@ -146,7 +146,7 @@ export function EditSputumTestForm({ open, setOpen, reportId, invoiceId }: Sputu
         onSuccess: (data) => {
             toast.success(data.message || "Test created successfully!");
             console.log("API Response:", data);
-            navigate({ to: "/pathology/hormone/sputum" });
+            navigate({ to: "/dashboard/pathology/hormone/sputum" });
             // optional:
             // form.reset();
             queryClient.invalidateQueries({
@@ -269,7 +269,7 @@ export function EditSputumTestForm({ open, setOpen, reportId, invoiceId }: Sputu
                                 {form.formState.isSubmitting ? "Saving..." : "Save"}
                             </Button>
 
-                            <Link to="/pathology/hormone/sputum/report/$reportId" params={{ reportId: reportId.toString() }}>
+                            <Link to="/dashboard/pathology/hormone/sputum/report/$reportId" params={{ reportId: reportId.toString() }}>
                                 <Button type="button" variant="warning">
                                     Print Preview
                                 </Button>

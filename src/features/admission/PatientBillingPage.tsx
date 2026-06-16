@@ -1169,7 +1169,7 @@ export function PatientBillingPage() {
             queryClient.invalidateQueries({ queryKey: ['final-bill', admissionId] })
             // Navigate to confirm balance page after a short delay
             setTimeout(() => {
-                navigate({ to: '/admission/patients/$admissionId/confirm-balance', params: { admissionId: String(admissionId) } })
+                navigate({ to: '/dashboard/admission/patients/$admissionId/confirm-balance', params: { admissionId: String(admissionId) } })
             }, 1500)
         },
         onError: (error: Error) => {
@@ -1472,7 +1472,7 @@ export function PatientBillingPage() {
                     title="Patient Billing"
                     subtitle={`${admissionData?.data?.patient_name || 'Unknown Patient'} • Admission #${admissionId}`}
                     backButton={{
-                        onClick: () => navigate({ to: '/admission/patients' }),
+                        onClick: () => navigate({ to: '/dashboard/admission/patients' }),
                     }}
                     actions={
                         admissionData?.data?.bill_created === 1 ? (

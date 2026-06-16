@@ -273,7 +273,7 @@ export default function DoctorTypes({ page, limit, search, setPage, setLimit, se
             const id = button.getAttribute('data-id');
 
             if (action === 'view' && id) {
-                navigate({ to: `/indoor/master/doctor-types/${id}` });
+                navigate({ to: `/dashboard/indoor/master/doctor-types/${id}` });
             } else if (action === 'edit' && id) {
                 setSelectedDoctorTypeId(Number(id));
                 setOpenEditForm(true);

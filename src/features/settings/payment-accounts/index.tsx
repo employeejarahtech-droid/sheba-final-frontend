@@ -18,11 +18,13 @@ type ScenarioConfig = {
 }
 type PaymentMappings = Record<string, ScenarioConfig>
 
-const SCENARIO_META: Record<string, { color: string; description: string; isMoneyIn: boolean }> = {
+const SCENARIO_META: Record<string, { color: string; description: string; isMoneyIn: boolean; accountTypes?: string[] }> = {
     outdoor_test_payment: {
         color: 'from-blue-600 to-cyan-500',
         description: 'When an outdoor patient pays for tests/services',
         isMoneyIn: true,
+        // Credit = Income; Debit (methods) = Asset (cash/bank)
+        accountTypes: undefined, // selectors default to leaf-only (no control accounts)
     },
     indoor_advance_payment: {
         color: 'from-green-600 to-emerald-500',
@@ -128,6 +130,7 @@ export function PaymentAccountSettings() {
     const handleSave = (key: string) => {
         saveMutation.mutate(mappings, {
             onSuccess: () => { setSaved(key); setTimeout(() => setSaved(null), 2000) },
+            onError: () => { setSaved(null); alert('Failed to save payment mappings') },
         })
     }
 
@@ -250,23 +253,25 @@ export function PaymentAccountSettings() {
                                 {meta.isMoneyIn ? (
                                     <div>
                                         <label className="block text-xs font-medium mb-1 text-gray-500 dark:text-gray-400">
-                                            Credit Account (Revenue / Receivable)
+                                            Credit Account (Revenue / Receivable) — pick a leaf account
                                         </label>
                                         <NestedAccountSelect
                                             value={mapping.credit_account_id || null}
                                             onChange={(id: number | null) => updateMapping(key, 'credit_account_id', id)}
                                             placeholder="Select credit account"
+                                            leafOnly
                                         />
                                     </div>
                                 ) : (
                                     <div>
                                         <label className="block text-xs font-medium mb-1 text-gray-500 dark:text-gray-400">
-                                            Debit Account (Payable / Revenue Reverse)
+                                            Debit Account (Payable / Revenue Reverse) — pick a leaf account
                                         </label>
                                         <NestedAccountSelect
                                             value={mapping.debit_account_id || null}
                                             onChange={(id: number | null) => updateMapping(key, 'debit_account_id', id)}
                                             placeholder="Select debit account"
+                                            leafOnly
                                         />
                                     </div>
                                 )}
@@ -307,6 +312,7 @@ export function PaymentAccountSettings() {
                                                         value={method.account_id || null}
                                                         onChange={(id: number | null) => updateMethod(key, idx, 'account_id', id)}
                                                         placeholder="Select account"
+                                                        leafOnly
                                                     />
                                                     <button
                                                         onClick={() => removeMethod(key, idx)}
@@ -348,9 +354,10 @@ export function PaymentAccountSettings() {
                                     <button
                                         onClick={() => handleSave(key)}
                                         disabled={saveMutation.isPending}
+                                        title="Saves all scenarios"
                                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
                                     >
-                                        {saved === key ? (<><CheckCircle className="w-3.5 h-3.5" /> Saved</>) : (<><Save className="w-3.5 h-3.5" /> Save</>)}
+                                        {saved === key ? (<><CheckCircle className="w-3.5 h-3.5" /> Saved</>) : (<><Save className="w-3.5 h-3.5" /> Save all</>)}
                                     </button>
                                 </div>
                             </div>

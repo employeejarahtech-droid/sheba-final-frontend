@@ -744,7 +744,7 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
     }
 
     const handleBack = () => {
-        navigate({ to: '/admission/patients/$admissionId/final-bill', params: { admissionId: String(admissionId) } })
+        navigate({ to: '/dashboard/admission/patients/$admissionId/final-bill', params: { admissionId: String(admissionId) } })
     }
 
     // Loading state
@@ -1210,7 +1210,7 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                                 </p>
                             </div>
                             <Button
-                                onClick={() => navigate({ to: '/admission/patients/$admissionId/confirm-balance', params: { admissionId: String(admissionId) } })}
+                                onClick={() => navigate({ to: '/dashboard/admission/patients/$admissionId/confirm-balance', params: { admissionId: String(admissionId) } })}
                                 className="bg-green-600 hover:bg-green-700"
                             >
                                 Confirm Balance

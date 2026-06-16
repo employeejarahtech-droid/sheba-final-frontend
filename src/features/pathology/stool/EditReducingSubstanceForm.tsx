@@ -129,7 +129,7 @@ export function EditStoolReducingSubstanceForm({ open, setOpen, reportId, invoic
         onSuccess: (data) => {
             toast.success(data.message || "Test created successfully!");
             console.log("API Response:", data);
-            navigate({ to: "/pathology/stool/reducing-substance" });
+            navigate({ to: "/dashboard/pathology/stool/reducing-substance" });
             // optional:
             // form.reset();
             queryClient.invalidateQueries({

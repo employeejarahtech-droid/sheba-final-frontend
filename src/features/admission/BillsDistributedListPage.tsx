@@ -102,7 +102,7 @@ export function BillsDistributedListPage() {
             data: "actions",
             title: "Actions",
             render: (_: any, __: any, row: AdmissionItem) => `
-                <button onclick="window.location.href='/admission/patients/${row.id}'"
+                <button onclick="window.location.href='/dashboard/admission/patients/${row.id}'"
                         class="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">
                     View
                 </button>

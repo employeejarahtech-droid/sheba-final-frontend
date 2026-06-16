@@ -128,7 +128,7 @@ export function EditBloodGroupForm({ open, setOpen, reportId, invoiceId }: Blood
         onSuccess: (data) => {
             toast.success(data.message || "Test created successfully!");
             console.log("API Response:", data);
-            navigate({ to: "/pathology/immunology/blood-group" });
+            navigate({ to: "/dashboard/pathology/immunology/blood-group" });
             // optional:
             // form.reset();
             queryClient.invalidateQueries({

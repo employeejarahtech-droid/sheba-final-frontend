@@ -216,7 +216,7 @@ export function EditDoctorForm({
               <div className="text-sm text-muted-foreground">
                 No doctor types available.
                 <a
-                  href="/indoor/master/doctor-types"
+                  href="/dashboard/indoor/master/doctor-types"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline ml-2"

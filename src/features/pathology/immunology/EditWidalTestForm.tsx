@@ -156,7 +156,7 @@ export function WidalTestForm({ open, setOpen, reportId, invoiceId }: WidalTestF
         onSuccess: (data) => {
             toast.success("Test created successfully!");
             console.log("API Response:", data);
-            navigate({ to: "/pathology/immunology/widal-test" });
+            navigate({ to: "/dashboard/pathology/immunology/widal-test" });
             // optional:
             queryClient.invalidateQueries({
                 queryKey: ["widal", reportId],
@@ -335,7 +335,7 @@ export function WidalTestForm({ open, setOpen, reportId, invoiceId }: WidalTestF
                                 {form.formState.isSubmitting ? "Saving..." : "Save"}
                             </Button>
 
-                            <Link to="/pathology/immunology/widal-test/report/$reportId" params={{ reportId: reportId.toString() }}>
+                            <Link to="/dashboard/pathology/immunology/widal-test/report/$reportId" params={{ reportId: reportId.toString() }}>
                                 <Button type="button" variant="warning">
                                     Print Preview
                                 </Button>

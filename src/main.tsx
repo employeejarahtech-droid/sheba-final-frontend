@@ -9,7 +9,7 @@ import {
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { Provider } from 'react-redux'
-//import { useAuthStore } from '@/stores/auth-store'
+import { getCookie } from '@/lib/cookies'
 import { handleServerError } from '@/lib/handle-server-error'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
@@ -57,11 +57,15 @@ const queryClient = new QueryClient({
     onError: (error) => {
       if (error instanceof AxiosError) {
         if (error.response?.status === 401) {
-          toast.error('Session expired!')
-          //useAuthStore.getState().auth.reset()
-          // Navigate using window.location to avoid circular dependency
-          const currentPath = window.location.pathname + window.location.search
-          window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`
+          // Only redirect to login if the user truly has no valid token.
+          // If a token exists, the 401 might be from a specific endpoint
+          // (e.g. missing permissions) — don't force-logout the entire session.
+          const hasToken = !!getCookie('accessToken')
+          if (!hasToken) {
+            toast.error('Session expired!')
+            const redirect = `${router.history.location.href}`
+            router.navigate({ to: '/login', search: { redirect } })
+          }
         }
         if (error.response?.status === 500) {
           toast.error('Internal Server Error!')

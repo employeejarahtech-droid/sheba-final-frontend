@@ -19,15 +19,24 @@ export function useLogin() {
       const data = res.data || res;
       const token = data.accessToken || data.token;
       const user = data.user;
-      const remember = variables.remember || false;
 
       if (!token || !user) {
         toast.error("Invalid response from server", { id: "login-toast" });
         throw new Error("Invalid response from server");
       }
 
-      // Save token & user with remember preference
-      setAuth(user, token, remember);
+      // Build company object if available
+      const company = user.companyId
+        ? {
+            id: user.companyId,
+            name: user.companyName || "",
+            subdomain: user.subdomain || "",
+            dbType: "shared" as const,
+          }
+        : null;
+
+      // Save token, user & company via triple-layer storage
+      setAuth(user, token, company);
       toast.success("Login successful!", { id: "login-toast" });
     },
 

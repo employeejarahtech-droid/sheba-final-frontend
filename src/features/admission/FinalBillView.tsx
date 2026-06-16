@@ -395,7 +395,7 @@ export function FinalBillView({ admissionId }: FinalBillViewProps) {
                     <Button
                         variant="outline"
                         className="flex-1"
-                        onClick={() => navigate({ to: '/admission/patients/$admissionId/final-bill', params: { admissionId: String(admissionId) } })}
+                        onClick={() => navigate({ to: '/dashboard/admission/patients/$admissionId/final-bill', params: { admissionId: String(admissionId) } })}
                     >
                         <ExternalLink className="w-4 h-4 mr-2" />
                         View Full Bill

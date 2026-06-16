@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { ArrowLeft, Stethoscope } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
@@ -93,7 +93,7 @@ export default function CreateServicePage() {
                     price: data.price ? parseFloat(data.price) : 0,
                     description: data.description,
                     status: data.status,
-                    service_category_id: data.serviceCategoryId || null
+                    serviceCategoryId: (data.serviceCategoryId && data.serviceCategoryId !== "none") ? parseInt(data.serviceCategoryId) : null
                 }),
             });
 
@@ -108,7 +108,7 @@ export default function CreateServicePage() {
             toast.success("Service created successfully");
             queryClient.invalidateQueries({ queryKey: ["services"] });
             queryClient.invalidateQueries({ queryKey: ["services-overall-stats"] });
-            navigate({ to: '/indoor/master/services' });
+            navigate({ to: '/dashboard/indoor/master/services' });
         },
         onError: (error: Error) => {
             toast.error(error.message || "Failed to create service");
@@ -123,57 +123,48 @@ export default function CreateServicePage() {
         <>
             <AppHeader fixed />
 
-            <Main className="p-6 lg:p-10">
-                <div className="max-w-2xl mx-auto space-y-6">
-                    {/* Header */}
-                    <div className="flex items-center gap-4">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => navigate({ to: '/indoor/master/services' })}
-                        >
-                            <ArrowLeft className="h-4 w-4 mr-2" />
-                            Back to Services
-                        </Button>
-                        <h1 className="text-2xl font-bold tracking-tight">Create New Service</h1>
-                    </div>
+            <Main className="flex flex-1 flex-col gap-6">
+                <Form {...form}>
+                    <form
+                        id="create-service-form"
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="space-y-5 w-full min-w-[650px] max-w-[750px] mx-auto px-4"
+                    >
+                        {/* Header */}
+                        <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
+                            <div className="flex items-center gap-4">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => navigate({ to: '/dashboard/indoor/master/services' })}
+                                >
+                                    <ArrowLeft className="h-5 w-5" />
+                                </Button>
+                                <div>
+                                    <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                                        Create New Service
+                                    </h1>
+                                    <p className="text-muted-foreground text-sm">Add a new service to the system</p>
+                                </div>
+                            </div>
+                        </div>
 
-                    {/* Form Card */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Service Information</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Form {...form}>
-                                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="serviceCategoryId"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Category</FormLabel>
-                                                <Select
-                                                    onValueChange={field.onChange}
-                                                    value={field.value || "none"}
-                                                >
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select category (optional)" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value="none">No Category</SelectItem>
-                                                        {categories.map((cat: any) => (
-                                                            <SelectItem key={cat.id} value={cat.id.toString()}>
-                                                                {cat.name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                        {/* Service Information */}
+                        <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                        <Stethoscope className="w-4 h-4 text-white" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-lg font-bold">Service Information</CardTitle>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400">Name, category, pricing, and status</p>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-4">
+                                <div className="space-y-4">
+                                    {/* Service Name */}
                                     <FormField
                                         control={form.control}
                                         name="name"
@@ -181,12 +172,93 @@ export default function CreateServicePage() {
                                             <FormItem>
                                                 <FormLabel>Service Name <span className="text-red-500">*</span></FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Enter service name" {...field} />
+                                                    <Input placeholder="e.g. General Consultation" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Category */}
+                                        <FormField
+                                            control={form.control}
+                                            name="serviceCategoryId"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Category</FormLabel>
+                                                    <Select
+                                                        onValueChange={field.onChange}
+                                                        value={field.value || "none"}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select category (optional)" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="none">No Category</SelectItem>
+                                                            {categories.map((cat: any) => (
+                                                                <SelectItem key={cat.id} value={cat.id.toString()}>
+                                                                    {cat.name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        {/* Status */}
+                                        <FormField
+                                            control={form.control}
+                                            name="status"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Status</FormLabel>
+                                                    <Select onValueChange={field.onChange} value={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select status" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="Active">Active</SelectItem>
+                                                            <SelectItem value="Inactive">Inactive</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+
+                                    {/* Price */}
+                                    <FormField
+                                        control={form.control}
+                                        name="price"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Price (৳) <span className="text-red-500">*</span></FormLabel>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">৳</span>
+                                                        <Input
+                                                            type="number"
+                                                            step="0.01"
+                                                            placeholder="0.00"
+                                                            className="pl-7"
+                                                            {...field}
+                                                        />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    {/* Description */}
                                     <FormField
                                         control={form.control}
                                         name="description"
@@ -196,7 +268,7 @@ export default function CreateServicePage() {
                                                 <FormControl>
                                                     <Textarea
                                                         placeholder="Enter description (optional)"
-                                                        className="min-h-[100px]"
+                                                        className="min-h-[80px] resize-y"
                                                         {...field}
                                                     />
                                                 </FormControl>
@@ -204,63 +276,32 @@ export default function CreateServicePage() {
                                             </FormItem>
                                         )}
                                     />
-                                    <FormField
-                                        control={form.control}
-                                        name="price"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Price (৳) <span className="text-red-500">*</span></FormLabel>
-                                                <FormControl>
-                                                    <Input type="number" step="0.01" placeholder="0.00" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="status"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Status</FormLabel>
-                                                <Select onValueChange={field.onChange} value={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select status" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value="Active">Active</SelectItem>
-                                                        <SelectItem value="Inactive">Inactive</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <div className="flex justify-end gap-2 pt-4">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => navigate({ to: '/indoor/master/services' })}
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button
-                                            type="submit"
-                                            disabled={createMutation.isPending}
-                                        >
-                                            {createMutation.isPending && (
-                                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                            )}
-                                            Create Service
-                                        </Button>
-                                    </div>
-                                </form>
-                            </Form>
-                        </CardContent>
-                    </Card>
-                </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Action Buttons */}
+                        <div className="flex items-center justify-end gap-3 pb-10">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="lg"
+                                onClick={() => navigate({ to: '/dashboard/indoor/master/services' })}
+                                disabled={createMutation.isPending}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                size="lg"
+                                disabled={createMutation.isPending}
+                                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white min-w-[200px]"
+                            >
+                                {createMutation.isPending ? "Creating..." : "Create Service"}
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
             </Main>
         </>
     );

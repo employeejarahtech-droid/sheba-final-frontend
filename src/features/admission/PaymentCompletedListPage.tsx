@@ -193,7 +193,7 @@ export function PaymentCompletedListPage({ page, limit, search, setPage, setSear
             orderable: false,
             responsivePriority: 10,
             render: (_: any, __: any, row: AdmissionItem) => `
-                <button onclick="window.location.href='/admission/patients/${row.id}'"
+                <button onclick="window.location.href='/dashboard/admission/patients/${row.id}'"
                         class="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                     View

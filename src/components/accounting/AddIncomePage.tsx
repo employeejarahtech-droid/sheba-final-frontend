@@ -98,7 +98,7 @@ export default function AddIncomePage() {
       await addIncome.mutateAsync(payload);
       toast.success("Income added successfully");
       reset(); // Clear the form
-      navigate({ to: "/accounting/reports/journal" }); // Go back to previous page
+      navigate({ to: "/dashboard/accounting/reports/journal" }); // Go back to previous page
     } catch (err) {
       console.error(err);
       const error = err as {

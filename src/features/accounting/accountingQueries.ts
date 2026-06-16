@@ -145,6 +145,16 @@ export const useUpdateAccountingAccountMutation = () => {
     });
 };
 
+export const useDeleteAccountingAccountMutation = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: number) => accountingService.deleteAccountingAccount(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ACCOUNTING_KEYS.accounts() });
+        },
+    });
+};
+
 export const useAddJournalEntryMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({

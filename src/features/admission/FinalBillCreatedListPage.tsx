@@ -322,7 +322,7 @@ export function FinalBillCreatedListPage({ page, limit, search, setPage, setSear
                 const hasOverpayment = dueAmount < 0
 
                 let buttons = `
-                    <button onclick="window.location.href='/admission/patients/${row.id}'"
+                    <button onclick="window.location.href='/dashboard/admission/patients/${row.id}'"
                             class="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         View
@@ -331,7 +331,7 @@ export function FinalBillCreatedListPage({ page, limit, search, setPage, setSear
 
                 if (hasDue) {
                     buttons += `
-                        <button onclick="window.location.href='/admission/patients/${row.id}/billing'"
+                        <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/billing'"
                                 class="inline-flex items-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium shadow transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
                             Pay Due
@@ -339,7 +339,7 @@ export function FinalBillCreatedListPage({ page, limit, search, setPage, setSear
                     `
                 } else if (hasOverpayment) {
                     buttons += `
-                        <button onclick="window.location.href='/admission/patients/${row.id}/billing'"
+                        <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/billing'"
                                 class="inline-flex items-center gap-2 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium shadow transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
                             Refund
@@ -613,10 +613,10 @@ export function FinalBillCreatedListPage({ page, limit, search, setPage, setSear
 
                             <!-- ACTION BUTTONS -->
                             <div class='flex flex-row flex-wrap gap-3 pt-4 w-full max-w-full box-border'>
-                                <a href="/admission/patients/${id}/print" class='flex-1 min-w-[140px] text-center px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-lg text-sm font-medium shadow transition no-underline box-border'>
+                                <a href="/dashboard/admission/patients/${id}/print" class='flex-1 min-w-[140px] text-center px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-lg text-sm font-medium shadow transition no-underline box-border'>
                                     Print Details
                                 </a>
-                                <button onclick="window.location.href='/admission/patients/${id}/final-bill'" class='flex-1 min-w-[140px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium shadow transition box-border'>
+                                <button onclick="window.location.href='/dashboard/admission/patients/${id}/final-bill'" class='flex-1 min-w-[140px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium shadow transition box-border'>
                                     View Final Bill
                                 </button>
                             </div>

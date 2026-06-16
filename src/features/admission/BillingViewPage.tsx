@@ -97,7 +97,7 @@ export function BillingViewPage() {
 
     const handleAddAnotherBill = () => {
         if (billing?.admission_id) {
-            navigate({ to: `/admission/patients/${billing.admission_id}/billing` })
+            navigate({ to: `/dashboard/admission/patients/${billing.admission_id}/billing` })
         }
     }
 
@@ -119,7 +119,7 @@ export function BillingViewPage() {
                             <p className="text-red-500 font-semibold mb-4">
                                 {(error as Error)?.message || 'Billing not found'}
                             </p>
-                            <Button onClick={() => navigate({ to: '/admission/patients' })}>
+                            <Button onClick={() => navigate({ to: '/dashboard/admission/patients' })}>
                                 Back to Patients List
                             </Button>
                         </div>
@@ -142,7 +142,7 @@ export function BillingViewPage() {
                     title="Bill Details"
                     subtitle="View and manage billing information"
                     backButton={{
-                        onClick: () => navigate({ to: '/admission/patients' }),
+                        onClick: () => navigate({ to: '/dashboard/admission/patients' }),
                     }}
                     actions={
                         <>
@@ -415,7 +415,7 @@ export function BillingViewPage() {
                 <div className="mt-6 flex justify-between items-center print:hidden">
                     <Button
                         variant="outline"
-                        onClick={() => navigate({ to: '/admission/patients' })}
+                        onClick={() => navigate({ to: '/dashboard/admission/patients' })}
                     >
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Back to Patients List

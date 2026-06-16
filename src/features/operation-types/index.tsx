@@ -293,7 +293,7 @@ export default function OperationTypes({ page, limit, search, setPage, setLimit,
             const id = button.getAttribute('data-id');
 
             if (action === 'view' && id) {
-                navigate({ to: `/indoor/master/operation-types/${id}` });
+                navigate({ to: `/dashboard/indoor/master/operation-types/${id}` });
             } else if (action === 'edit' && id) {
                 setSelectedOperationTypeId(Number(id));
                 setOpenEditForm(true);

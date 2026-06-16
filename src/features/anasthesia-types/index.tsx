@@ -293,7 +293,7 @@ export default function AnasthesiaTypes({ page, limit, search, setPage, setLimit
             const id = button.getAttribute('data-id');
 
             if (action === 'view' && id) {
-                navigate({ to: `/indoor/master/anasthesia-types/${id}` });
+                navigate({ to: `/dashboard/indoor/master/anasthesia-types/${id}` });
             } else if (action === 'edit' && id) {
                 setSelectedAnasthesiaTypeId(Number(id));
                 setOpenEditForm(true);

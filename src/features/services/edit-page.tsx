@@ -18,7 +18,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getCookie } from '@/lib/cookies';
 import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const serviceSchema = z.object({
     serviceCategoryId: z.string().optional(),
@@ -38,7 +38,6 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const token = getCookie('accessToken');
-    const [catOpen, setCatOpen] = useState(false);
 
     // Fetch service data
     const { data: serviceData, isLoading, error } = useQuery({
@@ -110,14 +109,16 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
         },
     })
 
-    // Update form when service data loads
+    // Reset form once when the service loads (guarded so a background refetch
+    // of the detail query can't wipe a category the user just picked).
+    const resetKeyRef = useRef<string | null>(null);
     useEffect(() => {
-        if (serviceData) {
-            const categoryId = serviceData.service_category_id
-                ? serviceData.service_category_id.toString()
-                : "none";
-            console.log('Edit Service - service_category_id:', serviceData.service_category_id);
-            console.log('Edit Service - setting serviceCategoryId to:', categoryId);
+        if (serviceData && resetKeyRef.current !== serviceId) {
+            resetKeyRef.current = serviceId;
+            // NOTE: the API returns the FK in camelCase (serviceCategoryId), matching
+            // the Sequelize model attribute — NOT service_category_id (the DB column).
+            const rawCategoryId = serviceData.serviceCategoryId ?? serviceData.service_category_id;
+            const categoryId = rawCategoryId ? rawCategoryId.toString() : "none";
             form.reset({
                 serviceCategoryId: categoryId,
                 name: serviceData.name || "",
@@ -126,7 +127,7 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
                 status: serviceData.status || "Active",
             })
         }
-    }, [serviceData, form])
+    }, [serviceData, serviceId, form])
 
     // Update mutation
     const updateMutation = useMutation({
@@ -143,7 +144,7 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
                     price: data.price,
                     description: data.description,
                     status: data.status,
-                    service_category_id: (data.serviceCategoryId && data.serviceCategoryId !== "none") ? parseInt(data.serviceCategoryId) : null,
+                    serviceCategoryId: (data.serviceCategoryId && data.serviceCategoryId !== "none") ? parseInt(data.serviceCategoryId) : null,
                 }),
             })
 
@@ -159,7 +160,7 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
             queryClient.invalidateQueries({ queryKey: ['service', serviceId] })
             queryClient.invalidateQueries({ queryKey: ['services'] })
             queryClient.invalidateQueries({ queryKey: ['services-overall-stats'] })
-            navigate({ to: '/indoor/master/services' })
+            navigate({ to: '/dashboard/indoor/master/services' })
         },
         onError: (error: Error) => {
             toast.error(error.message || 'Failed to update service')
@@ -194,7 +195,7 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
                     <p className="text-red-500 mb-4">Failed to load service data</p>
                     <Button
                         variant="outline"
-                        onClick={() => navigate({ to: '/indoor/master/services' })}
+                        onClick={() => navigate({ to: '/dashboard/indoor/master/services' })}
                     >
                         Back to Services
                     </Button>
@@ -204,7 +205,7 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
     }
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-background">
+        <div className="flex flex-col min-h-screen ">
             <AppHeader fixed />
 
             <Main className="p-6 lg:p-8 w-full flex-1">
@@ -222,7 +223,7 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
                         <Button
                             variant="ghost"
                             className="gap-2"
-                            onClick={() => navigate({ to: '/indoor/master/services' })}
+                            onClick={() => navigate({ to: '/dashboard/indoor/master/services' })}
                         >
                             <ArrowLeft className="h-4 w-4" />
                             Back
@@ -246,82 +247,35 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
                                     </div>
                                 </CardHeader>
                                 <CardContent className="px-4 md:px-6">
-                                    <div className="py-5 space-y-5">
-                                        {/* Category */}
+                                    <div className="py-5 space-y-5">                                        {/* Category */}
                                         <FormField
                                             control={form.control}
                                             name="serviceCategoryId"
-                                            render={({ field }) => {
-                                                const selectedCategory = categories?.find(
-                                                    (cat: any) => cat.id.toString() === field.value
-                                                );
-                                                console.log('Category field value:', field.value);
-                                                console.log('Categories available:', categories);
-                                                console.log('Selected category:', selectedCategory);
-                                                return (
-                                                    <FormItem>
-                                                        <FormLabel>Category</FormLabel>
-                                                        <Popover open={catOpen} onOpenChange={setCatOpen}>
-                                                            <PopoverTrigger asChild>
-                                                                <FormControl>
-                                                                    <button
-                                                                        type="button"
-                                                                        className={cn(
-                                                                            "w-full flex justify-between items-center px-3 py-2 border border-input rounded-md h-10 bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-sm",
-                                                                            !field.value && "text-muted-foreground"
-                                                                        )}
-                                                                    >
-                                                                        {selectedCategory?.name || (field.value === "none" ? "No Category" : "Select category")}
-                                                                        <ChevronDown className="h-4 w-4 opacity-50" />
-                                                                    </button>
-                                                                </FormControl>
-                                                            </PopoverTrigger>
-                                                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-                                                                <Command>
-                                                                    <CommandInput placeholder="Search category..." className="h-10" />
-                                                                    <CommandList className="max-h-[250px]">
-                                                                        <CommandEmpty>No category found.</CommandEmpty>
-                                                                        <CommandGroup>
-                                                                            <CommandItem
-                                                                                onSelect={() => {
-                                                                                    field.onChange("none");
-                                                                                    setCatOpen(false);
-                                                                                }}
-                                                                            >
-                                                                                No Category
-                                                                                <Check
-                                                                                    className={cn(
-                                                                                        "h-4 w-4 ml-auto",
-                                                                                        field.value === "none" ? "opacity-100" : "opacity-0"
-                                                                                    )}
-                                                                                />
-                                                                            </CommandItem>
-                                                                            {categories?.map((cat: any) => (
-                                                                                <CommandItem
-                                                                                    key={cat.id}
-                                                                                    onSelect={() => {
-                                                                                        field.onChange(cat.id.toString());
-                                                                                        setCatOpen(false);
-                                                                                    }}
-                                                                                >
-                                                                                    {cat.name}
-                                                                                    <Check
-                                                                                        className={cn(
-                                                                                            "h-4 w-4 ml-auto",
-                                                                                            cat.id.toString() === field.value ? "opacity-100" : "opacity-0"
-                                                                                        )}
-                                                                                    />
-                                                                                </CommandItem>
-                                                                            ))}
-                                                                        </CommandGroup>
-                                                                    </CommandList>
-                                                                </Command>
-                                                            </PopoverContent>
-                                                        </Popover>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                );
-                                            }}
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Category</FormLabel>
+                                                    <Select
+                                                        key={`${field.value}-${categories.length}`}
+                                                        onValueChange={field.onChange}
+                                                        value={field.value || "none"}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger className="h-10 w-full !h-auto">
+                                                                <SelectValue placeholder="Select category" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="none">No Category</SelectItem>
+                                                            {categories.map((cat: any) => (
+                                                                <SelectItem key={cat.id} value={cat.id.toString()}>
+                                                                    {cat.name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
                                         />
 
                                         {/* Service Name */}
@@ -422,7 +376,7 @@ export default function EditServicePage({ id: serviceId }: EditServicePageProps)
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => navigate({ to: '/indoor/master/services' })}
+                                    onClick={() => navigate({ to: '/dashboard/indoor/master/services' })}
                                     disabled={updateMutation.isPending}
                                 >
                                     Cancel

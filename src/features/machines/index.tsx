@@ -20,18 +20,24 @@ type MachineItem = {
     created_by_name?: string;
 };
 
-export default function Machines() {
+type MachinesProps = {
+    page: number;
+    limit: number;
+    search: string;
+    setPage: (page: number) => void;
+    setLimit: (limit: number) => void;
+    setSearch: (search: string) => void;
+};
+
+export default function Machines({ page, limit, search, setPage, setLimit, setSearch }: MachinesProps) {
     const [openEditForm, setOpenEditForm] = useState<boolean>(false);
     const [selectedMachineId, setSelectedMachineId] = useState<string | null>(null);
-    const [page, setPage] = useState(1);
-    const [limit, setLimit] = useState(10);
-    const [search, setSearch] = useState("");
 
 
     const token = getCookie('accessToken');
     //const navigate = useNavigate();
 
-    const { data } = useQuery({
+    const { data, isFetching } = useQuery({
         queryKey: ["machine", page, limit, search],
 
         queryFn: async () => {
@@ -332,16 +338,11 @@ export default function Machines() {
                     columns={columns}
                     data={data?.data?.items || []}
                     meta={data?.data?.meta}
-                    onPageChange={(newPage) => setPage(newPage)}
-                    onLimitChange={(newLimit) => {
-                        setLimit(newLimit);
-                        setPage(1);
-                    }}
+                    onPageChange={setPage}
+                    onLimitChange={setLimit}
                     search={search}
-                    onSearchChange={(value) => {
-                        setSearch(value);
-                        setPage(1);
-                    }}
+                    onSearchChange={setSearch}
+                    isLoading={isFetching}
                 />
             </div>
             <EditMachineForm open={openEditForm} setOpen={setOpenEditForm} machineId={selectedMachineId} />

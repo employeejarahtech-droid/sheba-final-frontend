@@ -131,7 +131,7 @@ export function EditBloodForBTCTForm({ open, setOpen, reportId, invoiceId }: BTC
         onSuccess: (data) => {
             toast.success(data.message || "Test created successfully!");
             console.log("API Response:", data);
-            navigate({ to: "/pathology/hematology/blood-for-bt-ct" });
+            navigate({ to: "/dashboard/pathology/hematology/blood-for-bt-ct" });
             // optional:
             queryClient.invalidateQueries({ queryKey: ["btct", reportId] });
         },
@@ -267,7 +267,7 @@ export function EditBloodForBTCTForm({ open, setOpen, reportId, invoiceId }: BTC
                                 {form.formState.isSubmitting ? "Saving..." : "Save"}
                             </Button>
 
-                            <Link to="/pathology/hematology/blood-for-bt-ct/report/$reportId" params={{ reportId: reportId.toString() }}>
+                            <Link to="/dashboard/pathology/hematology/blood-for-bt-ct/report/$reportId" params={{ reportId: reportId.toString() }}>
                                 <Button type="button" variant="warning">
                                     Print Preview
                                 </Button>

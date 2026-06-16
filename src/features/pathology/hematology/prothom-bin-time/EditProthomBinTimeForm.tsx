@@ -142,7 +142,7 @@ export function EditProthrombinTimeForm({ open, setOpen, reportId, invoiceId }: 
             console.log("Peripheral Blood Film Updated API Response:", data);
             queryClient.invalidateQueries({ queryKey: ["prothombin-time", reportId] });
             toast.success("Peripheral Blood Film updated successfully");
-            navigate({ to: "/pathology/hematology/prothom-bin-time-full" });
+            navigate({ to: "/dashboard/pathology/hematology/prothom-bin-time-full" });
         },
         onError: (error: Error) => {
             toast.error(error.message || "Failed to update prothombin time report");

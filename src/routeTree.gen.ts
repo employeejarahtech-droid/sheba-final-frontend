@@ -8,10 +8,16 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createFileRoute } from '@tanstack/react-router'
+
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ClerkRouteRouteImport } from './routes/clerk/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as platformRegisterRouteImport } from './routes/(platform)/register'
+import { Route as platformPricingRouteImport } from './routes/(platform)/pricing'
+import { Route as platformContactRouteImport } from './routes/(platform)/contact'
+import { Route as platformLayoutRouteImport } from './routes/(platform)/_layout'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
 import { Route as errors404RouteImport } from './routes/(errors)/404'
@@ -23,213 +29,234 @@ import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authOtpRouteImport } from './routes/(auth)/otp'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
+import { Route as authAuthCallbackRouteImport } from './routes/(auth)/auth-callback'
 import { Route as ClerkAuthenticatedRouteRouteImport } from './routes/clerk/_authenticated/route'
 import { Route as ClerkauthRouteRouteImport } from './routes/clerk/(auth)/route'
-import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
-import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
-import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks/index'
-import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
-import { Route as AuthenticatedRolesIndexRouteImport } from './routes/_authenticated/roles/index'
-import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications/index'
-import { Route as AuthenticatedMyAccountIndexRouteImport } from './routes/_authenticated/my-account/index'
-import { Route as AuthenticatedHelpIndexRouteImport } from './routes/_authenticated/help/index'
-import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_authenticated/help-center/index'
-import { Route as AuthenticatedDatabaseIndexRouteImport } from './routes/_authenticated/database/index'
-import { Route as AuthenticatedChatsIndexRouteImport } from './routes/_authenticated/chats/index'
-import { Route as AuthenticatedBackupsIndexRouteImport } from './routes/_authenticated/backups/index'
-import { Route as AuthenticatedBackupSettingsIndexRouteImport } from './routes/_authenticated/backup-settings/index'
-import { Route as AuthenticatedAppsIndexRouteImport } from './routes/_authenticated/apps/index'
-import { Route as AuthenticatedAccountingIndexRouteImport } from './routes/_authenticated/accounting/index'
+import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
+import { Route as platformAdminIndexRouteImport } from './routes/(platform)/admin/index'
 import { Route as ClerkAuthenticatedUserManagementRouteImport } from './routes/clerk/_authenticated/user-management'
 import { Route as ClerkauthSignUpRouteImport } from './routes/clerk/(auth)/sign-up'
 import { Route as ClerkauthSignInRouteImport } from './routes/clerk/(auth)/sign-in'
-import { Route as AuthenticatedSettingsPrefixRouteImport } from './routes/_authenticated/settings/prefix'
-import { Route as AuthenticatedSettingsPaymentAccountsRouteImport } from './routes/_authenticated/settings/payment-accounts'
-import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
-import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_authenticated/settings/display'
-import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
-import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
-import { Route as AuthenticatedNotificationsIdRouteImport } from './routes/_authenticated/notifications/$id'
-import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
-import { Route as AuthenticatedXRayAllIndexRouteImport } from './routes/_authenticated/x-ray/all/index'
-import { Route as AuthenticatedUltrasonogramAllIndexRouteImport } from './routes/_authenticated/ultrasonogram/all/index'
-import { Route as AuthenticatedRolesCreateIndexRouteImport } from './routes/_authenticated/roles/create/index'
-import { Route as AuthenticatedPayrollOverviewIndexRouteImport } from './routes/_authenticated/payroll/overview/index'
-import { Route as AuthenticatedPayrollEmployeesIndexRouteImport } from './routes/_authenticated/payroll/employees/index'
-import { Route as AuthenticatedEcgAllIndexRouteImport } from './routes/_authenticated/ecg/all/index'
-import { Route as AuthenticatedBanksBankWithdrawalsIndexRouteImport } from './routes/_authenticated/banks/bank-withdrawals/index'
-import { Route as AuthenticatedBanksBankTransactionsIndexRouteImport } from './routes/_authenticated/banks/bank-transactions/index'
-import { Route as AuthenticatedBanksBankDepositsIndexRouteImport } from './routes/_authenticated/banks/bank-deposits/index'
-import { Route as AuthenticatedBanksBankAccountsIndexRouteImport } from './routes/_authenticated/banks/bank-accounts/index'
-import { Route as AuthenticatedAdmissionSecondTimeBillIndexRouteImport } from './routes/_authenticated/admission/second-time-bill/index'
-import { Route as AuthenticatedAdmissionPatientsIndexRouteImport } from './routes/_authenticated/admission/patients/index'
-import { Route as AuthenticatedAdmissionNewAdmissionIndexRouteImport } from './routes/_authenticated/admission/new-admission/index'
-import { Route as AuthenticatedAdmissionInvoiceIndexRouteImport } from './routes/_authenticated/admission/invoice/index'
-import { Route as AuthenticatedAdmissionFirstTimeServiceIndexRouteImport } from './routes/_authenticated/admission/first-time-service/index'
-import { Route as AuthenticatedAdmissionFirstTimeBillIndexRouteImport } from './routes/_authenticated/admission/first-time-bill/index'
-import { Route as AuthenticatedAdmissionFinaliseServicesIndexRouteImport } from './routes/_authenticated/admission/finalise-services/index'
-import { Route as AuthenticatedAdmissionFinalBillsIndexRouteImport } from './routes/_authenticated/admission/final-bills/index'
-import { Route as AuthenticatedAdmissionDueCollectionIndexRouteImport } from './routes/_authenticated/admission/due-collection/index'
-import { Route as AuthenticatedAdmissionBedCabinChargeIndexRouteImport } from './routes/_authenticated/admission/bed-cabin-charge/index'
-import { Route as AuthenticatedAdmissionAdvancePaymentIndexRouteImport } from './routes/_authenticated/admission/advance-payment/index'
-import { Route as AuthenticatedAccountsPayToSurgeonIndexRouteImport } from './routes/_authenticated/accounts/pay-to-surgeon/index'
-import { Route as AuthenticatedAccountsPayToConsultantIndexRouteImport } from './routes/_authenticated/accounts/pay-to-consultant/index'
-import { Route as AuthenticatedAccountsPayToAssistantIndexRouteImport } from './routes/_authenticated/accounts/pay-to-assistant/index'
-import { Route as AuthenticatedAccountsPayToAnaesthetistIndexRouteImport } from './routes/_authenticated/accounts/pay-to-anaesthetist/index'
-import { Route as AuthenticatedAccountsJournalIndexRouteImport } from './routes/_authenticated/accounts/journal/index'
-import { Route as AuthenticatedAccountsDailyDebitIndexRouteImport } from './routes/_authenticated/accounts/daily-debit/index'
-import { Route as AuthenticatedAccountsDailyCreditIndexRouteImport } from './routes/_authenticated/accounts/daily-credit/index'
-import { Route as AuthenticatedAccountingTransactionsIndexRouteImport } from './routes/_authenticated/accounting/transactions/index'
-import { Route as AuthenticatedAccountingIncomeIndexRouteImport } from './routes/_authenticated/accounting/income/index'
-import { Route as AuthenticatedAccountingExpensesIndexRouteImport } from './routes/_authenticated/accounting/expenses/index'
-import { Route as AuthenticatedAccountingExpenseIndexRouteImport } from './routes/_authenticated/accounting/expense/index'
-import { Route as AuthenticatedAccountingAccountsIndexRouteImport } from './routes/_authenticated/accounting/accounts/index'
-import { Route as AuthenticatedRolesEditIdRouteImport } from './routes/_authenticated/roles/edit/$id'
-import { Route as AuthenticatedPayrollSalaryStaffIdIndexRouteImport } from './routes/_authenticated/payroll/salary/$staffId/index'
-import { Route as AuthenticatedPayrollAttendanceStaffIdIndexRouteImport } from './routes/_authenticated/payroll/attendance/$staffId/index'
-import { Route as AuthenticatedPathologyUrineUrineForSugarIndexRouteImport } from './routes/_authenticated/pathology/urine/urine-for-sugar/index'
-import { Route as AuthenticatedPathologyUrineUrineForReFullIndexRouteImport } from './routes/_authenticated/pathology/urine/urine-for-re-full/index'
-import { Route as AuthenticatedPathologyUrineUrineForAlbuminIndexRouteImport } from './routes/_authenticated/pathology/urine/urine-for-albumin/index'
-import { Route as AuthenticatedPathologyStoolStoolReIndexRouteImport } from './routes/_authenticated/pathology/stool/stool-re/index'
-import { Route as AuthenticatedPathologyStoolReducingSubstanceIndexRouteImport } from './routes/_authenticated/pathology/stool/reducing-substance/index'
-import { Route as AuthenticatedPathologyStoolOcultBloodTestIndexRouteImport } from './routes/_authenticated/pathology/stool/ocult-blood-test/index'
-import { Route as AuthenticatedPathologyImmunologyWidalTestIndexRouteImport } from './routes/_authenticated/pathology/immunology/widal-test/index'
-import { Route as AuthenticatedPathologyImmunologyMtIndexRouteImport } from './routes/_authenticated/pathology/immunology/mt/index'
-import { Route as AuthenticatedPathologyImmunologyBloodGroupIndexRouteImport } from './routes/_authenticated/pathology/immunology/blood-group/index'
-import { Route as AuthenticatedPathologyImmunologyBetaHcgIndexRouteImport } from './routes/_authenticated/pathology/immunology/beta-hcg/index'
-import { Route as AuthenticatedPathologyImmunologyAllIndexRouteImport } from './routes/_authenticated/pathology/immunology/all/index'
-import { Route as AuthenticatedPathologyHormoneT3t4tshIndexRouteImport } from './routes/_authenticated/pathology/hormone/t3t4tsh/index'
-import { Route as AuthenticatedPathologyHormoneSputumIndexRouteImport } from './routes/_authenticated/pathology/hormone/sputum/index'
-import { Route as AuthenticatedPathologyHormoneSkinScrappingForFungusIndexRouteImport } from './routes/_authenticated/pathology/hormone/skin-scrapping-for-fungus/index'
-import { Route as AuthenticatedPathologyHormoneSemenIndexRouteImport } from './routes/_authenticated/pathology/hormone/semen/index'
-import { Route as AuthenticatedPathologyHormoneElectrolytesIndexRouteImport } from './routes/_authenticated/pathology/hormone/electrolytes/index'
-import { Route as AuthenticatedPathologyHormoneAllIndexRouteImport } from './routes/_authenticated/pathology/hormone/all/index'
-import { Route as AuthenticatedPathologyHematologyProthomBinTimeFullIndexRouteImport } from './routes/_authenticated/pathology/hematology/prothom-bin-time-full/index'
-import { Route as AuthenticatedPathologyHematologyPeripheralBloodFilmIndexRouteImport } from './routes/_authenticated/pathology/hematology/peripheral-blood-film/index'
-import { Route as AuthenticatedPathologyHematologyCbcWithPbfIndexRouteImport } from './routes/_authenticated/pathology/hematology/cbc-with-pbf/index'
-import { Route as AuthenticatedPathologyHematologyCbcShortIndexRouteImport } from './routes/_authenticated/pathology/hematology/cbc-short/index'
-import { Route as AuthenticatedPathologyHematologyBloodForTcdcIndexRouteImport } from './routes/_authenticated/pathology/hematology/blood-for-tcdc/index'
-import { Route as AuthenticatedPathologyHematologyBloodForBtCtIndexRouteImport } from './routes/_authenticated/pathology/hematology/blood-for-bt-ct/index'
-import { Route as AuthenticatedPathologyHematologyAllIndexRouteImport } from './routes/_authenticated/pathology/hematology/all/index'
-import { Route as AuthenticatedPathologyBiochemicalLipidProfileIndexRouteImport } from './routes/_authenticated/pathology/biochemical/lipid-profile/index'
-import { Route as AuthenticatedPathologyBiochemicalAllIndexRouteImport } from './routes/_authenticated/pathology/biochemical/all/index'
-import { Route as AuthenticatedOutdoorReceptionUserInvoicesIndexRouteImport } from './routes/_authenticated/outdoor/reception/user-invoices/index'
-import { Route as AuthenticatedOutdoorReceptionPatientsIndexRouteImport } from './routes/_authenticated/outdoor/reception/patients/index'
-import { Route as AuthenticatedOutdoorReceptionPaidInvoicesIndexRouteImport } from './routes/_authenticated/outdoor/reception/paid-invoices/index'
-import { Route as AuthenticatedOutdoorReceptionMyInvoicesIndexRouteImport } from './routes/_authenticated/outdoor/reception/my-invoices/index'
-import { Route as AuthenticatedOutdoorReceptionDueCollectionIndexRouteImport } from './routes/_authenticated/outdoor/reception/due-collection/index'
-import { Route as AuthenticatedOutdoorMasterTestsIndexRouteImport } from './routes/_authenticated/outdoor/master/tests/index'
-import { Route as AuthenticatedOutdoorMasterTestTablesIndexRouteImport } from './routes/_authenticated/outdoor/master/test-tables/index'
-import { Route as AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRouteImport } from './routes/_authenticated/outdoor/master/sample-collection-rooms/index'
-import { Route as AuthenticatedOutdoorMasterMachinesIndexRouteImport } from './routes/_authenticated/outdoor/master/machines/index'
-import { Route as AuthenticatedOutdoorMasterDoctorsIndexRouteImport } from './routes/_authenticated/outdoor/master/doctors/index'
-import { Route as AuthenticatedOutdoorMasterDepartmentsIndexRouteImport } from './routes/_authenticated/outdoor/master/departments/index'
-import { Route as AuthenticatedOutdoorMasterCategoriesIndexRouteImport } from './routes/_authenticated/outdoor/master/categories/index'
-import { Route as AuthenticatedIndoorMasterTreatmentOutcomesIndexRouteImport } from './routes/_authenticated/indoor/master/treatment-outcomes/index'
-import { Route as AuthenticatedIndoorMasterServicesIndexRouteImport } from './routes/_authenticated/indoor/master/services/index'
-import { Route as AuthenticatedIndoorMasterServiceCategoriesIndexRouteImport } from './routes/_authenticated/indoor/master/service-categories/index'
-import { Route as AuthenticatedIndoorMasterPatientTypesIndexRouteImport } from './routes/_authenticated/indoor/master/patient-types/index'
-import { Route as AuthenticatedIndoorMasterOperationTypesIndexRouteImport } from './routes/_authenticated/indoor/master/operation-types/index'
-import { Route as AuthenticatedIndoorMasterDoctorTypesIndexRouteImport } from './routes/_authenticated/indoor/master/doctor-types/index'
-import { Route as AuthenticatedIndoorMasterBedCabinListIndexRouteImport } from './routes/_authenticated/indoor/master/bed-cabin-list/index'
-import { Route as AuthenticatedIndoorMasterAnasthesiaTypesIndexRouteImport } from './routes/_authenticated/indoor/master/anasthesia-types/index'
-import { Route as AuthenticatedIndoorManagementDoctorReferredIndexRouteImport } from './routes/_authenticated/indoor/management/doctor-referred/index'
-import { Route as AuthenticatedIndoorManagementDistributionsIndexRouteImport } from './routes/_authenticated/indoor/management/distributions/index'
-import { Route as AuthenticatedAdmissionPatientsPaymentCompletedListIndexRouteImport } from './routes/_authenticated/admission/patients/payment-completed-list/index'
-import { Route as AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRouteImport } from './routes/_authenticated/admission/patients/final-bill-created-list/index'
-import { Route as AuthenticatedAdmissionPatientsDischargedIndexRouteImport } from './routes/_authenticated/admission/patients/discharged/index'
-import { Route as AuthenticatedAdmissionPatientsDischargedListIndexRouteImport } from './routes/_authenticated/admission/patients/discharged-list/index'
-import { Route as AuthenticatedAdmissionPatientsBillDistributedListIndexRouteImport } from './routes/_authenticated/admission/patients/bill-distributed-list/index'
-import { Route as AuthenticatedAdmissionPatientsBillCreatedListIndexRouteImport } from './routes/_authenticated/admission/patients/bill-created-list/index'
-import { Route as AuthenticatedAdmissionPatientsBalanceDistributedListIndexRouteImport } from './routes/_authenticated/admission/patients/balance-distributed-list/index'
-import { Route as AuthenticatedAdmissionPatientsActiveIndexRouteImport } from './routes/_authenticated/admission/patients/active/index'
-import { Route as AuthenticatedAdmissionInvoiceListIndexRouteImport } from './routes/_authenticated/admission/invoice/list/index'
-import { Route as AuthenticatedAdmissionInvoiceCreateIndexRouteImport } from './routes/_authenticated/admission/invoice/create/index'
-import { Route as AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRouteImport } from './routes/_authenticated/admission/discharged-patients/bill-does-not-created/index'
-import { Route as AuthenticatedAdmissionBillingBillingIdIndexRouteImport } from './routes/_authenticated/admission/billing/$billingId/index'
-import { Route as AuthenticatedAccountingReportsTrialBalanceIndexRouteImport } from './routes/_authenticated/accounting/reports/trial-balance/index'
-import { Route as AuthenticatedAccountingReportsProfitLossIndexRouteImport } from './routes/_authenticated/accounting/reports/profit-loss/index'
-import { Route as AuthenticatedAccountingReportsProfitAndLossIndexRouteImport } from './routes/_authenticated/accounting/reports/profit-and-loss/index'
-import { Route as AuthenticatedAccountingReportsLedgerIndexRouteImport } from './routes/_authenticated/accounting/reports/ledger/index'
-import { Route as AuthenticatedAccountingReportsJournalIndexRouteImport } from './routes/_authenticated/accounting/reports/journal/index'
-import { Route as AuthenticatedAccountingReportsDailySummaryIndexRouteImport } from './routes/_authenticated/accounting/reports/daily-summary/index'
-import { Route as AuthenticatedAccountingReportsBalanceSheetIndexRouteImport } from './routes/_authenticated/accounting/reports/balance-sheet/index'
-import { Route as AuthenticatedXRayAllPrintIdRouteImport } from './routes/_authenticated/x-ray/all/print/$id'
-import { Route as AuthenticatedXRayAllEditIdRouteImport } from './routes/_authenticated/x-ray/all/edit/$id'
-import { Route as AuthenticatedUltrasonogramAllPrintIdRouteImport } from './routes/_authenticated/ultrasonogram/all/print/$id'
-import { Route as AuthenticatedUltrasonogramAllEditIdRouteImport } from './routes/_authenticated/ultrasonogram/all/edit/$id'
-import { Route as AuthenticatedRolesPermissionsRoleIdEditRouteImport } from './routes/_authenticated/roles/permissions/$roleId/edit'
-import { Route as AuthenticatedOutdoorReceptionInvoicesInvoiceIdRouteImport } from './routes/_authenticated/outdoor/reception/invoices/$invoiceId'
-import { Route as AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRouteImport } from './routes/_authenticated/outdoor/reception/due-collection/$invoiceId'
-import { Route as AuthenticatedOutdoorMasterTestsIdRouteImport } from './routes/_authenticated/outdoor/master/tests/$id'
-import { Route as AuthenticatedOutdoorMasterTestTablesIdRouteImport } from './routes/_authenticated/outdoor/master/test-tables/$id'
-import { Route as AuthenticatedOutdoorMasterDoctorsCreateRouteImport } from './routes/_authenticated/outdoor/master/doctors/create'
-import { Route as AuthenticatedOutdoorMasterDepartmentsIdRouteImport } from './routes/_authenticated/outdoor/master/departments/$id'
-import { Route as AuthenticatedOutdoorMasterCategoriesIdRouteImport } from './routes/_authenticated/outdoor/master/categories/$id'
-import { Route as AuthenticatedIndoorMasterServicesIdRouteImport } from './routes/_authenticated/indoor/master/services/$id'
-import { Route as AuthenticatedIndoorMasterBedCabinListIdRouteImport } from './routes/_authenticated/indoor/master/bed-cabin-list/$id'
-import { Route as AuthenticatedEcgAllPrintIdRouteImport } from './routes/_authenticated/ecg/all/print/$id'
-import { Route as AuthenticatedEcgAllEditIdRouteImport } from './routes/_authenticated/ecg/all/edit/$id'
-import { Route as AuthenticatedAccountingReportsLedgerPrintRouteImport } from './routes/_authenticated/accounting/reports/ledger/print'
-import { Route as AuthenticatedReportsMyOutdoorTodayCollectionIndexRouteImport } from './routes/_authenticated/reports/my/outdoor/today-collection/index'
-import { Route as AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRouteImport } from './routes/_authenticated/reports/my/outdoor/date-wise-collection/index'
-import { Route as AuthenticatedOutdoorReceptionInvoicesListIndexRouteImport } from './routes/_authenticated/outdoor/reception/invoices/list/index'
-import { Route as AuthenticatedOutdoorReceptionInvoicesCreateIndexRouteImport } from './routes/_authenticated/outdoor/reception/invoices/create/index'
-import { Route as AuthenticatedOutdoorMasterTestsCreateIndexRouteImport } from './routes/_authenticated/outdoor/master/tests/create/index'
-import { Route as AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRouteImport } from './routes/_authenticated/outdoor/master/doctors/$doctorId/index'
-import { Route as AuthenticatedIndoorMasterServicesCreateIndexRouteImport } from './routes/_authenticated/indoor/master/services/create/index'
-import { Route as AuthenticatedIndoorMasterBedCabinListCreateIndexRouteImport } from './routes/_authenticated/indoor/master/bed-cabin-list/create/index'
-import { Route as AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/print/index'
-import { Route as AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/final-bill/index'
-import { Route as AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/final-bill-print/index'
-import { Route as AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/distribute-bill/index'
-import { Route as AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/confirm-balance/index'
-import { Route as AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/billing/index'
-import { Route as AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/billing-print/index'
-import { Route as AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRouteImport } from './routes/_authenticated/admission/patients/$admissionId/bill-created/index'
-import { Route as AuthenticatedXRayAllEditBuilderIdRouteImport } from './routes/_authenticated/x-ray/all/edit/builder/$id'
-import { Route as AuthenticatedUltrasonogramAllEditBuilderIdRouteImport } from './routes/_authenticated/ultrasonogram/all/edit/builder/$id'
-import { Route as AuthenticatedPathologyUrineUrineForSugarReportReportIdRouteImport } from './routes/_authenticated/pathology/urine/urine-for-sugar/report/$reportId'
-import { Route as AuthenticatedPathologyUrineUrineForReFullReportReportIdRouteImport } from './routes/_authenticated/pathology/urine/urine-for-re-full/report/$reportId'
-import { Route as AuthenticatedPathologyUrineUrineForReFullEditIdRouteImport } from './routes/_authenticated/pathology/urine/urine-for-re-full/edit/$id'
-import { Route as AuthenticatedPathologyUrineUrineForAlbuminReportReportIdRouteImport } from './routes/_authenticated/pathology/urine/urine-for-albumin/report/$reportId'
-import { Route as AuthenticatedPathologyStoolStoolReReportReportIdRouteImport } from './routes/_authenticated/pathology/stool/stool-re/report/$reportId'
-import { Route as AuthenticatedPathologyStoolStoolReEditIdRouteImport } from './routes/_authenticated/pathology/stool/stool-re/edit/$id'
-import { Route as AuthenticatedPathologyStoolReducingSubstanceReportReportIdRouteImport } from './routes/_authenticated/pathology/stool/reducing-substance/report/$reportId'
-import { Route as AuthenticatedPathologyStoolOcultBloodTestReportReportIdRouteImport } from './routes/_authenticated/pathology/stool/ocult-blood-test/report/$reportId'
-import { Route as AuthenticatedPathologyImmunologyWidalTestReportReportIdRouteImport } from './routes/_authenticated/pathology/immunology/widal-test/report/$reportId'
-import { Route as AuthenticatedPathologyImmunologyMtReportReportIdRouteImport } from './routes/_authenticated/pathology/immunology/mt/report/$reportId'
-import { Route as AuthenticatedPathologyImmunologyBloodGroupReportReportIdRouteImport } from './routes/_authenticated/pathology/immunology/blood-group/report/$reportId'
-import { Route as AuthenticatedPathologyImmunologyBetaHcgReportReportIdRouteImport } from './routes/_authenticated/pathology/immunology/beta-hcg/report/$reportId'
-import { Route as AuthenticatedPathologyImmunologyAllReportReportIdRouteImport } from './routes/_authenticated/pathology/immunology/all/report/$reportId'
-import { Route as AuthenticatedPathologyHormoneT3t4tshReportReportIdRouteImport } from './routes/_authenticated/pathology/hormone/t3t4tsh/report/$reportId'
-import { Route as AuthenticatedPathologyHormoneSputumReportReportIdRouteImport } from './routes/_authenticated/pathology/hormone/sputum/report/$reportId'
-import { Route as AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRouteImport } from './routes/_authenticated/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
-import { Route as AuthenticatedPathologyHormoneSemenReportReportIdRouteImport } from './routes/_authenticated/pathology/hormone/semen/report/$reportId'
-import { Route as AuthenticatedPathologyHormoneSemenEditReportIdRouteImport } from './routes/_authenticated/pathology/hormone/semen/edit/$reportId'
-import { Route as AuthenticatedPathologyHormoneElectrolytesReportReportIdRouteImport } from './routes/_authenticated/pathology/hormone/electrolytes/report/$reportId'
-import { Route as AuthenticatedPathologyHormoneAllReportReportIdRouteImport } from './routes/_authenticated/pathology/hormone/all/report/$reportId'
-import { Route as AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRouteImport } from './routes/_authenticated/pathology/hematology/prothom-bin-time-full/report/$reportId'
-import { Route as AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRouteImport } from './routes/_authenticated/pathology/hematology/peripheral-blood-film/report/$reportId'
-import { Route as AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRouteImport } from './routes/_authenticated/pathology/hematology/cbc-with-pbf/report/$reportId'
-import { Route as AuthenticatedPathologyHematologyCbcWithPbfEditIdRouteImport } from './routes/_authenticated/pathology/hematology/cbc-with-pbf/edit/$id'
-import { Route as AuthenticatedPathologyHematologyCbcShortReportReportIdRouteImport } from './routes/_authenticated/pathology/hematology/cbc-short/report/$reportId'
-import { Route as AuthenticatedPathologyHematologyCbcShortEditIdRouteImport } from './routes/_authenticated/pathology/hematology/cbc-short/edit/$id'
-import { Route as AuthenticatedPathologyHematologyBloodForTcdcReportReportIdRouteImport } from './routes/_authenticated/pathology/hematology/blood-for-tcdc/report/$reportId'
-import { Route as AuthenticatedPathologyHematologyBloodForBtCtReportReportIdRouteImport } from './routes/_authenticated/pathology/hematology/blood-for-bt-ct/report/$reportId'
-import { Route as AuthenticatedPathologyHematologyAllReportReportIdRouteImport } from './routes/_authenticated/pathology/hematology/all/report/$reportId'
-import { Route as AuthenticatedPathologyBiochemicalLipidProfileReportReportIdRouteImport } from './routes/_authenticated/pathology/biochemical/lipid-profile/report/$reportId'
-import { Route as AuthenticatedPathologyBiochemicalAllReportReportIdRouteImport } from './routes/_authenticated/pathology/biochemical/all/report/$reportId'
-import { Route as AuthenticatedPathologyBiochemicalAllEditReportIdRouteImport } from './routes/_authenticated/pathology/biochemical/all/edit/$reportId'
-import { Route as AuthenticatedOutdoorMasterDoctorsDoctorIdEditRouteImport } from './routes/_authenticated/outdoor/master/doctors/$doctorId/edit'
-import { Route as AuthenticatedIndoorMasterServicesEditIdRouteImport } from './routes/_authenticated/indoor/master/services/edit/$id'
-import { Route as AuthenticatedEcgAllEditBuilderIdRouteImport } from './routes/_authenticated/ecg/all/edit/builder/$id'
-import { Route as AuthenticatedAdmissionPatientsAdmissionIdPrintStepRouteImport } from './routes/_authenticated/admission/patients/$admissionId/print/$step'
-import { Route as AuthenticatedPathologyImmunologyAllEditIdIndexRouteImport } from './routes/_authenticated/pathology/immunology/all/edit/[$id]/index'
-import { Route as AuthenticatedPathologyHormoneAllEditIdIndexRouteImport } from './routes/_authenticated/pathology/hormone/all/edit/[$id]/index'
-import { Route as AuthenticatedPathologyHematologyAllEditIdIndexRouteImport } from './routes/_authenticated/pathology/hematology/all/edit/[$id]/index'
-import { Route as AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRouteImport } from './routes/_authenticated/outdoor/reception/invoices/edit/$invoiceId/index'
-import { Route as AuthenticatedOutdoorMasterTestsEditIdIndexRouteImport } from './routes/_authenticated/outdoor/master/tests/edit/[$id]/index'
+import { Route as platformAdminSettingsRouteImport } from './routes/(platform)/admin/settings'
+import { Route as platformAdminRegistrationsRouteImport } from './routes/(platform)/admin/registrations'
+import { Route as platformAdminPlansRouteImport } from './routes/(platform)/admin/plans'
+import { Route as platformAdminModulesRouteImport } from './routes/(platform)/admin/modules'
+import { Route as platformAdminLoginRouteImport } from './routes/(platform)/admin/login'
+import { Route as platformAdminCompaniesRouteImport } from './routes/(platform)/admin/companies'
+import { Route as platformAdminBillingRouteImport } from './routes/(platform)/admin/billing'
+import { Route as platformAdminAdminsRouteImport } from './routes/(platform)/admin/admins'
+import { Route as platformAdminLayoutRouteImport } from './routes/(platform)/admin/_layout'
+import { Route as AuthenticatedDashboardSettingsRouteRouteImport } from './routes/_authenticated/dashboard/settings/route'
+import { Route as AuthenticatedDashboardUsersIndexRouteImport } from './routes/_authenticated/dashboard/users/index'
+import { Route as AuthenticatedDashboardTasksIndexRouteImport } from './routes/_authenticated/dashboard/tasks/index'
+import { Route as AuthenticatedDashboardSubscriptionIndexRouteImport } from './routes/_authenticated/dashboard/subscription/index'
+import { Route as AuthenticatedDashboardSettingsIndexRouteImport } from './routes/_authenticated/dashboard/settings/index'
+import { Route as AuthenticatedDashboardRolesIndexRouteImport } from './routes/_authenticated/dashboard/roles/index'
+import { Route as AuthenticatedDashboardNotificationsIndexRouteImport } from './routes/_authenticated/dashboard/notifications/index'
+import { Route as AuthenticatedDashboardMyAccountIndexRouteImport } from './routes/_authenticated/dashboard/my-account/index'
+import { Route as AuthenticatedDashboardHelpIndexRouteImport } from './routes/_authenticated/dashboard/help/index'
+import { Route as AuthenticatedDashboardHelpCenterIndexRouteImport } from './routes/_authenticated/dashboard/help-center/index'
+import { Route as AuthenticatedDashboardGalleryIndexRouteImport } from './routes/_authenticated/dashboard/gallery/index'
+import { Route as AuthenticatedDashboardDatabaseIndexRouteImport } from './routes/_authenticated/dashboard/database/index'
+import { Route as AuthenticatedDashboardCompanyAccountIndexRouteImport } from './routes/_authenticated/dashboard/company-account/index'
+import { Route as AuthenticatedDashboardChatsIndexRouteImport } from './routes/_authenticated/dashboard/chats/index'
+import { Route as AuthenticatedDashboardBackupsIndexRouteImport } from './routes/_authenticated/dashboard/backups/index'
+import { Route as AuthenticatedDashboardBackupSettingsIndexRouteImport } from './routes/_authenticated/dashboard/backup-settings/index'
+import { Route as AuthenticatedDashboardAppsIndexRouteImport } from './routes/_authenticated/dashboard/apps/index'
+import { Route as AuthenticatedDashboardAccountingIndexRouteImport } from './routes/_authenticated/dashboard/accounting/index'
+import { Route as AuthenticatedDashboardSettingsPrefixRouteImport } from './routes/_authenticated/dashboard/settings/prefix'
+import { Route as AuthenticatedDashboardSettingsPaymentAccountsRouteImport } from './routes/_authenticated/dashboard/settings/payment-accounts'
+import { Route as AuthenticatedDashboardSettingsNotificationsRouteImport } from './routes/_authenticated/dashboard/settings/notifications'
+import { Route as AuthenticatedDashboardSettingsDisplayRouteImport } from './routes/_authenticated/dashboard/settings/display'
+import { Route as AuthenticatedDashboardSettingsDateControlsRouteImport } from './routes/_authenticated/dashboard/settings/date-controls'
+import { Route as AuthenticatedDashboardSettingsAppearanceRouteImport } from './routes/_authenticated/dashboard/settings/appearance'
+import { Route as AuthenticatedDashboardSettingsAccountRouteImport } from './routes/_authenticated/dashboard/settings/account'
+import { Route as AuthenticatedDashboardNotificationsIdRouteImport } from './routes/_authenticated/dashboard/notifications/$id'
+import { Route as AuthenticatedDashboardErrorsErrorRouteImport } from './routes/_authenticated/dashboard/errors/$error'
+import { Route as AuthenticatedDashboardXRayAllIndexRouteImport } from './routes/_authenticated/dashboard/x-ray/all/index'
+import { Route as AuthenticatedDashboardUltrasonogramAllIndexRouteImport } from './routes/_authenticated/dashboard/ultrasonogram/all/index'
+import { Route as AuthenticatedDashboardRolesCreateIndexRouteImport } from './routes/_authenticated/dashboard/roles/create/index'
+import { Route as AuthenticatedDashboardPayrollOverviewIndexRouteImport } from './routes/_authenticated/dashboard/payroll/overview/index'
+import { Route as AuthenticatedDashboardPayrollEmployeesIndexRouteImport } from './routes/_authenticated/dashboard/payroll/employees/index'
+import { Route as AuthenticatedDashboardEcgAllIndexRouteImport } from './routes/_authenticated/dashboard/ecg/all/index'
+import { Route as AuthenticatedDashboardBanksBankWithdrawalsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-withdrawals/index'
+import { Route as AuthenticatedDashboardBanksBankTransactionsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-transactions/index'
+import { Route as AuthenticatedDashboardBanksBankDepositsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-deposits/index'
+import { Route as AuthenticatedDashboardBanksBankAccountsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-accounts/index'
+import { Route as AuthenticatedDashboardAdmissionSecondTimeBillIndexRouteImport } from './routes/_authenticated/dashboard/admission/second-time-bill/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/index'
+import { Route as AuthenticatedDashboardAdmissionNewAdmissionIndexRouteImport } from './routes/_authenticated/dashboard/admission/new-admission/index'
+import { Route as AuthenticatedDashboardAdmissionInvoiceIndexRouteImport } from './routes/_authenticated/dashboard/admission/invoice/index'
+import { Route as AuthenticatedDashboardAdmissionFirstTimeServiceIndexRouteImport } from './routes/_authenticated/dashboard/admission/first-time-service/index'
+import { Route as AuthenticatedDashboardAdmissionFirstTimeBillIndexRouteImport } from './routes/_authenticated/dashboard/admission/first-time-bill/index'
+import { Route as AuthenticatedDashboardAdmissionFinaliseServicesIndexRouteImport } from './routes/_authenticated/dashboard/admission/finalise-services/index'
+import { Route as AuthenticatedDashboardAdmissionFinalBillsIndexRouteImport } from './routes/_authenticated/dashboard/admission/final-bills/index'
+import { Route as AuthenticatedDashboardAdmissionDueCollectionIndexRouteImport } from './routes/_authenticated/dashboard/admission/due-collection/index'
+import { Route as AuthenticatedDashboardAdmissionBedCabinChargeIndexRouteImport } from './routes/_authenticated/dashboard/admission/bed-cabin-charge/index'
+import { Route as AuthenticatedDashboardAdmissionAdvancePaymentIndexRouteImport } from './routes/_authenticated/dashboard/admission/advance-payment/index'
+import { Route as AuthenticatedDashboardAccountsPayToSurgeonIndexRouteImport } from './routes/_authenticated/dashboard/accounts/pay-to-surgeon/index'
+import { Route as AuthenticatedDashboardAccountsPayToConsultantIndexRouteImport } from './routes/_authenticated/dashboard/accounts/pay-to-consultant/index'
+import { Route as AuthenticatedDashboardAccountsPayToAssistantIndexRouteImport } from './routes/_authenticated/dashboard/accounts/pay-to-assistant/index'
+import { Route as AuthenticatedDashboardAccountsPayToAnaesthetistIndexRouteImport } from './routes/_authenticated/dashboard/accounts/pay-to-anaesthetist/index'
+import { Route as AuthenticatedDashboardAccountsJournalIndexRouteImport } from './routes/_authenticated/dashboard/accounts/journal/index'
+import { Route as AuthenticatedDashboardAccountsDailyDebitIndexRouteImport } from './routes/_authenticated/dashboard/accounts/daily-debit/index'
+import { Route as AuthenticatedDashboardAccountsDailyCreditIndexRouteImport } from './routes/_authenticated/dashboard/accounts/daily-credit/index'
+import { Route as AuthenticatedDashboardAccountingTransactionsIndexRouteImport } from './routes/_authenticated/dashboard/accounting/transactions/index'
+import { Route as AuthenticatedDashboardAccountingIncomeIndexRouteImport } from './routes/_authenticated/dashboard/accounting/income/index'
+import { Route as AuthenticatedDashboardAccountingExpensesIndexRouteImport } from './routes/_authenticated/dashboard/accounting/expenses/index'
+import { Route as AuthenticatedDashboardAccountingExpenseIndexRouteImport } from './routes/_authenticated/dashboard/accounting/expense/index'
+import { Route as AuthenticatedDashboardAccountingAccountsIndexRouteImport } from './routes/_authenticated/dashboard/accounting/accounts/index'
+import { Route as AuthenticatedDashboardRolesEditIdRouteImport } from './routes/_authenticated/dashboard/roles/edit/$id'
+import { Route as AuthenticatedDashboardPayrollSalaryStaffIdIndexRouteImport } from './routes/_authenticated/dashboard/payroll/salary/$staffId/index'
+import { Route as AuthenticatedDashboardPayrollAttendanceStaffIdIndexRouteImport } from './routes/_authenticated/dashboard/payroll/attendance/$staffId/index'
+import { Route as AuthenticatedDashboardPathologyUrineUrineForSugarIndexRouteImport } from './routes/_authenticated/dashboard/pathology/urine/urine-for-sugar/index'
+import { Route as AuthenticatedDashboardPathologyUrineUrineForReFullIndexRouteImport } from './routes/_authenticated/dashboard/pathology/urine/urine-for-re-full/index'
+import { Route as AuthenticatedDashboardPathologyUrineUrineForAlbuminIndexRouteImport } from './routes/_authenticated/dashboard/pathology/urine/urine-for-albumin/index'
+import { Route as AuthenticatedDashboardPathologyStoolStoolReIndexRouteImport } from './routes/_authenticated/dashboard/pathology/stool/stool-re/index'
+import { Route as AuthenticatedDashboardPathologyStoolReducingSubstanceIndexRouteImport } from './routes/_authenticated/dashboard/pathology/stool/reducing-substance/index'
+import { Route as AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRouteImport } from './routes/_authenticated/dashboard/pathology/stool/ocult-blood-test/index'
+import { Route as AuthenticatedDashboardPathologyImmunologyWidalTestIndexRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/widal-test/index'
+import { Route as AuthenticatedDashboardPathologyImmunologyMtIndexRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/mt/index'
+import { Route as AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/blood-group/index'
+import { Route as AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/beta-hcg/index'
+import { Route as AuthenticatedDashboardPathologyImmunologyAllIndexRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/all/index'
+import { Route as AuthenticatedDashboardPathologyHormoneT3t4tshIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hormone/t3t4tsh/index'
+import { Route as AuthenticatedDashboardPathologyHormoneSputumIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hormone/sputum/index'
+import { Route as AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hormone/skin-scrapping-for-fungus/index'
+import { Route as AuthenticatedDashboardPathologyHormoneSemenIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hormone/semen/index'
+import { Route as AuthenticatedDashboardPathologyHormoneElectrolytesIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hormone/electrolytes/index'
+import { Route as AuthenticatedDashboardPathologyHormoneAllIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hormone/all/index'
+import { Route as AuthenticatedDashboardPathologyHematologyProthomBinTimeFullIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/prothom-bin-time-full/index'
+import { Route as AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/peripheral-blood-film/index'
+import { Route as AuthenticatedDashboardPathologyHematologyCbcWithPbfIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/index'
+import { Route as AuthenticatedDashboardPathologyHematologyCbcShortIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/cbc-short/index'
+import { Route as AuthenticatedDashboardPathologyHematologyBloodForTcdcIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/blood-for-tcdc/index'
+import { Route as AuthenticatedDashboardPathologyHematologyBloodForBtCtIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/blood-for-bt-ct/index'
+import { Route as AuthenticatedDashboardPathologyHematologyAllIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/all/index'
+import { Route as AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRouteImport } from './routes/_authenticated/dashboard/pathology/biochemical/lipid-profile/index'
+import { Route as AuthenticatedDashboardPathologyBiochemicalAllIndexRouteImport } from './routes/_authenticated/dashboard/pathology/biochemical/all/index'
+import { Route as AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/user-invoices/index'
+import { Route as AuthenticatedDashboardOutdoorReceptionPatientsIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/patients/index'
+import { Route as AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/paid-invoices/index'
+import { Route as AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/my-invoices/index'
+import { Route as AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/due-collection/index'
+import { Route as AuthenticatedDashboardOutdoorMasterTestsIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/tests/index'
+import { Route as AuthenticatedDashboardOutdoorMasterTestTablesIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/test-tables/index'
+import { Route as AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/sample-collection-rooms/index'
+import { Route as AuthenticatedDashboardOutdoorMasterMachinesIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/machines/index'
+import { Route as AuthenticatedDashboardOutdoorMasterDoctorsIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/doctors/index'
+import { Route as AuthenticatedDashboardOutdoorMasterDepartmentsIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/departments/index'
+import { Route as AuthenticatedDashboardOutdoorMasterCategoriesIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/categories/index'
+import { Route as AuthenticatedDashboardIndoorMasterTreatmentOutcomesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/treatment-outcomes/index'
+import { Route as AuthenticatedDashboardIndoorMasterServicesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/services/index'
+import { Route as AuthenticatedDashboardIndoorMasterServiceCategoriesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/service-categories/index'
+import { Route as AuthenticatedDashboardIndoorMasterPatientTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/patient-types/index'
+import { Route as AuthenticatedDashboardIndoorMasterOperationTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/operation-types/index'
+import { Route as AuthenticatedDashboardIndoorMasterDoctorTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/doctor-types/index'
+import { Route as AuthenticatedDashboardIndoorMasterBedCabinListIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/bed-cabin-list/index'
+import { Route as AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/anasthesia-types/index'
+import { Route as AuthenticatedDashboardIndoorManagementDoctorReferredIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/doctor-referred/index'
+import { Route as AuthenticatedDashboardIndoorManagementDistributionsIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/distributions/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/payment-completed-list/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/final-bill-created-list/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsDischargedIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/discharged/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsDischargedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/discharged-list/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/bill-distributed-list/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/bill-created-list/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/balance-distributed-list/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsActiveIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/active/index'
+import { Route as AuthenticatedDashboardAdmissionInvoiceListIndexRouteImport } from './routes/_authenticated/dashboard/admission/invoice/list/index'
+import { Route as AuthenticatedDashboardAdmissionInvoiceCreateIndexRouteImport } from './routes/_authenticated/dashboard/admission/invoice/create/index'
+import { Route as AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRouteImport } from './routes/_authenticated/dashboard/admission/discharged-patients/bill-does-not-created/index'
+import { Route as AuthenticatedDashboardAdmissionBillingBillingIdIndexRouteImport } from './routes/_authenticated/dashboard/admission/billing/$billingId/index'
+import { Route as AuthenticatedDashboardAccountingReportsTrialBalanceIndexRouteImport } from './routes/_authenticated/dashboard/accounting/reports/trial-balance/index'
+import { Route as AuthenticatedDashboardAccountingReportsProfitLossIndexRouteImport } from './routes/_authenticated/dashboard/accounting/reports/profit-loss/index'
+import { Route as AuthenticatedDashboardAccountingReportsProfitAndLossIndexRouteImport } from './routes/_authenticated/dashboard/accounting/reports/profit-and-loss/index'
+import { Route as AuthenticatedDashboardAccountingReportsMultiLedgerIndexRouteImport } from './routes/_authenticated/dashboard/accounting/reports/multi-ledger/index'
+import { Route as AuthenticatedDashboardAccountingReportsLedgerIndexRouteImport } from './routes/_authenticated/dashboard/accounting/reports/ledger/index'
+import { Route as AuthenticatedDashboardAccountingReportsJournalIndexRouteImport } from './routes/_authenticated/dashboard/accounting/reports/journal/index'
+import { Route as AuthenticatedDashboardAccountingReportsDailySummaryIndexRouteImport } from './routes/_authenticated/dashboard/accounting/reports/daily-summary/index'
+import { Route as AuthenticatedDashboardAccountingReportsCashFlowIndexRouteImport } from './routes/_authenticated/dashboard/accounting/reports/cash-flow/index'
+import { Route as AuthenticatedDashboardAccountingReportsBalanceSheetIndexRouteImport } from './routes/_authenticated/dashboard/accounting/reports/balance-sheet/index'
+import { Route as AuthenticatedDashboardXRayAllPrintIdRouteImport } from './routes/_authenticated/dashboard/x-ray/all/print/$id'
+import { Route as AuthenticatedDashboardXRayAllEditIdRouteImport } from './routes/_authenticated/dashboard/x-ray/all/edit/$id'
+import { Route as AuthenticatedDashboardUltrasonogramAllPrintIdRouteImport } from './routes/_authenticated/dashboard/ultrasonogram/all/print/$id'
+import { Route as AuthenticatedDashboardUltrasonogramAllEditIdRouteImport } from './routes/_authenticated/dashboard/ultrasonogram/all/edit/$id'
+import { Route as AuthenticatedDashboardRolesPermissionsRoleIdEditRouteImport } from './routes/_authenticated/dashboard/roles/permissions/$roleId/edit'
+import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId'
+import { Route as AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId'
+import { Route as AuthenticatedDashboardOutdoorMasterTestsIdRouteImport } from './routes/_authenticated/dashboard/outdoor/master/tests/$id'
+import { Route as AuthenticatedDashboardOutdoorMasterTestTablesIdRouteImport } from './routes/_authenticated/dashboard/outdoor/master/test-tables/$id'
+import { Route as AuthenticatedDashboardOutdoorMasterDoctorsCreateRouteImport } from './routes/_authenticated/dashboard/outdoor/master/doctors/create'
+import { Route as AuthenticatedDashboardOutdoorMasterDepartmentsIdRouteImport } from './routes/_authenticated/dashboard/outdoor/master/departments/$id'
+import { Route as AuthenticatedDashboardOutdoorMasterCategoriesIdRouteImport } from './routes/_authenticated/dashboard/outdoor/master/categories/$id'
+import { Route as AuthenticatedDashboardIndoorMasterServicesIdRouteImport } from './routes/_authenticated/dashboard/indoor/master/services/$id'
+import { Route as AuthenticatedDashboardIndoorMasterBedCabinListIdRouteImport } from './routes/_authenticated/dashboard/indoor/master/bed-cabin-list/$id'
+import { Route as AuthenticatedDashboardEcgAllPrintIdRouteImport } from './routes/_authenticated/dashboard/ecg/all/print/$id'
+import { Route as AuthenticatedDashboardEcgAllEditIdRouteImport } from './routes/_authenticated/dashboard/ecg/all/edit/$id'
+import { Route as AuthenticatedDashboardAccountingReportsMultiLedgerPrintRouteImport } from './routes/_authenticated/dashboard/accounting/reports/multi-ledger/print'
+import { Route as AuthenticatedDashboardAccountingReportsLedgerPrintRouteImport } from './routes/_authenticated/dashboard/accounting/reports/ledger/print'
+import { Route as AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRouteImport } from './routes/_authenticated/dashboard/reports/my/outdoor/today-collection/index'
+import { Route as AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRouteImport } from './routes/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/index'
+import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/list/index'
+import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/create/index'
+import { Route as AuthenticatedDashboardOutdoorMasterTestsCreateIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/tests/create/index'
+import { Route as AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/doctors/$doctorId/index'
+import { Route as AuthenticatedDashboardIndoorMasterServicesCreateIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/services/create/index'
+import { Route as AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/bed-cabin-list/create/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/print/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/final-bill/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/final-bill-print/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/distribute-bill/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/confirm-balance/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/billing/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/billing-print/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/bill-created/index'
+import { Route as AuthenticatedDashboardXRayAllEditBuilderIdRouteImport } from './routes/_authenticated/dashboard/x-ray/all/edit/builder/$id'
+import { Route as AuthenticatedDashboardUltrasonogramAllEditBuilderIdRouteImport } from './routes/_authenticated/dashboard/ultrasonogram/all/edit/builder/$id'
+import { Route as AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/urine/urine-for-sugar/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/urine/urine-for-re-full/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRouteImport } from './routes/_authenticated/dashboard/pathology/urine/urine-for-re-full/edit/$id'
+import { Route as AuthenticatedDashboardPathologyUrineUrineForAlbuminReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/urine/urine-for-albumin/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyStoolStoolReReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/stool/stool-re/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyStoolStoolReEditIdRouteImport } from './routes/_authenticated/dashboard/pathology/stool/stool-re/edit/$id'
+import { Route as AuthenticatedDashboardPathologyStoolReducingSubstanceReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/stool/reducing-substance/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/stool/ocult-blood-test/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/widal-test/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyImmunologyMtReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/mt/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/blood-group/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/beta-hcg/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyImmunologyAllReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/all/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyHormoneT3t4tshReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/hormone/t3t4tsh/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyHormoneSputumReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/hormone/sputum/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyHormoneSemenReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/hormone/semen/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyHormoneSemenEditReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/hormone/semen/edit/$reportId'
+import { Route as AuthenticatedDashboardPathologyHormoneElectrolytesReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/hormone/electrolytes/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyHormoneAllReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/hormone/all/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyHematologyProthomBinTimeFullReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/prothom-bin-time-full/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/peripheral-blood-film/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyHematologyCbcWithPbfReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyHematologyCbcWithPbfEditIdRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/edit/$id'
+import { Route as AuthenticatedDashboardPathologyHematologyCbcShortReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/cbc-short/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyHematologyCbcShortEditIdRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/cbc-short/edit/$id'
+import { Route as AuthenticatedDashboardPathologyHematologyBloodForTcdcReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/blood-for-tcdc/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyHematologyBloodForBtCtReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/blood-for-bt-ct/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyHematologyAllReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/all/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyBiochemicalLipidProfileReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/biochemical/lipid-profile/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyBiochemicalAllReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/biochemical/all/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/biochemical/all/edit/$reportId'
+import { Route as AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRouteImport } from './routes/_authenticated/dashboard/outdoor/master/doctors/$doctorId/edit'
+import { Route as AuthenticatedDashboardIndoorMasterServicesEditIdRouteImport } from './routes/_authenticated/dashboard/indoor/master/services/edit/$id'
+import { Route as AuthenticatedDashboardEcgAllEditBuilderIdRouteImport } from './routes/_authenticated/dashboard/ecg/all/edit/builder/$id'
+import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/print/$step'
+import { Route as AuthenticatedDashboardPathologyImmunologyAllEditIdIndexRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/all/edit/[$id]/index'
+import { Route as AuthenticatedDashboardPathologyHormoneAllEditIdIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hormone/all/edit/[$id]/index'
+import { Route as AuthenticatedDashboardPathologyHematologyAllEditIdIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/all/edit/[$id]/index'
+import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/edit/$invoiceId/index'
+import { Route as AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/tests/edit/[$id]/index'
+
+const platformAdminRouteImport = createFileRoute('/(platform)/admin')()
 
 const ClerkRouteRoute = ClerkRouteRouteImport.update({
   id: '/clerk',
@@ -240,10 +267,34 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => rootRouteImport,
+} as any)
+const platformAdminRoute = platformAdminRouteImport.update({
+  id: '/(platform)/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const platformRegisterRoute = platformRegisterRouteImport.update({
+  id: '/(platform)/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const platformPricingRoute = platformPricingRouteImport.update({
+  id: '/(platform)/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const platformContactRoute = platformContactRouteImport.update({
+  id: '/(platform)/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const platformLayoutRoute = platformLayoutRouteImport.update({
+  id: '/(platform)/_layout',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const errors503Route = errors503RouteImport.update({
   id: '/(errors)/503',
@@ -300,6 +351,11 @@ const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const authAuthCallbackRoute = authAuthCallbackRouteImport.update({
+  id: '/(auth)/auth-callback',
+  path: '/auth-callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClerkAuthenticatedRouteRoute = ClerkAuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => ClerkRouteRoute,
@@ -308,90 +364,17 @@ const ClerkauthRouteRoute = ClerkauthRouteRouteImport.update({
   id: '/(auth)',
   getParentRoute: () => ClerkRouteRoute,
 } as any)
-const AuthenticatedSettingsRouteRoute =
-  AuthenticatedSettingsRouteRouteImport.update({
-    id: '/settings',
-    path: '/settings',
+const AuthenticatedDashboardIndexRoute =
+  AuthenticatedDashboardIndexRouteImport.update({
+    id: '/dashboard/',
+    path: '/dashboard/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
-  id: '/users/',
-  path: '/users/',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const platformAdminIndexRoute = platformAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => platformAdminRoute,
 } as any)
-const AuthenticatedTasksIndexRoute = AuthenticatedTasksIndexRouteImport.update({
-  id: '/tasks/',
-  path: '/tasks/',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedSettingsIndexRoute =
-  AuthenticatedSettingsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedSettingsRouteRoute,
-  } as any)
-const AuthenticatedRolesIndexRoute = AuthenticatedRolesIndexRouteImport.update({
-  id: '/roles/',
-  path: '/roles/',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedNotificationsIndexRoute =
-  AuthenticatedNotificationsIndexRouteImport.update({
-    id: '/notifications/',
-    path: '/notifications/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedMyAccountIndexRoute =
-  AuthenticatedMyAccountIndexRouteImport.update({
-    id: '/my-account/',
-    path: '/my-account/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedHelpIndexRoute = AuthenticatedHelpIndexRouteImport.update({
-  id: '/help/',
-  path: '/help/',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedHelpCenterIndexRoute =
-  AuthenticatedHelpCenterIndexRouteImport.update({
-    id: '/help-center/',
-    path: '/help-center/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedDatabaseIndexRoute =
-  AuthenticatedDatabaseIndexRouteImport.update({
-    id: '/database/',
-    path: '/database/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedChatsIndexRoute = AuthenticatedChatsIndexRouteImport.update({
-  id: '/chats/',
-  path: '/chats/',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedBackupsIndexRoute =
-  AuthenticatedBackupsIndexRouteImport.update({
-    id: '/backups/',
-    path: '/backups/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedBackupSettingsIndexRoute =
-  AuthenticatedBackupSettingsIndexRouteImport.update({
-    id: '/backup-settings/',
-    path: '/backup-settings/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAppsIndexRoute = AuthenticatedAppsIndexRouteImport.update({
-  id: '/apps/',
-  path: '/apps/',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAccountingIndexRoute =
-  AuthenticatedAccountingIndexRouteImport.update({
-    id: '/accounting/',
-    path: '/accounting/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const ClerkAuthenticatedUserManagementRoute =
   ClerkAuthenticatedUserManagementRouteImport.update({
     id: '/user-management',
@@ -408,1148 +391,1394 @@ const ClerkauthSignInRoute = ClerkauthSignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => ClerkauthRouteRoute,
 } as any)
-const AuthenticatedSettingsPrefixRoute =
-  AuthenticatedSettingsPrefixRouteImport.update({
+const platformAdminSettingsRoute = platformAdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => platformAdminRoute,
+} as any)
+const platformAdminRegistrationsRoute =
+  platformAdminRegistrationsRouteImport.update({
+    id: '/registrations',
+    path: '/registrations',
+    getParentRoute: () => platformAdminRoute,
+  } as any)
+const platformAdminPlansRoute = platformAdminPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
+  getParentRoute: () => platformAdminRoute,
+} as any)
+const platformAdminModulesRoute = platformAdminModulesRouteImport.update({
+  id: '/modules',
+  path: '/modules',
+  getParentRoute: () => platformAdminRoute,
+} as any)
+const platformAdminLoginRoute = platformAdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => platformAdminRoute,
+} as any)
+const platformAdminCompaniesRoute = platformAdminCompaniesRouteImport.update({
+  id: '/companies',
+  path: '/companies',
+  getParentRoute: () => platformAdminRoute,
+} as any)
+const platformAdminBillingRoute = platformAdminBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => platformAdminRoute,
+} as any)
+const platformAdminAdminsRoute = platformAdminAdminsRouteImport.update({
+  id: '/admins',
+  path: '/admins',
+  getParentRoute: () => platformAdminRoute,
+} as any)
+const platformAdminLayoutRoute = platformAdminLayoutRouteImport.update({
+  id: '/_layout',
+  getParentRoute: () => platformAdminRoute,
+} as any)
+const AuthenticatedDashboardSettingsRouteRoute =
+  AuthenticatedDashboardSettingsRouteRouteImport.update({
+    id: '/dashboard/settings',
+    path: '/dashboard/settings',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardUsersIndexRoute =
+  AuthenticatedDashboardUsersIndexRouteImport.update({
+    id: '/dashboard/users/',
+    path: '/dashboard/users/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardTasksIndexRoute =
+  AuthenticatedDashboardTasksIndexRouteImport.update({
+    id: '/dashboard/tasks/',
+    path: '/dashboard/tasks/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardSubscriptionIndexRoute =
+  AuthenticatedDashboardSubscriptionIndexRouteImport.update({
+    id: '/dashboard/subscription/',
+    path: '/dashboard/subscription/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardSettingsIndexRoute =
+  AuthenticatedDashboardSettingsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
+  } as any)
+const AuthenticatedDashboardRolesIndexRoute =
+  AuthenticatedDashboardRolesIndexRouteImport.update({
+    id: '/dashboard/roles/',
+    path: '/dashboard/roles/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardNotificationsIndexRoute =
+  AuthenticatedDashboardNotificationsIndexRouteImport.update({
+    id: '/dashboard/notifications/',
+    path: '/dashboard/notifications/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardMyAccountIndexRoute =
+  AuthenticatedDashboardMyAccountIndexRouteImport.update({
+    id: '/dashboard/my-account/',
+    path: '/dashboard/my-account/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardHelpIndexRoute =
+  AuthenticatedDashboardHelpIndexRouteImport.update({
+    id: '/dashboard/help/',
+    path: '/dashboard/help/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardHelpCenterIndexRoute =
+  AuthenticatedDashboardHelpCenterIndexRouteImport.update({
+    id: '/dashboard/help-center/',
+    path: '/dashboard/help-center/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardGalleryIndexRoute =
+  AuthenticatedDashboardGalleryIndexRouteImport.update({
+    id: '/dashboard/gallery/',
+    path: '/dashboard/gallery/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardDatabaseIndexRoute =
+  AuthenticatedDashboardDatabaseIndexRouteImport.update({
+    id: '/dashboard/database/',
+    path: '/dashboard/database/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardCompanyAccountIndexRoute =
+  AuthenticatedDashboardCompanyAccountIndexRouteImport.update({
+    id: '/dashboard/company-account/',
+    path: '/dashboard/company-account/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardChatsIndexRoute =
+  AuthenticatedDashboardChatsIndexRouteImport.update({
+    id: '/dashboard/chats/',
+    path: '/dashboard/chats/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardBackupsIndexRoute =
+  AuthenticatedDashboardBackupsIndexRouteImport.update({
+    id: '/dashboard/backups/',
+    path: '/dashboard/backups/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardBackupSettingsIndexRoute =
+  AuthenticatedDashboardBackupSettingsIndexRouteImport.update({
+    id: '/dashboard/backup-settings/',
+    path: '/dashboard/backup-settings/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAppsIndexRoute =
+  AuthenticatedDashboardAppsIndexRouteImport.update({
+    id: '/dashboard/apps/',
+    path: '/dashboard/apps/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAccountingIndexRoute =
+  AuthenticatedDashboardAccountingIndexRouteImport.update({
+    id: '/dashboard/accounting/',
+    path: '/dashboard/accounting/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardSettingsPrefixRoute =
+  AuthenticatedDashboardSettingsPrefixRouteImport.update({
     id: '/prefix',
     path: '/prefix',
-    getParentRoute: () => AuthenticatedSettingsRouteRoute,
+    getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
   } as any)
-const AuthenticatedSettingsPaymentAccountsRoute =
-  AuthenticatedSettingsPaymentAccountsRouteImport.update({
+const AuthenticatedDashboardSettingsPaymentAccountsRoute =
+  AuthenticatedDashboardSettingsPaymentAccountsRouteImport.update({
     id: '/payment-accounts',
     path: '/payment-accounts',
-    getParentRoute: () => AuthenticatedSettingsRouteRoute,
+    getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
   } as any)
-const AuthenticatedSettingsNotificationsRoute =
-  AuthenticatedSettingsNotificationsRouteImport.update({
+const AuthenticatedDashboardSettingsNotificationsRoute =
+  AuthenticatedDashboardSettingsNotificationsRouteImport.update({
     id: '/notifications',
     path: '/notifications',
-    getParentRoute: () => AuthenticatedSettingsRouteRoute,
+    getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
   } as any)
-const AuthenticatedSettingsDisplayRoute =
-  AuthenticatedSettingsDisplayRouteImport.update({
+const AuthenticatedDashboardSettingsDisplayRoute =
+  AuthenticatedDashboardSettingsDisplayRouteImport.update({
     id: '/display',
     path: '/display',
-    getParentRoute: () => AuthenticatedSettingsRouteRoute,
+    getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
   } as any)
-const AuthenticatedSettingsAppearanceRoute =
-  AuthenticatedSettingsAppearanceRouteImport.update({
+const AuthenticatedDashboardSettingsDateControlsRoute =
+  AuthenticatedDashboardSettingsDateControlsRouteImport.update({
+    id: '/date-controls',
+    path: '/date-controls',
+    getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
+  } as any)
+const AuthenticatedDashboardSettingsAppearanceRoute =
+  AuthenticatedDashboardSettingsAppearanceRouteImport.update({
     id: '/appearance',
     path: '/appearance',
-    getParentRoute: () => AuthenticatedSettingsRouteRoute,
+    getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
   } as any)
-const AuthenticatedSettingsAccountRoute =
-  AuthenticatedSettingsAccountRouteImport.update({
+const AuthenticatedDashboardSettingsAccountRoute =
+  AuthenticatedDashboardSettingsAccountRouteImport.update({
     id: '/account',
     path: '/account',
-    getParentRoute: () => AuthenticatedSettingsRouteRoute,
+    getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
   } as any)
-const AuthenticatedNotificationsIdRoute =
-  AuthenticatedNotificationsIdRouteImport.update({
-    id: '/notifications/$id',
-    path: '/notifications/$id',
+const AuthenticatedDashboardNotificationsIdRoute =
+  AuthenticatedDashboardNotificationsIdRouteImport.update({
+    id: '/dashboard/notifications/$id',
+    path: '/dashboard/notifications/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedErrorsErrorRoute =
-  AuthenticatedErrorsErrorRouteImport.update({
-    id: '/errors/$error',
-    path: '/errors/$error',
+const AuthenticatedDashboardErrorsErrorRoute =
+  AuthenticatedDashboardErrorsErrorRouteImport.update({
+    id: '/dashboard/errors/$error',
+    path: '/dashboard/errors/$error',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedXRayAllIndexRoute =
-  AuthenticatedXRayAllIndexRouteImport.update({
-    id: '/x-ray/all/',
-    path: '/x-ray/all/',
+const AuthenticatedDashboardXRayAllIndexRoute =
+  AuthenticatedDashboardXRayAllIndexRouteImport.update({
+    id: '/dashboard/x-ray/all/',
+    path: '/dashboard/x-ray/all/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedUltrasonogramAllIndexRoute =
-  AuthenticatedUltrasonogramAllIndexRouteImport.update({
-    id: '/ultrasonogram/all/',
-    path: '/ultrasonogram/all/',
+const AuthenticatedDashboardUltrasonogramAllIndexRoute =
+  AuthenticatedDashboardUltrasonogramAllIndexRouteImport.update({
+    id: '/dashboard/ultrasonogram/all/',
+    path: '/dashboard/ultrasonogram/all/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedRolesCreateIndexRoute =
-  AuthenticatedRolesCreateIndexRouteImport.update({
-    id: '/roles/create/',
-    path: '/roles/create/',
+const AuthenticatedDashboardRolesCreateIndexRoute =
+  AuthenticatedDashboardRolesCreateIndexRouteImport.update({
+    id: '/dashboard/roles/create/',
+    path: '/dashboard/roles/create/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPayrollOverviewIndexRoute =
-  AuthenticatedPayrollOverviewIndexRouteImport.update({
-    id: '/payroll/overview/',
-    path: '/payroll/overview/',
+const AuthenticatedDashboardPayrollOverviewIndexRoute =
+  AuthenticatedDashboardPayrollOverviewIndexRouteImport.update({
+    id: '/dashboard/payroll/overview/',
+    path: '/dashboard/payroll/overview/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPayrollEmployeesIndexRoute =
-  AuthenticatedPayrollEmployeesIndexRouteImport.update({
-    id: '/payroll/employees/',
-    path: '/payroll/employees/',
+const AuthenticatedDashboardPayrollEmployeesIndexRoute =
+  AuthenticatedDashboardPayrollEmployeesIndexRouteImport.update({
+    id: '/dashboard/payroll/employees/',
+    path: '/dashboard/payroll/employees/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedEcgAllIndexRoute =
-  AuthenticatedEcgAllIndexRouteImport.update({
-    id: '/ecg/all/',
-    path: '/ecg/all/',
+const AuthenticatedDashboardEcgAllIndexRoute =
+  AuthenticatedDashboardEcgAllIndexRouteImport.update({
+    id: '/dashboard/ecg/all/',
+    path: '/dashboard/ecg/all/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedBanksBankWithdrawalsIndexRoute =
-  AuthenticatedBanksBankWithdrawalsIndexRouteImport.update({
-    id: '/banks/bank-withdrawals/',
-    path: '/banks/bank-withdrawals/',
+const AuthenticatedDashboardBanksBankWithdrawalsIndexRoute =
+  AuthenticatedDashboardBanksBankWithdrawalsIndexRouteImport.update({
+    id: '/dashboard/banks/bank-withdrawals/',
+    path: '/dashboard/banks/bank-withdrawals/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedBanksBankTransactionsIndexRoute =
-  AuthenticatedBanksBankTransactionsIndexRouteImport.update({
-    id: '/banks/bank-transactions/',
-    path: '/banks/bank-transactions/',
+const AuthenticatedDashboardBanksBankTransactionsIndexRoute =
+  AuthenticatedDashboardBanksBankTransactionsIndexRouteImport.update({
+    id: '/dashboard/banks/bank-transactions/',
+    path: '/dashboard/banks/bank-transactions/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedBanksBankDepositsIndexRoute =
-  AuthenticatedBanksBankDepositsIndexRouteImport.update({
-    id: '/banks/bank-deposits/',
-    path: '/banks/bank-deposits/',
+const AuthenticatedDashboardBanksBankDepositsIndexRoute =
+  AuthenticatedDashboardBanksBankDepositsIndexRouteImport.update({
+    id: '/dashboard/banks/bank-deposits/',
+    path: '/dashboard/banks/bank-deposits/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedBanksBankAccountsIndexRoute =
-  AuthenticatedBanksBankAccountsIndexRouteImport.update({
-    id: '/banks/bank-accounts/',
-    path: '/banks/bank-accounts/',
+const AuthenticatedDashboardBanksBankAccountsIndexRoute =
+  AuthenticatedDashboardBanksBankAccountsIndexRouteImport.update({
+    id: '/dashboard/banks/bank-accounts/',
+    path: '/dashboard/banks/bank-accounts/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdmissionSecondTimeBillIndexRoute =
-  AuthenticatedAdmissionSecondTimeBillIndexRouteImport.update({
-    id: '/admission/second-time-bill/',
-    path: '/admission/second-time-bill/',
+const AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute =
+  AuthenticatedDashboardAdmissionSecondTimeBillIndexRouteImport.update({
+    id: '/dashboard/admission/second-time-bill/',
+    path: '/dashboard/admission/second-time-bill/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdmissionPatientsIndexRoute =
-  AuthenticatedAdmissionPatientsIndexRouteImport.update({
-    id: '/admission/patients/',
-    path: '/admission/patients/',
+const AuthenticatedDashboardAdmissionPatientsIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsIndexRouteImport.update({
+    id: '/dashboard/admission/patients/',
+    path: '/dashboard/admission/patients/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdmissionNewAdmissionIndexRoute =
-  AuthenticatedAdmissionNewAdmissionIndexRouteImport.update({
-    id: '/admission/new-admission/',
-    path: '/admission/new-admission/',
+const AuthenticatedDashboardAdmissionNewAdmissionIndexRoute =
+  AuthenticatedDashboardAdmissionNewAdmissionIndexRouteImport.update({
+    id: '/dashboard/admission/new-admission/',
+    path: '/dashboard/admission/new-admission/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdmissionInvoiceIndexRoute =
-  AuthenticatedAdmissionInvoiceIndexRouteImport.update({
-    id: '/admission/invoice/',
-    path: '/admission/invoice/',
+const AuthenticatedDashboardAdmissionInvoiceIndexRoute =
+  AuthenticatedDashboardAdmissionInvoiceIndexRouteImport.update({
+    id: '/dashboard/admission/invoice/',
+    path: '/dashboard/admission/invoice/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdmissionFirstTimeServiceIndexRoute =
-  AuthenticatedAdmissionFirstTimeServiceIndexRouteImport.update({
-    id: '/admission/first-time-service/',
-    path: '/admission/first-time-service/',
+const AuthenticatedDashboardAdmissionFirstTimeServiceIndexRoute =
+  AuthenticatedDashboardAdmissionFirstTimeServiceIndexRouteImport.update({
+    id: '/dashboard/admission/first-time-service/',
+    path: '/dashboard/admission/first-time-service/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdmissionFirstTimeBillIndexRoute =
-  AuthenticatedAdmissionFirstTimeBillIndexRouteImport.update({
-    id: '/admission/first-time-bill/',
-    path: '/admission/first-time-bill/',
+const AuthenticatedDashboardAdmissionFirstTimeBillIndexRoute =
+  AuthenticatedDashboardAdmissionFirstTimeBillIndexRouteImport.update({
+    id: '/dashboard/admission/first-time-bill/',
+    path: '/dashboard/admission/first-time-bill/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdmissionFinaliseServicesIndexRoute =
-  AuthenticatedAdmissionFinaliseServicesIndexRouteImport.update({
-    id: '/admission/finalise-services/',
-    path: '/admission/finalise-services/',
+const AuthenticatedDashboardAdmissionFinaliseServicesIndexRoute =
+  AuthenticatedDashboardAdmissionFinaliseServicesIndexRouteImport.update({
+    id: '/dashboard/admission/finalise-services/',
+    path: '/dashboard/admission/finalise-services/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdmissionFinalBillsIndexRoute =
-  AuthenticatedAdmissionFinalBillsIndexRouteImport.update({
-    id: '/admission/final-bills/',
-    path: '/admission/final-bills/',
+const AuthenticatedDashboardAdmissionFinalBillsIndexRoute =
+  AuthenticatedDashboardAdmissionFinalBillsIndexRouteImport.update({
+    id: '/dashboard/admission/final-bills/',
+    path: '/dashboard/admission/final-bills/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdmissionDueCollectionIndexRoute =
-  AuthenticatedAdmissionDueCollectionIndexRouteImport.update({
-    id: '/admission/due-collection/',
-    path: '/admission/due-collection/',
+const AuthenticatedDashboardAdmissionDueCollectionIndexRoute =
+  AuthenticatedDashboardAdmissionDueCollectionIndexRouteImport.update({
+    id: '/dashboard/admission/due-collection/',
+    path: '/dashboard/admission/due-collection/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdmissionBedCabinChargeIndexRoute =
-  AuthenticatedAdmissionBedCabinChargeIndexRouteImport.update({
-    id: '/admission/bed-cabin-charge/',
-    path: '/admission/bed-cabin-charge/',
+const AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute =
+  AuthenticatedDashboardAdmissionBedCabinChargeIndexRouteImport.update({
+    id: '/dashboard/admission/bed-cabin-charge/',
+    path: '/dashboard/admission/bed-cabin-charge/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdmissionAdvancePaymentIndexRoute =
-  AuthenticatedAdmissionAdvancePaymentIndexRouteImport.update({
-    id: '/admission/advance-payment/',
-    path: '/admission/advance-payment/',
+const AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute =
+  AuthenticatedDashboardAdmissionAdvancePaymentIndexRouteImport.update({
+    id: '/dashboard/admission/advance-payment/',
+    path: '/dashboard/admission/advance-payment/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAccountsPayToSurgeonIndexRoute =
-  AuthenticatedAccountsPayToSurgeonIndexRouteImport.update({
-    id: '/accounts/pay-to-surgeon/',
-    path: '/accounts/pay-to-surgeon/',
+const AuthenticatedDashboardAccountsPayToSurgeonIndexRoute =
+  AuthenticatedDashboardAccountsPayToSurgeonIndexRouteImport.update({
+    id: '/dashboard/accounts/pay-to-surgeon/',
+    path: '/dashboard/accounts/pay-to-surgeon/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAccountsPayToConsultantIndexRoute =
-  AuthenticatedAccountsPayToConsultantIndexRouteImport.update({
-    id: '/accounts/pay-to-consultant/',
-    path: '/accounts/pay-to-consultant/',
+const AuthenticatedDashboardAccountsPayToConsultantIndexRoute =
+  AuthenticatedDashboardAccountsPayToConsultantIndexRouteImport.update({
+    id: '/dashboard/accounts/pay-to-consultant/',
+    path: '/dashboard/accounts/pay-to-consultant/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAccountsPayToAssistantIndexRoute =
-  AuthenticatedAccountsPayToAssistantIndexRouteImport.update({
-    id: '/accounts/pay-to-assistant/',
-    path: '/accounts/pay-to-assistant/',
+const AuthenticatedDashboardAccountsPayToAssistantIndexRoute =
+  AuthenticatedDashboardAccountsPayToAssistantIndexRouteImport.update({
+    id: '/dashboard/accounts/pay-to-assistant/',
+    path: '/dashboard/accounts/pay-to-assistant/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAccountsPayToAnaesthetistIndexRoute =
-  AuthenticatedAccountsPayToAnaesthetistIndexRouteImport.update({
-    id: '/accounts/pay-to-anaesthetist/',
-    path: '/accounts/pay-to-anaesthetist/',
+const AuthenticatedDashboardAccountsPayToAnaesthetistIndexRoute =
+  AuthenticatedDashboardAccountsPayToAnaesthetistIndexRouteImport.update({
+    id: '/dashboard/accounts/pay-to-anaesthetist/',
+    path: '/dashboard/accounts/pay-to-anaesthetist/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAccountsJournalIndexRoute =
-  AuthenticatedAccountsJournalIndexRouteImport.update({
-    id: '/accounts/journal/',
-    path: '/accounts/journal/',
+const AuthenticatedDashboardAccountsJournalIndexRoute =
+  AuthenticatedDashboardAccountsJournalIndexRouteImport.update({
+    id: '/dashboard/accounts/journal/',
+    path: '/dashboard/accounts/journal/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAccountsDailyDebitIndexRoute =
-  AuthenticatedAccountsDailyDebitIndexRouteImport.update({
-    id: '/accounts/daily-debit/',
-    path: '/accounts/daily-debit/',
+const AuthenticatedDashboardAccountsDailyDebitIndexRoute =
+  AuthenticatedDashboardAccountsDailyDebitIndexRouteImport.update({
+    id: '/dashboard/accounts/daily-debit/',
+    path: '/dashboard/accounts/daily-debit/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAccountsDailyCreditIndexRoute =
-  AuthenticatedAccountsDailyCreditIndexRouteImport.update({
-    id: '/accounts/daily-credit/',
-    path: '/accounts/daily-credit/',
+const AuthenticatedDashboardAccountsDailyCreditIndexRoute =
+  AuthenticatedDashboardAccountsDailyCreditIndexRouteImport.update({
+    id: '/dashboard/accounts/daily-credit/',
+    path: '/dashboard/accounts/daily-credit/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAccountingTransactionsIndexRoute =
-  AuthenticatedAccountingTransactionsIndexRouteImport.update({
-    id: '/accounting/transactions/',
-    path: '/accounting/transactions/',
+const AuthenticatedDashboardAccountingTransactionsIndexRoute =
+  AuthenticatedDashboardAccountingTransactionsIndexRouteImport.update({
+    id: '/dashboard/accounting/transactions/',
+    path: '/dashboard/accounting/transactions/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAccountingIncomeIndexRoute =
-  AuthenticatedAccountingIncomeIndexRouteImport.update({
-    id: '/accounting/income/',
-    path: '/accounting/income/',
+const AuthenticatedDashboardAccountingIncomeIndexRoute =
+  AuthenticatedDashboardAccountingIncomeIndexRouteImport.update({
+    id: '/dashboard/accounting/income/',
+    path: '/dashboard/accounting/income/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAccountingExpensesIndexRoute =
-  AuthenticatedAccountingExpensesIndexRouteImport.update({
-    id: '/accounting/expenses/',
-    path: '/accounting/expenses/',
+const AuthenticatedDashboardAccountingExpensesIndexRoute =
+  AuthenticatedDashboardAccountingExpensesIndexRouteImport.update({
+    id: '/dashboard/accounting/expenses/',
+    path: '/dashboard/accounting/expenses/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAccountingExpenseIndexRoute =
-  AuthenticatedAccountingExpenseIndexRouteImport.update({
-    id: '/accounting/expense/',
-    path: '/accounting/expense/',
+const AuthenticatedDashboardAccountingExpenseIndexRoute =
+  AuthenticatedDashboardAccountingExpenseIndexRouteImport.update({
+    id: '/dashboard/accounting/expense/',
+    path: '/dashboard/accounting/expense/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAccountingAccountsIndexRoute =
-  AuthenticatedAccountingAccountsIndexRouteImport.update({
-    id: '/accounting/accounts/',
-    path: '/accounting/accounts/',
+const AuthenticatedDashboardAccountingAccountsIndexRoute =
+  AuthenticatedDashboardAccountingAccountsIndexRouteImport.update({
+    id: '/dashboard/accounting/accounts/',
+    path: '/dashboard/accounting/accounts/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedRolesEditIdRoute =
-  AuthenticatedRolesEditIdRouteImport.update({
-    id: '/roles/edit/$id',
-    path: '/roles/edit/$id',
+const AuthenticatedDashboardRolesEditIdRoute =
+  AuthenticatedDashboardRolesEditIdRouteImport.update({
+    id: '/dashboard/roles/edit/$id',
+    path: '/dashboard/roles/edit/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPayrollSalaryStaffIdIndexRoute =
-  AuthenticatedPayrollSalaryStaffIdIndexRouteImport.update({
-    id: '/payroll/salary/$staffId/',
-    path: '/payroll/salary/$staffId/',
+const AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute =
+  AuthenticatedDashboardPayrollSalaryStaffIdIndexRouteImport.update({
+    id: '/dashboard/payroll/salary/$staffId/',
+    path: '/dashboard/payroll/salary/$staffId/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPayrollAttendanceStaffIdIndexRoute =
-  AuthenticatedPayrollAttendanceStaffIdIndexRouteImport.update({
-    id: '/payroll/attendance/$staffId/',
-    path: '/payroll/attendance/$staffId/',
+const AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute =
+  AuthenticatedDashboardPayrollAttendanceStaffIdIndexRouteImport.update({
+    id: '/dashboard/payroll/attendance/$staffId/',
+    path: '/dashboard/payroll/attendance/$staffId/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyUrineUrineForSugarIndexRoute =
-  AuthenticatedPathologyUrineUrineForSugarIndexRouteImport.update({
-    id: '/pathology/urine/urine-for-sugar/',
-    path: '/pathology/urine/urine-for-sugar/',
+const AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute =
+  AuthenticatedDashboardPathologyUrineUrineForSugarIndexRouteImport.update({
+    id: '/dashboard/pathology/urine/urine-for-sugar/',
+    path: '/dashboard/pathology/urine/urine-for-sugar/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyUrineUrineForReFullIndexRoute =
-  AuthenticatedPathologyUrineUrineForReFullIndexRouteImport.update({
-    id: '/pathology/urine/urine-for-re-full/',
-    path: '/pathology/urine/urine-for-re-full/',
+const AuthenticatedDashboardPathologyUrineUrineForReFullIndexRoute =
+  AuthenticatedDashboardPathologyUrineUrineForReFullIndexRouteImport.update({
+    id: '/dashboard/pathology/urine/urine-for-re-full/',
+    path: '/dashboard/pathology/urine/urine-for-re-full/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyUrineUrineForAlbuminIndexRoute =
-  AuthenticatedPathologyUrineUrineForAlbuminIndexRouteImport.update({
-    id: '/pathology/urine/urine-for-albumin/',
-    path: '/pathology/urine/urine-for-albumin/',
+const AuthenticatedDashboardPathologyUrineUrineForAlbuminIndexRoute =
+  AuthenticatedDashboardPathologyUrineUrineForAlbuminIndexRouteImport.update({
+    id: '/dashboard/pathology/urine/urine-for-albumin/',
+    path: '/dashboard/pathology/urine/urine-for-albumin/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyStoolStoolReIndexRoute =
-  AuthenticatedPathologyStoolStoolReIndexRouteImport.update({
-    id: '/pathology/stool/stool-re/',
-    path: '/pathology/stool/stool-re/',
+const AuthenticatedDashboardPathologyStoolStoolReIndexRoute =
+  AuthenticatedDashboardPathologyStoolStoolReIndexRouteImport.update({
+    id: '/dashboard/pathology/stool/stool-re/',
+    path: '/dashboard/pathology/stool/stool-re/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyStoolReducingSubstanceIndexRoute =
-  AuthenticatedPathologyStoolReducingSubstanceIndexRouteImport.update({
-    id: '/pathology/stool/reducing-substance/',
-    path: '/pathology/stool/reducing-substance/',
+const AuthenticatedDashboardPathologyStoolReducingSubstanceIndexRoute =
+  AuthenticatedDashboardPathologyStoolReducingSubstanceIndexRouteImport.update({
+    id: '/dashboard/pathology/stool/reducing-substance/',
+    path: '/dashboard/pathology/stool/reducing-substance/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyStoolOcultBloodTestIndexRoute =
-  AuthenticatedPathologyStoolOcultBloodTestIndexRouteImport.update({
-    id: '/pathology/stool/ocult-blood-test/',
-    path: '/pathology/stool/ocult-blood-test/',
+const AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRoute =
+  AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRouteImport.update({
+    id: '/dashboard/pathology/stool/ocult-blood-test/',
+    path: '/dashboard/pathology/stool/ocult-blood-test/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyImmunologyWidalTestIndexRoute =
-  AuthenticatedPathologyImmunologyWidalTestIndexRouteImport.update({
-    id: '/pathology/immunology/widal-test/',
-    path: '/pathology/immunology/widal-test/',
+const AuthenticatedDashboardPathologyImmunologyWidalTestIndexRoute =
+  AuthenticatedDashboardPathologyImmunologyWidalTestIndexRouteImport.update({
+    id: '/dashboard/pathology/immunology/widal-test/',
+    path: '/dashboard/pathology/immunology/widal-test/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyImmunologyMtIndexRoute =
-  AuthenticatedPathologyImmunologyMtIndexRouteImport.update({
-    id: '/pathology/immunology/mt/',
-    path: '/pathology/immunology/mt/',
+const AuthenticatedDashboardPathologyImmunologyMtIndexRoute =
+  AuthenticatedDashboardPathologyImmunologyMtIndexRouteImport.update({
+    id: '/dashboard/pathology/immunology/mt/',
+    path: '/dashboard/pathology/immunology/mt/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyImmunologyBloodGroupIndexRoute =
-  AuthenticatedPathologyImmunologyBloodGroupIndexRouteImport.update({
-    id: '/pathology/immunology/blood-group/',
-    path: '/pathology/immunology/blood-group/',
+const AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute =
+  AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRouteImport.update({
+    id: '/dashboard/pathology/immunology/blood-group/',
+    path: '/dashboard/pathology/immunology/blood-group/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyImmunologyBetaHcgIndexRoute =
-  AuthenticatedPathologyImmunologyBetaHcgIndexRouteImport.update({
-    id: '/pathology/immunology/beta-hcg/',
-    path: '/pathology/immunology/beta-hcg/',
+const AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRoute =
+  AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRouteImport.update({
+    id: '/dashboard/pathology/immunology/beta-hcg/',
+    path: '/dashboard/pathology/immunology/beta-hcg/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyImmunologyAllIndexRoute =
-  AuthenticatedPathologyImmunologyAllIndexRouteImport.update({
-    id: '/pathology/immunology/all/',
-    path: '/pathology/immunology/all/',
+const AuthenticatedDashboardPathologyImmunologyAllIndexRoute =
+  AuthenticatedDashboardPathologyImmunologyAllIndexRouteImport.update({
+    id: '/dashboard/pathology/immunology/all/',
+    path: '/dashboard/pathology/immunology/all/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyHormoneT3t4tshIndexRoute =
-  AuthenticatedPathologyHormoneT3t4tshIndexRouteImport.update({
-    id: '/pathology/hormone/t3t4tsh/',
-    path: '/pathology/hormone/t3t4tsh/',
+const AuthenticatedDashboardPathologyHormoneT3t4tshIndexRoute =
+  AuthenticatedDashboardPathologyHormoneT3t4tshIndexRouteImport.update({
+    id: '/dashboard/pathology/hormone/t3t4tsh/',
+    path: '/dashboard/pathology/hormone/t3t4tsh/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyHormoneSputumIndexRoute =
-  AuthenticatedPathologyHormoneSputumIndexRouteImport.update({
-    id: '/pathology/hormone/sputum/',
-    path: '/pathology/hormone/sputum/',
+const AuthenticatedDashboardPathologyHormoneSputumIndexRoute =
+  AuthenticatedDashboardPathologyHormoneSputumIndexRouteImport.update({
+    id: '/dashboard/pathology/hormone/sputum/',
+    path: '/dashboard/pathology/hormone/sputum/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyHormoneSkinScrappingForFungusIndexRoute =
-  AuthenticatedPathologyHormoneSkinScrappingForFungusIndexRouteImport.update({
-    id: '/pathology/hormone/skin-scrapping-for-fungus/',
-    path: '/pathology/hormone/skin-scrapping-for-fungus/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHormoneSemenIndexRoute =
-  AuthenticatedPathologyHormoneSemenIndexRouteImport.update({
-    id: '/pathology/hormone/semen/',
-    path: '/pathology/hormone/semen/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHormoneElectrolytesIndexRoute =
-  AuthenticatedPathologyHormoneElectrolytesIndexRouteImport.update({
-    id: '/pathology/hormone/electrolytes/',
-    path: '/pathology/hormone/electrolytes/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHormoneAllIndexRoute =
-  AuthenticatedPathologyHormoneAllIndexRouteImport.update({
-    id: '/pathology/hormone/all/',
-    path: '/pathology/hormone/all/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHematologyProthomBinTimeFullIndexRoute =
-  AuthenticatedPathologyHematologyProthomBinTimeFullIndexRouteImport.update({
-    id: '/pathology/hematology/prothom-bin-time-full/',
-    path: '/pathology/hematology/prothom-bin-time-full/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHematologyPeripheralBloodFilmIndexRoute =
-  AuthenticatedPathologyHematologyPeripheralBloodFilmIndexRouteImport.update({
-    id: '/pathology/hematology/peripheral-blood-film/',
-    path: '/pathology/hematology/peripheral-blood-film/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHematologyCbcWithPbfIndexRoute =
-  AuthenticatedPathologyHematologyCbcWithPbfIndexRouteImport.update({
-    id: '/pathology/hematology/cbc-with-pbf/',
-    path: '/pathology/hematology/cbc-with-pbf/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHematologyCbcShortIndexRoute =
-  AuthenticatedPathologyHematologyCbcShortIndexRouteImport.update({
-    id: '/pathology/hematology/cbc-short/',
-    path: '/pathology/hematology/cbc-short/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHematologyBloodForTcdcIndexRoute =
-  AuthenticatedPathologyHematologyBloodForTcdcIndexRouteImport.update({
-    id: '/pathology/hematology/blood-for-tcdc/',
-    path: '/pathology/hematology/blood-for-tcdc/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHematologyBloodForBtCtIndexRoute =
-  AuthenticatedPathologyHematologyBloodForBtCtIndexRouteImport.update({
-    id: '/pathology/hematology/blood-for-bt-ct/',
-    path: '/pathology/hematology/blood-for-bt-ct/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHematologyAllIndexRoute =
-  AuthenticatedPathologyHematologyAllIndexRouteImport.update({
-    id: '/pathology/hematology/all/',
-    path: '/pathology/hematology/all/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyBiochemicalLipidProfileIndexRoute =
-  AuthenticatedPathologyBiochemicalLipidProfileIndexRouteImport.update({
-    id: '/pathology/biochemical/lipid-profile/',
-    path: '/pathology/biochemical/lipid-profile/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyBiochemicalAllIndexRoute =
-  AuthenticatedPathologyBiochemicalAllIndexRouteImport.update({
-    id: '/pathology/biochemical/all/',
-    path: '/pathology/biochemical/all/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorReceptionUserInvoicesIndexRoute =
-  AuthenticatedOutdoorReceptionUserInvoicesIndexRouteImport.update({
-    id: '/outdoor/reception/user-invoices/',
-    path: '/outdoor/reception/user-invoices/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorReceptionPatientsIndexRoute =
-  AuthenticatedOutdoorReceptionPatientsIndexRouteImport.update({
-    id: '/outdoor/reception/patients/',
-    path: '/outdoor/reception/patients/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute =
-  AuthenticatedOutdoorReceptionPaidInvoicesIndexRouteImport.update({
-    id: '/outdoor/reception/paid-invoices/',
-    path: '/outdoor/reception/paid-invoices/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorReceptionMyInvoicesIndexRoute =
-  AuthenticatedOutdoorReceptionMyInvoicesIndexRouteImport.update({
-    id: '/outdoor/reception/my-invoices/',
-    path: '/outdoor/reception/my-invoices/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorReceptionDueCollectionIndexRoute =
-  AuthenticatedOutdoorReceptionDueCollectionIndexRouteImport.update({
-    id: '/outdoor/reception/due-collection/',
-    path: '/outdoor/reception/due-collection/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorMasterTestsIndexRoute =
-  AuthenticatedOutdoorMasterTestsIndexRouteImport.update({
-    id: '/outdoor/master/tests/',
-    path: '/outdoor/master/tests/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorMasterTestTablesIndexRoute =
-  AuthenticatedOutdoorMasterTestTablesIndexRouteImport.update({
-    id: '/outdoor/master/test-tables/',
-    path: '/outdoor/master/test-tables/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute =
-  AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRouteImport.update({
-    id: '/outdoor/master/sample-collection-rooms/',
-    path: '/outdoor/master/sample-collection-rooms/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorMasterMachinesIndexRoute =
-  AuthenticatedOutdoorMasterMachinesIndexRouteImport.update({
-    id: '/outdoor/master/machines/',
-    path: '/outdoor/master/machines/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorMasterDoctorsIndexRoute =
-  AuthenticatedOutdoorMasterDoctorsIndexRouteImport.update({
-    id: '/outdoor/master/doctors/',
-    path: '/outdoor/master/doctors/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorMasterDepartmentsIndexRoute =
-  AuthenticatedOutdoorMasterDepartmentsIndexRouteImport.update({
-    id: '/outdoor/master/departments/',
-    path: '/outdoor/master/departments/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorMasterCategoriesIndexRoute =
-  AuthenticatedOutdoorMasterCategoriesIndexRouteImport.update({
-    id: '/outdoor/master/categories/',
-    path: '/outdoor/master/categories/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndoorMasterTreatmentOutcomesIndexRoute =
-  AuthenticatedIndoorMasterTreatmentOutcomesIndexRouteImport.update({
-    id: '/indoor/master/treatment-outcomes/',
-    path: '/indoor/master/treatment-outcomes/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndoorMasterServicesIndexRoute =
-  AuthenticatedIndoorMasterServicesIndexRouteImport.update({
-    id: '/indoor/master/services/',
-    path: '/indoor/master/services/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndoorMasterServiceCategoriesIndexRoute =
-  AuthenticatedIndoorMasterServiceCategoriesIndexRouteImport.update({
-    id: '/indoor/master/service-categories/',
-    path: '/indoor/master/service-categories/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndoorMasterPatientTypesIndexRoute =
-  AuthenticatedIndoorMasterPatientTypesIndexRouteImport.update({
-    id: '/indoor/master/patient-types/',
-    path: '/indoor/master/patient-types/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndoorMasterOperationTypesIndexRoute =
-  AuthenticatedIndoorMasterOperationTypesIndexRouteImport.update({
-    id: '/indoor/master/operation-types/',
-    path: '/indoor/master/operation-types/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndoorMasterDoctorTypesIndexRoute =
-  AuthenticatedIndoorMasterDoctorTypesIndexRouteImport.update({
-    id: '/indoor/master/doctor-types/',
-    path: '/indoor/master/doctor-types/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndoorMasterBedCabinListIndexRoute =
-  AuthenticatedIndoorMasterBedCabinListIndexRouteImport.update({
-    id: '/indoor/master/bed-cabin-list/',
-    path: '/indoor/master/bed-cabin-list/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute =
-  AuthenticatedIndoorMasterAnasthesiaTypesIndexRouteImport.update({
-    id: '/indoor/master/anasthesia-types/',
-    path: '/indoor/master/anasthesia-types/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndoorManagementDoctorReferredIndexRoute =
-  AuthenticatedIndoorManagementDoctorReferredIndexRouteImport.update({
-    id: '/indoor/management/doctor-referred/',
-    path: '/indoor/management/doctor-referred/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndoorManagementDistributionsIndexRoute =
-  AuthenticatedIndoorManagementDistributionsIndexRouteImport.update({
-    id: '/indoor/management/distributions/',
-    path: '/indoor/management/distributions/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute =
-  AuthenticatedAdmissionPatientsPaymentCompletedListIndexRouteImport.update({
-    id: '/admission/patients/payment-completed-list/',
-    path: '/admission/patients/payment-completed-list/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute =
-  AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRouteImport.update({
-    id: '/admission/patients/final-bill-created-list/',
-    path: '/admission/patients/final-bill-created-list/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdmissionPatientsDischargedIndexRoute =
-  AuthenticatedAdmissionPatientsDischargedIndexRouteImport.update({
-    id: '/admission/patients/discharged/',
-    path: '/admission/patients/discharged/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdmissionPatientsDischargedListIndexRoute =
-  AuthenticatedAdmissionPatientsDischargedListIndexRouteImport.update({
-    id: '/admission/patients/discharged-list/',
-    path: '/admission/patients/discharged-list/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdmissionPatientsBillDistributedListIndexRoute =
-  AuthenticatedAdmissionPatientsBillDistributedListIndexRouteImport.update({
-    id: '/admission/patients/bill-distributed-list/',
-    path: '/admission/patients/bill-distributed-list/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdmissionPatientsBillCreatedListIndexRoute =
-  AuthenticatedAdmissionPatientsBillCreatedListIndexRouteImport.update({
-    id: '/admission/patients/bill-created-list/',
-    path: '/admission/patients/bill-created-list/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute =
-  AuthenticatedAdmissionPatientsBalanceDistributedListIndexRouteImport.update({
-    id: '/admission/patients/balance-distributed-list/',
-    path: '/admission/patients/balance-distributed-list/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdmissionPatientsActiveIndexRoute =
-  AuthenticatedAdmissionPatientsActiveIndexRouteImport.update({
-    id: '/admission/patients/active/',
-    path: '/admission/patients/active/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdmissionInvoiceListIndexRoute =
-  AuthenticatedAdmissionInvoiceListIndexRouteImport.update({
-    id: '/admission/invoice/list/',
-    path: '/admission/invoice/list/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdmissionInvoiceCreateIndexRoute =
-  AuthenticatedAdmissionInvoiceCreateIndexRouteImport.update({
-    id: '/admission/invoice/create/',
-    path: '/admission/invoice/create/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute =
-  AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRouteImport.update(
+const AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusIndexRoute =
+  AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusIndexRouteImport.update(
     {
-      id: '/admission/discharged-patients/bill-does-not-created/',
-      path: '/admission/discharged-patients/bill-does-not-created/',
+      id: '/dashboard/pathology/hormone/skin-scrapping-for-fungus/',
+      path: '/dashboard/pathology/hormone/skin-scrapping-for-fungus/',
       getParentRoute: () => AuthenticatedRouteRoute,
     } as any,
   )
-const AuthenticatedAdmissionBillingBillingIdIndexRoute =
-  AuthenticatedAdmissionBillingBillingIdIndexRouteImport.update({
-    id: '/admission/billing/$billingId/',
-    path: '/admission/billing/$billingId/',
+const AuthenticatedDashboardPathologyHormoneSemenIndexRoute =
+  AuthenticatedDashboardPathologyHormoneSemenIndexRouteImport.update({
+    id: '/dashboard/pathology/hormone/semen/',
+    path: '/dashboard/pathology/hormone/semen/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAccountingReportsTrialBalanceIndexRoute =
-  AuthenticatedAccountingReportsTrialBalanceIndexRouteImport.update({
-    id: '/accounting/reports/trial-balance/',
-    path: '/accounting/reports/trial-balance/',
+const AuthenticatedDashboardPathologyHormoneElectrolytesIndexRoute =
+  AuthenticatedDashboardPathologyHormoneElectrolytesIndexRouteImport.update({
+    id: '/dashboard/pathology/hormone/electrolytes/',
+    path: '/dashboard/pathology/hormone/electrolytes/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAccountingReportsProfitLossIndexRoute =
-  AuthenticatedAccountingReportsProfitLossIndexRouteImport.update({
-    id: '/accounting/reports/profit-loss/',
-    path: '/accounting/reports/profit-loss/',
+const AuthenticatedDashboardPathologyHormoneAllIndexRoute =
+  AuthenticatedDashboardPathologyHormoneAllIndexRouteImport.update({
+    id: '/dashboard/pathology/hormone/all/',
+    path: '/dashboard/pathology/hormone/all/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAccountingReportsProfitAndLossIndexRoute =
-  AuthenticatedAccountingReportsProfitAndLossIndexRouteImport.update({
-    id: '/accounting/reports/profit-and-loss/',
-    path: '/accounting/reports/profit-and-loss/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAccountingReportsLedgerIndexRoute =
-  AuthenticatedAccountingReportsLedgerIndexRouteImport.update({
-    id: '/accounting/reports/ledger/',
-    path: '/accounting/reports/ledger/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAccountingReportsJournalIndexRoute =
-  AuthenticatedAccountingReportsJournalIndexRouteImport.update({
-    id: '/accounting/reports/journal/',
-    path: '/accounting/reports/journal/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAccountingReportsDailySummaryIndexRoute =
-  AuthenticatedAccountingReportsDailySummaryIndexRouteImport.update({
-    id: '/accounting/reports/daily-summary/',
-    path: '/accounting/reports/daily-summary/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAccountingReportsBalanceSheetIndexRoute =
-  AuthenticatedAccountingReportsBalanceSheetIndexRouteImport.update({
-    id: '/accounting/reports/balance-sheet/',
-    path: '/accounting/reports/balance-sheet/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedXRayAllPrintIdRoute =
-  AuthenticatedXRayAllPrintIdRouteImport.update({
-    id: '/x-ray/all/print/$id',
-    path: '/x-ray/all/print/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedXRayAllEditIdRoute =
-  AuthenticatedXRayAllEditIdRouteImport.update({
-    id: '/x-ray/all/edit/$id',
-    path: '/x-ray/all/edit/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedUltrasonogramAllPrintIdRoute =
-  AuthenticatedUltrasonogramAllPrintIdRouteImport.update({
-    id: '/ultrasonogram/all/print/$id',
-    path: '/ultrasonogram/all/print/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedUltrasonogramAllEditIdRoute =
-  AuthenticatedUltrasonogramAllEditIdRouteImport.update({
-    id: '/ultrasonogram/all/edit/$id',
-    path: '/ultrasonogram/all/edit/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedRolesPermissionsRoleIdEditRoute =
-  AuthenticatedRolesPermissionsRoleIdEditRouteImport.update({
-    id: '/roles/permissions/$roleId/edit',
-    path: '/roles/permissions/$roleId/edit',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute =
-  AuthenticatedOutdoorReceptionInvoicesInvoiceIdRouteImport.update({
-    id: '/outdoor/reception/invoices/$invoiceId',
-    path: '/outdoor/reception/invoices/$invoiceId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRoute =
-  AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRouteImport.update({
-    id: '/outdoor/reception/due-collection/$invoiceId',
-    path: '/outdoor/reception/due-collection/$invoiceId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorMasterTestsIdRoute =
-  AuthenticatedOutdoorMasterTestsIdRouteImport.update({
-    id: '/outdoor/master/tests/$id',
-    path: '/outdoor/master/tests/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorMasterTestTablesIdRoute =
-  AuthenticatedOutdoorMasterTestTablesIdRouteImport.update({
-    id: '/outdoor/master/test-tables/$id',
-    path: '/outdoor/master/test-tables/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorMasterDoctorsCreateRoute =
-  AuthenticatedOutdoorMasterDoctorsCreateRouteImport.update({
-    id: '/outdoor/master/doctors/create',
-    path: '/outdoor/master/doctors/create',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorMasterDepartmentsIdRoute =
-  AuthenticatedOutdoorMasterDepartmentsIdRouteImport.update({
-    id: '/outdoor/master/departments/$id',
-    path: '/outdoor/master/departments/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorMasterCategoriesIdRoute =
-  AuthenticatedOutdoorMasterCategoriesIdRouteImport.update({
-    id: '/outdoor/master/categories/$id',
-    path: '/outdoor/master/categories/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndoorMasterServicesIdRoute =
-  AuthenticatedIndoorMasterServicesIdRouteImport.update({
-    id: '/indoor/master/services/$id',
-    path: '/indoor/master/services/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndoorMasterBedCabinListIdRoute =
-  AuthenticatedIndoorMasterBedCabinListIdRouteImport.update({
-    id: '/indoor/master/bed-cabin-list/$id',
-    path: '/indoor/master/bed-cabin-list/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedEcgAllPrintIdRoute =
-  AuthenticatedEcgAllPrintIdRouteImport.update({
-    id: '/ecg/all/print/$id',
-    path: '/ecg/all/print/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedEcgAllEditIdRoute =
-  AuthenticatedEcgAllEditIdRouteImport.update({
-    id: '/ecg/all/edit/$id',
-    path: '/ecg/all/edit/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAccountingReportsLedgerPrintRoute =
-  AuthenticatedAccountingReportsLedgerPrintRouteImport.update({
-    id: '/accounting/reports/ledger/print',
-    path: '/accounting/reports/ledger/print',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute =
-  AuthenticatedReportsMyOutdoorTodayCollectionIndexRouteImport.update({
-    id: '/reports/my/outdoor/today-collection/',
-    path: '/reports/my/outdoor/today-collection/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute =
-  AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRouteImport.update({
-    id: '/reports/my/outdoor/date-wise-collection/',
-    path: '/reports/my/outdoor/date-wise-collection/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorReceptionInvoicesListIndexRoute =
-  AuthenticatedOutdoorReceptionInvoicesListIndexRouteImport.update({
-    id: '/outdoor/reception/invoices/list/',
-    path: '/outdoor/reception/invoices/list/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute =
-  AuthenticatedOutdoorReceptionInvoicesCreateIndexRouteImport.update({
-    id: '/outdoor/reception/invoices/create/',
-    path: '/outdoor/reception/invoices/create/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorMasterTestsCreateIndexRoute =
-  AuthenticatedOutdoorMasterTestsCreateIndexRouteImport.update({
-    id: '/outdoor/master/tests/create/',
-    path: '/outdoor/master/tests/create/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute =
-  AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRouteImport.update({
-    id: '/outdoor/master/doctors/$doctorId/',
-    path: '/outdoor/master/doctors/$doctorId/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndoorMasterServicesCreateIndexRoute =
-  AuthenticatedIndoorMasterServicesCreateIndexRouteImport.update({
-    id: '/indoor/master/services/create/',
-    path: '/indoor/master/services/create/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndoorMasterBedCabinListCreateIndexRoute =
-  AuthenticatedIndoorMasterBedCabinListCreateIndexRouteImport.update({
-    id: '/indoor/master/bed-cabin-list/create/',
-    path: '/indoor/master/bed-cabin-list/create/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute =
-  AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRouteImport.update({
-    id: '/admission/patients/$admissionId/print/',
-    path: '/admission/patients/$admissionId/print/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute =
-  AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRouteImport.update({
-    id: '/admission/patients/$admissionId/final-bill/',
-    path: '/admission/patients/$admissionId/final-bill/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute =
-  AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRouteImport.update(
+const AuthenticatedDashboardPathologyHematologyProthomBinTimeFullIndexRoute =
+  AuthenticatedDashboardPathologyHematologyProthomBinTimeFullIndexRouteImport.update(
     {
-      id: '/admission/patients/$admissionId/final-bill-print/',
-      path: '/admission/patients/$admissionId/final-bill-print/',
+      id: '/dashboard/pathology/hematology/prothom-bin-time-full/',
+      path: '/dashboard/pathology/hematology/prothom-bin-time-full/',
       getParentRoute: () => AuthenticatedRouteRoute,
     } as any,
   )
-const AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute =
-  AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRouteImport.update(
+const AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmIndexRoute =
+  AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmIndexRouteImport.update(
     {
-      id: '/admission/patients/$admissionId/distribute-bill/',
-      path: '/admission/patients/$admissionId/distribute-bill/',
+      id: '/dashboard/pathology/hematology/peripheral-blood-film/',
+      path: '/dashboard/pathology/hematology/peripheral-blood-film/',
       getParentRoute: () => AuthenticatedRouteRoute,
     } as any,
   )
-const AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute =
-  AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRouteImport.update(
+const AuthenticatedDashboardPathologyHematologyCbcWithPbfIndexRoute =
+  AuthenticatedDashboardPathologyHematologyCbcWithPbfIndexRouteImport.update({
+    id: '/dashboard/pathology/hematology/cbc-with-pbf/',
+    path: '/dashboard/pathology/hematology/cbc-with-pbf/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyHematologyCbcShortIndexRoute =
+  AuthenticatedDashboardPathologyHematologyCbcShortIndexRouteImport.update({
+    id: '/dashboard/pathology/hematology/cbc-short/',
+    path: '/dashboard/pathology/hematology/cbc-short/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyHematologyBloodForTcdcIndexRoute =
+  AuthenticatedDashboardPathologyHematologyBloodForTcdcIndexRouteImport.update({
+    id: '/dashboard/pathology/hematology/blood-for-tcdc/',
+    path: '/dashboard/pathology/hematology/blood-for-tcdc/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyHematologyBloodForBtCtIndexRoute =
+  AuthenticatedDashboardPathologyHematologyBloodForBtCtIndexRouteImport.update({
+    id: '/dashboard/pathology/hematology/blood-for-bt-ct/',
+    path: '/dashboard/pathology/hematology/blood-for-bt-ct/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyHematologyAllIndexRoute =
+  AuthenticatedDashboardPathologyHematologyAllIndexRouteImport.update({
+    id: '/dashboard/pathology/hematology/all/',
+    path: '/dashboard/pathology/hematology/all/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRoute =
+  AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRouteImport.update(
     {
-      id: '/admission/patients/$admissionId/confirm-balance/',
-      path: '/admission/patients/$admissionId/confirm-balance/',
+      id: '/dashboard/pathology/biochemical/lipid-profile/',
+      path: '/dashboard/pathology/biochemical/lipid-profile/',
       getParentRoute: () => AuthenticatedRouteRoute,
     } as any,
   )
-const AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute =
-  AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRouteImport.update({
-    id: '/admission/patients/$admissionId/billing/',
-    path: '/admission/patients/$admissionId/billing/',
+const AuthenticatedDashboardPathologyBiochemicalAllIndexRoute =
+  AuthenticatedDashboardPathologyBiochemicalAllIndexRouteImport.update({
+    id: '/dashboard/pathology/biochemical/all/',
+    path: '/dashboard/pathology/biochemical/all/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute =
-  AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRouteImport.update({
-    id: '/admission/patients/$admissionId/billing-print/',
-    path: '/admission/patients/$admissionId/billing-print/',
+const AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute =
+  AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRouteImport.update({
+    id: '/dashboard/outdoor/reception/user-invoices/',
+    path: '/dashboard/outdoor/reception/user-invoices/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute =
-  AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRouteImport.update({
-    id: '/admission/patients/$admissionId/bill-created/',
-    path: '/admission/patients/$admissionId/bill-created/',
+const AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute =
+  AuthenticatedDashboardOutdoorReceptionPatientsIndexRouteImport.update({
+    id: '/dashboard/outdoor/reception/patients/',
+    path: '/dashboard/outdoor/reception/patients/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedXRayAllEditBuilderIdRoute =
-  AuthenticatedXRayAllEditBuilderIdRouteImport.update({
-    id: '/x-ray/all/edit/builder/$id',
-    path: '/x-ray/all/edit/builder/$id',
+const AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute =
+  AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRouteImport.update({
+    id: '/dashboard/outdoor/reception/paid-invoices/',
+    path: '/dashboard/outdoor/reception/paid-invoices/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedUltrasonogramAllEditBuilderIdRoute =
-  AuthenticatedUltrasonogramAllEditBuilderIdRouteImport.update({
-    id: '/ultrasonogram/all/edit/builder/$id',
-    path: '/ultrasonogram/all/edit/builder/$id',
+const AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute =
+  AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRouteImport.update({
+    id: '/dashboard/outdoor/reception/my-invoices/',
+    path: '/dashboard/outdoor/reception/my-invoices/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute =
-  AuthenticatedPathologyUrineUrineForSugarReportReportIdRouteImport.update({
-    id: '/pathology/urine/urine-for-sugar/report/$reportId',
-    path: '/pathology/urine/urine-for-sugar/report/$reportId',
+const AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute =
+  AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRouteImport.update({
+    id: '/dashboard/outdoor/reception/due-collection/',
+    path: '/dashboard/outdoor/reception/due-collection/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyUrineUrineForReFullReportReportIdRoute =
-  AuthenticatedPathologyUrineUrineForReFullReportReportIdRouteImport.update({
-    id: '/pathology/urine/urine-for-re-full/report/$reportId',
-    path: '/pathology/urine/urine-for-re-full/report/$reportId',
+const AuthenticatedDashboardOutdoorMasterTestsIndexRoute =
+  AuthenticatedDashboardOutdoorMasterTestsIndexRouteImport.update({
+    id: '/dashboard/outdoor/master/tests/',
+    path: '/dashboard/outdoor/master/tests/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyUrineUrineForReFullEditIdRoute =
-  AuthenticatedPathologyUrineUrineForReFullEditIdRouteImport.update({
-    id: '/pathology/urine/urine-for-re-full/edit/$id',
-    path: '/pathology/urine/urine-for-re-full/edit/$id',
+const AuthenticatedDashboardOutdoorMasterTestTablesIndexRoute =
+  AuthenticatedDashboardOutdoorMasterTestTablesIndexRouteImport.update({
+    id: '/dashboard/outdoor/master/test-tables/',
+    path: '/dashboard/outdoor/master/test-tables/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyUrineUrineForAlbuminReportReportIdRoute =
-  AuthenticatedPathologyUrineUrineForAlbuminReportReportIdRouteImport.update({
-    id: '/pathology/urine/urine-for-albumin/report/$reportId',
-    path: '/pathology/urine/urine-for-albumin/report/$reportId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyStoolStoolReReportReportIdRoute =
-  AuthenticatedPathologyStoolStoolReReportReportIdRouteImport.update({
-    id: '/pathology/stool/stool-re/report/$reportId',
-    path: '/pathology/stool/stool-re/report/$reportId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyStoolStoolReEditIdRoute =
-  AuthenticatedPathologyStoolStoolReEditIdRouteImport.update({
-    id: '/pathology/stool/stool-re/edit/$id',
-    path: '/pathology/stool/stool-re/edit/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyStoolReducingSubstanceReportReportIdRoute =
-  AuthenticatedPathologyStoolReducingSubstanceReportReportIdRouteImport.update({
-    id: '/pathology/stool/reducing-substance/report/$reportId',
-    path: '/pathology/stool/reducing-substance/report/$reportId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyStoolOcultBloodTestReportReportIdRoute =
-  AuthenticatedPathologyStoolOcultBloodTestReportReportIdRouteImport.update({
-    id: '/pathology/stool/ocult-blood-test/report/$reportId',
-    path: '/pathology/stool/ocult-blood-test/report/$reportId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyImmunologyWidalTestReportReportIdRoute =
-  AuthenticatedPathologyImmunologyWidalTestReportReportIdRouteImport.update({
-    id: '/pathology/immunology/widal-test/report/$reportId',
-    path: '/pathology/immunology/widal-test/report/$reportId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyImmunologyMtReportReportIdRoute =
-  AuthenticatedPathologyImmunologyMtReportReportIdRouteImport.update({
-    id: '/pathology/immunology/mt/report/$reportId',
-    path: '/pathology/immunology/mt/report/$reportId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyImmunologyBloodGroupReportReportIdRoute =
-  AuthenticatedPathologyImmunologyBloodGroupReportReportIdRouteImport.update({
-    id: '/pathology/immunology/blood-group/report/$reportId',
-    path: '/pathology/immunology/blood-group/report/$reportId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute =
-  AuthenticatedPathologyImmunologyBetaHcgReportReportIdRouteImport.update({
-    id: '/pathology/immunology/beta-hcg/report/$reportId',
-    path: '/pathology/immunology/beta-hcg/report/$reportId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyImmunologyAllReportReportIdRoute =
-  AuthenticatedPathologyImmunologyAllReportReportIdRouteImport.update({
-    id: '/pathology/immunology/all/report/$reportId',
-    path: '/pathology/immunology/all/report/$reportId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute =
-  AuthenticatedPathologyHormoneT3t4tshReportReportIdRouteImport.update({
-    id: '/pathology/hormone/t3t4tsh/report/$reportId',
-    path: '/pathology/hormone/t3t4tsh/report/$reportId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHormoneSputumReportReportIdRoute =
-  AuthenticatedPathologyHormoneSputumReportReportIdRouteImport.update({
-    id: '/pathology/hormone/sputum/report/$reportId',
-    path: '/pathology/hormone/sputum/report/$reportId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRoute =
-  AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRouteImport.update(
+const AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRoute =
+  AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRouteImport.update(
     {
-      id: '/pathology/hormone/skin-scrapping-for-fungus/report/$reportId',
-      path: '/pathology/hormone/skin-scrapping-for-fungus/report/$reportId',
+      id: '/dashboard/outdoor/master/sample-collection-rooms/',
+      path: '/dashboard/outdoor/master/sample-collection-rooms/',
       getParentRoute: () => AuthenticatedRouteRoute,
     } as any,
   )
-const AuthenticatedPathologyHormoneSemenReportReportIdRoute =
-  AuthenticatedPathologyHormoneSemenReportReportIdRouteImport.update({
-    id: '/pathology/hormone/semen/report/$reportId',
-    path: '/pathology/hormone/semen/report/$reportId',
+const AuthenticatedDashboardOutdoorMasterMachinesIndexRoute =
+  AuthenticatedDashboardOutdoorMasterMachinesIndexRouteImport.update({
+    id: '/dashboard/outdoor/master/machines/',
+    path: '/dashboard/outdoor/master/machines/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyHormoneSemenEditReportIdRoute =
-  AuthenticatedPathologyHormoneSemenEditReportIdRouteImport.update({
-    id: '/pathology/hormone/semen/edit/$reportId',
-    path: '/pathology/hormone/semen/edit/$reportId',
+const AuthenticatedDashboardOutdoorMasterDoctorsIndexRoute =
+  AuthenticatedDashboardOutdoorMasterDoctorsIndexRouteImport.update({
+    id: '/dashboard/outdoor/master/doctors/',
+    path: '/dashboard/outdoor/master/doctors/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute =
-  AuthenticatedPathologyHormoneElectrolytesReportReportIdRouteImport.update({
-    id: '/pathology/hormone/electrolytes/report/$reportId',
-    path: '/pathology/hormone/electrolytes/report/$reportId',
+const AuthenticatedDashboardOutdoorMasterDepartmentsIndexRoute =
+  AuthenticatedDashboardOutdoorMasterDepartmentsIndexRouteImport.update({
+    id: '/dashboard/outdoor/master/departments/',
+    path: '/dashboard/outdoor/master/departments/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyHormoneAllReportReportIdRoute =
-  AuthenticatedPathologyHormoneAllReportReportIdRouteImport.update({
-    id: '/pathology/hormone/all/report/$reportId',
-    path: '/pathology/hormone/all/report/$reportId',
+const AuthenticatedDashboardOutdoorMasterCategoriesIndexRoute =
+  AuthenticatedDashboardOutdoorMasterCategoriesIndexRouteImport.update({
+    id: '/dashboard/outdoor/master/categories/',
+    path: '/dashboard/outdoor/master/categories/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute =
-  AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRouteImport.update(
+const AuthenticatedDashboardIndoorMasterTreatmentOutcomesIndexRoute =
+  AuthenticatedDashboardIndoorMasterTreatmentOutcomesIndexRouteImport.update({
+    id: '/dashboard/indoor/master/treatment-outcomes/',
+    path: '/dashboard/indoor/master/treatment-outcomes/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorMasterServicesIndexRoute =
+  AuthenticatedDashboardIndoorMasterServicesIndexRouteImport.update({
+    id: '/dashboard/indoor/master/services/',
+    path: '/dashboard/indoor/master/services/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorMasterServiceCategoriesIndexRoute =
+  AuthenticatedDashboardIndoorMasterServiceCategoriesIndexRouteImport.update({
+    id: '/dashboard/indoor/master/service-categories/',
+    path: '/dashboard/indoor/master/service-categories/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute =
+  AuthenticatedDashboardIndoorMasterPatientTypesIndexRouteImport.update({
+    id: '/dashboard/indoor/master/patient-types/',
+    path: '/dashboard/indoor/master/patient-types/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute =
+  AuthenticatedDashboardIndoorMasterOperationTypesIndexRouteImport.update({
+    id: '/dashboard/indoor/master/operation-types/',
+    path: '/dashboard/indoor/master/operation-types/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute =
+  AuthenticatedDashboardIndoorMasterDoctorTypesIndexRouteImport.update({
+    id: '/dashboard/indoor/master/doctor-types/',
+    path: '/dashboard/indoor/master/doctor-types/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute =
+  AuthenticatedDashboardIndoorMasterBedCabinListIndexRouteImport.update({
+    id: '/dashboard/indoor/master/bed-cabin-list/',
+    path: '/dashboard/indoor/master/bed-cabin-list/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute =
+  AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRouteImport.update({
+    id: '/dashboard/indoor/master/anasthesia-types/',
+    path: '/dashboard/indoor/master/anasthesia-types/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute =
+  AuthenticatedDashboardIndoorManagementDoctorReferredIndexRouteImport.update({
+    id: '/dashboard/indoor/management/doctor-referred/',
+    path: '/dashboard/indoor/management/doctor-referred/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorManagementDistributionsIndexRoute =
+  AuthenticatedDashboardIndoorManagementDistributionsIndexRouteImport.update({
+    id: '/dashboard/indoor/management/distributions/',
+    path: '/dashboard/indoor/management/distributions/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRouteImport.update(
     {
-      id: '/pathology/hematology/prothom-bin-time-full/report/$reportId',
-      path: '/pathology/hematology/prothom-bin-time-full/report/$reportId',
+      id: '/dashboard/admission/patients/payment-completed-list/',
+      path: '/dashboard/admission/patients/payment-completed-list/',
       getParentRoute: () => AuthenticatedRouteRoute,
     } as any,
   )
-const AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRoute =
-  AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRouteImport.update(
+const AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRouteImport.update(
     {
-      id: '/pathology/hematology/peripheral-blood-film/report/$reportId',
-      path: '/pathology/hematology/peripheral-blood-film/report/$reportId',
+      id: '/dashboard/admission/patients/final-bill-created-list/',
+      path: '/dashboard/admission/patients/final-bill-created-list/',
       getParentRoute: () => AuthenticatedRouteRoute,
     } as any,
   )
-const AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRoute =
-  AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRouteImport.update({
-    id: '/pathology/hematology/cbc-with-pbf/report/$reportId',
-    path: '/pathology/hematology/cbc-with-pbf/report/$reportId',
+const AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsDischargedIndexRouteImport.update({
+    id: '/dashboard/admission/patients/discharged/',
+    path: '/dashboard/admission/patients/discharged/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyHematologyCbcWithPbfEditIdRoute =
-  AuthenticatedPathologyHematologyCbcWithPbfEditIdRouteImport.update({
-    id: '/pathology/hematology/cbc-with-pbf/edit/$id',
-    path: '/pathology/hematology/cbc-with-pbf/edit/$id',
+const AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsDischargedListIndexRouteImport.update({
+    id: '/dashboard/admission/patients/discharged-list/',
+    path: '/dashboard/admission/patients/discharged-list/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyHematologyCbcShortReportReportIdRoute =
-  AuthenticatedPathologyHematologyCbcShortReportReportIdRouteImport.update({
-    id: '/pathology/hematology/cbc-short/report/$reportId',
-    path: '/pathology/hematology/cbc-short/report/$reportId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHematologyCbcShortEditIdRoute =
-  AuthenticatedPathologyHematologyCbcShortEditIdRouteImport.update({
-    id: '/pathology/hematology/cbc-short/edit/$id',
-    path: '/pathology/hematology/cbc-short/edit/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHematologyBloodForTcdcReportReportIdRoute =
-  AuthenticatedPathologyHematologyBloodForTcdcReportReportIdRouteImport.update({
-    id: '/pathology/hematology/blood-for-tcdc/report/$reportId',
-    path: '/pathology/hematology/blood-for-tcdc/report/$reportId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHematologyBloodForBtCtReportReportIdRoute =
-  AuthenticatedPathologyHematologyBloodForBtCtReportReportIdRouteImport.update({
-    id: '/pathology/hematology/blood-for-bt-ct/report/$reportId',
-    path: '/pathology/hematology/blood-for-bt-ct/report/$reportId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyHematologyAllReportReportIdRoute =
-  AuthenticatedPathologyHematologyAllReportReportIdRouteImport.update({
-    id: '/pathology/hematology/all/report/$reportId',
-    path: '/pathology/hematology/all/report/$reportId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPathologyBiochemicalLipidProfileReportReportIdRoute =
-  AuthenticatedPathologyBiochemicalLipidProfileReportReportIdRouteImport.update(
+const AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRouteImport.update(
     {
-      id: '/pathology/biochemical/lipid-profile/report/$reportId',
-      path: '/pathology/biochemical/lipid-profile/report/$reportId',
+      id: '/dashboard/admission/patients/bill-distributed-list/',
+      path: '/dashboard/admission/patients/bill-distributed-list/',
       getParentRoute: () => AuthenticatedRouteRoute,
     } as any,
   )
-const AuthenticatedPathologyBiochemicalAllReportReportIdRoute =
-  AuthenticatedPathologyBiochemicalAllReportReportIdRouteImport.update({
-    id: '/pathology/biochemical/all/report/$reportId',
-    path: '/pathology/biochemical/all/report/$reportId',
+const AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/bill-created-list/',
+      path: '/dashboard/admission/patients/bill-created-list/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/balance-distributed-list/',
+      path: '/dashboard/admission/patients/balance-distributed-list/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardAdmissionPatientsActiveIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsActiveIndexRouteImport.update({
+    id: '/dashboard/admission/patients/active/',
+    path: '/dashboard/admission/patients/active/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyBiochemicalAllEditReportIdRoute =
-  AuthenticatedPathologyBiochemicalAllEditReportIdRouteImport.update({
-    id: '/pathology/biochemical/all/edit/$reportId',
-    path: '/pathology/biochemical/all/edit/$reportId',
+const AuthenticatedDashboardAdmissionInvoiceListIndexRoute =
+  AuthenticatedDashboardAdmissionInvoiceListIndexRouteImport.update({
+    id: '/dashboard/admission/invoice/list/',
+    path: '/dashboard/admission/invoice/list/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute =
-  AuthenticatedOutdoorMasterDoctorsDoctorIdEditRouteImport.update({
-    id: '/outdoor/master/doctors/$doctorId/edit',
-    path: '/outdoor/master/doctors/$doctorId/edit',
+const AuthenticatedDashboardAdmissionInvoiceCreateIndexRoute =
+  AuthenticatedDashboardAdmissionInvoiceCreateIndexRouteImport.update({
+    id: '/dashboard/admission/invoice/create/',
+    path: '/dashboard/admission/invoice/create/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedIndoorMasterServicesEditIdRoute =
-  AuthenticatedIndoorMasterServicesEditIdRouteImport.update({
-    id: '/indoor/master/services/edit/$id',
-    path: '/indoor/master/services/edit/$id',
+const AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute =
+  AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/discharged-patients/bill-does-not-created/',
+      path: '/dashboard/admission/discharged-patients/bill-does-not-created/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardAdmissionBillingBillingIdIndexRoute =
+  AuthenticatedDashboardAdmissionBillingBillingIdIndexRouteImport.update({
+    id: '/dashboard/admission/billing/$billingId/',
+    path: '/dashboard/admission/billing/$billingId/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedEcgAllEditBuilderIdRoute =
-  AuthenticatedEcgAllEditBuilderIdRouteImport.update({
-    id: '/ecg/all/edit/builder/$id',
-    path: '/ecg/all/edit/builder/$id',
+const AuthenticatedDashboardAccountingReportsTrialBalanceIndexRoute =
+  AuthenticatedDashboardAccountingReportsTrialBalanceIndexRouteImport.update({
+    id: '/dashboard/accounting/reports/trial-balance/',
+    path: '/dashboard/accounting/reports/trial-balance/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute =
-  AuthenticatedAdmissionPatientsAdmissionIdPrintStepRouteImport.update({
-    id: '/admission/patients/$admissionId/print/$step',
-    path: '/admission/patients/$admissionId/print/$step',
+const AuthenticatedDashboardAccountingReportsProfitLossIndexRoute =
+  AuthenticatedDashboardAccountingReportsProfitLossIndexRouteImport.update({
+    id: '/dashboard/accounting/reports/profit-loss/',
+    path: '/dashboard/accounting/reports/profit-loss/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyImmunologyAllEditIdIndexRoute =
-  AuthenticatedPathologyImmunologyAllEditIdIndexRouteImport.update({
-    id: '/pathology/immunology/all/edit/$id/',
-    path: '/pathology/immunology/all/edit/$id/',
+const AuthenticatedDashboardAccountingReportsProfitAndLossIndexRoute =
+  AuthenticatedDashboardAccountingReportsProfitAndLossIndexRouteImport.update({
+    id: '/dashboard/accounting/reports/profit-and-loss/',
+    path: '/dashboard/accounting/reports/profit-and-loss/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyHormoneAllEditIdIndexRoute =
-  AuthenticatedPathologyHormoneAllEditIdIndexRouteImport.update({
-    id: '/pathology/hormone/all/edit/$id/',
-    path: '/pathology/hormone/all/edit/$id/',
+const AuthenticatedDashboardAccountingReportsMultiLedgerIndexRoute =
+  AuthenticatedDashboardAccountingReportsMultiLedgerIndexRouteImport.update({
+    id: '/dashboard/accounting/reports/multi-ledger/',
+    path: '/dashboard/accounting/reports/multi-ledger/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPathologyHematologyAllEditIdIndexRoute =
-  AuthenticatedPathologyHematologyAllEditIdIndexRouteImport.update({
-    id: '/pathology/hematology/all/edit/$id/',
-    path: '/pathology/hematology/all/edit/$id/',
+const AuthenticatedDashboardAccountingReportsLedgerIndexRoute =
+  AuthenticatedDashboardAccountingReportsLedgerIndexRouteImport.update({
+    id: '/dashboard/accounting/reports/ledger/',
+    path: '/dashboard/accounting/reports/ledger/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRoute =
-  AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRouteImport.update({
-    id: '/outdoor/reception/invoices/edit/$invoiceId/',
-    path: '/outdoor/reception/invoices/edit/$invoiceId/',
+const AuthenticatedDashboardAccountingReportsJournalIndexRoute =
+  AuthenticatedDashboardAccountingReportsJournalIndexRouteImport.update({
+    id: '/dashboard/accounting/reports/journal/',
+    path: '/dashboard/accounting/reports/journal/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedOutdoorMasterTestsEditIdIndexRoute =
-  AuthenticatedOutdoorMasterTestsEditIdIndexRouteImport.update({
-    id: '/outdoor/master/tests/edit/$id/',
-    path: '/outdoor/master/tests/edit/$id/',
+const AuthenticatedDashboardAccountingReportsDailySummaryIndexRoute =
+  AuthenticatedDashboardAccountingReportsDailySummaryIndexRouteImport.update({
+    id: '/dashboard/accounting/reports/daily-summary/',
+    path: '/dashboard/accounting/reports/daily-summary/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAccountingReportsCashFlowIndexRoute =
+  AuthenticatedDashboardAccountingReportsCashFlowIndexRouteImport.update({
+    id: '/dashboard/accounting/reports/cash-flow/',
+    path: '/dashboard/accounting/reports/cash-flow/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAccountingReportsBalanceSheetIndexRoute =
+  AuthenticatedDashboardAccountingReportsBalanceSheetIndexRouteImport.update({
+    id: '/dashboard/accounting/reports/balance-sheet/',
+    path: '/dashboard/accounting/reports/balance-sheet/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardXRayAllPrintIdRoute =
+  AuthenticatedDashboardXRayAllPrintIdRouteImport.update({
+    id: '/dashboard/x-ray/all/print/$id',
+    path: '/dashboard/x-ray/all/print/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardXRayAllEditIdRoute =
+  AuthenticatedDashboardXRayAllEditIdRouteImport.update({
+    id: '/dashboard/x-ray/all/edit/$id',
+    path: '/dashboard/x-ray/all/edit/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardUltrasonogramAllPrintIdRoute =
+  AuthenticatedDashboardUltrasonogramAllPrintIdRouteImport.update({
+    id: '/dashboard/ultrasonogram/all/print/$id',
+    path: '/dashboard/ultrasonogram/all/print/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardUltrasonogramAllEditIdRoute =
+  AuthenticatedDashboardUltrasonogramAllEditIdRouteImport.update({
+    id: '/dashboard/ultrasonogram/all/edit/$id',
+    path: '/dashboard/ultrasonogram/all/edit/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardRolesPermissionsRoleIdEditRoute =
+  AuthenticatedDashboardRolesPermissionsRoleIdEditRouteImport.update({
+    id: '/dashboard/roles/permissions/$roleId/edit',
+    path: '/dashboard/roles/permissions/$roleId/edit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute =
+  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteImport.update({
+    id: '/dashboard/outdoor/reception/invoices/$invoiceId',
+    path: '/dashboard/outdoor/reception/invoices/$invoiceId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute =
+  AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRouteImport.update(
+    {
+      id: '/dashboard/outdoor/reception/due-collection/$invoiceId',
+      path: '/dashboard/outdoor/reception/due-collection/$invoiceId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardOutdoorMasterTestsIdRoute =
+  AuthenticatedDashboardOutdoorMasterTestsIdRouteImport.update({
+    id: '/dashboard/outdoor/master/tests/$id',
+    path: '/dashboard/outdoor/master/tests/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardOutdoorMasterTestTablesIdRoute =
+  AuthenticatedDashboardOutdoorMasterTestTablesIdRouteImport.update({
+    id: '/dashboard/outdoor/master/test-tables/$id',
+    path: '/dashboard/outdoor/master/test-tables/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardOutdoorMasterDoctorsCreateRoute =
+  AuthenticatedDashboardOutdoorMasterDoctorsCreateRouteImport.update({
+    id: '/dashboard/outdoor/master/doctors/create',
+    path: '/dashboard/outdoor/master/doctors/create',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardOutdoorMasterDepartmentsIdRoute =
+  AuthenticatedDashboardOutdoorMasterDepartmentsIdRouteImport.update({
+    id: '/dashboard/outdoor/master/departments/$id',
+    path: '/dashboard/outdoor/master/departments/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardOutdoorMasterCategoriesIdRoute =
+  AuthenticatedDashboardOutdoorMasterCategoriesIdRouteImport.update({
+    id: '/dashboard/outdoor/master/categories/$id',
+    path: '/dashboard/outdoor/master/categories/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorMasterServicesIdRoute =
+  AuthenticatedDashboardIndoorMasterServicesIdRouteImport.update({
+    id: '/dashboard/indoor/master/services/$id',
+    path: '/dashboard/indoor/master/services/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorMasterBedCabinListIdRoute =
+  AuthenticatedDashboardIndoorMasterBedCabinListIdRouteImport.update({
+    id: '/dashboard/indoor/master/bed-cabin-list/$id',
+    path: '/dashboard/indoor/master/bed-cabin-list/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardEcgAllPrintIdRoute =
+  AuthenticatedDashboardEcgAllPrintIdRouteImport.update({
+    id: '/dashboard/ecg/all/print/$id',
+    path: '/dashboard/ecg/all/print/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardEcgAllEditIdRoute =
+  AuthenticatedDashboardEcgAllEditIdRouteImport.update({
+    id: '/dashboard/ecg/all/edit/$id',
+    path: '/dashboard/ecg/all/edit/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute =
+  AuthenticatedDashboardAccountingReportsMultiLedgerPrintRouteImport.update({
+    id: '/dashboard/accounting/reports/multi-ledger/print',
+    path: '/dashboard/accounting/reports/multi-ledger/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAccountingReportsLedgerPrintRoute =
+  AuthenticatedDashboardAccountingReportsLedgerPrintRouteImport.update({
+    id: '/dashboard/accounting/reports/ledger/print',
+    path: '/dashboard/accounting/reports/ledger/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute =
+  AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRouteImport.update({
+    id: '/dashboard/reports/my/outdoor/today-collection/',
+    path: '/dashboard/reports/my/outdoor/today-collection/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute =
+  AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRouteImport.update(
+    {
+      id: '/dashboard/reports/my/outdoor/date-wise-collection/',
+      path: '/dashboard/reports/my/outdoor/date-wise-collection/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute =
+  AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRouteImport.update({
+    id: '/dashboard/outdoor/reception/invoices/list/',
+    path: '/dashboard/outdoor/reception/invoices/list/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute =
+  AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRouteImport.update({
+    id: '/dashboard/outdoor/reception/invoices/create/',
+    path: '/dashboard/outdoor/reception/invoices/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute =
+  AuthenticatedDashboardOutdoorMasterTestsCreateIndexRouteImport.update({
+    id: '/dashboard/outdoor/master/tests/create/',
+    path: '/dashboard/outdoor/master/tests/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute =
+  AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRouteImport.update({
+    id: '/dashboard/outdoor/master/doctors/$doctorId/',
+    path: '/dashboard/outdoor/master/doctors/$doctorId/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute =
+  AuthenticatedDashboardIndoorMasterServicesCreateIndexRouteImport.update({
+    id: '/dashboard/indoor/master/services/create/',
+    path: '/dashboard/indoor/master/services/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute =
+  AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRouteImport.update({
+    id: '/dashboard/indoor/master/bed-cabin-list/create/',
+    path: '/dashboard/indoor/master/bed-cabin-list/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/$admissionId/print/',
+      path: '/dashboard/admission/patients/$admissionId/print/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/$admissionId/final-bill/',
+      path: '/dashboard/admission/patients/$admissionId/final-bill/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/$admissionId/final-bill-print/',
+      path: '/dashboard/admission/patients/$admissionId/final-bill-print/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/$admissionId/distribute-bill/',
+      path: '/dashboard/admission/patients/$admissionId/distribute-bill/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/$admissionId/confirm-balance/',
+      path: '/dashboard/admission/patients/$admissionId/confirm-balance/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/$admissionId/billing/',
+      path: '/dashboard/admission/patients/$admissionId/billing/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/$admissionId/billing-print/',
+      path: '/dashboard/admission/patients/$admissionId/billing-print/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/$admissionId/bill-created/',
+      path: '/dashboard/admission/patients/$admissionId/bill-created/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardXRayAllEditBuilderIdRoute =
+  AuthenticatedDashboardXRayAllEditBuilderIdRouteImport.update({
+    id: '/dashboard/x-ray/all/edit/builder/$id',
+    path: '/dashboard/x-ray/all/edit/builder/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute =
+  AuthenticatedDashboardUltrasonogramAllEditBuilderIdRouteImport.update({
+    id: '/dashboard/ultrasonogram/all/edit/builder/$id',
+    path: '/dashboard/ultrasonogram/all/edit/builder/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute =
+  AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/urine/urine-for-sugar/report/$reportId',
+      path: '/dashboard/pathology/urine/urine-for-sugar/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRoute =
+  AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/urine/urine-for-re-full/report/$reportId',
+      path: '/dashboard/pathology/urine/urine-for-re-full/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRoute =
+  AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRouteImport.update({
+    id: '/dashboard/pathology/urine/urine-for-re-full/edit/$id',
+    path: '/dashboard/pathology/urine/urine-for-re-full/edit/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyUrineUrineForAlbuminReportReportIdRoute =
+  AuthenticatedDashboardPathologyUrineUrineForAlbuminReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/urine/urine-for-albumin/report/$reportId',
+      path: '/dashboard/pathology/urine/urine-for-albumin/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyStoolStoolReReportReportIdRoute =
+  AuthenticatedDashboardPathologyStoolStoolReReportReportIdRouteImport.update({
+    id: '/dashboard/pathology/stool/stool-re/report/$reportId',
+    path: '/dashboard/pathology/stool/stool-re/report/$reportId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyStoolStoolReEditIdRoute =
+  AuthenticatedDashboardPathologyStoolStoolReEditIdRouteImport.update({
+    id: '/dashboard/pathology/stool/stool-re/edit/$id',
+    path: '/dashboard/pathology/stool/stool-re/edit/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyStoolReducingSubstanceReportReportIdRoute =
+  AuthenticatedDashboardPathologyStoolReducingSubstanceReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/stool/reducing-substance/report/$reportId',
+      path: '/dashboard/pathology/stool/reducing-substance/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRoute =
+  AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/stool/ocult-blood-test/report/$reportId',
+      path: '/dashboard/pathology/stool/ocult-blood-test/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRoute =
+  AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/immunology/widal-test/report/$reportId',
+      path: '/dashboard/pathology/immunology/widal-test/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute =
+  AuthenticatedDashboardPathologyImmunologyMtReportReportIdRouteImport.update({
+    id: '/dashboard/pathology/immunology/mt/report/$reportId',
+    path: '/dashboard/pathology/immunology/mt/report/$reportId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute =
+  AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/immunology/blood-group/report/$reportId',
+      path: '/dashboard/pathology/immunology/blood-group/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRoute =
+  AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/immunology/beta-hcg/report/$reportId',
+      path: '/dashboard/pathology/immunology/beta-hcg/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyImmunologyAllReportReportIdRoute =
+  AuthenticatedDashboardPathologyImmunologyAllReportReportIdRouteImport.update({
+    id: '/dashboard/pathology/immunology/all/report/$reportId',
+    path: '/dashboard/pathology/immunology/all/report/$reportId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyHormoneT3t4tshReportReportIdRoute =
+  AuthenticatedDashboardPathologyHormoneT3t4tshReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/hormone/t3t4tsh/report/$reportId',
+      path: '/dashboard/pathology/hormone/t3t4tsh/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyHormoneSputumReportReportIdRoute =
+  AuthenticatedDashboardPathologyHormoneSputumReportReportIdRouteImport.update({
+    id: '/dashboard/pathology/hormone/sputum/report/$reportId',
+    path: '/dashboard/pathology/hormone/sputum/report/$reportId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusReportReportIdRoute =
+  AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/hormone/skin-scrapping-for-fungus/report/$reportId',
+      path: '/dashboard/pathology/hormone/skin-scrapping-for-fungus/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyHormoneSemenReportReportIdRoute =
+  AuthenticatedDashboardPathologyHormoneSemenReportReportIdRouteImport.update({
+    id: '/dashboard/pathology/hormone/semen/report/$reportId',
+    path: '/dashboard/pathology/hormone/semen/report/$reportId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyHormoneSemenEditReportIdRoute =
+  AuthenticatedDashboardPathologyHormoneSemenEditReportIdRouteImport.update({
+    id: '/dashboard/pathology/hormone/semen/edit/$reportId',
+    path: '/dashboard/pathology/hormone/semen/edit/$reportId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyHormoneElectrolytesReportReportIdRoute =
+  AuthenticatedDashboardPathologyHormoneElectrolytesReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/hormone/electrolytes/report/$reportId',
+      path: '/dashboard/pathology/hormone/electrolytes/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyHormoneAllReportReportIdRoute =
+  AuthenticatedDashboardPathologyHormoneAllReportReportIdRouteImport.update({
+    id: '/dashboard/pathology/hormone/all/report/$reportId',
+    path: '/dashboard/pathology/hormone/all/report/$reportId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyHematologyProthomBinTimeFullReportReportIdRoute =
+  AuthenticatedDashboardPathologyHematologyProthomBinTimeFullReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/hematology/prothom-bin-time-full/report/$reportId',
+      path: '/dashboard/pathology/hematology/prothom-bin-time-full/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmReportReportIdRoute =
+  AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/hematology/peripheral-blood-film/report/$reportId',
+      path: '/dashboard/pathology/hematology/peripheral-blood-film/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyHematologyCbcWithPbfReportReportIdRoute =
+  AuthenticatedDashboardPathologyHematologyCbcWithPbfReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/hematology/cbc-with-pbf/report/$reportId',
+      path: '/dashboard/pathology/hematology/cbc-with-pbf/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyHematologyCbcWithPbfEditIdRoute =
+  AuthenticatedDashboardPathologyHematologyCbcWithPbfEditIdRouteImport.update({
+    id: '/dashboard/pathology/hematology/cbc-with-pbf/edit/$id',
+    path: '/dashboard/pathology/hematology/cbc-with-pbf/edit/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyHematologyCbcShortReportReportIdRoute =
+  AuthenticatedDashboardPathologyHematologyCbcShortReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/hematology/cbc-short/report/$reportId',
+      path: '/dashboard/pathology/hematology/cbc-short/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyHematologyCbcShortEditIdRoute =
+  AuthenticatedDashboardPathologyHematologyCbcShortEditIdRouteImport.update({
+    id: '/dashboard/pathology/hematology/cbc-short/edit/$id',
+    path: '/dashboard/pathology/hematology/cbc-short/edit/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyHematologyBloodForTcdcReportReportIdRoute =
+  AuthenticatedDashboardPathologyHematologyBloodForTcdcReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/hematology/blood-for-tcdc/report/$reportId',
+      path: '/dashboard/pathology/hematology/blood-for-tcdc/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyHematologyBloodForBtCtReportReportIdRoute =
+  AuthenticatedDashboardPathologyHematologyBloodForBtCtReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/hematology/blood-for-bt-ct/report/$reportId',
+      path: '/dashboard/pathology/hematology/blood-for-bt-ct/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyHematologyAllReportReportIdRoute =
+  AuthenticatedDashboardPathologyHematologyAllReportReportIdRouteImport.update({
+    id: '/dashboard/pathology/hematology/all/report/$reportId',
+    path: '/dashboard/pathology/hematology/all/report/$reportId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyBiochemicalLipidProfileReportReportIdRoute =
+  AuthenticatedDashboardPathologyBiochemicalLipidProfileReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/biochemical/lipid-profile/report/$reportId',
+      path: '/dashboard/pathology/biochemical/lipid-profile/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyBiochemicalAllReportReportIdRoute =
+  AuthenticatedDashboardPathologyBiochemicalAllReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/biochemical/all/report/$reportId',
+      path: '/dashboard/pathology/biochemical/all/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRoute =
+  AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRouteImport.update({
+    id: '/dashboard/pathology/biochemical/all/edit/$reportId',
+    path: '/dashboard/pathology/biochemical/all/edit/$reportId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute =
+  AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRouteImport.update({
+    id: '/dashboard/outdoor/master/doctors/$doctorId/edit',
+    path: '/dashboard/outdoor/master/doctors/$doctorId/edit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorMasterServicesEditIdRoute =
+  AuthenticatedDashboardIndoorMasterServicesEditIdRouteImport.update({
+    id: '/dashboard/indoor/master/services/edit/$id',
+    path: '/dashboard/indoor/master/services/edit/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardEcgAllEditBuilderIdRoute =
+  AuthenticatedDashboardEcgAllEditBuilderIdRouteImport.update({
+    id: '/dashboard/ecg/all/edit/builder/$id',
+    path: '/dashboard/ecg/all/edit/builder/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute =
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/$admissionId/print/$step',
+      path: '/dashboard/admission/patients/$admissionId/print/$step',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPathologyImmunologyAllEditIdIndexRoute =
+  AuthenticatedDashboardPathologyImmunologyAllEditIdIndexRouteImport.update({
+    id: '/dashboard/pathology/immunology/all/edit/$id/',
+    path: '/dashboard/pathology/immunology/all/edit/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyHormoneAllEditIdIndexRoute =
+  AuthenticatedDashboardPathologyHormoneAllEditIdIndexRouteImport.update({
+    id: '/dashboard/pathology/hormone/all/edit/$id/',
+    path: '/dashboard/pathology/hormone/all/edit/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPathologyHematologyAllEditIdIndexRoute =
+  AuthenticatedDashboardPathologyHematologyAllEditIdIndexRouteImport.update({
+    id: '/dashboard/pathology/hematology/all/edit/$id/',
+    path: '/dashboard/pathology/hematology/all/edit/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRoute =
+  AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRouteImport.update(
+    {
+      id: '/dashboard/outdoor/reception/invoices/edit/$invoiceId/',
+      path: '/dashboard/outdoor/reception/invoices/edit/$invoiceId/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute =
+  AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRouteImport.update({
+    id: '/dashboard/outdoor/master/tests/edit/$id/',
+    path: '/dashboard/outdoor/master/tests/edit/$id/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/clerk': typeof ClerkAuthenticatedRouteRouteWithChildren
-  '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
+  '/auth-callback': typeof authAuthCallbackRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/otp': typeof authOtpRoute
@@ -1561,214 +1790,237 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
-  '/': typeof AuthenticatedIndexRoute
-  '/errors/$error': typeof AuthenticatedErrorsErrorRoute
-  '/notifications/$id': typeof AuthenticatedNotificationsIdRoute
-  '/settings/account': typeof AuthenticatedSettingsAccountRoute
-  '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
-  '/settings/display': typeof AuthenticatedSettingsDisplayRoute
-  '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
-  '/settings/payment-accounts': typeof AuthenticatedSettingsPaymentAccountsRoute
-  '/settings/prefix': typeof AuthenticatedSettingsPrefixRoute
+  '/contact': typeof platformContactRoute
+  '/pricing': typeof platformPricingRoute
+  '/register': typeof platformRegisterRoute
+  '/dashboard/settings': typeof AuthenticatedDashboardSettingsRouteRouteWithChildren
+  '/admin': typeof platformAdminLayoutRoute
+  '/admin/admins': typeof platformAdminAdminsRoute
+  '/admin/billing': typeof platformAdminBillingRoute
+  '/admin/companies': typeof platformAdminCompaniesRoute
+  '/admin/login': typeof platformAdminLoginRoute
+  '/admin/modules': typeof platformAdminModulesRoute
+  '/admin/plans': typeof platformAdminPlansRoute
+  '/admin/registrations': typeof platformAdminRegistrationsRoute
+  '/admin/settings': typeof platformAdminSettingsRoute
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
-  '/accounting': typeof AuthenticatedAccountingIndexRoute
-  '/apps': typeof AuthenticatedAppsIndexRoute
-  '/backup-settings': typeof AuthenticatedBackupSettingsIndexRoute
-  '/backups': typeof AuthenticatedBackupsIndexRoute
-  '/chats': typeof AuthenticatedChatsIndexRoute
-  '/database': typeof AuthenticatedDatabaseIndexRoute
-  '/help-center': typeof AuthenticatedHelpCenterIndexRoute
-  '/help': typeof AuthenticatedHelpIndexRoute
-  '/my-account': typeof AuthenticatedMyAccountIndexRoute
-  '/notifications': typeof AuthenticatedNotificationsIndexRoute
-  '/roles': typeof AuthenticatedRolesIndexRoute
-  '/settings/': typeof AuthenticatedSettingsIndexRoute
-  '/tasks': typeof AuthenticatedTasksIndexRoute
-  '/users': typeof AuthenticatedUsersIndexRoute
-  '/roles/edit/$id': typeof AuthenticatedRolesEditIdRoute
-  '/accounting/accounts': typeof AuthenticatedAccountingAccountsIndexRoute
-  '/accounting/expense': typeof AuthenticatedAccountingExpenseIndexRoute
-  '/accounting/expenses': typeof AuthenticatedAccountingExpensesIndexRoute
-  '/accounting/income': typeof AuthenticatedAccountingIncomeIndexRoute
-  '/accounting/transactions': typeof AuthenticatedAccountingTransactionsIndexRoute
-  '/accounts/daily-credit': typeof AuthenticatedAccountsDailyCreditIndexRoute
-  '/accounts/daily-debit': typeof AuthenticatedAccountsDailyDebitIndexRoute
-  '/accounts/journal': typeof AuthenticatedAccountsJournalIndexRoute
-  '/accounts/pay-to-anaesthetist': typeof AuthenticatedAccountsPayToAnaesthetistIndexRoute
-  '/accounts/pay-to-assistant': typeof AuthenticatedAccountsPayToAssistantIndexRoute
-  '/accounts/pay-to-consultant': typeof AuthenticatedAccountsPayToConsultantIndexRoute
-  '/accounts/pay-to-surgeon': typeof AuthenticatedAccountsPayToSurgeonIndexRoute
-  '/admission/advance-payment': typeof AuthenticatedAdmissionAdvancePaymentIndexRoute
-  '/admission/bed-cabin-charge': typeof AuthenticatedAdmissionBedCabinChargeIndexRoute
-  '/admission/due-collection': typeof AuthenticatedAdmissionDueCollectionIndexRoute
-  '/admission/final-bills': typeof AuthenticatedAdmissionFinalBillsIndexRoute
-  '/admission/finalise-services': typeof AuthenticatedAdmissionFinaliseServicesIndexRoute
-  '/admission/first-time-bill': typeof AuthenticatedAdmissionFirstTimeBillIndexRoute
-  '/admission/first-time-service': typeof AuthenticatedAdmissionFirstTimeServiceIndexRoute
-  '/admission/invoice': typeof AuthenticatedAdmissionInvoiceIndexRoute
-  '/admission/new-admission': typeof AuthenticatedAdmissionNewAdmissionIndexRoute
-  '/admission/patients': typeof AuthenticatedAdmissionPatientsIndexRoute
-  '/admission/second-time-bill': typeof AuthenticatedAdmissionSecondTimeBillIndexRoute
-  '/banks/bank-accounts': typeof AuthenticatedBanksBankAccountsIndexRoute
-  '/banks/bank-deposits': typeof AuthenticatedBanksBankDepositsIndexRoute
-  '/banks/bank-transactions': typeof AuthenticatedBanksBankTransactionsIndexRoute
-  '/banks/bank-withdrawals': typeof AuthenticatedBanksBankWithdrawalsIndexRoute
-  '/ecg/all': typeof AuthenticatedEcgAllIndexRoute
-  '/payroll/employees': typeof AuthenticatedPayrollEmployeesIndexRoute
-  '/payroll/overview': typeof AuthenticatedPayrollOverviewIndexRoute
-  '/roles/create': typeof AuthenticatedRolesCreateIndexRoute
-  '/ultrasonogram/all': typeof AuthenticatedUltrasonogramAllIndexRoute
-  '/x-ray/all': typeof AuthenticatedXRayAllIndexRoute
-  '/accounting/reports/ledger/print': typeof AuthenticatedAccountingReportsLedgerPrintRoute
-  '/ecg/all/edit/$id': typeof AuthenticatedEcgAllEditIdRoute
-  '/ecg/all/print/$id': typeof AuthenticatedEcgAllPrintIdRoute
-  '/indoor/master/bed-cabin-list/$id': typeof AuthenticatedIndoorMasterBedCabinListIdRoute
-  '/indoor/master/services/$id': typeof AuthenticatedIndoorMasterServicesIdRoute
-  '/outdoor/master/categories/$id': typeof AuthenticatedOutdoorMasterCategoriesIdRoute
-  '/outdoor/master/departments/$id': typeof AuthenticatedOutdoorMasterDepartmentsIdRoute
-  '/outdoor/master/doctors/create': typeof AuthenticatedOutdoorMasterDoctorsCreateRoute
-  '/outdoor/master/test-tables/$id': typeof AuthenticatedOutdoorMasterTestTablesIdRoute
-  '/outdoor/master/tests/$id': typeof AuthenticatedOutdoorMasterTestsIdRoute
-  '/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRoute
-  '/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute
-  '/roles/permissions/$roleId/edit': typeof AuthenticatedRolesPermissionsRoleIdEditRoute
-  '/ultrasonogram/all/edit/$id': typeof AuthenticatedUltrasonogramAllEditIdRoute
-  '/ultrasonogram/all/print/$id': typeof AuthenticatedUltrasonogramAllPrintIdRoute
-  '/x-ray/all/edit/$id': typeof AuthenticatedXRayAllEditIdRoute
-  '/x-ray/all/print/$id': typeof AuthenticatedXRayAllPrintIdRoute
-  '/accounting/reports/balance-sheet': typeof AuthenticatedAccountingReportsBalanceSheetIndexRoute
-  '/accounting/reports/daily-summary': typeof AuthenticatedAccountingReportsDailySummaryIndexRoute
-  '/accounting/reports/journal': typeof AuthenticatedAccountingReportsJournalIndexRoute
-  '/accounting/reports/ledger': typeof AuthenticatedAccountingReportsLedgerIndexRoute
-  '/accounting/reports/profit-and-loss': typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
-  '/accounting/reports/profit-loss': typeof AuthenticatedAccountingReportsProfitLossIndexRoute
-  '/accounting/reports/trial-balance': typeof AuthenticatedAccountingReportsTrialBalanceIndexRoute
-  '/admission/billing/$billingId': typeof AuthenticatedAdmissionBillingBillingIdIndexRoute
-  '/admission/discharged-patients/bill-does-not-created': typeof AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
-  '/admission/invoice/create': typeof AuthenticatedAdmissionInvoiceCreateIndexRoute
-  '/admission/invoice/list': typeof AuthenticatedAdmissionInvoiceListIndexRoute
-  '/admission/patients/active': typeof AuthenticatedAdmissionPatientsActiveIndexRoute
-  '/admission/patients/balance-distributed-list': typeof AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute
-  '/admission/patients/bill-created-list': typeof AuthenticatedAdmissionPatientsBillCreatedListIndexRoute
-  '/admission/patients/bill-distributed-list': typeof AuthenticatedAdmissionPatientsBillDistributedListIndexRoute
-  '/admission/patients/discharged-list': typeof AuthenticatedAdmissionPatientsDischargedListIndexRoute
-  '/admission/patients/discharged': typeof AuthenticatedAdmissionPatientsDischargedIndexRoute
-  '/admission/patients/final-bill-created-list': typeof AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute
-  '/admission/patients/payment-completed-list': typeof AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute
-  '/indoor/management/distributions': typeof AuthenticatedIndoorManagementDistributionsIndexRoute
-  '/indoor/management/doctor-referred': typeof AuthenticatedIndoorManagementDoctorReferredIndexRoute
-  '/indoor/master/anasthesia-types': typeof AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute
-  '/indoor/master/bed-cabin-list': typeof AuthenticatedIndoorMasterBedCabinListIndexRoute
-  '/indoor/master/doctor-types': typeof AuthenticatedIndoorMasterDoctorTypesIndexRoute
-  '/indoor/master/operation-types': typeof AuthenticatedIndoorMasterOperationTypesIndexRoute
-  '/indoor/master/patient-types': typeof AuthenticatedIndoorMasterPatientTypesIndexRoute
-  '/indoor/master/service-categories': typeof AuthenticatedIndoorMasterServiceCategoriesIndexRoute
-  '/indoor/master/services': typeof AuthenticatedIndoorMasterServicesIndexRoute
-  '/indoor/master/treatment-outcomes': typeof AuthenticatedIndoorMasterTreatmentOutcomesIndexRoute
-  '/outdoor/master/categories': typeof AuthenticatedOutdoorMasterCategoriesIndexRoute
-  '/outdoor/master/departments': typeof AuthenticatedOutdoorMasterDepartmentsIndexRoute
-  '/outdoor/master/doctors': typeof AuthenticatedOutdoorMasterDoctorsIndexRoute
-  '/outdoor/master/machines': typeof AuthenticatedOutdoorMasterMachinesIndexRoute
-  '/outdoor/master/sample-collection-rooms': typeof AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute
-  '/outdoor/master/test-tables': typeof AuthenticatedOutdoorMasterTestTablesIndexRoute
-  '/outdoor/master/tests': typeof AuthenticatedOutdoorMasterTestsIndexRoute
-  '/outdoor/reception/due-collection': typeof AuthenticatedOutdoorReceptionDueCollectionIndexRoute
-  '/outdoor/reception/my-invoices': typeof AuthenticatedOutdoorReceptionMyInvoicesIndexRoute
-  '/outdoor/reception/paid-invoices': typeof AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute
-  '/outdoor/reception/patients': typeof AuthenticatedOutdoorReceptionPatientsIndexRoute
-  '/outdoor/reception/user-invoices': typeof AuthenticatedOutdoorReceptionUserInvoicesIndexRoute
-  '/pathology/biochemical/all': typeof AuthenticatedPathologyBiochemicalAllIndexRoute
-  '/pathology/biochemical/lipid-profile': typeof AuthenticatedPathologyBiochemicalLipidProfileIndexRoute
-  '/pathology/hematology/all': typeof AuthenticatedPathologyHematologyAllIndexRoute
-  '/pathology/hematology/blood-for-bt-ct': typeof AuthenticatedPathologyHematologyBloodForBtCtIndexRoute
-  '/pathology/hematology/blood-for-tcdc': typeof AuthenticatedPathologyHematologyBloodForTcdcIndexRoute
-  '/pathology/hematology/cbc-short': typeof AuthenticatedPathologyHematologyCbcShortIndexRoute
-  '/pathology/hematology/cbc-with-pbf': typeof AuthenticatedPathologyHematologyCbcWithPbfIndexRoute
-  '/pathology/hematology/peripheral-blood-film': typeof AuthenticatedPathologyHematologyPeripheralBloodFilmIndexRoute
-  '/pathology/hematology/prothom-bin-time-full': typeof AuthenticatedPathologyHematologyProthomBinTimeFullIndexRoute
-  '/pathology/hormone/all': typeof AuthenticatedPathologyHormoneAllIndexRoute
-  '/pathology/hormone/electrolytes': typeof AuthenticatedPathologyHormoneElectrolytesIndexRoute
-  '/pathology/hormone/semen': typeof AuthenticatedPathologyHormoneSemenIndexRoute
-  '/pathology/hormone/skin-scrapping-for-fungus': typeof AuthenticatedPathologyHormoneSkinScrappingForFungusIndexRoute
-  '/pathology/hormone/sputum': typeof AuthenticatedPathologyHormoneSputumIndexRoute
-  '/pathology/hormone/t3t4tsh': typeof AuthenticatedPathologyHormoneT3t4tshIndexRoute
-  '/pathology/immunology/all': typeof AuthenticatedPathologyImmunologyAllIndexRoute
-  '/pathology/immunology/beta-hcg': typeof AuthenticatedPathologyImmunologyBetaHcgIndexRoute
-  '/pathology/immunology/blood-group': typeof AuthenticatedPathologyImmunologyBloodGroupIndexRoute
-  '/pathology/immunology/mt': typeof AuthenticatedPathologyImmunologyMtIndexRoute
-  '/pathology/immunology/widal-test': typeof AuthenticatedPathologyImmunologyWidalTestIndexRoute
-  '/pathology/stool/ocult-blood-test': typeof AuthenticatedPathologyStoolOcultBloodTestIndexRoute
-  '/pathology/stool/reducing-substance': typeof AuthenticatedPathologyStoolReducingSubstanceIndexRoute
-  '/pathology/stool/stool-re': typeof AuthenticatedPathologyStoolStoolReIndexRoute
-  '/pathology/urine/urine-for-albumin': typeof AuthenticatedPathologyUrineUrineForAlbuminIndexRoute
-  '/pathology/urine/urine-for-re-full': typeof AuthenticatedPathologyUrineUrineForReFullIndexRoute
-  '/pathology/urine/urine-for-sugar': typeof AuthenticatedPathologyUrineUrineForSugarIndexRoute
-  '/payroll/attendance/$staffId': typeof AuthenticatedPayrollAttendanceStaffIdIndexRoute
-  '/payroll/salary/$staffId': typeof AuthenticatedPayrollSalaryStaffIdIndexRoute
-  '/admission/patients/$admissionId/print/$step': typeof AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute
-  '/ecg/all/edit/builder/$id': typeof AuthenticatedEcgAllEditBuilderIdRoute
-  '/indoor/master/services/edit/$id': typeof AuthenticatedIndoorMasterServicesEditIdRoute
-  '/outdoor/master/doctors/$doctorId/edit': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute
-  '/pathology/biochemical/all/edit/$reportId': typeof AuthenticatedPathologyBiochemicalAllEditReportIdRoute
-  '/pathology/biochemical/all/report/$reportId': typeof AuthenticatedPathologyBiochemicalAllReportReportIdRoute
-  '/pathology/biochemical/lipid-profile/report/$reportId': typeof AuthenticatedPathologyBiochemicalLipidProfileReportReportIdRoute
-  '/pathology/hematology/all/report/$reportId': typeof AuthenticatedPathologyHematologyAllReportReportIdRoute
-  '/pathology/hematology/blood-for-bt-ct/report/$reportId': typeof AuthenticatedPathologyHematologyBloodForBtCtReportReportIdRoute
-  '/pathology/hematology/blood-for-tcdc/report/$reportId': typeof AuthenticatedPathologyHematologyBloodForTcdcReportReportIdRoute
-  '/pathology/hematology/cbc-short/edit/$id': typeof AuthenticatedPathologyHematologyCbcShortEditIdRoute
-  '/pathology/hematology/cbc-short/report/$reportId': typeof AuthenticatedPathologyHematologyCbcShortReportReportIdRoute
-  '/pathology/hematology/cbc-with-pbf/edit/$id': typeof AuthenticatedPathologyHematologyCbcWithPbfEditIdRoute
-  '/pathology/hematology/cbc-with-pbf/report/$reportId': typeof AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRoute
-  '/pathology/hematology/peripheral-blood-film/report/$reportId': typeof AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRoute
-  '/pathology/hematology/prothom-bin-time-full/report/$reportId': typeof AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute
-  '/pathology/hormone/all/report/$reportId': typeof AuthenticatedPathologyHormoneAllReportReportIdRoute
-  '/pathology/hormone/electrolytes/report/$reportId': typeof AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute
-  '/pathology/hormone/semen/edit/$reportId': typeof AuthenticatedPathologyHormoneSemenEditReportIdRoute
-  '/pathology/hormone/semen/report/$reportId': typeof AuthenticatedPathologyHormoneSemenReportReportIdRoute
-  '/pathology/hormone/skin-scrapping-for-fungus/report/$reportId': typeof AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRoute
-  '/pathology/hormone/sputum/report/$reportId': typeof AuthenticatedPathologyHormoneSputumReportReportIdRoute
-  '/pathology/hormone/t3t4tsh/report/$reportId': typeof AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute
-  '/pathology/immunology/all/report/$reportId': typeof AuthenticatedPathologyImmunologyAllReportReportIdRoute
-  '/pathology/immunology/beta-hcg/report/$reportId': typeof AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute
-  '/pathology/immunology/blood-group/report/$reportId': typeof AuthenticatedPathologyImmunologyBloodGroupReportReportIdRoute
-  '/pathology/immunology/mt/report/$reportId': typeof AuthenticatedPathologyImmunologyMtReportReportIdRoute
-  '/pathology/immunology/widal-test/report/$reportId': typeof AuthenticatedPathologyImmunologyWidalTestReportReportIdRoute
-  '/pathology/stool/ocult-blood-test/report/$reportId': typeof AuthenticatedPathologyStoolOcultBloodTestReportReportIdRoute
-  '/pathology/stool/reducing-substance/report/$reportId': typeof AuthenticatedPathologyStoolReducingSubstanceReportReportIdRoute
-  '/pathology/stool/stool-re/edit/$id': typeof AuthenticatedPathologyStoolStoolReEditIdRoute
-  '/pathology/stool/stool-re/report/$reportId': typeof AuthenticatedPathologyStoolStoolReReportReportIdRoute
-  '/pathology/urine/urine-for-albumin/report/$reportId': typeof AuthenticatedPathologyUrineUrineForAlbuminReportReportIdRoute
-  '/pathology/urine/urine-for-re-full/edit/$id': typeof AuthenticatedPathologyUrineUrineForReFullEditIdRoute
-  '/pathology/urine/urine-for-re-full/report/$reportId': typeof AuthenticatedPathologyUrineUrineForReFullReportReportIdRoute
-  '/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
-  '/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
-  '/x-ray/all/edit/builder/$id': typeof AuthenticatedXRayAllEditBuilderIdRoute
-  '/admission/patients/$admissionId/bill-created': typeof AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute
-  '/admission/patients/$admissionId/billing-print': typeof AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute
-  '/admission/patients/$admissionId/billing': typeof AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute
-  '/admission/patients/$admissionId/confirm-balance': typeof AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
-  '/admission/patients/$admissionId/distribute-bill': typeof AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute
-  '/admission/patients/$admissionId/final-bill-print': typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
-  '/admission/patients/$admissionId/final-bill': typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute
-  '/admission/patients/$admissionId/print': typeof AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute
-  '/indoor/master/bed-cabin-list/create': typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
-  '/indoor/master/services/create': typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
-  '/outdoor/master/doctors/$doctorId': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
-  '/outdoor/master/tests/create': typeof AuthenticatedOutdoorMasterTestsCreateIndexRoute
-  '/outdoor/reception/invoices/create': typeof AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute
-  '/outdoor/reception/invoices/list': typeof AuthenticatedOutdoorReceptionInvoicesListIndexRoute
-  '/reports/my/outdoor/date-wise-collection': typeof AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute
-  '/reports/my/outdoor/today-collection': typeof AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute
-  '/outdoor/master/tests/edit/$id': typeof AuthenticatedOutdoorMasterTestsEditIdIndexRoute
-  '/outdoor/reception/invoices/edit/$invoiceId': typeof AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
-  '/pathology/hematology/all/edit/$id': typeof AuthenticatedPathologyHematologyAllEditIdIndexRoute
-  '/pathology/hormone/all/edit/$id': typeof AuthenticatedPathologyHormoneAllEditIdIndexRoute
-  '/pathology/immunology/all/edit/$id': typeof AuthenticatedPathologyImmunologyAllEditIdIndexRoute
+  '/admin/': typeof platformAdminIndexRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/dashboard/errors/$error': typeof AuthenticatedDashboardErrorsErrorRoute
+  '/dashboard/notifications/$id': typeof AuthenticatedDashboardNotificationsIdRoute
+  '/dashboard/settings/account': typeof AuthenticatedDashboardSettingsAccountRoute
+  '/dashboard/settings/appearance': typeof AuthenticatedDashboardSettingsAppearanceRoute
+  '/dashboard/settings/date-controls': typeof AuthenticatedDashboardSettingsDateControlsRoute
+  '/dashboard/settings/display': typeof AuthenticatedDashboardSettingsDisplayRoute
+  '/dashboard/settings/notifications': typeof AuthenticatedDashboardSettingsNotificationsRoute
+  '/dashboard/settings/payment-accounts': typeof AuthenticatedDashboardSettingsPaymentAccountsRoute
+  '/dashboard/settings/prefix': typeof AuthenticatedDashboardSettingsPrefixRoute
+  '/dashboard/accounting': typeof AuthenticatedDashboardAccountingIndexRoute
+  '/dashboard/apps': typeof AuthenticatedDashboardAppsIndexRoute
+  '/dashboard/backup-settings': typeof AuthenticatedDashboardBackupSettingsIndexRoute
+  '/dashboard/backups': typeof AuthenticatedDashboardBackupsIndexRoute
+  '/dashboard/chats': typeof AuthenticatedDashboardChatsIndexRoute
+  '/dashboard/company-account': typeof AuthenticatedDashboardCompanyAccountIndexRoute
+  '/dashboard/database': typeof AuthenticatedDashboardDatabaseIndexRoute
+  '/dashboard/gallery': typeof AuthenticatedDashboardGalleryIndexRoute
+  '/dashboard/help-center': typeof AuthenticatedDashboardHelpCenterIndexRoute
+  '/dashboard/help': typeof AuthenticatedDashboardHelpIndexRoute
+  '/dashboard/my-account': typeof AuthenticatedDashboardMyAccountIndexRoute
+  '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsIndexRoute
+  '/dashboard/roles': typeof AuthenticatedDashboardRolesIndexRoute
+  '/dashboard/settings/': typeof AuthenticatedDashboardSettingsIndexRoute
+  '/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionIndexRoute
+  '/dashboard/tasks': typeof AuthenticatedDashboardTasksIndexRoute
+  '/dashboard/users': typeof AuthenticatedDashboardUsersIndexRoute
+  '/dashboard/roles/edit/$id': typeof AuthenticatedDashboardRolesEditIdRoute
+  '/dashboard/accounting/accounts': typeof AuthenticatedDashboardAccountingAccountsIndexRoute
+  '/dashboard/accounting/expense': typeof AuthenticatedDashboardAccountingExpenseIndexRoute
+  '/dashboard/accounting/expenses': typeof AuthenticatedDashboardAccountingExpensesIndexRoute
+  '/dashboard/accounting/income': typeof AuthenticatedDashboardAccountingIncomeIndexRoute
+  '/dashboard/accounting/transactions': typeof AuthenticatedDashboardAccountingTransactionsIndexRoute
+  '/dashboard/accounts/daily-credit': typeof AuthenticatedDashboardAccountsDailyCreditIndexRoute
+  '/dashboard/accounts/daily-debit': typeof AuthenticatedDashboardAccountsDailyDebitIndexRoute
+  '/dashboard/accounts/journal': typeof AuthenticatedDashboardAccountsJournalIndexRoute
+  '/dashboard/accounts/pay-to-anaesthetist': typeof AuthenticatedDashboardAccountsPayToAnaesthetistIndexRoute
+  '/dashboard/accounts/pay-to-assistant': typeof AuthenticatedDashboardAccountsPayToAssistantIndexRoute
+  '/dashboard/accounts/pay-to-consultant': typeof AuthenticatedDashboardAccountsPayToConsultantIndexRoute
+  '/dashboard/accounts/pay-to-surgeon': typeof AuthenticatedDashboardAccountsPayToSurgeonIndexRoute
+  '/dashboard/admission/advance-payment': typeof AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute
+  '/dashboard/admission/bed-cabin-charge': typeof AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute
+  '/dashboard/admission/due-collection': typeof AuthenticatedDashboardAdmissionDueCollectionIndexRoute
+  '/dashboard/admission/final-bills': typeof AuthenticatedDashboardAdmissionFinalBillsIndexRoute
+  '/dashboard/admission/finalise-services': typeof AuthenticatedDashboardAdmissionFinaliseServicesIndexRoute
+  '/dashboard/admission/first-time-bill': typeof AuthenticatedDashboardAdmissionFirstTimeBillIndexRoute
+  '/dashboard/admission/first-time-service': typeof AuthenticatedDashboardAdmissionFirstTimeServiceIndexRoute
+  '/dashboard/admission/invoice': typeof AuthenticatedDashboardAdmissionInvoiceIndexRoute
+  '/dashboard/admission/new-admission': typeof AuthenticatedDashboardAdmissionNewAdmissionIndexRoute
+  '/dashboard/admission/patients': typeof AuthenticatedDashboardAdmissionPatientsIndexRoute
+  '/dashboard/admission/second-time-bill': typeof AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute
+  '/dashboard/banks/bank-accounts': typeof AuthenticatedDashboardBanksBankAccountsIndexRoute
+  '/dashboard/banks/bank-deposits': typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
+  '/dashboard/banks/bank-transactions': typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
+  '/dashboard/banks/bank-withdrawals': typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
+  '/dashboard/ecg/all': typeof AuthenticatedDashboardEcgAllIndexRoute
+  '/dashboard/payroll/employees': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
+  '/dashboard/payroll/overview': typeof AuthenticatedDashboardPayrollOverviewIndexRoute
+  '/dashboard/roles/create': typeof AuthenticatedDashboardRolesCreateIndexRoute
+  '/dashboard/ultrasonogram/all': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
+  '/dashboard/x-ray/all': typeof AuthenticatedDashboardXRayAllIndexRoute
+  '/dashboard/accounting/reports/ledger/print': typeof AuthenticatedDashboardAccountingReportsLedgerPrintRoute
+  '/dashboard/accounting/reports/multi-ledger/print': typeof AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute
+  '/dashboard/ecg/all/edit/$id': typeof AuthenticatedDashboardEcgAllEditIdRoute
+  '/dashboard/ecg/all/print/$id': typeof AuthenticatedDashboardEcgAllPrintIdRoute
+  '/dashboard/indoor/master/bed-cabin-list/$id': typeof AuthenticatedDashboardIndoorMasterBedCabinListIdRoute
+  '/dashboard/indoor/master/services/$id': typeof AuthenticatedDashboardIndoorMasterServicesIdRoute
+  '/dashboard/outdoor/master/categories/$id': typeof AuthenticatedDashboardOutdoorMasterCategoriesIdRoute
+  '/dashboard/outdoor/master/departments/$id': typeof AuthenticatedDashboardOutdoorMasterDepartmentsIdRoute
+  '/dashboard/outdoor/master/doctors/create': typeof AuthenticatedDashboardOutdoorMasterDoctorsCreateRoute
+  '/dashboard/outdoor/master/test-tables/$id': typeof AuthenticatedDashboardOutdoorMasterTestTablesIdRoute
+  '/dashboard/outdoor/master/tests/$id': typeof AuthenticatedDashboardOutdoorMasterTestsIdRoute
+  '/dashboard/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
+  '/dashboard/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute
+  '/dashboard/roles/permissions/$roleId/edit': typeof AuthenticatedDashboardRolesPermissionsRoleIdEditRoute
+  '/dashboard/ultrasonogram/all/edit/$id': typeof AuthenticatedDashboardUltrasonogramAllEditIdRoute
+  '/dashboard/ultrasonogram/all/print/$id': typeof AuthenticatedDashboardUltrasonogramAllPrintIdRoute
+  '/dashboard/x-ray/all/edit/$id': typeof AuthenticatedDashboardXRayAllEditIdRoute
+  '/dashboard/x-ray/all/print/$id': typeof AuthenticatedDashboardXRayAllPrintIdRoute
+  '/dashboard/accounting/reports/balance-sheet': typeof AuthenticatedDashboardAccountingReportsBalanceSheetIndexRoute
+  '/dashboard/accounting/reports/cash-flow': typeof AuthenticatedDashboardAccountingReportsCashFlowIndexRoute
+  '/dashboard/accounting/reports/daily-summary': typeof AuthenticatedDashboardAccountingReportsDailySummaryIndexRoute
+  '/dashboard/accounting/reports/journal': typeof AuthenticatedDashboardAccountingReportsJournalIndexRoute
+  '/dashboard/accounting/reports/ledger': typeof AuthenticatedDashboardAccountingReportsLedgerIndexRoute
+  '/dashboard/accounting/reports/multi-ledger': typeof AuthenticatedDashboardAccountingReportsMultiLedgerIndexRoute
+  '/dashboard/accounting/reports/profit-and-loss': typeof AuthenticatedDashboardAccountingReportsProfitAndLossIndexRoute
+  '/dashboard/accounting/reports/profit-loss': typeof AuthenticatedDashboardAccountingReportsProfitLossIndexRoute
+  '/dashboard/accounting/reports/trial-balance': typeof AuthenticatedDashboardAccountingReportsTrialBalanceIndexRoute
+  '/dashboard/admission/billing/$billingId': typeof AuthenticatedDashboardAdmissionBillingBillingIdIndexRoute
+  '/dashboard/admission/discharged-patients/bill-does-not-created': typeof AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
+  '/dashboard/admission/invoice/create': typeof AuthenticatedDashboardAdmissionInvoiceCreateIndexRoute
+  '/dashboard/admission/invoice/list': typeof AuthenticatedDashboardAdmissionInvoiceListIndexRoute
+  '/dashboard/admission/patients/active': typeof AuthenticatedDashboardAdmissionPatientsActiveIndexRoute
+  '/dashboard/admission/patients/balance-distributed-list': typeof AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRoute
+  '/dashboard/admission/patients/bill-created-list': typeof AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRoute
+  '/dashboard/admission/patients/bill-distributed-list': typeof AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute
+  '/dashboard/admission/patients/discharged-list': typeof AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute
+  '/dashboard/admission/patients/discharged': typeof AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute
+  '/dashboard/admission/patients/final-bill-created-list': typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
+  '/dashboard/admission/patients/payment-completed-list': typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
+  '/dashboard/indoor/management/distributions': typeof AuthenticatedDashboardIndoorManagementDistributionsIndexRoute
+  '/dashboard/indoor/management/doctor-referred': typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
+  '/dashboard/indoor/master/anasthesia-types': typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
+  '/dashboard/indoor/master/bed-cabin-list': typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
+  '/dashboard/indoor/master/doctor-types': typeof AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute
+  '/dashboard/indoor/master/operation-types': typeof AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute
+  '/dashboard/indoor/master/patient-types': typeof AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute
+  '/dashboard/indoor/master/service-categories': typeof AuthenticatedDashboardIndoorMasterServiceCategoriesIndexRoute
+  '/dashboard/indoor/master/services': typeof AuthenticatedDashboardIndoorMasterServicesIndexRoute
+  '/dashboard/indoor/master/treatment-outcomes': typeof AuthenticatedDashboardIndoorMasterTreatmentOutcomesIndexRoute
+  '/dashboard/outdoor/master/categories': typeof AuthenticatedDashboardOutdoorMasterCategoriesIndexRoute
+  '/dashboard/outdoor/master/departments': typeof AuthenticatedDashboardOutdoorMasterDepartmentsIndexRoute
+  '/dashboard/outdoor/master/doctors': typeof AuthenticatedDashboardOutdoorMasterDoctorsIndexRoute
+  '/dashboard/outdoor/master/machines': typeof AuthenticatedDashboardOutdoorMasterMachinesIndexRoute
+  '/dashboard/outdoor/master/sample-collection-rooms': typeof AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRoute
+  '/dashboard/outdoor/master/test-tables': typeof AuthenticatedDashboardOutdoorMasterTestTablesIndexRoute
+  '/dashboard/outdoor/master/tests': typeof AuthenticatedDashboardOutdoorMasterTestsIndexRoute
+  '/dashboard/outdoor/reception/due-collection': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute
+  '/dashboard/outdoor/reception/my-invoices': typeof AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute
+  '/dashboard/outdoor/reception/paid-invoices': typeof AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute
+  '/dashboard/outdoor/reception/patients': typeof AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute
+  '/dashboard/outdoor/reception/user-invoices': typeof AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute
+  '/dashboard/pathology/biochemical/all': typeof AuthenticatedDashboardPathologyBiochemicalAllIndexRoute
+  '/dashboard/pathology/biochemical/lipid-profile': typeof AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRoute
+  '/dashboard/pathology/hematology/all': typeof AuthenticatedDashboardPathologyHematologyAllIndexRoute
+  '/dashboard/pathology/hematology/blood-for-bt-ct': typeof AuthenticatedDashboardPathologyHematologyBloodForBtCtIndexRoute
+  '/dashboard/pathology/hematology/blood-for-tcdc': typeof AuthenticatedDashboardPathologyHematologyBloodForTcdcIndexRoute
+  '/dashboard/pathology/hematology/cbc-short': typeof AuthenticatedDashboardPathologyHematologyCbcShortIndexRoute
+  '/dashboard/pathology/hematology/cbc-with-pbf': typeof AuthenticatedDashboardPathologyHematologyCbcWithPbfIndexRoute
+  '/dashboard/pathology/hematology/peripheral-blood-film': typeof AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmIndexRoute
+  '/dashboard/pathology/hematology/prothom-bin-time-full': typeof AuthenticatedDashboardPathologyHematologyProthomBinTimeFullIndexRoute
+  '/dashboard/pathology/hormone/all': typeof AuthenticatedDashboardPathologyHormoneAllIndexRoute
+  '/dashboard/pathology/hormone/electrolytes': typeof AuthenticatedDashboardPathologyHormoneElectrolytesIndexRoute
+  '/dashboard/pathology/hormone/semen': typeof AuthenticatedDashboardPathologyHormoneSemenIndexRoute
+  '/dashboard/pathology/hormone/skin-scrapping-for-fungus': typeof AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusIndexRoute
+  '/dashboard/pathology/hormone/sputum': typeof AuthenticatedDashboardPathologyHormoneSputumIndexRoute
+  '/dashboard/pathology/hormone/t3t4tsh': typeof AuthenticatedDashboardPathologyHormoneT3t4tshIndexRoute
+  '/dashboard/pathology/immunology/all': typeof AuthenticatedDashboardPathologyImmunologyAllIndexRoute
+  '/dashboard/pathology/immunology/beta-hcg': typeof AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRoute
+  '/dashboard/pathology/immunology/blood-group': typeof AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute
+  '/dashboard/pathology/immunology/mt': typeof AuthenticatedDashboardPathologyImmunologyMtIndexRoute
+  '/dashboard/pathology/immunology/widal-test': typeof AuthenticatedDashboardPathologyImmunologyWidalTestIndexRoute
+  '/dashboard/pathology/stool/ocult-blood-test': typeof AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRoute
+  '/dashboard/pathology/stool/reducing-substance': typeof AuthenticatedDashboardPathologyStoolReducingSubstanceIndexRoute
+  '/dashboard/pathology/stool/stool-re': typeof AuthenticatedDashboardPathologyStoolStoolReIndexRoute
+  '/dashboard/pathology/urine/urine-for-albumin': typeof AuthenticatedDashboardPathologyUrineUrineForAlbuminIndexRoute
+  '/dashboard/pathology/urine/urine-for-re-full': typeof AuthenticatedDashboardPathologyUrineUrineForReFullIndexRoute
+  '/dashboard/pathology/urine/urine-for-sugar': typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
+  '/dashboard/payroll/attendance/$staffId': typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
+  '/dashboard/payroll/salary/$staffId': typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  '/dashboard/admission/patients/$admissionId/print/$step': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
+  '/dashboard/ecg/all/edit/builder/$id': typeof AuthenticatedDashboardEcgAllEditBuilderIdRoute
+  '/dashboard/indoor/master/services/edit/$id': typeof AuthenticatedDashboardIndoorMasterServicesEditIdRoute
+  '/dashboard/outdoor/master/doctors/$doctorId/edit': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute
+  '/dashboard/pathology/biochemical/all/edit/$reportId': typeof AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRoute
+  '/dashboard/pathology/biochemical/all/report/$reportId': typeof AuthenticatedDashboardPathologyBiochemicalAllReportReportIdRoute
+  '/dashboard/pathology/biochemical/lipid-profile/report/$reportId': typeof AuthenticatedDashboardPathologyBiochemicalLipidProfileReportReportIdRoute
+  '/dashboard/pathology/hematology/all/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyAllReportReportIdRoute
+  '/dashboard/pathology/hematology/blood-for-bt-ct/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyBloodForBtCtReportReportIdRoute
+  '/dashboard/pathology/hematology/blood-for-tcdc/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyBloodForTcdcReportReportIdRoute
+  '/dashboard/pathology/hematology/cbc-short/edit/$id': typeof AuthenticatedDashboardPathologyHematologyCbcShortEditIdRoute
+  '/dashboard/pathology/hematology/cbc-short/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyCbcShortReportReportIdRoute
+  '/dashboard/pathology/hematology/cbc-with-pbf/edit/$id': typeof AuthenticatedDashboardPathologyHematologyCbcWithPbfEditIdRoute
+  '/dashboard/pathology/hematology/cbc-with-pbf/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyCbcWithPbfReportReportIdRoute
+  '/dashboard/pathology/hematology/peripheral-blood-film/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmReportReportIdRoute
+  '/dashboard/pathology/hematology/prothom-bin-time-full/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyProthomBinTimeFullReportReportIdRoute
+  '/dashboard/pathology/hormone/all/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneAllReportReportIdRoute
+  '/dashboard/pathology/hormone/electrolytes/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneElectrolytesReportReportIdRoute
+  '/dashboard/pathology/hormone/semen/edit/$reportId': typeof AuthenticatedDashboardPathologyHormoneSemenEditReportIdRoute
+  '/dashboard/pathology/hormone/semen/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneSemenReportReportIdRoute
+  '/dashboard/pathology/hormone/skin-scrapping-for-fungus/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusReportReportIdRoute
+  '/dashboard/pathology/hormone/sputum/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneSputumReportReportIdRoute
+  '/dashboard/pathology/hormone/t3t4tsh/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneT3t4tshReportReportIdRoute
+  '/dashboard/pathology/immunology/all/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyAllReportReportIdRoute
+  '/dashboard/pathology/immunology/beta-hcg/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRoute
+  '/dashboard/pathology/immunology/blood-group/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute
+  '/dashboard/pathology/immunology/mt/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute
+  '/dashboard/pathology/immunology/widal-test/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRoute
+  '/dashboard/pathology/stool/ocult-blood-test/report/$reportId': typeof AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRoute
+  '/dashboard/pathology/stool/reducing-substance/report/$reportId': typeof AuthenticatedDashboardPathologyStoolReducingSubstanceReportReportIdRoute
+  '/dashboard/pathology/stool/stool-re/edit/$id': typeof AuthenticatedDashboardPathologyStoolStoolReEditIdRoute
+  '/dashboard/pathology/stool/stool-re/report/$reportId': typeof AuthenticatedDashboardPathologyStoolStoolReReportReportIdRoute
+  '/dashboard/pathology/urine/urine-for-albumin/report/$reportId': typeof AuthenticatedDashboardPathologyUrineUrineForAlbuminReportReportIdRoute
+  '/dashboard/pathology/urine/urine-for-re-full/edit/$id': typeof AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRoute
+  '/dashboard/pathology/urine/urine-for-re-full/report/$reportId': typeof AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRoute
+  '/dashboard/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute
+  '/dashboard/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute
+  '/dashboard/x-ray/all/edit/builder/$id': typeof AuthenticatedDashboardXRayAllEditBuilderIdRoute
+  '/dashboard/admission/patients/$admissionId/bill-created': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRoute
+  '/dashboard/admission/patients/$admissionId/billing-print': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRoute
+  '/dashboard/admission/patients/$admissionId/billing': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRoute
+  '/dashboard/admission/patients/$admissionId/confirm-balance': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
+  '/dashboard/admission/patients/$admissionId/distribute-bill': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute
+  '/dashboard/admission/patients/$admissionId/final-bill-print': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
+  '/dashboard/admission/patients/$admissionId/final-bill': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute
+  '/dashboard/admission/patients/$admissionId/print': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute
+  '/dashboard/indoor/master/bed-cabin-list/create': typeof AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute
+  '/dashboard/indoor/master/services/create': typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
+  '/dashboard/outdoor/master/doctors/$doctorId': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
+  '/dashboard/outdoor/master/tests/create': typeof AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute
+  '/dashboard/outdoor/reception/invoices/create': typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
+  '/dashboard/outdoor/reception/invoices/list': typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
+  '/dashboard/reports/my/outdoor/date-wise-collection': typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute
+  '/dashboard/reports/my/outdoor/today-collection': typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute
+  '/dashboard/outdoor/master/tests/edit/$id': typeof AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute
+  '/dashboard/outdoor/reception/invoices/edit/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
+  '/dashboard/pathology/hematology/all/edit/$id': typeof AuthenticatedDashboardPathologyHematologyAllEditIdIndexRoute
+  '/dashboard/pathology/hormone/all/edit/$id': typeof AuthenticatedDashboardPathologyHormoneAllEditIdIndexRoute
+  '/dashboard/pathology/immunology/all/edit/$id': typeof AuthenticatedDashboardPathologyImmunologyAllEditIdIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/clerk': typeof ClerkAuthenticatedRouteRouteWithChildren
+  '/auth-callback': typeof authAuthCallbackRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/otp': typeof authOtpRoute
@@ -1780,219 +2032,239 @@ export interface FileRoutesByTo {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
-  '/': typeof AuthenticatedIndexRoute
-  '/errors/$error': typeof AuthenticatedErrorsErrorRoute
-  '/notifications/$id': typeof AuthenticatedNotificationsIdRoute
-  '/settings/account': typeof AuthenticatedSettingsAccountRoute
-  '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
-  '/settings/display': typeof AuthenticatedSettingsDisplayRoute
-  '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
-  '/settings/payment-accounts': typeof AuthenticatedSettingsPaymentAccountsRoute
-  '/settings/prefix': typeof AuthenticatedSettingsPrefixRoute
+  '/contact': typeof platformContactRoute
+  '/pricing': typeof platformPricingRoute
+  '/register': typeof platformRegisterRoute
+  '/admin': typeof platformAdminIndexRoute
+  '/admin/admins': typeof platformAdminAdminsRoute
+  '/admin/billing': typeof platformAdminBillingRoute
+  '/admin/companies': typeof platformAdminCompaniesRoute
+  '/admin/login': typeof platformAdminLoginRoute
+  '/admin/modules': typeof platformAdminModulesRoute
+  '/admin/plans': typeof platformAdminPlansRoute
+  '/admin/registrations': typeof platformAdminRegistrationsRoute
+  '/admin/settings': typeof platformAdminSettingsRoute
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
-  '/accounting': typeof AuthenticatedAccountingIndexRoute
-  '/apps': typeof AuthenticatedAppsIndexRoute
-  '/backup-settings': typeof AuthenticatedBackupSettingsIndexRoute
-  '/backups': typeof AuthenticatedBackupsIndexRoute
-  '/chats': typeof AuthenticatedChatsIndexRoute
-  '/database': typeof AuthenticatedDatabaseIndexRoute
-  '/help-center': typeof AuthenticatedHelpCenterIndexRoute
-  '/help': typeof AuthenticatedHelpIndexRoute
-  '/my-account': typeof AuthenticatedMyAccountIndexRoute
-  '/notifications': typeof AuthenticatedNotificationsIndexRoute
-  '/roles': typeof AuthenticatedRolesIndexRoute
-  '/settings': typeof AuthenticatedSettingsIndexRoute
-  '/tasks': typeof AuthenticatedTasksIndexRoute
-  '/users': typeof AuthenticatedUsersIndexRoute
-  '/roles/edit/$id': typeof AuthenticatedRolesEditIdRoute
-  '/accounting/accounts': typeof AuthenticatedAccountingAccountsIndexRoute
-  '/accounting/expense': typeof AuthenticatedAccountingExpenseIndexRoute
-  '/accounting/expenses': typeof AuthenticatedAccountingExpensesIndexRoute
-  '/accounting/income': typeof AuthenticatedAccountingIncomeIndexRoute
-  '/accounting/transactions': typeof AuthenticatedAccountingTransactionsIndexRoute
-  '/accounts/daily-credit': typeof AuthenticatedAccountsDailyCreditIndexRoute
-  '/accounts/daily-debit': typeof AuthenticatedAccountsDailyDebitIndexRoute
-  '/accounts/journal': typeof AuthenticatedAccountsJournalIndexRoute
-  '/accounts/pay-to-anaesthetist': typeof AuthenticatedAccountsPayToAnaesthetistIndexRoute
-  '/accounts/pay-to-assistant': typeof AuthenticatedAccountsPayToAssistantIndexRoute
-  '/accounts/pay-to-consultant': typeof AuthenticatedAccountsPayToConsultantIndexRoute
-  '/accounts/pay-to-surgeon': typeof AuthenticatedAccountsPayToSurgeonIndexRoute
-  '/admission/advance-payment': typeof AuthenticatedAdmissionAdvancePaymentIndexRoute
-  '/admission/bed-cabin-charge': typeof AuthenticatedAdmissionBedCabinChargeIndexRoute
-  '/admission/due-collection': typeof AuthenticatedAdmissionDueCollectionIndexRoute
-  '/admission/final-bills': typeof AuthenticatedAdmissionFinalBillsIndexRoute
-  '/admission/finalise-services': typeof AuthenticatedAdmissionFinaliseServicesIndexRoute
-  '/admission/first-time-bill': typeof AuthenticatedAdmissionFirstTimeBillIndexRoute
-  '/admission/first-time-service': typeof AuthenticatedAdmissionFirstTimeServiceIndexRoute
-  '/admission/invoice': typeof AuthenticatedAdmissionInvoiceIndexRoute
-  '/admission/new-admission': typeof AuthenticatedAdmissionNewAdmissionIndexRoute
-  '/admission/patients': typeof AuthenticatedAdmissionPatientsIndexRoute
-  '/admission/second-time-bill': typeof AuthenticatedAdmissionSecondTimeBillIndexRoute
-  '/banks/bank-accounts': typeof AuthenticatedBanksBankAccountsIndexRoute
-  '/banks/bank-deposits': typeof AuthenticatedBanksBankDepositsIndexRoute
-  '/banks/bank-transactions': typeof AuthenticatedBanksBankTransactionsIndexRoute
-  '/banks/bank-withdrawals': typeof AuthenticatedBanksBankWithdrawalsIndexRoute
-  '/ecg/all': typeof AuthenticatedEcgAllIndexRoute
-  '/payroll/employees': typeof AuthenticatedPayrollEmployeesIndexRoute
-  '/payroll/overview': typeof AuthenticatedPayrollOverviewIndexRoute
-  '/roles/create': typeof AuthenticatedRolesCreateIndexRoute
-  '/ultrasonogram/all': typeof AuthenticatedUltrasonogramAllIndexRoute
-  '/x-ray/all': typeof AuthenticatedXRayAllIndexRoute
-  '/accounting/reports/ledger/print': typeof AuthenticatedAccountingReportsLedgerPrintRoute
-  '/ecg/all/edit/$id': typeof AuthenticatedEcgAllEditIdRoute
-  '/ecg/all/print/$id': typeof AuthenticatedEcgAllPrintIdRoute
-  '/indoor/master/bed-cabin-list/$id': typeof AuthenticatedIndoorMasterBedCabinListIdRoute
-  '/indoor/master/services/$id': typeof AuthenticatedIndoorMasterServicesIdRoute
-  '/outdoor/master/categories/$id': typeof AuthenticatedOutdoorMasterCategoriesIdRoute
-  '/outdoor/master/departments/$id': typeof AuthenticatedOutdoorMasterDepartmentsIdRoute
-  '/outdoor/master/doctors/create': typeof AuthenticatedOutdoorMasterDoctorsCreateRoute
-  '/outdoor/master/test-tables/$id': typeof AuthenticatedOutdoorMasterTestTablesIdRoute
-  '/outdoor/master/tests/$id': typeof AuthenticatedOutdoorMasterTestsIdRoute
-  '/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRoute
-  '/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute
-  '/roles/permissions/$roleId/edit': typeof AuthenticatedRolesPermissionsRoleIdEditRoute
-  '/ultrasonogram/all/edit/$id': typeof AuthenticatedUltrasonogramAllEditIdRoute
-  '/ultrasonogram/all/print/$id': typeof AuthenticatedUltrasonogramAllPrintIdRoute
-  '/x-ray/all/edit/$id': typeof AuthenticatedXRayAllEditIdRoute
-  '/x-ray/all/print/$id': typeof AuthenticatedXRayAllPrintIdRoute
-  '/accounting/reports/balance-sheet': typeof AuthenticatedAccountingReportsBalanceSheetIndexRoute
-  '/accounting/reports/daily-summary': typeof AuthenticatedAccountingReportsDailySummaryIndexRoute
-  '/accounting/reports/journal': typeof AuthenticatedAccountingReportsJournalIndexRoute
-  '/accounting/reports/ledger': typeof AuthenticatedAccountingReportsLedgerIndexRoute
-  '/accounting/reports/profit-and-loss': typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
-  '/accounting/reports/profit-loss': typeof AuthenticatedAccountingReportsProfitLossIndexRoute
-  '/accounting/reports/trial-balance': typeof AuthenticatedAccountingReportsTrialBalanceIndexRoute
-  '/admission/billing/$billingId': typeof AuthenticatedAdmissionBillingBillingIdIndexRoute
-  '/admission/discharged-patients/bill-does-not-created': typeof AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
-  '/admission/invoice/create': typeof AuthenticatedAdmissionInvoiceCreateIndexRoute
-  '/admission/invoice/list': typeof AuthenticatedAdmissionInvoiceListIndexRoute
-  '/admission/patients/active': typeof AuthenticatedAdmissionPatientsActiveIndexRoute
-  '/admission/patients/balance-distributed-list': typeof AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute
-  '/admission/patients/bill-created-list': typeof AuthenticatedAdmissionPatientsBillCreatedListIndexRoute
-  '/admission/patients/bill-distributed-list': typeof AuthenticatedAdmissionPatientsBillDistributedListIndexRoute
-  '/admission/patients/discharged-list': typeof AuthenticatedAdmissionPatientsDischargedListIndexRoute
-  '/admission/patients/discharged': typeof AuthenticatedAdmissionPatientsDischargedIndexRoute
-  '/admission/patients/final-bill-created-list': typeof AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute
-  '/admission/patients/payment-completed-list': typeof AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute
-  '/indoor/management/distributions': typeof AuthenticatedIndoorManagementDistributionsIndexRoute
-  '/indoor/management/doctor-referred': typeof AuthenticatedIndoorManagementDoctorReferredIndexRoute
-  '/indoor/master/anasthesia-types': typeof AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute
-  '/indoor/master/bed-cabin-list': typeof AuthenticatedIndoorMasterBedCabinListIndexRoute
-  '/indoor/master/doctor-types': typeof AuthenticatedIndoorMasterDoctorTypesIndexRoute
-  '/indoor/master/operation-types': typeof AuthenticatedIndoorMasterOperationTypesIndexRoute
-  '/indoor/master/patient-types': typeof AuthenticatedIndoorMasterPatientTypesIndexRoute
-  '/indoor/master/service-categories': typeof AuthenticatedIndoorMasterServiceCategoriesIndexRoute
-  '/indoor/master/services': typeof AuthenticatedIndoorMasterServicesIndexRoute
-  '/indoor/master/treatment-outcomes': typeof AuthenticatedIndoorMasterTreatmentOutcomesIndexRoute
-  '/outdoor/master/categories': typeof AuthenticatedOutdoorMasterCategoriesIndexRoute
-  '/outdoor/master/departments': typeof AuthenticatedOutdoorMasterDepartmentsIndexRoute
-  '/outdoor/master/doctors': typeof AuthenticatedOutdoorMasterDoctorsIndexRoute
-  '/outdoor/master/machines': typeof AuthenticatedOutdoorMasterMachinesIndexRoute
-  '/outdoor/master/sample-collection-rooms': typeof AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute
-  '/outdoor/master/test-tables': typeof AuthenticatedOutdoorMasterTestTablesIndexRoute
-  '/outdoor/master/tests': typeof AuthenticatedOutdoorMasterTestsIndexRoute
-  '/outdoor/reception/due-collection': typeof AuthenticatedOutdoorReceptionDueCollectionIndexRoute
-  '/outdoor/reception/my-invoices': typeof AuthenticatedOutdoorReceptionMyInvoicesIndexRoute
-  '/outdoor/reception/paid-invoices': typeof AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute
-  '/outdoor/reception/patients': typeof AuthenticatedOutdoorReceptionPatientsIndexRoute
-  '/outdoor/reception/user-invoices': typeof AuthenticatedOutdoorReceptionUserInvoicesIndexRoute
-  '/pathology/biochemical/all': typeof AuthenticatedPathologyBiochemicalAllIndexRoute
-  '/pathology/biochemical/lipid-profile': typeof AuthenticatedPathologyBiochemicalLipidProfileIndexRoute
-  '/pathology/hematology/all': typeof AuthenticatedPathologyHematologyAllIndexRoute
-  '/pathology/hematology/blood-for-bt-ct': typeof AuthenticatedPathologyHematologyBloodForBtCtIndexRoute
-  '/pathology/hematology/blood-for-tcdc': typeof AuthenticatedPathologyHematologyBloodForTcdcIndexRoute
-  '/pathology/hematology/cbc-short': typeof AuthenticatedPathologyHematologyCbcShortIndexRoute
-  '/pathology/hematology/cbc-with-pbf': typeof AuthenticatedPathologyHematologyCbcWithPbfIndexRoute
-  '/pathology/hematology/peripheral-blood-film': typeof AuthenticatedPathologyHematologyPeripheralBloodFilmIndexRoute
-  '/pathology/hematology/prothom-bin-time-full': typeof AuthenticatedPathologyHematologyProthomBinTimeFullIndexRoute
-  '/pathology/hormone/all': typeof AuthenticatedPathologyHormoneAllIndexRoute
-  '/pathology/hormone/electrolytes': typeof AuthenticatedPathologyHormoneElectrolytesIndexRoute
-  '/pathology/hormone/semen': typeof AuthenticatedPathologyHormoneSemenIndexRoute
-  '/pathology/hormone/skin-scrapping-for-fungus': typeof AuthenticatedPathologyHormoneSkinScrappingForFungusIndexRoute
-  '/pathology/hormone/sputum': typeof AuthenticatedPathologyHormoneSputumIndexRoute
-  '/pathology/hormone/t3t4tsh': typeof AuthenticatedPathologyHormoneT3t4tshIndexRoute
-  '/pathology/immunology/all': typeof AuthenticatedPathologyImmunologyAllIndexRoute
-  '/pathology/immunology/beta-hcg': typeof AuthenticatedPathologyImmunologyBetaHcgIndexRoute
-  '/pathology/immunology/blood-group': typeof AuthenticatedPathologyImmunologyBloodGroupIndexRoute
-  '/pathology/immunology/mt': typeof AuthenticatedPathologyImmunologyMtIndexRoute
-  '/pathology/immunology/widal-test': typeof AuthenticatedPathologyImmunologyWidalTestIndexRoute
-  '/pathology/stool/ocult-blood-test': typeof AuthenticatedPathologyStoolOcultBloodTestIndexRoute
-  '/pathology/stool/reducing-substance': typeof AuthenticatedPathologyStoolReducingSubstanceIndexRoute
-  '/pathology/stool/stool-re': typeof AuthenticatedPathologyStoolStoolReIndexRoute
-  '/pathology/urine/urine-for-albumin': typeof AuthenticatedPathologyUrineUrineForAlbuminIndexRoute
-  '/pathology/urine/urine-for-re-full': typeof AuthenticatedPathologyUrineUrineForReFullIndexRoute
-  '/pathology/urine/urine-for-sugar': typeof AuthenticatedPathologyUrineUrineForSugarIndexRoute
-  '/payroll/attendance/$staffId': typeof AuthenticatedPayrollAttendanceStaffIdIndexRoute
-  '/payroll/salary/$staffId': typeof AuthenticatedPayrollSalaryStaffIdIndexRoute
-  '/admission/patients/$admissionId/print/$step': typeof AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute
-  '/ecg/all/edit/builder/$id': typeof AuthenticatedEcgAllEditBuilderIdRoute
-  '/indoor/master/services/edit/$id': typeof AuthenticatedIndoorMasterServicesEditIdRoute
-  '/outdoor/master/doctors/$doctorId/edit': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute
-  '/pathology/biochemical/all/edit/$reportId': typeof AuthenticatedPathologyBiochemicalAllEditReportIdRoute
-  '/pathology/biochemical/all/report/$reportId': typeof AuthenticatedPathologyBiochemicalAllReportReportIdRoute
-  '/pathology/biochemical/lipid-profile/report/$reportId': typeof AuthenticatedPathologyBiochemicalLipidProfileReportReportIdRoute
-  '/pathology/hematology/all/report/$reportId': typeof AuthenticatedPathologyHematologyAllReportReportIdRoute
-  '/pathology/hematology/blood-for-bt-ct/report/$reportId': typeof AuthenticatedPathologyHematologyBloodForBtCtReportReportIdRoute
-  '/pathology/hematology/blood-for-tcdc/report/$reportId': typeof AuthenticatedPathologyHematologyBloodForTcdcReportReportIdRoute
-  '/pathology/hematology/cbc-short/edit/$id': typeof AuthenticatedPathologyHematologyCbcShortEditIdRoute
-  '/pathology/hematology/cbc-short/report/$reportId': typeof AuthenticatedPathologyHematologyCbcShortReportReportIdRoute
-  '/pathology/hematology/cbc-with-pbf/edit/$id': typeof AuthenticatedPathologyHematologyCbcWithPbfEditIdRoute
-  '/pathology/hematology/cbc-with-pbf/report/$reportId': typeof AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRoute
-  '/pathology/hematology/peripheral-blood-film/report/$reportId': typeof AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRoute
-  '/pathology/hematology/prothom-bin-time-full/report/$reportId': typeof AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute
-  '/pathology/hormone/all/report/$reportId': typeof AuthenticatedPathologyHormoneAllReportReportIdRoute
-  '/pathology/hormone/electrolytes/report/$reportId': typeof AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute
-  '/pathology/hormone/semen/edit/$reportId': typeof AuthenticatedPathologyHormoneSemenEditReportIdRoute
-  '/pathology/hormone/semen/report/$reportId': typeof AuthenticatedPathologyHormoneSemenReportReportIdRoute
-  '/pathology/hormone/skin-scrapping-for-fungus/report/$reportId': typeof AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRoute
-  '/pathology/hormone/sputum/report/$reportId': typeof AuthenticatedPathologyHormoneSputumReportReportIdRoute
-  '/pathology/hormone/t3t4tsh/report/$reportId': typeof AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute
-  '/pathology/immunology/all/report/$reportId': typeof AuthenticatedPathologyImmunologyAllReportReportIdRoute
-  '/pathology/immunology/beta-hcg/report/$reportId': typeof AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute
-  '/pathology/immunology/blood-group/report/$reportId': typeof AuthenticatedPathologyImmunologyBloodGroupReportReportIdRoute
-  '/pathology/immunology/mt/report/$reportId': typeof AuthenticatedPathologyImmunologyMtReportReportIdRoute
-  '/pathology/immunology/widal-test/report/$reportId': typeof AuthenticatedPathologyImmunologyWidalTestReportReportIdRoute
-  '/pathology/stool/ocult-blood-test/report/$reportId': typeof AuthenticatedPathologyStoolOcultBloodTestReportReportIdRoute
-  '/pathology/stool/reducing-substance/report/$reportId': typeof AuthenticatedPathologyStoolReducingSubstanceReportReportIdRoute
-  '/pathology/stool/stool-re/edit/$id': typeof AuthenticatedPathologyStoolStoolReEditIdRoute
-  '/pathology/stool/stool-re/report/$reportId': typeof AuthenticatedPathologyStoolStoolReReportReportIdRoute
-  '/pathology/urine/urine-for-albumin/report/$reportId': typeof AuthenticatedPathologyUrineUrineForAlbuminReportReportIdRoute
-  '/pathology/urine/urine-for-re-full/edit/$id': typeof AuthenticatedPathologyUrineUrineForReFullEditIdRoute
-  '/pathology/urine/urine-for-re-full/report/$reportId': typeof AuthenticatedPathologyUrineUrineForReFullReportReportIdRoute
-  '/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
-  '/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
-  '/x-ray/all/edit/builder/$id': typeof AuthenticatedXRayAllEditBuilderIdRoute
-  '/admission/patients/$admissionId/bill-created': typeof AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute
-  '/admission/patients/$admissionId/billing-print': typeof AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute
-  '/admission/patients/$admissionId/billing': typeof AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute
-  '/admission/patients/$admissionId/confirm-balance': typeof AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
-  '/admission/patients/$admissionId/distribute-bill': typeof AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute
-  '/admission/patients/$admissionId/final-bill-print': typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
-  '/admission/patients/$admissionId/final-bill': typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute
-  '/admission/patients/$admissionId/print': typeof AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute
-  '/indoor/master/bed-cabin-list/create': typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
-  '/indoor/master/services/create': typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
-  '/outdoor/master/doctors/$doctorId': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
-  '/outdoor/master/tests/create': typeof AuthenticatedOutdoorMasterTestsCreateIndexRoute
-  '/outdoor/reception/invoices/create': typeof AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute
-  '/outdoor/reception/invoices/list': typeof AuthenticatedOutdoorReceptionInvoicesListIndexRoute
-  '/reports/my/outdoor/date-wise-collection': typeof AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute
-  '/reports/my/outdoor/today-collection': typeof AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute
-  '/outdoor/master/tests/edit/$id': typeof AuthenticatedOutdoorMasterTestsEditIdIndexRoute
-  '/outdoor/reception/invoices/edit/$invoiceId': typeof AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
-  '/pathology/hematology/all/edit/$id': typeof AuthenticatedPathologyHematologyAllEditIdIndexRoute
-  '/pathology/hormone/all/edit/$id': typeof AuthenticatedPathologyHormoneAllEditIdIndexRoute
-  '/pathology/immunology/all/edit/$id': typeof AuthenticatedPathologyImmunologyAllEditIdIndexRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/dashboard/errors/$error': typeof AuthenticatedDashboardErrorsErrorRoute
+  '/dashboard/notifications/$id': typeof AuthenticatedDashboardNotificationsIdRoute
+  '/dashboard/settings/account': typeof AuthenticatedDashboardSettingsAccountRoute
+  '/dashboard/settings/appearance': typeof AuthenticatedDashboardSettingsAppearanceRoute
+  '/dashboard/settings/date-controls': typeof AuthenticatedDashboardSettingsDateControlsRoute
+  '/dashboard/settings/display': typeof AuthenticatedDashboardSettingsDisplayRoute
+  '/dashboard/settings/notifications': typeof AuthenticatedDashboardSettingsNotificationsRoute
+  '/dashboard/settings/payment-accounts': typeof AuthenticatedDashboardSettingsPaymentAccountsRoute
+  '/dashboard/settings/prefix': typeof AuthenticatedDashboardSettingsPrefixRoute
+  '/dashboard/accounting': typeof AuthenticatedDashboardAccountingIndexRoute
+  '/dashboard/apps': typeof AuthenticatedDashboardAppsIndexRoute
+  '/dashboard/backup-settings': typeof AuthenticatedDashboardBackupSettingsIndexRoute
+  '/dashboard/backups': typeof AuthenticatedDashboardBackupsIndexRoute
+  '/dashboard/chats': typeof AuthenticatedDashboardChatsIndexRoute
+  '/dashboard/company-account': typeof AuthenticatedDashboardCompanyAccountIndexRoute
+  '/dashboard/database': typeof AuthenticatedDashboardDatabaseIndexRoute
+  '/dashboard/gallery': typeof AuthenticatedDashboardGalleryIndexRoute
+  '/dashboard/help-center': typeof AuthenticatedDashboardHelpCenterIndexRoute
+  '/dashboard/help': typeof AuthenticatedDashboardHelpIndexRoute
+  '/dashboard/my-account': typeof AuthenticatedDashboardMyAccountIndexRoute
+  '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsIndexRoute
+  '/dashboard/roles': typeof AuthenticatedDashboardRolesIndexRoute
+  '/dashboard/settings': typeof AuthenticatedDashboardSettingsIndexRoute
+  '/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionIndexRoute
+  '/dashboard/tasks': typeof AuthenticatedDashboardTasksIndexRoute
+  '/dashboard/users': typeof AuthenticatedDashboardUsersIndexRoute
+  '/dashboard/roles/edit/$id': typeof AuthenticatedDashboardRolesEditIdRoute
+  '/dashboard/accounting/accounts': typeof AuthenticatedDashboardAccountingAccountsIndexRoute
+  '/dashboard/accounting/expense': typeof AuthenticatedDashboardAccountingExpenseIndexRoute
+  '/dashboard/accounting/expenses': typeof AuthenticatedDashboardAccountingExpensesIndexRoute
+  '/dashboard/accounting/income': typeof AuthenticatedDashboardAccountingIncomeIndexRoute
+  '/dashboard/accounting/transactions': typeof AuthenticatedDashboardAccountingTransactionsIndexRoute
+  '/dashboard/accounts/daily-credit': typeof AuthenticatedDashboardAccountsDailyCreditIndexRoute
+  '/dashboard/accounts/daily-debit': typeof AuthenticatedDashboardAccountsDailyDebitIndexRoute
+  '/dashboard/accounts/journal': typeof AuthenticatedDashboardAccountsJournalIndexRoute
+  '/dashboard/accounts/pay-to-anaesthetist': typeof AuthenticatedDashboardAccountsPayToAnaesthetistIndexRoute
+  '/dashboard/accounts/pay-to-assistant': typeof AuthenticatedDashboardAccountsPayToAssistantIndexRoute
+  '/dashboard/accounts/pay-to-consultant': typeof AuthenticatedDashboardAccountsPayToConsultantIndexRoute
+  '/dashboard/accounts/pay-to-surgeon': typeof AuthenticatedDashboardAccountsPayToSurgeonIndexRoute
+  '/dashboard/admission/advance-payment': typeof AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute
+  '/dashboard/admission/bed-cabin-charge': typeof AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute
+  '/dashboard/admission/due-collection': typeof AuthenticatedDashboardAdmissionDueCollectionIndexRoute
+  '/dashboard/admission/final-bills': typeof AuthenticatedDashboardAdmissionFinalBillsIndexRoute
+  '/dashboard/admission/finalise-services': typeof AuthenticatedDashboardAdmissionFinaliseServicesIndexRoute
+  '/dashboard/admission/first-time-bill': typeof AuthenticatedDashboardAdmissionFirstTimeBillIndexRoute
+  '/dashboard/admission/first-time-service': typeof AuthenticatedDashboardAdmissionFirstTimeServiceIndexRoute
+  '/dashboard/admission/invoice': typeof AuthenticatedDashboardAdmissionInvoiceIndexRoute
+  '/dashboard/admission/new-admission': typeof AuthenticatedDashboardAdmissionNewAdmissionIndexRoute
+  '/dashboard/admission/patients': typeof AuthenticatedDashboardAdmissionPatientsIndexRoute
+  '/dashboard/admission/second-time-bill': typeof AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute
+  '/dashboard/banks/bank-accounts': typeof AuthenticatedDashboardBanksBankAccountsIndexRoute
+  '/dashboard/banks/bank-deposits': typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
+  '/dashboard/banks/bank-transactions': typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
+  '/dashboard/banks/bank-withdrawals': typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
+  '/dashboard/ecg/all': typeof AuthenticatedDashboardEcgAllIndexRoute
+  '/dashboard/payroll/employees': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
+  '/dashboard/payroll/overview': typeof AuthenticatedDashboardPayrollOverviewIndexRoute
+  '/dashboard/roles/create': typeof AuthenticatedDashboardRolesCreateIndexRoute
+  '/dashboard/ultrasonogram/all': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
+  '/dashboard/x-ray/all': typeof AuthenticatedDashboardXRayAllIndexRoute
+  '/dashboard/accounting/reports/ledger/print': typeof AuthenticatedDashboardAccountingReportsLedgerPrintRoute
+  '/dashboard/accounting/reports/multi-ledger/print': typeof AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute
+  '/dashboard/ecg/all/edit/$id': typeof AuthenticatedDashboardEcgAllEditIdRoute
+  '/dashboard/ecg/all/print/$id': typeof AuthenticatedDashboardEcgAllPrintIdRoute
+  '/dashboard/indoor/master/bed-cabin-list/$id': typeof AuthenticatedDashboardIndoorMasterBedCabinListIdRoute
+  '/dashboard/indoor/master/services/$id': typeof AuthenticatedDashboardIndoorMasterServicesIdRoute
+  '/dashboard/outdoor/master/categories/$id': typeof AuthenticatedDashboardOutdoorMasterCategoriesIdRoute
+  '/dashboard/outdoor/master/departments/$id': typeof AuthenticatedDashboardOutdoorMasterDepartmentsIdRoute
+  '/dashboard/outdoor/master/doctors/create': typeof AuthenticatedDashboardOutdoorMasterDoctorsCreateRoute
+  '/dashboard/outdoor/master/test-tables/$id': typeof AuthenticatedDashboardOutdoorMasterTestTablesIdRoute
+  '/dashboard/outdoor/master/tests/$id': typeof AuthenticatedDashboardOutdoorMasterTestsIdRoute
+  '/dashboard/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
+  '/dashboard/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute
+  '/dashboard/roles/permissions/$roleId/edit': typeof AuthenticatedDashboardRolesPermissionsRoleIdEditRoute
+  '/dashboard/ultrasonogram/all/edit/$id': typeof AuthenticatedDashboardUltrasonogramAllEditIdRoute
+  '/dashboard/ultrasonogram/all/print/$id': typeof AuthenticatedDashboardUltrasonogramAllPrintIdRoute
+  '/dashboard/x-ray/all/edit/$id': typeof AuthenticatedDashboardXRayAllEditIdRoute
+  '/dashboard/x-ray/all/print/$id': typeof AuthenticatedDashboardXRayAllPrintIdRoute
+  '/dashboard/accounting/reports/balance-sheet': typeof AuthenticatedDashboardAccountingReportsBalanceSheetIndexRoute
+  '/dashboard/accounting/reports/cash-flow': typeof AuthenticatedDashboardAccountingReportsCashFlowIndexRoute
+  '/dashboard/accounting/reports/daily-summary': typeof AuthenticatedDashboardAccountingReportsDailySummaryIndexRoute
+  '/dashboard/accounting/reports/journal': typeof AuthenticatedDashboardAccountingReportsJournalIndexRoute
+  '/dashboard/accounting/reports/ledger': typeof AuthenticatedDashboardAccountingReportsLedgerIndexRoute
+  '/dashboard/accounting/reports/multi-ledger': typeof AuthenticatedDashboardAccountingReportsMultiLedgerIndexRoute
+  '/dashboard/accounting/reports/profit-and-loss': typeof AuthenticatedDashboardAccountingReportsProfitAndLossIndexRoute
+  '/dashboard/accounting/reports/profit-loss': typeof AuthenticatedDashboardAccountingReportsProfitLossIndexRoute
+  '/dashboard/accounting/reports/trial-balance': typeof AuthenticatedDashboardAccountingReportsTrialBalanceIndexRoute
+  '/dashboard/admission/billing/$billingId': typeof AuthenticatedDashboardAdmissionBillingBillingIdIndexRoute
+  '/dashboard/admission/discharged-patients/bill-does-not-created': typeof AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
+  '/dashboard/admission/invoice/create': typeof AuthenticatedDashboardAdmissionInvoiceCreateIndexRoute
+  '/dashboard/admission/invoice/list': typeof AuthenticatedDashboardAdmissionInvoiceListIndexRoute
+  '/dashboard/admission/patients/active': typeof AuthenticatedDashboardAdmissionPatientsActiveIndexRoute
+  '/dashboard/admission/patients/balance-distributed-list': typeof AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRoute
+  '/dashboard/admission/patients/bill-created-list': typeof AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRoute
+  '/dashboard/admission/patients/bill-distributed-list': typeof AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute
+  '/dashboard/admission/patients/discharged-list': typeof AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute
+  '/dashboard/admission/patients/discharged': typeof AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute
+  '/dashboard/admission/patients/final-bill-created-list': typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
+  '/dashboard/admission/patients/payment-completed-list': typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
+  '/dashboard/indoor/management/distributions': typeof AuthenticatedDashboardIndoorManagementDistributionsIndexRoute
+  '/dashboard/indoor/management/doctor-referred': typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
+  '/dashboard/indoor/master/anasthesia-types': typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
+  '/dashboard/indoor/master/bed-cabin-list': typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
+  '/dashboard/indoor/master/doctor-types': typeof AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute
+  '/dashboard/indoor/master/operation-types': typeof AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute
+  '/dashboard/indoor/master/patient-types': typeof AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute
+  '/dashboard/indoor/master/service-categories': typeof AuthenticatedDashboardIndoorMasterServiceCategoriesIndexRoute
+  '/dashboard/indoor/master/services': typeof AuthenticatedDashboardIndoorMasterServicesIndexRoute
+  '/dashboard/indoor/master/treatment-outcomes': typeof AuthenticatedDashboardIndoorMasterTreatmentOutcomesIndexRoute
+  '/dashboard/outdoor/master/categories': typeof AuthenticatedDashboardOutdoorMasterCategoriesIndexRoute
+  '/dashboard/outdoor/master/departments': typeof AuthenticatedDashboardOutdoorMasterDepartmentsIndexRoute
+  '/dashboard/outdoor/master/doctors': typeof AuthenticatedDashboardOutdoorMasterDoctorsIndexRoute
+  '/dashboard/outdoor/master/machines': typeof AuthenticatedDashboardOutdoorMasterMachinesIndexRoute
+  '/dashboard/outdoor/master/sample-collection-rooms': typeof AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRoute
+  '/dashboard/outdoor/master/test-tables': typeof AuthenticatedDashboardOutdoorMasterTestTablesIndexRoute
+  '/dashboard/outdoor/master/tests': typeof AuthenticatedDashboardOutdoorMasterTestsIndexRoute
+  '/dashboard/outdoor/reception/due-collection': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute
+  '/dashboard/outdoor/reception/my-invoices': typeof AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute
+  '/dashboard/outdoor/reception/paid-invoices': typeof AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute
+  '/dashboard/outdoor/reception/patients': typeof AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute
+  '/dashboard/outdoor/reception/user-invoices': typeof AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute
+  '/dashboard/pathology/biochemical/all': typeof AuthenticatedDashboardPathologyBiochemicalAllIndexRoute
+  '/dashboard/pathology/biochemical/lipid-profile': typeof AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRoute
+  '/dashboard/pathology/hematology/all': typeof AuthenticatedDashboardPathologyHematologyAllIndexRoute
+  '/dashboard/pathology/hematology/blood-for-bt-ct': typeof AuthenticatedDashboardPathologyHematologyBloodForBtCtIndexRoute
+  '/dashboard/pathology/hematology/blood-for-tcdc': typeof AuthenticatedDashboardPathologyHematologyBloodForTcdcIndexRoute
+  '/dashboard/pathology/hematology/cbc-short': typeof AuthenticatedDashboardPathologyHematologyCbcShortIndexRoute
+  '/dashboard/pathology/hematology/cbc-with-pbf': typeof AuthenticatedDashboardPathologyHematologyCbcWithPbfIndexRoute
+  '/dashboard/pathology/hematology/peripheral-blood-film': typeof AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmIndexRoute
+  '/dashboard/pathology/hematology/prothom-bin-time-full': typeof AuthenticatedDashboardPathologyHematologyProthomBinTimeFullIndexRoute
+  '/dashboard/pathology/hormone/all': typeof AuthenticatedDashboardPathologyHormoneAllIndexRoute
+  '/dashboard/pathology/hormone/electrolytes': typeof AuthenticatedDashboardPathologyHormoneElectrolytesIndexRoute
+  '/dashboard/pathology/hormone/semen': typeof AuthenticatedDashboardPathologyHormoneSemenIndexRoute
+  '/dashboard/pathology/hormone/skin-scrapping-for-fungus': typeof AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusIndexRoute
+  '/dashboard/pathology/hormone/sputum': typeof AuthenticatedDashboardPathologyHormoneSputumIndexRoute
+  '/dashboard/pathology/hormone/t3t4tsh': typeof AuthenticatedDashboardPathologyHormoneT3t4tshIndexRoute
+  '/dashboard/pathology/immunology/all': typeof AuthenticatedDashboardPathologyImmunologyAllIndexRoute
+  '/dashboard/pathology/immunology/beta-hcg': typeof AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRoute
+  '/dashboard/pathology/immunology/blood-group': typeof AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute
+  '/dashboard/pathology/immunology/mt': typeof AuthenticatedDashboardPathologyImmunologyMtIndexRoute
+  '/dashboard/pathology/immunology/widal-test': typeof AuthenticatedDashboardPathologyImmunologyWidalTestIndexRoute
+  '/dashboard/pathology/stool/ocult-blood-test': typeof AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRoute
+  '/dashboard/pathology/stool/reducing-substance': typeof AuthenticatedDashboardPathologyStoolReducingSubstanceIndexRoute
+  '/dashboard/pathology/stool/stool-re': typeof AuthenticatedDashboardPathologyStoolStoolReIndexRoute
+  '/dashboard/pathology/urine/urine-for-albumin': typeof AuthenticatedDashboardPathologyUrineUrineForAlbuminIndexRoute
+  '/dashboard/pathology/urine/urine-for-re-full': typeof AuthenticatedDashboardPathologyUrineUrineForReFullIndexRoute
+  '/dashboard/pathology/urine/urine-for-sugar': typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
+  '/dashboard/payroll/attendance/$staffId': typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
+  '/dashboard/payroll/salary/$staffId': typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  '/dashboard/admission/patients/$admissionId/print/$step': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
+  '/dashboard/ecg/all/edit/builder/$id': typeof AuthenticatedDashboardEcgAllEditBuilderIdRoute
+  '/dashboard/indoor/master/services/edit/$id': typeof AuthenticatedDashboardIndoorMasterServicesEditIdRoute
+  '/dashboard/outdoor/master/doctors/$doctorId/edit': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute
+  '/dashboard/pathology/biochemical/all/edit/$reportId': typeof AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRoute
+  '/dashboard/pathology/biochemical/all/report/$reportId': typeof AuthenticatedDashboardPathologyBiochemicalAllReportReportIdRoute
+  '/dashboard/pathology/biochemical/lipid-profile/report/$reportId': typeof AuthenticatedDashboardPathologyBiochemicalLipidProfileReportReportIdRoute
+  '/dashboard/pathology/hematology/all/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyAllReportReportIdRoute
+  '/dashboard/pathology/hematology/blood-for-bt-ct/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyBloodForBtCtReportReportIdRoute
+  '/dashboard/pathology/hematology/blood-for-tcdc/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyBloodForTcdcReportReportIdRoute
+  '/dashboard/pathology/hematology/cbc-short/edit/$id': typeof AuthenticatedDashboardPathologyHematologyCbcShortEditIdRoute
+  '/dashboard/pathology/hematology/cbc-short/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyCbcShortReportReportIdRoute
+  '/dashboard/pathology/hematology/cbc-with-pbf/edit/$id': typeof AuthenticatedDashboardPathologyHematologyCbcWithPbfEditIdRoute
+  '/dashboard/pathology/hematology/cbc-with-pbf/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyCbcWithPbfReportReportIdRoute
+  '/dashboard/pathology/hematology/peripheral-blood-film/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmReportReportIdRoute
+  '/dashboard/pathology/hematology/prothom-bin-time-full/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyProthomBinTimeFullReportReportIdRoute
+  '/dashboard/pathology/hormone/all/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneAllReportReportIdRoute
+  '/dashboard/pathology/hormone/electrolytes/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneElectrolytesReportReportIdRoute
+  '/dashboard/pathology/hormone/semen/edit/$reportId': typeof AuthenticatedDashboardPathologyHormoneSemenEditReportIdRoute
+  '/dashboard/pathology/hormone/semen/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneSemenReportReportIdRoute
+  '/dashboard/pathology/hormone/skin-scrapping-for-fungus/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusReportReportIdRoute
+  '/dashboard/pathology/hormone/sputum/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneSputumReportReportIdRoute
+  '/dashboard/pathology/hormone/t3t4tsh/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneT3t4tshReportReportIdRoute
+  '/dashboard/pathology/immunology/all/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyAllReportReportIdRoute
+  '/dashboard/pathology/immunology/beta-hcg/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRoute
+  '/dashboard/pathology/immunology/blood-group/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute
+  '/dashboard/pathology/immunology/mt/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute
+  '/dashboard/pathology/immunology/widal-test/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRoute
+  '/dashboard/pathology/stool/ocult-blood-test/report/$reportId': typeof AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRoute
+  '/dashboard/pathology/stool/reducing-substance/report/$reportId': typeof AuthenticatedDashboardPathologyStoolReducingSubstanceReportReportIdRoute
+  '/dashboard/pathology/stool/stool-re/edit/$id': typeof AuthenticatedDashboardPathologyStoolStoolReEditIdRoute
+  '/dashboard/pathology/stool/stool-re/report/$reportId': typeof AuthenticatedDashboardPathologyStoolStoolReReportReportIdRoute
+  '/dashboard/pathology/urine/urine-for-albumin/report/$reportId': typeof AuthenticatedDashboardPathologyUrineUrineForAlbuminReportReportIdRoute
+  '/dashboard/pathology/urine/urine-for-re-full/edit/$id': typeof AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRoute
+  '/dashboard/pathology/urine/urine-for-re-full/report/$reportId': typeof AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRoute
+  '/dashboard/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute
+  '/dashboard/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute
+  '/dashboard/x-ray/all/edit/builder/$id': typeof AuthenticatedDashboardXRayAllEditBuilderIdRoute
+  '/dashboard/admission/patients/$admissionId/bill-created': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRoute
+  '/dashboard/admission/patients/$admissionId/billing-print': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRoute
+  '/dashboard/admission/patients/$admissionId/billing': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRoute
+  '/dashboard/admission/patients/$admissionId/confirm-balance': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
+  '/dashboard/admission/patients/$admissionId/distribute-bill': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute
+  '/dashboard/admission/patients/$admissionId/final-bill-print': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
+  '/dashboard/admission/patients/$admissionId/final-bill': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute
+  '/dashboard/admission/patients/$admissionId/print': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute
+  '/dashboard/indoor/master/bed-cabin-list/create': typeof AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute
+  '/dashboard/indoor/master/services/create': typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
+  '/dashboard/outdoor/master/doctors/$doctorId': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
+  '/dashboard/outdoor/master/tests/create': typeof AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute
+  '/dashboard/outdoor/reception/invoices/create': typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
+  '/dashboard/outdoor/reception/invoices/list': typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
+  '/dashboard/reports/my/outdoor/date-wise-collection': typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute
+  '/dashboard/reports/my/outdoor/today-collection': typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute
+  '/dashboard/outdoor/master/tests/edit/$id': typeof AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute
+  '/dashboard/outdoor/reception/invoices/edit/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
+  '/dashboard/pathology/hematology/all/edit/$id': typeof AuthenticatedDashboardPathologyHematologyAllEditIdIndexRoute
+  '/dashboard/pathology/hormone/all/edit/$id': typeof AuthenticatedDashboardPathologyHormoneAllEditIdIndexRoute
+  '/dashboard/pathology/immunology/all/edit/$id': typeof AuthenticatedDashboardPathologyImmunologyAllEditIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/clerk': typeof ClerkRouteRouteWithChildren
-  '/_authenticated/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/clerk/(auth)': typeof ClerkauthRouteRouteWithChildren
   '/clerk/_authenticated': typeof ClerkAuthenticatedRouteRouteWithChildren
+  '/(auth)/auth-callback': typeof authAuthCallbackRoute
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/otp': typeof authOtpRoute
@@ -2004,217 +2276,241 @@ export interface FileRoutesById {
   '/(errors)/404': typeof errors404Route
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
-  '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
-  '/_authenticated/notifications/$id': typeof AuthenticatedNotificationsIdRoute
-  '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
-  '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
-  '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
-  '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
-  '/_authenticated/settings/payment-accounts': typeof AuthenticatedSettingsPaymentAccountsRoute
-  '/_authenticated/settings/prefix': typeof AuthenticatedSettingsPrefixRoute
+  '/(platform)/_layout': typeof platformLayoutRoute
+  '/(platform)/contact': typeof platformContactRoute
+  '/(platform)/pricing': typeof platformPricingRoute
+  '/(platform)/register': typeof platformRegisterRoute
+  '/_authenticated/dashboard/settings': typeof AuthenticatedDashboardSettingsRouteRouteWithChildren
+  '/(platform)/admin': typeof platformAdminRouteWithChildren
+  '/(platform)/admin/_layout': typeof platformAdminLayoutRoute
+  '/(platform)/admin/admins': typeof platformAdminAdminsRoute
+  '/(platform)/admin/billing': typeof platformAdminBillingRoute
+  '/(platform)/admin/companies': typeof platformAdminCompaniesRoute
+  '/(platform)/admin/login': typeof platformAdminLoginRoute
+  '/(platform)/admin/modules': typeof platformAdminModulesRoute
+  '/(platform)/admin/plans': typeof platformAdminPlansRoute
+  '/(platform)/admin/registrations': typeof platformAdminRegistrationsRoute
+  '/(platform)/admin/settings': typeof platformAdminSettingsRoute
   '/clerk/(auth)/sign-in': typeof ClerkauthSignInRoute
   '/clerk/(auth)/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/_authenticated/user-management': typeof ClerkAuthenticatedUserManagementRoute
-  '/_authenticated/accounting/': typeof AuthenticatedAccountingIndexRoute
-  '/_authenticated/apps/': typeof AuthenticatedAppsIndexRoute
-  '/_authenticated/backup-settings/': typeof AuthenticatedBackupSettingsIndexRoute
-  '/_authenticated/backups/': typeof AuthenticatedBackupsIndexRoute
-  '/_authenticated/chats/': typeof AuthenticatedChatsIndexRoute
-  '/_authenticated/database/': typeof AuthenticatedDatabaseIndexRoute
-  '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
-  '/_authenticated/help/': typeof AuthenticatedHelpIndexRoute
-  '/_authenticated/my-account/': typeof AuthenticatedMyAccountIndexRoute
-  '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
-  '/_authenticated/roles/': typeof AuthenticatedRolesIndexRoute
-  '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
-  '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
-  '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
-  '/_authenticated/roles/edit/$id': typeof AuthenticatedRolesEditIdRoute
-  '/_authenticated/accounting/accounts/': typeof AuthenticatedAccountingAccountsIndexRoute
-  '/_authenticated/accounting/expense/': typeof AuthenticatedAccountingExpenseIndexRoute
-  '/_authenticated/accounting/expenses/': typeof AuthenticatedAccountingExpensesIndexRoute
-  '/_authenticated/accounting/income/': typeof AuthenticatedAccountingIncomeIndexRoute
-  '/_authenticated/accounting/transactions/': typeof AuthenticatedAccountingTransactionsIndexRoute
-  '/_authenticated/accounts/daily-credit/': typeof AuthenticatedAccountsDailyCreditIndexRoute
-  '/_authenticated/accounts/daily-debit/': typeof AuthenticatedAccountsDailyDebitIndexRoute
-  '/_authenticated/accounts/journal/': typeof AuthenticatedAccountsJournalIndexRoute
-  '/_authenticated/accounts/pay-to-anaesthetist/': typeof AuthenticatedAccountsPayToAnaesthetistIndexRoute
-  '/_authenticated/accounts/pay-to-assistant/': typeof AuthenticatedAccountsPayToAssistantIndexRoute
-  '/_authenticated/accounts/pay-to-consultant/': typeof AuthenticatedAccountsPayToConsultantIndexRoute
-  '/_authenticated/accounts/pay-to-surgeon/': typeof AuthenticatedAccountsPayToSurgeonIndexRoute
-  '/_authenticated/admission/advance-payment/': typeof AuthenticatedAdmissionAdvancePaymentIndexRoute
-  '/_authenticated/admission/bed-cabin-charge/': typeof AuthenticatedAdmissionBedCabinChargeIndexRoute
-  '/_authenticated/admission/due-collection/': typeof AuthenticatedAdmissionDueCollectionIndexRoute
-  '/_authenticated/admission/final-bills/': typeof AuthenticatedAdmissionFinalBillsIndexRoute
-  '/_authenticated/admission/finalise-services/': typeof AuthenticatedAdmissionFinaliseServicesIndexRoute
-  '/_authenticated/admission/first-time-bill/': typeof AuthenticatedAdmissionFirstTimeBillIndexRoute
-  '/_authenticated/admission/first-time-service/': typeof AuthenticatedAdmissionFirstTimeServiceIndexRoute
-  '/_authenticated/admission/invoice/': typeof AuthenticatedAdmissionInvoiceIndexRoute
-  '/_authenticated/admission/new-admission/': typeof AuthenticatedAdmissionNewAdmissionIndexRoute
-  '/_authenticated/admission/patients/': typeof AuthenticatedAdmissionPatientsIndexRoute
-  '/_authenticated/admission/second-time-bill/': typeof AuthenticatedAdmissionSecondTimeBillIndexRoute
-  '/_authenticated/banks/bank-accounts/': typeof AuthenticatedBanksBankAccountsIndexRoute
-  '/_authenticated/banks/bank-deposits/': typeof AuthenticatedBanksBankDepositsIndexRoute
-  '/_authenticated/banks/bank-transactions/': typeof AuthenticatedBanksBankTransactionsIndexRoute
-  '/_authenticated/banks/bank-withdrawals/': typeof AuthenticatedBanksBankWithdrawalsIndexRoute
-  '/_authenticated/ecg/all/': typeof AuthenticatedEcgAllIndexRoute
-  '/_authenticated/payroll/employees/': typeof AuthenticatedPayrollEmployeesIndexRoute
-  '/_authenticated/payroll/overview/': typeof AuthenticatedPayrollOverviewIndexRoute
-  '/_authenticated/roles/create/': typeof AuthenticatedRolesCreateIndexRoute
-  '/_authenticated/ultrasonogram/all/': typeof AuthenticatedUltrasonogramAllIndexRoute
-  '/_authenticated/x-ray/all/': typeof AuthenticatedXRayAllIndexRoute
-  '/_authenticated/accounting/reports/ledger/print': typeof AuthenticatedAccountingReportsLedgerPrintRoute
-  '/_authenticated/ecg/all/edit/$id': typeof AuthenticatedEcgAllEditIdRoute
-  '/_authenticated/ecg/all/print/$id': typeof AuthenticatedEcgAllPrintIdRoute
-  '/_authenticated/indoor/master/bed-cabin-list/$id': typeof AuthenticatedIndoorMasterBedCabinListIdRoute
-  '/_authenticated/indoor/master/services/$id': typeof AuthenticatedIndoorMasterServicesIdRoute
-  '/_authenticated/outdoor/master/categories/$id': typeof AuthenticatedOutdoorMasterCategoriesIdRoute
-  '/_authenticated/outdoor/master/departments/$id': typeof AuthenticatedOutdoorMasterDepartmentsIdRoute
-  '/_authenticated/outdoor/master/doctors/create': typeof AuthenticatedOutdoorMasterDoctorsCreateRoute
-  '/_authenticated/outdoor/master/test-tables/$id': typeof AuthenticatedOutdoorMasterTestTablesIdRoute
-  '/_authenticated/outdoor/master/tests/$id': typeof AuthenticatedOutdoorMasterTestsIdRoute
-  '/_authenticated/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRoute
-  '/_authenticated/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute
-  '/_authenticated/roles/permissions/$roleId/edit': typeof AuthenticatedRolesPermissionsRoleIdEditRoute
-  '/_authenticated/ultrasonogram/all/edit/$id': typeof AuthenticatedUltrasonogramAllEditIdRoute
-  '/_authenticated/ultrasonogram/all/print/$id': typeof AuthenticatedUltrasonogramAllPrintIdRoute
-  '/_authenticated/x-ray/all/edit/$id': typeof AuthenticatedXRayAllEditIdRoute
-  '/_authenticated/x-ray/all/print/$id': typeof AuthenticatedXRayAllPrintIdRoute
-  '/_authenticated/accounting/reports/balance-sheet/': typeof AuthenticatedAccountingReportsBalanceSheetIndexRoute
-  '/_authenticated/accounting/reports/daily-summary/': typeof AuthenticatedAccountingReportsDailySummaryIndexRoute
-  '/_authenticated/accounting/reports/journal/': typeof AuthenticatedAccountingReportsJournalIndexRoute
-  '/_authenticated/accounting/reports/ledger/': typeof AuthenticatedAccountingReportsLedgerIndexRoute
-  '/_authenticated/accounting/reports/profit-and-loss/': typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
-  '/_authenticated/accounting/reports/profit-loss/': typeof AuthenticatedAccountingReportsProfitLossIndexRoute
-  '/_authenticated/accounting/reports/trial-balance/': typeof AuthenticatedAccountingReportsTrialBalanceIndexRoute
-  '/_authenticated/admission/billing/$billingId/': typeof AuthenticatedAdmissionBillingBillingIdIndexRoute
-  '/_authenticated/admission/discharged-patients/bill-does-not-created/': typeof AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
-  '/_authenticated/admission/invoice/create/': typeof AuthenticatedAdmissionInvoiceCreateIndexRoute
-  '/_authenticated/admission/invoice/list/': typeof AuthenticatedAdmissionInvoiceListIndexRoute
-  '/_authenticated/admission/patients/active/': typeof AuthenticatedAdmissionPatientsActiveIndexRoute
-  '/_authenticated/admission/patients/balance-distributed-list/': typeof AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute
-  '/_authenticated/admission/patients/bill-created-list/': typeof AuthenticatedAdmissionPatientsBillCreatedListIndexRoute
-  '/_authenticated/admission/patients/bill-distributed-list/': typeof AuthenticatedAdmissionPatientsBillDistributedListIndexRoute
-  '/_authenticated/admission/patients/discharged-list/': typeof AuthenticatedAdmissionPatientsDischargedListIndexRoute
-  '/_authenticated/admission/patients/discharged/': typeof AuthenticatedAdmissionPatientsDischargedIndexRoute
-  '/_authenticated/admission/patients/final-bill-created-list/': typeof AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute
-  '/_authenticated/admission/patients/payment-completed-list/': typeof AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute
-  '/_authenticated/indoor/management/distributions/': typeof AuthenticatedIndoorManagementDistributionsIndexRoute
-  '/_authenticated/indoor/management/doctor-referred/': typeof AuthenticatedIndoorManagementDoctorReferredIndexRoute
-  '/_authenticated/indoor/master/anasthesia-types/': typeof AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute
-  '/_authenticated/indoor/master/bed-cabin-list/': typeof AuthenticatedIndoorMasterBedCabinListIndexRoute
-  '/_authenticated/indoor/master/doctor-types/': typeof AuthenticatedIndoorMasterDoctorTypesIndexRoute
-  '/_authenticated/indoor/master/operation-types/': typeof AuthenticatedIndoorMasterOperationTypesIndexRoute
-  '/_authenticated/indoor/master/patient-types/': typeof AuthenticatedIndoorMasterPatientTypesIndexRoute
-  '/_authenticated/indoor/master/service-categories/': typeof AuthenticatedIndoorMasterServiceCategoriesIndexRoute
-  '/_authenticated/indoor/master/services/': typeof AuthenticatedIndoorMasterServicesIndexRoute
-  '/_authenticated/indoor/master/treatment-outcomes/': typeof AuthenticatedIndoorMasterTreatmentOutcomesIndexRoute
-  '/_authenticated/outdoor/master/categories/': typeof AuthenticatedOutdoorMasterCategoriesIndexRoute
-  '/_authenticated/outdoor/master/departments/': typeof AuthenticatedOutdoorMasterDepartmentsIndexRoute
-  '/_authenticated/outdoor/master/doctors/': typeof AuthenticatedOutdoorMasterDoctorsIndexRoute
-  '/_authenticated/outdoor/master/machines/': typeof AuthenticatedOutdoorMasterMachinesIndexRoute
-  '/_authenticated/outdoor/master/sample-collection-rooms/': typeof AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute
-  '/_authenticated/outdoor/master/test-tables/': typeof AuthenticatedOutdoorMasterTestTablesIndexRoute
-  '/_authenticated/outdoor/master/tests/': typeof AuthenticatedOutdoorMasterTestsIndexRoute
-  '/_authenticated/outdoor/reception/due-collection/': typeof AuthenticatedOutdoorReceptionDueCollectionIndexRoute
-  '/_authenticated/outdoor/reception/my-invoices/': typeof AuthenticatedOutdoorReceptionMyInvoicesIndexRoute
-  '/_authenticated/outdoor/reception/paid-invoices/': typeof AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute
-  '/_authenticated/outdoor/reception/patients/': typeof AuthenticatedOutdoorReceptionPatientsIndexRoute
-  '/_authenticated/outdoor/reception/user-invoices/': typeof AuthenticatedOutdoorReceptionUserInvoicesIndexRoute
-  '/_authenticated/pathology/biochemical/all/': typeof AuthenticatedPathologyBiochemicalAllIndexRoute
-  '/_authenticated/pathology/biochemical/lipid-profile/': typeof AuthenticatedPathologyBiochemicalLipidProfileIndexRoute
-  '/_authenticated/pathology/hematology/all/': typeof AuthenticatedPathologyHematologyAllIndexRoute
-  '/_authenticated/pathology/hematology/blood-for-bt-ct/': typeof AuthenticatedPathologyHematologyBloodForBtCtIndexRoute
-  '/_authenticated/pathology/hematology/blood-for-tcdc/': typeof AuthenticatedPathologyHematologyBloodForTcdcIndexRoute
-  '/_authenticated/pathology/hematology/cbc-short/': typeof AuthenticatedPathologyHematologyCbcShortIndexRoute
-  '/_authenticated/pathology/hematology/cbc-with-pbf/': typeof AuthenticatedPathologyHematologyCbcWithPbfIndexRoute
-  '/_authenticated/pathology/hematology/peripheral-blood-film/': typeof AuthenticatedPathologyHematologyPeripheralBloodFilmIndexRoute
-  '/_authenticated/pathology/hematology/prothom-bin-time-full/': typeof AuthenticatedPathologyHematologyProthomBinTimeFullIndexRoute
-  '/_authenticated/pathology/hormone/all/': typeof AuthenticatedPathologyHormoneAllIndexRoute
-  '/_authenticated/pathology/hormone/electrolytes/': typeof AuthenticatedPathologyHormoneElectrolytesIndexRoute
-  '/_authenticated/pathology/hormone/semen/': typeof AuthenticatedPathologyHormoneSemenIndexRoute
-  '/_authenticated/pathology/hormone/skin-scrapping-for-fungus/': typeof AuthenticatedPathologyHormoneSkinScrappingForFungusIndexRoute
-  '/_authenticated/pathology/hormone/sputum/': typeof AuthenticatedPathologyHormoneSputumIndexRoute
-  '/_authenticated/pathology/hormone/t3t4tsh/': typeof AuthenticatedPathologyHormoneT3t4tshIndexRoute
-  '/_authenticated/pathology/immunology/all/': typeof AuthenticatedPathologyImmunologyAllIndexRoute
-  '/_authenticated/pathology/immunology/beta-hcg/': typeof AuthenticatedPathologyImmunologyBetaHcgIndexRoute
-  '/_authenticated/pathology/immunology/blood-group/': typeof AuthenticatedPathologyImmunologyBloodGroupIndexRoute
-  '/_authenticated/pathology/immunology/mt/': typeof AuthenticatedPathologyImmunologyMtIndexRoute
-  '/_authenticated/pathology/immunology/widal-test/': typeof AuthenticatedPathologyImmunologyWidalTestIndexRoute
-  '/_authenticated/pathology/stool/ocult-blood-test/': typeof AuthenticatedPathologyStoolOcultBloodTestIndexRoute
-  '/_authenticated/pathology/stool/reducing-substance/': typeof AuthenticatedPathologyStoolReducingSubstanceIndexRoute
-  '/_authenticated/pathology/stool/stool-re/': typeof AuthenticatedPathologyStoolStoolReIndexRoute
-  '/_authenticated/pathology/urine/urine-for-albumin/': typeof AuthenticatedPathologyUrineUrineForAlbuminIndexRoute
-  '/_authenticated/pathology/urine/urine-for-re-full/': typeof AuthenticatedPathologyUrineUrineForReFullIndexRoute
-  '/_authenticated/pathology/urine/urine-for-sugar/': typeof AuthenticatedPathologyUrineUrineForSugarIndexRoute
-  '/_authenticated/payroll/attendance/$staffId/': typeof AuthenticatedPayrollAttendanceStaffIdIndexRoute
-  '/_authenticated/payroll/salary/$staffId/': typeof AuthenticatedPayrollSalaryStaffIdIndexRoute
-  '/_authenticated/admission/patients/$admissionId/print/$step': typeof AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute
-  '/_authenticated/ecg/all/edit/builder/$id': typeof AuthenticatedEcgAllEditBuilderIdRoute
-  '/_authenticated/indoor/master/services/edit/$id': typeof AuthenticatedIndoorMasterServicesEditIdRoute
-  '/_authenticated/outdoor/master/doctors/$doctorId/edit': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute
-  '/_authenticated/pathology/biochemical/all/edit/$reportId': typeof AuthenticatedPathologyBiochemicalAllEditReportIdRoute
-  '/_authenticated/pathology/biochemical/all/report/$reportId': typeof AuthenticatedPathologyBiochemicalAllReportReportIdRoute
-  '/_authenticated/pathology/biochemical/lipid-profile/report/$reportId': typeof AuthenticatedPathologyBiochemicalLipidProfileReportReportIdRoute
-  '/_authenticated/pathology/hematology/all/report/$reportId': typeof AuthenticatedPathologyHematologyAllReportReportIdRoute
-  '/_authenticated/pathology/hematology/blood-for-bt-ct/report/$reportId': typeof AuthenticatedPathologyHematologyBloodForBtCtReportReportIdRoute
-  '/_authenticated/pathology/hematology/blood-for-tcdc/report/$reportId': typeof AuthenticatedPathologyHematologyBloodForTcdcReportReportIdRoute
-  '/_authenticated/pathology/hematology/cbc-short/edit/$id': typeof AuthenticatedPathologyHematologyCbcShortEditIdRoute
-  '/_authenticated/pathology/hematology/cbc-short/report/$reportId': typeof AuthenticatedPathologyHematologyCbcShortReportReportIdRoute
-  '/_authenticated/pathology/hematology/cbc-with-pbf/edit/$id': typeof AuthenticatedPathologyHematologyCbcWithPbfEditIdRoute
-  '/_authenticated/pathology/hematology/cbc-with-pbf/report/$reportId': typeof AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRoute
-  '/_authenticated/pathology/hematology/peripheral-blood-film/report/$reportId': typeof AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRoute
-  '/_authenticated/pathology/hematology/prothom-bin-time-full/report/$reportId': typeof AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute
-  '/_authenticated/pathology/hormone/all/report/$reportId': typeof AuthenticatedPathologyHormoneAllReportReportIdRoute
-  '/_authenticated/pathology/hormone/electrolytes/report/$reportId': typeof AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute
-  '/_authenticated/pathology/hormone/semen/edit/$reportId': typeof AuthenticatedPathologyHormoneSemenEditReportIdRoute
-  '/_authenticated/pathology/hormone/semen/report/$reportId': typeof AuthenticatedPathologyHormoneSemenReportReportIdRoute
-  '/_authenticated/pathology/hormone/skin-scrapping-for-fungus/report/$reportId': typeof AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRoute
-  '/_authenticated/pathology/hormone/sputum/report/$reportId': typeof AuthenticatedPathologyHormoneSputumReportReportIdRoute
-  '/_authenticated/pathology/hormone/t3t4tsh/report/$reportId': typeof AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute
-  '/_authenticated/pathology/immunology/all/report/$reportId': typeof AuthenticatedPathologyImmunologyAllReportReportIdRoute
-  '/_authenticated/pathology/immunology/beta-hcg/report/$reportId': typeof AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute
-  '/_authenticated/pathology/immunology/blood-group/report/$reportId': typeof AuthenticatedPathologyImmunologyBloodGroupReportReportIdRoute
-  '/_authenticated/pathology/immunology/mt/report/$reportId': typeof AuthenticatedPathologyImmunologyMtReportReportIdRoute
-  '/_authenticated/pathology/immunology/widal-test/report/$reportId': typeof AuthenticatedPathologyImmunologyWidalTestReportReportIdRoute
-  '/_authenticated/pathology/stool/ocult-blood-test/report/$reportId': typeof AuthenticatedPathologyStoolOcultBloodTestReportReportIdRoute
-  '/_authenticated/pathology/stool/reducing-substance/report/$reportId': typeof AuthenticatedPathologyStoolReducingSubstanceReportReportIdRoute
-  '/_authenticated/pathology/stool/stool-re/edit/$id': typeof AuthenticatedPathologyStoolStoolReEditIdRoute
-  '/_authenticated/pathology/stool/stool-re/report/$reportId': typeof AuthenticatedPathologyStoolStoolReReportReportIdRoute
-  '/_authenticated/pathology/urine/urine-for-albumin/report/$reportId': typeof AuthenticatedPathologyUrineUrineForAlbuminReportReportIdRoute
-  '/_authenticated/pathology/urine/urine-for-re-full/edit/$id': typeof AuthenticatedPathologyUrineUrineForReFullEditIdRoute
-  '/_authenticated/pathology/urine/urine-for-re-full/report/$reportId': typeof AuthenticatedPathologyUrineUrineForReFullReportReportIdRoute
-  '/_authenticated/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
-  '/_authenticated/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
-  '/_authenticated/x-ray/all/edit/builder/$id': typeof AuthenticatedXRayAllEditBuilderIdRoute
-  '/_authenticated/admission/patients/$admissionId/bill-created/': typeof AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute
-  '/_authenticated/admission/patients/$admissionId/billing-print/': typeof AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute
-  '/_authenticated/admission/patients/$admissionId/billing/': typeof AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute
-  '/_authenticated/admission/patients/$admissionId/confirm-balance/': typeof AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
-  '/_authenticated/admission/patients/$admissionId/distribute-bill/': typeof AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute
-  '/_authenticated/admission/patients/$admissionId/final-bill-print/': typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
-  '/_authenticated/admission/patients/$admissionId/final-bill/': typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute
-  '/_authenticated/admission/patients/$admissionId/print/': typeof AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute
-  '/_authenticated/indoor/master/bed-cabin-list/create/': typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
-  '/_authenticated/indoor/master/services/create/': typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
-  '/_authenticated/outdoor/master/doctors/$doctorId/': typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
-  '/_authenticated/outdoor/master/tests/create/': typeof AuthenticatedOutdoorMasterTestsCreateIndexRoute
-  '/_authenticated/outdoor/reception/invoices/create/': typeof AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute
-  '/_authenticated/outdoor/reception/invoices/list/': typeof AuthenticatedOutdoorReceptionInvoicesListIndexRoute
-  '/_authenticated/reports/my/outdoor/date-wise-collection/': typeof AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute
-  '/_authenticated/reports/my/outdoor/today-collection/': typeof AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute
-  '/_authenticated/outdoor/master/tests/edit/$id/': typeof AuthenticatedOutdoorMasterTestsEditIdIndexRoute
-  '/_authenticated/outdoor/reception/invoices/edit/$invoiceId/': typeof AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
-  '/_authenticated/pathology/hematology/all/edit/$id/': typeof AuthenticatedPathologyHematologyAllEditIdIndexRoute
-  '/_authenticated/pathology/hormone/all/edit/$id/': typeof AuthenticatedPathologyHormoneAllEditIdIndexRoute
-  '/_authenticated/pathology/immunology/all/edit/$id/': typeof AuthenticatedPathologyImmunologyAllEditIdIndexRoute
+  '/(platform)/admin/': typeof platformAdminIndexRoute
+  '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/_authenticated/dashboard/errors/$error': typeof AuthenticatedDashboardErrorsErrorRoute
+  '/_authenticated/dashboard/notifications/$id': typeof AuthenticatedDashboardNotificationsIdRoute
+  '/_authenticated/dashboard/settings/account': typeof AuthenticatedDashboardSettingsAccountRoute
+  '/_authenticated/dashboard/settings/appearance': typeof AuthenticatedDashboardSettingsAppearanceRoute
+  '/_authenticated/dashboard/settings/date-controls': typeof AuthenticatedDashboardSettingsDateControlsRoute
+  '/_authenticated/dashboard/settings/display': typeof AuthenticatedDashboardSettingsDisplayRoute
+  '/_authenticated/dashboard/settings/notifications': typeof AuthenticatedDashboardSettingsNotificationsRoute
+  '/_authenticated/dashboard/settings/payment-accounts': typeof AuthenticatedDashboardSettingsPaymentAccountsRoute
+  '/_authenticated/dashboard/settings/prefix': typeof AuthenticatedDashboardSettingsPrefixRoute
+  '/_authenticated/dashboard/accounting/': typeof AuthenticatedDashboardAccountingIndexRoute
+  '/_authenticated/dashboard/apps/': typeof AuthenticatedDashboardAppsIndexRoute
+  '/_authenticated/dashboard/backup-settings/': typeof AuthenticatedDashboardBackupSettingsIndexRoute
+  '/_authenticated/dashboard/backups/': typeof AuthenticatedDashboardBackupsIndexRoute
+  '/_authenticated/dashboard/chats/': typeof AuthenticatedDashboardChatsIndexRoute
+  '/_authenticated/dashboard/company-account/': typeof AuthenticatedDashboardCompanyAccountIndexRoute
+  '/_authenticated/dashboard/database/': typeof AuthenticatedDashboardDatabaseIndexRoute
+  '/_authenticated/dashboard/gallery/': typeof AuthenticatedDashboardGalleryIndexRoute
+  '/_authenticated/dashboard/help-center/': typeof AuthenticatedDashboardHelpCenterIndexRoute
+  '/_authenticated/dashboard/help/': typeof AuthenticatedDashboardHelpIndexRoute
+  '/_authenticated/dashboard/my-account/': typeof AuthenticatedDashboardMyAccountIndexRoute
+  '/_authenticated/dashboard/notifications/': typeof AuthenticatedDashboardNotificationsIndexRoute
+  '/_authenticated/dashboard/roles/': typeof AuthenticatedDashboardRolesIndexRoute
+  '/_authenticated/dashboard/settings/': typeof AuthenticatedDashboardSettingsIndexRoute
+  '/_authenticated/dashboard/subscription/': typeof AuthenticatedDashboardSubscriptionIndexRoute
+  '/_authenticated/dashboard/tasks/': typeof AuthenticatedDashboardTasksIndexRoute
+  '/_authenticated/dashboard/users/': typeof AuthenticatedDashboardUsersIndexRoute
+  '/_authenticated/dashboard/roles/edit/$id': typeof AuthenticatedDashboardRolesEditIdRoute
+  '/_authenticated/dashboard/accounting/accounts/': typeof AuthenticatedDashboardAccountingAccountsIndexRoute
+  '/_authenticated/dashboard/accounting/expense/': typeof AuthenticatedDashboardAccountingExpenseIndexRoute
+  '/_authenticated/dashboard/accounting/expenses/': typeof AuthenticatedDashboardAccountingExpensesIndexRoute
+  '/_authenticated/dashboard/accounting/income/': typeof AuthenticatedDashboardAccountingIncomeIndexRoute
+  '/_authenticated/dashboard/accounting/transactions/': typeof AuthenticatedDashboardAccountingTransactionsIndexRoute
+  '/_authenticated/dashboard/accounts/daily-credit/': typeof AuthenticatedDashboardAccountsDailyCreditIndexRoute
+  '/_authenticated/dashboard/accounts/daily-debit/': typeof AuthenticatedDashboardAccountsDailyDebitIndexRoute
+  '/_authenticated/dashboard/accounts/journal/': typeof AuthenticatedDashboardAccountsJournalIndexRoute
+  '/_authenticated/dashboard/accounts/pay-to-anaesthetist/': typeof AuthenticatedDashboardAccountsPayToAnaesthetistIndexRoute
+  '/_authenticated/dashboard/accounts/pay-to-assistant/': typeof AuthenticatedDashboardAccountsPayToAssistantIndexRoute
+  '/_authenticated/dashboard/accounts/pay-to-consultant/': typeof AuthenticatedDashboardAccountsPayToConsultantIndexRoute
+  '/_authenticated/dashboard/accounts/pay-to-surgeon/': typeof AuthenticatedDashboardAccountsPayToSurgeonIndexRoute
+  '/_authenticated/dashboard/admission/advance-payment/': typeof AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute
+  '/_authenticated/dashboard/admission/bed-cabin-charge/': typeof AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute
+  '/_authenticated/dashboard/admission/due-collection/': typeof AuthenticatedDashboardAdmissionDueCollectionIndexRoute
+  '/_authenticated/dashboard/admission/final-bills/': typeof AuthenticatedDashboardAdmissionFinalBillsIndexRoute
+  '/_authenticated/dashboard/admission/finalise-services/': typeof AuthenticatedDashboardAdmissionFinaliseServicesIndexRoute
+  '/_authenticated/dashboard/admission/first-time-bill/': typeof AuthenticatedDashboardAdmissionFirstTimeBillIndexRoute
+  '/_authenticated/dashboard/admission/first-time-service/': typeof AuthenticatedDashboardAdmissionFirstTimeServiceIndexRoute
+  '/_authenticated/dashboard/admission/invoice/': typeof AuthenticatedDashboardAdmissionInvoiceIndexRoute
+  '/_authenticated/dashboard/admission/new-admission/': typeof AuthenticatedDashboardAdmissionNewAdmissionIndexRoute
+  '/_authenticated/dashboard/admission/patients/': typeof AuthenticatedDashboardAdmissionPatientsIndexRoute
+  '/_authenticated/dashboard/admission/second-time-bill/': typeof AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute
+  '/_authenticated/dashboard/banks/bank-accounts/': typeof AuthenticatedDashboardBanksBankAccountsIndexRoute
+  '/_authenticated/dashboard/banks/bank-deposits/': typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
+  '/_authenticated/dashboard/banks/bank-transactions/': typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
+  '/_authenticated/dashboard/banks/bank-withdrawals/': typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
+  '/_authenticated/dashboard/ecg/all/': typeof AuthenticatedDashboardEcgAllIndexRoute
+  '/_authenticated/dashboard/payroll/employees/': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
+  '/_authenticated/dashboard/payroll/overview/': typeof AuthenticatedDashboardPayrollOverviewIndexRoute
+  '/_authenticated/dashboard/roles/create/': typeof AuthenticatedDashboardRolesCreateIndexRoute
+  '/_authenticated/dashboard/ultrasonogram/all/': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
+  '/_authenticated/dashboard/x-ray/all/': typeof AuthenticatedDashboardXRayAllIndexRoute
+  '/_authenticated/dashboard/accounting/reports/ledger/print': typeof AuthenticatedDashboardAccountingReportsLedgerPrintRoute
+  '/_authenticated/dashboard/accounting/reports/multi-ledger/print': typeof AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute
+  '/_authenticated/dashboard/ecg/all/edit/$id': typeof AuthenticatedDashboardEcgAllEditIdRoute
+  '/_authenticated/dashboard/ecg/all/print/$id': typeof AuthenticatedDashboardEcgAllPrintIdRoute
+  '/_authenticated/dashboard/indoor/master/bed-cabin-list/$id': typeof AuthenticatedDashboardIndoorMasterBedCabinListIdRoute
+  '/_authenticated/dashboard/indoor/master/services/$id': typeof AuthenticatedDashboardIndoorMasterServicesIdRoute
+  '/_authenticated/dashboard/outdoor/master/categories/$id': typeof AuthenticatedDashboardOutdoorMasterCategoriesIdRoute
+  '/_authenticated/dashboard/outdoor/master/departments/$id': typeof AuthenticatedDashboardOutdoorMasterDepartmentsIdRoute
+  '/_authenticated/dashboard/outdoor/master/doctors/create': typeof AuthenticatedDashboardOutdoorMasterDoctorsCreateRoute
+  '/_authenticated/dashboard/outdoor/master/test-tables/$id': typeof AuthenticatedDashboardOutdoorMasterTestTablesIdRoute
+  '/_authenticated/dashboard/outdoor/master/tests/$id': typeof AuthenticatedDashboardOutdoorMasterTestsIdRoute
+  '/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
+  '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute
+  '/_authenticated/dashboard/roles/permissions/$roleId/edit': typeof AuthenticatedDashboardRolesPermissionsRoleIdEditRoute
+  '/_authenticated/dashboard/ultrasonogram/all/edit/$id': typeof AuthenticatedDashboardUltrasonogramAllEditIdRoute
+  '/_authenticated/dashboard/ultrasonogram/all/print/$id': typeof AuthenticatedDashboardUltrasonogramAllPrintIdRoute
+  '/_authenticated/dashboard/x-ray/all/edit/$id': typeof AuthenticatedDashboardXRayAllEditIdRoute
+  '/_authenticated/dashboard/x-ray/all/print/$id': typeof AuthenticatedDashboardXRayAllPrintIdRoute
+  '/_authenticated/dashboard/accounting/reports/balance-sheet/': typeof AuthenticatedDashboardAccountingReportsBalanceSheetIndexRoute
+  '/_authenticated/dashboard/accounting/reports/cash-flow/': typeof AuthenticatedDashboardAccountingReportsCashFlowIndexRoute
+  '/_authenticated/dashboard/accounting/reports/daily-summary/': typeof AuthenticatedDashboardAccountingReportsDailySummaryIndexRoute
+  '/_authenticated/dashboard/accounting/reports/journal/': typeof AuthenticatedDashboardAccountingReportsJournalIndexRoute
+  '/_authenticated/dashboard/accounting/reports/ledger/': typeof AuthenticatedDashboardAccountingReportsLedgerIndexRoute
+  '/_authenticated/dashboard/accounting/reports/multi-ledger/': typeof AuthenticatedDashboardAccountingReportsMultiLedgerIndexRoute
+  '/_authenticated/dashboard/accounting/reports/profit-and-loss/': typeof AuthenticatedDashboardAccountingReportsProfitAndLossIndexRoute
+  '/_authenticated/dashboard/accounting/reports/profit-loss/': typeof AuthenticatedDashboardAccountingReportsProfitLossIndexRoute
+  '/_authenticated/dashboard/accounting/reports/trial-balance/': typeof AuthenticatedDashboardAccountingReportsTrialBalanceIndexRoute
+  '/_authenticated/dashboard/admission/billing/$billingId/': typeof AuthenticatedDashboardAdmissionBillingBillingIdIndexRoute
+  '/_authenticated/dashboard/admission/discharged-patients/bill-does-not-created/': typeof AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
+  '/_authenticated/dashboard/admission/invoice/create/': typeof AuthenticatedDashboardAdmissionInvoiceCreateIndexRoute
+  '/_authenticated/dashboard/admission/invoice/list/': typeof AuthenticatedDashboardAdmissionInvoiceListIndexRoute
+  '/_authenticated/dashboard/admission/patients/active/': typeof AuthenticatedDashboardAdmissionPatientsActiveIndexRoute
+  '/_authenticated/dashboard/admission/patients/balance-distributed-list/': typeof AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRoute
+  '/_authenticated/dashboard/admission/patients/bill-created-list/': typeof AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRoute
+  '/_authenticated/dashboard/admission/patients/bill-distributed-list/': typeof AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute
+  '/_authenticated/dashboard/admission/patients/discharged-list/': typeof AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute
+  '/_authenticated/dashboard/admission/patients/discharged/': typeof AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute
+  '/_authenticated/dashboard/admission/patients/final-bill-created-list/': typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
+  '/_authenticated/dashboard/admission/patients/payment-completed-list/': typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
+  '/_authenticated/dashboard/indoor/management/distributions/': typeof AuthenticatedDashboardIndoorManagementDistributionsIndexRoute
+  '/_authenticated/dashboard/indoor/management/doctor-referred/': typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
+  '/_authenticated/dashboard/indoor/master/anasthesia-types/': typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
+  '/_authenticated/dashboard/indoor/master/bed-cabin-list/': typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
+  '/_authenticated/dashboard/indoor/master/doctor-types/': typeof AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute
+  '/_authenticated/dashboard/indoor/master/operation-types/': typeof AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute
+  '/_authenticated/dashboard/indoor/master/patient-types/': typeof AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute
+  '/_authenticated/dashboard/indoor/master/service-categories/': typeof AuthenticatedDashboardIndoorMasterServiceCategoriesIndexRoute
+  '/_authenticated/dashboard/indoor/master/services/': typeof AuthenticatedDashboardIndoorMasterServicesIndexRoute
+  '/_authenticated/dashboard/indoor/master/treatment-outcomes/': typeof AuthenticatedDashboardIndoorMasterTreatmentOutcomesIndexRoute
+  '/_authenticated/dashboard/outdoor/master/categories/': typeof AuthenticatedDashboardOutdoorMasterCategoriesIndexRoute
+  '/_authenticated/dashboard/outdoor/master/departments/': typeof AuthenticatedDashboardOutdoorMasterDepartmentsIndexRoute
+  '/_authenticated/dashboard/outdoor/master/doctors/': typeof AuthenticatedDashboardOutdoorMasterDoctorsIndexRoute
+  '/_authenticated/dashboard/outdoor/master/machines/': typeof AuthenticatedDashboardOutdoorMasterMachinesIndexRoute
+  '/_authenticated/dashboard/outdoor/master/sample-collection-rooms/': typeof AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRoute
+  '/_authenticated/dashboard/outdoor/master/test-tables/': typeof AuthenticatedDashboardOutdoorMasterTestTablesIndexRoute
+  '/_authenticated/dashboard/outdoor/master/tests/': typeof AuthenticatedDashboardOutdoorMasterTestsIndexRoute
+  '/_authenticated/dashboard/outdoor/reception/due-collection/': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute
+  '/_authenticated/dashboard/outdoor/reception/my-invoices/': typeof AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute
+  '/_authenticated/dashboard/outdoor/reception/paid-invoices/': typeof AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute
+  '/_authenticated/dashboard/outdoor/reception/patients/': typeof AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute
+  '/_authenticated/dashboard/outdoor/reception/user-invoices/': typeof AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute
+  '/_authenticated/dashboard/pathology/biochemical/all/': typeof AuthenticatedDashboardPathologyBiochemicalAllIndexRoute
+  '/_authenticated/dashboard/pathology/biochemical/lipid-profile/': typeof AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRoute
+  '/_authenticated/dashboard/pathology/hematology/all/': typeof AuthenticatedDashboardPathologyHematologyAllIndexRoute
+  '/_authenticated/dashboard/pathology/hematology/blood-for-bt-ct/': typeof AuthenticatedDashboardPathologyHematologyBloodForBtCtIndexRoute
+  '/_authenticated/dashboard/pathology/hematology/blood-for-tcdc/': typeof AuthenticatedDashboardPathologyHematologyBloodForTcdcIndexRoute
+  '/_authenticated/dashboard/pathology/hematology/cbc-short/': typeof AuthenticatedDashboardPathologyHematologyCbcShortIndexRoute
+  '/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/': typeof AuthenticatedDashboardPathologyHematologyCbcWithPbfIndexRoute
+  '/_authenticated/dashboard/pathology/hematology/peripheral-blood-film/': typeof AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmIndexRoute
+  '/_authenticated/dashboard/pathology/hematology/prothom-bin-time-full/': typeof AuthenticatedDashboardPathologyHematologyProthomBinTimeFullIndexRoute
+  '/_authenticated/dashboard/pathology/hormone/all/': typeof AuthenticatedDashboardPathologyHormoneAllIndexRoute
+  '/_authenticated/dashboard/pathology/hormone/electrolytes/': typeof AuthenticatedDashboardPathologyHormoneElectrolytesIndexRoute
+  '/_authenticated/dashboard/pathology/hormone/semen/': typeof AuthenticatedDashboardPathologyHormoneSemenIndexRoute
+  '/_authenticated/dashboard/pathology/hormone/skin-scrapping-for-fungus/': typeof AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusIndexRoute
+  '/_authenticated/dashboard/pathology/hormone/sputum/': typeof AuthenticatedDashboardPathologyHormoneSputumIndexRoute
+  '/_authenticated/dashboard/pathology/hormone/t3t4tsh/': typeof AuthenticatedDashboardPathologyHormoneT3t4tshIndexRoute
+  '/_authenticated/dashboard/pathology/immunology/all/': typeof AuthenticatedDashboardPathologyImmunologyAllIndexRoute
+  '/_authenticated/dashboard/pathology/immunology/beta-hcg/': typeof AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRoute
+  '/_authenticated/dashboard/pathology/immunology/blood-group/': typeof AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute
+  '/_authenticated/dashboard/pathology/immunology/mt/': typeof AuthenticatedDashboardPathologyImmunologyMtIndexRoute
+  '/_authenticated/dashboard/pathology/immunology/widal-test/': typeof AuthenticatedDashboardPathologyImmunologyWidalTestIndexRoute
+  '/_authenticated/dashboard/pathology/stool/ocult-blood-test/': typeof AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRoute
+  '/_authenticated/dashboard/pathology/stool/reducing-substance/': typeof AuthenticatedDashboardPathologyStoolReducingSubstanceIndexRoute
+  '/_authenticated/dashboard/pathology/stool/stool-re/': typeof AuthenticatedDashboardPathologyStoolStoolReIndexRoute
+  '/_authenticated/dashboard/pathology/urine/urine-for-albumin/': typeof AuthenticatedDashboardPathologyUrineUrineForAlbuminIndexRoute
+  '/_authenticated/dashboard/pathology/urine/urine-for-re-full/': typeof AuthenticatedDashboardPathologyUrineUrineForReFullIndexRoute
+  '/_authenticated/dashboard/pathology/urine/urine-for-sugar/': typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
+  '/_authenticated/dashboard/payroll/attendance/$staffId/': typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
+  '/_authenticated/dashboard/payroll/salary/$staffId/': typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  '/_authenticated/dashboard/admission/patients/$admissionId/print/$step': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
+  '/_authenticated/dashboard/ecg/all/edit/builder/$id': typeof AuthenticatedDashboardEcgAllEditBuilderIdRoute
+  '/_authenticated/dashboard/indoor/master/services/edit/$id': typeof AuthenticatedDashboardIndoorMasterServicesEditIdRoute
+  '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/edit': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute
+  '/_authenticated/dashboard/pathology/biochemical/all/edit/$reportId': typeof AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRoute
+  '/_authenticated/dashboard/pathology/biochemical/all/report/$reportId': typeof AuthenticatedDashboardPathologyBiochemicalAllReportReportIdRoute
+  '/_authenticated/dashboard/pathology/biochemical/lipid-profile/report/$reportId': typeof AuthenticatedDashboardPathologyBiochemicalLipidProfileReportReportIdRoute
+  '/_authenticated/dashboard/pathology/hematology/all/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyAllReportReportIdRoute
+  '/_authenticated/dashboard/pathology/hematology/blood-for-bt-ct/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyBloodForBtCtReportReportIdRoute
+  '/_authenticated/dashboard/pathology/hematology/blood-for-tcdc/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyBloodForTcdcReportReportIdRoute
+  '/_authenticated/dashboard/pathology/hematology/cbc-short/edit/$id': typeof AuthenticatedDashboardPathologyHematologyCbcShortEditIdRoute
+  '/_authenticated/dashboard/pathology/hematology/cbc-short/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyCbcShortReportReportIdRoute
+  '/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/edit/$id': typeof AuthenticatedDashboardPathologyHematologyCbcWithPbfEditIdRoute
+  '/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyCbcWithPbfReportReportIdRoute
+  '/_authenticated/dashboard/pathology/hematology/peripheral-blood-film/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmReportReportIdRoute
+  '/_authenticated/dashboard/pathology/hematology/prothom-bin-time-full/report/$reportId': typeof AuthenticatedDashboardPathologyHematologyProthomBinTimeFullReportReportIdRoute
+  '/_authenticated/dashboard/pathology/hormone/all/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneAllReportReportIdRoute
+  '/_authenticated/dashboard/pathology/hormone/electrolytes/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneElectrolytesReportReportIdRoute
+  '/_authenticated/dashboard/pathology/hormone/semen/edit/$reportId': typeof AuthenticatedDashboardPathologyHormoneSemenEditReportIdRoute
+  '/_authenticated/dashboard/pathology/hormone/semen/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneSemenReportReportIdRoute
+  '/_authenticated/dashboard/pathology/hormone/skin-scrapping-for-fungus/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusReportReportIdRoute
+  '/_authenticated/dashboard/pathology/hormone/sputum/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneSputumReportReportIdRoute
+  '/_authenticated/dashboard/pathology/hormone/t3t4tsh/report/$reportId': typeof AuthenticatedDashboardPathologyHormoneT3t4tshReportReportIdRoute
+  '/_authenticated/dashboard/pathology/immunology/all/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyAllReportReportIdRoute
+  '/_authenticated/dashboard/pathology/immunology/beta-hcg/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRoute
+  '/_authenticated/dashboard/pathology/immunology/blood-group/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute
+  '/_authenticated/dashboard/pathology/immunology/mt/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute
+  '/_authenticated/dashboard/pathology/immunology/widal-test/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRoute
+  '/_authenticated/dashboard/pathology/stool/ocult-blood-test/report/$reportId': typeof AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRoute
+  '/_authenticated/dashboard/pathology/stool/reducing-substance/report/$reportId': typeof AuthenticatedDashboardPathologyStoolReducingSubstanceReportReportIdRoute
+  '/_authenticated/dashboard/pathology/stool/stool-re/edit/$id': typeof AuthenticatedDashboardPathologyStoolStoolReEditIdRoute
+  '/_authenticated/dashboard/pathology/stool/stool-re/report/$reportId': typeof AuthenticatedDashboardPathologyStoolStoolReReportReportIdRoute
+  '/_authenticated/dashboard/pathology/urine/urine-for-albumin/report/$reportId': typeof AuthenticatedDashboardPathologyUrineUrineForAlbuminReportReportIdRoute
+  '/_authenticated/dashboard/pathology/urine/urine-for-re-full/edit/$id': typeof AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRoute
+  '/_authenticated/dashboard/pathology/urine/urine-for-re-full/report/$reportId': typeof AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRoute
+  '/_authenticated/dashboard/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute
+  '/_authenticated/dashboard/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute
+  '/_authenticated/dashboard/x-ray/all/edit/builder/$id': typeof AuthenticatedDashboardXRayAllEditBuilderIdRoute
+  '/_authenticated/dashboard/admission/patients/$admissionId/bill-created/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRoute
+  '/_authenticated/dashboard/admission/patients/$admissionId/billing-print/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRoute
+  '/_authenticated/dashboard/admission/patients/$admissionId/billing/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRoute
+  '/_authenticated/dashboard/admission/patients/$admissionId/confirm-balance/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
+  '/_authenticated/dashboard/admission/patients/$admissionId/distribute-bill/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute
+  '/_authenticated/dashboard/admission/patients/$admissionId/final-bill-print/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
+  '/_authenticated/dashboard/admission/patients/$admissionId/final-bill/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute
+  '/_authenticated/dashboard/admission/patients/$admissionId/print/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute
+  '/_authenticated/dashboard/indoor/master/bed-cabin-list/create/': typeof AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute
+  '/_authenticated/dashboard/indoor/master/services/create/': typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
+  '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
+  '/_authenticated/dashboard/outdoor/master/tests/create/': typeof AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute
+  '/_authenticated/dashboard/outdoor/reception/invoices/create/': typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
+  '/_authenticated/dashboard/outdoor/reception/invoices/list/': typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
+  '/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/': typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute
+  '/_authenticated/dashboard/reports/my/outdoor/today-collection/': typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute
+  '/_authenticated/dashboard/outdoor/master/tests/edit/$id/': typeof AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute
+  '/_authenticated/dashboard/outdoor/reception/invoices/edit/$invoiceId/': typeof AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
+  '/_authenticated/dashboard/pathology/hematology/all/edit/$id/': typeof AuthenticatedDashboardPathologyHematologyAllEditIdIndexRoute
+  '/_authenticated/dashboard/pathology/hormone/all/edit/$id/': typeof AuthenticatedDashboardPathologyHormoneAllEditIdIndexRoute
+  '/_authenticated/dashboard/pathology/immunology/all/edit/$id/': typeof AuthenticatedDashboardPathologyImmunologyAllEditIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/clerk'
-    | '/settings'
+    | '/auth-callback'
     | '/forgot-password'
     | '/login'
     | '/otp'
@@ -2226,214 +2522,237 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
-    | '/'
-    | '/errors/$error'
-    | '/notifications/$id'
-    | '/settings/account'
-    | '/settings/appearance'
-    | '/settings/display'
-    | '/settings/notifications'
-    | '/settings/payment-accounts'
-    | '/settings/prefix'
+    | '/contact'
+    | '/pricing'
+    | '/register'
+    | '/dashboard/settings'
+    | '/admin'
+    | '/admin/admins'
+    | '/admin/billing'
+    | '/admin/companies'
+    | '/admin/login'
+    | '/admin/modules'
+    | '/admin/plans'
+    | '/admin/registrations'
+    | '/admin/settings'
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
-    | '/accounting'
-    | '/apps'
-    | '/backup-settings'
-    | '/backups'
-    | '/chats'
-    | '/database'
-    | '/help-center'
-    | '/help'
-    | '/my-account'
-    | '/notifications'
-    | '/roles'
-    | '/settings/'
-    | '/tasks'
-    | '/users'
-    | '/roles/edit/$id'
-    | '/accounting/accounts'
-    | '/accounting/expense'
-    | '/accounting/expenses'
-    | '/accounting/income'
-    | '/accounting/transactions'
-    | '/accounts/daily-credit'
-    | '/accounts/daily-debit'
-    | '/accounts/journal'
-    | '/accounts/pay-to-anaesthetist'
-    | '/accounts/pay-to-assistant'
-    | '/accounts/pay-to-consultant'
-    | '/accounts/pay-to-surgeon'
-    | '/admission/advance-payment'
-    | '/admission/bed-cabin-charge'
-    | '/admission/due-collection'
-    | '/admission/final-bills'
-    | '/admission/finalise-services'
-    | '/admission/first-time-bill'
-    | '/admission/first-time-service'
-    | '/admission/invoice'
-    | '/admission/new-admission'
-    | '/admission/patients'
-    | '/admission/second-time-bill'
-    | '/banks/bank-accounts'
-    | '/banks/bank-deposits'
-    | '/banks/bank-transactions'
-    | '/banks/bank-withdrawals'
-    | '/ecg/all'
-    | '/payroll/employees'
-    | '/payroll/overview'
-    | '/roles/create'
-    | '/ultrasonogram/all'
-    | '/x-ray/all'
-    | '/accounting/reports/ledger/print'
-    | '/ecg/all/edit/$id'
-    | '/ecg/all/print/$id'
-    | '/indoor/master/bed-cabin-list/$id'
-    | '/indoor/master/services/$id'
-    | '/outdoor/master/categories/$id'
-    | '/outdoor/master/departments/$id'
-    | '/outdoor/master/doctors/create'
-    | '/outdoor/master/test-tables/$id'
-    | '/outdoor/master/tests/$id'
-    | '/outdoor/reception/due-collection/$invoiceId'
-    | '/outdoor/reception/invoices/$invoiceId'
-    | '/roles/permissions/$roleId/edit'
-    | '/ultrasonogram/all/edit/$id'
-    | '/ultrasonogram/all/print/$id'
-    | '/x-ray/all/edit/$id'
-    | '/x-ray/all/print/$id'
-    | '/accounting/reports/balance-sheet'
-    | '/accounting/reports/daily-summary'
-    | '/accounting/reports/journal'
-    | '/accounting/reports/ledger'
-    | '/accounting/reports/profit-and-loss'
-    | '/accounting/reports/profit-loss'
-    | '/accounting/reports/trial-balance'
-    | '/admission/billing/$billingId'
-    | '/admission/discharged-patients/bill-does-not-created'
-    | '/admission/invoice/create'
-    | '/admission/invoice/list'
-    | '/admission/patients/active'
-    | '/admission/patients/balance-distributed-list'
-    | '/admission/patients/bill-created-list'
-    | '/admission/patients/bill-distributed-list'
-    | '/admission/patients/discharged-list'
-    | '/admission/patients/discharged'
-    | '/admission/patients/final-bill-created-list'
-    | '/admission/patients/payment-completed-list'
-    | '/indoor/management/distributions'
-    | '/indoor/management/doctor-referred'
-    | '/indoor/master/anasthesia-types'
-    | '/indoor/master/bed-cabin-list'
-    | '/indoor/master/doctor-types'
-    | '/indoor/master/operation-types'
-    | '/indoor/master/patient-types'
-    | '/indoor/master/service-categories'
-    | '/indoor/master/services'
-    | '/indoor/master/treatment-outcomes'
-    | '/outdoor/master/categories'
-    | '/outdoor/master/departments'
-    | '/outdoor/master/doctors'
-    | '/outdoor/master/machines'
-    | '/outdoor/master/sample-collection-rooms'
-    | '/outdoor/master/test-tables'
-    | '/outdoor/master/tests'
-    | '/outdoor/reception/due-collection'
-    | '/outdoor/reception/my-invoices'
-    | '/outdoor/reception/paid-invoices'
-    | '/outdoor/reception/patients'
-    | '/outdoor/reception/user-invoices'
-    | '/pathology/biochemical/all'
-    | '/pathology/biochemical/lipid-profile'
-    | '/pathology/hematology/all'
-    | '/pathology/hematology/blood-for-bt-ct'
-    | '/pathology/hematology/blood-for-tcdc'
-    | '/pathology/hematology/cbc-short'
-    | '/pathology/hematology/cbc-with-pbf'
-    | '/pathology/hematology/peripheral-blood-film'
-    | '/pathology/hematology/prothom-bin-time-full'
-    | '/pathology/hormone/all'
-    | '/pathology/hormone/electrolytes'
-    | '/pathology/hormone/semen'
-    | '/pathology/hormone/skin-scrapping-for-fungus'
-    | '/pathology/hormone/sputum'
-    | '/pathology/hormone/t3t4tsh'
-    | '/pathology/immunology/all'
-    | '/pathology/immunology/beta-hcg'
-    | '/pathology/immunology/blood-group'
-    | '/pathology/immunology/mt'
-    | '/pathology/immunology/widal-test'
-    | '/pathology/stool/ocult-blood-test'
-    | '/pathology/stool/reducing-substance'
-    | '/pathology/stool/stool-re'
-    | '/pathology/urine/urine-for-albumin'
-    | '/pathology/urine/urine-for-re-full'
-    | '/pathology/urine/urine-for-sugar'
-    | '/payroll/attendance/$staffId'
-    | '/payroll/salary/$staffId'
-    | '/admission/patients/$admissionId/print/$step'
-    | '/ecg/all/edit/builder/$id'
-    | '/indoor/master/services/edit/$id'
-    | '/outdoor/master/doctors/$doctorId/edit'
-    | '/pathology/biochemical/all/edit/$reportId'
-    | '/pathology/biochemical/all/report/$reportId'
-    | '/pathology/biochemical/lipid-profile/report/$reportId'
-    | '/pathology/hematology/all/report/$reportId'
-    | '/pathology/hematology/blood-for-bt-ct/report/$reportId'
-    | '/pathology/hematology/blood-for-tcdc/report/$reportId'
-    | '/pathology/hematology/cbc-short/edit/$id'
-    | '/pathology/hematology/cbc-short/report/$reportId'
-    | '/pathology/hematology/cbc-with-pbf/edit/$id'
-    | '/pathology/hematology/cbc-with-pbf/report/$reportId'
-    | '/pathology/hematology/peripheral-blood-film/report/$reportId'
-    | '/pathology/hematology/prothom-bin-time-full/report/$reportId'
-    | '/pathology/hormone/all/report/$reportId'
-    | '/pathology/hormone/electrolytes/report/$reportId'
-    | '/pathology/hormone/semen/edit/$reportId'
-    | '/pathology/hormone/semen/report/$reportId'
-    | '/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
-    | '/pathology/hormone/sputum/report/$reportId'
-    | '/pathology/hormone/t3t4tsh/report/$reportId'
-    | '/pathology/immunology/all/report/$reportId'
-    | '/pathology/immunology/beta-hcg/report/$reportId'
-    | '/pathology/immunology/blood-group/report/$reportId'
-    | '/pathology/immunology/mt/report/$reportId'
-    | '/pathology/immunology/widal-test/report/$reportId'
-    | '/pathology/stool/ocult-blood-test/report/$reportId'
-    | '/pathology/stool/reducing-substance/report/$reportId'
-    | '/pathology/stool/stool-re/edit/$id'
-    | '/pathology/stool/stool-re/report/$reportId'
-    | '/pathology/urine/urine-for-albumin/report/$reportId'
-    | '/pathology/urine/urine-for-re-full/edit/$id'
-    | '/pathology/urine/urine-for-re-full/report/$reportId'
-    | '/pathology/urine/urine-for-sugar/report/$reportId'
-    | '/ultrasonogram/all/edit/builder/$id'
-    | '/x-ray/all/edit/builder/$id'
-    | '/admission/patients/$admissionId/bill-created'
-    | '/admission/patients/$admissionId/billing-print'
-    | '/admission/patients/$admissionId/billing'
-    | '/admission/patients/$admissionId/confirm-balance'
-    | '/admission/patients/$admissionId/distribute-bill'
-    | '/admission/patients/$admissionId/final-bill-print'
-    | '/admission/patients/$admissionId/final-bill'
-    | '/admission/patients/$admissionId/print'
-    | '/indoor/master/bed-cabin-list/create'
-    | '/indoor/master/services/create'
-    | '/outdoor/master/doctors/$doctorId'
-    | '/outdoor/master/tests/create'
-    | '/outdoor/reception/invoices/create'
-    | '/outdoor/reception/invoices/list'
-    | '/reports/my/outdoor/date-wise-collection'
-    | '/reports/my/outdoor/today-collection'
-    | '/outdoor/master/tests/edit/$id'
-    | '/outdoor/reception/invoices/edit/$invoiceId'
-    | '/pathology/hematology/all/edit/$id'
-    | '/pathology/hormone/all/edit/$id'
-    | '/pathology/immunology/all/edit/$id'
+    | '/admin/'
+    | '/dashboard'
+    | '/dashboard/errors/$error'
+    | '/dashboard/notifications/$id'
+    | '/dashboard/settings/account'
+    | '/dashboard/settings/appearance'
+    | '/dashboard/settings/date-controls'
+    | '/dashboard/settings/display'
+    | '/dashboard/settings/notifications'
+    | '/dashboard/settings/payment-accounts'
+    | '/dashboard/settings/prefix'
+    | '/dashboard/accounting'
+    | '/dashboard/apps'
+    | '/dashboard/backup-settings'
+    | '/dashboard/backups'
+    | '/dashboard/chats'
+    | '/dashboard/company-account'
+    | '/dashboard/database'
+    | '/dashboard/gallery'
+    | '/dashboard/help-center'
+    | '/dashboard/help'
+    | '/dashboard/my-account'
+    | '/dashboard/notifications'
+    | '/dashboard/roles'
+    | '/dashboard/settings/'
+    | '/dashboard/subscription'
+    | '/dashboard/tasks'
+    | '/dashboard/users'
+    | '/dashboard/roles/edit/$id'
+    | '/dashboard/accounting/accounts'
+    | '/dashboard/accounting/expense'
+    | '/dashboard/accounting/expenses'
+    | '/dashboard/accounting/income'
+    | '/dashboard/accounting/transactions'
+    | '/dashboard/accounts/daily-credit'
+    | '/dashboard/accounts/daily-debit'
+    | '/dashboard/accounts/journal'
+    | '/dashboard/accounts/pay-to-anaesthetist'
+    | '/dashboard/accounts/pay-to-assistant'
+    | '/dashboard/accounts/pay-to-consultant'
+    | '/dashboard/accounts/pay-to-surgeon'
+    | '/dashboard/admission/advance-payment'
+    | '/dashboard/admission/bed-cabin-charge'
+    | '/dashboard/admission/due-collection'
+    | '/dashboard/admission/final-bills'
+    | '/dashboard/admission/finalise-services'
+    | '/dashboard/admission/first-time-bill'
+    | '/dashboard/admission/first-time-service'
+    | '/dashboard/admission/invoice'
+    | '/dashboard/admission/new-admission'
+    | '/dashboard/admission/patients'
+    | '/dashboard/admission/second-time-bill'
+    | '/dashboard/banks/bank-accounts'
+    | '/dashboard/banks/bank-deposits'
+    | '/dashboard/banks/bank-transactions'
+    | '/dashboard/banks/bank-withdrawals'
+    | '/dashboard/ecg/all'
+    | '/dashboard/payroll/employees'
+    | '/dashboard/payroll/overview'
+    | '/dashboard/roles/create'
+    | '/dashboard/ultrasonogram/all'
+    | '/dashboard/x-ray/all'
+    | '/dashboard/accounting/reports/ledger/print'
+    | '/dashboard/accounting/reports/multi-ledger/print'
+    | '/dashboard/ecg/all/edit/$id'
+    | '/dashboard/ecg/all/print/$id'
+    | '/dashboard/indoor/master/bed-cabin-list/$id'
+    | '/dashboard/indoor/master/services/$id'
+    | '/dashboard/outdoor/master/categories/$id'
+    | '/dashboard/outdoor/master/departments/$id'
+    | '/dashboard/outdoor/master/doctors/create'
+    | '/dashboard/outdoor/master/test-tables/$id'
+    | '/dashboard/outdoor/master/tests/$id'
+    | '/dashboard/outdoor/reception/due-collection/$invoiceId'
+    | '/dashboard/outdoor/reception/invoices/$invoiceId'
+    | '/dashboard/roles/permissions/$roleId/edit'
+    | '/dashboard/ultrasonogram/all/edit/$id'
+    | '/dashboard/ultrasonogram/all/print/$id'
+    | '/dashboard/x-ray/all/edit/$id'
+    | '/dashboard/x-ray/all/print/$id'
+    | '/dashboard/accounting/reports/balance-sheet'
+    | '/dashboard/accounting/reports/cash-flow'
+    | '/dashboard/accounting/reports/daily-summary'
+    | '/dashboard/accounting/reports/journal'
+    | '/dashboard/accounting/reports/ledger'
+    | '/dashboard/accounting/reports/multi-ledger'
+    | '/dashboard/accounting/reports/profit-and-loss'
+    | '/dashboard/accounting/reports/profit-loss'
+    | '/dashboard/accounting/reports/trial-balance'
+    | '/dashboard/admission/billing/$billingId'
+    | '/dashboard/admission/discharged-patients/bill-does-not-created'
+    | '/dashboard/admission/invoice/create'
+    | '/dashboard/admission/invoice/list'
+    | '/dashboard/admission/patients/active'
+    | '/dashboard/admission/patients/balance-distributed-list'
+    | '/dashboard/admission/patients/bill-created-list'
+    | '/dashboard/admission/patients/bill-distributed-list'
+    | '/dashboard/admission/patients/discharged-list'
+    | '/dashboard/admission/patients/discharged'
+    | '/dashboard/admission/patients/final-bill-created-list'
+    | '/dashboard/admission/patients/payment-completed-list'
+    | '/dashboard/indoor/management/distributions'
+    | '/dashboard/indoor/management/doctor-referred'
+    | '/dashboard/indoor/master/anasthesia-types'
+    | '/dashboard/indoor/master/bed-cabin-list'
+    | '/dashboard/indoor/master/doctor-types'
+    | '/dashboard/indoor/master/operation-types'
+    | '/dashboard/indoor/master/patient-types'
+    | '/dashboard/indoor/master/service-categories'
+    | '/dashboard/indoor/master/services'
+    | '/dashboard/indoor/master/treatment-outcomes'
+    | '/dashboard/outdoor/master/categories'
+    | '/dashboard/outdoor/master/departments'
+    | '/dashboard/outdoor/master/doctors'
+    | '/dashboard/outdoor/master/machines'
+    | '/dashboard/outdoor/master/sample-collection-rooms'
+    | '/dashboard/outdoor/master/test-tables'
+    | '/dashboard/outdoor/master/tests'
+    | '/dashboard/outdoor/reception/due-collection'
+    | '/dashboard/outdoor/reception/my-invoices'
+    | '/dashboard/outdoor/reception/paid-invoices'
+    | '/dashboard/outdoor/reception/patients'
+    | '/dashboard/outdoor/reception/user-invoices'
+    | '/dashboard/pathology/biochemical/all'
+    | '/dashboard/pathology/biochemical/lipid-profile'
+    | '/dashboard/pathology/hematology/all'
+    | '/dashboard/pathology/hematology/blood-for-bt-ct'
+    | '/dashboard/pathology/hematology/blood-for-tcdc'
+    | '/dashboard/pathology/hematology/cbc-short'
+    | '/dashboard/pathology/hematology/cbc-with-pbf'
+    | '/dashboard/pathology/hematology/peripheral-blood-film'
+    | '/dashboard/pathology/hematology/prothom-bin-time-full'
+    | '/dashboard/pathology/hormone/all'
+    | '/dashboard/pathology/hormone/electrolytes'
+    | '/dashboard/pathology/hormone/semen'
+    | '/dashboard/pathology/hormone/skin-scrapping-for-fungus'
+    | '/dashboard/pathology/hormone/sputum'
+    | '/dashboard/pathology/hormone/t3t4tsh'
+    | '/dashboard/pathology/immunology/all'
+    | '/dashboard/pathology/immunology/beta-hcg'
+    | '/dashboard/pathology/immunology/blood-group'
+    | '/dashboard/pathology/immunology/mt'
+    | '/dashboard/pathology/immunology/widal-test'
+    | '/dashboard/pathology/stool/ocult-blood-test'
+    | '/dashboard/pathology/stool/reducing-substance'
+    | '/dashboard/pathology/stool/stool-re'
+    | '/dashboard/pathology/urine/urine-for-albumin'
+    | '/dashboard/pathology/urine/urine-for-re-full'
+    | '/dashboard/pathology/urine/urine-for-sugar'
+    | '/dashboard/payroll/attendance/$staffId'
+    | '/dashboard/payroll/salary/$staffId'
+    | '/dashboard/admission/patients/$admissionId/print/$step'
+    | '/dashboard/ecg/all/edit/builder/$id'
+    | '/dashboard/indoor/master/services/edit/$id'
+    | '/dashboard/outdoor/master/doctors/$doctorId/edit'
+    | '/dashboard/pathology/biochemical/all/edit/$reportId'
+    | '/dashboard/pathology/biochemical/all/report/$reportId'
+    | '/dashboard/pathology/biochemical/lipid-profile/report/$reportId'
+    | '/dashboard/pathology/hematology/all/report/$reportId'
+    | '/dashboard/pathology/hematology/blood-for-bt-ct/report/$reportId'
+    | '/dashboard/pathology/hematology/blood-for-tcdc/report/$reportId'
+    | '/dashboard/pathology/hematology/cbc-short/edit/$id'
+    | '/dashboard/pathology/hematology/cbc-short/report/$reportId'
+    | '/dashboard/pathology/hematology/cbc-with-pbf/edit/$id'
+    | '/dashboard/pathology/hematology/cbc-with-pbf/report/$reportId'
+    | '/dashboard/pathology/hematology/peripheral-blood-film/report/$reportId'
+    | '/dashboard/pathology/hematology/prothom-bin-time-full/report/$reportId'
+    | '/dashboard/pathology/hormone/all/report/$reportId'
+    | '/dashboard/pathology/hormone/electrolytes/report/$reportId'
+    | '/dashboard/pathology/hormone/semen/edit/$reportId'
+    | '/dashboard/pathology/hormone/semen/report/$reportId'
+    | '/dashboard/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
+    | '/dashboard/pathology/hormone/sputum/report/$reportId'
+    | '/dashboard/pathology/hormone/t3t4tsh/report/$reportId'
+    | '/dashboard/pathology/immunology/all/report/$reportId'
+    | '/dashboard/pathology/immunology/beta-hcg/report/$reportId'
+    | '/dashboard/pathology/immunology/blood-group/report/$reportId'
+    | '/dashboard/pathology/immunology/mt/report/$reportId'
+    | '/dashboard/pathology/immunology/widal-test/report/$reportId'
+    | '/dashboard/pathology/stool/ocult-blood-test/report/$reportId'
+    | '/dashboard/pathology/stool/reducing-substance/report/$reportId'
+    | '/dashboard/pathology/stool/stool-re/edit/$id'
+    | '/dashboard/pathology/stool/stool-re/report/$reportId'
+    | '/dashboard/pathology/urine/urine-for-albumin/report/$reportId'
+    | '/dashboard/pathology/urine/urine-for-re-full/edit/$id'
+    | '/dashboard/pathology/urine/urine-for-re-full/report/$reportId'
+    | '/dashboard/pathology/urine/urine-for-sugar/report/$reportId'
+    | '/dashboard/ultrasonogram/all/edit/builder/$id'
+    | '/dashboard/x-ray/all/edit/builder/$id'
+    | '/dashboard/admission/patients/$admissionId/bill-created'
+    | '/dashboard/admission/patients/$admissionId/billing-print'
+    | '/dashboard/admission/patients/$admissionId/billing'
+    | '/dashboard/admission/patients/$admissionId/confirm-balance'
+    | '/dashboard/admission/patients/$admissionId/distribute-bill'
+    | '/dashboard/admission/patients/$admissionId/final-bill-print'
+    | '/dashboard/admission/patients/$admissionId/final-bill'
+    | '/dashboard/admission/patients/$admissionId/print'
+    | '/dashboard/indoor/master/bed-cabin-list/create'
+    | '/dashboard/indoor/master/services/create'
+    | '/dashboard/outdoor/master/doctors/$doctorId'
+    | '/dashboard/outdoor/master/tests/create'
+    | '/dashboard/outdoor/reception/invoices/create'
+    | '/dashboard/outdoor/reception/invoices/list'
+    | '/dashboard/reports/my/outdoor/date-wise-collection'
+    | '/dashboard/reports/my/outdoor/today-collection'
+    | '/dashboard/outdoor/master/tests/edit/$id'
+    | '/dashboard/outdoor/reception/invoices/edit/$invoiceId'
+    | '/dashboard/pathology/hematology/all/edit/$id'
+    | '/dashboard/pathology/hormone/all/edit/$id'
+    | '/dashboard/pathology/immunology/all/edit/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/clerk'
+    | '/auth-callback'
     | '/forgot-password'
     | '/login'
     | '/otp'
@@ -2445,218 +2764,238 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
-    | '/'
-    | '/errors/$error'
-    | '/notifications/$id'
-    | '/settings/account'
-    | '/settings/appearance'
-    | '/settings/display'
-    | '/settings/notifications'
-    | '/settings/payment-accounts'
-    | '/settings/prefix'
+    | '/contact'
+    | '/pricing'
+    | '/register'
+    | '/admin'
+    | '/admin/admins'
+    | '/admin/billing'
+    | '/admin/companies'
+    | '/admin/login'
+    | '/admin/modules'
+    | '/admin/plans'
+    | '/admin/registrations'
+    | '/admin/settings'
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
-    | '/accounting'
-    | '/apps'
-    | '/backup-settings'
-    | '/backups'
-    | '/chats'
-    | '/database'
-    | '/help-center'
-    | '/help'
-    | '/my-account'
-    | '/notifications'
-    | '/roles'
-    | '/settings'
-    | '/tasks'
-    | '/users'
-    | '/roles/edit/$id'
-    | '/accounting/accounts'
-    | '/accounting/expense'
-    | '/accounting/expenses'
-    | '/accounting/income'
-    | '/accounting/transactions'
-    | '/accounts/daily-credit'
-    | '/accounts/daily-debit'
-    | '/accounts/journal'
-    | '/accounts/pay-to-anaesthetist'
-    | '/accounts/pay-to-assistant'
-    | '/accounts/pay-to-consultant'
-    | '/accounts/pay-to-surgeon'
-    | '/admission/advance-payment'
-    | '/admission/bed-cabin-charge'
-    | '/admission/due-collection'
-    | '/admission/final-bills'
-    | '/admission/finalise-services'
-    | '/admission/first-time-bill'
-    | '/admission/first-time-service'
-    | '/admission/invoice'
-    | '/admission/new-admission'
-    | '/admission/patients'
-    | '/admission/second-time-bill'
-    | '/banks/bank-accounts'
-    | '/banks/bank-deposits'
-    | '/banks/bank-transactions'
-    | '/banks/bank-withdrawals'
-    | '/ecg/all'
-    | '/payroll/employees'
-    | '/payroll/overview'
-    | '/roles/create'
-    | '/ultrasonogram/all'
-    | '/x-ray/all'
-    | '/accounting/reports/ledger/print'
-    | '/ecg/all/edit/$id'
-    | '/ecg/all/print/$id'
-    | '/indoor/master/bed-cabin-list/$id'
-    | '/indoor/master/services/$id'
-    | '/outdoor/master/categories/$id'
-    | '/outdoor/master/departments/$id'
-    | '/outdoor/master/doctors/create'
-    | '/outdoor/master/test-tables/$id'
-    | '/outdoor/master/tests/$id'
-    | '/outdoor/reception/due-collection/$invoiceId'
-    | '/outdoor/reception/invoices/$invoiceId'
-    | '/roles/permissions/$roleId/edit'
-    | '/ultrasonogram/all/edit/$id'
-    | '/ultrasonogram/all/print/$id'
-    | '/x-ray/all/edit/$id'
-    | '/x-ray/all/print/$id'
-    | '/accounting/reports/balance-sheet'
-    | '/accounting/reports/daily-summary'
-    | '/accounting/reports/journal'
-    | '/accounting/reports/ledger'
-    | '/accounting/reports/profit-and-loss'
-    | '/accounting/reports/profit-loss'
-    | '/accounting/reports/trial-balance'
-    | '/admission/billing/$billingId'
-    | '/admission/discharged-patients/bill-does-not-created'
-    | '/admission/invoice/create'
-    | '/admission/invoice/list'
-    | '/admission/patients/active'
-    | '/admission/patients/balance-distributed-list'
-    | '/admission/patients/bill-created-list'
-    | '/admission/patients/bill-distributed-list'
-    | '/admission/patients/discharged-list'
-    | '/admission/patients/discharged'
-    | '/admission/patients/final-bill-created-list'
-    | '/admission/patients/payment-completed-list'
-    | '/indoor/management/distributions'
-    | '/indoor/management/doctor-referred'
-    | '/indoor/master/anasthesia-types'
-    | '/indoor/master/bed-cabin-list'
-    | '/indoor/master/doctor-types'
-    | '/indoor/master/operation-types'
-    | '/indoor/master/patient-types'
-    | '/indoor/master/service-categories'
-    | '/indoor/master/services'
-    | '/indoor/master/treatment-outcomes'
-    | '/outdoor/master/categories'
-    | '/outdoor/master/departments'
-    | '/outdoor/master/doctors'
-    | '/outdoor/master/machines'
-    | '/outdoor/master/sample-collection-rooms'
-    | '/outdoor/master/test-tables'
-    | '/outdoor/master/tests'
-    | '/outdoor/reception/due-collection'
-    | '/outdoor/reception/my-invoices'
-    | '/outdoor/reception/paid-invoices'
-    | '/outdoor/reception/patients'
-    | '/outdoor/reception/user-invoices'
-    | '/pathology/biochemical/all'
-    | '/pathology/biochemical/lipid-profile'
-    | '/pathology/hematology/all'
-    | '/pathology/hematology/blood-for-bt-ct'
-    | '/pathology/hematology/blood-for-tcdc'
-    | '/pathology/hematology/cbc-short'
-    | '/pathology/hematology/cbc-with-pbf'
-    | '/pathology/hematology/peripheral-blood-film'
-    | '/pathology/hematology/prothom-bin-time-full'
-    | '/pathology/hormone/all'
-    | '/pathology/hormone/electrolytes'
-    | '/pathology/hormone/semen'
-    | '/pathology/hormone/skin-scrapping-for-fungus'
-    | '/pathology/hormone/sputum'
-    | '/pathology/hormone/t3t4tsh'
-    | '/pathology/immunology/all'
-    | '/pathology/immunology/beta-hcg'
-    | '/pathology/immunology/blood-group'
-    | '/pathology/immunology/mt'
-    | '/pathology/immunology/widal-test'
-    | '/pathology/stool/ocult-blood-test'
-    | '/pathology/stool/reducing-substance'
-    | '/pathology/stool/stool-re'
-    | '/pathology/urine/urine-for-albumin'
-    | '/pathology/urine/urine-for-re-full'
-    | '/pathology/urine/urine-for-sugar'
-    | '/payroll/attendance/$staffId'
-    | '/payroll/salary/$staffId'
-    | '/admission/patients/$admissionId/print/$step'
-    | '/ecg/all/edit/builder/$id'
-    | '/indoor/master/services/edit/$id'
-    | '/outdoor/master/doctors/$doctorId/edit'
-    | '/pathology/biochemical/all/edit/$reportId'
-    | '/pathology/biochemical/all/report/$reportId'
-    | '/pathology/biochemical/lipid-profile/report/$reportId'
-    | '/pathology/hematology/all/report/$reportId'
-    | '/pathology/hematology/blood-for-bt-ct/report/$reportId'
-    | '/pathology/hematology/blood-for-tcdc/report/$reportId'
-    | '/pathology/hematology/cbc-short/edit/$id'
-    | '/pathology/hematology/cbc-short/report/$reportId'
-    | '/pathology/hematology/cbc-with-pbf/edit/$id'
-    | '/pathology/hematology/cbc-with-pbf/report/$reportId'
-    | '/pathology/hematology/peripheral-blood-film/report/$reportId'
-    | '/pathology/hematology/prothom-bin-time-full/report/$reportId'
-    | '/pathology/hormone/all/report/$reportId'
-    | '/pathology/hormone/electrolytes/report/$reportId'
-    | '/pathology/hormone/semen/edit/$reportId'
-    | '/pathology/hormone/semen/report/$reportId'
-    | '/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
-    | '/pathology/hormone/sputum/report/$reportId'
-    | '/pathology/hormone/t3t4tsh/report/$reportId'
-    | '/pathology/immunology/all/report/$reportId'
-    | '/pathology/immunology/beta-hcg/report/$reportId'
-    | '/pathology/immunology/blood-group/report/$reportId'
-    | '/pathology/immunology/mt/report/$reportId'
-    | '/pathology/immunology/widal-test/report/$reportId'
-    | '/pathology/stool/ocult-blood-test/report/$reportId'
-    | '/pathology/stool/reducing-substance/report/$reportId'
-    | '/pathology/stool/stool-re/edit/$id'
-    | '/pathology/stool/stool-re/report/$reportId'
-    | '/pathology/urine/urine-for-albumin/report/$reportId'
-    | '/pathology/urine/urine-for-re-full/edit/$id'
-    | '/pathology/urine/urine-for-re-full/report/$reportId'
-    | '/pathology/urine/urine-for-sugar/report/$reportId'
-    | '/ultrasonogram/all/edit/builder/$id'
-    | '/x-ray/all/edit/builder/$id'
-    | '/admission/patients/$admissionId/bill-created'
-    | '/admission/patients/$admissionId/billing-print'
-    | '/admission/patients/$admissionId/billing'
-    | '/admission/patients/$admissionId/confirm-balance'
-    | '/admission/patients/$admissionId/distribute-bill'
-    | '/admission/patients/$admissionId/final-bill-print'
-    | '/admission/patients/$admissionId/final-bill'
-    | '/admission/patients/$admissionId/print'
-    | '/indoor/master/bed-cabin-list/create'
-    | '/indoor/master/services/create'
-    | '/outdoor/master/doctors/$doctorId'
-    | '/outdoor/master/tests/create'
-    | '/outdoor/reception/invoices/create'
-    | '/outdoor/reception/invoices/list'
-    | '/reports/my/outdoor/date-wise-collection'
-    | '/reports/my/outdoor/today-collection'
-    | '/outdoor/master/tests/edit/$id'
-    | '/outdoor/reception/invoices/edit/$invoiceId'
-    | '/pathology/hematology/all/edit/$id'
-    | '/pathology/hormone/all/edit/$id'
-    | '/pathology/immunology/all/edit/$id'
+    | '/dashboard'
+    | '/dashboard/errors/$error'
+    | '/dashboard/notifications/$id'
+    | '/dashboard/settings/account'
+    | '/dashboard/settings/appearance'
+    | '/dashboard/settings/date-controls'
+    | '/dashboard/settings/display'
+    | '/dashboard/settings/notifications'
+    | '/dashboard/settings/payment-accounts'
+    | '/dashboard/settings/prefix'
+    | '/dashboard/accounting'
+    | '/dashboard/apps'
+    | '/dashboard/backup-settings'
+    | '/dashboard/backups'
+    | '/dashboard/chats'
+    | '/dashboard/company-account'
+    | '/dashboard/database'
+    | '/dashboard/gallery'
+    | '/dashboard/help-center'
+    | '/dashboard/help'
+    | '/dashboard/my-account'
+    | '/dashboard/notifications'
+    | '/dashboard/roles'
+    | '/dashboard/settings'
+    | '/dashboard/subscription'
+    | '/dashboard/tasks'
+    | '/dashboard/users'
+    | '/dashboard/roles/edit/$id'
+    | '/dashboard/accounting/accounts'
+    | '/dashboard/accounting/expense'
+    | '/dashboard/accounting/expenses'
+    | '/dashboard/accounting/income'
+    | '/dashboard/accounting/transactions'
+    | '/dashboard/accounts/daily-credit'
+    | '/dashboard/accounts/daily-debit'
+    | '/dashboard/accounts/journal'
+    | '/dashboard/accounts/pay-to-anaesthetist'
+    | '/dashboard/accounts/pay-to-assistant'
+    | '/dashboard/accounts/pay-to-consultant'
+    | '/dashboard/accounts/pay-to-surgeon'
+    | '/dashboard/admission/advance-payment'
+    | '/dashboard/admission/bed-cabin-charge'
+    | '/dashboard/admission/due-collection'
+    | '/dashboard/admission/final-bills'
+    | '/dashboard/admission/finalise-services'
+    | '/dashboard/admission/first-time-bill'
+    | '/dashboard/admission/first-time-service'
+    | '/dashboard/admission/invoice'
+    | '/dashboard/admission/new-admission'
+    | '/dashboard/admission/patients'
+    | '/dashboard/admission/second-time-bill'
+    | '/dashboard/banks/bank-accounts'
+    | '/dashboard/banks/bank-deposits'
+    | '/dashboard/banks/bank-transactions'
+    | '/dashboard/banks/bank-withdrawals'
+    | '/dashboard/ecg/all'
+    | '/dashboard/payroll/employees'
+    | '/dashboard/payroll/overview'
+    | '/dashboard/roles/create'
+    | '/dashboard/ultrasonogram/all'
+    | '/dashboard/x-ray/all'
+    | '/dashboard/accounting/reports/ledger/print'
+    | '/dashboard/accounting/reports/multi-ledger/print'
+    | '/dashboard/ecg/all/edit/$id'
+    | '/dashboard/ecg/all/print/$id'
+    | '/dashboard/indoor/master/bed-cabin-list/$id'
+    | '/dashboard/indoor/master/services/$id'
+    | '/dashboard/outdoor/master/categories/$id'
+    | '/dashboard/outdoor/master/departments/$id'
+    | '/dashboard/outdoor/master/doctors/create'
+    | '/dashboard/outdoor/master/test-tables/$id'
+    | '/dashboard/outdoor/master/tests/$id'
+    | '/dashboard/outdoor/reception/due-collection/$invoiceId'
+    | '/dashboard/outdoor/reception/invoices/$invoiceId'
+    | '/dashboard/roles/permissions/$roleId/edit'
+    | '/dashboard/ultrasonogram/all/edit/$id'
+    | '/dashboard/ultrasonogram/all/print/$id'
+    | '/dashboard/x-ray/all/edit/$id'
+    | '/dashboard/x-ray/all/print/$id'
+    | '/dashboard/accounting/reports/balance-sheet'
+    | '/dashboard/accounting/reports/cash-flow'
+    | '/dashboard/accounting/reports/daily-summary'
+    | '/dashboard/accounting/reports/journal'
+    | '/dashboard/accounting/reports/ledger'
+    | '/dashboard/accounting/reports/multi-ledger'
+    | '/dashboard/accounting/reports/profit-and-loss'
+    | '/dashboard/accounting/reports/profit-loss'
+    | '/dashboard/accounting/reports/trial-balance'
+    | '/dashboard/admission/billing/$billingId'
+    | '/dashboard/admission/discharged-patients/bill-does-not-created'
+    | '/dashboard/admission/invoice/create'
+    | '/dashboard/admission/invoice/list'
+    | '/dashboard/admission/patients/active'
+    | '/dashboard/admission/patients/balance-distributed-list'
+    | '/dashboard/admission/patients/bill-created-list'
+    | '/dashboard/admission/patients/bill-distributed-list'
+    | '/dashboard/admission/patients/discharged-list'
+    | '/dashboard/admission/patients/discharged'
+    | '/dashboard/admission/patients/final-bill-created-list'
+    | '/dashboard/admission/patients/payment-completed-list'
+    | '/dashboard/indoor/management/distributions'
+    | '/dashboard/indoor/management/doctor-referred'
+    | '/dashboard/indoor/master/anasthesia-types'
+    | '/dashboard/indoor/master/bed-cabin-list'
+    | '/dashboard/indoor/master/doctor-types'
+    | '/dashboard/indoor/master/operation-types'
+    | '/dashboard/indoor/master/patient-types'
+    | '/dashboard/indoor/master/service-categories'
+    | '/dashboard/indoor/master/services'
+    | '/dashboard/indoor/master/treatment-outcomes'
+    | '/dashboard/outdoor/master/categories'
+    | '/dashboard/outdoor/master/departments'
+    | '/dashboard/outdoor/master/doctors'
+    | '/dashboard/outdoor/master/machines'
+    | '/dashboard/outdoor/master/sample-collection-rooms'
+    | '/dashboard/outdoor/master/test-tables'
+    | '/dashboard/outdoor/master/tests'
+    | '/dashboard/outdoor/reception/due-collection'
+    | '/dashboard/outdoor/reception/my-invoices'
+    | '/dashboard/outdoor/reception/paid-invoices'
+    | '/dashboard/outdoor/reception/patients'
+    | '/dashboard/outdoor/reception/user-invoices'
+    | '/dashboard/pathology/biochemical/all'
+    | '/dashboard/pathology/biochemical/lipid-profile'
+    | '/dashboard/pathology/hematology/all'
+    | '/dashboard/pathology/hematology/blood-for-bt-ct'
+    | '/dashboard/pathology/hematology/blood-for-tcdc'
+    | '/dashboard/pathology/hematology/cbc-short'
+    | '/dashboard/pathology/hematology/cbc-with-pbf'
+    | '/dashboard/pathology/hematology/peripheral-blood-film'
+    | '/dashboard/pathology/hematology/prothom-bin-time-full'
+    | '/dashboard/pathology/hormone/all'
+    | '/dashboard/pathology/hormone/electrolytes'
+    | '/dashboard/pathology/hormone/semen'
+    | '/dashboard/pathology/hormone/skin-scrapping-for-fungus'
+    | '/dashboard/pathology/hormone/sputum'
+    | '/dashboard/pathology/hormone/t3t4tsh'
+    | '/dashboard/pathology/immunology/all'
+    | '/dashboard/pathology/immunology/beta-hcg'
+    | '/dashboard/pathology/immunology/blood-group'
+    | '/dashboard/pathology/immunology/mt'
+    | '/dashboard/pathology/immunology/widal-test'
+    | '/dashboard/pathology/stool/ocult-blood-test'
+    | '/dashboard/pathology/stool/reducing-substance'
+    | '/dashboard/pathology/stool/stool-re'
+    | '/dashboard/pathology/urine/urine-for-albumin'
+    | '/dashboard/pathology/urine/urine-for-re-full'
+    | '/dashboard/pathology/urine/urine-for-sugar'
+    | '/dashboard/payroll/attendance/$staffId'
+    | '/dashboard/payroll/salary/$staffId'
+    | '/dashboard/admission/patients/$admissionId/print/$step'
+    | '/dashboard/ecg/all/edit/builder/$id'
+    | '/dashboard/indoor/master/services/edit/$id'
+    | '/dashboard/outdoor/master/doctors/$doctorId/edit'
+    | '/dashboard/pathology/biochemical/all/edit/$reportId'
+    | '/dashboard/pathology/biochemical/all/report/$reportId'
+    | '/dashboard/pathology/biochemical/lipid-profile/report/$reportId'
+    | '/dashboard/pathology/hematology/all/report/$reportId'
+    | '/dashboard/pathology/hematology/blood-for-bt-ct/report/$reportId'
+    | '/dashboard/pathology/hematology/blood-for-tcdc/report/$reportId'
+    | '/dashboard/pathology/hematology/cbc-short/edit/$id'
+    | '/dashboard/pathology/hematology/cbc-short/report/$reportId'
+    | '/dashboard/pathology/hematology/cbc-with-pbf/edit/$id'
+    | '/dashboard/pathology/hematology/cbc-with-pbf/report/$reportId'
+    | '/dashboard/pathology/hematology/peripheral-blood-film/report/$reportId'
+    | '/dashboard/pathology/hematology/prothom-bin-time-full/report/$reportId'
+    | '/dashboard/pathology/hormone/all/report/$reportId'
+    | '/dashboard/pathology/hormone/electrolytes/report/$reportId'
+    | '/dashboard/pathology/hormone/semen/edit/$reportId'
+    | '/dashboard/pathology/hormone/semen/report/$reportId'
+    | '/dashboard/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
+    | '/dashboard/pathology/hormone/sputum/report/$reportId'
+    | '/dashboard/pathology/hormone/t3t4tsh/report/$reportId'
+    | '/dashboard/pathology/immunology/all/report/$reportId'
+    | '/dashboard/pathology/immunology/beta-hcg/report/$reportId'
+    | '/dashboard/pathology/immunology/blood-group/report/$reportId'
+    | '/dashboard/pathology/immunology/mt/report/$reportId'
+    | '/dashboard/pathology/immunology/widal-test/report/$reportId'
+    | '/dashboard/pathology/stool/ocult-blood-test/report/$reportId'
+    | '/dashboard/pathology/stool/reducing-substance/report/$reportId'
+    | '/dashboard/pathology/stool/stool-re/edit/$id'
+    | '/dashboard/pathology/stool/stool-re/report/$reportId'
+    | '/dashboard/pathology/urine/urine-for-albumin/report/$reportId'
+    | '/dashboard/pathology/urine/urine-for-re-full/edit/$id'
+    | '/dashboard/pathology/urine/urine-for-re-full/report/$reportId'
+    | '/dashboard/pathology/urine/urine-for-sugar/report/$reportId'
+    | '/dashboard/ultrasonogram/all/edit/builder/$id'
+    | '/dashboard/x-ray/all/edit/builder/$id'
+    | '/dashboard/admission/patients/$admissionId/bill-created'
+    | '/dashboard/admission/patients/$admissionId/billing-print'
+    | '/dashboard/admission/patients/$admissionId/billing'
+    | '/dashboard/admission/patients/$admissionId/confirm-balance'
+    | '/dashboard/admission/patients/$admissionId/distribute-bill'
+    | '/dashboard/admission/patients/$admissionId/final-bill-print'
+    | '/dashboard/admission/patients/$admissionId/final-bill'
+    | '/dashboard/admission/patients/$admissionId/print'
+    | '/dashboard/indoor/master/bed-cabin-list/create'
+    | '/dashboard/indoor/master/services/create'
+    | '/dashboard/outdoor/master/doctors/$doctorId'
+    | '/dashboard/outdoor/master/tests/create'
+    | '/dashboard/outdoor/reception/invoices/create'
+    | '/dashboard/outdoor/reception/invoices/list'
+    | '/dashboard/reports/my/outdoor/date-wise-collection'
+    | '/dashboard/reports/my/outdoor/today-collection'
+    | '/dashboard/outdoor/master/tests/edit/$id'
+    | '/dashboard/outdoor/reception/invoices/edit/$invoiceId'
+    | '/dashboard/pathology/hematology/all/edit/$id'
+    | '/dashboard/pathology/hormone/all/edit/$id'
+    | '/dashboard/pathology/immunology/all/edit/$id'
   id:
     | '__root__'
+    | '/'
     | '/_authenticated'
     | '/clerk'
-    | '/_authenticated/settings'
     | '/clerk/(auth)'
     | '/clerk/_authenticated'
+    | '/(auth)/auth-callback'
     | '/(auth)/forgot-password'
     | '/(auth)/login'
     | '/(auth)/otp'
@@ -2668,216 +3007,241 @@ export interface FileRouteTypes {
     | '/(errors)/404'
     | '/(errors)/500'
     | '/(errors)/503'
-    | '/_authenticated/'
-    | '/_authenticated/errors/$error'
-    | '/_authenticated/notifications/$id'
-    | '/_authenticated/settings/account'
-    | '/_authenticated/settings/appearance'
-    | '/_authenticated/settings/display'
-    | '/_authenticated/settings/notifications'
-    | '/_authenticated/settings/payment-accounts'
-    | '/_authenticated/settings/prefix'
+    | '/(platform)/_layout'
+    | '/(platform)/contact'
+    | '/(platform)/pricing'
+    | '/(platform)/register'
+    | '/_authenticated/dashboard/settings'
+    | '/(platform)/admin'
+    | '/(platform)/admin/_layout'
+    | '/(platform)/admin/admins'
+    | '/(platform)/admin/billing'
+    | '/(platform)/admin/companies'
+    | '/(platform)/admin/login'
+    | '/(platform)/admin/modules'
+    | '/(platform)/admin/plans'
+    | '/(platform)/admin/registrations'
+    | '/(platform)/admin/settings'
     | '/clerk/(auth)/sign-in'
     | '/clerk/(auth)/sign-up'
     | '/clerk/_authenticated/user-management'
-    | '/_authenticated/accounting/'
-    | '/_authenticated/apps/'
-    | '/_authenticated/backup-settings/'
-    | '/_authenticated/backups/'
-    | '/_authenticated/chats/'
-    | '/_authenticated/database/'
-    | '/_authenticated/help-center/'
-    | '/_authenticated/help/'
-    | '/_authenticated/my-account/'
-    | '/_authenticated/notifications/'
-    | '/_authenticated/roles/'
-    | '/_authenticated/settings/'
-    | '/_authenticated/tasks/'
-    | '/_authenticated/users/'
-    | '/_authenticated/roles/edit/$id'
-    | '/_authenticated/accounting/accounts/'
-    | '/_authenticated/accounting/expense/'
-    | '/_authenticated/accounting/expenses/'
-    | '/_authenticated/accounting/income/'
-    | '/_authenticated/accounting/transactions/'
-    | '/_authenticated/accounts/daily-credit/'
-    | '/_authenticated/accounts/daily-debit/'
-    | '/_authenticated/accounts/journal/'
-    | '/_authenticated/accounts/pay-to-anaesthetist/'
-    | '/_authenticated/accounts/pay-to-assistant/'
-    | '/_authenticated/accounts/pay-to-consultant/'
-    | '/_authenticated/accounts/pay-to-surgeon/'
-    | '/_authenticated/admission/advance-payment/'
-    | '/_authenticated/admission/bed-cabin-charge/'
-    | '/_authenticated/admission/due-collection/'
-    | '/_authenticated/admission/final-bills/'
-    | '/_authenticated/admission/finalise-services/'
-    | '/_authenticated/admission/first-time-bill/'
-    | '/_authenticated/admission/first-time-service/'
-    | '/_authenticated/admission/invoice/'
-    | '/_authenticated/admission/new-admission/'
-    | '/_authenticated/admission/patients/'
-    | '/_authenticated/admission/second-time-bill/'
-    | '/_authenticated/banks/bank-accounts/'
-    | '/_authenticated/banks/bank-deposits/'
-    | '/_authenticated/banks/bank-transactions/'
-    | '/_authenticated/banks/bank-withdrawals/'
-    | '/_authenticated/ecg/all/'
-    | '/_authenticated/payroll/employees/'
-    | '/_authenticated/payroll/overview/'
-    | '/_authenticated/roles/create/'
-    | '/_authenticated/ultrasonogram/all/'
-    | '/_authenticated/x-ray/all/'
-    | '/_authenticated/accounting/reports/ledger/print'
-    | '/_authenticated/ecg/all/edit/$id'
-    | '/_authenticated/ecg/all/print/$id'
-    | '/_authenticated/indoor/master/bed-cabin-list/$id'
-    | '/_authenticated/indoor/master/services/$id'
-    | '/_authenticated/outdoor/master/categories/$id'
-    | '/_authenticated/outdoor/master/departments/$id'
-    | '/_authenticated/outdoor/master/doctors/create'
-    | '/_authenticated/outdoor/master/test-tables/$id'
-    | '/_authenticated/outdoor/master/tests/$id'
-    | '/_authenticated/outdoor/reception/due-collection/$invoiceId'
-    | '/_authenticated/outdoor/reception/invoices/$invoiceId'
-    | '/_authenticated/roles/permissions/$roleId/edit'
-    | '/_authenticated/ultrasonogram/all/edit/$id'
-    | '/_authenticated/ultrasonogram/all/print/$id'
-    | '/_authenticated/x-ray/all/edit/$id'
-    | '/_authenticated/x-ray/all/print/$id'
-    | '/_authenticated/accounting/reports/balance-sheet/'
-    | '/_authenticated/accounting/reports/daily-summary/'
-    | '/_authenticated/accounting/reports/journal/'
-    | '/_authenticated/accounting/reports/ledger/'
-    | '/_authenticated/accounting/reports/profit-and-loss/'
-    | '/_authenticated/accounting/reports/profit-loss/'
-    | '/_authenticated/accounting/reports/trial-balance/'
-    | '/_authenticated/admission/billing/$billingId/'
-    | '/_authenticated/admission/discharged-patients/bill-does-not-created/'
-    | '/_authenticated/admission/invoice/create/'
-    | '/_authenticated/admission/invoice/list/'
-    | '/_authenticated/admission/patients/active/'
-    | '/_authenticated/admission/patients/balance-distributed-list/'
-    | '/_authenticated/admission/patients/bill-created-list/'
-    | '/_authenticated/admission/patients/bill-distributed-list/'
-    | '/_authenticated/admission/patients/discharged-list/'
-    | '/_authenticated/admission/patients/discharged/'
-    | '/_authenticated/admission/patients/final-bill-created-list/'
-    | '/_authenticated/admission/patients/payment-completed-list/'
-    | '/_authenticated/indoor/management/distributions/'
-    | '/_authenticated/indoor/management/doctor-referred/'
-    | '/_authenticated/indoor/master/anasthesia-types/'
-    | '/_authenticated/indoor/master/bed-cabin-list/'
-    | '/_authenticated/indoor/master/doctor-types/'
-    | '/_authenticated/indoor/master/operation-types/'
-    | '/_authenticated/indoor/master/patient-types/'
-    | '/_authenticated/indoor/master/service-categories/'
-    | '/_authenticated/indoor/master/services/'
-    | '/_authenticated/indoor/master/treatment-outcomes/'
-    | '/_authenticated/outdoor/master/categories/'
-    | '/_authenticated/outdoor/master/departments/'
-    | '/_authenticated/outdoor/master/doctors/'
-    | '/_authenticated/outdoor/master/machines/'
-    | '/_authenticated/outdoor/master/sample-collection-rooms/'
-    | '/_authenticated/outdoor/master/test-tables/'
-    | '/_authenticated/outdoor/master/tests/'
-    | '/_authenticated/outdoor/reception/due-collection/'
-    | '/_authenticated/outdoor/reception/my-invoices/'
-    | '/_authenticated/outdoor/reception/paid-invoices/'
-    | '/_authenticated/outdoor/reception/patients/'
-    | '/_authenticated/outdoor/reception/user-invoices/'
-    | '/_authenticated/pathology/biochemical/all/'
-    | '/_authenticated/pathology/biochemical/lipid-profile/'
-    | '/_authenticated/pathology/hematology/all/'
-    | '/_authenticated/pathology/hematology/blood-for-bt-ct/'
-    | '/_authenticated/pathology/hematology/blood-for-tcdc/'
-    | '/_authenticated/pathology/hematology/cbc-short/'
-    | '/_authenticated/pathology/hematology/cbc-with-pbf/'
-    | '/_authenticated/pathology/hematology/peripheral-blood-film/'
-    | '/_authenticated/pathology/hematology/prothom-bin-time-full/'
-    | '/_authenticated/pathology/hormone/all/'
-    | '/_authenticated/pathology/hormone/electrolytes/'
-    | '/_authenticated/pathology/hormone/semen/'
-    | '/_authenticated/pathology/hormone/skin-scrapping-for-fungus/'
-    | '/_authenticated/pathology/hormone/sputum/'
-    | '/_authenticated/pathology/hormone/t3t4tsh/'
-    | '/_authenticated/pathology/immunology/all/'
-    | '/_authenticated/pathology/immunology/beta-hcg/'
-    | '/_authenticated/pathology/immunology/blood-group/'
-    | '/_authenticated/pathology/immunology/mt/'
-    | '/_authenticated/pathology/immunology/widal-test/'
-    | '/_authenticated/pathology/stool/ocult-blood-test/'
-    | '/_authenticated/pathology/stool/reducing-substance/'
-    | '/_authenticated/pathology/stool/stool-re/'
-    | '/_authenticated/pathology/urine/urine-for-albumin/'
-    | '/_authenticated/pathology/urine/urine-for-re-full/'
-    | '/_authenticated/pathology/urine/urine-for-sugar/'
-    | '/_authenticated/payroll/attendance/$staffId/'
-    | '/_authenticated/payroll/salary/$staffId/'
-    | '/_authenticated/admission/patients/$admissionId/print/$step'
-    | '/_authenticated/ecg/all/edit/builder/$id'
-    | '/_authenticated/indoor/master/services/edit/$id'
-    | '/_authenticated/outdoor/master/doctors/$doctorId/edit'
-    | '/_authenticated/pathology/biochemical/all/edit/$reportId'
-    | '/_authenticated/pathology/biochemical/all/report/$reportId'
-    | '/_authenticated/pathology/biochemical/lipid-profile/report/$reportId'
-    | '/_authenticated/pathology/hematology/all/report/$reportId'
-    | '/_authenticated/pathology/hematology/blood-for-bt-ct/report/$reportId'
-    | '/_authenticated/pathology/hematology/blood-for-tcdc/report/$reportId'
-    | '/_authenticated/pathology/hematology/cbc-short/edit/$id'
-    | '/_authenticated/pathology/hematology/cbc-short/report/$reportId'
-    | '/_authenticated/pathology/hematology/cbc-with-pbf/edit/$id'
-    | '/_authenticated/pathology/hematology/cbc-with-pbf/report/$reportId'
-    | '/_authenticated/pathology/hematology/peripheral-blood-film/report/$reportId'
-    | '/_authenticated/pathology/hematology/prothom-bin-time-full/report/$reportId'
-    | '/_authenticated/pathology/hormone/all/report/$reportId'
-    | '/_authenticated/pathology/hormone/electrolytes/report/$reportId'
-    | '/_authenticated/pathology/hormone/semen/edit/$reportId'
-    | '/_authenticated/pathology/hormone/semen/report/$reportId'
-    | '/_authenticated/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
-    | '/_authenticated/pathology/hormone/sputum/report/$reportId'
-    | '/_authenticated/pathology/hormone/t3t4tsh/report/$reportId'
-    | '/_authenticated/pathology/immunology/all/report/$reportId'
-    | '/_authenticated/pathology/immunology/beta-hcg/report/$reportId'
-    | '/_authenticated/pathology/immunology/blood-group/report/$reportId'
-    | '/_authenticated/pathology/immunology/mt/report/$reportId'
-    | '/_authenticated/pathology/immunology/widal-test/report/$reportId'
-    | '/_authenticated/pathology/stool/ocult-blood-test/report/$reportId'
-    | '/_authenticated/pathology/stool/reducing-substance/report/$reportId'
-    | '/_authenticated/pathology/stool/stool-re/edit/$id'
-    | '/_authenticated/pathology/stool/stool-re/report/$reportId'
-    | '/_authenticated/pathology/urine/urine-for-albumin/report/$reportId'
-    | '/_authenticated/pathology/urine/urine-for-re-full/edit/$id'
-    | '/_authenticated/pathology/urine/urine-for-re-full/report/$reportId'
-    | '/_authenticated/pathology/urine/urine-for-sugar/report/$reportId'
-    | '/_authenticated/ultrasonogram/all/edit/builder/$id'
-    | '/_authenticated/x-ray/all/edit/builder/$id'
-    | '/_authenticated/admission/patients/$admissionId/bill-created/'
-    | '/_authenticated/admission/patients/$admissionId/billing-print/'
-    | '/_authenticated/admission/patients/$admissionId/billing/'
-    | '/_authenticated/admission/patients/$admissionId/confirm-balance/'
-    | '/_authenticated/admission/patients/$admissionId/distribute-bill/'
-    | '/_authenticated/admission/patients/$admissionId/final-bill-print/'
-    | '/_authenticated/admission/patients/$admissionId/final-bill/'
-    | '/_authenticated/admission/patients/$admissionId/print/'
-    | '/_authenticated/indoor/master/bed-cabin-list/create/'
-    | '/_authenticated/indoor/master/services/create/'
-    | '/_authenticated/outdoor/master/doctors/$doctorId/'
-    | '/_authenticated/outdoor/master/tests/create/'
-    | '/_authenticated/outdoor/reception/invoices/create/'
-    | '/_authenticated/outdoor/reception/invoices/list/'
-    | '/_authenticated/reports/my/outdoor/date-wise-collection/'
-    | '/_authenticated/reports/my/outdoor/today-collection/'
-    | '/_authenticated/outdoor/master/tests/edit/$id/'
-    | '/_authenticated/outdoor/reception/invoices/edit/$invoiceId/'
-    | '/_authenticated/pathology/hematology/all/edit/$id/'
-    | '/_authenticated/pathology/hormone/all/edit/$id/'
-    | '/_authenticated/pathology/immunology/all/edit/$id/'
+    | '/(platform)/admin/'
+    | '/_authenticated/dashboard/'
+    | '/_authenticated/dashboard/errors/$error'
+    | '/_authenticated/dashboard/notifications/$id'
+    | '/_authenticated/dashboard/settings/account'
+    | '/_authenticated/dashboard/settings/appearance'
+    | '/_authenticated/dashboard/settings/date-controls'
+    | '/_authenticated/dashboard/settings/display'
+    | '/_authenticated/dashboard/settings/notifications'
+    | '/_authenticated/dashboard/settings/payment-accounts'
+    | '/_authenticated/dashboard/settings/prefix'
+    | '/_authenticated/dashboard/accounting/'
+    | '/_authenticated/dashboard/apps/'
+    | '/_authenticated/dashboard/backup-settings/'
+    | '/_authenticated/dashboard/backups/'
+    | '/_authenticated/dashboard/chats/'
+    | '/_authenticated/dashboard/company-account/'
+    | '/_authenticated/dashboard/database/'
+    | '/_authenticated/dashboard/gallery/'
+    | '/_authenticated/dashboard/help-center/'
+    | '/_authenticated/dashboard/help/'
+    | '/_authenticated/dashboard/my-account/'
+    | '/_authenticated/dashboard/notifications/'
+    | '/_authenticated/dashboard/roles/'
+    | '/_authenticated/dashboard/settings/'
+    | '/_authenticated/dashboard/subscription/'
+    | '/_authenticated/dashboard/tasks/'
+    | '/_authenticated/dashboard/users/'
+    | '/_authenticated/dashboard/roles/edit/$id'
+    | '/_authenticated/dashboard/accounting/accounts/'
+    | '/_authenticated/dashboard/accounting/expense/'
+    | '/_authenticated/dashboard/accounting/expenses/'
+    | '/_authenticated/dashboard/accounting/income/'
+    | '/_authenticated/dashboard/accounting/transactions/'
+    | '/_authenticated/dashboard/accounts/daily-credit/'
+    | '/_authenticated/dashboard/accounts/daily-debit/'
+    | '/_authenticated/dashboard/accounts/journal/'
+    | '/_authenticated/dashboard/accounts/pay-to-anaesthetist/'
+    | '/_authenticated/dashboard/accounts/pay-to-assistant/'
+    | '/_authenticated/dashboard/accounts/pay-to-consultant/'
+    | '/_authenticated/dashboard/accounts/pay-to-surgeon/'
+    | '/_authenticated/dashboard/admission/advance-payment/'
+    | '/_authenticated/dashboard/admission/bed-cabin-charge/'
+    | '/_authenticated/dashboard/admission/due-collection/'
+    | '/_authenticated/dashboard/admission/final-bills/'
+    | '/_authenticated/dashboard/admission/finalise-services/'
+    | '/_authenticated/dashboard/admission/first-time-bill/'
+    | '/_authenticated/dashboard/admission/first-time-service/'
+    | '/_authenticated/dashboard/admission/invoice/'
+    | '/_authenticated/dashboard/admission/new-admission/'
+    | '/_authenticated/dashboard/admission/patients/'
+    | '/_authenticated/dashboard/admission/second-time-bill/'
+    | '/_authenticated/dashboard/banks/bank-accounts/'
+    | '/_authenticated/dashboard/banks/bank-deposits/'
+    | '/_authenticated/dashboard/banks/bank-transactions/'
+    | '/_authenticated/dashboard/banks/bank-withdrawals/'
+    | '/_authenticated/dashboard/ecg/all/'
+    | '/_authenticated/dashboard/payroll/employees/'
+    | '/_authenticated/dashboard/payroll/overview/'
+    | '/_authenticated/dashboard/roles/create/'
+    | '/_authenticated/dashboard/ultrasonogram/all/'
+    | '/_authenticated/dashboard/x-ray/all/'
+    | '/_authenticated/dashboard/accounting/reports/ledger/print'
+    | '/_authenticated/dashboard/accounting/reports/multi-ledger/print'
+    | '/_authenticated/dashboard/ecg/all/edit/$id'
+    | '/_authenticated/dashboard/ecg/all/print/$id'
+    | '/_authenticated/dashboard/indoor/master/bed-cabin-list/$id'
+    | '/_authenticated/dashboard/indoor/master/services/$id'
+    | '/_authenticated/dashboard/outdoor/master/categories/$id'
+    | '/_authenticated/dashboard/outdoor/master/departments/$id'
+    | '/_authenticated/dashboard/outdoor/master/doctors/create'
+    | '/_authenticated/dashboard/outdoor/master/test-tables/$id'
+    | '/_authenticated/dashboard/outdoor/master/tests/$id'
+    | '/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId'
+    | '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId'
+    | '/_authenticated/dashboard/roles/permissions/$roleId/edit'
+    | '/_authenticated/dashboard/ultrasonogram/all/edit/$id'
+    | '/_authenticated/dashboard/ultrasonogram/all/print/$id'
+    | '/_authenticated/dashboard/x-ray/all/edit/$id'
+    | '/_authenticated/dashboard/x-ray/all/print/$id'
+    | '/_authenticated/dashboard/accounting/reports/balance-sheet/'
+    | '/_authenticated/dashboard/accounting/reports/cash-flow/'
+    | '/_authenticated/dashboard/accounting/reports/daily-summary/'
+    | '/_authenticated/dashboard/accounting/reports/journal/'
+    | '/_authenticated/dashboard/accounting/reports/ledger/'
+    | '/_authenticated/dashboard/accounting/reports/multi-ledger/'
+    | '/_authenticated/dashboard/accounting/reports/profit-and-loss/'
+    | '/_authenticated/dashboard/accounting/reports/profit-loss/'
+    | '/_authenticated/dashboard/accounting/reports/trial-balance/'
+    | '/_authenticated/dashboard/admission/billing/$billingId/'
+    | '/_authenticated/dashboard/admission/discharged-patients/bill-does-not-created/'
+    | '/_authenticated/dashboard/admission/invoice/create/'
+    | '/_authenticated/dashboard/admission/invoice/list/'
+    | '/_authenticated/dashboard/admission/patients/active/'
+    | '/_authenticated/dashboard/admission/patients/balance-distributed-list/'
+    | '/_authenticated/dashboard/admission/patients/bill-created-list/'
+    | '/_authenticated/dashboard/admission/patients/bill-distributed-list/'
+    | '/_authenticated/dashboard/admission/patients/discharged-list/'
+    | '/_authenticated/dashboard/admission/patients/discharged/'
+    | '/_authenticated/dashboard/admission/patients/final-bill-created-list/'
+    | '/_authenticated/dashboard/admission/patients/payment-completed-list/'
+    | '/_authenticated/dashboard/indoor/management/distributions/'
+    | '/_authenticated/dashboard/indoor/management/doctor-referred/'
+    | '/_authenticated/dashboard/indoor/master/anasthesia-types/'
+    | '/_authenticated/dashboard/indoor/master/bed-cabin-list/'
+    | '/_authenticated/dashboard/indoor/master/doctor-types/'
+    | '/_authenticated/dashboard/indoor/master/operation-types/'
+    | '/_authenticated/dashboard/indoor/master/patient-types/'
+    | '/_authenticated/dashboard/indoor/master/service-categories/'
+    | '/_authenticated/dashboard/indoor/master/services/'
+    | '/_authenticated/dashboard/indoor/master/treatment-outcomes/'
+    | '/_authenticated/dashboard/outdoor/master/categories/'
+    | '/_authenticated/dashboard/outdoor/master/departments/'
+    | '/_authenticated/dashboard/outdoor/master/doctors/'
+    | '/_authenticated/dashboard/outdoor/master/machines/'
+    | '/_authenticated/dashboard/outdoor/master/sample-collection-rooms/'
+    | '/_authenticated/dashboard/outdoor/master/test-tables/'
+    | '/_authenticated/dashboard/outdoor/master/tests/'
+    | '/_authenticated/dashboard/outdoor/reception/due-collection/'
+    | '/_authenticated/dashboard/outdoor/reception/my-invoices/'
+    | '/_authenticated/dashboard/outdoor/reception/paid-invoices/'
+    | '/_authenticated/dashboard/outdoor/reception/patients/'
+    | '/_authenticated/dashboard/outdoor/reception/user-invoices/'
+    | '/_authenticated/dashboard/pathology/biochemical/all/'
+    | '/_authenticated/dashboard/pathology/biochemical/lipid-profile/'
+    | '/_authenticated/dashboard/pathology/hematology/all/'
+    | '/_authenticated/dashboard/pathology/hematology/blood-for-bt-ct/'
+    | '/_authenticated/dashboard/pathology/hematology/blood-for-tcdc/'
+    | '/_authenticated/dashboard/pathology/hematology/cbc-short/'
+    | '/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/'
+    | '/_authenticated/dashboard/pathology/hematology/peripheral-blood-film/'
+    | '/_authenticated/dashboard/pathology/hematology/prothom-bin-time-full/'
+    | '/_authenticated/dashboard/pathology/hormone/all/'
+    | '/_authenticated/dashboard/pathology/hormone/electrolytes/'
+    | '/_authenticated/dashboard/pathology/hormone/semen/'
+    | '/_authenticated/dashboard/pathology/hormone/skin-scrapping-for-fungus/'
+    | '/_authenticated/dashboard/pathology/hormone/sputum/'
+    | '/_authenticated/dashboard/pathology/hormone/t3t4tsh/'
+    | '/_authenticated/dashboard/pathology/immunology/all/'
+    | '/_authenticated/dashboard/pathology/immunology/beta-hcg/'
+    | '/_authenticated/dashboard/pathology/immunology/blood-group/'
+    | '/_authenticated/dashboard/pathology/immunology/mt/'
+    | '/_authenticated/dashboard/pathology/immunology/widal-test/'
+    | '/_authenticated/dashboard/pathology/stool/ocult-blood-test/'
+    | '/_authenticated/dashboard/pathology/stool/reducing-substance/'
+    | '/_authenticated/dashboard/pathology/stool/stool-re/'
+    | '/_authenticated/dashboard/pathology/urine/urine-for-albumin/'
+    | '/_authenticated/dashboard/pathology/urine/urine-for-re-full/'
+    | '/_authenticated/dashboard/pathology/urine/urine-for-sugar/'
+    | '/_authenticated/dashboard/payroll/attendance/$staffId/'
+    | '/_authenticated/dashboard/payroll/salary/$staffId/'
+    | '/_authenticated/dashboard/admission/patients/$admissionId/print/$step'
+    | '/_authenticated/dashboard/ecg/all/edit/builder/$id'
+    | '/_authenticated/dashboard/indoor/master/services/edit/$id'
+    | '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/edit'
+    | '/_authenticated/dashboard/pathology/biochemical/all/edit/$reportId'
+    | '/_authenticated/dashboard/pathology/biochemical/all/report/$reportId'
+    | '/_authenticated/dashboard/pathology/biochemical/lipid-profile/report/$reportId'
+    | '/_authenticated/dashboard/pathology/hematology/all/report/$reportId'
+    | '/_authenticated/dashboard/pathology/hematology/blood-for-bt-ct/report/$reportId'
+    | '/_authenticated/dashboard/pathology/hematology/blood-for-tcdc/report/$reportId'
+    | '/_authenticated/dashboard/pathology/hematology/cbc-short/edit/$id'
+    | '/_authenticated/dashboard/pathology/hematology/cbc-short/report/$reportId'
+    | '/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/edit/$id'
+    | '/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/report/$reportId'
+    | '/_authenticated/dashboard/pathology/hematology/peripheral-blood-film/report/$reportId'
+    | '/_authenticated/dashboard/pathology/hematology/prothom-bin-time-full/report/$reportId'
+    | '/_authenticated/dashboard/pathology/hormone/all/report/$reportId'
+    | '/_authenticated/dashboard/pathology/hormone/electrolytes/report/$reportId'
+    | '/_authenticated/dashboard/pathology/hormone/semen/edit/$reportId'
+    | '/_authenticated/dashboard/pathology/hormone/semen/report/$reportId'
+    | '/_authenticated/dashboard/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
+    | '/_authenticated/dashboard/pathology/hormone/sputum/report/$reportId'
+    | '/_authenticated/dashboard/pathology/hormone/t3t4tsh/report/$reportId'
+    | '/_authenticated/dashboard/pathology/immunology/all/report/$reportId'
+    | '/_authenticated/dashboard/pathology/immunology/beta-hcg/report/$reportId'
+    | '/_authenticated/dashboard/pathology/immunology/blood-group/report/$reportId'
+    | '/_authenticated/dashboard/pathology/immunology/mt/report/$reportId'
+    | '/_authenticated/dashboard/pathology/immunology/widal-test/report/$reportId'
+    | '/_authenticated/dashboard/pathology/stool/ocult-blood-test/report/$reportId'
+    | '/_authenticated/dashboard/pathology/stool/reducing-substance/report/$reportId'
+    | '/_authenticated/dashboard/pathology/stool/stool-re/edit/$id'
+    | '/_authenticated/dashboard/pathology/stool/stool-re/report/$reportId'
+    | '/_authenticated/dashboard/pathology/urine/urine-for-albumin/report/$reportId'
+    | '/_authenticated/dashboard/pathology/urine/urine-for-re-full/edit/$id'
+    | '/_authenticated/dashboard/pathology/urine/urine-for-re-full/report/$reportId'
+    | '/_authenticated/dashboard/pathology/urine/urine-for-sugar/report/$reportId'
+    | '/_authenticated/dashboard/ultrasonogram/all/edit/builder/$id'
+    | '/_authenticated/dashboard/x-ray/all/edit/builder/$id'
+    | '/_authenticated/dashboard/admission/patients/$admissionId/bill-created/'
+    | '/_authenticated/dashboard/admission/patients/$admissionId/billing-print/'
+    | '/_authenticated/dashboard/admission/patients/$admissionId/billing/'
+    | '/_authenticated/dashboard/admission/patients/$admissionId/confirm-balance/'
+    | '/_authenticated/dashboard/admission/patients/$admissionId/distribute-bill/'
+    | '/_authenticated/dashboard/admission/patients/$admissionId/final-bill-print/'
+    | '/_authenticated/dashboard/admission/patients/$admissionId/final-bill/'
+    | '/_authenticated/dashboard/admission/patients/$admissionId/print/'
+    | '/_authenticated/dashboard/indoor/master/bed-cabin-list/create/'
+    | '/_authenticated/dashboard/indoor/master/services/create/'
+    | '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/'
+    | '/_authenticated/dashboard/outdoor/master/tests/create/'
+    | '/_authenticated/dashboard/outdoor/reception/invoices/create/'
+    | '/_authenticated/dashboard/outdoor/reception/invoices/list/'
+    | '/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/'
+    | '/_authenticated/dashboard/reports/my/outdoor/today-collection/'
+    | '/_authenticated/dashboard/outdoor/master/tests/edit/$id/'
+    | '/_authenticated/dashboard/outdoor/reception/invoices/edit/$invoiceId/'
+    | '/_authenticated/dashboard/pathology/hematology/all/edit/$id/'
+    | '/_authenticated/dashboard/pathology/hormone/all/edit/$id/'
+    | '/_authenticated/dashboard/pathology/immunology/all/edit/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   ClerkRouteRoute: typeof ClerkRouteRouteWithChildren
+  authAuthCallbackRoute: typeof authAuthCallbackRoute
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authLoginRoute: typeof authLoginRoute
   authOtpRoute: typeof authOtpRoute
@@ -2889,6 +3253,11 @@ export interface RootRouteChildren {
   errors404Route: typeof errors404Route
   errors500Route: typeof errors500Route
   errors503Route: typeof errors503Route
+  platformLayoutRoute: typeof platformLayoutRoute
+  platformContactRoute: typeof platformContactRoute
+  platformPricingRoute: typeof platformPricingRoute
+  platformRegisterRoute: typeof platformRegisterRoute
+  platformAdminRoute: typeof platformAdminRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -2907,12 +3276,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/': {
-      id: '/_authenticated/'
+    '/': {
+      id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(platform)/admin': {
+      id: '/(platform)/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof platformAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(platform)/register': {
+      id: '/(platform)/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof platformRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(platform)/pricing': {
+      id: '/(platform)/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof platformPricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(platform)/contact': {
+      id: '/(platform)/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof platformContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(platform)/_layout': {
+      id: '/(platform)/_layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof platformLayoutRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/(errors)/503': {
       id: '/(errors)/503'
@@ -2991,6 +3395,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(auth)/auth-callback': {
+      id: '/(auth)/auth-callback'
+      path: '/auth-callback'
+      fullPath: '/auth-callback'
+      preLoaderRoute: typeof authAuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/clerk/_authenticated': {
       id: '/clerk/_authenticated'
       path: ''
@@ -3005,110 +3416,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClerkauthRouteRouteImport
       parentRoute: typeof ClerkRouteRoute
     }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteRouteImport
+    '/_authenticated/dashboard/': {
+      id: '/_authenticated/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/users/': {
-      id: '/_authenticated/users/'
-      path: '/users'
-      fullPath: '/users'
-      preLoaderRoute: typeof AuthenticatedUsersIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/tasks/': {
-      id: '/_authenticated/tasks/'
-      path: '/tasks'
-      fullPath: '/tasks'
-      preLoaderRoute: typeof AuthenticatedTasksIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/settings/': {
-      id: '/_authenticated/settings/'
+    '/(platform)/admin/': {
+      id: '/(platform)/admin/'
       path: '/'
-      fullPath: '/settings/'
-      preLoaderRoute: typeof AuthenticatedSettingsIndexRouteImport
-      parentRoute: typeof AuthenticatedSettingsRouteRoute
-    }
-    '/_authenticated/roles/': {
-      id: '/_authenticated/roles/'
-      path: '/roles'
-      fullPath: '/roles'
-      preLoaderRoute: typeof AuthenticatedRolesIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/notifications/': {
-      id: '/_authenticated/notifications/'
-      path: '/notifications'
-      fullPath: '/notifications'
-      preLoaderRoute: typeof AuthenticatedNotificationsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/my-account/': {
-      id: '/_authenticated/my-account/'
-      path: '/my-account'
-      fullPath: '/my-account'
-      preLoaderRoute: typeof AuthenticatedMyAccountIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/help/': {
-      id: '/_authenticated/help/'
-      path: '/help'
-      fullPath: '/help'
-      preLoaderRoute: typeof AuthenticatedHelpIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/help-center/': {
-      id: '/_authenticated/help-center/'
-      path: '/help-center'
-      fullPath: '/help-center'
-      preLoaderRoute: typeof AuthenticatedHelpCenterIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/database/': {
-      id: '/_authenticated/database/'
-      path: '/database'
-      fullPath: '/database'
-      preLoaderRoute: typeof AuthenticatedDatabaseIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/chats/': {
-      id: '/_authenticated/chats/'
-      path: '/chats'
-      fullPath: '/chats'
-      preLoaderRoute: typeof AuthenticatedChatsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/backups/': {
-      id: '/_authenticated/backups/'
-      path: '/backups'
-      fullPath: '/backups'
-      preLoaderRoute: typeof AuthenticatedBackupsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/backup-settings/': {
-      id: '/_authenticated/backup-settings/'
-      path: '/backup-settings'
-      fullPath: '/backup-settings'
-      preLoaderRoute: typeof AuthenticatedBackupSettingsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/apps/': {
-      id: '/_authenticated/apps/'
-      path: '/apps'
-      fullPath: '/apps'
-      preLoaderRoute: typeof AuthenticatedAppsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/accounting/': {
-      id: '/_authenticated/accounting/'
-      path: '/accounting'
-      fullPath: '/accounting'
-      preLoaderRoute: typeof AuthenticatedAccountingIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      fullPath: '/admin/'
+      preLoaderRoute: typeof platformAdminIndexRouteImport
+      parentRoute: typeof platformAdminRoute
     }
     '/clerk/_authenticated/user-management': {
       id: '/clerk/_authenticated/user-management'
@@ -3131,1912 +3451,2174 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClerkauthSignInRouteImport
       parentRoute: typeof ClerkauthRouteRoute
     }
-    '/_authenticated/settings/prefix': {
-      id: '/_authenticated/settings/prefix'
+    '/(platform)/admin/settings': {
+      id: '/(platform)/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof platformAdminSettingsRouteImport
+      parentRoute: typeof platformAdminRoute
+    }
+    '/(platform)/admin/registrations': {
+      id: '/(platform)/admin/registrations'
+      path: '/registrations'
+      fullPath: '/admin/registrations'
+      preLoaderRoute: typeof platformAdminRegistrationsRouteImport
+      parentRoute: typeof platformAdminRoute
+    }
+    '/(platform)/admin/plans': {
+      id: '/(platform)/admin/plans'
+      path: '/plans'
+      fullPath: '/admin/plans'
+      preLoaderRoute: typeof platformAdminPlansRouteImport
+      parentRoute: typeof platformAdminRoute
+    }
+    '/(platform)/admin/modules': {
+      id: '/(platform)/admin/modules'
+      path: '/modules'
+      fullPath: '/admin/modules'
+      preLoaderRoute: typeof platformAdminModulesRouteImport
+      parentRoute: typeof platformAdminRoute
+    }
+    '/(platform)/admin/login': {
+      id: '/(platform)/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof platformAdminLoginRouteImport
+      parentRoute: typeof platformAdminRoute
+    }
+    '/(platform)/admin/companies': {
+      id: '/(platform)/admin/companies'
+      path: '/companies'
+      fullPath: '/admin/companies'
+      preLoaderRoute: typeof platformAdminCompaniesRouteImport
+      parentRoute: typeof platformAdminRoute
+    }
+    '/(platform)/admin/billing': {
+      id: '/(platform)/admin/billing'
+      path: '/billing'
+      fullPath: '/admin/billing'
+      preLoaderRoute: typeof platformAdminBillingRouteImport
+      parentRoute: typeof platformAdminRoute
+    }
+    '/(platform)/admin/admins': {
+      id: '/(platform)/admin/admins'
+      path: '/admins'
+      fullPath: '/admin/admins'
+      preLoaderRoute: typeof platformAdminAdminsRouteImport
+      parentRoute: typeof platformAdminRoute
+    }
+    '/(platform)/admin/_layout': {
+      id: '/(platform)/admin/_layout'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof platformAdminLayoutRouteImport
+      parentRoute: typeof platformAdminRoute
+    }
+    '/_authenticated/dashboard/settings': {
+      id: '/_authenticated/dashboard/settings'
+      path: '/dashboard/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/users/': {
+      id: '/_authenticated/dashboard/users/'
+      path: '/dashboard/users'
+      fullPath: '/dashboard/users'
+      preLoaderRoute: typeof AuthenticatedDashboardUsersIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/tasks/': {
+      id: '/_authenticated/dashboard/tasks/'
+      path: '/dashboard/tasks'
+      fullPath: '/dashboard/tasks'
+      preLoaderRoute: typeof AuthenticatedDashboardTasksIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/subscription/': {
+      id: '/_authenticated/dashboard/subscription/'
+      path: '/dashboard/subscription'
+      fullPath: '/dashboard/subscription'
+      preLoaderRoute: typeof AuthenticatedDashboardSubscriptionIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/settings/': {
+      id: '/_authenticated/dashboard/settings/'
+      path: '/'
+      fullPath: '/dashboard/settings/'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsIndexRouteImport
+      parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
+    }
+    '/_authenticated/dashboard/roles/': {
+      id: '/_authenticated/dashboard/roles/'
+      path: '/dashboard/roles'
+      fullPath: '/dashboard/roles'
+      preLoaderRoute: typeof AuthenticatedDashboardRolesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/notifications/': {
+      id: '/_authenticated/dashboard/notifications/'
+      path: '/dashboard/notifications'
+      fullPath: '/dashboard/notifications'
+      preLoaderRoute: typeof AuthenticatedDashboardNotificationsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/my-account/': {
+      id: '/_authenticated/dashboard/my-account/'
+      path: '/dashboard/my-account'
+      fullPath: '/dashboard/my-account'
+      preLoaderRoute: typeof AuthenticatedDashboardMyAccountIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/help/': {
+      id: '/_authenticated/dashboard/help/'
+      path: '/dashboard/help'
+      fullPath: '/dashboard/help'
+      preLoaderRoute: typeof AuthenticatedDashboardHelpIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/help-center/': {
+      id: '/_authenticated/dashboard/help-center/'
+      path: '/dashboard/help-center'
+      fullPath: '/dashboard/help-center'
+      preLoaderRoute: typeof AuthenticatedDashboardHelpCenterIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/gallery/': {
+      id: '/_authenticated/dashboard/gallery/'
+      path: '/dashboard/gallery'
+      fullPath: '/dashboard/gallery'
+      preLoaderRoute: typeof AuthenticatedDashboardGalleryIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/database/': {
+      id: '/_authenticated/dashboard/database/'
+      path: '/dashboard/database'
+      fullPath: '/dashboard/database'
+      preLoaderRoute: typeof AuthenticatedDashboardDatabaseIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/company-account/': {
+      id: '/_authenticated/dashboard/company-account/'
+      path: '/dashboard/company-account'
+      fullPath: '/dashboard/company-account'
+      preLoaderRoute: typeof AuthenticatedDashboardCompanyAccountIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/chats/': {
+      id: '/_authenticated/dashboard/chats/'
+      path: '/dashboard/chats'
+      fullPath: '/dashboard/chats'
+      preLoaderRoute: typeof AuthenticatedDashboardChatsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/backups/': {
+      id: '/_authenticated/dashboard/backups/'
+      path: '/dashboard/backups'
+      fullPath: '/dashboard/backups'
+      preLoaderRoute: typeof AuthenticatedDashboardBackupsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/backup-settings/': {
+      id: '/_authenticated/dashboard/backup-settings/'
+      path: '/dashboard/backup-settings'
+      fullPath: '/dashboard/backup-settings'
+      preLoaderRoute: typeof AuthenticatedDashboardBackupSettingsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/apps/': {
+      id: '/_authenticated/dashboard/apps/'
+      path: '/dashboard/apps'
+      fullPath: '/dashboard/apps'
+      preLoaderRoute: typeof AuthenticatedDashboardAppsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/accounting/': {
+      id: '/_authenticated/dashboard/accounting/'
+      path: '/dashboard/accounting'
+      fullPath: '/dashboard/accounting'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/settings/prefix': {
+      id: '/_authenticated/dashboard/settings/prefix'
       path: '/prefix'
-      fullPath: '/settings/prefix'
-      preLoaderRoute: typeof AuthenticatedSettingsPrefixRouteImport
-      parentRoute: typeof AuthenticatedSettingsRouteRoute
+      fullPath: '/dashboard/settings/prefix'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsPrefixRouteImport
+      parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
     }
-    '/_authenticated/settings/payment-accounts': {
-      id: '/_authenticated/settings/payment-accounts'
+    '/_authenticated/dashboard/settings/payment-accounts': {
+      id: '/_authenticated/dashboard/settings/payment-accounts'
       path: '/payment-accounts'
-      fullPath: '/settings/payment-accounts'
-      preLoaderRoute: typeof AuthenticatedSettingsPaymentAccountsRouteImport
-      parentRoute: typeof AuthenticatedSettingsRouteRoute
+      fullPath: '/dashboard/settings/payment-accounts'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsPaymentAccountsRouteImport
+      parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
     }
-    '/_authenticated/settings/notifications': {
-      id: '/_authenticated/settings/notifications'
+    '/_authenticated/dashboard/settings/notifications': {
+      id: '/_authenticated/dashboard/settings/notifications'
       path: '/notifications'
-      fullPath: '/settings/notifications'
-      preLoaderRoute: typeof AuthenticatedSettingsNotificationsRouteImport
-      parentRoute: typeof AuthenticatedSettingsRouteRoute
+      fullPath: '/dashboard/settings/notifications'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsNotificationsRouteImport
+      parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
     }
-    '/_authenticated/settings/display': {
-      id: '/_authenticated/settings/display'
+    '/_authenticated/dashboard/settings/display': {
+      id: '/_authenticated/dashboard/settings/display'
       path: '/display'
-      fullPath: '/settings/display'
-      preLoaderRoute: typeof AuthenticatedSettingsDisplayRouteImport
-      parentRoute: typeof AuthenticatedSettingsRouteRoute
+      fullPath: '/dashboard/settings/display'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsDisplayRouteImport
+      parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
     }
-    '/_authenticated/settings/appearance': {
-      id: '/_authenticated/settings/appearance'
+    '/_authenticated/dashboard/settings/date-controls': {
+      id: '/_authenticated/dashboard/settings/date-controls'
+      path: '/date-controls'
+      fullPath: '/dashboard/settings/date-controls'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsDateControlsRouteImport
+      parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
+    }
+    '/_authenticated/dashboard/settings/appearance': {
+      id: '/_authenticated/dashboard/settings/appearance'
       path: '/appearance'
-      fullPath: '/settings/appearance'
-      preLoaderRoute: typeof AuthenticatedSettingsAppearanceRouteImport
-      parentRoute: typeof AuthenticatedSettingsRouteRoute
+      fullPath: '/dashboard/settings/appearance'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsAppearanceRouteImport
+      parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
     }
-    '/_authenticated/settings/account': {
-      id: '/_authenticated/settings/account'
+    '/_authenticated/dashboard/settings/account': {
+      id: '/_authenticated/dashboard/settings/account'
       path: '/account'
-      fullPath: '/settings/account'
-      preLoaderRoute: typeof AuthenticatedSettingsAccountRouteImport
-      parentRoute: typeof AuthenticatedSettingsRouteRoute
+      fullPath: '/dashboard/settings/account'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsAccountRouteImport
+      parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
     }
-    '/_authenticated/notifications/$id': {
-      id: '/_authenticated/notifications/$id'
-      path: '/notifications/$id'
-      fullPath: '/notifications/$id'
-      preLoaderRoute: typeof AuthenticatedNotificationsIdRouteImport
+    '/_authenticated/dashboard/notifications/$id': {
+      id: '/_authenticated/dashboard/notifications/$id'
+      path: '/dashboard/notifications/$id'
+      fullPath: '/dashboard/notifications/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardNotificationsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/errors/$error': {
-      id: '/_authenticated/errors/$error'
-      path: '/errors/$error'
-      fullPath: '/errors/$error'
-      preLoaderRoute: typeof AuthenticatedErrorsErrorRouteImport
+    '/_authenticated/dashboard/errors/$error': {
+      id: '/_authenticated/dashboard/errors/$error'
+      path: '/dashboard/errors/$error'
+      fullPath: '/dashboard/errors/$error'
+      preLoaderRoute: typeof AuthenticatedDashboardErrorsErrorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/x-ray/all/': {
-      id: '/_authenticated/x-ray/all/'
-      path: '/x-ray/all'
-      fullPath: '/x-ray/all'
-      preLoaderRoute: typeof AuthenticatedXRayAllIndexRouteImport
+    '/_authenticated/dashboard/x-ray/all/': {
+      id: '/_authenticated/dashboard/x-ray/all/'
+      path: '/dashboard/x-ray/all'
+      fullPath: '/dashboard/x-ray/all'
+      preLoaderRoute: typeof AuthenticatedDashboardXRayAllIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/ultrasonogram/all/': {
-      id: '/_authenticated/ultrasonogram/all/'
-      path: '/ultrasonogram/all'
-      fullPath: '/ultrasonogram/all'
-      preLoaderRoute: typeof AuthenticatedUltrasonogramAllIndexRouteImport
+    '/_authenticated/dashboard/ultrasonogram/all/': {
+      id: '/_authenticated/dashboard/ultrasonogram/all/'
+      path: '/dashboard/ultrasonogram/all'
+      fullPath: '/dashboard/ultrasonogram/all'
+      preLoaderRoute: typeof AuthenticatedDashboardUltrasonogramAllIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/roles/create/': {
-      id: '/_authenticated/roles/create/'
-      path: '/roles/create'
-      fullPath: '/roles/create'
-      preLoaderRoute: typeof AuthenticatedRolesCreateIndexRouteImport
+    '/_authenticated/dashboard/roles/create/': {
+      id: '/_authenticated/dashboard/roles/create/'
+      path: '/dashboard/roles/create'
+      fullPath: '/dashboard/roles/create'
+      preLoaderRoute: typeof AuthenticatedDashboardRolesCreateIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/payroll/overview/': {
-      id: '/_authenticated/payroll/overview/'
-      path: '/payroll/overview'
-      fullPath: '/payroll/overview'
-      preLoaderRoute: typeof AuthenticatedPayrollOverviewIndexRouteImport
+    '/_authenticated/dashboard/payroll/overview/': {
+      id: '/_authenticated/dashboard/payroll/overview/'
+      path: '/dashboard/payroll/overview'
+      fullPath: '/dashboard/payroll/overview'
+      preLoaderRoute: typeof AuthenticatedDashboardPayrollOverviewIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/payroll/employees/': {
-      id: '/_authenticated/payroll/employees/'
-      path: '/payroll/employees'
-      fullPath: '/payroll/employees'
-      preLoaderRoute: typeof AuthenticatedPayrollEmployeesIndexRouteImport
+    '/_authenticated/dashboard/payroll/employees/': {
+      id: '/_authenticated/dashboard/payroll/employees/'
+      path: '/dashboard/payroll/employees'
+      fullPath: '/dashboard/payroll/employees'
+      preLoaderRoute: typeof AuthenticatedDashboardPayrollEmployeesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/ecg/all/': {
-      id: '/_authenticated/ecg/all/'
-      path: '/ecg/all'
-      fullPath: '/ecg/all'
-      preLoaderRoute: typeof AuthenticatedEcgAllIndexRouteImport
+    '/_authenticated/dashboard/ecg/all/': {
+      id: '/_authenticated/dashboard/ecg/all/'
+      path: '/dashboard/ecg/all'
+      fullPath: '/dashboard/ecg/all'
+      preLoaderRoute: typeof AuthenticatedDashboardEcgAllIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/banks/bank-withdrawals/': {
-      id: '/_authenticated/banks/bank-withdrawals/'
-      path: '/banks/bank-withdrawals'
-      fullPath: '/banks/bank-withdrawals'
-      preLoaderRoute: typeof AuthenticatedBanksBankWithdrawalsIndexRouteImport
+    '/_authenticated/dashboard/banks/bank-withdrawals/': {
+      id: '/_authenticated/dashboard/banks/bank-withdrawals/'
+      path: '/dashboard/banks/bank-withdrawals'
+      fullPath: '/dashboard/banks/bank-withdrawals'
+      preLoaderRoute: typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/banks/bank-transactions/': {
-      id: '/_authenticated/banks/bank-transactions/'
-      path: '/banks/bank-transactions'
-      fullPath: '/banks/bank-transactions'
-      preLoaderRoute: typeof AuthenticatedBanksBankTransactionsIndexRouteImport
+    '/_authenticated/dashboard/banks/bank-transactions/': {
+      id: '/_authenticated/dashboard/banks/bank-transactions/'
+      path: '/dashboard/banks/bank-transactions'
+      fullPath: '/dashboard/banks/bank-transactions'
+      preLoaderRoute: typeof AuthenticatedDashboardBanksBankTransactionsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/banks/bank-deposits/': {
-      id: '/_authenticated/banks/bank-deposits/'
-      path: '/banks/bank-deposits'
-      fullPath: '/banks/bank-deposits'
-      preLoaderRoute: typeof AuthenticatedBanksBankDepositsIndexRouteImport
+    '/_authenticated/dashboard/banks/bank-deposits/': {
+      id: '/_authenticated/dashboard/banks/bank-deposits/'
+      path: '/dashboard/banks/bank-deposits'
+      fullPath: '/dashboard/banks/bank-deposits'
+      preLoaderRoute: typeof AuthenticatedDashboardBanksBankDepositsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/banks/bank-accounts/': {
-      id: '/_authenticated/banks/bank-accounts/'
-      path: '/banks/bank-accounts'
-      fullPath: '/banks/bank-accounts'
-      preLoaderRoute: typeof AuthenticatedBanksBankAccountsIndexRouteImport
+    '/_authenticated/dashboard/banks/bank-accounts/': {
+      id: '/_authenticated/dashboard/banks/bank-accounts/'
+      path: '/dashboard/banks/bank-accounts'
+      fullPath: '/dashboard/banks/bank-accounts'
+      preLoaderRoute: typeof AuthenticatedDashboardBanksBankAccountsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/second-time-bill/': {
-      id: '/_authenticated/admission/second-time-bill/'
-      path: '/admission/second-time-bill'
-      fullPath: '/admission/second-time-bill'
-      preLoaderRoute: typeof AuthenticatedAdmissionSecondTimeBillIndexRouteImport
+    '/_authenticated/dashboard/admission/second-time-bill/': {
+      id: '/_authenticated/dashboard/admission/second-time-bill/'
+      path: '/dashboard/admission/second-time-bill'
+      fullPath: '/dashboard/admission/second-time-bill'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionSecondTimeBillIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/': {
-      id: '/_authenticated/admission/patients/'
-      path: '/admission/patients'
-      fullPath: '/admission/patients'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsIndexRouteImport
+    '/_authenticated/dashboard/admission/patients/': {
+      id: '/_authenticated/dashboard/admission/patients/'
+      path: '/dashboard/admission/patients'
+      fullPath: '/dashboard/admission/patients'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/new-admission/': {
-      id: '/_authenticated/admission/new-admission/'
-      path: '/admission/new-admission'
-      fullPath: '/admission/new-admission'
-      preLoaderRoute: typeof AuthenticatedAdmissionNewAdmissionIndexRouteImport
+    '/_authenticated/dashboard/admission/new-admission/': {
+      id: '/_authenticated/dashboard/admission/new-admission/'
+      path: '/dashboard/admission/new-admission'
+      fullPath: '/dashboard/admission/new-admission'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionNewAdmissionIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/invoice/': {
-      id: '/_authenticated/admission/invoice/'
-      path: '/admission/invoice'
-      fullPath: '/admission/invoice'
-      preLoaderRoute: typeof AuthenticatedAdmissionInvoiceIndexRouteImport
+    '/_authenticated/dashboard/admission/invoice/': {
+      id: '/_authenticated/dashboard/admission/invoice/'
+      path: '/dashboard/admission/invoice'
+      fullPath: '/dashboard/admission/invoice'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionInvoiceIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/first-time-service/': {
-      id: '/_authenticated/admission/first-time-service/'
-      path: '/admission/first-time-service'
-      fullPath: '/admission/first-time-service'
-      preLoaderRoute: typeof AuthenticatedAdmissionFirstTimeServiceIndexRouteImport
+    '/_authenticated/dashboard/admission/first-time-service/': {
+      id: '/_authenticated/dashboard/admission/first-time-service/'
+      path: '/dashboard/admission/first-time-service'
+      fullPath: '/dashboard/admission/first-time-service'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionFirstTimeServiceIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/first-time-bill/': {
-      id: '/_authenticated/admission/first-time-bill/'
-      path: '/admission/first-time-bill'
-      fullPath: '/admission/first-time-bill'
-      preLoaderRoute: typeof AuthenticatedAdmissionFirstTimeBillIndexRouteImport
+    '/_authenticated/dashboard/admission/first-time-bill/': {
+      id: '/_authenticated/dashboard/admission/first-time-bill/'
+      path: '/dashboard/admission/first-time-bill'
+      fullPath: '/dashboard/admission/first-time-bill'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionFirstTimeBillIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/finalise-services/': {
-      id: '/_authenticated/admission/finalise-services/'
-      path: '/admission/finalise-services'
-      fullPath: '/admission/finalise-services'
-      preLoaderRoute: typeof AuthenticatedAdmissionFinaliseServicesIndexRouteImport
+    '/_authenticated/dashboard/admission/finalise-services/': {
+      id: '/_authenticated/dashboard/admission/finalise-services/'
+      path: '/dashboard/admission/finalise-services'
+      fullPath: '/dashboard/admission/finalise-services'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionFinaliseServicesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/final-bills/': {
-      id: '/_authenticated/admission/final-bills/'
-      path: '/admission/final-bills'
-      fullPath: '/admission/final-bills'
-      preLoaderRoute: typeof AuthenticatedAdmissionFinalBillsIndexRouteImport
+    '/_authenticated/dashboard/admission/final-bills/': {
+      id: '/_authenticated/dashboard/admission/final-bills/'
+      path: '/dashboard/admission/final-bills'
+      fullPath: '/dashboard/admission/final-bills'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionFinalBillsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/due-collection/': {
-      id: '/_authenticated/admission/due-collection/'
-      path: '/admission/due-collection'
-      fullPath: '/admission/due-collection'
-      preLoaderRoute: typeof AuthenticatedAdmissionDueCollectionIndexRouteImport
+    '/_authenticated/dashboard/admission/due-collection/': {
+      id: '/_authenticated/dashboard/admission/due-collection/'
+      path: '/dashboard/admission/due-collection'
+      fullPath: '/dashboard/admission/due-collection'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionDueCollectionIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/bed-cabin-charge/': {
-      id: '/_authenticated/admission/bed-cabin-charge/'
-      path: '/admission/bed-cabin-charge'
-      fullPath: '/admission/bed-cabin-charge'
-      preLoaderRoute: typeof AuthenticatedAdmissionBedCabinChargeIndexRouteImport
+    '/_authenticated/dashboard/admission/bed-cabin-charge/': {
+      id: '/_authenticated/dashboard/admission/bed-cabin-charge/'
+      path: '/dashboard/admission/bed-cabin-charge'
+      fullPath: '/dashboard/admission/bed-cabin-charge'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionBedCabinChargeIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/advance-payment/': {
-      id: '/_authenticated/admission/advance-payment/'
-      path: '/admission/advance-payment'
-      fullPath: '/admission/advance-payment'
-      preLoaderRoute: typeof AuthenticatedAdmissionAdvancePaymentIndexRouteImport
+    '/_authenticated/dashboard/admission/advance-payment/': {
+      id: '/_authenticated/dashboard/admission/advance-payment/'
+      path: '/dashboard/admission/advance-payment'
+      fullPath: '/dashboard/admission/advance-payment'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionAdvancePaymentIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounts/pay-to-surgeon/': {
-      id: '/_authenticated/accounts/pay-to-surgeon/'
-      path: '/accounts/pay-to-surgeon'
-      fullPath: '/accounts/pay-to-surgeon'
-      preLoaderRoute: typeof AuthenticatedAccountsPayToSurgeonIndexRouteImport
+    '/_authenticated/dashboard/accounts/pay-to-surgeon/': {
+      id: '/_authenticated/dashboard/accounts/pay-to-surgeon/'
+      path: '/dashboard/accounts/pay-to-surgeon'
+      fullPath: '/dashboard/accounts/pay-to-surgeon'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountsPayToSurgeonIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounts/pay-to-consultant/': {
-      id: '/_authenticated/accounts/pay-to-consultant/'
-      path: '/accounts/pay-to-consultant'
-      fullPath: '/accounts/pay-to-consultant'
-      preLoaderRoute: typeof AuthenticatedAccountsPayToConsultantIndexRouteImport
+    '/_authenticated/dashboard/accounts/pay-to-consultant/': {
+      id: '/_authenticated/dashboard/accounts/pay-to-consultant/'
+      path: '/dashboard/accounts/pay-to-consultant'
+      fullPath: '/dashboard/accounts/pay-to-consultant'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountsPayToConsultantIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounts/pay-to-assistant/': {
-      id: '/_authenticated/accounts/pay-to-assistant/'
-      path: '/accounts/pay-to-assistant'
-      fullPath: '/accounts/pay-to-assistant'
-      preLoaderRoute: typeof AuthenticatedAccountsPayToAssistantIndexRouteImport
+    '/_authenticated/dashboard/accounts/pay-to-assistant/': {
+      id: '/_authenticated/dashboard/accounts/pay-to-assistant/'
+      path: '/dashboard/accounts/pay-to-assistant'
+      fullPath: '/dashboard/accounts/pay-to-assistant'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountsPayToAssistantIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounts/pay-to-anaesthetist/': {
-      id: '/_authenticated/accounts/pay-to-anaesthetist/'
-      path: '/accounts/pay-to-anaesthetist'
-      fullPath: '/accounts/pay-to-anaesthetist'
-      preLoaderRoute: typeof AuthenticatedAccountsPayToAnaesthetistIndexRouteImport
+    '/_authenticated/dashboard/accounts/pay-to-anaesthetist/': {
+      id: '/_authenticated/dashboard/accounts/pay-to-anaesthetist/'
+      path: '/dashboard/accounts/pay-to-anaesthetist'
+      fullPath: '/dashboard/accounts/pay-to-anaesthetist'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountsPayToAnaesthetistIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounts/journal/': {
-      id: '/_authenticated/accounts/journal/'
-      path: '/accounts/journal'
-      fullPath: '/accounts/journal'
-      preLoaderRoute: typeof AuthenticatedAccountsJournalIndexRouteImport
+    '/_authenticated/dashboard/accounts/journal/': {
+      id: '/_authenticated/dashboard/accounts/journal/'
+      path: '/dashboard/accounts/journal'
+      fullPath: '/dashboard/accounts/journal'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountsJournalIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounts/daily-debit/': {
-      id: '/_authenticated/accounts/daily-debit/'
-      path: '/accounts/daily-debit'
-      fullPath: '/accounts/daily-debit'
-      preLoaderRoute: typeof AuthenticatedAccountsDailyDebitIndexRouteImport
+    '/_authenticated/dashboard/accounts/daily-debit/': {
+      id: '/_authenticated/dashboard/accounts/daily-debit/'
+      path: '/dashboard/accounts/daily-debit'
+      fullPath: '/dashboard/accounts/daily-debit'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountsDailyDebitIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounts/daily-credit/': {
-      id: '/_authenticated/accounts/daily-credit/'
-      path: '/accounts/daily-credit'
-      fullPath: '/accounts/daily-credit'
-      preLoaderRoute: typeof AuthenticatedAccountsDailyCreditIndexRouteImport
+    '/_authenticated/dashboard/accounts/daily-credit/': {
+      id: '/_authenticated/dashboard/accounts/daily-credit/'
+      path: '/dashboard/accounts/daily-credit'
+      fullPath: '/dashboard/accounts/daily-credit'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountsDailyCreditIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounting/transactions/': {
-      id: '/_authenticated/accounting/transactions/'
-      path: '/accounting/transactions'
-      fullPath: '/accounting/transactions'
-      preLoaderRoute: typeof AuthenticatedAccountingTransactionsIndexRouteImport
+    '/_authenticated/dashboard/accounting/transactions/': {
+      id: '/_authenticated/dashboard/accounting/transactions/'
+      path: '/dashboard/accounting/transactions'
+      fullPath: '/dashboard/accounting/transactions'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingTransactionsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounting/income/': {
-      id: '/_authenticated/accounting/income/'
-      path: '/accounting/income'
-      fullPath: '/accounting/income'
-      preLoaderRoute: typeof AuthenticatedAccountingIncomeIndexRouteImport
+    '/_authenticated/dashboard/accounting/income/': {
+      id: '/_authenticated/dashboard/accounting/income/'
+      path: '/dashboard/accounting/income'
+      fullPath: '/dashboard/accounting/income'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingIncomeIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounting/expenses/': {
-      id: '/_authenticated/accounting/expenses/'
-      path: '/accounting/expenses'
-      fullPath: '/accounting/expenses'
-      preLoaderRoute: typeof AuthenticatedAccountingExpensesIndexRouteImport
+    '/_authenticated/dashboard/accounting/expenses/': {
+      id: '/_authenticated/dashboard/accounting/expenses/'
+      path: '/dashboard/accounting/expenses'
+      fullPath: '/dashboard/accounting/expenses'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingExpensesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounting/expense/': {
-      id: '/_authenticated/accounting/expense/'
-      path: '/accounting/expense'
-      fullPath: '/accounting/expense'
-      preLoaderRoute: typeof AuthenticatedAccountingExpenseIndexRouteImport
+    '/_authenticated/dashboard/accounting/expense/': {
+      id: '/_authenticated/dashboard/accounting/expense/'
+      path: '/dashboard/accounting/expense'
+      fullPath: '/dashboard/accounting/expense'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingExpenseIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounting/accounts/': {
-      id: '/_authenticated/accounting/accounts/'
-      path: '/accounting/accounts'
-      fullPath: '/accounting/accounts'
-      preLoaderRoute: typeof AuthenticatedAccountingAccountsIndexRouteImport
+    '/_authenticated/dashboard/accounting/accounts/': {
+      id: '/_authenticated/dashboard/accounting/accounts/'
+      path: '/dashboard/accounting/accounts'
+      fullPath: '/dashboard/accounting/accounts'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingAccountsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/roles/edit/$id': {
-      id: '/_authenticated/roles/edit/$id'
-      path: '/roles/edit/$id'
-      fullPath: '/roles/edit/$id'
-      preLoaderRoute: typeof AuthenticatedRolesEditIdRouteImport
+    '/_authenticated/dashboard/roles/edit/$id': {
+      id: '/_authenticated/dashboard/roles/edit/$id'
+      path: '/dashboard/roles/edit/$id'
+      fullPath: '/dashboard/roles/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardRolesEditIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/payroll/salary/$staffId/': {
-      id: '/_authenticated/payroll/salary/$staffId/'
-      path: '/payroll/salary/$staffId'
-      fullPath: '/payroll/salary/$staffId'
-      preLoaderRoute: typeof AuthenticatedPayrollSalaryStaffIdIndexRouteImport
+    '/_authenticated/dashboard/payroll/salary/$staffId/': {
+      id: '/_authenticated/dashboard/payroll/salary/$staffId/'
+      path: '/dashboard/payroll/salary/$staffId'
+      fullPath: '/dashboard/payroll/salary/$staffId'
+      preLoaderRoute: typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/payroll/attendance/$staffId/': {
-      id: '/_authenticated/payroll/attendance/$staffId/'
-      path: '/payroll/attendance/$staffId'
-      fullPath: '/payroll/attendance/$staffId'
-      preLoaderRoute: typeof AuthenticatedPayrollAttendanceStaffIdIndexRouteImport
+    '/_authenticated/dashboard/payroll/attendance/$staffId/': {
+      id: '/_authenticated/dashboard/payroll/attendance/$staffId/'
+      path: '/dashboard/payroll/attendance/$staffId'
+      fullPath: '/dashboard/payroll/attendance/$staffId'
+      preLoaderRoute: typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/urine/urine-for-sugar/': {
-      id: '/_authenticated/pathology/urine/urine-for-sugar/'
-      path: '/pathology/urine/urine-for-sugar'
-      fullPath: '/pathology/urine/urine-for-sugar'
-      preLoaderRoute: typeof AuthenticatedPathologyUrineUrineForSugarIndexRouteImport
+    '/_authenticated/dashboard/pathology/urine/urine-for-sugar/': {
+      id: '/_authenticated/dashboard/pathology/urine/urine-for-sugar/'
+      path: '/dashboard/pathology/urine/urine-for-sugar'
+      fullPath: '/dashboard/pathology/urine/urine-for-sugar'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/urine/urine-for-re-full/': {
-      id: '/_authenticated/pathology/urine/urine-for-re-full/'
-      path: '/pathology/urine/urine-for-re-full'
-      fullPath: '/pathology/urine/urine-for-re-full'
-      preLoaderRoute: typeof AuthenticatedPathologyUrineUrineForReFullIndexRouteImport
+    '/_authenticated/dashboard/pathology/urine/urine-for-re-full/': {
+      id: '/_authenticated/dashboard/pathology/urine/urine-for-re-full/'
+      path: '/dashboard/pathology/urine/urine-for-re-full'
+      fullPath: '/dashboard/pathology/urine/urine-for-re-full'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyUrineUrineForReFullIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/urine/urine-for-albumin/': {
-      id: '/_authenticated/pathology/urine/urine-for-albumin/'
-      path: '/pathology/urine/urine-for-albumin'
-      fullPath: '/pathology/urine/urine-for-albumin'
-      preLoaderRoute: typeof AuthenticatedPathologyUrineUrineForAlbuminIndexRouteImport
+    '/_authenticated/dashboard/pathology/urine/urine-for-albumin/': {
+      id: '/_authenticated/dashboard/pathology/urine/urine-for-albumin/'
+      path: '/dashboard/pathology/urine/urine-for-albumin'
+      fullPath: '/dashboard/pathology/urine/urine-for-albumin'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyUrineUrineForAlbuminIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/stool/stool-re/': {
-      id: '/_authenticated/pathology/stool/stool-re/'
-      path: '/pathology/stool/stool-re'
-      fullPath: '/pathology/stool/stool-re'
-      preLoaderRoute: typeof AuthenticatedPathologyStoolStoolReIndexRouteImport
+    '/_authenticated/dashboard/pathology/stool/stool-re/': {
+      id: '/_authenticated/dashboard/pathology/stool/stool-re/'
+      path: '/dashboard/pathology/stool/stool-re'
+      fullPath: '/dashboard/pathology/stool/stool-re'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyStoolStoolReIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/stool/reducing-substance/': {
-      id: '/_authenticated/pathology/stool/reducing-substance/'
-      path: '/pathology/stool/reducing-substance'
-      fullPath: '/pathology/stool/reducing-substance'
-      preLoaderRoute: typeof AuthenticatedPathologyStoolReducingSubstanceIndexRouteImport
+    '/_authenticated/dashboard/pathology/stool/reducing-substance/': {
+      id: '/_authenticated/dashboard/pathology/stool/reducing-substance/'
+      path: '/dashboard/pathology/stool/reducing-substance'
+      fullPath: '/dashboard/pathology/stool/reducing-substance'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyStoolReducingSubstanceIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/stool/ocult-blood-test/': {
-      id: '/_authenticated/pathology/stool/ocult-blood-test/'
-      path: '/pathology/stool/ocult-blood-test'
-      fullPath: '/pathology/stool/ocult-blood-test'
-      preLoaderRoute: typeof AuthenticatedPathologyStoolOcultBloodTestIndexRouteImport
+    '/_authenticated/dashboard/pathology/stool/ocult-blood-test/': {
+      id: '/_authenticated/dashboard/pathology/stool/ocult-blood-test/'
+      path: '/dashboard/pathology/stool/ocult-blood-test'
+      fullPath: '/dashboard/pathology/stool/ocult-blood-test'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/immunology/widal-test/': {
-      id: '/_authenticated/pathology/immunology/widal-test/'
-      path: '/pathology/immunology/widal-test'
-      fullPath: '/pathology/immunology/widal-test'
-      preLoaderRoute: typeof AuthenticatedPathologyImmunologyWidalTestIndexRouteImport
+    '/_authenticated/dashboard/pathology/immunology/widal-test/': {
+      id: '/_authenticated/dashboard/pathology/immunology/widal-test/'
+      path: '/dashboard/pathology/immunology/widal-test'
+      fullPath: '/dashboard/pathology/immunology/widal-test'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyImmunologyWidalTestIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/immunology/mt/': {
-      id: '/_authenticated/pathology/immunology/mt/'
-      path: '/pathology/immunology/mt'
-      fullPath: '/pathology/immunology/mt'
-      preLoaderRoute: typeof AuthenticatedPathologyImmunologyMtIndexRouteImport
+    '/_authenticated/dashboard/pathology/immunology/mt/': {
+      id: '/_authenticated/dashboard/pathology/immunology/mt/'
+      path: '/dashboard/pathology/immunology/mt'
+      fullPath: '/dashboard/pathology/immunology/mt'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyImmunologyMtIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/immunology/blood-group/': {
-      id: '/_authenticated/pathology/immunology/blood-group/'
-      path: '/pathology/immunology/blood-group'
-      fullPath: '/pathology/immunology/blood-group'
-      preLoaderRoute: typeof AuthenticatedPathologyImmunologyBloodGroupIndexRouteImport
+    '/_authenticated/dashboard/pathology/immunology/blood-group/': {
+      id: '/_authenticated/dashboard/pathology/immunology/blood-group/'
+      path: '/dashboard/pathology/immunology/blood-group'
+      fullPath: '/dashboard/pathology/immunology/blood-group'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/immunology/beta-hcg/': {
-      id: '/_authenticated/pathology/immunology/beta-hcg/'
-      path: '/pathology/immunology/beta-hcg'
-      fullPath: '/pathology/immunology/beta-hcg'
-      preLoaderRoute: typeof AuthenticatedPathologyImmunologyBetaHcgIndexRouteImport
+    '/_authenticated/dashboard/pathology/immunology/beta-hcg/': {
+      id: '/_authenticated/dashboard/pathology/immunology/beta-hcg/'
+      path: '/dashboard/pathology/immunology/beta-hcg'
+      fullPath: '/dashboard/pathology/immunology/beta-hcg'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/immunology/all/': {
-      id: '/_authenticated/pathology/immunology/all/'
-      path: '/pathology/immunology/all'
-      fullPath: '/pathology/immunology/all'
-      preLoaderRoute: typeof AuthenticatedPathologyImmunologyAllIndexRouteImport
+    '/_authenticated/dashboard/pathology/immunology/all/': {
+      id: '/_authenticated/dashboard/pathology/immunology/all/'
+      path: '/dashboard/pathology/immunology/all'
+      fullPath: '/dashboard/pathology/immunology/all'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyImmunologyAllIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hormone/t3t4tsh/': {
-      id: '/_authenticated/pathology/hormone/t3t4tsh/'
-      path: '/pathology/hormone/t3t4tsh'
-      fullPath: '/pathology/hormone/t3t4tsh'
-      preLoaderRoute: typeof AuthenticatedPathologyHormoneT3t4tshIndexRouteImport
+    '/_authenticated/dashboard/pathology/hormone/t3t4tsh/': {
+      id: '/_authenticated/dashboard/pathology/hormone/t3t4tsh/'
+      path: '/dashboard/pathology/hormone/t3t4tsh'
+      fullPath: '/dashboard/pathology/hormone/t3t4tsh'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHormoneT3t4tshIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hormone/sputum/': {
-      id: '/_authenticated/pathology/hormone/sputum/'
-      path: '/pathology/hormone/sputum'
-      fullPath: '/pathology/hormone/sputum'
-      preLoaderRoute: typeof AuthenticatedPathologyHormoneSputumIndexRouteImport
+    '/_authenticated/dashboard/pathology/hormone/sputum/': {
+      id: '/_authenticated/dashboard/pathology/hormone/sputum/'
+      path: '/dashboard/pathology/hormone/sputum'
+      fullPath: '/dashboard/pathology/hormone/sputum'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHormoneSputumIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hormone/skin-scrapping-for-fungus/': {
-      id: '/_authenticated/pathology/hormone/skin-scrapping-for-fungus/'
-      path: '/pathology/hormone/skin-scrapping-for-fungus'
-      fullPath: '/pathology/hormone/skin-scrapping-for-fungus'
-      preLoaderRoute: typeof AuthenticatedPathologyHormoneSkinScrappingForFungusIndexRouteImport
+    '/_authenticated/dashboard/pathology/hormone/skin-scrapping-for-fungus/': {
+      id: '/_authenticated/dashboard/pathology/hormone/skin-scrapping-for-fungus/'
+      path: '/dashboard/pathology/hormone/skin-scrapping-for-fungus'
+      fullPath: '/dashboard/pathology/hormone/skin-scrapping-for-fungus'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hormone/semen/': {
-      id: '/_authenticated/pathology/hormone/semen/'
-      path: '/pathology/hormone/semen'
-      fullPath: '/pathology/hormone/semen'
-      preLoaderRoute: typeof AuthenticatedPathologyHormoneSemenIndexRouteImport
+    '/_authenticated/dashboard/pathology/hormone/semen/': {
+      id: '/_authenticated/dashboard/pathology/hormone/semen/'
+      path: '/dashboard/pathology/hormone/semen'
+      fullPath: '/dashboard/pathology/hormone/semen'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHormoneSemenIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hormone/electrolytes/': {
-      id: '/_authenticated/pathology/hormone/electrolytes/'
-      path: '/pathology/hormone/electrolytes'
-      fullPath: '/pathology/hormone/electrolytes'
-      preLoaderRoute: typeof AuthenticatedPathologyHormoneElectrolytesIndexRouteImport
+    '/_authenticated/dashboard/pathology/hormone/electrolytes/': {
+      id: '/_authenticated/dashboard/pathology/hormone/electrolytes/'
+      path: '/dashboard/pathology/hormone/electrolytes'
+      fullPath: '/dashboard/pathology/hormone/electrolytes'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHormoneElectrolytesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hormone/all/': {
-      id: '/_authenticated/pathology/hormone/all/'
-      path: '/pathology/hormone/all'
-      fullPath: '/pathology/hormone/all'
-      preLoaderRoute: typeof AuthenticatedPathologyHormoneAllIndexRouteImport
+    '/_authenticated/dashboard/pathology/hormone/all/': {
+      id: '/_authenticated/dashboard/pathology/hormone/all/'
+      path: '/dashboard/pathology/hormone/all'
+      fullPath: '/dashboard/pathology/hormone/all'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHormoneAllIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/prothom-bin-time-full/': {
-      id: '/_authenticated/pathology/hematology/prothom-bin-time-full/'
-      path: '/pathology/hematology/prothom-bin-time-full'
-      fullPath: '/pathology/hematology/prothom-bin-time-full'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyProthomBinTimeFullIndexRouteImport
+    '/_authenticated/dashboard/pathology/hematology/prothom-bin-time-full/': {
+      id: '/_authenticated/dashboard/pathology/hematology/prothom-bin-time-full/'
+      path: '/dashboard/pathology/hematology/prothom-bin-time-full'
+      fullPath: '/dashboard/pathology/hematology/prothom-bin-time-full'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyProthomBinTimeFullIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/peripheral-blood-film/': {
-      id: '/_authenticated/pathology/hematology/peripheral-blood-film/'
-      path: '/pathology/hematology/peripheral-blood-film'
-      fullPath: '/pathology/hematology/peripheral-blood-film'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyPeripheralBloodFilmIndexRouteImport
+    '/_authenticated/dashboard/pathology/hematology/peripheral-blood-film/': {
+      id: '/_authenticated/dashboard/pathology/hematology/peripheral-blood-film/'
+      path: '/dashboard/pathology/hematology/peripheral-blood-film'
+      fullPath: '/dashboard/pathology/hematology/peripheral-blood-film'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/cbc-with-pbf/': {
-      id: '/_authenticated/pathology/hematology/cbc-with-pbf/'
-      path: '/pathology/hematology/cbc-with-pbf'
-      fullPath: '/pathology/hematology/cbc-with-pbf'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyCbcWithPbfIndexRouteImport
+    '/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/': {
+      id: '/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/'
+      path: '/dashboard/pathology/hematology/cbc-with-pbf'
+      fullPath: '/dashboard/pathology/hematology/cbc-with-pbf'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyCbcWithPbfIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/cbc-short/': {
-      id: '/_authenticated/pathology/hematology/cbc-short/'
-      path: '/pathology/hematology/cbc-short'
-      fullPath: '/pathology/hematology/cbc-short'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyCbcShortIndexRouteImport
+    '/_authenticated/dashboard/pathology/hematology/cbc-short/': {
+      id: '/_authenticated/dashboard/pathology/hematology/cbc-short/'
+      path: '/dashboard/pathology/hematology/cbc-short'
+      fullPath: '/dashboard/pathology/hematology/cbc-short'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyCbcShortIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/blood-for-tcdc/': {
-      id: '/_authenticated/pathology/hematology/blood-for-tcdc/'
-      path: '/pathology/hematology/blood-for-tcdc'
-      fullPath: '/pathology/hematology/blood-for-tcdc'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyBloodForTcdcIndexRouteImport
+    '/_authenticated/dashboard/pathology/hematology/blood-for-tcdc/': {
+      id: '/_authenticated/dashboard/pathology/hematology/blood-for-tcdc/'
+      path: '/dashboard/pathology/hematology/blood-for-tcdc'
+      fullPath: '/dashboard/pathology/hematology/blood-for-tcdc'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyBloodForTcdcIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/blood-for-bt-ct/': {
-      id: '/_authenticated/pathology/hematology/blood-for-bt-ct/'
-      path: '/pathology/hematology/blood-for-bt-ct'
-      fullPath: '/pathology/hematology/blood-for-bt-ct'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyBloodForBtCtIndexRouteImport
+    '/_authenticated/dashboard/pathology/hematology/blood-for-bt-ct/': {
+      id: '/_authenticated/dashboard/pathology/hematology/blood-for-bt-ct/'
+      path: '/dashboard/pathology/hematology/blood-for-bt-ct'
+      fullPath: '/dashboard/pathology/hematology/blood-for-bt-ct'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyBloodForBtCtIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/all/': {
-      id: '/_authenticated/pathology/hematology/all/'
-      path: '/pathology/hematology/all'
-      fullPath: '/pathology/hematology/all'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyAllIndexRouteImport
+    '/_authenticated/dashboard/pathology/hematology/all/': {
+      id: '/_authenticated/dashboard/pathology/hematology/all/'
+      path: '/dashboard/pathology/hematology/all'
+      fullPath: '/dashboard/pathology/hematology/all'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyAllIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/biochemical/lipid-profile/': {
-      id: '/_authenticated/pathology/biochemical/lipid-profile/'
-      path: '/pathology/biochemical/lipid-profile'
-      fullPath: '/pathology/biochemical/lipid-profile'
-      preLoaderRoute: typeof AuthenticatedPathologyBiochemicalLipidProfileIndexRouteImport
+    '/_authenticated/dashboard/pathology/biochemical/lipid-profile/': {
+      id: '/_authenticated/dashboard/pathology/biochemical/lipid-profile/'
+      path: '/dashboard/pathology/biochemical/lipid-profile'
+      fullPath: '/dashboard/pathology/biochemical/lipid-profile'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/biochemical/all/': {
-      id: '/_authenticated/pathology/biochemical/all/'
-      path: '/pathology/biochemical/all'
-      fullPath: '/pathology/biochemical/all'
-      preLoaderRoute: typeof AuthenticatedPathologyBiochemicalAllIndexRouteImport
+    '/_authenticated/dashboard/pathology/biochemical/all/': {
+      id: '/_authenticated/dashboard/pathology/biochemical/all/'
+      path: '/dashboard/pathology/biochemical/all'
+      fullPath: '/dashboard/pathology/biochemical/all'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyBiochemicalAllIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/reception/user-invoices/': {
-      id: '/_authenticated/outdoor/reception/user-invoices/'
-      path: '/outdoor/reception/user-invoices'
-      fullPath: '/outdoor/reception/user-invoices'
-      preLoaderRoute: typeof AuthenticatedOutdoorReceptionUserInvoicesIndexRouteImport
+    '/_authenticated/dashboard/outdoor/reception/user-invoices/': {
+      id: '/_authenticated/dashboard/outdoor/reception/user-invoices/'
+      path: '/dashboard/outdoor/reception/user-invoices'
+      fullPath: '/dashboard/outdoor/reception/user-invoices'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/reception/patients/': {
-      id: '/_authenticated/outdoor/reception/patients/'
-      path: '/outdoor/reception/patients'
-      fullPath: '/outdoor/reception/patients'
-      preLoaderRoute: typeof AuthenticatedOutdoorReceptionPatientsIndexRouteImport
+    '/_authenticated/dashboard/outdoor/reception/patients/': {
+      id: '/_authenticated/dashboard/outdoor/reception/patients/'
+      path: '/dashboard/outdoor/reception/patients'
+      fullPath: '/dashboard/outdoor/reception/patients'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionPatientsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/reception/paid-invoices/': {
-      id: '/_authenticated/outdoor/reception/paid-invoices/'
-      path: '/outdoor/reception/paid-invoices'
-      fullPath: '/outdoor/reception/paid-invoices'
-      preLoaderRoute: typeof AuthenticatedOutdoorReceptionPaidInvoicesIndexRouteImport
+    '/_authenticated/dashboard/outdoor/reception/paid-invoices/': {
+      id: '/_authenticated/dashboard/outdoor/reception/paid-invoices/'
+      path: '/dashboard/outdoor/reception/paid-invoices'
+      fullPath: '/dashboard/outdoor/reception/paid-invoices'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/reception/my-invoices/': {
-      id: '/_authenticated/outdoor/reception/my-invoices/'
-      path: '/outdoor/reception/my-invoices'
-      fullPath: '/outdoor/reception/my-invoices'
-      preLoaderRoute: typeof AuthenticatedOutdoorReceptionMyInvoicesIndexRouteImport
+    '/_authenticated/dashboard/outdoor/reception/my-invoices/': {
+      id: '/_authenticated/dashboard/outdoor/reception/my-invoices/'
+      path: '/dashboard/outdoor/reception/my-invoices'
+      fullPath: '/dashboard/outdoor/reception/my-invoices'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/reception/due-collection/': {
-      id: '/_authenticated/outdoor/reception/due-collection/'
-      path: '/outdoor/reception/due-collection'
-      fullPath: '/outdoor/reception/due-collection'
-      preLoaderRoute: typeof AuthenticatedOutdoorReceptionDueCollectionIndexRouteImport
+    '/_authenticated/dashboard/outdoor/reception/due-collection/': {
+      id: '/_authenticated/dashboard/outdoor/reception/due-collection/'
+      path: '/dashboard/outdoor/reception/due-collection'
+      fullPath: '/dashboard/outdoor/reception/due-collection'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/tests/': {
-      id: '/_authenticated/outdoor/master/tests/'
-      path: '/outdoor/master/tests'
-      fullPath: '/outdoor/master/tests'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterTestsIndexRouteImport
+    '/_authenticated/dashboard/outdoor/master/tests/': {
+      id: '/_authenticated/dashboard/outdoor/master/tests/'
+      path: '/dashboard/outdoor/master/tests'
+      fullPath: '/dashboard/outdoor/master/tests'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterTestsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/test-tables/': {
-      id: '/_authenticated/outdoor/master/test-tables/'
-      path: '/outdoor/master/test-tables'
-      fullPath: '/outdoor/master/test-tables'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterTestTablesIndexRouteImport
+    '/_authenticated/dashboard/outdoor/master/test-tables/': {
+      id: '/_authenticated/dashboard/outdoor/master/test-tables/'
+      path: '/dashboard/outdoor/master/test-tables'
+      fullPath: '/dashboard/outdoor/master/test-tables'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterTestTablesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/sample-collection-rooms/': {
-      id: '/_authenticated/outdoor/master/sample-collection-rooms/'
-      path: '/outdoor/master/sample-collection-rooms'
-      fullPath: '/outdoor/master/sample-collection-rooms'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRouteImport
+    '/_authenticated/dashboard/outdoor/master/sample-collection-rooms/': {
+      id: '/_authenticated/dashboard/outdoor/master/sample-collection-rooms/'
+      path: '/dashboard/outdoor/master/sample-collection-rooms'
+      fullPath: '/dashboard/outdoor/master/sample-collection-rooms'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/machines/': {
-      id: '/_authenticated/outdoor/master/machines/'
-      path: '/outdoor/master/machines'
-      fullPath: '/outdoor/master/machines'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterMachinesIndexRouteImport
+    '/_authenticated/dashboard/outdoor/master/machines/': {
+      id: '/_authenticated/dashboard/outdoor/master/machines/'
+      path: '/dashboard/outdoor/master/machines'
+      fullPath: '/dashboard/outdoor/master/machines'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterMachinesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/doctors/': {
-      id: '/_authenticated/outdoor/master/doctors/'
-      path: '/outdoor/master/doctors'
-      fullPath: '/outdoor/master/doctors'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterDoctorsIndexRouteImport
+    '/_authenticated/dashboard/outdoor/master/doctors/': {
+      id: '/_authenticated/dashboard/outdoor/master/doctors/'
+      path: '/dashboard/outdoor/master/doctors'
+      fullPath: '/dashboard/outdoor/master/doctors'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterDoctorsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/departments/': {
-      id: '/_authenticated/outdoor/master/departments/'
-      path: '/outdoor/master/departments'
-      fullPath: '/outdoor/master/departments'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterDepartmentsIndexRouteImport
+    '/_authenticated/dashboard/outdoor/master/departments/': {
+      id: '/_authenticated/dashboard/outdoor/master/departments/'
+      path: '/dashboard/outdoor/master/departments'
+      fullPath: '/dashboard/outdoor/master/departments'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterDepartmentsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/categories/': {
-      id: '/_authenticated/outdoor/master/categories/'
-      path: '/outdoor/master/categories'
-      fullPath: '/outdoor/master/categories'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterCategoriesIndexRouteImport
+    '/_authenticated/dashboard/outdoor/master/categories/': {
+      id: '/_authenticated/dashboard/outdoor/master/categories/'
+      path: '/dashboard/outdoor/master/categories'
+      fullPath: '/dashboard/outdoor/master/categories'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterCategoriesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indoor/master/treatment-outcomes/': {
-      id: '/_authenticated/indoor/master/treatment-outcomes/'
-      path: '/indoor/master/treatment-outcomes'
-      fullPath: '/indoor/master/treatment-outcomes'
-      preLoaderRoute: typeof AuthenticatedIndoorMasterTreatmentOutcomesIndexRouteImport
+    '/_authenticated/dashboard/indoor/master/treatment-outcomes/': {
+      id: '/_authenticated/dashboard/indoor/master/treatment-outcomes/'
+      path: '/dashboard/indoor/master/treatment-outcomes'
+      fullPath: '/dashboard/indoor/master/treatment-outcomes'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterTreatmentOutcomesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indoor/master/services/': {
-      id: '/_authenticated/indoor/master/services/'
-      path: '/indoor/master/services'
-      fullPath: '/indoor/master/services'
-      preLoaderRoute: typeof AuthenticatedIndoorMasterServicesIndexRouteImport
+    '/_authenticated/dashboard/indoor/master/services/': {
+      id: '/_authenticated/dashboard/indoor/master/services/'
+      path: '/dashboard/indoor/master/services'
+      fullPath: '/dashboard/indoor/master/services'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterServicesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indoor/master/service-categories/': {
-      id: '/_authenticated/indoor/master/service-categories/'
-      path: '/indoor/master/service-categories'
-      fullPath: '/indoor/master/service-categories'
-      preLoaderRoute: typeof AuthenticatedIndoorMasterServiceCategoriesIndexRouteImport
+    '/_authenticated/dashboard/indoor/master/service-categories/': {
+      id: '/_authenticated/dashboard/indoor/master/service-categories/'
+      path: '/dashboard/indoor/master/service-categories'
+      fullPath: '/dashboard/indoor/master/service-categories'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterServiceCategoriesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indoor/master/patient-types/': {
-      id: '/_authenticated/indoor/master/patient-types/'
-      path: '/indoor/master/patient-types'
-      fullPath: '/indoor/master/patient-types'
-      preLoaderRoute: typeof AuthenticatedIndoorMasterPatientTypesIndexRouteImport
+    '/_authenticated/dashboard/indoor/master/patient-types/': {
+      id: '/_authenticated/dashboard/indoor/master/patient-types/'
+      path: '/dashboard/indoor/master/patient-types'
+      fullPath: '/dashboard/indoor/master/patient-types'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterPatientTypesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indoor/master/operation-types/': {
-      id: '/_authenticated/indoor/master/operation-types/'
-      path: '/indoor/master/operation-types'
-      fullPath: '/indoor/master/operation-types'
-      preLoaderRoute: typeof AuthenticatedIndoorMasterOperationTypesIndexRouteImport
+    '/_authenticated/dashboard/indoor/master/operation-types/': {
+      id: '/_authenticated/dashboard/indoor/master/operation-types/'
+      path: '/dashboard/indoor/master/operation-types'
+      fullPath: '/dashboard/indoor/master/operation-types'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterOperationTypesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indoor/master/doctor-types/': {
-      id: '/_authenticated/indoor/master/doctor-types/'
-      path: '/indoor/master/doctor-types'
-      fullPath: '/indoor/master/doctor-types'
-      preLoaderRoute: typeof AuthenticatedIndoorMasterDoctorTypesIndexRouteImport
+    '/_authenticated/dashboard/indoor/master/doctor-types/': {
+      id: '/_authenticated/dashboard/indoor/master/doctor-types/'
+      path: '/dashboard/indoor/master/doctor-types'
+      fullPath: '/dashboard/indoor/master/doctor-types'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterDoctorTypesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indoor/master/bed-cabin-list/': {
-      id: '/_authenticated/indoor/master/bed-cabin-list/'
-      path: '/indoor/master/bed-cabin-list'
-      fullPath: '/indoor/master/bed-cabin-list'
-      preLoaderRoute: typeof AuthenticatedIndoorMasterBedCabinListIndexRouteImport
+    '/_authenticated/dashboard/indoor/master/bed-cabin-list/': {
+      id: '/_authenticated/dashboard/indoor/master/bed-cabin-list/'
+      path: '/dashboard/indoor/master/bed-cabin-list'
+      fullPath: '/dashboard/indoor/master/bed-cabin-list'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indoor/master/anasthesia-types/': {
-      id: '/_authenticated/indoor/master/anasthesia-types/'
-      path: '/indoor/master/anasthesia-types'
-      fullPath: '/indoor/master/anasthesia-types'
-      preLoaderRoute: typeof AuthenticatedIndoorMasterAnasthesiaTypesIndexRouteImport
+    '/_authenticated/dashboard/indoor/master/anasthesia-types/': {
+      id: '/_authenticated/dashboard/indoor/master/anasthesia-types/'
+      path: '/dashboard/indoor/master/anasthesia-types'
+      fullPath: '/dashboard/indoor/master/anasthesia-types'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indoor/management/doctor-referred/': {
-      id: '/_authenticated/indoor/management/doctor-referred/'
-      path: '/indoor/management/doctor-referred'
-      fullPath: '/indoor/management/doctor-referred'
-      preLoaderRoute: typeof AuthenticatedIndoorManagementDoctorReferredIndexRouteImport
+    '/_authenticated/dashboard/indoor/management/doctor-referred/': {
+      id: '/_authenticated/dashboard/indoor/management/doctor-referred/'
+      path: '/dashboard/indoor/management/doctor-referred'
+      fullPath: '/dashboard/indoor/management/doctor-referred'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indoor/management/distributions/': {
-      id: '/_authenticated/indoor/management/distributions/'
-      path: '/indoor/management/distributions'
-      fullPath: '/indoor/management/distributions'
-      preLoaderRoute: typeof AuthenticatedIndoorManagementDistributionsIndexRouteImport
+    '/_authenticated/dashboard/indoor/management/distributions/': {
+      id: '/_authenticated/dashboard/indoor/management/distributions/'
+      path: '/dashboard/indoor/management/distributions'
+      fullPath: '/dashboard/indoor/management/distributions'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorManagementDistributionsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/payment-completed-list/': {
-      id: '/_authenticated/admission/patients/payment-completed-list/'
-      path: '/admission/patients/payment-completed-list'
-      fullPath: '/admission/patients/payment-completed-list'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsPaymentCompletedListIndexRouteImport
+    '/_authenticated/dashboard/admission/patients/payment-completed-list/': {
+      id: '/_authenticated/dashboard/admission/patients/payment-completed-list/'
+      path: '/dashboard/admission/patients/payment-completed-list'
+      fullPath: '/dashboard/admission/patients/payment-completed-list'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/final-bill-created-list/': {
-      id: '/_authenticated/admission/patients/final-bill-created-list/'
-      path: '/admission/patients/final-bill-created-list'
-      fullPath: '/admission/patients/final-bill-created-list'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRouteImport
+    '/_authenticated/dashboard/admission/patients/final-bill-created-list/': {
+      id: '/_authenticated/dashboard/admission/patients/final-bill-created-list/'
+      path: '/dashboard/admission/patients/final-bill-created-list'
+      fullPath: '/dashboard/admission/patients/final-bill-created-list'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/discharged/': {
-      id: '/_authenticated/admission/patients/discharged/'
-      path: '/admission/patients/discharged'
-      fullPath: '/admission/patients/discharged'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsDischargedIndexRouteImport
+    '/_authenticated/dashboard/admission/patients/discharged/': {
+      id: '/_authenticated/dashboard/admission/patients/discharged/'
+      path: '/dashboard/admission/patients/discharged'
+      fullPath: '/dashboard/admission/patients/discharged'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsDischargedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/discharged-list/': {
-      id: '/_authenticated/admission/patients/discharged-list/'
-      path: '/admission/patients/discharged-list'
-      fullPath: '/admission/patients/discharged-list'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsDischargedListIndexRouteImport
+    '/_authenticated/dashboard/admission/patients/discharged-list/': {
+      id: '/_authenticated/dashboard/admission/patients/discharged-list/'
+      path: '/dashboard/admission/patients/discharged-list'
+      fullPath: '/dashboard/admission/patients/discharged-list'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsDischargedListIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/bill-distributed-list/': {
-      id: '/_authenticated/admission/patients/bill-distributed-list/'
-      path: '/admission/patients/bill-distributed-list'
-      fullPath: '/admission/patients/bill-distributed-list'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsBillDistributedListIndexRouteImport
+    '/_authenticated/dashboard/admission/patients/bill-distributed-list/': {
+      id: '/_authenticated/dashboard/admission/patients/bill-distributed-list/'
+      path: '/dashboard/admission/patients/bill-distributed-list'
+      fullPath: '/dashboard/admission/patients/bill-distributed-list'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/bill-created-list/': {
-      id: '/_authenticated/admission/patients/bill-created-list/'
-      path: '/admission/patients/bill-created-list'
-      fullPath: '/admission/patients/bill-created-list'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsBillCreatedListIndexRouteImport
+    '/_authenticated/dashboard/admission/patients/bill-created-list/': {
+      id: '/_authenticated/dashboard/admission/patients/bill-created-list/'
+      path: '/dashboard/admission/patients/bill-created-list'
+      fullPath: '/dashboard/admission/patients/bill-created-list'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/balance-distributed-list/': {
-      id: '/_authenticated/admission/patients/balance-distributed-list/'
-      path: '/admission/patients/balance-distributed-list'
-      fullPath: '/admission/patients/balance-distributed-list'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsBalanceDistributedListIndexRouteImport
+    '/_authenticated/dashboard/admission/patients/balance-distributed-list/': {
+      id: '/_authenticated/dashboard/admission/patients/balance-distributed-list/'
+      path: '/dashboard/admission/patients/balance-distributed-list'
+      fullPath: '/dashboard/admission/patients/balance-distributed-list'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/active/': {
-      id: '/_authenticated/admission/patients/active/'
-      path: '/admission/patients/active'
-      fullPath: '/admission/patients/active'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsActiveIndexRouteImport
+    '/_authenticated/dashboard/admission/patients/active/': {
+      id: '/_authenticated/dashboard/admission/patients/active/'
+      path: '/dashboard/admission/patients/active'
+      fullPath: '/dashboard/admission/patients/active'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsActiveIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/invoice/list/': {
-      id: '/_authenticated/admission/invoice/list/'
-      path: '/admission/invoice/list'
-      fullPath: '/admission/invoice/list'
-      preLoaderRoute: typeof AuthenticatedAdmissionInvoiceListIndexRouteImport
+    '/_authenticated/dashboard/admission/invoice/list/': {
+      id: '/_authenticated/dashboard/admission/invoice/list/'
+      path: '/dashboard/admission/invoice/list'
+      fullPath: '/dashboard/admission/invoice/list'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionInvoiceListIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/invoice/create/': {
-      id: '/_authenticated/admission/invoice/create/'
-      path: '/admission/invoice/create'
-      fullPath: '/admission/invoice/create'
-      preLoaderRoute: typeof AuthenticatedAdmissionInvoiceCreateIndexRouteImport
+    '/_authenticated/dashboard/admission/invoice/create/': {
+      id: '/_authenticated/dashboard/admission/invoice/create/'
+      path: '/dashboard/admission/invoice/create'
+      fullPath: '/dashboard/admission/invoice/create'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionInvoiceCreateIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/discharged-patients/bill-does-not-created/': {
-      id: '/_authenticated/admission/discharged-patients/bill-does-not-created/'
-      path: '/admission/discharged-patients/bill-does-not-created'
-      fullPath: '/admission/discharged-patients/bill-does-not-created'
-      preLoaderRoute: typeof AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRouteImport
+    '/_authenticated/dashboard/admission/discharged-patients/bill-does-not-created/': {
+      id: '/_authenticated/dashboard/admission/discharged-patients/bill-does-not-created/'
+      path: '/dashboard/admission/discharged-patients/bill-does-not-created'
+      fullPath: '/dashboard/admission/discharged-patients/bill-does-not-created'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/billing/$billingId/': {
-      id: '/_authenticated/admission/billing/$billingId/'
-      path: '/admission/billing/$billingId'
-      fullPath: '/admission/billing/$billingId'
-      preLoaderRoute: typeof AuthenticatedAdmissionBillingBillingIdIndexRouteImport
+    '/_authenticated/dashboard/admission/billing/$billingId/': {
+      id: '/_authenticated/dashboard/admission/billing/$billingId/'
+      path: '/dashboard/admission/billing/$billingId'
+      fullPath: '/dashboard/admission/billing/$billingId'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionBillingBillingIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounting/reports/trial-balance/': {
-      id: '/_authenticated/accounting/reports/trial-balance/'
-      path: '/accounting/reports/trial-balance'
-      fullPath: '/accounting/reports/trial-balance'
-      preLoaderRoute: typeof AuthenticatedAccountingReportsTrialBalanceIndexRouteImport
+    '/_authenticated/dashboard/accounting/reports/trial-balance/': {
+      id: '/_authenticated/dashboard/accounting/reports/trial-balance/'
+      path: '/dashboard/accounting/reports/trial-balance'
+      fullPath: '/dashboard/accounting/reports/trial-balance'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsTrialBalanceIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounting/reports/profit-loss/': {
-      id: '/_authenticated/accounting/reports/profit-loss/'
-      path: '/accounting/reports/profit-loss'
-      fullPath: '/accounting/reports/profit-loss'
-      preLoaderRoute: typeof AuthenticatedAccountingReportsProfitLossIndexRouteImport
+    '/_authenticated/dashboard/accounting/reports/profit-loss/': {
+      id: '/_authenticated/dashboard/accounting/reports/profit-loss/'
+      path: '/dashboard/accounting/reports/profit-loss'
+      fullPath: '/dashboard/accounting/reports/profit-loss'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsProfitLossIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounting/reports/profit-and-loss/': {
-      id: '/_authenticated/accounting/reports/profit-and-loss/'
-      path: '/accounting/reports/profit-and-loss'
-      fullPath: '/accounting/reports/profit-and-loss'
-      preLoaderRoute: typeof AuthenticatedAccountingReportsProfitAndLossIndexRouteImport
+    '/_authenticated/dashboard/accounting/reports/profit-and-loss/': {
+      id: '/_authenticated/dashboard/accounting/reports/profit-and-loss/'
+      path: '/dashboard/accounting/reports/profit-and-loss'
+      fullPath: '/dashboard/accounting/reports/profit-and-loss'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsProfitAndLossIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounting/reports/ledger/': {
-      id: '/_authenticated/accounting/reports/ledger/'
-      path: '/accounting/reports/ledger'
-      fullPath: '/accounting/reports/ledger'
-      preLoaderRoute: typeof AuthenticatedAccountingReportsLedgerIndexRouteImport
+    '/_authenticated/dashboard/accounting/reports/multi-ledger/': {
+      id: '/_authenticated/dashboard/accounting/reports/multi-ledger/'
+      path: '/dashboard/accounting/reports/multi-ledger'
+      fullPath: '/dashboard/accounting/reports/multi-ledger'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsMultiLedgerIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounting/reports/journal/': {
-      id: '/_authenticated/accounting/reports/journal/'
-      path: '/accounting/reports/journal'
-      fullPath: '/accounting/reports/journal'
-      preLoaderRoute: typeof AuthenticatedAccountingReportsJournalIndexRouteImport
+    '/_authenticated/dashboard/accounting/reports/ledger/': {
+      id: '/_authenticated/dashboard/accounting/reports/ledger/'
+      path: '/dashboard/accounting/reports/ledger'
+      fullPath: '/dashboard/accounting/reports/ledger'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsLedgerIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounting/reports/daily-summary/': {
-      id: '/_authenticated/accounting/reports/daily-summary/'
-      path: '/accounting/reports/daily-summary'
-      fullPath: '/accounting/reports/daily-summary'
-      preLoaderRoute: typeof AuthenticatedAccountingReportsDailySummaryIndexRouteImport
+    '/_authenticated/dashboard/accounting/reports/journal/': {
+      id: '/_authenticated/dashboard/accounting/reports/journal/'
+      path: '/dashboard/accounting/reports/journal'
+      fullPath: '/dashboard/accounting/reports/journal'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsJournalIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounting/reports/balance-sheet/': {
-      id: '/_authenticated/accounting/reports/balance-sheet/'
-      path: '/accounting/reports/balance-sheet'
-      fullPath: '/accounting/reports/balance-sheet'
-      preLoaderRoute: typeof AuthenticatedAccountingReportsBalanceSheetIndexRouteImport
+    '/_authenticated/dashboard/accounting/reports/daily-summary/': {
+      id: '/_authenticated/dashboard/accounting/reports/daily-summary/'
+      path: '/dashboard/accounting/reports/daily-summary'
+      fullPath: '/dashboard/accounting/reports/daily-summary'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsDailySummaryIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/x-ray/all/print/$id': {
-      id: '/_authenticated/x-ray/all/print/$id'
-      path: '/x-ray/all/print/$id'
-      fullPath: '/x-ray/all/print/$id'
-      preLoaderRoute: typeof AuthenticatedXRayAllPrintIdRouteImport
+    '/_authenticated/dashboard/accounting/reports/cash-flow/': {
+      id: '/_authenticated/dashboard/accounting/reports/cash-flow/'
+      path: '/dashboard/accounting/reports/cash-flow'
+      fullPath: '/dashboard/accounting/reports/cash-flow'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsCashFlowIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/x-ray/all/edit/$id': {
-      id: '/_authenticated/x-ray/all/edit/$id'
-      path: '/x-ray/all/edit/$id'
-      fullPath: '/x-ray/all/edit/$id'
-      preLoaderRoute: typeof AuthenticatedXRayAllEditIdRouteImport
+    '/_authenticated/dashboard/accounting/reports/balance-sheet/': {
+      id: '/_authenticated/dashboard/accounting/reports/balance-sheet/'
+      path: '/dashboard/accounting/reports/balance-sheet'
+      fullPath: '/dashboard/accounting/reports/balance-sheet'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsBalanceSheetIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/ultrasonogram/all/print/$id': {
-      id: '/_authenticated/ultrasonogram/all/print/$id'
-      path: '/ultrasonogram/all/print/$id'
-      fullPath: '/ultrasonogram/all/print/$id'
-      preLoaderRoute: typeof AuthenticatedUltrasonogramAllPrintIdRouteImport
+    '/_authenticated/dashboard/x-ray/all/print/$id': {
+      id: '/_authenticated/dashboard/x-ray/all/print/$id'
+      path: '/dashboard/x-ray/all/print/$id'
+      fullPath: '/dashboard/x-ray/all/print/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardXRayAllPrintIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/ultrasonogram/all/edit/$id': {
-      id: '/_authenticated/ultrasonogram/all/edit/$id'
-      path: '/ultrasonogram/all/edit/$id'
-      fullPath: '/ultrasonogram/all/edit/$id'
-      preLoaderRoute: typeof AuthenticatedUltrasonogramAllEditIdRouteImport
+    '/_authenticated/dashboard/x-ray/all/edit/$id': {
+      id: '/_authenticated/dashboard/x-ray/all/edit/$id'
+      path: '/dashboard/x-ray/all/edit/$id'
+      fullPath: '/dashboard/x-ray/all/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardXRayAllEditIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/roles/permissions/$roleId/edit': {
-      id: '/_authenticated/roles/permissions/$roleId/edit'
-      path: '/roles/permissions/$roleId/edit'
-      fullPath: '/roles/permissions/$roleId/edit'
-      preLoaderRoute: typeof AuthenticatedRolesPermissionsRoleIdEditRouteImport
+    '/_authenticated/dashboard/ultrasonogram/all/print/$id': {
+      id: '/_authenticated/dashboard/ultrasonogram/all/print/$id'
+      path: '/dashboard/ultrasonogram/all/print/$id'
+      fullPath: '/dashboard/ultrasonogram/all/print/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardUltrasonogramAllPrintIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/reception/invoices/$invoiceId': {
-      id: '/_authenticated/outdoor/reception/invoices/$invoiceId'
-      path: '/outdoor/reception/invoices/$invoiceId'
-      fullPath: '/outdoor/reception/invoices/$invoiceId'
-      preLoaderRoute: typeof AuthenticatedOutdoorReceptionInvoicesInvoiceIdRouteImport
+    '/_authenticated/dashboard/ultrasonogram/all/edit/$id': {
+      id: '/_authenticated/dashboard/ultrasonogram/all/edit/$id'
+      path: '/dashboard/ultrasonogram/all/edit/$id'
+      fullPath: '/dashboard/ultrasonogram/all/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardUltrasonogramAllEditIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/reception/due-collection/$invoiceId': {
-      id: '/_authenticated/outdoor/reception/due-collection/$invoiceId'
-      path: '/outdoor/reception/due-collection/$invoiceId'
-      fullPath: '/outdoor/reception/due-collection/$invoiceId'
-      preLoaderRoute: typeof AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRouteImport
+    '/_authenticated/dashboard/roles/permissions/$roleId/edit': {
+      id: '/_authenticated/dashboard/roles/permissions/$roleId/edit'
+      path: '/dashboard/roles/permissions/$roleId/edit'
+      fullPath: '/dashboard/roles/permissions/$roleId/edit'
+      preLoaderRoute: typeof AuthenticatedDashboardRolesPermissionsRoleIdEditRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/tests/$id': {
-      id: '/_authenticated/outdoor/master/tests/$id'
-      path: '/outdoor/master/tests/$id'
-      fullPath: '/outdoor/master/tests/$id'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterTestsIdRouteImport
+    '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId': {
+      id: '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId'
+      path: '/dashboard/outdoor/reception/invoices/$invoiceId'
+      fullPath: '/dashboard/outdoor/reception/invoices/$invoiceId'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/test-tables/$id': {
-      id: '/_authenticated/outdoor/master/test-tables/$id'
-      path: '/outdoor/master/test-tables/$id'
-      fullPath: '/outdoor/master/test-tables/$id'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterTestTablesIdRouteImport
+    '/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId': {
+      id: '/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId'
+      path: '/dashboard/outdoor/reception/due-collection/$invoiceId'
+      fullPath: '/dashboard/outdoor/reception/due-collection/$invoiceId'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/doctors/create': {
-      id: '/_authenticated/outdoor/master/doctors/create'
-      path: '/outdoor/master/doctors/create'
-      fullPath: '/outdoor/master/doctors/create'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterDoctorsCreateRouteImport
+    '/_authenticated/dashboard/outdoor/master/tests/$id': {
+      id: '/_authenticated/dashboard/outdoor/master/tests/$id'
+      path: '/dashboard/outdoor/master/tests/$id'
+      fullPath: '/dashboard/outdoor/master/tests/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterTestsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/departments/$id': {
-      id: '/_authenticated/outdoor/master/departments/$id'
-      path: '/outdoor/master/departments/$id'
-      fullPath: '/outdoor/master/departments/$id'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterDepartmentsIdRouteImport
+    '/_authenticated/dashboard/outdoor/master/test-tables/$id': {
+      id: '/_authenticated/dashboard/outdoor/master/test-tables/$id'
+      path: '/dashboard/outdoor/master/test-tables/$id'
+      fullPath: '/dashboard/outdoor/master/test-tables/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterTestTablesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/categories/$id': {
-      id: '/_authenticated/outdoor/master/categories/$id'
-      path: '/outdoor/master/categories/$id'
-      fullPath: '/outdoor/master/categories/$id'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterCategoriesIdRouteImport
+    '/_authenticated/dashboard/outdoor/master/doctors/create': {
+      id: '/_authenticated/dashboard/outdoor/master/doctors/create'
+      path: '/dashboard/outdoor/master/doctors/create'
+      fullPath: '/dashboard/outdoor/master/doctors/create'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterDoctorsCreateRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indoor/master/services/$id': {
-      id: '/_authenticated/indoor/master/services/$id'
-      path: '/indoor/master/services/$id'
-      fullPath: '/indoor/master/services/$id'
-      preLoaderRoute: typeof AuthenticatedIndoorMasterServicesIdRouteImport
+    '/_authenticated/dashboard/outdoor/master/departments/$id': {
+      id: '/_authenticated/dashboard/outdoor/master/departments/$id'
+      path: '/dashboard/outdoor/master/departments/$id'
+      fullPath: '/dashboard/outdoor/master/departments/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterDepartmentsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indoor/master/bed-cabin-list/$id': {
-      id: '/_authenticated/indoor/master/bed-cabin-list/$id'
-      path: '/indoor/master/bed-cabin-list/$id'
-      fullPath: '/indoor/master/bed-cabin-list/$id'
-      preLoaderRoute: typeof AuthenticatedIndoorMasterBedCabinListIdRouteImport
+    '/_authenticated/dashboard/outdoor/master/categories/$id': {
+      id: '/_authenticated/dashboard/outdoor/master/categories/$id'
+      path: '/dashboard/outdoor/master/categories/$id'
+      fullPath: '/dashboard/outdoor/master/categories/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterCategoriesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/ecg/all/print/$id': {
-      id: '/_authenticated/ecg/all/print/$id'
-      path: '/ecg/all/print/$id'
-      fullPath: '/ecg/all/print/$id'
-      preLoaderRoute: typeof AuthenticatedEcgAllPrintIdRouteImport
+    '/_authenticated/dashboard/indoor/master/services/$id': {
+      id: '/_authenticated/dashboard/indoor/master/services/$id'
+      path: '/dashboard/indoor/master/services/$id'
+      fullPath: '/dashboard/indoor/master/services/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterServicesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/ecg/all/edit/$id': {
-      id: '/_authenticated/ecg/all/edit/$id'
-      path: '/ecg/all/edit/$id'
-      fullPath: '/ecg/all/edit/$id'
-      preLoaderRoute: typeof AuthenticatedEcgAllEditIdRouteImport
+    '/_authenticated/dashboard/indoor/master/bed-cabin-list/$id': {
+      id: '/_authenticated/dashboard/indoor/master/bed-cabin-list/$id'
+      path: '/dashboard/indoor/master/bed-cabin-list/$id'
+      fullPath: '/dashboard/indoor/master/bed-cabin-list/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/accounting/reports/ledger/print': {
-      id: '/_authenticated/accounting/reports/ledger/print'
-      path: '/accounting/reports/ledger/print'
-      fullPath: '/accounting/reports/ledger/print'
-      preLoaderRoute: typeof AuthenticatedAccountingReportsLedgerPrintRouteImport
+    '/_authenticated/dashboard/ecg/all/print/$id': {
+      id: '/_authenticated/dashboard/ecg/all/print/$id'
+      path: '/dashboard/ecg/all/print/$id'
+      fullPath: '/dashboard/ecg/all/print/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardEcgAllPrintIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/reports/my/outdoor/today-collection/': {
-      id: '/_authenticated/reports/my/outdoor/today-collection/'
-      path: '/reports/my/outdoor/today-collection'
-      fullPath: '/reports/my/outdoor/today-collection'
-      preLoaderRoute: typeof AuthenticatedReportsMyOutdoorTodayCollectionIndexRouteImport
+    '/_authenticated/dashboard/ecg/all/edit/$id': {
+      id: '/_authenticated/dashboard/ecg/all/edit/$id'
+      path: '/dashboard/ecg/all/edit/$id'
+      fullPath: '/dashboard/ecg/all/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardEcgAllEditIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/reports/my/outdoor/date-wise-collection/': {
-      id: '/_authenticated/reports/my/outdoor/date-wise-collection/'
-      path: '/reports/my/outdoor/date-wise-collection'
-      fullPath: '/reports/my/outdoor/date-wise-collection'
-      preLoaderRoute: typeof AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRouteImport
+    '/_authenticated/dashboard/accounting/reports/multi-ledger/print': {
+      id: '/_authenticated/dashboard/accounting/reports/multi-ledger/print'
+      path: '/dashboard/accounting/reports/multi-ledger/print'
+      fullPath: '/dashboard/accounting/reports/multi-ledger/print'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsMultiLedgerPrintRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/reception/invoices/list/': {
-      id: '/_authenticated/outdoor/reception/invoices/list/'
-      path: '/outdoor/reception/invoices/list'
-      fullPath: '/outdoor/reception/invoices/list'
-      preLoaderRoute: typeof AuthenticatedOutdoorReceptionInvoicesListIndexRouteImport
+    '/_authenticated/dashboard/accounting/reports/ledger/print': {
+      id: '/_authenticated/dashboard/accounting/reports/ledger/print'
+      path: '/dashboard/accounting/reports/ledger/print'
+      fullPath: '/dashboard/accounting/reports/ledger/print'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsLedgerPrintRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/reception/invoices/create/': {
-      id: '/_authenticated/outdoor/reception/invoices/create/'
-      path: '/outdoor/reception/invoices/create'
-      fullPath: '/outdoor/reception/invoices/create'
-      preLoaderRoute: typeof AuthenticatedOutdoorReceptionInvoicesCreateIndexRouteImport
+    '/_authenticated/dashboard/reports/my/outdoor/today-collection/': {
+      id: '/_authenticated/dashboard/reports/my/outdoor/today-collection/'
+      path: '/dashboard/reports/my/outdoor/today-collection'
+      fullPath: '/dashboard/reports/my/outdoor/today-collection'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/tests/create/': {
-      id: '/_authenticated/outdoor/master/tests/create/'
-      path: '/outdoor/master/tests/create'
-      fullPath: '/outdoor/master/tests/create'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterTestsCreateIndexRouteImport
+    '/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/': {
+      id: '/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/'
+      path: '/dashboard/reports/my/outdoor/date-wise-collection'
+      fullPath: '/dashboard/reports/my/outdoor/date-wise-collection'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/doctors/$doctorId/': {
-      id: '/_authenticated/outdoor/master/doctors/$doctorId/'
-      path: '/outdoor/master/doctors/$doctorId'
-      fullPath: '/outdoor/master/doctors/$doctorId'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRouteImport
+    '/_authenticated/dashboard/outdoor/reception/invoices/list/': {
+      id: '/_authenticated/dashboard/outdoor/reception/invoices/list/'
+      path: '/dashboard/outdoor/reception/invoices/list'
+      fullPath: '/dashboard/outdoor/reception/invoices/list'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indoor/master/services/create/': {
-      id: '/_authenticated/indoor/master/services/create/'
-      path: '/indoor/master/services/create'
-      fullPath: '/indoor/master/services/create'
-      preLoaderRoute: typeof AuthenticatedIndoorMasterServicesCreateIndexRouteImport
+    '/_authenticated/dashboard/outdoor/reception/invoices/create/': {
+      id: '/_authenticated/dashboard/outdoor/reception/invoices/create/'
+      path: '/dashboard/outdoor/reception/invoices/create'
+      fullPath: '/dashboard/outdoor/reception/invoices/create'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indoor/master/bed-cabin-list/create/': {
-      id: '/_authenticated/indoor/master/bed-cabin-list/create/'
-      path: '/indoor/master/bed-cabin-list/create'
-      fullPath: '/indoor/master/bed-cabin-list/create'
-      preLoaderRoute: typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRouteImport
+    '/_authenticated/dashboard/outdoor/master/tests/create/': {
+      id: '/_authenticated/dashboard/outdoor/master/tests/create/'
+      path: '/dashboard/outdoor/master/tests/create'
+      fullPath: '/dashboard/outdoor/master/tests/create'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterTestsCreateIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/$admissionId/print/': {
-      id: '/_authenticated/admission/patients/$admissionId/print/'
-      path: '/admission/patients/$admissionId/print'
-      fullPath: '/admission/patients/$admissionId/print'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRouteImport
+    '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/': {
+      id: '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/'
+      path: '/dashboard/outdoor/master/doctors/$doctorId'
+      fullPath: '/dashboard/outdoor/master/doctors/$doctorId'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/$admissionId/final-bill/': {
-      id: '/_authenticated/admission/patients/$admissionId/final-bill/'
-      path: '/admission/patients/$admissionId/final-bill'
-      fullPath: '/admission/patients/$admissionId/final-bill'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRouteImport
+    '/_authenticated/dashboard/indoor/master/services/create/': {
+      id: '/_authenticated/dashboard/indoor/master/services/create/'
+      path: '/dashboard/indoor/master/services/create'
+      fullPath: '/dashboard/indoor/master/services/create'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/$admissionId/final-bill-print/': {
-      id: '/_authenticated/admission/patients/$admissionId/final-bill-print/'
-      path: '/admission/patients/$admissionId/final-bill-print'
-      fullPath: '/admission/patients/$admissionId/final-bill-print'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRouteImport
+    '/_authenticated/dashboard/indoor/master/bed-cabin-list/create/': {
+      id: '/_authenticated/dashboard/indoor/master/bed-cabin-list/create/'
+      path: '/dashboard/indoor/master/bed-cabin-list/create'
+      fullPath: '/dashboard/indoor/master/bed-cabin-list/create'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/$admissionId/distribute-bill/': {
-      id: '/_authenticated/admission/patients/$admissionId/distribute-bill/'
-      path: '/admission/patients/$admissionId/distribute-bill'
-      fullPath: '/admission/patients/$admissionId/distribute-bill'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRouteImport
+    '/_authenticated/dashboard/admission/patients/$admissionId/print/': {
+      id: '/_authenticated/dashboard/admission/patients/$admissionId/print/'
+      path: '/dashboard/admission/patients/$admissionId/print'
+      fullPath: '/dashboard/admission/patients/$admissionId/print'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/$admissionId/confirm-balance/': {
-      id: '/_authenticated/admission/patients/$admissionId/confirm-balance/'
-      path: '/admission/patients/$admissionId/confirm-balance'
-      fullPath: '/admission/patients/$admissionId/confirm-balance'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRouteImport
+    '/_authenticated/dashboard/admission/patients/$admissionId/final-bill/': {
+      id: '/_authenticated/dashboard/admission/patients/$admissionId/final-bill/'
+      path: '/dashboard/admission/patients/$admissionId/final-bill'
+      fullPath: '/dashboard/admission/patients/$admissionId/final-bill'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/$admissionId/billing/': {
-      id: '/_authenticated/admission/patients/$admissionId/billing/'
-      path: '/admission/patients/$admissionId/billing'
-      fullPath: '/admission/patients/$admissionId/billing'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRouteImport
+    '/_authenticated/dashboard/admission/patients/$admissionId/final-bill-print/': {
+      id: '/_authenticated/dashboard/admission/patients/$admissionId/final-bill-print/'
+      path: '/dashboard/admission/patients/$admissionId/final-bill-print'
+      fullPath: '/dashboard/admission/patients/$admissionId/final-bill-print'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/$admissionId/billing-print/': {
-      id: '/_authenticated/admission/patients/$admissionId/billing-print/'
-      path: '/admission/patients/$admissionId/billing-print'
-      fullPath: '/admission/patients/$admissionId/billing-print'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRouteImport
+    '/_authenticated/dashboard/admission/patients/$admissionId/distribute-bill/': {
+      id: '/_authenticated/dashboard/admission/patients/$admissionId/distribute-bill/'
+      path: '/dashboard/admission/patients/$admissionId/distribute-bill'
+      fullPath: '/dashboard/admission/patients/$admissionId/distribute-bill'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/$admissionId/bill-created/': {
-      id: '/_authenticated/admission/patients/$admissionId/bill-created/'
-      path: '/admission/patients/$admissionId/bill-created'
-      fullPath: '/admission/patients/$admissionId/bill-created'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRouteImport
+    '/_authenticated/dashboard/admission/patients/$admissionId/confirm-balance/': {
+      id: '/_authenticated/dashboard/admission/patients/$admissionId/confirm-balance/'
+      path: '/dashboard/admission/patients/$admissionId/confirm-balance'
+      fullPath: '/dashboard/admission/patients/$admissionId/confirm-balance'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/x-ray/all/edit/builder/$id': {
-      id: '/_authenticated/x-ray/all/edit/builder/$id'
-      path: '/x-ray/all/edit/builder/$id'
-      fullPath: '/x-ray/all/edit/builder/$id'
-      preLoaderRoute: typeof AuthenticatedXRayAllEditBuilderIdRouteImport
+    '/_authenticated/dashboard/admission/patients/$admissionId/billing/': {
+      id: '/_authenticated/dashboard/admission/patients/$admissionId/billing/'
+      path: '/dashboard/admission/patients/$admissionId/billing'
+      fullPath: '/dashboard/admission/patients/$admissionId/billing'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/ultrasonogram/all/edit/builder/$id': {
-      id: '/_authenticated/ultrasonogram/all/edit/builder/$id'
-      path: '/ultrasonogram/all/edit/builder/$id'
-      fullPath: '/ultrasonogram/all/edit/builder/$id'
-      preLoaderRoute: typeof AuthenticatedUltrasonogramAllEditBuilderIdRouteImport
+    '/_authenticated/dashboard/admission/patients/$admissionId/billing-print/': {
+      id: '/_authenticated/dashboard/admission/patients/$admissionId/billing-print/'
+      path: '/dashboard/admission/patients/$admissionId/billing-print'
+      fullPath: '/dashboard/admission/patients/$admissionId/billing-print'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/urine/urine-for-sugar/report/$reportId': {
-      id: '/_authenticated/pathology/urine/urine-for-sugar/report/$reportId'
-      path: '/pathology/urine/urine-for-sugar/report/$reportId'
-      fullPath: '/pathology/urine/urine-for-sugar/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRouteImport
+    '/_authenticated/dashboard/admission/patients/$admissionId/bill-created/': {
+      id: '/_authenticated/dashboard/admission/patients/$admissionId/bill-created/'
+      path: '/dashboard/admission/patients/$admissionId/bill-created'
+      fullPath: '/dashboard/admission/patients/$admissionId/bill-created'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/urine/urine-for-re-full/report/$reportId': {
-      id: '/_authenticated/pathology/urine/urine-for-re-full/report/$reportId'
-      path: '/pathology/urine/urine-for-re-full/report/$reportId'
-      fullPath: '/pathology/urine/urine-for-re-full/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyUrineUrineForReFullReportReportIdRouteImport
+    '/_authenticated/dashboard/x-ray/all/edit/builder/$id': {
+      id: '/_authenticated/dashboard/x-ray/all/edit/builder/$id'
+      path: '/dashboard/x-ray/all/edit/builder/$id'
+      fullPath: '/dashboard/x-ray/all/edit/builder/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardXRayAllEditBuilderIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/urine/urine-for-re-full/edit/$id': {
-      id: '/_authenticated/pathology/urine/urine-for-re-full/edit/$id'
-      path: '/pathology/urine/urine-for-re-full/edit/$id'
-      fullPath: '/pathology/urine/urine-for-re-full/edit/$id'
-      preLoaderRoute: typeof AuthenticatedPathologyUrineUrineForReFullEditIdRouteImport
+    '/_authenticated/dashboard/ultrasonogram/all/edit/builder/$id': {
+      id: '/_authenticated/dashboard/ultrasonogram/all/edit/builder/$id'
+      path: '/dashboard/ultrasonogram/all/edit/builder/$id'
+      fullPath: '/dashboard/ultrasonogram/all/edit/builder/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardUltrasonogramAllEditBuilderIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/urine/urine-for-albumin/report/$reportId': {
-      id: '/_authenticated/pathology/urine/urine-for-albumin/report/$reportId'
-      path: '/pathology/urine/urine-for-albumin/report/$reportId'
-      fullPath: '/pathology/urine/urine-for-albumin/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyUrineUrineForAlbuminReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/urine/urine-for-sugar/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/urine/urine-for-sugar/report/$reportId'
+      path: '/dashboard/pathology/urine/urine-for-sugar/report/$reportId'
+      fullPath: '/dashboard/pathology/urine/urine-for-sugar/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/stool/stool-re/report/$reportId': {
-      id: '/_authenticated/pathology/stool/stool-re/report/$reportId'
-      path: '/pathology/stool/stool-re/report/$reportId'
-      fullPath: '/pathology/stool/stool-re/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyStoolStoolReReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/urine/urine-for-re-full/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/urine/urine-for-re-full/report/$reportId'
+      path: '/dashboard/pathology/urine/urine-for-re-full/report/$reportId'
+      fullPath: '/dashboard/pathology/urine/urine-for-re-full/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/stool/stool-re/edit/$id': {
-      id: '/_authenticated/pathology/stool/stool-re/edit/$id'
-      path: '/pathology/stool/stool-re/edit/$id'
-      fullPath: '/pathology/stool/stool-re/edit/$id'
-      preLoaderRoute: typeof AuthenticatedPathologyStoolStoolReEditIdRouteImport
+    '/_authenticated/dashboard/pathology/urine/urine-for-re-full/edit/$id': {
+      id: '/_authenticated/dashboard/pathology/urine/urine-for-re-full/edit/$id'
+      path: '/dashboard/pathology/urine/urine-for-re-full/edit/$id'
+      fullPath: '/dashboard/pathology/urine/urine-for-re-full/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/stool/reducing-substance/report/$reportId': {
-      id: '/_authenticated/pathology/stool/reducing-substance/report/$reportId'
-      path: '/pathology/stool/reducing-substance/report/$reportId'
-      fullPath: '/pathology/stool/reducing-substance/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyStoolReducingSubstanceReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/urine/urine-for-albumin/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/urine/urine-for-albumin/report/$reportId'
+      path: '/dashboard/pathology/urine/urine-for-albumin/report/$reportId'
+      fullPath: '/dashboard/pathology/urine/urine-for-albumin/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyUrineUrineForAlbuminReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/stool/ocult-blood-test/report/$reportId': {
-      id: '/_authenticated/pathology/stool/ocult-blood-test/report/$reportId'
-      path: '/pathology/stool/ocult-blood-test/report/$reportId'
-      fullPath: '/pathology/stool/ocult-blood-test/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyStoolOcultBloodTestReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/stool/stool-re/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/stool/stool-re/report/$reportId'
+      path: '/dashboard/pathology/stool/stool-re/report/$reportId'
+      fullPath: '/dashboard/pathology/stool/stool-re/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyStoolStoolReReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/immunology/widal-test/report/$reportId': {
-      id: '/_authenticated/pathology/immunology/widal-test/report/$reportId'
-      path: '/pathology/immunology/widal-test/report/$reportId'
-      fullPath: '/pathology/immunology/widal-test/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyImmunologyWidalTestReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/stool/stool-re/edit/$id': {
+      id: '/_authenticated/dashboard/pathology/stool/stool-re/edit/$id'
+      path: '/dashboard/pathology/stool/stool-re/edit/$id'
+      fullPath: '/dashboard/pathology/stool/stool-re/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyStoolStoolReEditIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/immunology/mt/report/$reportId': {
-      id: '/_authenticated/pathology/immunology/mt/report/$reportId'
-      path: '/pathology/immunology/mt/report/$reportId'
-      fullPath: '/pathology/immunology/mt/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyImmunologyMtReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/stool/reducing-substance/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/stool/reducing-substance/report/$reportId'
+      path: '/dashboard/pathology/stool/reducing-substance/report/$reportId'
+      fullPath: '/dashboard/pathology/stool/reducing-substance/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyStoolReducingSubstanceReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/immunology/blood-group/report/$reportId': {
-      id: '/_authenticated/pathology/immunology/blood-group/report/$reportId'
-      path: '/pathology/immunology/blood-group/report/$reportId'
-      fullPath: '/pathology/immunology/blood-group/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyImmunologyBloodGroupReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/stool/ocult-blood-test/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/stool/ocult-blood-test/report/$reportId'
+      path: '/dashboard/pathology/stool/ocult-blood-test/report/$reportId'
+      fullPath: '/dashboard/pathology/stool/ocult-blood-test/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/immunology/beta-hcg/report/$reportId': {
-      id: '/_authenticated/pathology/immunology/beta-hcg/report/$reportId'
-      path: '/pathology/immunology/beta-hcg/report/$reportId'
-      fullPath: '/pathology/immunology/beta-hcg/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyImmunologyBetaHcgReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/immunology/widal-test/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/immunology/widal-test/report/$reportId'
+      path: '/dashboard/pathology/immunology/widal-test/report/$reportId'
+      fullPath: '/dashboard/pathology/immunology/widal-test/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/immunology/all/report/$reportId': {
-      id: '/_authenticated/pathology/immunology/all/report/$reportId'
-      path: '/pathology/immunology/all/report/$reportId'
-      fullPath: '/pathology/immunology/all/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyImmunologyAllReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/immunology/mt/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/immunology/mt/report/$reportId'
+      path: '/dashboard/pathology/immunology/mt/report/$reportId'
+      fullPath: '/dashboard/pathology/immunology/mt/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyImmunologyMtReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hormone/t3t4tsh/report/$reportId': {
-      id: '/_authenticated/pathology/hormone/t3t4tsh/report/$reportId'
-      path: '/pathology/hormone/t3t4tsh/report/$reportId'
-      fullPath: '/pathology/hormone/t3t4tsh/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyHormoneT3t4tshReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/immunology/blood-group/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/immunology/blood-group/report/$reportId'
+      path: '/dashboard/pathology/immunology/blood-group/report/$reportId'
+      fullPath: '/dashboard/pathology/immunology/blood-group/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hormone/sputum/report/$reportId': {
-      id: '/_authenticated/pathology/hormone/sputum/report/$reportId'
-      path: '/pathology/hormone/sputum/report/$reportId'
-      fullPath: '/pathology/hormone/sputum/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyHormoneSputumReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/immunology/beta-hcg/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/immunology/beta-hcg/report/$reportId'
+      path: '/dashboard/pathology/immunology/beta-hcg/report/$reportId'
+      fullPath: '/dashboard/pathology/immunology/beta-hcg/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hormone/skin-scrapping-for-fungus/report/$reportId': {
-      id: '/_authenticated/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
-      path: '/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
-      fullPath: '/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/immunology/all/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/immunology/all/report/$reportId'
+      path: '/dashboard/pathology/immunology/all/report/$reportId'
+      fullPath: '/dashboard/pathology/immunology/all/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyImmunologyAllReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hormone/semen/report/$reportId': {
-      id: '/_authenticated/pathology/hormone/semen/report/$reportId'
-      path: '/pathology/hormone/semen/report/$reportId'
-      fullPath: '/pathology/hormone/semen/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyHormoneSemenReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/hormone/t3t4tsh/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/hormone/t3t4tsh/report/$reportId'
+      path: '/dashboard/pathology/hormone/t3t4tsh/report/$reportId'
+      fullPath: '/dashboard/pathology/hormone/t3t4tsh/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHormoneT3t4tshReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hormone/semen/edit/$reportId': {
-      id: '/_authenticated/pathology/hormone/semen/edit/$reportId'
-      path: '/pathology/hormone/semen/edit/$reportId'
-      fullPath: '/pathology/hormone/semen/edit/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyHormoneSemenEditReportIdRouteImport
+    '/_authenticated/dashboard/pathology/hormone/sputum/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/hormone/sputum/report/$reportId'
+      path: '/dashboard/pathology/hormone/sputum/report/$reportId'
+      fullPath: '/dashboard/pathology/hormone/sputum/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHormoneSputumReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hormone/electrolytes/report/$reportId': {
-      id: '/_authenticated/pathology/hormone/electrolytes/report/$reportId'
-      path: '/pathology/hormone/electrolytes/report/$reportId'
-      fullPath: '/pathology/hormone/electrolytes/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyHormoneElectrolytesReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/hormone/skin-scrapping-for-fungus/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
+      path: '/dashboard/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
+      fullPath: '/dashboard/pathology/hormone/skin-scrapping-for-fungus/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hormone/all/report/$reportId': {
-      id: '/_authenticated/pathology/hormone/all/report/$reportId'
-      path: '/pathology/hormone/all/report/$reportId'
-      fullPath: '/pathology/hormone/all/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyHormoneAllReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/hormone/semen/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/hormone/semen/report/$reportId'
+      path: '/dashboard/pathology/hormone/semen/report/$reportId'
+      fullPath: '/dashboard/pathology/hormone/semen/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHormoneSemenReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/prothom-bin-time-full/report/$reportId': {
-      id: '/_authenticated/pathology/hematology/prothom-bin-time-full/report/$reportId'
-      path: '/pathology/hematology/prothom-bin-time-full/report/$reportId'
-      fullPath: '/pathology/hematology/prothom-bin-time-full/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/hormone/semen/edit/$reportId': {
+      id: '/_authenticated/dashboard/pathology/hormone/semen/edit/$reportId'
+      path: '/dashboard/pathology/hormone/semen/edit/$reportId'
+      fullPath: '/dashboard/pathology/hormone/semen/edit/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHormoneSemenEditReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/peripheral-blood-film/report/$reportId': {
-      id: '/_authenticated/pathology/hematology/peripheral-blood-film/report/$reportId'
-      path: '/pathology/hematology/peripheral-blood-film/report/$reportId'
-      fullPath: '/pathology/hematology/peripheral-blood-film/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/hormone/electrolytes/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/hormone/electrolytes/report/$reportId'
+      path: '/dashboard/pathology/hormone/electrolytes/report/$reportId'
+      fullPath: '/dashboard/pathology/hormone/electrolytes/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHormoneElectrolytesReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/cbc-with-pbf/report/$reportId': {
-      id: '/_authenticated/pathology/hematology/cbc-with-pbf/report/$reportId'
-      path: '/pathology/hematology/cbc-with-pbf/report/$reportId'
-      fullPath: '/pathology/hematology/cbc-with-pbf/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/hormone/all/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/hormone/all/report/$reportId'
+      path: '/dashboard/pathology/hormone/all/report/$reportId'
+      fullPath: '/dashboard/pathology/hormone/all/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHormoneAllReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/cbc-with-pbf/edit/$id': {
-      id: '/_authenticated/pathology/hematology/cbc-with-pbf/edit/$id'
-      path: '/pathology/hematology/cbc-with-pbf/edit/$id'
-      fullPath: '/pathology/hematology/cbc-with-pbf/edit/$id'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyCbcWithPbfEditIdRouteImport
+    '/_authenticated/dashboard/pathology/hematology/prothom-bin-time-full/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/hematology/prothom-bin-time-full/report/$reportId'
+      path: '/dashboard/pathology/hematology/prothom-bin-time-full/report/$reportId'
+      fullPath: '/dashboard/pathology/hematology/prothom-bin-time-full/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyProthomBinTimeFullReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/cbc-short/report/$reportId': {
-      id: '/_authenticated/pathology/hematology/cbc-short/report/$reportId'
-      path: '/pathology/hematology/cbc-short/report/$reportId'
-      fullPath: '/pathology/hematology/cbc-short/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyCbcShortReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/hematology/peripheral-blood-film/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/hematology/peripheral-blood-film/report/$reportId'
+      path: '/dashboard/pathology/hematology/peripheral-blood-film/report/$reportId'
+      fullPath: '/dashboard/pathology/hematology/peripheral-blood-film/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/cbc-short/edit/$id': {
-      id: '/_authenticated/pathology/hematology/cbc-short/edit/$id'
-      path: '/pathology/hematology/cbc-short/edit/$id'
-      fullPath: '/pathology/hematology/cbc-short/edit/$id'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyCbcShortEditIdRouteImport
+    '/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/report/$reportId'
+      path: '/dashboard/pathology/hematology/cbc-with-pbf/report/$reportId'
+      fullPath: '/dashboard/pathology/hematology/cbc-with-pbf/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyCbcWithPbfReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/blood-for-tcdc/report/$reportId': {
-      id: '/_authenticated/pathology/hematology/blood-for-tcdc/report/$reportId'
-      path: '/pathology/hematology/blood-for-tcdc/report/$reportId'
-      fullPath: '/pathology/hematology/blood-for-tcdc/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyBloodForTcdcReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/edit/$id': {
+      id: '/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/edit/$id'
+      path: '/dashboard/pathology/hematology/cbc-with-pbf/edit/$id'
+      fullPath: '/dashboard/pathology/hematology/cbc-with-pbf/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyCbcWithPbfEditIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/blood-for-bt-ct/report/$reportId': {
-      id: '/_authenticated/pathology/hematology/blood-for-bt-ct/report/$reportId'
-      path: '/pathology/hematology/blood-for-bt-ct/report/$reportId'
-      fullPath: '/pathology/hematology/blood-for-bt-ct/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyBloodForBtCtReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/hematology/cbc-short/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/hematology/cbc-short/report/$reportId'
+      path: '/dashboard/pathology/hematology/cbc-short/report/$reportId'
+      fullPath: '/dashboard/pathology/hematology/cbc-short/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyCbcShortReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/all/report/$reportId': {
-      id: '/_authenticated/pathology/hematology/all/report/$reportId'
-      path: '/pathology/hematology/all/report/$reportId'
-      fullPath: '/pathology/hematology/all/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyAllReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/hematology/cbc-short/edit/$id': {
+      id: '/_authenticated/dashboard/pathology/hematology/cbc-short/edit/$id'
+      path: '/dashboard/pathology/hematology/cbc-short/edit/$id'
+      fullPath: '/dashboard/pathology/hematology/cbc-short/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyCbcShortEditIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/biochemical/lipid-profile/report/$reportId': {
-      id: '/_authenticated/pathology/biochemical/lipid-profile/report/$reportId'
-      path: '/pathology/biochemical/lipid-profile/report/$reportId'
-      fullPath: '/pathology/biochemical/lipid-profile/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyBiochemicalLipidProfileReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/hematology/blood-for-tcdc/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/hematology/blood-for-tcdc/report/$reportId'
+      path: '/dashboard/pathology/hematology/blood-for-tcdc/report/$reportId'
+      fullPath: '/dashboard/pathology/hematology/blood-for-tcdc/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyBloodForTcdcReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/biochemical/all/report/$reportId': {
-      id: '/_authenticated/pathology/biochemical/all/report/$reportId'
-      path: '/pathology/biochemical/all/report/$reportId'
-      fullPath: '/pathology/biochemical/all/report/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyBiochemicalAllReportReportIdRouteImport
+    '/_authenticated/dashboard/pathology/hematology/blood-for-bt-ct/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/hematology/blood-for-bt-ct/report/$reportId'
+      path: '/dashboard/pathology/hematology/blood-for-bt-ct/report/$reportId'
+      fullPath: '/dashboard/pathology/hematology/blood-for-bt-ct/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyBloodForBtCtReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/biochemical/all/edit/$reportId': {
-      id: '/_authenticated/pathology/biochemical/all/edit/$reportId'
-      path: '/pathology/biochemical/all/edit/$reportId'
-      fullPath: '/pathology/biochemical/all/edit/$reportId'
-      preLoaderRoute: typeof AuthenticatedPathologyBiochemicalAllEditReportIdRouteImport
+    '/_authenticated/dashboard/pathology/hematology/all/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/hematology/all/report/$reportId'
+      path: '/dashboard/pathology/hematology/all/report/$reportId'
+      fullPath: '/dashboard/pathology/hematology/all/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyAllReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/doctors/$doctorId/edit': {
-      id: '/_authenticated/outdoor/master/doctors/$doctorId/edit'
-      path: '/outdoor/master/doctors/$doctorId/edit'
-      fullPath: '/outdoor/master/doctors/$doctorId/edit'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterDoctorsDoctorIdEditRouteImport
+    '/_authenticated/dashboard/pathology/biochemical/lipid-profile/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/biochemical/lipid-profile/report/$reportId'
+      path: '/dashboard/pathology/biochemical/lipid-profile/report/$reportId'
+      fullPath: '/dashboard/pathology/biochemical/lipid-profile/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyBiochemicalLipidProfileReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indoor/master/services/edit/$id': {
-      id: '/_authenticated/indoor/master/services/edit/$id'
-      path: '/indoor/master/services/edit/$id'
-      fullPath: '/indoor/master/services/edit/$id'
-      preLoaderRoute: typeof AuthenticatedIndoorMasterServicesEditIdRouteImport
+    '/_authenticated/dashboard/pathology/biochemical/all/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/biochemical/all/report/$reportId'
+      path: '/dashboard/pathology/biochemical/all/report/$reportId'
+      fullPath: '/dashboard/pathology/biochemical/all/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyBiochemicalAllReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/ecg/all/edit/builder/$id': {
-      id: '/_authenticated/ecg/all/edit/builder/$id'
-      path: '/ecg/all/edit/builder/$id'
-      fullPath: '/ecg/all/edit/builder/$id'
-      preLoaderRoute: typeof AuthenticatedEcgAllEditBuilderIdRouteImport
+    '/_authenticated/dashboard/pathology/biochemical/all/edit/$reportId': {
+      id: '/_authenticated/dashboard/pathology/biochemical/all/edit/$reportId'
+      path: '/dashboard/pathology/biochemical/all/edit/$reportId'
+      fullPath: '/dashboard/pathology/biochemical/all/edit/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admission/patients/$admissionId/print/$step': {
-      id: '/_authenticated/admission/patients/$admissionId/print/$step'
-      path: '/admission/patients/$admissionId/print/$step'
-      fullPath: '/admission/patients/$admissionId/print/$step'
-      preLoaderRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdPrintStepRouteImport
+    '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/edit': {
+      id: '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/edit'
+      path: '/dashboard/outdoor/master/doctors/$doctorId/edit'
+      fullPath: '/dashboard/outdoor/master/doctors/$doctorId/edit'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/immunology/all/edit/$id/': {
-      id: '/_authenticated/pathology/immunology/all/edit/$id/'
-      path: '/pathology/immunology/all/edit/$id'
-      fullPath: '/pathology/immunology/all/edit/$id'
-      preLoaderRoute: typeof AuthenticatedPathologyImmunologyAllEditIdIndexRouteImport
+    '/_authenticated/dashboard/indoor/master/services/edit/$id': {
+      id: '/_authenticated/dashboard/indoor/master/services/edit/$id'
+      path: '/dashboard/indoor/master/services/edit/$id'
+      fullPath: '/dashboard/indoor/master/services/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterServicesEditIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hormone/all/edit/$id/': {
-      id: '/_authenticated/pathology/hormone/all/edit/$id/'
-      path: '/pathology/hormone/all/edit/$id'
-      fullPath: '/pathology/hormone/all/edit/$id'
-      preLoaderRoute: typeof AuthenticatedPathologyHormoneAllEditIdIndexRouteImport
+    '/_authenticated/dashboard/ecg/all/edit/builder/$id': {
+      id: '/_authenticated/dashboard/ecg/all/edit/builder/$id'
+      path: '/dashboard/ecg/all/edit/builder/$id'
+      fullPath: '/dashboard/ecg/all/edit/builder/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardEcgAllEditBuilderIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pathology/hematology/all/edit/$id/': {
-      id: '/_authenticated/pathology/hematology/all/edit/$id/'
-      path: '/pathology/hematology/all/edit/$id'
-      fullPath: '/pathology/hematology/all/edit/$id'
-      preLoaderRoute: typeof AuthenticatedPathologyHematologyAllEditIdIndexRouteImport
+    '/_authenticated/dashboard/admission/patients/$admissionId/print/$step': {
+      id: '/_authenticated/dashboard/admission/patients/$admissionId/print/$step'
+      path: '/dashboard/admission/patients/$admissionId/print/$step'
+      fullPath: '/dashboard/admission/patients/$admissionId/print/$step'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/reception/invoices/edit/$invoiceId/': {
-      id: '/_authenticated/outdoor/reception/invoices/edit/$invoiceId/'
-      path: '/outdoor/reception/invoices/edit/$invoiceId'
-      fullPath: '/outdoor/reception/invoices/edit/$invoiceId'
-      preLoaderRoute: typeof AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRouteImport
+    '/_authenticated/dashboard/pathology/immunology/all/edit/$id/': {
+      id: '/_authenticated/dashboard/pathology/immunology/all/edit/$id/'
+      path: '/dashboard/pathology/immunology/all/edit/$id'
+      fullPath: '/dashboard/pathology/immunology/all/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyImmunologyAllEditIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/outdoor/master/tests/edit/$id/': {
-      id: '/_authenticated/outdoor/master/tests/edit/$id/'
-      path: '/outdoor/master/tests/edit/$id'
-      fullPath: '/outdoor/master/tests/edit/$id'
-      preLoaderRoute: typeof AuthenticatedOutdoorMasterTestsEditIdIndexRouteImport
+    '/_authenticated/dashboard/pathology/hormone/all/edit/$id/': {
+      id: '/_authenticated/dashboard/pathology/hormone/all/edit/$id/'
+      path: '/dashboard/pathology/hormone/all/edit/$id'
+      fullPath: '/dashboard/pathology/hormone/all/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHormoneAllEditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pathology/hematology/all/edit/$id/': {
+      id: '/_authenticated/dashboard/pathology/hematology/all/edit/$id/'
+      path: '/dashboard/pathology/hematology/all/edit/$id'
+      fullPath: '/dashboard/pathology/hematology/all/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyHematologyAllEditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/outdoor/reception/invoices/edit/$invoiceId/': {
+      id: '/_authenticated/dashboard/outdoor/reception/invoices/edit/$invoiceId/'
+      path: '/dashboard/outdoor/reception/invoices/edit/$invoiceId'
+      fullPath: '/dashboard/outdoor/reception/invoices/edit/$invoiceId'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/outdoor/master/tests/edit/$id/': {
+      id: '/_authenticated/dashboard/outdoor/master/tests/edit/$id/'
+      path: '/dashboard/outdoor/master/tests/edit/$id'
+      fullPath: '/dashboard/outdoor/master/tests/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
-interface AuthenticatedSettingsRouteRouteChildren {
-  AuthenticatedSettingsAccountRoute: typeof AuthenticatedSettingsAccountRoute
-  AuthenticatedSettingsAppearanceRoute: typeof AuthenticatedSettingsAppearanceRoute
-  AuthenticatedSettingsDisplayRoute: typeof AuthenticatedSettingsDisplayRoute
-  AuthenticatedSettingsNotificationsRoute: typeof AuthenticatedSettingsNotificationsRoute
-  AuthenticatedSettingsPaymentAccountsRoute: typeof AuthenticatedSettingsPaymentAccountsRoute
-  AuthenticatedSettingsPrefixRoute: typeof AuthenticatedSettingsPrefixRoute
-  AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
+interface AuthenticatedDashboardSettingsRouteRouteChildren {
+  AuthenticatedDashboardSettingsAccountRoute: typeof AuthenticatedDashboardSettingsAccountRoute
+  AuthenticatedDashboardSettingsAppearanceRoute: typeof AuthenticatedDashboardSettingsAppearanceRoute
+  AuthenticatedDashboardSettingsDateControlsRoute: typeof AuthenticatedDashboardSettingsDateControlsRoute
+  AuthenticatedDashboardSettingsDisplayRoute: typeof AuthenticatedDashboardSettingsDisplayRoute
+  AuthenticatedDashboardSettingsNotificationsRoute: typeof AuthenticatedDashboardSettingsNotificationsRoute
+  AuthenticatedDashboardSettingsPaymentAccountsRoute: typeof AuthenticatedDashboardSettingsPaymentAccountsRoute
+  AuthenticatedDashboardSettingsPrefixRoute: typeof AuthenticatedDashboardSettingsPrefixRoute
+  AuthenticatedDashboardSettingsIndexRoute: typeof AuthenticatedDashboardSettingsIndexRoute
 }
 
-const AuthenticatedSettingsRouteRouteChildren: AuthenticatedSettingsRouteRouteChildren =
+const AuthenticatedDashboardSettingsRouteRouteChildren: AuthenticatedDashboardSettingsRouteRouteChildren =
   {
-    AuthenticatedSettingsAccountRoute: AuthenticatedSettingsAccountRoute,
-    AuthenticatedSettingsAppearanceRoute: AuthenticatedSettingsAppearanceRoute,
-    AuthenticatedSettingsDisplayRoute: AuthenticatedSettingsDisplayRoute,
-    AuthenticatedSettingsNotificationsRoute:
-      AuthenticatedSettingsNotificationsRoute,
-    AuthenticatedSettingsPaymentAccountsRoute:
-      AuthenticatedSettingsPaymentAccountsRoute,
-    AuthenticatedSettingsPrefixRoute: AuthenticatedSettingsPrefixRoute,
-    AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
+    AuthenticatedDashboardSettingsAccountRoute:
+      AuthenticatedDashboardSettingsAccountRoute,
+    AuthenticatedDashboardSettingsAppearanceRoute:
+      AuthenticatedDashboardSettingsAppearanceRoute,
+    AuthenticatedDashboardSettingsDateControlsRoute:
+      AuthenticatedDashboardSettingsDateControlsRoute,
+    AuthenticatedDashboardSettingsDisplayRoute:
+      AuthenticatedDashboardSettingsDisplayRoute,
+    AuthenticatedDashboardSettingsNotificationsRoute:
+      AuthenticatedDashboardSettingsNotificationsRoute,
+    AuthenticatedDashboardSettingsPaymentAccountsRoute:
+      AuthenticatedDashboardSettingsPaymentAccountsRoute,
+    AuthenticatedDashboardSettingsPrefixRoute:
+      AuthenticatedDashboardSettingsPrefixRoute,
+    AuthenticatedDashboardSettingsIndexRoute:
+      AuthenticatedDashboardSettingsIndexRoute,
   }
 
-const AuthenticatedSettingsRouteRouteWithChildren =
-  AuthenticatedSettingsRouteRoute._addFileChildren(
-    AuthenticatedSettingsRouteRouteChildren,
+const AuthenticatedDashboardSettingsRouteRouteWithChildren =
+  AuthenticatedDashboardSettingsRouteRoute._addFileChildren(
+    AuthenticatedDashboardSettingsRouteRouteChildren,
   )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
-  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
-  AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
-  AuthenticatedNotificationsIdRoute: typeof AuthenticatedNotificationsIdRoute
-  AuthenticatedAccountingIndexRoute: typeof AuthenticatedAccountingIndexRoute
-  AuthenticatedAppsIndexRoute: typeof AuthenticatedAppsIndexRoute
-  AuthenticatedBackupSettingsIndexRoute: typeof AuthenticatedBackupSettingsIndexRoute
-  AuthenticatedBackupsIndexRoute: typeof AuthenticatedBackupsIndexRoute
-  AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
-  AuthenticatedDatabaseIndexRoute: typeof AuthenticatedDatabaseIndexRoute
-  AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
-  AuthenticatedHelpIndexRoute: typeof AuthenticatedHelpIndexRoute
-  AuthenticatedMyAccountIndexRoute: typeof AuthenticatedMyAccountIndexRoute
-  AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
-  AuthenticatedRolesIndexRoute: typeof AuthenticatedRolesIndexRoute
-  AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
-  AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
-  AuthenticatedRolesEditIdRoute: typeof AuthenticatedRolesEditIdRoute
-  AuthenticatedAccountingAccountsIndexRoute: typeof AuthenticatedAccountingAccountsIndexRoute
-  AuthenticatedAccountingExpenseIndexRoute: typeof AuthenticatedAccountingExpenseIndexRoute
-  AuthenticatedAccountingExpensesIndexRoute: typeof AuthenticatedAccountingExpensesIndexRoute
-  AuthenticatedAccountingIncomeIndexRoute: typeof AuthenticatedAccountingIncomeIndexRoute
-  AuthenticatedAccountingTransactionsIndexRoute: typeof AuthenticatedAccountingTransactionsIndexRoute
-  AuthenticatedAccountsDailyCreditIndexRoute: typeof AuthenticatedAccountsDailyCreditIndexRoute
-  AuthenticatedAccountsDailyDebitIndexRoute: typeof AuthenticatedAccountsDailyDebitIndexRoute
-  AuthenticatedAccountsJournalIndexRoute: typeof AuthenticatedAccountsJournalIndexRoute
-  AuthenticatedAccountsPayToAnaesthetistIndexRoute: typeof AuthenticatedAccountsPayToAnaesthetistIndexRoute
-  AuthenticatedAccountsPayToAssistantIndexRoute: typeof AuthenticatedAccountsPayToAssistantIndexRoute
-  AuthenticatedAccountsPayToConsultantIndexRoute: typeof AuthenticatedAccountsPayToConsultantIndexRoute
-  AuthenticatedAccountsPayToSurgeonIndexRoute: typeof AuthenticatedAccountsPayToSurgeonIndexRoute
-  AuthenticatedAdmissionAdvancePaymentIndexRoute: typeof AuthenticatedAdmissionAdvancePaymentIndexRoute
-  AuthenticatedAdmissionBedCabinChargeIndexRoute: typeof AuthenticatedAdmissionBedCabinChargeIndexRoute
-  AuthenticatedAdmissionDueCollectionIndexRoute: typeof AuthenticatedAdmissionDueCollectionIndexRoute
-  AuthenticatedAdmissionFinalBillsIndexRoute: typeof AuthenticatedAdmissionFinalBillsIndexRoute
-  AuthenticatedAdmissionFinaliseServicesIndexRoute: typeof AuthenticatedAdmissionFinaliseServicesIndexRoute
-  AuthenticatedAdmissionFirstTimeBillIndexRoute: typeof AuthenticatedAdmissionFirstTimeBillIndexRoute
-  AuthenticatedAdmissionFirstTimeServiceIndexRoute: typeof AuthenticatedAdmissionFirstTimeServiceIndexRoute
-  AuthenticatedAdmissionInvoiceIndexRoute: typeof AuthenticatedAdmissionInvoiceIndexRoute
-  AuthenticatedAdmissionNewAdmissionIndexRoute: typeof AuthenticatedAdmissionNewAdmissionIndexRoute
-  AuthenticatedAdmissionPatientsIndexRoute: typeof AuthenticatedAdmissionPatientsIndexRoute
-  AuthenticatedAdmissionSecondTimeBillIndexRoute: typeof AuthenticatedAdmissionSecondTimeBillIndexRoute
-  AuthenticatedBanksBankAccountsIndexRoute: typeof AuthenticatedBanksBankAccountsIndexRoute
-  AuthenticatedBanksBankDepositsIndexRoute: typeof AuthenticatedBanksBankDepositsIndexRoute
-  AuthenticatedBanksBankTransactionsIndexRoute: typeof AuthenticatedBanksBankTransactionsIndexRoute
-  AuthenticatedBanksBankWithdrawalsIndexRoute: typeof AuthenticatedBanksBankWithdrawalsIndexRoute
-  AuthenticatedEcgAllIndexRoute: typeof AuthenticatedEcgAllIndexRoute
-  AuthenticatedPayrollEmployeesIndexRoute: typeof AuthenticatedPayrollEmployeesIndexRoute
-  AuthenticatedPayrollOverviewIndexRoute: typeof AuthenticatedPayrollOverviewIndexRoute
-  AuthenticatedRolesCreateIndexRoute: typeof AuthenticatedRolesCreateIndexRoute
-  AuthenticatedUltrasonogramAllIndexRoute: typeof AuthenticatedUltrasonogramAllIndexRoute
-  AuthenticatedXRayAllIndexRoute: typeof AuthenticatedXRayAllIndexRoute
-  AuthenticatedAccountingReportsLedgerPrintRoute: typeof AuthenticatedAccountingReportsLedgerPrintRoute
-  AuthenticatedEcgAllEditIdRoute: typeof AuthenticatedEcgAllEditIdRoute
-  AuthenticatedEcgAllPrintIdRoute: typeof AuthenticatedEcgAllPrintIdRoute
-  AuthenticatedIndoorMasterBedCabinListIdRoute: typeof AuthenticatedIndoorMasterBedCabinListIdRoute
-  AuthenticatedIndoorMasterServicesIdRoute: typeof AuthenticatedIndoorMasterServicesIdRoute
-  AuthenticatedOutdoorMasterCategoriesIdRoute: typeof AuthenticatedOutdoorMasterCategoriesIdRoute
-  AuthenticatedOutdoorMasterDepartmentsIdRoute: typeof AuthenticatedOutdoorMasterDepartmentsIdRoute
-  AuthenticatedOutdoorMasterDoctorsCreateRoute: typeof AuthenticatedOutdoorMasterDoctorsCreateRoute
-  AuthenticatedOutdoorMasterTestTablesIdRoute: typeof AuthenticatedOutdoorMasterTestTablesIdRoute
-  AuthenticatedOutdoorMasterTestsIdRoute: typeof AuthenticatedOutdoorMasterTestsIdRoute
-  AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRoute: typeof AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRoute
-  AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute: typeof AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute
-  AuthenticatedRolesPermissionsRoleIdEditRoute: typeof AuthenticatedRolesPermissionsRoleIdEditRoute
-  AuthenticatedUltrasonogramAllEditIdRoute: typeof AuthenticatedUltrasonogramAllEditIdRoute
-  AuthenticatedUltrasonogramAllPrintIdRoute: typeof AuthenticatedUltrasonogramAllPrintIdRoute
-  AuthenticatedXRayAllEditIdRoute: typeof AuthenticatedXRayAllEditIdRoute
-  AuthenticatedXRayAllPrintIdRoute: typeof AuthenticatedXRayAllPrintIdRoute
-  AuthenticatedAccountingReportsBalanceSheetIndexRoute: typeof AuthenticatedAccountingReportsBalanceSheetIndexRoute
-  AuthenticatedAccountingReportsDailySummaryIndexRoute: typeof AuthenticatedAccountingReportsDailySummaryIndexRoute
-  AuthenticatedAccountingReportsJournalIndexRoute: typeof AuthenticatedAccountingReportsJournalIndexRoute
-  AuthenticatedAccountingReportsLedgerIndexRoute: typeof AuthenticatedAccountingReportsLedgerIndexRoute
-  AuthenticatedAccountingReportsProfitAndLossIndexRoute: typeof AuthenticatedAccountingReportsProfitAndLossIndexRoute
-  AuthenticatedAccountingReportsProfitLossIndexRoute: typeof AuthenticatedAccountingReportsProfitLossIndexRoute
-  AuthenticatedAccountingReportsTrialBalanceIndexRoute: typeof AuthenticatedAccountingReportsTrialBalanceIndexRoute
-  AuthenticatedAdmissionBillingBillingIdIndexRoute: typeof AuthenticatedAdmissionBillingBillingIdIndexRoute
-  AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute: typeof AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
-  AuthenticatedAdmissionInvoiceCreateIndexRoute: typeof AuthenticatedAdmissionInvoiceCreateIndexRoute
-  AuthenticatedAdmissionInvoiceListIndexRoute: typeof AuthenticatedAdmissionInvoiceListIndexRoute
-  AuthenticatedAdmissionPatientsActiveIndexRoute: typeof AuthenticatedAdmissionPatientsActiveIndexRoute
-  AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute: typeof AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute
-  AuthenticatedAdmissionPatientsBillCreatedListIndexRoute: typeof AuthenticatedAdmissionPatientsBillCreatedListIndexRoute
-  AuthenticatedAdmissionPatientsBillDistributedListIndexRoute: typeof AuthenticatedAdmissionPatientsBillDistributedListIndexRoute
-  AuthenticatedAdmissionPatientsDischargedListIndexRoute: typeof AuthenticatedAdmissionPatientsDischargedListIndexRoute
-  AuthenticatedAdmissionPatientsDischargedIndexRoute: typeof AuthenticatedAdmissionPatientsDischargedIndexRoute
-  AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute: typeof AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute
-  AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute: typeof AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute
-  AuthenticatedIndoorManagementDistributionsIndexRoute: typeof AuthenticatedIndoorManagementDistributionsIndexRoute
-  AuthenticatedIndoorManagementDoctorReferredIndexRoute: typeof AuthenticatedIndoorManagementDoctorReferredIndexRoute
-  AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute: typeof AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute
-  AuthenticatedIndoorMasterBedCabinListIndexRoute: typeof AuthenticatedIndoorMasterBedCabinListIndexRoute
-  AuthenticatedIndoorMasterDoctorTypesIndexRoute: typeof AuthenticatedIndoorMasterDoctorTypesIndexRoute
-  AuthenticatedIndoorMasterOperationTypesIndexRoute: typeof AuthenticatedIndoorMasterOperationTypesIndexRoute
-  AuthenticatedIndoorMasterPatientTypesIndexRoute: typeof AuthenticatedIndoorMasterPatientTypesIndexRoute
-  AuthenticatedIndoorMasterServiceCategoriesIndexRoute: typeof AuthenticatedIndoorMasterServiceCategoriesIndexRoute
-  AuthenticatedIndoorMasterServicesIndexRoute: typeof AuthenticatedIndoorMasterServicesIndexRoute
-  AuthenticatedIndoorMasterTreatmentOutcomesIndexRoute: typeof AuthenticatedIndoorMasterTreatmentOutcomesIndexRoute
-  AuthenticatedOutdoorMasterCategoriesIndexRoute: typeof AuthenticatedOutdoorMasterCategoriesIndexRoute
-  AuthenticatedOutdoorMasterDepartmentsIndexRoute: typeof AuthenticatedOutdoorMasterDepartmentsIndexRoute
-  AuthenticatedOutdoorMasterDoctorsIndexRoute: typeof AuthenticatedOutdoorMasterDoctorsIndexRoute
-  AuthenticatedOutdoorMasterMachinesIndexRoute: typeof AuthenticatedOutdoorMasterMachinesIndexRoute
-  AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute: typeof AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute
-  AuthenticatedOutdoorMasterTestTablesIndexRoute: typeof AuthenticatedOutdoorMasterTestTablesIndexRoute
-  AuthenticatedOutdoorMasterTestsIndexRoute: typeof AuthenticatedOutdoorMasterTestsIndexRoute
-  AuthenticatedOutdoorReceptionDueCollectionIndexRoute: typeof AuthenticatedOutdoorReceptionDueCollectionIndexRoute
-  AuthenticatedOutdoorReceptionMyInvoicesIndexRoute: typeof AuthenticatedOutdoorReceptionMyInvoicesIndexRoute
-  AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute: typeof AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute
-  AuthenticatedOutdoorReceptionPatientsIndexRoute: typeof AuthenticatedOutdoorReceptionPatientsIndexRoute
-  AuthenticatedOutdoorReceptionUserInvoicesIndexRoute: typeof AuthenticatedOutdoorReceptionUserInvoicesIndexRoute
-  AuthenticatedPathologyBiochemicalAllIndexRoute: typeof AuthenticatedPathologyBiochemicalAllIndexRoute
-  AuthenticatedPathologyBiochemicalLipidProfileIndexRoute: typeof AuthenticatedPathologyBiochemicalLipidProfileIndexRoute
-  AuthenticatedPathologyHematologyAllIndexRoute: typeof AuthenticatedPathologyHematologyAllIndexRoute
-  AuthenticatedPathologyHematologyBloodForBtCtIndexRoute: typeof AuthenticatedPathologyHematologyBloodForBtCtIndexRoute
-  AuthenticatedPathologyHematologyBloodForTcdcIndexRoute: typeof AuthenticatedPathologyHematologyBloodForTcdcIndexRoute
-  AuthenticatedPathologyHematologyCbcShortIndexRoute: typeof AuthenticatedPathologyHematologyCbcShortIndexRoute
-  AuthenticatedPathologyHematologyCbcWithPbfIndexRoute: typeof AuthenticatedPathologyHematologyCbcWithPbfIndexRoute
-  AuthenticatedPathologyHematologyPeripheralBloodFilmIndexRoute: typeof AuthenticatedPathologyHematologyPeripheralBloodFilmIndexRoute
-  AuthenticatedPathologyHematologyProthomBinTimeFullIndexRoute: typeof AuthenticatedPathologyHematologyProthomBinTimeFullIndexRoute
-  AuthenticatedPathologyHormoneAllIndexRoute: typeof AuthenticatedPathologyHormoneAllIndexRoute
-  AuthenticatedPathologyHormoneElectrolytesIndexRoute: typeof AuthenticatedPathologyHormoneElectrolytesIndexRoute
-  AuthenticatedPathologyHormoneSemenIndexRoute: typeof AuthenticatedPathologyHormoneSemenIndexRoute
-  AuthenticatedPathologyHormoneSkinScrappingForFungusIndexRoute: typeof AuthenticatedPathologyHormoneSkinScrappingForFungusIndexRoute
-  AuthenticatedPathologyHormoneSputumIndexRoute: typeof AuthenticatedPathologyHormoneSputumIndexRoute
-  AuthenticatedPathologyHormoneT3t4tshIndexRoute: typeof AuthenticatedPathologyHormoneT3t4tshIndexRoute
-  AuthenticatedPathologyImmunologyAllIndexRoute: typeof AuthenticatedPathologyImmunologyAllIndexRoute
-  AuthenticatedPathologyImmunologyBetaHcgIndexRoute: typeof AuthenticatedPathologyImmunologyBetaHcgIndexRoute
-  AuthenticatedPathologyImmunologyBloodGroupIndexRoute: typeof AuthenticatedPathologyImmunologyBloodGroupIndexRoute
-  AuthenticatedPathologyImmunologyMtIndexRoute: typeof AuthenticatedPathologyImmunologyMtIndexRoute
-  AuthenticatedPathologyImmunologyWidalTestIndexRoute: typeof AuthenticatedPathologyImmunologyWidalTestIndexRoute
-  AuthenticatedPathologyStoolOcultBloodTestIndexRoute: typeof AuthenticatedPathologyStoolOcultBloodTestIndexRoute
-  AuthenticatedPathologyStoolReducingSubstanceIndexRoute: typeof AuthenticatedPathologyStoolReducingSubstanceIndexRoute
-  AuthenticatedPathologyStoolStoolReIndexRoute: typeof AuthenticatedPathologyStoolStoolReIndexRoute
-  AuthenticatedPathologyUrineUrineForAlbuminIndexRoute: typeof AuthenticatedPathologyUrineUrineForAlbuminIndexRoute
-  AuthenticatedPathologyUrineUrineForReFullIndexRoute: typeof AuthenticatedPathologyUrineUrineForReFullIndexRoute
-  AuthenticatedPathologyUrineUrineForSugarIndexRoute: typeof AuthenticatedPathologyUrineUrineForSugarIndexRoute
-  AuthenticatedPayrollAttendanceStaffIdIndexRoute: typeof AuthenticatedPayrollAttendanceStaffIdIndexRoute
-  AuthenticatedPayrollSalaryStaffIdIndexRoute: typeof AuthenticatedPayrollSalaryStaffIdIndexRoute
-  AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute
-  AuthenticatedEcgAllEditBuilderIdRoute: typeof AuthenticatedEcgAllEditBuilderIdRoute
-  AuthenticatedIndoorMasterServicesEditIdRoute: typeof AuthenticatedIndoorMasterServicesEditIdRoute
-  AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute: typeof AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute
-  AuthenticatedPathologyBiochemicalAllEditReportIdRoute: typeof AuthenticatedPathologyBiochemicalAllEditReportIdRoute
-  AuthenticatedPathologyBiochemicalAllReportReportIdRoute: typeof AuthenticatedPathologyBiochemicalAllReportReportIdRoute
-  AuthenticatedPathologyBiochemicalLipidProfileReportReportIdRoute: typeof AuthenticatedPathologyBiochemicalLipidProfileReportReportIdRoute
-  AuthenticatedPathologyHematologyAllReportReportIdRoute: typeof AuthenticatedPathologyHematologyAllReportReportIdRoute
-  AuthenticatedPathologyHematologyBloodForBtCtReportReportIdRoute: typeof AuthenticatedPathologyHematologyBloodForBtCtReportReportIdRoute
-  AuthenticatedPathologyHematologyBloodForTcdcReportReportIdRoute: typeof AuthenticatedPathologyHematologyBloodForTcdcReportReportIdRoute
-  AuthenticatedPathologyHematologyCbcShortEditIdRoute: typeof AuthenticatedPathologyHematologyCbcShortEditIdRoute
-  AuthenticatedPathologyHematologyCbcShortReportReportIdRoute: typeof AuthenticatedPathologyHematologyCbcShortReportReportIdRoute
-  AuthenticatedPathologyHematologyCbcWithPbfEditIdRoute: typeof AuthenticatedPathologyHematologyCbcWithPbfEditIdRoute
-  AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRoute: typeof AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRoute
-  AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRoute: typeof AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRoute
-  AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute: typeof AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute
-  AuthenticatedPathologyHormoneAllReportReportIdRoute: typeof AuthenticatedPathologyHormoneAllReportReportIdRoute
-  AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute: typeof AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute
-  AuthenticatedPathologyHormoneSemenEditReportIdRoute: typeof AuthenticatedPathologyHormoneSemenEditReportIdRoute
-  AuthenticatedPathologyHormoneSemenReportReportIdRoute: typeof AuthenticatedPathologyHormoneSemenReportReportIdRoute
-  AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRoute: typeof AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRoute
-  AuthenticatedPathologyHormoneSputumReportReportIdRoute: typeof AuthenticatedPathologyHormoneSputumReportReportIdRoute
-  AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute: typeof AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute
-  AuthenticatedPathologyImmunologyAllReportReportIdRoute: typeof AuthenticatedPathologyImmunologyAllReportReportIdRoute
-  AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute: typeof AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute
-  AuthenticatedPathologyImmunologyBloodGroupReportReportIdRoute: typeof AuthenticatedPathologyImmunologyBloodGroupReportReportIdRoute
-  AuthenticatedPathologyImmunologyMtReportReportIdRoute: typeof AuthenticatedPathologyImmunologyMtReportReportIdRoute
-  AuthenticatedPathologyImmunologyWidalTestReportReportIdRoute: typeof AuthenticatedPathologyImmunologyWidalTestReportReportIdRoute
-  AuthenticatedPathologyStoolOcultBloodTestReportReportIdRoute: typeof AuthenticatedPathologyStoolOcultBloodTestReportReportIdRoute
-  AuthenticatedPathologyStoolReducingSubstanceReportReportIdRoute: typeof AuthenticatedPathologyStoolReducingSubstanceReportReportIdRoute
-  AuthenticatedPathologyStoolStoolReEditIdRoute: typeof AuthenticatedPathologyStoolStoolReEditIdRoute
-  AuthenticatedPathologyStoolStoolReReportReportIdRoute: typeof AuthenticatedPathologyStoolStoolReReportReportIdRoute
-  AuthenticatedPathologyUrineUrineForAlbuminReportReportIdRoute: typeof AuthenticatedPathologyUrineUrineForAlbuminReportReportIdRoute
-  AuthenticatedPathologyUrineUrineForReFullEditIdRoute: typeof AuthenticatedPathologyUrineUrineForReFullEditIdRoute
-  AuthenticatedPathologyUrineUrineForReFullReportReportIdRoute: typeof AuthenticatedPathologyUrineUrineForReFullReportReportIdRoute
-  AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute: typeof AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute
-  AuthenticatedUltrasonogramAllEditBuilderIdRoute: typeof AuthenticatedUltrasonogramAllEditBuilderIdRoute
-  AuthenticatedXRayAllEditBuilderIdRoute: typeof AuthenticatedXRayAllEditBuilderIdRoute
-  AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute
-  AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute
-  AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute
-  AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
-  AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute
-  AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
-  AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute
-  AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute: typeof AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute
-  AuthenticatedIndoorMasterBedCabinListCreateIndexRoute: typeof AuthenticatedIndoorMasterBedCabinListCreateIndexRoute
-  AuthenticatedIndoorMasterServicesCreateIndexRoute: typeof AuthenticatedIndoorMasterServicesCreateIndexRoute
-  AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute: typeof AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute
-  AuthenticatedOutdoorMasterTestsCreateIndexRoute: typeof AuthenticatedOutdoorMasterTestsCreateIndexRoute
-  AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute: typeof AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute
-  AuthenticatedOutdoorReceptionInvoicesListIndexRoute: typeof AuthenticatedOutdoorReceptionInvoicesListIndexRoute
-  AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute: typeof AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute
-  AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute: typeof AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute
-  AuthenticatedOutdoorMasterTestsEditIdIndexRoute: typeof AuthenticatedOutdoorMasterTestsEditIdIndexRoute
-  AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRoute: typeof AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
-  AuthenticatedPathologyHematologyAllEditIdIndexRoute: typeof AuthenticatedPathologyHematologyAllEditIdIndexRoute
-  AuthenticatedPathologyHormoneAllEditIdIndexRoute: typeof AuthenticatedPathologyHormoneAllEditIdIndexRoute
-  AuthenticatedPathologyImmunologyAllEditIdIndexRoute: typeof AuthenticatedPathologyImmunologyAllEditIdIndexRoute
+  AuthenticatedDashboardSettingsRouteRoute: typeof AuthenticatedDashboardSettingsRouteRouteWithChildren
+  AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+  AuthenticatedDashboardErrorsErrorRoute: typeof AuthenticatedDashboardErrorsErrorRoute
+  AuthenticatedDashboardNotificationsIdRoute: typeof AuthenticatedDashboardNotificationsIdRoute
+  AuthenticatedDashboardAccountingIndexRoute: typeof AuthenticatedDashboardAccountingIndexRoute
+  AuthenticatedDashboardAppsIndexRoute: typeof AuthenticatedDashboardAppsIndexRoute
+  AuthenticatedDashboardBackupSettingsIndexRoute: typeof AuthenticatedDashboardBackupSettingsIndexRoute
+  AuthenticatedDashboardBackupsIndexRoute: typeof AuthenticatedDashboardBackupsIndexRoute
+  AuthenticatedDashboardChatsIndexRoute: typeof AuthenticatedDashboardChatsIndexRoute
+  AuthenticatedDashboardCompanyAccountIndexRoute: typeof AuthenticatedDashboardCompanyAccountIndexRoute
+  AuthenticatedDashboardDatabaseIndexRoute: typeof AuthenticatedDashboardDatabaseIndexRoute
+  AuthenticatedDashboardGalleryIndexRoute: typeof AuthenticatedDashboardGalleryIndexRoute
+  AuthenticatedDashboardHelpCenterIndexRoute: typeof AuthenticatedDashboardHelpCenterIndexRoute
+  AuthenticatedDashboardHelpIndexRoute: typeof AuthenticatedDashboardHelpIndexRoute
+  AuthenticatedDashboardMyAccountIndexRoute: typeof AuthenticatedDashboardMyAccountIndexRoute
+  AuthenticatedDashboardNotificationsIndexRoute: typeof AuthenticatedDashboardNotificationsIndexRoute
+  AuthenticatedDashboardRolesIndexRoute: typeof AuthenticatedDashboardRolesIndexRoute
+  AuthenticatedDashboardSubscriptionIndexRoute: typeof AuthenticatedDashboardSubscriptionIndexRoute
+  AuthenticatedDashboardTasksIndexRoute: typeof AuthenticatedDashboardTasksIndexRoute
+  AuthenticatedDashboardUsersIndexRoute: typeof AuthenticatedDashboardUsersIndexRoute
+  AuthenticatedDashboardRolesEditIdRoute: typeof AuthenticatedDashboardRolesEditIdRoute
+  AuthenticatedDashboardAccountingAccountsIndexRoute: typeof AuthenticatedDashboardAccountingAccountsIndexRoute
+  AuthenticatedDashboardAccountingExpenseIndexRoute: typeof AuthenticatedDashboardAccountingExpenseIndexRoute
+  AuthenticatedDashboardAccountingExpensesIndexRoute: typeof AuthenticatedDashboardAccountingExpensesIndexRoute
+  AuthenticatedDashboardAccountingIncomeIndexRoute: typeof AuthenticatedDashboardAccountingIncomeIndexRoute
+  AuthenticatedDashboardAccountingTransactionsIndexRoute: typeof AuthenticatedDashboardAccountingTransactionsIndexRoute
+  AuthenticatedDashboardAccountsDailyCreditIndexRoute: typeof AuthenticatedDashboardAccountsDailyCreditIndexRoute
+  AuthenticatedDashboardAccountsDailyDebitIndexRoute: typeof AuthenticatedDashboardAccountsDailyDebitIndexRoute
+  AuthenticatedDashboardAccountsJournalIndexRoute: typeof AuthenticatedDashboardAccountsJournalIndexRoute
+  AuthenticatedDashboardAccountsPayToAnaesthetistIndexRoute: typeof AuthenticatedDashboardAccountsPayToAnaesthetistIndexRoute
+  AuthenticatedDashboardAccountsPayToAssistantIndexRoute: typeof AuthenticatedDashboardAccountsPayToAssistantIndexRoute
+  AuthenticatedDashboardAccountsPayToConsultantIndexRoute: typeof AuthenticatedDashboardAccountsPayToConsultantIndexRoute
+  AuthenticatedDashboardAccountsPayToSurgeonIndexRoute: typeof AuthenticatedDashboardAccountsPayToSurgeonIndexRoute
+  AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute: typeof AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute
+  AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute: typeof AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute
+  AuthenticatedDashboardAdmissionDueCollectionIndexRoute: typeof AuthenticatedDashboardAdmissionDueCollectionIndexRoute
+  AuthenticatedDashboardAdmissionFinalBillsIndexRoute: typeof AuthenticatedDashboardAdmissionFinalBillsIndexRoute
+  AuthenticatedDashboardAdmissionFinaliseServicesIndexRoute: typeof AuthenticatedDashboardAdmissionFinaliseServicesIndexRoute
+  AuthenticatedDashboardAdmissionFirstTimeBillIndexRoute: typeof AuthenticatedDashboardAdmissionFirstTimeBillIndexRoute
+  AuthenticatedDashboardAdmissionFirstTimeServiceIndexRoute: typeof AuthenticatedDashboardAdmissionFirstTimeServiceIndexRoute
+  AuthenticatedDashboardAdmissionInvoiceIndexRoute: typeof AuthenticatedDashboardAdmissionInvoiceIndexRoute
+  AuthenticatedDashboardAdmissionNewAdmissionIndexRoute: typeof AuthenticatedDashboardAdmissionNewAdmissionIndexRoute
+  AuthenticatedDashboardAdmissionPatientsIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsIndexRoute
+  AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute: typeof AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute
+  AuthenticatedDashboardBanksBankAccountsIndexRoute: typeof AuthenticatedDashboardBanksBankAccountsIndexRoute
+  AuthenticatedDashboardBanksBankDepositsIndexRoute: typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
+  AuthenticatedDashboardBanksBankTransactionsIndexRoute: typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
+  AuthenticatedDashboardBanksBankWithdrawalsIndexRoute: typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
+  AuthenticatedDashboardEcgAllIndexRoute: typeof AuthenticatedDashboardEcgAllIndexRoute
+  AuthenticatedDashboardPayrollEmployeesIndexRoute: typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
+  AuthenticatedDashboardPayrollOverviewIndexRoute: typeof AuthenticatedDashboardPayrollOverviewIndexRoute
+  AuthenticatedDashboardRolesCreateIndexRoute: typeof AuthenticatedDashboardRolesCreateIndexRoute
+  AuthenticatedDashboardUltrasonogramAllIndexRoute: typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
+  AuthenticatedDashboardXRayAllIndexRoute: typeof AuthenticatedDashboardXRayAllIndexRoute
+  AuthenticatedDashboardAccountingReportsLedgerPrintRoute: typeof AuthenticatedDashboardAccountingReportsLedgerPrintRoute
+  AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute: typeof AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute
+  AuthenticatedDashboardEcgAllEditIdRoute: typeof AuthenticatedDashboardEcgAllEditIdRoute
+  AuthenticatedDashboardEcgAllPrintIdRoute: typeof AuthenticatedDashboardEcgAllPrintIdRoute
+  AuthenticatedDashboardIndoorMasterBedCabinListIdRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListIdRoute
+  AuthenticatedDashboardIndoorMasterServicesIdRoute: typeof AuthenticatedDashboardIndoorMasterServicesIdRoute
+  AuthenticatedDashboardOutdoorMasterCategoriesIdRoute: typeof AuthenticatedDashboardOutdoorMasterCategoriesIdRoute
+  AuthenticatedDashboardOutdoorMasterDepartmentsIdRoute: typeof AuthenticatedDashboardOutdoorMasterDepartmentsIdRoute
+  AuthenticatedDashboardOutdoorMasterDoctorsCreateRoute: typeof AuthenticatedDashboardOutdoorMasterDoctorsCreateRoute
+  AuthenticatedDashboardOutdoorMasterTestTablesIdRoute: typeof AuthenticatedDashboardOutdoorMasterTestTablesIdRoute
+  AuthenticatedDashboardOutdoorMasterTestsIdRoute: typeof AuthenticatedDashboardOutdoorMasterTestsIdRoute
+  AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute: typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
+  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute
+  AuthenticatedDashboardRolesPermissionsRoleIdEditRoute: typeof AuthenticatedDashboardRolesPermissionsRoleIdEditRoute
+  AuthenticatedDashboardUltrasonogramAllEditIdRoute: typeof AuthenticatedDashboardUltrasonogramAllEditIdRoute
+  AuthenticatedDashboardUltrasonogramAllPrintIdRoute: typeof AuthenticatedDashboardUltrasonogramAllPrintIdRoute
+  AuthenticatedDashboardXRayAllEditIdRoute: typeof AuthenticatedDashboardXRayAllEditIdRoute
+  AuthenticatedDashboardXRayAllPrintIdRoute: typeof AuthenticatedDashboardXRayAllPrintIdRoute
+  AuthenticatedDashboardAccountingReportsBalanceSheetIndexRoute: typeof AuthenticatedDashboardAccountingReportsBalanceSheetIndexRoute
+  AuthenticatedDashboardAccountingReportsCashFlowIndexRoute: typeof AuthenticatedDashboardAccountingReportsCashFlowIndexRoute
+  AuthenticatedDashboardAccountingReportsDailySummaryIndexRoute: typeof AuthenticatedDashboardAccountingReportsDailySummaryIndexRoute
+  AuthenticatedDashboardAccountingReportsJournalIndexRoute: typeof AuthenticatedDashboardAccountingReportsJournalIndexRoute
+  AuthenticatedDashboardAccountingReportsLedgerIndexRoute: typeof AuthenticatedDashboardAccountingReportsLedgerIndexRoute
+  AuthenticatedDashboardAccountingReportsMultiLedgerIndexRoute: typeof AuthenticatedDashboardAccountingReportsMultiLedgerIndexRoute
+  AuthenticatedDashboardAccountingReportsProfitAndLossIndexRoute: typeof AuthenticatedDashboardAccountingReportsProfitAndLossIndexRoute
+  AuthenticatedDashboardAccountingReportsProfitLossIndexRoute: typeof AuthenticatedDashboardAccountingReportsProfitLossIndexRoute
+  AuthenticatedDashboardAccountingReportsTrialBalanceIndexRoute: typeof AuthenticatedDashboardAccountingReportsTrialBalanceIndexRoute
+  AuthenticatedDashboardAdmissionBillingBillingIdIndexRoute: typeof AuthenticatedDashboardAdmissionBillingBillingIdIndexRoute
+  AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute: typeof AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
+  AuthenticatedDashboardAdmissionInvoiceCreateIndexRoute: typeof AuthenticatedDashboardAdmissionInvoiceCreateIndexRoute
+  AuthenticatedDashboardAdmissionInvoiceListIndexRoute: typeof AuthenticatedDashboardAdmissionInvoiceListIndexRoute
+  AuthenticatedDashboardAdmissionPatientsActiveIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsActiveIndexRoute
+  AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRoute
+  AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRoute
+  AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute
+  AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute
+  AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute
+  AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
+  AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
+  AuthenticatedDashboardIndoorManagementDistributionsIndexRoute: typeof AuthenticatedDashboardIndoorManagementDistributionsIndexRoute
+  AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute: typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
+  AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
+  AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
+  AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute
+  AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute
+  AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute
+  AuthenticatedDashboardIndoorMasterServiceCategoriesIndexRoute: typeof AuthenticatedDashboardIndoorMasterServiceCategoriesIndexRoute
+  AuthenticatedDashboardIndoorMasterServicesIndexRoute: typeof AuthenticatedDashboardIndoorMasterServicesIndexRoute
+  AuthenticatedDashboardIndoorMasterTreatmentOutcomesIndexRoute: typeof AuthenticatedDashboardIndoorMasterTreatmentOutcomesIndexRoute
+  AuthenticatedDashboardOutdoorMasterCategoriesIndexRoute: typeof AuthenticatedDashboardOutdoorMasterCategoriesIndexRoute
+  AuthenticatedDashboardOutdoorMasterDepartmentsIndexRoute: typeof AuthenticatedDashboardOutdoorMasterDepartmentsIndexRoute
+  AuthenticatedDashboardOutdoorMasterDoctorsIndexRoute: typeof AuthenticatedDashboardOutdoorMasterDoctorsIndexRoute
+  AuthenticatedDashboardOutdoorMasterMachinesIndexRoute: typeof AuthenticatedDashboardOutdoorMasterMachinesIndexRoute
+  AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRoute: typeof AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRoute
+  AuthenticatedDashboardOutdoorMasterTestTablesIndexRoute: typeof AuthenticatedDashboardOutdoorMasterTestTablesIndexRoute
+  AuthenticatedDashboardOutdoorMasterTestsIndexRoute: typeof AuthenticatedDashboardOutdoorMasterTestsIndexRoute
+  AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute
+  AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute
+  AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute
+  AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute
+  AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute
+  AuthenticatedDashboardPathologyBiochemicalAllIndexRoute: typeof AuthenticatedDashboardPathologyBiochemicalAllIndexRoute
+  AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRoute: typeof AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRoute
+  AuthenticatedDashboardPathologyHematologyAllIndexRoute: typeof AuthenticatedDashboardPathologyHematologyAllIndexRoute
+  AuthenticatedDashboardPathologyHematologyBloodForBtCtIndexRoute: typeof AuthenticatedDashboardPathologyHematologyBloodForBtCtIndexRoute
+  AuthenticatedDashboardPathologyHematologyBloodForTcdcIndexRoute: typeof AuthenticatedDashboardPathologyHematologyBloodForTcdcIndexRoute
+  AuthenticatedDashboardPathologyHematologyCbcShortIndexRoute: typeof AuthenticatedDashboardPathologyHematologyCbcShortIndexRoute
+  AuthenticatedDashboardPathologyHematologyCbcWithPbfIndexRoute: typeof AuthenticatedDashboardPathologyHematologyCbcWithPbfIndexRoute
+  AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmIndexRoute: typeof AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmIndexRoute
+  AuthenticatedDashboardPathologyHematologyProthomBinTimeFullIndexRoute: typeof AuthenticatedDashboardPathologyHematologyProthomBinTimeFullIndexRoute
+  AuthenticatedDashboardPathologyHormoneAllIndexRoute: typeof AuthenticatedDashboardPathologyHormoneAllIndexRoute
+  AuthenticatedDashboardPathologyHormoneElectrolytesIndexRoute: typeof AuthenticatedDashboardPathologyHormoneElectrolytesIndexRoute
+  AuthenticatedDashboardPathologyHormoneSemenIndexRoute: typeof AuthenticatedDashboardPathologyHormoneSemenIndexRoute
+  AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusIndexRoute: typeof AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusIndexRoute
+  AuthenticatedDashboardPathologyHormoneSputumIndexRoute: typeof AuthenticatedDashboardPathologyHormoneSputumIndexRoute
+  AuthenticatedDashboardPathologyHormoneT3t4tshIndexRoute: typeof AuthenticatedDashboardPathologyHormoneT3t4tshIndexRoute
+  AuthenticatedDashboardPathologyImmunologyAllIndexRoute: typeof AuthenticatedDashboardPathologyImmunologyAllIndexRoute
+  AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRoute: typeof AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRoute
+  AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute: typeof AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute
+  AuthenticatedDashboardPathologyImmunologyMtIndexRoute: typeof AuthenticatedDashboardPathologyImmunologyMtIndexRoute
+  AuthenticatedDashboardPathologyImmunologyWidalTestIndexRoute: typeof AuthenticatedDashboardPathologyImmunologyWidalTestIndexRoute
+  AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRoute: typeof AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRoute
+  AuthenticatedDashboardPathologyStoolReducingSubstanceIndexRoute: typeof AuthenticatedDashboardPathologyStoolReducingSubstanceIndexRoute
+  AuthenticatedDashboardPathologyStoolStoolReIndexRoute: typeof AuthenticatedDashboardPathologyStoolStoolReIndexRoute
+  AuthenticatedDashboardPathologyUrineUrineForAlbuminIndexRoute: typeof AuthenticatedDashboardPathologyUrineUrineForAlbuminIndexRoute
+  AuthenticatedDashboardPathologyUrineUrineForReFullIndexRoute: typeof AuthenticatedDashboardPathologyUrineUrineForReFullIndexRoute
+  AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute: typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
+  AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute: typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
+  AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute: typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
+  AuthenticatedDashboardEcgAllEditBuilderIdRoute: typeof AuthenticatedDashboardEcgAllEditBuilderIdRoute
+  AuthenticatedDashboardIndoorMasterServicesEditIdRoute: typeof AuthenticatedDashboardIndoorMasterServicesEditIdRoute
+  AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute: typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute
+  AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRoute: typeof AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRoute
+  AuthenticatedDashboardPathologyBiochemicalAllReportReportIdRoute: typeof AuthenticatedDashboardPathologyBiochemicalAllReportReportIdRoute
+  AuthenticatedDashboardPathologyBiochemicalLipidProfileReportReportIdRoute: typeof AuthenticatedDashboardPathologyBiochemicalLipidProfileReportReportIdRoute
+  AuthenticatedDashboardPathologyHematologyAllReportReportIdRoute: typeof AuthenticatedDashboardPathologyHematologyAllReportReportIdRoute
+  AuthenticatedDashboardPathologyHematologyBloodForBtCtReportReportIdRoute: typeof AuthenticatedDashboardPathologyHematologyBloodForBtCtReportReportIdRoute
+  AuthenticatedDashboardPathologyHematologyBloodForTcdcReportReportIdRoute: typeof AuthenticatedDashboardPathologyHematologyBloodForTcdcReportReportIdRoute
+  AuthenticatedDashboardPathologyHematologyCbcShortEditIdRoute: typeof AuthenticatedDashboardPathologyHematologyCbcShortEditIdRoute
+  AuthenticatedDashboardPathologyHematologyCbcShortReportReportIdRoute: typeof AuthenticatedDashboardPathologyHematologyCbcShortReportReportIdRoute
+  AuthenticatedDashboardPathologyHematologyCbcWithPbfEditIdRoute: typeof AuthenticatedDashboardPathologyHematologyCbcWithPbfEditIdRoute
+  AuthenticatedDashboardPathologyHematologyCbcWithPbfReportReportIdRoute: typeof AuthenticatedDashboardPathologyHematologyCbcWithPbfReportReportIdRoute
+  AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmReportReportIdRoute: typeof AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmReportReportIdRoute
+  AuthenticatedDashboardPathologyHematologyProthomBinTimeFullReportReportIdRoute: typeof AuthenticatedDashboardPathologyHematologyProthomBinTimeFullReportReportIdRoute
+  AuthenticatedDashboardPathologyHormoneAllReportReportIdRoute: typeof AuthenticatedDashboardPathologyHormoneAllReportReportIdRoute
+  AuthenticatedDashboardPathologyHormoneElectrolytesReportReportIdRoute: typeof AuthenticatedDashboardPathologyHormoneElectrolytesReportReportIdRoute
+  AuthenticatedDashboardPathologyHormoneSemenEditReportIdRoute: typeof AuthenticatedDashboardPathologyHormoneSemenEditReportIdRoute
+  AuthenticatedDashboardPathologyHormoneSemenReportReportIdRoute: typeof AuthenticatedDashboardPathologyHormoneSemenReportReportIdRoute
+  AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusReportReportIdRoute: typeof AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusReportReportIdRoute
+  AuthenticatedDashboardPathologyHormoneSputumReportReportIdRoute: typeof AuthenticatedDashboardPathologyHormoneSputumReportReportIdRoute
+  AuthenticatedDashboardPathologyHormoneT3t4tshReportReportIdRoute: typeof AuthenticatedDashboardPathologyHormoneT3t4tshReportReportIdRoute
+  AuthenticatedDashboardPathologyImmunologyAllReportReportIdRoute: typeof AuthenticatedDashboardPathologyImmunologyAllReportReportIdRoute
+  AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRoute: typeof AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRoute
+  AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute: typeof AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute
+  AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute: typeof AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute
+  AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRoute: typeof AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRoute
+  AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRoute: typeof AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRoute
+  AuthenticatedDashboardPathologyStoolReducingSubstanceReportReportIdRoute: typeof AuthenticatedDashboardPathologyStoolReducingSubstanceReportReportIdRoute
+  AuthenticatedDashboardPathologyStoolStoolReEditIdRoute: typeof AuthenticatedDashboardPathologyStoolStoolReEditIdRoute
+  AuthenticatedDashboardPathologyStoolStoolReReportReportIdRoute: typeof AuthenticatedDashboardPathologyStoolStoolReReportReportIdRoute
+  AuthenticatedDashboardPathologyUrineUrineForAlbuminReportReportIdRoute: typeof AuthenticatedDashboardPathologyUrineUrineForAlbuminReportReportIdRoute
+  AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRoute: typeof AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRoute
+  AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRoute: typeof AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRoute
+  AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute: typeof AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute
+  AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute: typeof AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute
+  AuthenticatedDashboardXRayAllEditBuilderIdRoute: typeof AuthenticatedDashboardXRayAllEditBuilderIdRoute
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRoute
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRoute
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRoute
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute
+  AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute
+  AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute: typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
+  AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute: typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
+  AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute: typeof AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute
+  AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
+  AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
+  AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute: typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute
+  AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute: typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute
+  AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute: typeof AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute
+  AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
+  AuthenticatedDashboardPathologyHematologyAllEditIdIndexRoute: typeof AuthenticatedDashboardPathologyHematologyAllEditIdIndexRoute
+  AuthenticatedDashboardPathologyHormoneAllEditIdIndexRoute: typeof AuthenticatedDashboardPathologyHormoneAllEditIdIndexRoute
+  AuthenticatedDashboardPathologyImmunologyAllEditIdIndexRoute: typeof AuthenticatedDashboardPathologyImmunologyAllEditIdIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
-  AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
-  AuthenticatedNotificationsIdRoute: AuthenticatedNotificationsIdRoute,
-  AuthenticatedAccountingIndexRoute: AuthenticatedAccountingIndexRoute,
-  AuthenticatedAppsIndexRoute: AuthenticatedAppsIndexRoute,
-  AuthenticatedBackupSettingsIndexRoute: AuthenticatedBackupSettingsIndexRoute,
-  AuthenticatedBackupsIndexRoute: AuthenticatedBackupsIndexRoute,
-  AuthenticatedChatsIndexRoute: AuthenticatedChatsIndexRoute,
-  AuthenticatedDatabaseIndexRoute: AuthenticatedDatabaseIndexRoute,
-  AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
-  AuthenticatedHelpIndexRoute: AuthenticatedHelpIndexRoute,
-  AuthenticatedMyAccountIndexRoute: AuthenticatedMyAccountIndexRoute,
-  AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
-  AuthenticatedRolesIndexRoute: AuthenticatedRolesIndexRoute,
-  AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
-  AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
-  AuthenticatedRolesEditIdRoute: AuthenticatedRolesEditIdRoute,
-  AuthenticatedAccountingAccountsIndexRoute:
-    AuthenticatedAccountingAccountsIndexRoute,
-  AuthenticatedAccountingExpenseIndexRoute:
-    AuthenticatedAccountingExpenseIndexRoute,
-  AuthenticatedAccountingExpensesIndexRoute:
-    AuthenticatedAccountingExpensesIndexRoute,
-  AuthenticatedAccountingIncomeIndexRoute:
-    AuthenticatedAccountingIncomeIndexRoute,
-  AuthenticatedAccountingTransactionsIndexRoute:
-    AuthenticatedAccountingTransactionsIndexRoute,
-  AuthenticatedAccountsDailyCreditIndexRoute:
-    AuthenticatedAccountsDailyCreditIndexRoute,
-  AuthenticatedAccountsDailyDebitIndexRoute:
-    AuthenticatedAccountsDailyDebitIndexRoute,
-  AuthenticatedAccountsJournalIndexRoute:
-    AuthenticatedAccountsJournalIndexRoute,
-  AuthenticatedAccountsPayToAnaesthetistIndexRoute:
-    AuthenticatedAccountsPayToAnaesthetistIndexRoute,
-  AuthenticatedAccountsPayToAssistantIndexRoute:
-    AuthenticatedAccountsPayToAssistantIndexRoute,
-  AuthenticatedAccountsPayToConsultantIndexRoute:
-    AuthenticatedAccountsPayToConsultantIndexRoute,
-  AuthenticatedAccountsPayToSurgeonIndexRoute:
-    AuthenticatedAccountsPayToSurgeonIndexRoute,
-  AuthenticatedAdmissionAdvancePaymentIndexRoute:
-    AuthenticatedAdmissionAdvancePaymentIndexRoute,
-  AuthenticatedAdmissionBedCabinChargeIndexRoute:
-    AuthenticatedAdmissionBedCabinChargeIndexRoute,
-  AuthenticatedAdmissionDueCollectionIndexRoute:
-    AuthenticatedAdmissionDueCollectionIndexRoute,
-  AuthenticatedAdmissionFinalBillsIndexRoute:
-    AuthenticatedAdmissionFinalBillsIndexRoute,
-  AuthenticatedAdmissionFinaliseServicesIndexRoute:
-    AuthenticatedAdmissionFinaliseServicesIndexRoute,
-  AuthenticatedAdmissionFirstTimeBillIndexRoute:
-    AuthenticatedAdmissionFirstTimeBillIndexRoute,
-  AuthenticatedAdmissionFirstTimeServiceIndexRoute:
-    AuthenticatedAdmissionFirstTimeServiceIndexRoute,
-  AuthenticatedAdmissionInvoiceIndexRoute:
-    AuthenticatedAdmissionInvoiceIndexRoute,
-  AuthenticatedAdmissionNewAdmissionIndexRoute:
-    AuthenticatedAdmissionNewAdmissionIndexRoute,
-  AuthenticatedAdmissionPatientsIndexRoute:
-    AuthenticatedAdmissionPatientsIndexRoute,
-  AuthenticatedAdmissionSecondTimeBillIndexRoute:
-    AuthenticatedAdmissionSecondTimeBillIndexRoute,
-  AuthenticatedBanksBankAccountsIndexRoute:
-    AuthenticatedBanksBankAccountsIndexRoute,
-  AuthenticatedBanksBankDepositsIndexRoute:
-    AuthenticatedBanksBankDepositsIndexRoute,
-  AuthenticatedBanksBankTransactionsIndexRoute:
-    AuthenticatedBanksBankTransactionsIndexRoute,
-  AuthenticatedBanksBankWithdrawalsIndexRoute:
-    AuthenticatedBanksBankWithdrawalsIndexRoute,
-  AuthenticatedEcgAllIndexRoute: AuthenticatedEcgAllIndexRoute,
-  AuthenticatedPayrollEmployeesIndexRoute:
-    AuthenticatedPayrollEmployeesIndexRoute,
-  AuthenticatedPayrollOverviewIndexRoute:
-    AuthenticatedPayrollOverviewIndexRoute,
-  AuthenticatedRolesCreateIndexRoute: AuthenticatedRolesCreateIndexRoute,
-  AuthenticatedUltrasonogramAllIndexRoute:
-    AuthenticatedUltrasonogramAllIndexRoute,
-  AuthenticatedXRayAllIndexRoute: AuthenticatedXRayAllIndexRoute,
-  AuthenticatedAccountingReportsLedgerPrintRoute:
-    AuthenticatedAccountingReportsLedgerPrintRoute,
-  AuthenticatedEcgAllEditIdRoute: AuthenticatedEcgAllEditIdRoute,
-  AuthenticatedEcgAllPrintIdRoute: AuthenticatedEcgAllPrintIdRoute,
-  AuthenticatedIndoorMasterBedCabinListIdRoute:
-    AuthenticatedIndoorMasterBedCabinListIdRoute,
-  AuthenticatedIndoorMasterServicesIdRoute:
-    AuthenticatedIndoorMasterServicesIdRoute,
-  AuthenticatedOutdoorMasterCategoriesIdRoute:
-    AuthenticatedOutdoorMasterCategoriesIdRoute,
-  AuthenticatedOutdoorMasterDepartmentsIdRoute:
-    AuthenticatedOutdoorMasterDepartmentsIdRoute,
-  AuthenticatedOutdoorMasterDoctorsCreateRoute:
-    AuthenticatedOutdoorMasterDoctorsCreateRoute,
-  AuthenticatedOutdoorMasterTestTablesIdRoute:
-    AuthenticatedOutdoorMasterTestTablesIdRoute,
-  AuthenticatedOutdoorMasterTestsIdRoute:
-    AuthenticatedOutdoorMasterTestsIdRoute,
-  AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRoute:
-    AuthenticatedOutdoorReceptionDueCollectionInvoiceIdRoute,
-  AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute:
-    AuthenticatedOutdoorReceptionInvoicesInvoiceIdRoute,
-  AuthenticatedRolesPermissionsRoleIdEditRoute:
-    AuthenticatedRolesPermissionsRoleIdEditRoute,
-  AuthenticatedUltrasonogramAllEditIdRoute:
-    AuthenticatedUltrasonogramAllEditIdRoute,
-  AuthenticatedUltrasonogramAllPrintIdRoute:
-    AuthenticatedUltrasonogramAllPrintIdRoute,
-  AuthenticatedXRayAllEditIdRoute: AuthenticatedXRayAllEditIdRoute,
-  AuthenticatedXRayAllPrintIdRoute: AuthenticatedXRayAllPrintIdRoute,
-  AuthenticatedAccountingReportsBalanceSheetIndexRoute:
-    AuthenticatedAccountingReportsBalanceSheetIndexRoute,
-  AuthenticatedAccountingReportsDailySummaryIndexRoute:
-    AuthenticatedAccountingReportsDailySummaryIndexRoute,
-  AuthenticatedAccountingReportsJournalIndexRoute:
-    AuthenticatedAccountingReportsJournalIndexRoute,
-  AuthenticatedAccountingReportsLedgerIndexRoute:
-    AuthenticatedAccountingReportsLedgerIndexRoute,
-  AuthenticatedAccountingReportsProfitAndLossIndexRoute:
-    AuthenticatedAccountingReportsProfitAndLossIndexRoute,
-  AuthenticatedAccountingReportsProfitLossIndexRoute:
-    AuthenticatedAccountingReportsProfitLossIndexRoute,
-  AuthenticatedAccountingReportsTrialBalanceIndexRoute:
-    AuthenticatedAccountingReportsTrialBalanceIndexRoute,
-  AuthenticatedAdmissionBillingBillingIdIndexRoute:
-    AuthenticatedAdmissionBillingBillingIdIndexRoute,
-  AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute:
-    AuthenticatedAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute,
-  AuthenticatedAdmissionInvoiceCreateIndexRoute:
-    AuthenticatedAdmissionInvoiceCreateIndexRoute,
-  AuthenticatedAdmissionInvoiceListIndexRoute:
-    AuthenticatedAdmissionInvoiceListIndexRoute,
-  AuthenticatedAdmissionPatientsActiveIndexRoute:
-    AuthenticatedAdmissionPatientsActiveIndexRoute,
-  AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute:
-    AuthenticatedAdmissionPatientsBalanceDistributedListIndexRoute,
-  AuthenticatedAdmissionPatientsBillCreatedListIndexRoute:
-    AuthenticatedAdmissionPatientsBillCreatedListIndexRoute,
-  AuthenticatedAdmissionPatientsBillDistributedListIndexRoute:
-    AuthenticatedAdmissionPatientsBillDistributedListIndexRoute,
-  AuthenticatedAdmissionPatientsDischargedListIndexRoute:
-    AuthenticatedAdmissionPatientsDischargedListIndexRoute,
-  AuthenticatedAdmissionPatientsDischargedIndexRoute:
-    AuthenticatedAdmissionPatientsDischargedIndexRoute,
-  AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute:
-    AuthenticatedAdmissionPatientsFinalBillCreatedListIndexRoute,
-  AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute:
-    AuthenticatedAdmissionPatientsPaymentCompletedListIndexRoute,
-  AuthenticatedIndoorManagementDistributionsIndexRoute:
-    AuthenticatedIndoorManagementDistributionsIndexRoute,
-  AuthenticatedIndoorManagementDoctorReferredIndexRoute:
-    AuthenticatedIndoorManagementDoctorReferredIndexRoute,
-  AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute:
-    AuthenticatedIndoorMasterAnasthesiaTypesIndexRoute,
-  AuthenticatedIndoorMasterBedCabinListIndexRoute:
-    AuthenticatedIndoorMasterBedCabinListIndexRoute,
-  AuthenticatedIndoorMasterDoctorTypesIndexRoute:
-    AuthenticatedIndoorMasterDoctorTypesIndexRoute,
-  AuthenticatedIndoorMasterOperationTypesIndexRoute:
-    AuthenticatedIndoorMasterOperationTypesIndexRoute,
-  AuthenticatedIndoorMasterPatientTypesIndexRoute:
-    AuthenticatedIndoorMasterPatientTypesIndexRoute,
-  AuthenticatedIndoorMasterServiceCategoriesIndexRoute:
-    AuthenticatedIndoorMasterServiceCategoriesIndexRoute,
-  AuthenticatedIndoorMasterServicesIndexRoute:
-    AuthenticatedIndoorMasterServicesIndexRoute,
-  AuthenticatedIndoorMasterTreatmentOutcomesIndexRoute:
-    AuthenticatedIndoorMasterTreatmentOutcomesIndexRoute,
-  AuthenticatedOutdoorMasterCategoriesIndexRoute:
-    AuthenticatedOutdoorMasterCategoriesIndexRoute,
-  AuthenticatedOutdoorMasterDepartmentsIndexRoute:
-    AuthenticatedOutdoorMasterDepartmentsIndexRoute,
-  AuthenticatedOutdoorMasterDoctorsIndexRoute:
-    AuthenticatedOutdoorMasterDoctorsIndexRoute,
-  AuthenticatedOutdoorMasterMachinesIndexRoute:
-    AuthenticatedOutdoorMasterMachinesIndexRoute,
-  AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute:
-    AuthenticatedOutdoorMasterSampleCollectionRoomsIndexRoute,
-  AuthenticatedOutdoorMasterTestTablesIndexRoute:
-    AuthenticatedOutdoorMasterTestTablesIndexRoute,
-  AuthenticatedOutdoorMasterTestsIndexRoute:
-    AuthenticatedOutdoorMasterTestsIndexRoute,
-  AuthenticatedOutdoorReceptionDueCollectionIndexRoute:
-    AuthenticatedOutdoorReceptionDueCollectionIndexRoute,
-  AuthenticatedOutdoorReceptionMyInvoicesIndexRoute:
-    AuthenticatedOutdoorReceptionMyInvoicesIndexRoute,
-  AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute:
-    AuthenticatedOutdoorReceptionPaidInvoicesIndexRoute,
-  AuthenticatedOutdoorReceptionPatientsIndexRoute:
-    AuthenticatedOutdoorReceptionPatientsIndexRoute,
-  AuthenticatedOutdoorReceptionUserInvoicesIndexRoute:
-    AuthenticatedOutdoorReceptionUserInvoicesIndexRoute,
-  AuthenticatedPathologyBiochemicalAllIndexRoute:
-    AuthenticatedPathologyBiochemicalAllIndexRoute,
-  AuthenticatedPathologyBiochemicalLipidProfileIndexRoute:
-    AuthenticatedPathologyBiochemicalLipidProfileIndexRoute,
-  AuthenticatedPathologyHematologyAllIndexRoute:
-    AuthenticatedPathologyHematologyAllIndexRoute,
-  AuthenticatedPathologyHematologyBloodForBtCtIndexRoute:
-    AuthenticatedPathologyHematologyBloodForBtCtIndexRoute,
-  AuthenticatedPathologyHematologyBloodForTcdcIndexRoute:
-    AuthenticatedPathologyHematologyBloodForTcdcIndexRoute,
-  AuthenticatedPathologyHematologyCbcShortIndexRoute:
-    AuthenticatedPathologyHematologyCbcShortIndexRoute,
-  AuthenticatedPathologyHematologyCbcWithPbfIndexRoute:
-    AuthenticatedPathologyHematologyCbcWithPbfIndexRoute,
-  AuthenticatedPathologyHematologyPeripheralBloodFilmIndexRoute:
-    AuthenticatedPathologyHematologyPeripheralBloodFilmIndexRoute,
-  AuthenticatedPathologyHematologyProthomBinTimeFullIndexRoute:
-    AuthenticatedPathologyHematologyProthomBinTimeFullIndexRoute,
-  AuthenticatedPathologyHormoneAllIndexRoute:
-    AuthenticatedPathologyHormoneAllIndexRoute,
-  AuthenticatedPathologyHormoneElectrolytesIndexRoute:
-    AuthenticatedPathologyHormoneElectrolytesIndexRoute,
-  AuthenticatedPathologyHormoneSemenIndexRoute:
-    AuthenticatedPathologyHormoneSemenIndexRoute,
-  AuthenticatedPathologyHormoneSkinScrappingForFungusIndexRoute:
-    AuthenticatedPathologyHormoneSkinScrappingForFungusIndexRoute,
-  AuthenticatedPathologyHormoneSputumIndexRoute:
-    AuthenticatedPathologyHormoneSputumIndexRoute,
-  AuthenticatedPathologyHormoneT3t4tshIndexRoute:
-    AuthenticatedPathologyHormoneT3t4tshIndexRoute,
-  AuthenticatedPathologyImmunologyAllIndexRoute:
-    AuthenticatedPathologyImmunologyAllIndexRoute,
-  AuthenticatedPathologyImmunologyBetaHcgIndexRoute:
-    AuthenticatedPathologyImmunologyBetaHcgIndexRoute,
-  AuthenticatedPathologyImmunologyBloodGroupIndexRoute:
-    AuthenticatedPathologyImmunologyBloodGroupIndexRoute,
-  AuthenticatedPathologyImmunologyMtIndexRoute:
-    AuthenticatedPathologyImmunologyMtIndexRoute,
-  AuthenticatedPathologyImmunologyWidalTestIndexRoute:
-    AuthenticatedPathologyImmunologyWidalTestIndexRoute,
-  AuthenticatedPathologyStoolOcultBloodTestIndexRoute:
-    AuthenticatedPathologyStoolOcultBloodTestIndexRoute,
-  AuthenticatedPathologyStoolReducingSubstanceIndexRoute:
-    AuthenticatedPathologyStoolReducingSubstanceIndexRoute,
-  AuthenticatedPathologyStoolStoolReIndexRoute:
-    AuthenticatedPathologyStoolStoolReIndexRoute,
-  AuthenticatedPathologyUrineUrineForAlbuminIndexRoute:
-    AuthenticatedPathologyUrineUrineForAlbuminIndexRoute,
-  AuthenticatedPathologyUrineUrineForReFullIndexRoute:
-    AuthenticatedPathologyUrineUrineForReFullIndexRoute,
-  AuthenticatedPathologyUrineUrineForSugarIndexRoute:
-    AuthenticatedPathologyUrineUrineForSugarIndexRoute,
-  AuthenticatedPayrollAttendanceStaffIdIndexRoute:
-    AuthenticatedPayrollAttendanceStaffIdIndexRoute,
-  AuthenticatedPayrollSalaryStaffIdIndexRoute:
-    AuthenticatedPayrollSalaryStaffIdIndexRoute,
-  AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute:
-    AuthenticatedAdmissionPatientsAdmissionIdPrintStepRoute,
-  AuthenticatedEcgAllEditBuilderIdRoute: AuthenticatedEcgAllEditBuilderIdRoute,
-  AuthenticatedIndoorMasterServicesEditIdRoute:
-    AuthenticatedIndoorMasterServicesEditIdRoute,
-  AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute:
-    AuthenticatedOutdoorMasterDoctorsDoctorIdEditRoute,
-  AuthenticatedPathologyBiochemicalAllEditReportIdRoute:
-    AuthenticatedPathologyBiochemicalAllEditReportIdRoute,
-  AuthenticatedPathologyBiochemicalAllReportReportIdRoute:
-    AuthenticatedPathologyBiochemicalAllReportReportIdRoute,
-  AuthenticatedPathologyBiochemicalLipidProfileReportReportIdRoute:
-    AuthenticatedPathologyBiochemicalLipidProfileReportReportIdRoute,
-  AuthenticatedPathologyHematologyAllReportReportIdRoute:
-    AuthenticatedPathologyHematologyAllReportReportIdRoute,
-  AuthenticatedPathologyHematologyBloodForBtCtReportReportIdRoute:
-    AuthenticatedPathologyHematologyBloodForBtCtReportReportIdRoute,
-  AuthenticatedPathologyHematologyBloodForTcdcReportReportIdRoute:
-    AuthenticatedPathologyHematologyBloodForTcdcReportReportIdRoute,
-  AuthenticatedPathologyHematologyCbcShortEditIdRoute:
-    AuthenticatedPathologyHematologyCbcShortEditIdRoute,
-  AuthenticatedPathologyHematologyCbcShortReportReportIdRoute:
-    AuthenticatedPathologyHematologyCbcShortReportReportIdRoute,
-  AuthenticatedPathologyHematologyCbcWithPbfEditIdRoute:
-    AuthenticatedPathologyHematologyCbcWithPbfEditIdRoute,
-  AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRoute:
-    AuthenticatedPathologyHematologyCbcWithPbfReportReportIdRoute,
-  AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRoute:
-    AuthenticatedPathologyHematologyPeripheralBloodFilmReportReportIdRoute,
-  AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute:
-    AuthenticatedPathologyHematologyProthomBinTimeFullReportReportIdRoute,
-  AuthenticatedPathologyHormoneAllReportReportIdRoute:
-    AuthenticatedPathologyHormoneAllReportReportIdRoute,
-  AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute:
-    AuthenticatedPathologyHormoneElectrolytesReportReportIdRoute,
-  AuthenticatedPathologyHormoneSemenEditReportIdRoute:
-    AuthenticatedPathologyHormoneSemenEditReportIdRoute,
-  AuthenticatedPathologyHormoneSemenReportReportIdRoute:
-    AuthenticatedPathologyHormoneSemenReportReportIdRoute,
-  AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRoute:
-    AuthenticatedPathologyHormoneSkinScrappingForFungusReportReportIdRoute,
-  AuthenticatedPathologyHormoneSputumReportReportIdRoute:
-    AuthenticatedPathologyHormoneSputumReportReportIdRoute,
-  AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute:
-    AuthenticatedPathologyHormoneT3t4tshReportReportIdRoute,
-  AuthenticatedPathologyImmunologyAllReportReportIdRoute:
-    AuthenticatedPathologyImmunologyAllReportReportIdRoute,
-  AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute:
-    AuthenticatedPathologyImmunologyBetaHcgReportReportIdRoute,
-  AuthenticatedPathologyImmunologyBloodGroupReportReportIdRoute:
-    AuthenticatedPathologyImmunologyBloodGroupReportReportIdRoute,
-  AuthenticatedPathologyImmunologyMtReportReportIdRoute:
-    AuthenticatedPathologyImmunologyMtReportReportIdRoute,
-  AuthenticatedPathologyImmunologyWidalTestReportReportIdRoute:
-    AuthenticatedPathologyImmunologyWidalTestReportReportIdRoute,
-  AuthenticatedPathologyStoolOcultBloodTestReportReportIdRoute:
-    AuthenticatedPathologyStoolOcultBloodTestReportReportIdRoute,
-  AuthenticatedPathologyStoolReducingSubstanceReportReportIdRoute:
-    AuthenticatedPathologyStoolReducingSubstanceReportReportIdRoute,
-  AuthenticatedPathologyStoolStoolReEditIdRoute:
-    AuthenticatedPathologyStoolStoolReEditIdRoute,
-  AuthenticatedPathologyStoolStoolReReportReportIdRoute:
-    AuthenticatedPathologyStoolStoolReReportReportIdRoute,
-  AuthenticatedPathologyUrineUrineForAlbuminReportReportIdRoute:
-    AuthenticatedPathologyUrineUrineForAlbuminReportReportIdRoute,
-  AuthenticatedPathologyUrineUrineForReFullEditIdRoute:
-    AuthenticatedPathologyUrineUrineForReFullEditIdRoute,
-  AuthenticatedPathologyUrineUrineForReFullReportReportIdRoute:
-    AuthenticatedPathologyUrineUrineForReFullReportReportIdRoute,
-  AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute:
-    AuthenticatedPathologyUrineUrineForSugarReportReportIdRoute,
-  AuthenticatedUltrasonogramAllEditBuilderIdRoute:
-    AuthenticatedUltrasonogramAllEditBuilderIdRoute,
-  AuthenticatedXRayAllEditBuilderIdRoute:
-    AuthenticatedXRayAllEditBuilderIdRoute,
-  AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute:
-    AuthenticatedAdmissionPatientsAdmissionIdBillCreatedIndexRoute,
-  AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute:
-    AuthenticatedAdmissionPatientsAdmissionIdBillingPrintIndexRoute,
-  AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute:
-    AuthenticatedAdmissionPatientsAdmissionIdBillingIndexRoute,
-  AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute:
-    AuthenticatedAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute,
-  AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute:
-    AuthenticatedAdmissionPatientsAdmissionIdDistributeBillIndexRoute,
-  AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute:
-    AuthenticatedAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute,
-  AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute:
-    AuthenticatedAdmissionPatientsAdmissionIdFinalBillIndexRoute,
-  AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute:
-    AuthenticatedAdmissionPatientsAdmissionIdPrintIndexRoute,
-  AuthenticatedIndoorMasterBedCabinListCreateIndexRoute:
-    AuthenticatedIndoorMasterBedCabinListCreateIndexRoute,
-  AuthenticatedIndoorMasterServicesCreateIndexRoute:
-    AuthenticatedIndoorMasterServicesCreateIndexRoute,
-  AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute:
-    AuthenticatedOutdoorMasterDoctorsDoctorIdIndexRoute,
-  AuthenticatedOutdoorMasterTestsCreateIndexRoute:
-    AuthenticatedOutdoorMasterTestsCreateIndexRoute,
-  AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute:
-    AuthenticatedOutdoorReceptionInvoicesCreateIndexRoute,
-  AuthenticatedOutdoorReceptionInvoicesListIndexRoute:
-    AuthenticatedOutdoorReceptionInvoicesListIndexRoute,
-  AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute:
-    AuthenticatedReportsMyOutdoorDateWiseCollectionIndexRoute,
-  AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute:
-    AuthenticatedReportsMyOutdoorTodayCollectionIndexRoute,
-  AuthenticatedOutdoorMasterTestsEditIdIndexRoute:
-    AuthenticatedOutdoorMasterTestsEditIdIndexRoute,
-  AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRoute:
-    AuthenticatedOutdoorReceptionInvoicesEditInvoiceIdIndexRoute,
-  AuthenticatedPathologyHematologyAllEditIdIndexRoute:
-    AuthenticatedPathologyHematologyAllEditIdIndexRoute,
-  AuthenticatedPathologyHormoneAllEditIdIndexRoute:
-    AuthenticatedPathologyHormoneAllEditIdIndexRoute,
-  AuthenticatedPathologyImmunologyAllEditIdIndexRoute:
-    AuthenticatedPathologyImmunologyAllEditIdIndexRoute,
+  AuthenticatedDashboardSettingsRouteRoute:
+    AuthenticatedDashboardSettingsRouteRouteWithChildren,
+  AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+  AuthenticatedDashboardErrorsErrorRoute:
+    AuthenticatedDashboardErrorsErrorRoute,
+  AuthenticatedDashboardNotificationsIdRoute:
+    AuthenticatedDashboardNotificationsIdRoute,
+  AuthenticatedDashboardAccountingIndexRoute:
+    AuthenticatedDashboardAccountingIndexRoute,
+  AuthenticatedDashboardAppsIndexRoute: AuthenticatedDashboardAppsIndexRoute,
+  AuthenticatedDashboardBackupSettingsIndexRoute:
+    AuthenticatedDashboardBackupSettingsIndexRoute,
+  AuthenticatedDashboardBackupsIndexRoute:
+    AuthenticatedDashboardBackupsIndexRoute,
+  AuthenticatedDashboardChatsIndexRoute: AuthenticatedDashboardChatsIndexRoute,
+  AuthenticatedDashboardCompanyAccountIndexRoute:
+    AuthenticatedDashboardCompanyAccountIndexRoute,
+  AuthenticatedDashboardDatabaseIndexRoute:
+    AuthenticatedDashboardDatabaseIndexRoute,
+  AuthenticatedDashboardGalleryIndexRoute:
+    AuthenticatedDashboardGalleryIndexRoute,
+  AuthenticatedDashboardHelpCenterIndexRoute:
+    AuthenticatedDashboardHelpCenterIndexRoute,
+  AuthenticatedDashboardHelpIndexRoute: AuthenticatedDashboardHelpIndexRoute,
+  AuthenticatedDashboardMyAccountIndexRoute:
+    AuthenticatedDashboardMyAccountIndexRoute,
+  AuthenticatedDashboardNotificationsIndexRoute:
+    AuthenticatedDashboardNotificationsIndexRoute,
+  AuthenticatedDashboardRolesIndexRoute: AuthenticatedDashboardRolesIndexRoute,
+  AuthenticatedDashboardSubscriptionIndexRoute:
+    AuthenticatedDashboardSubscriptionIndexRoute,
+  AuthenticatedDashboardTasksIndexRoute: AuthenticatedDashboardTasksIndexRoute,
+  AuthenticatedDashboardUsersIndexRoute: AuthenticatedDashboardUsersIndexRoute,
+  AuthenticatedDashboardRolesEditIdRoute:
+    AuthenticatedDashboardRolesEditIdRoute,
+  AuthenticatedDashboardAccountingAccountsIndexRoute:
+    AuthenticatedDashboardAccountingAccountsIndexRoute,
+  AuthenticatedDashboardAccountingExpenseIndexRoute:
+    AuthenticatedDashboardAccountingExpenseIndexRoute,
+  AuthenticatedDashboardAccountingExpensesIndexRoute:
+    AuthenticatedDashboardAccountingExpensesIndexRoute,
+  AuthenticatedDashboardAccountingIncomeIndexRoute:
+    AuthenticatedDashboardAccountingIncomeIndexRoute,
+  AuthenticatedDashboardAccountingTransactionsIndexRoute:
+    AuthenticatedDashboardAccountingTransactionsIndexRoute,
+  AuthenticatedDashboardAccountsDailyCreditIndexRoute:
+    AuthenticatedDashboardAccountsDailyCreditIndexRoute,
+  AuthenticatedDashboardAccountsDailyDebitIndexRoute:
+    AuthenticatedDashboardAccountsDailyDebitIndexRoute,
+  AuthenticatedDashboardAccountsJournalIndexRoute:
+    AuthenticatedDashboardAccountsJournalIndexRoute,
+  AuthenticatedDashboardAccountsPayToAnaesthetistIndexRoute:
+    AuthenticatedDashboardAccountsPayToAnaesthetistIndexRoute,
+  AuthenticatedDashboardAccountsPayToAssistantIndexRoute:
+    AuthenticatedDashboardAccountsPayToAssistantIndexRoute,
+  AuthenticatedDashboardAccountsPayToConsultantIndexRoute:
+    AuthenticatedDashboardAccountsPayToConsultantIndexRoute,
+  AuthenticatedDashboardAccountsPayToSurgeonIndexRoute:
+    AuthenticatedDashboardAccountsPayToSurgeonIndexRoute,
+  AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute:
+    AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute,
+  AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute:
+    AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute,
+  AuthenticatedDashboardAdmissionDueCollectionIndexRoute:
+    AuthenticatedDashboardAdmissionDueCollectionIndexRoute,
+  AuthenticatedDashboardAdmissionFinalBillsIndexRoute:
+    AuthenticatedDashboardAdmissionFinalBillsIndexRoute,
+  AuthenticatedDashboardAdmissionFinaliseServicesIndexRoute:
+    AuthenticatedDashboardAdmissionFinaliseServicesIndexRoute,
+  AuthenticatedDashboardAdmissionFirstTimeBillIndexRoute:
+    AuthenticatedDashboardAdmissionFirstTimeBillIndexRoute,
+  AuthenticatedDashboardAdmissionFirstTimeServiceIndexRoute:
+    AuthenticatedDashboardAdmissionFirstTimeServiceIndexRoute,
+  AuthenticatedDashboardAdmissionInvoiceIndexRoute:
+    AuthenticatedDashboardAdmissionInvoiceIndexRoute,
+  AuthenticatedDashboardAdmissionNewAdmissionIndexRoute:
+    AuthenticatedDashboardAdmissionNewAdmissionIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsIndexRoute,
+  AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute:
+    AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute,
+  AuthenticatedDashboardBanksBankAccountsIndexRoute:
+    AuthenticatedDashboardBanksBankAccountsIndexRoute,
+  AuthenticatedDashboardBanksBankDepositsIndexRoute:
+    AuthenticatedDashboardBanksBankDepositsIndexRoute,
+  AuthenticatedDashboardBanksBankTransactionsIndexRoute:
+    AuthenticatedDashboardBanksBankTransactionsIndexRoute,
+  AuthenticatedDashboardBanksBankWithdrawalsIndexRoute:
+    AuthenticatedDashboardBanksBankWithdrawalsIndexRoute,
+  AuthenticatedDashboardEcgAllIndexRoute:
+    AuthenticatedDashboardEcgAllIndexRoute,
+  AuthenticatedDashboardPayrollEmployeesIndexRoute:
+    AuthenticatedDashboardPayrollEmployeesIndexRoute,
+  AuthenticatedDashboardPayrollOverviewIndexRoute:
+    AuthenticatedDashboardPayrollOverviewIndexRoute,
+  AuthenticatedDashboardRolesCreateIndexRoute:
+    AuthenticatedDashboardRolesCreateIndexRoute,
+  AuthenticatedDashboardUltrasonogramAllIndexRoute:
+    AuthenticatedDashboardUltrasonogramAllIndexRoute,
+  AuthenticatedDashboardXRayAllIndexRoute:
+    AuthenticatedDashboardXRayAllIndexRoute,
+  AuthenticatedDashboardAccountingReportsLedgerPrintRoute:
+    AuthenticatedDashboardAccountingReportsLedgerPrintRoute,
+  AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute:
+    AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute,
+  AuthenticatedDashboardEcgAllEditIdRoute:
+    AuthenticatedDashboardEcgAllEditIdRoute,
+  AuthenticatedDashboardEcgAllPrintIdRoute:
+    AuthenticatedDashboardEcgAllPrintIdRoute,
+  AuthenticatedDashboardIndoorMasterBedCabinListIdRoute:
+    AuthenticatedDashboardIndoorMasterBedCabinListIdRoute,
+  AuthenticatedDashboardIndoorMasterServicesIdRoute:
+    AuthenticatedDashboardIndoorMasterServicesIdRoute,
+  AuthenticatedDashboardOutdoorMasterCategoriesIdRoute:
+    AuthenticatedDashboardOutdoorMasterCategoriesIdRoute,
+  AuthenticatedDashboardOutdoorMasterDepartmentsIdRoute:
+    AuthenticatedDashboardOutdoorMasterDepartmentsIdRoute,
+  AuthenticatedDashboardOutdoorMasterDoctorsCreateRoute:
+    AuthenticatedDashboardOutdoorMasterDoctorsCreateRoute,
+  AuthenticatedDashboardOutdoorMasterTestTablesIdRoute:
+    AuthenticatedDashboardOutdoorMasterTestTablesIdRoute,
+  AuthenticatedDashboardOutdoorMasterTestsIdRoute:
+    AuthenticatedDashboardOutdoorMasterTestsIdRoute,
+  AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute:
+    AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute,
+  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute:
+    AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute,
+  AuthenticatedDashboardRolesPermissionsRoleIdEditRoute:
+    AuthenticatedDashboardRolesPermissionsRoleIdEditRoute,
+  AuthenticatedDashboardUltrasonogramAllEditIdRoute:
+    AuthenticatedDashboardUltrasonogramAllEditIdRoute,
+  AuthenticatedDashboardUltrasonogramAllPrintIdRoute:
+    AuthenticatedDashboardUltrasonogramAllPrintIdRoute,
+  AuthenticatedDashboardXRayAllEditIdRoute:
+    AuthenticatedDashboardXRayAllEditIdRoute,
+  AuthenticatedDashboardXRayAllPrintIdRoute:
+    AuthenticatedDashboardXRayAllPrintIdRoute,
+  AuthenticatedDashboardAccountingReportsBalanceSheetIndexRoute:
+    AuthenticatedDashboardAccountingReportsBalanceSheetIndexRoute,
+  AuthenticatedDashboardAccountingReportsCashFlowIndexRoute:
+    AuthenticatedDashboardAccountingReportsCashFlowIndexRoute,
+  AuthenticatedDashboardAccountingReportsDailySummaryIndexRoute:
+    AuthenticatedDashboardAccountingReportsDailySummaryIndexRoute,
+  AuthenticatedDashboardAccountingReportsJournalIndexRoute:
+    AuthenticatedDashboardAccountingReportsJournalIndexRoute,
+  AuthenticatedDashboardAccountingReportsLedgerIndexRoute:
+    AuthenticatedDashboardAccountingReportsLedgerIndexRoute,
+  AuthenticatedDashboardAccountingReportsMultiLedgerIndexRoute:
+    AuthenticatedDashboardAccountingReportsMultiLedgerIndexRoute,
+  AuthenticatedDashboardAccountingReportsProfitAndLossIndexRoute:
+    AuthenticatedDashboardAccountingReportsProfitAndLossIndexRoute,
+  AuthenticatedDashboardAccountingReportsProfitLossIndexRoute:
+    AuthenticatedDashboardAccountingReportsProfitLossIndexRoute,
+  AuthenticatedDashboardAccountingReportsTrialBalanceIndexRoute:
+    AuthenticatedDashboardAccountingReportsTrialBalanceIndexRoute,
+  AuthenticatedDashboardAdmissionBillingBillingIdIndexRoute:
+    AuthenticatedDashboardAdmissionBillingBillingIdIndexRoute,
+  AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute:
+    AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute,
+  AuthenticatedDashboardAdmissionInvoiceCreateIndexRoute:
+    AuthenticatedDashboardAdmissionInvoiceCreateIndexRoute,
+  AuthenticatedDashboardAdmissionInvoiceListIndexRoute:
+    AuthenticatedDashboardAdmissionInvoiceListIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsActiveIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsActiveIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute,
+  AuthenticatedDashboardIndoorManagementDistributionsIndexRoute:
+    AuthenticatedDashboardIndoorManagementDistributionsIndexRoute,
+  AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute:
+    AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute,
+  AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute:
+    AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute,
+  AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute:
+    AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute,
+  AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute:
+    AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute,
+  AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute:
+    AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute,
+  AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute:
+    AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute,
+  AuthenticatedDashboardIndoorMasterServiceCategoriesIndexRoute:
+    AuthenticatedDashboardIndoorMasterServiceCategoriesIndexRoute,
+  AuthenticatedDashboardIndoorMasterServicesIndexRoute:
+    AuthenticatedDashboardIndoorMasterServicesIndexRoute,
+  AuthenticatedDashboardIndoorMasterTreatmentOutcomesIndexRoute:
+    AuthenticatedDashboardIndoorMasterTreatmentOutcomesIndexRoute,
+  AuthenticatedDashboardOutdoorMasterCategoriesIndexRoute:
+    AuthenticatedDashboardOutdoorMasterCategoriesIndexRoute,
+  AuthenticatedDashboardOutdoorMasterDepartmentsIndexRoute:
+    AuthenticatedDashboardOutdoorMasterDepartmentsIndexRoute,
+  AuthenticatedDashboardOutdoorMasterDoctorsIndexRoute:
+    AuthenticatedDashboardOutdoorMasterDoctorsIndexRoute,
+  AuthenticatedDashboardOutdoorMasterMachinesIndexRoute:
+    AuthenticatedDashboardOutdoorMasterMachinesIndexRoute,
+  AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRoute:
+    AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRoute,
+  AuthenticatedDashboardOutdoorMasterTestTablesIndexRoute:
+    AuthenticatedDashboardOutdoorMasterTestTablesIndexRoute,
+  AuthenticatedDashboardOutdoorMasterTestsIndexRoute:
+    AuthenticatedDashboardOutdoorMasterTestsIndexRoute,
+  AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute:
+    AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute,
+  AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute:
+    AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute,
+  AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute:
+    AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute,
+  AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute:
+    AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute,
+  AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute:
+    AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute,
+  AuthenticatedDashboardPathologyBiochemicalAllIndexRoute:
+    AuthenticatedDashboardPathologyBiochemicalAllIndexRoute,
+  AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRoute:
+    AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRoute,
+  AuthenticatedDashboardPathologyHematologyAllIndexRoute:
+    AuthenticatedDashboardPathologyHematologyAllIndexRoute,
+  AuthenticatedDashboardPathologyHematologyBloodForBtCtIndexRoute:
+    AuthenticatedDashboardPathologyHematologyBloodForBtCtIndexRoute,
+  AuthenticatedDashboardPathologyHematologyBloodForTcdcIndexRoute:
+    AuthenticatedDashboardPathologyHematologyBloodForTcdcIndexRoute,
+  AuthenticatedDashboardPathologyHematologyCbcShortIndexRoute:
+    AuthenticatedDashboardPathologyHematologyCbcShortIndexRoute,
+  AuthenticatedDashboardPathologyHematologyCbcWithPbfIndexRoute:
+    AuthenticatedDashboardPathologyHematologyCbcWithPbfIndexRoute,
+  AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmIndexRoute:
+    AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmIndexRoute,
+  AuthenticatedDashboardPathologyHematologyProthomBinTimeFullIndexRoute:
+    AuthenticatedDashboardPathologyHematologyProthomBinTimeFullIndexRoute,
+  AuthenticatedDashboardPathologyHormoneAllIndexRoute:
+    AuthenticatedDashboardPathologyHormoneAllIndexRoute,
+  AuthenticatedDashboardPathologyHormoneElectrolytesIndexRoute:
+    AuthenticatedDashboardPathologyHormoneElectrolytesIndexRoute,
+  AuthenticatedDashboardPathologyHormoneSemenIndexRoute:
+    AuthenticatedDashboardPathologyHormoneSemenIndexRoute,
+  AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusIndexRoute:
+    AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusIndexRoute,
+  AuthenticatedDashboardPathologyHormoneSputumIndexRoute:
+    AuthenticatedDashboardPathologyHormoneSputumIndexRoute,
+  AuthenticatedDashboardPathologyHormoneT3t4tshIndexRoute:
+    AuthenticatedDashboardPathologyHormoneT3t4tshIndexRoute,
+  AuthenticatedDashboardPathologyImmunologyAllIndexRoute:
+    AuthenticatedDashboardPathologyImmunologyAllIndexRoute,
+  AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRoute:
+    AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRoute,
+  AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute:
+    AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute,
+  AuthenticatedDashboardPathologyImmunologyMtIndexRoute:
+    AuthenticatedDashboardPathologyImmunologyMtIndexRoute,
+  AuthenticatedDashboardPathologyImmunologyWidalTestIndexRoute:
+    AuthenticatedDashboardPathologyImmunologyWidalTestIndexRoute,
+  AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRoute:
+    AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRoute,
+  AuthenticatedDashboardPathologyStoolReducingSubstanceIndexRoute:
+    AuthenticatedDashboardPathologyStoolReducingSubstanceIndexRoute,
+  AuthenticatedDashboardPathologyStoolStoolReIndexRoute:
+    AuthenticatedDashboardPathologyStoolStoolReIndexRoute,
+  AuthenticatedDashboardPathologyUrineUrineForAlbuminIndexRoute:
+    AuthenticatedDashboardPathologyUrineUrineForAlbuminIndexRoute,
+  AuthenticatedDashboardPathologyUrineUrineForReFullIndexRoute:
+    AuthenticatedDashboardPathologyUrineUrineForReFullIndexRoute,
+  AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute:
+    AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute,
+  AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute:
+    AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute,
+  AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute:
+    AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute:
+    AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute,
+  AuthenticatedDashboardEcgAllEditBuilderIdRoute:
+    AuthenticatedDashboardEcgAllEditBuilderIdRoute,
+  AuthenticatedDashboardIndoorMasterServicesEditIdRoute:
+    AuthenticatedDashboardIndoorMasterServicesEditIdRoute,
+  AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute:
+    AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute,
+  AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRoute:
+    AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRoute,
+  AuthenticatedDashboardPathologyBiochemicalAllReportReportIdRoute:
+    AuthenticatedDashboardPathologyBiochemicalAllReportReportIdRoute,
+  AuthenticatedDashboardPathologyBiochemicalLipidProfileReportReportIdRoute:
+    AuthenticatedDashboardPathologyBiochemicalLipidProfileReportReportIdRoute,
+  AuthenticatedDashboardPathologyHematologyAllReportReportIdRoute:
+    AuthenticatedDashboardPathologyHematologyAllReportReportIdRoute,
+  AuthenticatedDashboardPathologyHematologyBloodForBtCtReportReportIdRoute:
+    AuthenticatedDashboardPathologyHematologyBloodForBtCtReportReportIdRoute,
+  AuthenticatedDashboardPathologyHematologyBloodForTcdcReportReportIdRoute:
+    AuthenticatedDashboardPathologyHematologyBloodForTcdcReportReportIdRoute,
+  AuthenticatedDashboardPathologyHematologyCbcShortEditIdRoute:
+    AuthenticatedDashboardPathologyHematologyCbcShortEditIdRoute,
+  AuthenticatedDashboardPathologyHematologyCbcShortReportReportIdRoute:
+    AuthenticatedDashboardPathologyHematologyCbcShortReportReportIdRoute,
+  AuthenticatedDashboardPathologyHematologyCbcWithPbfEditIdRoute:
+    AuthenticatedDashboardPathologyHematologyCbcWithPbfEditIdRoute,
+  AuthenticatedDashboardPathologyHematologyCbcWithPbfReportReportIdRoute:
+    AuthenticatedDashboardPathologyHematologyCbcWithPbfReportReportIdRoute,
+  AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmReportReportIdRoute:
+    AuthenticatedDashboardPathologyHematologyPeripheralBloodFilmReportReportIdRoute,
+  AuthenticatedDashboardPathologyHematologyProthomBinTimeFullReportReportIdRoute:
+    AuthenticatedDashboardPathologyHematologyProthomBinTimeFullReportReportIdRoute,
+  AuthenticatedDashboardPathologyHormoneAllReportReportIdRoute:
+    AuthenticatedDashboardPathologyHormoneAllReportReportIdRoute,
+  AuthenticatedDashboardPathologyHormoneElectrolytesReportReportIdRoute:
+    AuthenticatedDashboardPathologyHormoneElectrolytesReportReportIdRoute,
+  AuthenticatedDashboardPathologyHormoneSemenEditReportIdRoute:
+    AuthenticatedDashboardPathologyHormoneSemenEditReportIdRoute,
+  AuthenticatedDashboardPathologyHormoneSemenReportReportIdRoute:
+    AuthenticatedDashboardPathologyHormoneSemenReportReportIdRoute,
+  AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusReportReportIdRoute:
+    AuthenticatedDashboardPathologyHormoneSkinScrappingForFungusReportReportIdRoute,
+  AuthenticatedDashboardPathologyHormoneSputumReportReportIdRoute:
+    AuthenticatedDashboardPathologyHormoneSputumReportReportIdRoute,
+  AuthenticatedDashboardPathologyHormoneT3t4tshReportReportIdRoute:
+    AuthenticatedDashboardPathologyHormoneT3t4tshReportReportIdRoute,
+  AuthenticatedDashboardPathologyImmunologyAllReportReportIdRoute:
+    AuthenticatedDashboardPathologyImmunologyAllReportReportIdRoute,
+  AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRoute:
+    AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRoute,
+  AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute:
+    AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute,
+  AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute:
+    AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute,
+  AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRoute:
+    AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRoute,
+  AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRoute:
+    AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRoute,
+  AuthenticatedDashboardPathologyStoolReducingSubstanceReportReportIdRoute:
+    AuthenticatedDashboardPathologyStoolReducingSubstanceReportReportIdRoute,
+  AuthenticatedDashboardPathologyStoolStoolReEditIdRoute:
+    AuthenticatedDashboardPathologyStoolStoolReEditIdRoute,
+  AuthenticatedDashboardPathologyStoolStoolReReportReportIdRoute:
+    AuthenticatedDashboardPathologyStoolStoolReReportReportIdRoute,
+  AuthenticatedDashboardPathologyUrineUrineForAlbuminReportReportIdRoute:
+    AuthenticatedDashboardPathologyUrineUrineForAlbuminReportReportIdRoute,
+  AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRoute:
+    AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRoute,
+  AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRoute:
+    AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRoute,
+  AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute:
+    AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute,
+  AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute:
+    AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute,
+  AuthenticatedDashboardXRayAllEditBuilderIdRoute:
+    AuthenticatedDashboardXRayAllEditBuilderIdRoute,
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute,
+  AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute:
+    AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute,
+  AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute:
+    AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute,
+  AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute:
+    AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute,
+  AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute:
+    AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute,
+  AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute:
+    AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute,
+  AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute:
+    AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute,
+  AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute:
+    AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute,
+  AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute:
+    AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute,
+  AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute:
+    AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute,
+  AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRoute:
+    AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRoute,
+  AuthenticatedDashboardPathologyHematologyAllEditIdIndexRoute:
+    AuthenticatedDashboardPathologyHematologyAllEditIdIndexRoute,
+  AuthenticatedDashboardPathologyHormoneAllEditIdIndexRoute:
+    AuthenticatedDashboardPathologyHormoneAllEditIdIndexRoute,
+  AuthenticatedDashboardPathologyImmunologyAllEditIdIndexRoute:
+    AuthenticatedDashboardPathologyImmunologyAllEditIdIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -5085,9 +5667,41 @@ const ClerkRouteRouteWithChildren = ClerkRouteRoute._addFileChildren(
   ClerkRouteRouteChildren,
 )
 
+interface platformAdminRouteChildren {
+  platformAdminLayoutRoute: typeof platformAdminLayoutRoute
+  platformAdminAdminsRoute: typeof platformAdminAdminsRoute
+  platformAdminBillingRoute: typeof platformAdminBillingRoute
+  platformAdminCompaniesRoute: typeof platformAdminCompaniesRoute
+  platformAdminLoginRoute: typeof platformAdminLoginRoute
+  platformAdminModulesRoute: typeof platformAdminModulesRoute
+  platformAdminPlansRoute: typeof platformAdminPlansRoute
+  platformAdminRegistrationsRoute: typeof platformAdminRegistrationsRoute
+  platformAdminSettingsRoute: typeof platformAdminSettingsRoute
+  platformAdminIndexRoute: typeof platformAdminIndexRoute
+}
+
+const platformAdminRouteChildren: platformAdminRouteChildren = {
+  platformAdminLayoutRoute: platformAdminLayoutRoute,
+  platformAdminAdminsRoute: platformAdminAdminsRoute,
+  platformAdminBillingRoute: platformAdminBillingRoute,
+  platformAdminCompaniesRoute: platformAdminCompaniesRoute,
+  platformAdminLoginRoute: platformAdminLoginRoute,
+  platformAdminModulesRoute: platformAdminModulesRoute,
+  platformAdminPlansRoute: platformAdminPlansRoute,
+  platformAdminRegistrationsRoute: platformAdminRegistrationsRoute,
+  platformAdminSettingsRoute: platformAdminSettingsRoute,
+  platformAdminIndexRoute: platformAdminIndexRoute,
+}
+
+const platformAdminRouteWithChildren = platformAdminRoute._addFileChildren(
+  platformAdminRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   ClerkRouteRoute: ClerkRouteRouteWithChildren,
+  authAuthCallbackRoute: authAuthCallbackRoute,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authLoginRoute: authLoginRoute,
   authOtpRoute: authOtpRoute,
@@ -5099,6 +5713,11 @@ const rootRouteChildren: RootRouteChildren = {
   errors404Route: errors404Route,
   errors500Route: errors500Route,
   errors503Route: errors503Route,
+  platformLayoutRoute: platformLayoutRoute,
+  platformContactRoute: platformContactRoute,
+  platformPricingRoute: platformPricingRoute,
+  platformRegisterRoute: platformRegisterRoute,
+  platformAdminRoute: platformAdminRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

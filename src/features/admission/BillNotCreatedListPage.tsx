@@ -179,7 +179,7 @@ export function BillNotCreatedListPage() {
             responsivePriority: 1,
             render: (_data: any, _type: string, row: AdmissionItem) => {
                 return `
-                    <a href="/admission/patients/${row.id}/billing"
+                    <a href="/dashboard/admission/patients/${row.id}/billing"
                        class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 no-underline">
                         Add Billing
                     </a>
@@ -270,7 +270,7 @@ export function BillNotCreatedListPage() {
                             </li>
                         </ul>
                         <div class="mt-8 flex justify-end gap-3 border-t pt-5">
-                            <a href="/admission/patients/${id}/billing"
+                            <a href="/dashboard/admission/patients/${id}/billing"
                                class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-orange-600 text-white hover:bg-orange-700 transition h-10 px-5 shadow no-underline">
                                 Add Billing
                             </a>

@@ -11,6 +11,13 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { FlaskConical, CheckCircle, FolderTree, DollarSign } from 'lucide-react'
 import { useCurrency } from '@/hooks/use-currency'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 
 type TestItem = {
     id: number
@@ -18,6 +25,12 @@ type TestItem = {
     category_id: number
     match_table_name: number
     price: number
+    sample_collection_room_id?: number;
+    sampleCollectionRoom?: {
+        id: number;
+        name: string;
+        location: string;
+    };
     category: {
         id: number;
         name: string;
@@ -37,27 +50,53 @@ interface ListOfTestsProps {
     page: number;
     limit: number;
     search: string;
+    categoryId?: number;
     setPage: (page: number) => void;
     setLimit: (limit: number) => void;
     setSearch: (search: string) => void;
+    setCategoryId: (categoryId: number | undefined) => void;
 }
 
-export default function ListOfTests({ page, limit, search, setPage, setLimit, setSearch }: ListOfTestsProps) {
+export default function ListOfTests({ page, limit, search, categoryId, setPage, setLimit, setSearch, setCategoryId }: ListOfTestsProps) {
     const { currencySymbol } = useCurrency();
 
     const token = getCookie('accessToken');
 
     const { data, isFetching } = useQuery({
-        queryKey: ["tests", page, limit, search],
+        queryKey: ["tests", page, limit, search, categoryId],
         queryFn: async () => {
+            const params = new URLSearchParams({
+                page: String(page),
+                limit: String(limit),
+                search: search,
+            });
+            if (categoryId) params.set('category_id', String(categoryId));
+
             const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/tests?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
+                `${import.meta.env.VITE_API_URL}/api/tests?${params.toString()}`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
             );
             if (!res.ok) throw new Error("Failed to fetch tests");
             return res.json();
+        },
+        enabled: !!token,
+    });
+
+    // Fetch categories for filter dropdown
+    const { data: categoriesData } = useQuery({
+        queryKey: ["test-category"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/test-category?limit=100`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch categories");
+            const result = await res.json();
+            return result.data?.rows || result.data?.items || result.data || [];
         },
         enabled: !!token,
     });
@@ -88,20 +127,6 @@ export default function ListOfTests({ page, limit, search, setPage, setLimit, se
                 gradient: "from-purple-600 to-purple-400",
                 shadow: "shadow-purple-500/30",
                 icon: <FolderTree className="w-6 h-6 text-white" />,
-            },
-            {
-                label: "Avg Price",
-                value: totalTests > 0 ? `${currencySymbol}${(totalRevenue / totalTests).toFixed(0)}` : `${currencySymbol}0`,
-                gradient: "from-emerald-600 to-emerald-400",
-                shadow: "shadow-emerald-500/30",
-                icon: <CheckCircle className="w-6 h-6 text-white" />,
-            },
-            {
-                label: "Total Revenue",
-                value: `${currencySymbol}${totalRevenue.toLocaleString()}`,
-                gradient: "from-amber-600 to-amber-400",
-                shadow: "shadow-amber-500/30",
-                icon: <DollarSign className="w-6 h-6 text-white" />,
             },
         ];
     }, [data]);
@@ -136,8 +161,9 @@ export default function ListOfTests({ page, limit, search, setPage, setLimit, se
             const tableName = btn.dataset.tableName || '-';
             const category = btn.dataset.category || '-';
             const department = btn.dataset.department || '-';
+            const room = btn.dataset.room || '-';
+            const creator = btn.dataset.creator || '-';
             const price = btn.dataset.price || '0';
-            const createdBy = btn.dataset.createdBy || '-';
             const id = btn.dataset.id || '';
             const currency = btn.dataset.currency || '$';
 
@@ -162,8 +188,8 @@ export default function ListOfTests({ page, limit, search, setPage, setLimit, se
                             </li>
 
                             <li class="flex flex-col">
-                                <span class="text-gray-500">Match Table</span>
-                                <span class="font-medium text-gray-700">${tableName}</span>
+                                <span class="text-gray-500">Report Template</span>
+                                <span class="font-mono text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">${tableName}</span>
                             </li>
 
                             <li class="flex flex-col">
@@ -181,25 +207,32 @@ export default function ListOfTests({ page, limit, search, setPage, setLimit, se
                             </li>
 
                             <li class="flex flex-col">
+                                <span class="text-gray-500">Sample Collection Room</span>
+                                <span class="px-3 py-1 w-fit text-xs font-semibold rounded-full bg-teal-100 text-teal-700">
+                                    ${room}
+                                </span>
+                            </li>
+
+                            <li class="flex flex-col">
                                 <span class="text-gray-500">Price</span>
                                 <span class="font-bold text-lg text-blue-600">${currency}${price}</span>
                             </li>
 
-                            <li class="flex flex-col">
+                            <li class="flex flex-col md:col-span-2">
                                 <span class="text-gray-500">Created By</span>
-                                <span class="font-medium text-gray-700">${createdBy}</span>
+                                <span class="font-medium text-gray-700">${creator}</span>
                             </li>
 
                         </ul>
 
                         <!-- Actions -->
                         <div class="mt-8 flex justify-end gap-3 border-t pt-5">
-                            <a href="/outdoor/master/tests/${id}"
+                            <a href="/dashboard/outdoor/master/tests/${id}"
                                class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 transition h-10 px-5">
                                 View
                             </a>
 
-                            <a href="/outdoor/master/tests/edit/${id}"
+                            <a href="/dashboard/outdoor/master/tests/edit/${id}"
                                class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition h-10 px-5 shadow">
                                 Edit
                             </a>
@@ -213,7 +246,7 @@ export default function ListOfTests({ page, limit, search, setPage, setLimit, se
             newRow.className = 'child-row-detail';
             const cell = document.createElement('td');
             cell.className = 'p-4 bg-muted/50';
-            cell.colSpan = 10;
+            cell.colSpan = 7;
             cell.appendChild(cardContainer);
             newRow.appendChild(cell);
 
@@ -244,6 +277,10 @@ export default function ListOfTests({ page, limit, search, setPage, setLimit, se
                 const tableName = row.match_table_name ? String(row.match_table_name) : 'N/A';
                 const category = row.category?.name || 'N/A';
                 const department = row.category?.department?.name || '-';
+                const room = row.sampleCollectionRoom
+                    ? `${row.sampleCollectionRoom.name}${row.sampleCollectionRoom.location ? ` (${row.sampleCollectionRoom.location})` : ''}`
+                    : '-';
+                const creator = row.creator?.name || '-';
 
                 return `
                     <div class="flex items-center gap-2">
@@ -253,9 +290,10 @@ export default function ListOfTests({ page, limit, search, setPage, setLimit, se
                                 data-table-name="${tableName.replace(/"/g, '&quot;')}"
                                 data-category="${category.replace(/"/g, '&quot;')}"
                                 data-department="${department.replace(/"/g, '&quot;')}"
+                                data-room="${room.replace(/"/g, '&quot;')}"
+                                data-creator="${creator.replace(/"/g, '&quot;')}"
                                 data-price="${Number(row.price || 0).toFixed(2)}"
                                 data-currency="${currencySymbol}"
-                                data-created-by="${(row.creator?.name || '-').replace(/"/g, '&quot;')}"
                                 data-id="${row.id}">+</button>
                         <span>${sl}</span>
                     </div>
@@ -314,11 +352,18 @@ export default function ListOfTests({ page, limit, search, setPage, setLimit, se
         },
         {
             data: null,
-            title: "Created By",
-            orderable: true,
+            title: "Room No",
+            orderable: false,
             responsivePriority: 3,
             render: (_data: any, _type: string, row: TestItem) => {
-                return `<span class="text-sm text-muted-foreground">${row.creator?.name || '-'}</span>`;
+                const room = row.sampleCollectionRoom;
+                if (!room) return '<span class="text-muted-foreground">-</span>';
+                return `
+                    <div class="flex flex-col">
+                        <span class="font-medium">${room.name}</span>
+                        ${room.location ? `<span class="text-xs text-muted-foreground">${room.location}</span>` : ''}
+                    </div>
+                `;
             },
             defaultContent: "-",
         },
@@ -330,10 +375,10 @@ export default function ListOfTests({ page, limit, search, setPage, setLimit, se
             render: (_data: any, _type: string, row: TestItem) => {
                 return `
                     <div class="flex gap-2">
-                        <a href="/outdoor/master/tests/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+                        <a href="/dashboard/outdoor/master/tests/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
                             View
                         </a>
-                        <a href="/outdoor/master/tests/edit/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+                        <a href="/dashboard/outdoor/master/tests/edit/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
                             Edit
                         </a>
                     </div>
@@ -349,12 +394,12 @@ export default function ListOfTests({ page, limit, search, setPage, setLimit, se
         <main className='p-4'>
             <div className="flex flex-wrap items-end justify-between gap-2 mb-3">
                 <h1 className="text-2xl font-bold tracking-tight">List of Tests</h1>
-                <Link to="/outdoor/master/tests/create"><Button>Create New Test</Button></Link>
+                <Link to="/dashboard/outdoor/master/tests/create"><Button>Create New Test</Button></Link>
                 {/* <CreateTestForm /> */}
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 {stats.map((item, idx) => (
                     <div
                         key={idx}
@@ -393,6 +438,24 @@ export default function ListOfTests({ page, limit, search, setPage, setLimit, se
                 search={search}
                 isLoading={isFetching}
                 onSearchChange={setSearch}
+                filterSlot={
+                    <Select
+                        value={categoryId ? String(categoryId) : 'all'}
+                        onValueChange={(val) => setCategoryId(val === 'all' ? undefined : Number(val))}
+                    >
+                        <SelectTrigger className="w-[180px] h-9">
+                            <SelectValue placeholder="All Categories" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Categories</SelectItem>
+                            {categoriesData?.map((cat: any) => (
+                                <SelectItem key={cat.id} value={String(cat.id)}>
+                                    {cat.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                }
             />
         </main>
     </>

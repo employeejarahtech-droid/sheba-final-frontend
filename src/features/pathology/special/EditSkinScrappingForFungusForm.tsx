@@ -150,7 +150,7 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
         onSuccess: (data) => {
             toast.success(data.message || "Test created successfully!");
             console.log("API Response:", data);
-            navigate({ to: "/pathology/hormone/skin-scrapping-for-fungus" });
+            navigate({ to: "/dashboard/pathology/hormone/skin-scrapping-for-fungus" });
             // optional:
             // form.reset();
             queryClient.invalidateQueries({

@@ -189,6 +189,21 @@ export const useLedgerReport = (params: { account_id: number; from?: string; to?
     });
 };
 
+export const useMultiLedgerReport = (params: { account_ids: number[]; from?: string; to?: string }) => {
+    return useQuery({
+        queryKey: ["accounting", "multi-ledger", params],
+        queryFn: () => accountingService.getMultiLedgerReport(params),
+        enabled: params.account_ids.length > 0,
+    });
+};
+
+export const useRootAccounts = () => {
+    return useQuery({
+        queryKey: ["accounting", "root-accounts"],
+        queryFn: () => accountingService.getRootAccounts(),
+    });
+};
+
 export const useAllTransactions = (params: { from?: string; to?: string; type?: string; search?: string } = {}) => {
     return useQuery({
         queryKey: ["accounting", "transactions", params],

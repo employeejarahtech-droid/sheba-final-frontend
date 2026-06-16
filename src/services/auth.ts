@@ -1,5 +1,5 @@
 export async function loginApi(email: string, password: string) {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+  const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -11,4 +11,21 @@ export async function loginApi(email: string, password: string) {
   }
 
   return res.json(); // should return { user, accessToken }
+}
+
+export async function getCurrentUser(token: string) {
+  const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/me`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch user: ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data.user || data.data?.user || data;
 }

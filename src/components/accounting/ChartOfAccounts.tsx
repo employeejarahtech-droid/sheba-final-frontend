@@ -3,7 +3,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Edit, ChevronsUpDown, Check } from "lucide-react";
+import { Plus, Edit, Trash2, Lock, ChevronsUpDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -42,7 +42,7 @@ import {
     useLazyGetAccountingAccountsQuery,
     useAddAccountingAccountMutation,
     useUpdateAccountingAccountMutation,
-    // useDeleteAccountingAccountMutation
+    useDeleteAccountingAccountMutation,
 } from "@/features/accounting/accountingQueries";
 import type { ChartOfAccount } from "@/types/accounting.types";
 import { toast } from "sonner";
@@ -65,7 +65,8 @@ export default function ChartOfAccounts() {
 
     const addAccountingAccount = useAddAccountingAccountMutation();
     const updateAccountingAccount = useUpdateAccountingAccountMutation();
-    const isLoading = addAccountingAccount.isPending || updateAccountingAccount.isPending;
+    const deleteAccountingAccount = useDeleteAccountingAccountMutation();
+    const isLoading = addAccountingAccount.isPending || updateAccountingAccount.isPending || deleteAccountingAccount.isPending;
 
     const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<CreateAccountFormValues>({
         defaultValues: { name: "", code: "", type: undefined, parent_id: undefined },
@@ -102,12 +103,17 @@ export default function ChartOfAccounts() {
         setIsOpen(true);
     };
 
-    // const onDelete = async (id: number) => {
-    //     if (confirm("Are you sure you want to delete this account?")) {
-    //         await deleteAccountingAccount(id).unwrap();
-    //         refetch();
-    //     }
-    // };
+    const onDelete = async (account: ChartOfAccount) => {
+        if (!confirm(`Delete "${account.name}"?\n\nIf it has transactions it will be deactivated (kept for history) instead of removed.`)) return;
+        try {
+            await deleteAccountingAccount.mutateAsync(account.id);
+            toast.success("Account deleted successfully");
+            refetch();
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to delete account");
+            console.error("Account delete failed", error);
+        }
+    };
 
     const ParentAccountSelect = ({ control }: { control: any }) => {
         const [query, setQuery] = useState("");
@@ -170,23 +176,43 @@ export default function ChartOfAccounts() {
         {
             accessorKey: "name",
             header: "Account Name",
-            cell: ({ row }) => (
-                <div className="flex items-center" style={{ paddingLeft: `${(row.original.level || 0) * 20}px` }}>
-                    {(row.original.level || 0) > 0 && <span className="mr-2 text-muted-foreground">└─</span>}
-                    <span className={(row.original.level || 0) === 0 ? "font-semibold" : ""}>{row.original.name}</span>
-                </div>
-            ),
+            cell: ({ row }) => {
+                const acc = row.original;
+                return (
+                    <div className="flex items-center gap-2" style={{ paddingLeft: `${(acc.level || 0) * 20}px` }}>
+                        {(acc.level || 0) > 0 && <span className="mr-2 text-muted-foreground">└─</span>}
+                        <span className={(acc.level || 0) === 0 ? "font-semibold" : ""}>{acc.name}</span>
+                        {acc.is_protected && (
+                            <Badge variant="secondary" className="gap-1"><Lock className="h-3 w-3" /> Protected</Badge>
+                        )}
+                        {!acc.is_active && <Badge variant="outline">Inactive</Badge>}
+                    </div>
+                );
+            },
         },
         { accessorKey: "type", header: "Type", cell: ({ row }) => <Badge variant="outline">{row.original.type}</Badge> },
         {
             id: "actions",
             header: () => <div className="text-right">Actions</div>,
-            cell: ({ row }) => (
-                <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => onEdit(row.original)}><Edit className="h-4 w-4" /></Button>
-                    {/* <Button variant="ghost" size="icon" className="text-destructive" onClick={() => onDelete(row.original.id)}><Trash2 className="h-4 w-4" /></Button> */}
-                </div>
-            ),
+            cell: ({ row }) => {
+                const acc = row.original;
+                if (acc.is_protected) {
+                    // Locked head — cannot update or delete
+                    return (
+                        <div className="flex justify-end gap-2">
+                            <Button variant="ghost" size="icon" disabled title="Protected account — cannot edit or delete">
+                                <Lock className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                        </div>
+                    );
+                }
+                return (
+                    <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => onEdit(acc)}><Edit className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="text-destructive" onClick={() => onDelete(acc)}><Trash2 className="h-4 w-4" /></Button>
+                    </div>
+                );
+            },
         },
     ];
 

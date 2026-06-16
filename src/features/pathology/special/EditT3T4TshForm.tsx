@@ -151,7 +151,7 @@ export function ThyroidFunctionTestForm({ open, setOpen, reportId, invoiceId }: 
         onSuccess: (data) => {
             toast.success(data.message || "Test created successfully!");
             console.log("API Response:", data);
-            navigate({ to: "/pathology/hormone/t3t4tsh" });
+            navigate({ to: "/dashboard/pathology/hormone/t3t4tsh" });
             queryClient.invalidateQueries({
                 queryKey: ["t3t4tsh", reportId],
             });
@@ -301,7 +301,7 @@ export function ThyroidFunctionTestForm({ open, setOpen, reportId, invoiceId }: 
                                 {form.formState.isSubmitting ? "Saving..." : "Save"}
                             </Button>
 
-                            <Link to="/pathology/hormone/t3t4tsh/report/$reportId" params={{ reportId: reportId.toString() }}>
+                            <Link to="/dashboard/pathology/hormone/t3t4tsh/report/$reportId" params={{ reportId: reportId.toString() }}>
                                 <Button type="button" variant="warning">
                                     Print Preview
                                 </Button>

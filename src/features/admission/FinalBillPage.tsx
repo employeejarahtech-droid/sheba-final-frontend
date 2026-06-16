@@ -508,7 +508,7 @@ export function FinalBillPage({ admissionId }: FinalBillPageProps) {
     })
 
     const handleBack = () => {
-        navigate({ to: '/admission/patients/$admissionId/billing', params: { admissionId: String(admissionId) } })
+        navigate({ to: '/dashboard/admission/patients/$admissionId/billing', params: { admissionId: String(admissionId) } })
     }
 
     const handleSave = () => {
@@ -692,7 +692,7 @@ export function FinalBillPage({ admissionId }: FinalBillPageProps) {
                         Back
                     </Button>
                     <Link
-                        to="/admission/patients/$admissionId/final-bill-print"
+                        to="/dashboard/admission/patients/$admissionId/final-bill-print"
                         params={{ admissionId: String(admissionId) }}
                     >
                         <Button>

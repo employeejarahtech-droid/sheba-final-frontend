@@ -147,7 +147,7 @@ export function Dashboard() {
 
         {/* ===== Quick Actions ===== */}
         <div className='mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-          <Link to='/admission/new-admission'>
+          <Link to='/dashboard/admission/new-admission'>
             <Card className='cursor-pointer transition-colors hover:border-primary/50 hover:bg-muted/50'>
               <CardContent className='flex items-center gap-4 p-4'>
                 <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10'>
@@ -162,7 +162,7 @@ export function Dashboard() {
               </CardContent>
             </Card>
           </Link>
-          <Link to='/outdoor/reception/invoices/create'>
+          <Link to='/dashboard/outdoor/reception/invoices/create'>
             <Card className='cursor-pointer transition-colors hover:border-primary/50 hover:bg-muted/50'>
               <CardContent className='flex items-center gap-4 p-4'>
                 <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10'>
@@ -177,7 +177,7 @@ export function Dashboard() {
               </CardContent>
             </Card>
           </Link>
-          <Link to='/outdoor/reception/due-collection'>
+          <Link to='/dashboard/outdoor/reception/due-collection'>
             <Card className='cursor-pointer transition-colors hover:border-primary/50 hover:bg-muted/50'>
               <CardContent className='flex items-center gap-4 p-4'>
                 <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10'>
@@ -192,7 +192,7 @@ export function Dashboard() {
               </CardContent>
             </Card>
           </Link>
-          <Link to='/reports/my/outdoor/today-collection'>
+          <Link to='/dashboard/reports/my/outdoor/today-collection'>
             <Card className='cursor-pointer transition-colors hover:border-primary/50 hover:bg-muted/50'>
               <CardContent className='flex items-center gap-4 p-4'>
                 <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10'>

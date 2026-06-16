@@ -4,34 +4,31 @@ import { getCookie } from '@/lib/cookies'
 import { useAppDispatch } from '@/store/store'
 import { setCurrency } from '@/store/currencySlice'
 
-type ProfileResponse = {
-  id: number
-  companyName: string
-  email: string
-  avatar: string | null
-  bio?: string | null
+type CompanySettings = {
   currency?: string | null
-  address1?: string | null
-  address2?: string | null
 }
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const token = getCookie('accessToken')
   const dispatch = useAppDispatch()
 
-  // Fetch profile to get currency setting
-  const { data: profileData } = useQuery<ProfileResponse>({
-    queryKey: ['user-currency'],
-    queryFn: async (): Promise<ProfileResponse> => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/profile`, {
+  // Currency is the authoritative field on company settings (edited on the
+  // settings page). The users/profile endpoint does not expose currency, so we
+  // read it from company settings instead. Sharing the ['company-settings']
+  // query key dedupes the request with the settings page and keeps the store in
+  // sync automatically when currency is updated there.
+  const { data: settingsData } = useQuery<CompanySettings>({
+    queryKey: ['company-settings'],
+    queryFn: async (): Promise<CompanySettings> => {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/company-settings`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       })
 
       if (!res.ok) {
-        // Silently fail if profile fetch fails
-        return {} as ProfileResponse
+        // Silently fail if settings fetch fails
+        return {} as CompanySettings
       }
 
       const response = await res.json()
@@ -42,12 +39,12 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     refetchOnWindowFocus: false,
   })
 
-  // Update Redux store when profile data loads
+  // Hydrate the Redux store once the company currency is known
   useEffect(() => {
-    if (profileData?.currency) {
-      dispatch(setCurrency(profileData.currency))
+    if (settingsData?.currency) {
+      dispatch(setCurrency(settingsData.currency))
     }
-  }, [profileData, dispatch])
+  }, [settingsData, dispatch])
 
   return <>{children}</>
 }

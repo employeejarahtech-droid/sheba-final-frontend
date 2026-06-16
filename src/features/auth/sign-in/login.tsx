@@ -12,7 +12,7 @@ export function Login() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/company-settings/public`)
+        const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/company-settings/public`)
 
         if (res.ok) {
           const response = await res.json()
@@ -21,7 +21,7 @@ export function Login() {
           }
           let logoUrl = response.data?.company_logo || null
           if (logoUrl && !logoUrl.startsWith('http') && !logoUrl.startsWith('data:')) {
-            logoUrl = `${import.meta.env.VITE_API_URL}${logoUrl}`
+            logoUrl = `${import.meta.env.VITE_API_URL || ''}${logoUrl}`
           }
           setProfileImage(logoUrl)
 

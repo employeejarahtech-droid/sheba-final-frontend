@@ -203,7 +203,7 @@ export function FinalBillsListPage() {
             const btn = button as HTMLButtonElement
             const admissionId = btn.dataset.admissionId
             if (admissionId) {
-                navigate({ to: '/admission/patients/$admissionId/final-bill', params: { admissionId } })
+                navigate({ to: '/dashboard/admission/patients/$admissionId/final-bill', params: { admissionId } })
             }
         }
 
