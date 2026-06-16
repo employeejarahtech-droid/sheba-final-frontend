@@ -8,8 +8,6 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createFileRoute } from '@tanstack/react-router'
-
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ClerkRouteRouteImport } from './routes/clerk/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -153,6 +151,7 @@ import { Route as AuthenticatedDashboardIndoorMasterServiceCategoriesIndexRouteI
 import { Route as AuthenticatedDashboardIndoorMasterPatientTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/patient-types/index'
 import { Route as AuthenticatedDashboardIndoorMasterOperationTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/operation-types/index'
 import { Route as AuthenticatedDashboardIndoorMasterDoctorTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/doctor-types/index'
+import { Route as AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/bed-resource-types/index'
 import { Route as AuthenticatedDashboardIndoorMasterBedCabinListIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/bed-cabin-list/index'
 import { Route as AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/anasthesia-types/index'
 import { Route as AuthenticatedDashboardIndoorManagementDoctorReferredIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/doctor-referred/index'
@@ -256,8 +255,6 @@ import { Route as AuthenticatedDashboardPathologyHematologyAllEditIdIndexRouteIm
 import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/edit/$invoiceId/index'
 import { Route as AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/tests/edit/[$id]/index'
 
-const platformAdminRouteImport = createFileRoute('/(platform)/admin')()
-
 const ClerkRouteRoute = ClerkRouteRouteImport.update({
   id: '/clerk',
   path: '/clerk',
@@ -270,11 +267,6 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const platformAdminRoute = platformAdminRouteImport.update({
-  id: '/(platform)/admin',
-  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const platformRegisterRoute = platformRegisterRouteImport.update({
@@ -1086,6 +1078,12 @@ const AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute =
   AuthenticatedDashboardIndoorMasterDoctorTypesIndexRouteImport.update({
     id: '/dashboard/indoor/master/doctor-types/',
     path: '/dashboard/indoor/master/doctor-types/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute =
+  AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRouteImport.update({
+    id: '/dashboard/indoor/master/bed-resource-types/',
+    path: '/dashboard/indoor/master/bed-resource-types/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute =
@@ -1911,6 +1909,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/indoor/management/doctor-referred': typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
   '/dashboard/indoor/master/anasthesia-types': typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   '/dashboard/indoor/master/bed-cabin-list': typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
+  '/dashboard/indoor/master/bed-resource-types': typeof AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute
   '/dashboard/indoor/master/doctor-types': typeof AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute
   '/dashboard/indoor/master/operation-types': typeof AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute
   '/dashboard/indoor/master/patient-types': typeof AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute
@@ -2151,6 +2150,7 @@ export interface FileRoutesByTo {
   '/dashboard/indoor/management/doctor-referred': typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
   '/dashboard/indoor/master/anasthesia-types': typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   '/dashboard/indoor/master/bed-cabin-list': typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
+  '/dashboard/indoor/master/bed-resource-types': typeof AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute
   '/dashboard/indoor/master/doctor-types': typeof AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute
   '/dashboard/indoor/master/operation-types': typeof AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute
   '/dashboard/indoor/master/patient-types': typeof AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute
@@ -2281,7 +2281,6 @@ export interface FileRoutesById {
   '/(platform)/pricing': typeof platformPricingRoute
   '/(platform)/register': typeof platformRegisterRoute
   '/_authenticated/dashboard/settings': typeof AuthenticatedDashboardSettingsRouteRouteWithChildren
-  '/(platform)/admin': typeof platformAdminRouteWithChildren
   '/(platform)/admin/_layout': typeof platformAdminLayoutRoute
   '/(platform)/admin/admins': typeof platformAdminAdminsRoute
   '/(platform)/admin/billing': typeof platformAdminBillingRoute
@@ -2399,6 +2398,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/indoor/management/doctor-referred/': typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
   '/_authenticated/dashboard/indoor/master/anasthesia-types/': typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   '/_authenticated/dashboard/indoor/master/bed-cabin-list/': typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
+  '/_authenticated/dashboard/indoor/master/bed-resource-types/': typeof AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute
   '/_authenticated/dashboard/indoor/master/doctor-types/': typeof AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute
   '/_authenticated/dashboard/indoor/master/operation-types/': typeof AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute
   '/_authenticated/dashboard/indoor/master/patient-types/': typeof AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute
@@ -2643,6 +2643,7 @@ export interface FileRouteTypes {
     | '/dashboard/indoor/management/doctor-referred'
     | '/dashboard/indoor/master/anasthesia-types'
     | '/dashboard/indoor/master/bed-cabin-list'
+    | '/dashboard/indoor/master/bed-resource-types'
     | '/dashboard/indoor/master/doctor-types'
     | '/dashboard/indoor/master/operation-types'
     | '/dashboard/indoor/master/patient-types'
@@ -2883,6 +2884,7 @@ export interface FileRouteTypes {
     | '/dashboard/indoor/management/doctor-referred'
     | '/dashboard/indoor/master/anasthesia-types'
     | '/dashboard/indoor/master/bed-cabin-list'
+    | '/dashboard/indoor/master/bed-resource-types'
     | '/dashboard/indoor/master/doctor-types'
     | '/dashboard/indoor/master/operation-types'
     | '/dashboard/indoor/master/patient-types'
@@ -3012,7 +3014,6 @@ export interface FileRouteTypes {
     | '/(platform)/pricing'
     | '/(platform)/register'
     | '/_authenticated/dashboard/settings'
-    | '/(platform)/admin'
     | '/(platform)/admin/_layout'
     | '/(platform)/admin/admins'
     | '/(platform)/admin/billing'
@@ -3130,6 +3131,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/indoor/management/doctor-referred/'
     | '/_authenticated/dashboard/indoor/master/anasthesia-types/'
     | '/_authenticated/dashboard/indoor/master/bed-cabin-list/'
+    | '/_authenticated/dashboard/indoor/master/bed-resource-types/'
     | '/_authenticated/dashboard/indoor/master/doctor-types/'
     | '/_authenticated/dashboard/indoor/master/operation-types/'
     | '/_authenticated/dashboard/indoor/master/patient-types/'
@@ -3257,7 +3259,6 @@ export interface RootRouteChildren {
   platformContactRoute: typeof platformContactRoute
   platformPricingRoute: typeof platformPricingRoute
   platformRegisterRoute: typeof platformRegisterRoute
-  platformAdminRoute: typeof platformAdminRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -3281,13 +3282,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(platform)/admin': {
-      id: '/(platform)/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof platformAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(platform)/register': {
@@ -3509,7 +3503,7 @@ declare module '@tanstack/react-router' {
     }
     '/(platform)/admin/_layout': {
       id: '/(platform)/admin/_layout'
-      path: '/admin'
+      path: ''
       fullPath: '/admin'
       preLoaderRoute: typeof platformAdminLayoutRouteImport
       parentRoute: typeof platformAdminRoute
@@ -4261,6 +4255,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/indoor/master/doctor-types'
       fullPath: '/dashboard/indoor/master/doctor-types'
       preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterDoctorTypesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/indoor/master/bed-resource-types/': {
+      id: '/_authenticated/dashboard/indoor/master/bed-resource-types/'
+      path: '/dashboard/indoor/master/bed-resource-types'
+      fullPath: '/dashboard/indoor/master/bed-resource-types'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/indoor/master/bed-cabin-list/': {
@@ -5114,6 +5115,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute: typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
   AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
+  AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute
   AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute
   AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute
   AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterPatientTypesIndexRoute
@@ -5409,6 +5411,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute,
   AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute:
     AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute,
+  AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute:
+    AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRoute,
   AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute:
     AuthenticatedDashboardIndoorMasterDoctorTypesIndexRoute,
   AuthenticatedDashboardIndoorMasterOperationTypesIndexRoute:
@@ -5667,36 +5671,6 @@ const ClerkRouteRouteWithChildren = ClerkRouteRoute._addFileChildren(
   ClerkRouteRouteChildren,
 )
 
-interface platformAdminRouteChildren {
-  platformAdminLayoutRoute: typeof platformAdminLayoutRoute
-  platformAdminAdminsRoute: typeof platformAdminAdminsRoute
-  platformAdminBillingRoute: typeof platformAdminBillingRoute
-  platformAdminCompaniesRoute: typeof platformAdminCompaniesRoute
-  platformAdminLoginRoute: typeof platformAdminLoginRoute
-  platformAdminModulesRoute: typeof platformAdminModulesRoute
-  platformAdminPlansRoute: typeof platformAdminPlansRoute
-  platformAdminRegistrationsRoute: typeof platformAdminRegistrationsRoute
-  platformAdminSettingsRoute: typeof platformAdminSettingsRoute
-  platformAdminIndexRoute: typeof platformAdminIndexRoute
-}
-
-const platformAdminRouteChildren: platformAdminRouteChildren = {
-  platformAdminLayoutRoute: platformAdminLayoutRoute,
-  platformAdminAdminsRoute: platformAdminAdminsRoute,
-  platformAdminBillingRoute: platformAdminBillingRoute,
-  platformAdminCompaniesRoute: platformAdminCompaniesRoute,
-  platformAdminLoginRoute: platformAdminLoginRoute,
-  platformAdminModulesRoute: platformAdminModulesRoute,
-  platformAdminPlansRoute: platformAdminPlansRoute,
-  platformAdminRegistrationsRoute: platformAdminRegistrationsRoute,
-  platformAdminSettingsRoute: platformAdminSettingsRoute,
-  platformAdminIndexRoute: platformAdminIndexRoute,
-}
-
-const platformAdminRouteWithChildren = platformAdminRoute._addFileChildren(
-  platformAdminRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -5717,7 +5691,6 @@ const rootRouteChildren: RootRouteChildren = {
   platformContactRoute: platformContactRoute,
   platformPricingRoute: platformPricingRoute,
   platformRegisterRoute: platformRegisterRoute,
-  platformAdminRoute: platformAdminRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -13,10 +13,13 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { ArrowLeft, Bed, Save } from 'lucide-react'
+import { ArrowLeft, Bed, Save, Check, ChevronDown } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { useEffect } from 'react'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react'
 
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
@@ -27,7 +30,7 @@ export const Route = createFileRoute('/_authenticated/dashboard/indoor/master/be
 
 const bedCabinSchema = z.object({
     code: z.string().min(1, "Code is required"),
-    type: z.enum(["Cabin", "Bed", "Special"]),
+    type: z.string().min(1, "Resource type is required"),
     ward: z.string().min(1, "Ward/Department is required"),
     price: z.coerce.number().min(0, "Price must be zero or positive"),
     status: z.enum(["Available", "Occupied", "Maintenance"]),
@@ -39,6 +42,32 @@ function EditBedCabin() {
     const { id } = Route.useParams()
     const navigate = useNavigate()
     const token = getCookie('accessToken');
+    const [typeOpen, setTypeOpen] = useState(false);
+
+    const { data: resourceTypesData } = useQuery({
+        queryKey: ['bed-resource-types-list'],
+        queryFn: async () => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/bed-resource-type?limit=100`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!res.ok) throw new Error('Failed to fetch resource types');
+            const result = await res.json();
+            return result.data?.items || [];
+        },
+        enabled: !!token,
+    });
+
+    const defaultOptions = [
+        { name: "Bed", value: "Bed" },
+        { name: "Cabin", value: "Cabin" },
+        { name: "Special (ICU/CCU)", value: "Special" }
+    ];
+
+    const options = resourceTypesData && resourceTypesData.length > 0
+        ? resourceTypesData.map((t: any) => ({ name: t.name, value: t.name }))
+        : defaultOptions;
 
     const form = useForm<BedCabinValues>({
         resolver: zodResolver(bedCabinSchema) as any,
@@ -177,83 +206,66 @@ function EditBedCabin() {
         <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-background">
             <AppHeader fixed />
 
-            <Main className="p-6 lg:p-10 w-full flex-1">
-                <div className="space-y-6 max-w-5xl mx-auto">
-                    {/* Page Header */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-1 border-gray-200 dark:border-gray-800 pb-4">
-                        <div>
-                            <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent uppercase">
-                                Edit Room/Bed
-                            </h1>
-                            <p className="text-muted-foreground mt-1 text-sm font-medium">
-                                Update bed or cabin configuration and pricing
-                            </p>
+            <Main className="flex flex-1 flex-col gap-6">
+                <Form {...form}>
+                    <form
+                        id="edit-bed-cabin-form"
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="space-y-5 w-full min-w-[650px] max-w-[750px] mx-auto px-4"
+                    >
+                        {/* Header */}
+                        <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
+                            <div className="flex items-center gap-4">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => navigate({ to: '..' })}
+                                >
+                                    <ArrowLeft className="h-5 w-5" />
+                                </Button>
+                                <div>
+                                    <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                                        Edit Room/Bed
+                                    </h1>
+                                    <p className="text-muted-foreground text-sm">Update bed or cabin configuration and pricing</p>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <Button
-                                variant="outline"
-                                className="hidden sm:flex items-center gap-2 rounded-xl border-gray-200 bg-white shadow-sm transition-all hover:bg-gray-50"
-                                onClick={() => navigate({ to: '..' })}
-                            >
-                                <ArrowLeft className="h-4 w-4" />
-                                Back to List
-                            </Button>
-                            <Button
-                                type="submit"
-                                form="edit-bed-cabin-form"
-                                disabled={updateMutation.isPending}
-                                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25 border-none px-6 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] font-bold"
-                            >
-                                {updateMutation.isPending ? (
-                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                ) : (
-                                    <Save className="h-4 w-4" />
-                                )}
-                                {updateMutation.isPending ? "Updating..." : "Save Changes"}
-                            </Button>
-                        </div>
-                    </div>
 
-                    <Form {...form}>
-                        <form id="edit-bed-cabin-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                            <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl shadow-sm overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0 gap-0">
-                                <CardHeader className="p-0 border-b-1 border-blue-100 dark:border-blue-900 gap-0">
-                                    <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 px-6 py-4 flex items-center gap-4">
-                                        <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
-                                            <Bed className="h-6 w-6 text-white" />
-                                        </div>
-                                        <div>
-                                            <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-100">
-                                                Edit Configuration
-                                            </CardTitle>
-                                            <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
-                                                Update the details for this room or bed
-                                            </CardDescription>
-                                        </div>
+                        {/* Physical Configuration */}
+                        <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                        <Bed className="w-4 h-4 text-white" />
                                     </div>
-                                </CardHeader>
-                                <CardContent className="p-4 md:p-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                                    <div>
+                                        <CardTitle className="text-lg font-bold">Edit Configuration</CardTitle>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400">Update the details for this room or bed</p>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-4">
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {/* Code */}
                                         <FormField<BedCabinValues>
                                             control={form.control}
                                             name="code"
                                             render={({ field }) => (
-                                                <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                                        Bed/Cabin Code
-                                                    </FormLabel>
+                                                <FormItem>
+                                                    <FormLabel>Bed/Cabin Code</FormLabel>
                                                     <FormControl>
                                                         <Input
                                                             placeholder="e.g. C-101, B-205"
-                                                            className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all shadow-sm"
                                                             {...field}
                                                         />
                                                     </FormControl>
-                                                    <FormDescription className="text-[10px] text-muted-foreground mt-0">
+                                                    <FormDescription className="text-xs">
                                                         Unique identification code for this resource.
                                                     </FormDescription>
-                                                    <FormMessage className="text-[10px]" />
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
@@ -262,49 +274,82 @@ function EditBedCabin() {
                                         <FormField
                                             control={form.control}
                                             name="type"
-                                            render={({ field }) => (
-                                                <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Resource Type</FormLabel>
-                                                    <Select onValueChange={field.onChange} value={field.value}>
-                                                        <FormControl>
-                                                            <SelectTrigger className="w-full !h-auto h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm text-sm">
-                                                                <SelectValue placeholder="Select type" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent className="rounded-xl border-gray-100 shadow-xl">
-                                                            <SelectItem value="Bed">Bed</SelectItem>
-                                                            <SelectItem value="Cabin">Cabin</SelectItem>
-                                                            <SelectItem value="Special">Special (ICU/CCU)</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormDescription className="text-[10px] text-muted-foreground mt-0">
-                                                        Classification of the resource.
-                                                    </FormDescription>
-                                                    <FormMessage className="text-[10px]" />
-                                                </FormItem>
-                                            )}
+                                            render={({ field }) => {
+                                                const selectedOption = options.find(opt => opt.value === field.value);
+                                                return (
+                                                    <FormItem>
+                                                        <FormLabel>Resource Type</FormLabel>
+                                                        <Popover open={typeOpen} onOpenChange={setTypeOpen}>
+                                                            <PopoverTrigger asChild>
+                                                                <FormControl>
+                                                                    <button
+                                                                        type="button"
+                                                                        className={cn(
+                                                                            "w-full flex justify-between items-center px-3 py-1 border rounded-md h-9 text-sm bg-transparent border-gray-200 dark:border-gray-800",
+                                                                            !field.value && "text-muted-foreground"
+                                                                        )}
+                                                                    >
+                                                                        {selectedOption?.name || "Select type"}
+                                                                        <ChevronDown className="h-4 w-4 opacity-50" />
+                                                                    </button>
+                                                                </FormControl>
+                                                            </PopoverTrigger>
+                                                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                                                                <Command>
+                                                                    <CommandInput placeholder="Search type..." />
+                                                                    <CommandList>
+                                                                        <CommandEmpty>No resource type found.</CommandEmpty>
+                                                                        <CommandGroup>
+                                                                            {options.map((opt) => (
+                                                                                <CommandItem
+                                                                                    key={opt.value}
+                                                                                    onSelect={() => {
+                                                                                        field.onChange(opt.value);
+                                                                                        setTypeOpen(false);
+                                                                                    }}
+                                                                                >
+                                                                                    {opt.name}
+                                                                                    <Check
+                                                                                        className={cn(
+                                                                                            "h-4 w-4 ml-auto",
+                                                                                            opt.value === field.value ? "opacity-100" : "opacity-0"
+                                                                                        )}
+                                                                                    />
+                                                                                </CommandItem>
+                                                                            ))}
+                                                                        </CommandGroup>
+                                                                    </CommandList>
+                                                                </Command>
+                                                            </PopoverContent>
+                                                        </Popover>
+                                                        <FormDescription className="text-xs">
+                                                            Classification of the resource.
+                                                        </FormDescription>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                );
+                                            }}
                                         />
+                                    </div>
 
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {/* Ward */}
                                         <FormField
                                             control={form.control}
                                             name="ward"
                                             render={({ field }) => (
-                                                <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                                        Ward / Department
-                                                    </FormLabel>
+                                                <FormItem>
+                                                    <FormLabel>Ward / Department</FormLabel>
                                                     <FormControl>
                                                         <Input
                                                             placeholder="e.g. VIP Ward, General Ward 2"
-                                                            className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all shadow-sm"
                                                             {...field}
                                                         />
                                                     </FormControl>
-                                                    <FormDescription className="text-[10px] text-muted-foreground mt-0">
+                                                    <FormDescription className="text-xs">
                                                         The location within the hospital.
                                                     </FormDescription>
-                                                    <FormMessage className="text-[10px]" />
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
@@ -314,37 +359,39 @@ function EditBedCabin() {
                                             control={form.control}
                                             name="price"
                                             render={({ field }) => (
-                                                <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Daily Charge (৳)</FormLabel>
+                                                <FormItem>
+                                                    <FormLabel>Daily Charge (৳)</FormLabel>
                                                     <FormControl>
                                                         <div className="relative group">
                                                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-blue-600 transition-colors font-semibold">৳</span>
                                                             <Input
                                                                 type="number"
                                                                 placeholder="0.00"
-                                                                className="h-10 pl-8 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all shadow-sm"
+                                                                className="pl-8"
                                                                 {...field}
                                                             />
                                                         </div>
                                                     </FormControl>
-                                                    <FormDescription className="text-[10px] text-muted-foreground mt-0">
+                                                    <FormDescription className="text-xs">
                                                         The base daily billing amount.
                                                     </FormDescription>
-                                                    <FormMessage className="text-[10px]" />
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
+                                    </div>
 
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {/* Status */}
                                         <FormField
                                             control={form.control}
                                             name="status"
                                             render={({ field }) => (
-                                                <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Current Status</FormLabel>
+                                                <FormItem>
+                                                    <FormLabel>Current Status</FormLabel>
                                                     <Select onValueChange={field.onChange} value={field.value}>
                                                         <FormControl>
-                                                            <SelectTrigger className="w-full !h-auto h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm text-sm">
+                                                            <SelectTrigger className="w-full">
                                                                 <SelectValue placeholder="Select status" />
                                                             </SelectTrigger>
                                                         </FormControl>
@@ -354,44 +401,45 @@ function EditBedCabin() {
                                                             <SelectItem value="Maintenance">Under Maintenance</SelectItem>
                                                         </SelectContent>
                                                     </Select>
-                                                    <FormDescription className="text-[10px] text-muted-foreground mt-0">
+                                                    <FormDescription className="text-xs">
                                                         Current availability status.
                                                     </FormDescription>
-                                                    <FormMessage className="text-[10px]" />
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
                                     </div>
+                                </div>
+                            </CardContent>
+                        </Card>
 
-                                    <Separator className="my-6" />
-
-                                    <div className="flex justify-end gap-4">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            className="px-8 h-12 rounded-xl border-gray-200 font-semibold shadow-sm transition-all hover:bg-gray-50"
-                                            onClick={() => navigate({ to: '..' })}
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button
-                                            type="submit"
-                                            disabled={updateMutation.isPending}
-                                            className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-xl shadow-blue-500/30 border-none px-10 h-12 rounded-xl transition-all font-bold"
-                                        >
-                                            {updateMutation.isPending ? (
-                                                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
-                                            ) : (
-                                                <Save className="h-5 w-5 mr-2" />
-                                            )}
-                                            {updateMutation.isPending ? "Updating..." : "Save Changes"}
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </form>
-                    </Form>
-                </div>
+                        {/* Action Buttons */}
+                        <div className="flex items-center justify-end gap-3 pb-10">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="lg"
+                                onClick={() => navigate({ to: '..' })}
+                                disabled={updateMutation.isPending}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                size="lg"
+                                disabled={updateMutation.isPending}
+                                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white min-w-[200px]"
+                            >
+                                {updateMutation.isPending ? (
+                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
+                                ) : (
+                                    <Save className="h-5 w-5 mr-2" />
+                                )}
+                                {updateMutation.isPending ? "Updating..." : "Save Changes"}
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
             </Main>
         </div>
     )
