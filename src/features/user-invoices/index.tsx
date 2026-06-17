@@ -656,7 +656,7 @@ export default function UserInvoices({ page, limit, search, statusFilter, select
         },
         {
             data: "total_amount",
-            title: "Total Amount",
+            title: `Total Amount (${currencySymbol})`,
             orderable: true,
             responsivePriority: 4,
             render: (data: any) => String(data ?? "-"),
@@ -664,7 +664,7 @@ export default function UserInvoices({ page, limit, search, statusFilter, select
         },
         {
             data: null,
-            title: "Discount",
+            title: `Discount (${currencySymbol})`,
             orderable: false,
             responsivePriority: 5,
             render: (_data: any, _type: string, row: InvoiceItem) => {

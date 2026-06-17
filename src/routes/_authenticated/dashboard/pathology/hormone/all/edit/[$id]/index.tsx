@@ -144,7 +144,7 @@ function EditReportHormone() {
       {/* Main */}
       <Main>
         <div className="flex items-center gap-4 mb-6">
-          <Link to="/dashboard/hormone/all">
+          <Link to="/dashboard/pathology/hormone/all">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to All Reports

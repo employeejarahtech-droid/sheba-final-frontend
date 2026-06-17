@@ -497,10 +497,14 @@ function RegisterPage() {
                                   {COUNTRIES.map((country) => (
                                     <CommandItem
                                       key={country}
-                                      value={country}
+                                      value={country.toLowerCase()}
                                       onSelect={() => {
                                         setValue('country', country, { shouldValidate: true })
                                         setOpenCountry(false)
+                                        const currencyInfo = CURRENCIES.find((c) => c.country === country)
+                                        if (currencyInfo) {
+                                          setValue('currency', currencyInfo.code, { shouldValidate: true })
+                                        }
                                       }}
                                     >
                                       <Check
@@ -541,7 +545,7 @@ function RegisterPage() {
                                   {CURRENCIES.map((c) => (
                                     <CommandItem
                                       key={`${c.country}-${c.code}`}
-                                      value={`${c.country} ${c.code} ${c.name}`}
+                                      value={`${c.country} ${c.code} ${c.name}`.toLowerCase()}
                                       onSelect={() => {
                                         setValue('currency', c.code, { shouldValidate: true })
                                         setOpenCurrency(false)

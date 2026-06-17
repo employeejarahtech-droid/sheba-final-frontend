@@ -9,6 +9,7 @@ import { getCookie } from '@/lib/cookies'
 import { Card, CardContent } from '@/components/ui/card'
 import { FolderOpen, Activity, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useCurrency } from '@/hooks/use-currency'
 
 type ServiceItem = {
     id: number;
@@ -35,6 +36,7 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
 
     const token = getCookie('accessToken');
     const navigate = useNavigate();
+    const { currencySymbol } = useCurrency();
 
     const { data } = useQuery({
         queryKey: ["services", page, limit, search],
@@ -143,8 +145,8 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
         },
         {
             data: "price",
-            title: "Price",
-            render: (data: any) => `৳${parseFloat(data).toFixed(2)}`,
+            title: `Price (${currencySymbol})`,
+            render: (data: any) => parseFloat(data).toFixed(2),
         },
         {
             data: "status",
@@ -256,7 +258,7 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
 
                             <li class="flex flex-col">
                                 <span class="text-gray-500">Price</span>
-                                <span class="font-bold text-lg text-indigo-600">৳${price}</span>
+                                 <span class="font-bold text-lg text-indigo-600">${currencySymbol} ${price}</span>
                             </li>
 
                             <li class="flex flex-col md:col-span-2">

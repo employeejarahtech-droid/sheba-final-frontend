@@ -2,22 +2,31 @@ import { useAppSelector } from '@/store/store'
 
 // Currency code to symbol mapping
 const CURRENCY_SYMBOLS: Record<string, string> = {
-  USD: '$',
-  BDT: '৳',
-  EUR: '€',
-  GBP: '£',
-  JPY: '¥',
-  INR: '₹',
-  CAD: 'C$',
-  AUD: 'A$',
-  CNY: '¥',
+  USD: 'USD',
+  BDT: 'BDT',
+  EUR: 'EUR',
+  GBP: 'GBP',
+  JPY: 'JPY',
+  INR: 'INR',
+  CAD: 'CAD',
+  AUD: 'AUD',
+  CNY: 'CNY',
+  // Middle East currencies
+  AED: 'AED',
+  SAR: 'SAR',
+  QAR: 'QAR',
+  KWD: 'KWD',
+  OMR: 'OMR',
+  BHD: 'BHD',
+  EGP: 'EGP',
+  PKR: 'PKR',
   // If the value is already a symbol, return it as-is
-  $: '$',
-  '৳': '৳',
-  '€': '€',
-  '£': '£',
-  '¥': '¥',
-  '₹': '₹',
+  $: 'USD',
+  '৳': 'BDT',
+  '€': 'EUR',
+  '£': 'GBP',
+  '¥': 'JPY',
+  '₹': 'INR',
 }
 
 // Currency code to locale mapping
@@ -31,6 +40,15 @@ const CURRENCY_LOCALES: Record<string, string> = {
   CAD: 'en-CA',
   AUD: 'en-AU',
   CNY: 'zh-CN',
+  // Middle East currencies
+  AED: 'ar-AE',
+  SAR: 'ar-SA',
+  QAR: 'ar-QA',
+  KWD: 'ar-KW',
+  OMR: 'ar-OM',
+  BHD: 'ar-BH',
+  EGP: 'ar-EG',
+  PKR: 'ur-PK',
 }
 
 /**
@@ -38,11 +56,11 @@ const CURRENCY_LOCALES: Record<string, string> = {
  * @returns Object containing currency code, symbol, locale, and format function
  */
 export function useCurrency() {
-  const currency = useAppSelector(state => state.currency.value) || 'USD'
+  const currency = useAppSelector(state => state.currency.value) || ''
 
   // Check if it's already a symbol (for backwards compatibility), map to code
   let currencyCode = currency
-  if (currency === '$' || currency === 'USD') currencyCode = 'USD'
+  if (!currency || currency === '$' || currency === 'USD') currencyCode = 'USD'
   else if (currency === '৳' || currency === 'BDT') currencyCode = 'BDT'
   else if (currency === '€' || currency === 'EUR') currencyCode = 'EUR'
   else if (currency === '£' || currency === 'GBP') currencyCode = 'GBP'
@@ -55,10 +73,16 @@ export function useCurrency() {
   // Format function using Intl.NumberFormat
   const format = (amount: number | string) => {
     const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
-    return numAmount.toLocaleString(locale, {
-      style: 'currency',
-      currency: currencyCode,
-    })
+    try {
+      return numAmount.toLocaleString(locale, {
+        style: 'currency',
+        currency: currencyCode || 'USD',
+        currencyDisplay: 'code',
+      })
+    } catch {
+      // Fallback: manual format if Intl doesn't recognise the code
+      return `${currencySymbol} ${numAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    }
   }
 
   return {
@@ -80,5 +104,5 @@ export function formatCurrency(amount: number | string, currency?: string): stri
     ? CURRENCY_SYMBOLS[currency] || currency
     : CURRENCY_SYMBOLS['USD'] // Default to USD if no currency provided
 
-  return `${symbol}${numAmount.toLocaleString()}`
+  return `${symbol} ${numAmount.toLocaleString()}`
 }

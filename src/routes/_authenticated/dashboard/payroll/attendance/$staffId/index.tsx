@@ -48,7 +48,7 @@ const dummyAttendanceRecords = [
 ];
 
 function AttendancePage() {
-    const { staffId } = useParams({ from: '/_authenticated/payroll/attendance/$staffId/' });
+    const { staffId } = useParams({ from: '/_authenticated/dashboard/payroll/attendance/$staffId/' });
     const navigate = useNavigate();
 
     const [staff, setStaff] = useState<Staff | null>(null);

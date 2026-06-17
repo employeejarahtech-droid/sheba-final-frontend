@@ -134,7 +134,7 @@ function DoctorSelect({
                 return (
                   <CommandItem
                     key={doctor.id}
-                    value={`${doctor.doctor_name} ${doctor.qualification || ''} ${doctor.speciality || ''} ${doctor.id}`}
+                    value={`${doctor.doctor_name} ${doctor.qualification || ''} ${doctor.speciality || ''} ${doctor.id}`.toLowerCase()}
                     onSelect={() => {
                       onChange(String(doctor.id));
                       setOpen(false);

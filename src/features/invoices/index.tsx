@@ -702,7 +702,7 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
         },
         {
             data: "total_amount",
-            title: "Total Amount",
+            title: `Total Amount (${currencySymbol})`,
             orderable: true,
             responsivePriority: 4,
             render: (data: any) => String(data ?? "-"),
@@ -710,7 +710,7 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
         },
         {
             data: null, // Computed field
-            title: "Discount",
+            title: `Discount (${currencySymbol})`,
             orderable: false,
             responsivePriority: 5,
             render: (_data: any, _type: string, row: InvoiceItem) => {

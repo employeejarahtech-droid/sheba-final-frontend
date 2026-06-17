@@ -238,7 +238,7 @@ export function ProfileForm() {
                           {CURRENCIES.map((c) => (
                             <CommandItem
                               key={`${c.country}-${c.code}`}
-                              value={`${c.country} ${c.code} ${c.name}`}
+                              value={`${c.country} ${c.code} ${c.name}`.toLowerCase()}
                               onSelect={() => {
                                 field.onChange(c.code)
                                 setOpenCurrency(false)
@@ -274,6 +274,7 @@ export function ProfileForm() {
               <FormItem>
                 <FormLabel>Date Format</FormLabel>
                 <Select
+                  key={field.value}
                   value={field.value}
                   onValueChange={field.onChange}
                 >
@@ -285,10 +286,7 @@ export function ProfileForm() {
                   <SelectContent>
                     {DATE_FORMATS.map((f) => (
                       <SelectItem key={f.value} value={f.value}>
-                        <span className="flex items-center gap-2">
-                          <span>{f.label}</span>
-                          <span className="text-xs text-muted-foreground">— {f.sample}</span>
-                        </span>
+                        {f.label} — {f.sample}
                       </SelectItem>
                     ))}
                   </SelectContent>

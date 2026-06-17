@@ -24,6 +24,7 @@ export const ACCOUNTING_KEYS = {
     dailySummary: () => [...ACCOUNTING_KEYS.all, 'dailySummary'] as const,
     transactions: () => [...ACCOUNTING_KEYS.all, 'transactions'] as const,
     nextCode: (parentId: number) => [...ACCOUNTING_KEYS.all, 'nextCode', parentId] as const,
+    cashFlow: () => [...ACCOUNTING_KEYS.all, 'cashFlow'] as const,
 };
 
 export const useGetAccountingOverviewQuery = () => {
@@ -199,6 +200,13 @@ export const useGetBalanceSheetQuery = (params?: { date?: string }) => {
     return useQuery({
         queryKey: [...ACCOUNTING_KEYS.balanceSheet(), params],
         queryFn: () => accountingService.getBalanceSheet(params),
+    });
+};
+
+export const useGetCashFlowQuery = (params?: { from?: string; to?: string }) => {
+    return useQuery({
+        queryKey: [...ACCOUNTING_KEYS.cashFlow(), params],
+        queryFn: () => accountingService.getCashFlow(params),
     });
 };
 

@@ -65,7 +65,7 @@ const getDummyStaff = (staffId: string): Staff => ({
 });
 
 function SalaryPage() {
-    const { staffId } = useParams({ from: '/_authenticated/payroll/salary/$staffId/' });
+    const { staffId } = useParams({ from: '/_authenticated/dashboard/payroll/salary/$staffId/' });
     const navigate = useNavigate();
 
     // Local state (not using API for now)

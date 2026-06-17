@@ -25,7 +25,9 @@ import type {
     ExpenseResponse,
     IncomeResponse,
     JournalReportResponse,
-    PayrollResponse
+    PayrollResponse,
+    CashFlowResponse,
+    CashFlowReport
 } from '@/types/accounting.types';
 
 // Reuse types from accounting.types where possible, or define response shapes here if needed.
@@ -274,6 +276,12 @@ export const accountingService = {
     getBalanceSheet: async (params?: { date?: string }) => {
         const response = await api.get<BalanceSheetResponse>('/accounting/reports/balance-sheet', { params });
         return response.data;
+    },
+
+    // GET CASH FLOW
+    getCashFlow: async (params?: { from?: string; to?: string }): Promise<CashFlowReport> => {
+        const response = await api.get<CashFlowResponse>('/accounting/reports/cash-flow', { params });
+        return response.data.data;
     },
 
     // GET TRANSACTIONS

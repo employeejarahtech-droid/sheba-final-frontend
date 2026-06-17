@@ -5,14 +5,14 @@ import { Main } from '@/components/layout/main'
 import { PageHeader } from '@/components/layout/page-header'
 
 import { DataTable } from '@/components/DataTable'
-import { CreateBedWardForm } from './components/CreateBedWardForm'
-import { EditBedWardForm } from './components/EditBedWardForm'
+import { CreateBedCabinTypeForm } from './components/CreateBedCabinTypeForm'
+import { EditBedCabinTypeForm } from './components/EditBedCabinTypeForm'
 import { useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
 import { Card, CardContent } from '@/components/ui/card'
 import { BedDouble, Layers } from 'lucide-react'
 
-type BedWardItem = {
+type BedCabinTypeItem = {
     id: number;
     name: string;
     description: string | null;
@@ -21,7 +21,7 @@ type BedWardItem = {
     created_by_name?: string;
 };
 
-interface BedWardsProps {
+interface BedCabinTypesProps {
     page: number;
     limit: number;
     search: string;
@@ -30,22 +30,22 @@ interface BedWardsProps {
     setSearch: (search: string) => void;
 }
 
-export default function BedWards({ page, limit, search, setPage, setLimit, setSearch }: BedWardsProps) {
+export default function BedCabinTypes({ page, limit, search, setPage, setLimit, setSearch }: BedCabinTypesProps) {
     const [openEditForm, setOpenEditForm] = useState<boolean>(false);
-    const [selectedBedWardId, setSelectedBedWardId] = useState<number | null>(null);
+    const [selectedBedCabinTypeId, setSelectedBedCabinTypeId] = useState<number | null>(null);
 
     const token = getCookie('accessToken');
 
     const { data } = useQuery({
-        queryKey: ["bed-wards", page, limit, search],
+        queryKey: ["bed-cabin-types", page, limit, search],
         queryFn: async () => {
             const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/bed-ward?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
+                `${import.meta.env.VITE_API_URL}/api/bed-cabin-type?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
             );
-            if (!res.ok) throw new Error("Failed to fetch bed wards");
+            if (!res.ok) throw new Error("Failed to fetch bed & cabin types");
             return res.json();
         },
         enabled: !!token,
@@ -62,31 +62,31 @@ export default function BedWards({ page, limit, search, setPage, setLimit, setSe
 
     // Fetch overall statistics
     const { data: statsData } = useQuery({
-        queryKey: ["bed-wards-overall-stats"],
+        queryKey: ["bed-cabin-types-overall-stats"],
         queryFn: async () => {
             const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/bed-ward/statistics/overall`,
+                `${import.meta.env.VITE_API_URL}/api/bed-cabin-type/statistics/overall`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
             );
-            if (!res.ok) return { totalWards: 0, totalBeds: 0 };
+            if (!res.ok) return { totalTypes: 0, totalBeds: 0 };
             const result = await res.json();
-            return result.data || { totalWards: 0, totalBeds: 0 };
+            return result.data || { totalTypes: 0, totalBeds: 0 };
         },
         enabled: !!token,
     });
 
-    const stats = statsData || { totalWards: 0, totalBeds: 0 };
+    const stats = statsData || { totalTypes: 0, totalBeds: 0 };
 
     const statCards = [
         {
-            title: 'Total Wards / Departments',
-            value: stats.totalWards || 0,
+            title: 'Total Cabin / Bed Types',
+            value: stats.totalTypes || 0,
             icon: <Layers className='h-6 w-6' />,
             gradient: 'from-blue-600 to-indigo-600',
             shadow: 'shadow-blue-500/20',
-            label: 'Active Wards'
+            label: 'Active Types'
         },
         {
             title: 'Total Bed/Cabin Capacity',
@@ -137,8 +137,8 @@ export default function BedWards({ page, limit, search, setPage, setLimit, setSe
                 <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                     <!-- Header -->
                     <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
-                        <h2 class="text-lg font-semibold text-white">Ward / Department Information</h2>
-                        <p class="text-blue-100 text-sm">Detailed overview of selected ward or department</p>
+                        <h2 class="text-lg font-semibold text-white">Bed & Cabin Type Information</h2>
+                        <p class="text-blue-100 text-sm">Detailed overview of selected bed or cabin type</p>
                     </div>
 
                     <!-- Body -->
@@ -146,12 +146,12 @@ export default function BedWards({ page, limit, search, setPage, setLimit, setSe
                         <ul class="grid md:grid-cols-2 gap-6 text-sm">
 
                             <li class="flex flex-col">
-                                <span class="text-gray-500">Ward ID</span>
+                                <span class="text-gray-500">Type ID</span>
                                 <span class="font-mono text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">#${id}</span>
                             </li>
 
                             <li class="flex flex-col">
-                                <span class="text-gray-500">Ward Name</span>
+                                <span class="text-gray-500">Type Name</span>
                                 <span class="font-semibold text-gray-800 text-base">${name}</span>
                             </li>
 
@@ -210,7 +210,7 @@ export default function BedWards({ page, limit, search, setPage, setLimit, setSe
         {
             data: "id",
             title: "ID",
-            render: (data: any, _type: string, row: BedWardItem) => {
+            render: (data: any, _type: string, row: BedCabinTypeItem) => {
                 const createdAt = row.created_at ? new Date(row.created_at).toLocaleDateString() : '-';
                 return `
                     <div class="flex items-center gap-2">
@@ -228,7 +228,7 @@ export default function BedWards({ page, limit, search, setPage, setLimit, setSe
         },
         {
             data: "name",
-            title: "Ward Name",
+            title: "Type Name",
         },
         {
             data: "description",
@@ -247,7 +247,7 @@ export default function BedWards({ page, limit, search, setPage, setLimit, setSe
         {
             data: "created_by",
             title: "Created By",
-            render: (_data: any, _type: string, row: BedWardItem) => {
+            render: (_data: any, _type: string, row: BedCabinTypeItem) => {
                 const name = row.created_by_name || row.created_by || '-';
                 return `<span class="text-sm text-muted-foreground">${name}</span>`;
             },
@@ -255,7 +255,7 @@ export default function BedWards({ page, limit, search, setPage, setLimit, setSe
         {
             data: null,
             title: "Actions",
-            render: (_data: any, _type: string, row: BedWardItem) => {
+            render: (_data: any, _type: string, row: BedCabinTypeItem) => {
                 return `
                     <div class="flex gap-2">
                         <button data-action="edit" data-id="${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3">
@@ -278,7 +278,7 @@ export default function BedWards({ page, limit, search, setPage, setLimit, setSe
             const id = button.getAttribute('data-id');
 
             if (action === 'edit' && id) {
-                setSelectedBedWardId(Number(id));
+                setSelectedBedCabinTypeId(Number(id));
                 setOpenEditForm(true);
             }
         };
@@ -289,7 +289,7 @@ export default function BedWards({ page, limit, search, setPage, setLimit, setSe
         return () => {
             document.removeEventListener('click', handleTableClick);
         };
-    }, [setSelectedBedWardId, setOpenEditForm]);
+    }, [setSelectedBedCabinTypeId, setOpenEditForm]);
 
     return <>
         <AppHeader fixed />
@@ -322,8 +322,8 @@ export default function BedWards({ page, limit, search, setPage, setLimit, setSe
 
                 {/* Header & Table */}
                 <PageHeader
-                    title="List of Wards & Departments"
-                    actions={<CreateBedWardForm />}
+                    title="List of Bed & Cabin Types"
+                    actions={<CreateBedCabinTypeForm />}
                 />
                 <DataTable
                     columns={columns}
@@ -335,7 +335,7 @@ export default function BedWards({ page, limit, search, setPage, setLimit, setSe
                     onSearchChange={setSearch}
                 />
             </div>
-            <EditBedWardForm open={openEditForm} setOpen={setOpenEditForm} bedWardId={selectedBedWardId} />
+            <EditBedCabinTypeForm open={openEditForm} setOpen={setOpenEditForm} bedCabinTypeId={selectedBedCabinTypeId} />
         </main>
     </>
 }

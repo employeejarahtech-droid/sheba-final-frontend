@@ -7,22 +7,18 @@ import {
     CircleCheck,
     User,
     Activity,
-    Loader2,
     Stethoscope,
+    Bed,
+    ClipboardList,
     Check,
     ChevronDown,
-    Bed,
-    CalendarIcon,
-    ClipboardList,
-    X,
-    LayoutGrid,
-    Search,
-    AlertCircle
+    CalendarIcon
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { useDebounce } from "@/hooks/useDebounce";
 
 import {
     Form,
@@ -36,27 +32,35 @@ import {
 
 import { Calendar } from "@/components/ui/calendar";
 import { useDateFormat } from "@/hooks/use-date-format";
-import { useCurrency } from "@/hooks/use-currency";
-import { useDebounce } from "@/hooks/useDebounce";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command";
 import { AppHeader } from '@/components/layout/app-header';
+;
+;
+;
+;
 import { Main } from '@/components/layout/main';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
 
-export const Route = createFileRoute('/_authenticated/dashboard/admission/new-admission/')({
+
+export const Route = createFileRoute('/_authenticated/dashboard/admission/new-admission/index/bak')({
     component: IndoorNewAdmission,
 })
 
@@ -68,10 +72,11 @@ const admissionSchema = z.object({
     gender: z.string().min(1, "Gender is required"),
     patientType: z.string().min(1, "Patient type is required"),
     mobile_number: z.string().min(11, "Phone number required"),
-    idCardNumber: z.string().optional(),
     address: z.string().min(1, "Address required"),
     underConsultant: z.string().optional(),
     referredBy: z.string().optional(),
+    attendingDoctor: z.string().optional(),
+    admittedBy: z.string().optional(),
     admissionDate: z.string().min(1, "Admission date required"),
     admissionTime: z.string().min(1, "Admission time required"),
     ward: z.string().optional(),
@@ -85,105 +90,6 @@ const admissionSchema = z.object({
     message: "Either Age in Years or Months is required",
     path: ["ageYears"],
 });
-
-// Patient Type Select Component with Search
-interface PatientTypeSelectProps {
-    patientTypes: any[];
-    value: string;
-    onChange: (value: string) => void;
-    label: string;
-    placeholder: string;
-    disabled?: boolean;
-    loading?: boolean;
-}
-
-function PatientTypeSelect({
-    patientTypes,
-    value,
-    onChange,
-    label: _label,
-    placeholder,
-    disabled = false,
-    loading = false
-}: PatientTypeSelectProps) {
-    const [open, setOpen] = useState(false);
-
-    const selectedType = patientTypes.find((t: any) => String(t.id) === value);
-
-    return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <FormControl>
-                    <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                            "w-full justify-between h-10 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm",
-                            !value && "text-muted-foreground"
-                        )}
-                        disabled={disabled || loading}
-                    >
-                        {selectedType ? (
-                            <div className="flex flex-col items-start">
-                                <span className="font-medium">{selectedType.name}</span>
-                                {selectedType.description && (
-                                    <span className="text-xs text-muted-foreground">
-                                        {selectedType.description}
-                                    </span>
-                                )}
-                            </div>
-                        ) : (
-                            placeholder
-                        )}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                </FormControl>
-            </PopoverTrigger>
-            <PopoverContent className="w-[400px] p-0" align="start">
-                <Command>
-                    <CommandInput placeholder="Search patient type..." />
-                    <CommandList>
-                        <CommandEmpty>
-                            {loading ? "Loading patient types..." : "No patient type found."}
-                        </CommandEmpty>
-                        <CommandGroup>
-                            {patientTypes.map((type: any) => {
-                                const displayName = type.name;
-                                const subtitle = type.description;
-
-                                return (
-                                    <CommandItem
-                                        key={type.id}
-                                        value={`${type.name} ${type.description || ''} ${type.id}`.toLowerCase()}
-                                        onSelect={() => {
-                                            onChange(String(type.id));
-                                            setOpen(false);
-                                        }}
-                                    >
-                                        <Check
-                                            className={cn(
-                                                "mr-2 h-4 w-4",
-                                                value === String(type.id) ? "opacity-100" : "opacity-0"
-                                            )}
-                                        />
-                                        <div className="flex flex-col">
-                                            <span className="font-medium">{displayName}</span>
-                                            {subtitle && (
-                                                <span className="text-xs text-muted-foreground">
-                                                    {subtitle}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </CommandItem>
-                                );
-                            })}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
-    );
-}
 
 // Doctor Select Component with Search
 interface DoctorSelectProps {
@@ -298,26 +204,6 @@ function DoctorSelect({
                         )}
                         {loading ? (
                             <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin opacity-50" />
-                        ) : value ? (
-                            <div
-                                role="button"
-                                tabIndex={0}
-                                className="ml-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-muted-foreground hover:text-red-500 transition-colors cursor-pointer"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    onChange("");
-                                }}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" || e.key === " ") {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        onChange("");
-                                    }
-                                }}
-                            >
-                                <X className="h-3.5 w-3.5" />
-                            </div>
                         ) : (
                             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         )}
@@ -326,33 +212,18 @@ function DoctorSelect({
             </PopoverTrigger>
             <PopoverContent className="w-[400px] p-0" align="start">
                 <Command shouldFilter={false}>
-                    <CommandInput
-                        placeholder="Search doctor by name, qualification, or specialty..."
+                    <CommandInput 
+                        placeholder="Search doctor by name, qualification, or specialty..." 
                         value={searchVal}
                         onValueChange={setSearchVal}
                     />
                     <CommandList>
-                        {value && (
-                            <CommandGroup heading="Actions">
-                                <CommandItem
-                                    value="clear-selection"
-                                    onSelect={() => {
-                                        onChange("");
-                                        setOpen(false);
-                                    }}
-                                    className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium cursor-pointer flex items-center"
-                                >
-                                    <X className="mr-2 h-4 w-4 text-red-500" />
-                                    Clear Selection
-                                </CommandItem>
-                            </CommandGroup>
-                        )}
                         {displayedDoctors.length === 0 && (
                             <CommandEmpty>
                                 {loading ? "Loading doctors..." : "No doctor found."}
                             </CommandEmpty>
                         )}
-                        <CommandGroup heading={value ? "Doctors" : undefined}>
+                        <CommandGroup>
                             {displayedDoctors.map((doctor: any) => {
                                 const displayName = `Dr. ${doctor.doctor_name}`;
                                 const subtitle = [
@@ -363,7 +234,7 @@ function DoctorSelect({
                                 return (
                                     <CommandItem
                                         key={doctor.id}
-                                        value={`${doctor.doctor_name} ${doctor.qualification || ''} ${doctor.speciality || ''} ${doctor.id}`.toLowerCase()}
+                                        value={`${doctor.doctor_name} ${doctor.qualification || ''} ${doctor.speciality || ''} ${doctor.id}`}
                                         onSelect={() => {
                                             onChange(String(doctor.id));
                                             setOpen(false);
@@ -394,6 +265,7 @@ function DoctorSelect({
     );
 }
 
+
 // Bed Select Component with Search
 interface BedSelectProps {
     beds: any[];
@@ -414,7 +286,6 @@ function BedSelect({
     disabled = false,
     loading = false
 }: BedSelectProps) {
-    const { currencySymbol, format } = useCurrency();
     const [open, setOpen] = useState(false);
 
     const selectedBed = beds.find((b: any) => String(b.id) === value);
@@ -433,10 +304,10 @@ function BedSelect({
                         disabled={disabled || loading}
                     >
                         {selectedBed ? (
-                            <div className="flex flex-col items-start text-left">
+                            <div className="flex flex-col items-start">
                                 <span className="font-medium">{selectedBed.code}</span>
                                 <span className="text-xs text-muted-foreground">
-                                    {selectedBed.type} - {selectedBed.ward} ({format(selectedBed.price)})
+                                    {selectedBed.type} - {selectedBed.ward} (৳{selectedBed.price})
                                 </span>
                             </div>
                         ) : (
@@ -456,12 +327,12 @@ function BedSelect({
                         <CommandGroup>
                             {beds.map((bed: any) => {
                                 const displayName = bed.code;
-                                const subtitle = `${bed.type} - ${bed.ward} - ${format(bed.price)}`;
+                                const subtitle = `${bed.type} - ${bed.ward} - ৳${bed.price}`;
 
                                 return (
                                     <CommandItem
                                         key={bed.id}
-                                        value={`${bed.code} ${bed.type} ${bed.ward} ${bed.price} ${bed.id}`.toLowerCase()}
+                                        value={`${bed.code} ${bed.type} ${bed.ward} ${bed.price} ${bed.id}`}
                                         onSelect={() => {
                                             onChange(String(bed.id));
                                             setOpen(false);
@@ -476,7 +347,7 @@ function BedSelect({
                                         <div className="flex flex-col flex-1">
                                             <div className="flex items-center justify-between">
                                                 <span className="font-medium">{displayName}</span>
-                                                <span className="text-sm font-semibold text-blue-600">{format(bed.price)}</span>
+                                                <span className="text-sm font-semibold text-blue-600">৳{bed.price}</span>
                                             </div>
                                             <span className="text-xs text-muted-foreground">
                                                 {subtitle}
@@ -493,77 +364,118 @@ function BedSelect({
     );
 }
 
+// Patient Type Select Component with Search
+interface PatientTypeSelectProps {
+    patientTypes: any[];
+    value: string;
+    onChange: (value: string) => void;
+    label: string;
+    placeholder: string;
+    disabled?: boolean;
+    loading?: boolean;
+}
+
+function PatientTypeSelect({
+    patientTypes,
+    value,
+    onChange,
+    label: _label,
+    placeholder,
+    disabled = false,
+    loading = false
+}: PatientTypeSelectProps) {
+    const [open, setOpen] = useState(false);
+
+    const selectedType = patientTypes.find((t: any) => String(t.id) === value);
+
+    return (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <FormControl>
+                    <Button
+                        variant="outline"
+                        role="combobox"
+                        className={cn(
+                            "w-full justify-between h-10 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm",
+                            !value && "text-muted-foreground"
+                        )}
+                        disabled={disabled || loading}
+                    >
+                        {selectedType ? (
+                            <div className="flex flex-col items-start">
+                                <span className="font-medium">{selectedType.name}</span>
+                                {selectedType.description && (
+                                    <span className="text-xs text-muted-foreground">
+                                        {selectedType.description}
+                                    </span>
+                                )}
+                            </div>
+                        ) : (
+                            placeholder
+                        )}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                </FormControl>
+            </PopoverTrigger>
+            <PopoverContent className="w-[400px] p-0" align="start">
+                <Command>
+                    <CommandInput placeholder="Search patient type..." />
+                    <CommandList>
+                        <CommandEmpty>
+                            {loading ? "Loading patient types..." : "No patient type found."}
+                        </CommandEmpty>
+                        <CommandGroup>
+                            {patientTypes.map((type: any) => {
+                                const displayName = type.name;
+                                const subtitle = type.description;
+
+                                return (
+                                    <CommandItem
+                                        key={type.id}
+                                        value={`${type.name} ${type.description || ''} ${type.id}`}
+                                        onSelect={() => {
+                                            onChange(String(type.id));
+                                            setOpen(false);
+                                        }}
+                                    >
+                                        <Check
+                                            className={cn(
+                                                "mr-2 h-4 w-4",
+                                                value === String(type.id) ? "opacity-100" : "opacity-0"
+                                            )}
+                                        />
+                                        <div className="flex flex-col">
+                                            <span className="font-medium">{displayName}</span>
+                                            {subtitle && (
+                                                <span className="text-xs text-muted-foreground">
+                                                    {subtitle}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </CommandItem>
+                                );
+                            })}
+                        </CommandGroup>
+                    </CommandList>
+                </Command>
+            </PopoverContent>
+        </Popover>
+    );
+}
+
 function IndoorNewAdmission() {
     const navigate = useNavigate();
     const token = getCookie('accessToken');
     const queryClient = useQueryClient();
-    const { format } = useCurrency();
 
     // Tenant date format from settings
     const { dateFormat, formatHint, formatDate, parseDate, toISODate } = useDateFormat();
     const dateTouchedRef = useRef(false);
 
-    const [isBoardOpen, setIsBoardOpen] = useState(false);
-    const [boardFilter, setBoardFilter] = useState<'all' | 'free' | 'booked' | 'maintenance'>('all');
-    const [boardSearch, setBoardSearch] = useState('');
-    const [boardPage, setBoardPage] = useState(1);
-    const boardLimit = 10;
 
-    useEffect(() => {
-        setBoardPage(1);
-    }, [boardFilter, boardSearch]);
-
-    // Fetch ALL beds/cabins (including occupied and maintenance ones) for the Bed Status Board modal
-    const { data: allBedsData, isLoading: allBedsLoading } = useQuery({
-        queryKey: ['all-beds-cabins-board'],
-        queryFn: async () => {
-            const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/bed-cabin?limit=200`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-            if (!res.ok) return { data: { items: [] } };
-            return res.json();
-        },
-        enabled: !!token && isBoardOpen, // Fetch only when modal is open to save API requests
-        staleTime: 10 * 1000, // Cache for 10 seconds
-    });
-
-    const allBeds = allBedsData?.data?.items || [];
-
-    const filteredBoardBeds = useMemo(() => {
-        return allBeds.filter((bed: any) => {
-            // 1. Filter by status tab
-            const statusKey = String(bed.status || 'Available').toLowerCase().trim();
-            const isFree = statusKey === 'available' || statusKey === 'free';
-            const isBooked = statusKey === 'occupied' || statusKey === 'booked';
-            if (boardFilter === 'free' && !isFree) return false;
-            if (boardFilter === 'booked' && !isBooked) return false;
-            if (boardFilter === 'maintenance' && statusKey !== 'maintenance') return false;
-
-            // 2. Filter by search (code, ward, or type)
-            if (boardSearch.trim() !== '') {
-                const searchLower = boardSearch.toLowerCase().trim();
-                const codeMatch = bed.code?.toLowerCase().includes(searchLower);
-                const wardMatch = bed.ward?.toLowerCase().includes(searchLower);
-                const typeMatch = bed.type?.toLowerCase().includes(searchLower);
-                return codeMatch || wardMatch || typeMatch;
-            }
-
-            return true;
-        });
-    }, [allBeds, boardFilter, boardSearch]);
-
-    const paginatedBoardBeds = useMemo(() => {
-        const startIndex = (boardPage - 1) * boardLimit;
-        return filteredBoardBeds.slice(startIndex, startIndex + boardLimit);
-    }, [filteredBoardBeds, boardPage]);
-
-    const totalBoardPages = Math.ceil(filteredBoardBeds.length / boardLimit);
 
     // Fetch patient types
-    const { data: patientTypesData, isLoading: patientTypesLoading } = useQuery({
+    const { data: patientTypesData } = useQuery({
         queryKey: ['patient-types'],
         queryFn: async () => {
             const res = await fetch(
@@ -576,13 +488,13 @@ function IndoorNewAdmission() {
             return res.json();
         },
         enabled: !!token,
-        staleTime: 10 * 60 * 1000,
+        staleTime: 10 * 60 * 1000, // Cache for 10 minutes
     });
 
     const patientTypes = patientTypesData?.data?.items || [];
 
     // Fetch beds/cabins - only available ones for new admission
-    const { data: bedsData, isLoading: bedsLoading } = useQuery({
+    const { data: bedsData } = useQuery({
         queryKey: ['beds-cabins'],
         queryFn: async () => {
             const res = await fetch(
@@ -595,7 +507,7 @@ function IndoorNewAdmission() {
             return res.json();
         },
         enabled: !!token,
-        staleTime: 30 * 1000, // Cache for 30 seconds
+        staleTime: 30 * 1000, // Cache for 30 seconds to stay reasonably updated on available beds
     });
 
     const beds = bedsData?.data?.items || [];
@@ -610,10 +522,11 @@ function IndoorNewAdmission() {
             gender: "",
             patientType: "",
             mobile_number: "",
-            idCardNumber: "",
             address: "",
             underConsultant: "",
             referredBy: "",
+            attendingDoctor: "",
+            admittedBy: "",
             admissionDate: formatDate(new Date()),
             admissionTime: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
             ward: "",
@@ -651,7 +564,6 @@ function IndoorNewAdmission() {
                     doctor_id: values.underConsultant ? parseInt(values.underConsultant) : null,
                     diagnosis: values.reason,
                     status: 'active',
-                    id_card_number: values.idCardNumber || null,
                 }),
             });
 
@@ -678,7 +590,7 @@ function IndoorNewAdmission() {
     }
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen ">
             <AppHeader fixed />
 
             <Main className="p-6 lg:p-10 w-full flex-1">
@@ -734,15 +646,17 @@ function IndoorNewAdmission() {
                                     </div>
                                 </CardHeader>
                                 <CardContent className="px-4 md:px-6 py-6">
-                                    {/* Debug current date settings */}
-                                    <div className="mb-5 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-3">
-                                        <h4 className="text-sm font-bold text-amber-800 dark:text-amber-300">System Date Debug:</h4>
-                                        <div className="grid grid-cols-2 gap-2 text-xs text-amber-700 dark:text-amber-400 mt-1">
-                                            <div><strong>Configured Format (from DB):</strong> {dateFormat}</div>
-                                            <div><strong>Formatted Today Date:</strong> {formatDate(new Date())}</div>
-                                            <div><strong>Form Field Value:</strong> {form.watch("admissionDate")}</div>
-                                            <div><strong>Format Hint:</strong> {formatHint}</div>
-                                        </div>
+                                    {/* Custom Admission ID - Auto-generated */}
+                                    <div className="mb-5 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 p-3">
+                                        <FormLabel className="text-sm font-semibold text-blue-700 dark:text-blue-300">Custom Admission ID</FormLabel>
+                                        <Input
+                                            placeholder="Auto-generated from settings (e.g., ADM-20260228-1)"
+                                            disabled
+                                            className="h-10 mt-1.5 rounded-md border-blue-300 dark:border-blue-900 bg-white dark:bg-gray-950 text-blue-800 dark:text-blue-200 font-semibold text-sm cursor-not-allowed"
+                                        />
+                                        <p className="text-[11px] text-blue-600 dark:text-blue-400 mt-1">
+                                            Auto-generated on creation, based on Settings → Prefix configuration
+                                        </p>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
@@ -751,7 +665,7 @@ function IndoorNewAdmission() {
                                             name="patientName"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Patient Name <span className="text-destructive">*</span></FormLabel>
+                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Patient Name</FormLabel>
                                                     <FormControl>
                                                         <Input placeholder="Full name" className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all" {...field} />
                                                     </FormControl>
@@ -764,7 +678,7 @@ function IndoorNewAdmission() {
                                             name="fatherName"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Father / Husband Name <span className="text-destructive">*</span></FormLabel>
+                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Father / Husband Name</FormLabel>
                                                     <FormControl>
                                                         <Input placeholder="Guardian name" className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all" {...field} />
                                                     </FormControl>
@@ -777,7 +691,7 @@ function IndoorNewAdmission() {
                                             name="ageYears"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Age <span className="text-destructive">*</span></FormLabel>
+                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Age</FormLabel>
                                                     <div className="flex gap-2 items-center">
                                                         <FormControl>
                                                             <Input
@@ -820,7 +734,7 @@ function IndoorNewAdmission() {
                                             name="gender"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Gender <span className="text-destructive">*</span></FormLabel>
+                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Gender</FormLabel>
                                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                         <FormControl>
                                                             <SelectTrigger className="w-full h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all">
@@ -842,7 +756,7 @@ function IndoorNewAdmission() {
                                             name="patientType"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Patient Type <span className="text-destructive">*</span></FormLabel>
+                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Patient Type</FormLabel>
                                                     <PatientTypeSelect
                                                         patientTypes={patientTypes}
                                                         value={field.value}
@@ -850,7 +764,7 @@ function IndoorNewAdmission() {
                                                         label="Patient Type"
                                                         placeholder="Select patient type"
                                                         disabled={false}
-                                                        loading={patientTypesLoading}
+                                                        loading={false}
                                                     />
                                                     <FormMessage />
                                                 </FormItem>
@@ -861,25 +775,12 @@ function IndoorNewAdmission() {
                                             name="mobile_number"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Mobile Number <span className="text-destructive">*</span></FormLabel>
+                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Mobile Number</FormLabel>
                                                     <FormControl>
                                                         <div className="relative">
                                                             <Activity className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                                             <Input placeholder="017XXX..." className="h-10 pl-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all" {...field} />
                                                         </div>
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={form.control}
-                                            name="idCardNumber"
-                                            render={({ field }) => (
-                                                <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">ID Card Number (Optional)</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="NID, Passport or Birth Cert" className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all" {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -894,7 +795,7 @@ function IndoorNewAdmission() {
                                             name="address"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Detailed Address <span className="text-destructive">*</span></FormLabel>
+                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Detailed Address</FormLabel>
                                                     <FormControl>
                                                         <Textarea
                                                             placeholder="Enter complete residential address"
@@ -928,6 +829,8 @@ function IndoorNewAdmission() {
                                         {[
                                             { name: "underConsultant", label: "Under Consultant", placeholder: "Select consultant" },
                                             { name: "referredBy", label: "Referred By", placeholder: "Select referrer" },
+                                            { name: "attendingDoctor", label: "Attending Doctor", placeholder: "Select attending doctor" },
+                                            { name: "admittedBy", label: "Admitted By", placeholder: "Select admitting doctor" },
                                         ].map((fieldInfo) => (
                                             <FormField
                                                 key={fieldInfo.name}
@@ -972,7 +875,7 @@ function IndoorNewAdmission() {
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col gap-2">
                                                     <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                                        Admission Date <span className="text-destructive">*</span> <span className="text-xs font-normal text-muted-foreground">({formatHint})</span>
+                                                        Admission Date <span className="text-xs font-normal text-muted-foreground">({formatHint})</span>
                                                     </FormLabel>
                                                     <Popover>
                                                         <PopoverTrigger asChild>
@@ -1016,7 +919,7 @@ function IndoorNewAdmission() {
                                             name="admissionTime"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Admission Time <span className="text-destructive">*</span></FormLabel>
+                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Admission Time</FormLabel>
                                                     <FormControl>
                                                         <Input
                                                             type="time"
@@ -1033,190 +936,16 @@ function IndoorNewAdmission() {
                                             name="bedNumber"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col gap-2">
-                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Bed / Cabin Allocation <span className="text-destructive">*</span></FormLabel>
-                                                    <div className="flex gap-2">
-                                                        <div className="flex-1">
-                                                            <BedSelect
-                                                                beds={beds}
-                                                                value={field.value}
-                                                                onChange={field.onChange}
-                                                                label="Bed / Cabin Allocation"
-                                                                placeholder="Select bed or cabin"
-                                                                disabled={false}
-                                                                loading={bedsLoading}
-                                                            />
-                                                        </div>
-                                                        <Dialog open={isBoardOpen} onOpenChange={setIsBoardOpen}>
-                                                            <DialogTrigger asChild>
-                                                                <Button
-                                                                    type="button"
-                                                                    variant="outline"
-                                                                    className="h-11 px-3 rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5 shrink-0"
-                                                                    title="Quick view of beds & cabins"
-                                                                >
-                                                                    <LayoutGrid className="h-4 w-4 text-blue-500" />
-                                                                    <span>Quick View</span>
-                                                                </Button>
-                                                            </DialogTrigger>
-                                                            <DialogContent className="sm:max-w-[850px] max-w-[850px] w-[95vw] sm:w-full max-h-[85vh] overflow-y-auto p-6 rounded-2xl">
-                                                                <DialogHeader className="pb-4 border-b border-gray-100 dark:border-gray-800">
-                                                                    <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                                                                        <Bed className="h-5 w-5 text-blue-500" />
-                                                                        <span>Bed & Cabin Quick View</span>
-                                                                    </DialogTitle>
-                                                                    <p className="text-xs text-muted-foreground mt-1">
-                                                                        Real-time occupancy status. Select an available bed to assign it to the patient.
-                                                                    </p>
-                                                                </DialogHeader>
-
-                                                                {/* Search & Filters */}
-                                                                <div className="flex flex-col sm:flex-row gap-4 items-center justify-between my-5">
-                                                                    <div className="relative w-full sm:flex-1">
-                                                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                                        <Input
-                                                                            placeholder="Search by code, ward, or type..."
-                                                                            value={boardSearch}
-                                                                            onChange={(e) => setBoardSearch(e.target.value)}
-                                                                            className="pl-9 h-10 w-full rounded-xl"
-                                                                        />
-                                                                    </div>
-                                                                    <div className="w-full sm:w-56">
-                                                                        <Select
-                                                                            value={boardFilter}
-                                                                            onValueChange={(val: any) => setBoardFilter(val)}
-                                                                        >
-                                                                            <SelectTrigger className="w-full h-10 rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 font-medium text-sm">
-                                                                                <SelectValue placeholder="Filter by status" />
-                                                                            </SelectTrigger>
-                                                                            <SelectContent>
-                                                                                <SelectItem value="all">All Beds</SelectItem>
-                                                                                <SelectItem value="free">Available (Free)</SelectItem>
-                                                                                <SelectItem value="booked">Occupied (Booked)</SelectItem>
-                                                                                <SelectItem value="maintenance">Maintenance</SelectItem>
-                                                                            </SelectContent>
-                                                                        </Select>
-                                                                    </div>
-                                                                </div>
-
-                                                                {/* Grid Layout of Beds */}
-                                                                {allBedsLoading ? (
-                                                                    <div className="flex flex-col items-center justify-center py-20 gap-3">
-                                                                        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                                                                        <span className="text-sm font-medium text-muted-foreground">Loading quick view...</span>
-                                                                    </div>
-                                                                ) : filteredBoardBeds.length === 0 ? (
-                                                                    <div className="text-center py-16 border-2 border-dashed rounded-2xl border-gray-200 dark:border-gray-800 w-full">
-                                                                        <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                                                                        <p className="text-sm font-semibold text-muted-foreground">No beds match your filter/search criteria.</p>
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="space-y-4">
-                                                                        <div className="overflow-x-auto rounded-xl border border-gray-150 dark:border-gray-800 w-full">
-                                                                            <table className="w-full text-sm text-left border-collapse">
-                                                                                <thead className="bg-gray-50/70 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-xs uppercase font-semibold border-b border-gray-150 dark:border-gray-800">
-                                                                                    <tr>
-                                                                                        <th className="px-4 py-3">Bed / Cabin Code</th>
-                                                                                        <th className="px-4 py-3">Type</th>
-                                                                                        <th className="px-4 py-3">Ward / Department</th>
-                                                                                        <th className="px-4 py-3">Price / Day</th>
-                                                                                        <th className="px-4 py-3">Status</th>
-                                                                                        <th className="px-4 py-3 text-right">Action</th>
-                                                                                    </tr>
-                                                                                </thead>
-                                                                                <tbody className="divide-y divide-gray-100 dark:divide-gray-800/60">
-                                                                                    {paginatedBoardBeds.map((bed: any) => {
-                                                                                        const statusKey = String(bed.status || 'Available').toLowerCase().trim();
-                                                                                        const isAvailable = statusKey === 'available' || statusKey === 'free';
-                                                                                        const isOccupied = statusKey === 'occupied' || statusKey === 'booked';
-                                                                                        const isMaintenance = statusKey === 'maintenance';
-
-                                                                                        return (
-                                                                                            <tr
-                                                                                                key={bed.id}
-                                                                                                className={cn(
-                                                                                                    "hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors",
-                                                                                                    isAvailable && "bg-green-50/5 dark:bg-green-950/2",
-                                                                                                    isOccupied && "bg-red-50/5 dark:bg-red-950/2",
-                                                                                                    isMaintenance && "bg-amber-50/5 dark:bg-amber-950/2"
-                                                                                                )}
-                                                                                            >
-                                                                                                <td className="px-4 py-3.5 font-bold text-gray-900 dark:text-white">{bed.code}</td>
-                                                                                                <td className="px-4 py-3.5 text-gray-600 dark:text-gray-400 font-medium">{bed.type}</td>
-                                                                                                <td className="px-4 py-3.5 text-gray-600 dark:text-gray-400 font-medium">{bed.ward}</td>
-                                                                                                <td className="px-4 py-3.5 font-semibold text-blue-600 dark:text-blue-400">{format(bed.price)}</td>
-                                                                                                <td className="px-4 py-3.5">
-                                                                                                    <span className={cn(
-                                                                                                        "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border",
-                                                                                                        isAvailable && "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-300 dark:border-green-800",
-                                                                                                        isOccupied && "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-300 dark:border-red-800",
-                                                                                                        isMaintenance && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-800"
-                                                                                                    )}>
-                                                                                                        {isAvailable ? 'Free' : isOccupied ? 'Booked' : 'Maintenance'}
-                                                                                                    </span>
-                                                                                                </td>
-                                                                                                <td className="px-4 py-3.5 text-right">
-                                                                                                    <Button
-                                                                                                        type="button"
-                                                                                                        size="sm"
-                                                                                                        variant={isAvailable ? "default" : "outline"}
-                                                                                                        className={cn(
-                                                                                                            "h-8 rounded-lg text-xs font-bold px-3 transition-all",
-                                                                                                            isAvailable
-                                                                                                                ? "bg-green-600 text-white hover:bg-green-700 dark:bg-green-600"
-                                                                                                                : "opacity-60 pointer-events-none"
-                                                                                                        )}
-                                                                                                        disabled={!isAvailable}
-                                                                                                        onClick={() => {
-                                                                                                            field.onChange(String(bed.id));
-                                                                                                            setIsBoardOpen(false);
-                                                                                                        }}
-                                                                                                    >
-                                                                                                        {isAvailable ? 'Select' : isOccupied ? 'Booked' : 'Maintenance'}
-                                                                                                    </Button>
-                                                                                                </td>
-                                                                                            </tr>
-                                                                                        );
-                                                                                    })}
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </div>
-
-                                                                        {/* Pagination Controls */}
-                                                                        <div className="flex items-center justify-between border-t border-gray-150 dark:border-gray-800 pt-4 px-1">
-                                                                            <div className="text-xs text-muted-foreground font-semibold">
-                                                                                Showing {filteredBoardBeds.length === 0 ? 0 : (boardPage - 1) * boardLimit + 1} to {Math.min(filteredBoardBeds.length, boardPage * boardLimit)} of {filteredBoardBeds.length} beds
-                                                                            </div>
-                                                                            <div className="flex items-center gap-2">
-                                                                                <Button
-                                                                                    type="button"
-                                                                                    variant="outline"
-                                                                                    size="sm"
-                                                                                    className="h-8 rounded-lg text-xs font-bold"
-                                                                                    onClick={() => setBoardPage(p => Math.max(1, p - 1))}
-                                                                                    disabled={boardPage === 1}
-                                                                                >
-                                                                                    Previous
-                                                                                </Button>
-                                                                                <span className="text-xs font-semibold px-2 text-gray-700 dark:text-gray-300">
-                                                                                    Page {boardPage} of {totalBoardPages || 1}
-                                                                                </span>
-                                                                                <Button
-                                                                                    type="button"
-                                                                                    variant="outline"
-                                                                                    size="sm"
-                                                                                    className="h-8 rounded-lg text-xs font-bold"
-                                                                                    onClick={() => setBoardPage(p => Math.min(totalBoardPages, p + 1))}
-                                                                                    disabled={boardPage === totalBoardPages || totalBoardPages === 0}
-                                                                                >
-                                                                                    Next
-                                                                                </Button>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-                                                            </DialogContent>
-                                                        </Dialog>
-                                                    </div>
+                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Bed / Cabin Allocation</FormLabel>
+                                                    <BedSelect
+                                                        beds={beds}
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                        label="Bed / Cabin Allocation"
+                                                        placeholder="Select bed or cabin"
+                                                        disabled={false}
+                                                        loading={false}
+                                                    />
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
@@ -1244,7 +973,7 @@ function IndoorNewAdmission() {
                                         name="reason"
                                         render={({ field }) => (
                                             <FormItem className="flex flex-col gap-2">
-                                                <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Chief Complaint / Reason <span className="text-destructive">*</span></FormLabel>
+                                                <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Chief Complaint / Reason</FormLabel>
                                                 <FormControl>
                                                     <Textarea
                                                         placeholder="Describe the clinical reason for patient admission..."
@@ -1261,31 +990,6 @@ function IndoorNewAdmission() {
                                     />
                                 </CardContent>
                             </Card>
-
-                            {/* Action Buttons at Bottom */}
-                            <div className="flex items-center justify-end gap-3 pt-4 pb-10">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="rounded-xl border-gray-200"
-                                    onClick={() => navigate({ to: '/dashboard/admission/patients' })}
-                                    disabled={createMutation.isPending}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={createMutation.isPending}
-                                    className="min-w-[150px]"
-                                >
-                                    {createMutation.isPending ? (
-                                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                    ) : (
-                                        <CircleCheck className="h-4 w-4 mr-2" />
-                                    )}
-                                    {createMutation.isPending ? "Submitting..." : "Admit Patient"}
-                                </Button>
-                            </div>
                         </form>
                     </Form>
                 </div>

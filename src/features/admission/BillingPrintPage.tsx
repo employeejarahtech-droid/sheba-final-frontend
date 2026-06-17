@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 import { useParams } from '@tanstack/react-router'
 import { Loader2, ArrowLeft, FileText, Building2 } from 'lucide-react'
 import { getCookie } from '@/lib/cookies'
+import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
 import { Button } from '@/components/ui/button'
 
 const API_URL = import.meta.env.VITE_API_URL
@@ -65,8 +67,20 @@ type BedBill = {
 }
 
 export function BillingPrintPage() {
-    const { admissionId } = useParams({ from: '/_authenticated/admission/patients/$admissionId/billing-print/' })
+    const { admissionId } = useParams({ from: '/_authenticated/dashboard/admission/patients/$admissionId/billing-print/' })
     const token = getCookie('accessToken')
+    const { formatDate } = useDateFormat()
+    const { format } = useCurrency()
+    const safeFormatDate = (dateVal: any) => {
+        if (!dateVal) return '-'
+        if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+            const [y, m, day] = dateVal.split('-').map(Number)
+            return formatDate(new Date(y, m - 1, day))
+        }
+        const d = new Date(dateVal)
+        if (isNaN(d.getTime())) return '-'
+        return formatDate(d)
+    }
 
     // Fetch admission details
     const { data: admissionData, isLoading: admissionLoading } = useQuery({
@@ -262,7 +276,7 @@ export function BillingPrintPage() {
                 {/* Document Title */}
                 <div className="text-center bg-gray-50 rounded-lg py-3 mb-6 border border-gray-200">
                     <h2 className="text-xl font-bold text-gray-800">Patient Billing Statement</h2>
-                    <p className="text-sm text-gray-600">Admission ID: {admissionId} | Generated: {new Date().toLocaleDateString()}</p>
+                    <p className="text-sm text-gray-600">Admission ID: {admissionId} | Generated: {safeFormatDate(new Date())}</p>
                 </div>
 
                 {/* Patient Information */}
@@ -284,7 +298,7 @@ export function BillingPrintPage() {
                         <div>
                             <span className="text-gray-600">Admission Date:</span>
                             <p className="font-medium">
-                                {admission?.admission_date ? new Date(admission.admission_date).toLocaleDateString() : '-'}
+                                {admission?.admission_date ? safeFormatDate(admission.admission_date) : '-'}
                             </p>
                         </div>
                         <div>
@@ -326,16 +340,16 @@ export function BillingPrintPage() {
                                             <tr key={idx}>
                                                 <td className="border p-2">{bill.bed_code} ({bill.bed_type})</td>
                                                 <td className="border p-2 text-center">{bill.days}</td>
-                                                <td className="border p-2 text-right">৳{Number(bill.rate_per_day).toFixed(2)}</td>
-                                                <td className="border p-2 text-right">৳{Number(bill.total_amount).toFixed(2)}</td>
+                                                <td className="border p-2 text-right">{format(Number(bill.rate_per_day))}</td>
+                                                <td className="border p-2 text-right">{format(Number(bill.total_amount))}</td>
                                             </tr>
                                         ))
                                     ) : bedCharges.breakdown?.map((bed: any, idx: number) => (
                                         <tr key={idx}>
                                             <td className="border p-2">{bed.bed_code} ({bed.bed_type})</td>
                                             <td className="border p-2 text-center">{bed.days}</td>
-                                            <td className="border p-2 text-right">৳{Number(bed.daily_rate).toFixed(2)}</td>
-                                            <td className="border p-2 text-right">৳{Number(bed.charges).toFixed(2)}</td>
+                                            <td className="border p-2 text-right">{format(Number(bed.daily_rate))}</td>
+                                            <td className="border p-2 text-right">{format(Number(bed.charges))}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -358,8 +372,8 @@ export function BillingPrintPage() {
                                     {operations.map((op: Operation, idx: number) => (
                                         <tr key={idx}>
                                             <td className="border p-2">{op.operation_type}</td>
-                                            <td className="border p-2">{op.operation_date}</td>
-                                            <td className="border p-2 text-right">৳{Number(op.charges).toFixed(2)}</td>
+                                            <td className="border p-2">{safeFormatDate(op.operation_date)}</td>
+                                            <td className="border p-2 text-right">{format(Number(op.charges))}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -382,8 +396,8 @@ export function BillingPrintPage() {
                                     {consultants.map((c: Consultant, idx: number) => (
                                         <tr key={idx}>
                                             <td className="border p-2">{c.consultant_name}</td>
-                                            <td className="border p-2">{c.visit_date}</td>
-                                            <td className="border p-2 text-right">৳{Number(c.fees).toFixed(2)}</td>
+                                            <td className="border p-2">{safeFormatDate(c.visit_date)}</td>
+                                            <td className="border p-2 text-right">{format(Number(c.fees))}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -406,8 +420,8 @@ export function BillingPrintPage() {
                                     {surgeons.map((s: Surgeon, idx: number) => (
                                         <tr key={idx}>
                                             <td className="border p-2">{s.surgeon_name}</td>
-                                            <td className="border p-2">{s.operation_date}</td>
-                                            <td className="border p-2 text-right">৳{Number(s.fees).toFixed(2)}</td>
+                                            <td className="border p-2">{safeFormatDate(s.operation_date)}</td>
+                                            <td className="border p-2 text-right">{format(Number(s.fees))}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -430,8 +444,8 @@ export function BillingPrintPage() {
                                     {assistants.map((a: Assistant, idx: number) => (
                                         <tr key={idx}>
                                             <td className="border p-2">{a.assistant_name}</td>
-                                            <td className="border p-2">{a.operation_date}</td>
-                                            <td className="border p-2 text-right">৳{Number(a.fees).toFixed(2)}</td>
+                                            <td className="border p-2">{safeFormatDate(a.operation_date)}</td>
+                                            <td className="border p-2 text-right">{format(Number(a.fees))}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -455,7 +469,7 @@ export function BillingPrintPage() {
                                         <tr key={idx}>
                                             <td className="border p-2">{s.service_name}</td>
                                             <td className="border p-2">{s.note || '-'}</td>
-                                            <td className="border p-2 text-right">৳{Number(s.amount).toFixed(2)}</td>
+                                            <td className="border p-2 text-right">{format(Number(s.amount))}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -470,41 +484,41 @@ export function BillingPrintPage() {
                     <div className="space-y-2 text-sm">
                         <div className="flex justify-between py-1">
                             <span>Bed/Cabin Charges:</span>
-                            <span>৳{totalBedCharges.toFixed(2)}</span>
+                            <span>{format(totalBedCharges)}</span>
                         </div>
                         {totalOperations > 0 && (
                             <div className="flex justify-between py-1">
                                 <span>Operation Types Charges:</span>
-                                <span>৳{totalOperations.toFixed(2)}</span>
+                                <span>{format(totalOperations)}</span>
                             </div>
                         )}
                         {totalConsultants > 0 && (
                             <div className="flex justify-between py-1">
                                 <span>Consultant Fees:</span>
-                                <span>৳{totalConsultants.toFixed(2)}</span>
+                                <span>{format(totalConsultants)}</span>
                             </div>
                         )}
                         {totalSurgeons > 0 && (
                             <div className="flex justify-between py-1">
                                 <span>Surgeon Fees:</span>
-                                <span>৳{totalSurgeons.toFixed(2)}</span>
+                                <span>{format(totalSurgeons)}</span>
                             </div>
                         )}
                         {totalAssistants > 0 && (
                             <div className="flex justify-between py-1">
                                 <span>Assistant Fees:</span>
-                                <span>৳{totalAssistants.toFixed(2)}</span>
+                                <span>{format(totalAssistants)}</span>
                             </div>
                         )}
                         {totalServices > 0 && (
                             <div className="flex justify-between py-1">
                                 <span>Services Charges:</span>
-                                <span>৳{totalServices.toFixed(2)}</span>
+                                <span>{format(totalServices)}</span>
                             </div>
                         )}
                         <div className="flex justify-between py-2 border-t-2 border-gray-800 font-bold text-lg">
                             <span>Grand Total:</span>
-                            <span className="text-blue-600">৳{grandTotal.toFixed(2)}</span>
+                            <span className="text-blue-600">{format(grandTotal)}</span>
                         </div>
                     </div>
                 </div>

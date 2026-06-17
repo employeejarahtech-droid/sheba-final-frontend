@@ -122,8 +122,8 @@ function AllReportsBiochemical() {
 
       // Status badge
       const statusBadge = status === 'Completed'
-        ? <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Completed</span>
-        : <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">Pending</span>;
+        ? `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Completed</span>`
+        : `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">Pending</span>`;
 
       // Build the HTML content
       let htmlContent = `
@@ -342,7 +342,7 @@ function AllReportsBiochemical() {
         // Split comma-separated test names and display as badges
         const names = testNames.split(',').filter((name: string) => name.trim() !== '');
         return names.map((name: string) =>
-          <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1">${name.trim()}</span>
+          `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1">${name.trim()}</span>`
         ).join('');
       }
     },
@@ -355,7 +355,7 @@ function AllReportsBiochemical() {
       render: (data: any) => {
         const status = data || 'Pending';
         const color = status === 'Completed' ? 'bg-green-500' : 'bg-yellow-500';
-        return <span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status}</span>;
+        return `<span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status}</span>`;
       }
     },
   ];

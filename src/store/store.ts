@@ -5,7 +5,7 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 // Currency Slice
 export const currencySlice = createSlice({
     name: 'currency',
-    initialState: { value: '$' },
+    initialState: { value: '' },
     reducers: {
         setCurrency: (state, action) => {
             state.value = action.payload;

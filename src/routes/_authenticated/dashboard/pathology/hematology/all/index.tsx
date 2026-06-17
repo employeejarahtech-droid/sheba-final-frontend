@@ -121,8 +121,8 @@ function AllReportsHematology() {
 
       // Status badge
       const statusBadge = status === 'Completed'
-? <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Completed</span>
-        : <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">Pending</span>;
+        ? `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Completed</span>`
+        : `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">Pending</span>`;
 
       // Build the HTML content
       let htmlContent = `
@@ -169,11 +169,11 @@ function AllReportsHematology() {
 
         <!-- Footer Actions -->
         <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-          <a href="/dashboard/hematology/all/report/${reciptId}"
+          <a href="/dashboard/pathology/hematology/all/report/${reciptId}"
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
             View Report
           </a>
-          <a href="/dashboard/hematology/all/edit/${reciptId}"
+          <a href="/dashboard/pathology/hematology/all/edit/${reciptId}"
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-rose-600 text-white hover:bg-rose-700 h-10 px-5 transition shadow-md">
             Edit
           </a>
@@ -326,7 +326,7 @@ function AllReportsHematology() {
 
         const names = testNames.split(',').filter((name: string) => name.trim() !== '');
         return names.map((name: string) =>
-          <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1">${name.trim()}</span>
+          `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1">${name.trim()}</span>`
         ).join('');
       },
       defaultContent: "",
@@ -338,7 +338,31 @@ function AllReportsHematology() {
       render: (_data: any, _type: string, row: ReportsItem) => {
         const status = row.Status || 'Pending';
         const color = status === 'Completed' ? 'bg-green-500' : 'bg-yellow-500';
-        return <span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status}</span>;
+        return `<span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status}</span>`;
+      },
+      defaultContent: "",
+    },
+    {
+      data: null,
+      title: "Actions",
+      orderable: false,
+      searchable: false,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const id = row.ReciptID;
+        return `
+          <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
+            <a href="/dashboard/pathology/hematology/all/edit/${id}" title="Edit report"
+               class="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-xs font-medium h-8 px-2.5 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+              Edit
+            </a>
+            <a href="/dashboard/pathology/hematology/all/report/${id}" target="_blank" rel="noopener noreferrer" title="Print / view report"
+               class="inline-flex items-center gap-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium h-8 px-2.5 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V2h12v7"/><path d="M6 14h12v8H6z"/></svg>
+              Print
+            </a>
+          </div>
+        `;
       },
       defaultContent: "",
     },

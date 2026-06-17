@@ -2,6 +2,7 @@ import { useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { getCookie } from '@/lib/cookies'
+import { useDateFormat } from '@/hooks/use-date-format'
 import { ArrowLeft, FileText, Calendar, User, Phone, BedDouble, Stethoscope, DollarSign } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,10 +11,21 @@ import { useCurrency } from '@/hooks/use-currency'
 import { PageHeader } from '@/components/layout/page-header'
 
 export function BillCreatedPage() {
-    const { admissionId } = useParams({ from: '/_authenticated/admission/patients/$admissionId/bill-created/' })
+    const { admissionId } = useParams({ from: '/_authenticated/dashboard/admission/patients/$admissionId/bill-created/' })
     const navigate = useNavigate()
     const token = getCookie('accessToken')
     const { format } = useCurrency()
+    const { formatDate } = useDateFormat()
+    const safeFormatDate = (dateVal: any) => {
+        if (!dateVal) return '-'
+        if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+            const [y, m, day] = dateVal.split('-').map(Number)
+            return formatDate(new Date(y, m - 1, day))
+        }
+        const d = new Date(dateVal)
+        if (isNaN(d.getTime())) return '-'
+        return formatDate(d)
+    }
 
     // Fetch admission details
     const { data: admissionData, isLoading } = useQuery({
@@ -105,7 +117,7 @@ export function BillCreatedPage() {
                         <div>
                             <span className="text-sm text-muted-foreground">Admission Date</span>
                             <p className="font-semibold">
-                                {admission?.admission_date ? new Date(admission.admission_date).toLocaleDateString() : '-'}
+                                {admission?.admission_date ? safeFormatDate(admission.admission_date) : '-'}
                             </p>
                         </div>
                         <div>
@@ -125,7 +137,7 @@ export function BillCreatedPage() {
                         <div>
                             <span className="text-sm text-muted-foreground">Bill Created</span>
                             <p className="font-semibold text-green-600">
-                                {admission?.bill_created_date ? new Date(admission.bill_created_date).toLocaleDateString() : '-'}
+                                {admission?.bill_created_date ? safeFormatDate(admission.bill_created_date) : '-'}
                             </p>
                         </div>
                     </div>
@@ -146,7 +158,7 @@ export function BillCreatedPage() {
                                     <div key={item.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
                                         <div>
                                             <p className="font-medium">{item.operation_type || item.name}</p>
-                                            <p className="text-sm text-muted-foreground">{item.operation_date}</p>
+                                            <p className="text-sm text-muted-foreground">{safeFormatDate(item.operation_date)}</p>
                                         </div>
                                         <p className="font-semibold">{format(parseFloat(item.amount || 0))}</p>
                                     </div>
@@ -280,7 +292,7 @@ export function BillCreatedPage() {
                                         <div>
                                             <p className="font-medium">{item.bed_cabin?.code || 'Bed/Cabin'} ({item.days} days)</p>
                                             <p className="text-sm text-muted-foreground">
-                                                {item.from_date} to {item.to_date}
+                                                {safeFormatDate(item.from_date)} to {safeFormatDate(item.to_date)}
                                             </p>
                                         </div>
                                         <p className="font-semibold">{format(parseFloat(item.amount || 0))}</p>

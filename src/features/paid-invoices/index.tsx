@@ -585,7 +585,7 @@ export default function PaidInvoices({ page, limit, search, from, to, setPage, s
     },
     {
       data: "total_amount",
-      title: "Total Amount",
+      title: `Total Amount (${currencySymbol})`,
       orderable: true,
       responsivePriority: 4,
       render: (data: any) => String(data ?? "-"),

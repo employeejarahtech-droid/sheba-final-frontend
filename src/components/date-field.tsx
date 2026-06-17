@@ -35,6 +35,7 @@ export function DateField({ value, onChange, placeholder = 'Pick a date', classN
     <Popover>
       <PopoverTrigger asChild>
         <Button
+          type="button"
           variant="outline"
           size="sm"
           className={cn('h-9 justify-start text-left font-normal', !value && 'text-muted-foreground', className)}

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Main } from '@/components/layout/main';
 import { AppHeader } from '@/components/layout/app-header';
 import { useState } from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
 ;
 ;
 ;
@@ -29,9 +30,10 @@ export const Route = createFileRoute('/_authenticated/dashboard/indoor/master/be
 
 const bedCabinSchema = z.object({
     code: z.string().min(1, "Code is required"),
-    type: z.string().min(1, "Resource type is required"),
+    type: z.string().min(1, "Bed/Cabin type is required"),
     ward: z.string().min(1, "Ward/Department is required"),
     price: z.coerce.number().min(0, "Price must be zero or positive"),
+    show_in_admission: z.boolean().default(true),
 })
 
 type BedCabinValues = z.infer<typeof bedCabinSchema>
@@ -42,15 +44,15 @@ function CreateBedCabin() {
     const [typeOpen, setTypeOpen] = useState(false);
     const [wardOpen, setWardOpen] = useState(false);
 
-    const { data: resourceTypesData } = useQuery({
-        queryKey: ['bed-resource-types-list'],
+    const { data: bedCabinTypesData } = useQuery({
+        queryKey: ['bed-cabin-types-list'],
         queryFn: async () => {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/bed-resource-type?limit=100`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/bed-cabin-type?limit=100`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            if (!res.ok) throw new Error('Failed to fetch resource types');
+            if (!res.ok) throw new Error('Failed to fetch bed & cabin types');
             const result = await res.json();
             return result.data?.items || [];
         },
@@ -78,8 +80,8 @@ function CreateBedCabin() {
         { name: "Special (ICU/CCU)", value: "Special" }
     ];
 
-    const options = resourceTypesData && resourceTypesData.length > 0
-        ? resourceTypesData.map((t: any) => ({ name: t.name, value: t.name }))
+    const options = bedCabinTypesData && bedCabinTypesData.length > 0
+        ? bedCabinTypesData.map((t: any) => ({ name: t.name, value: t.name }))
         : defaultOptions;
 
     const wardOptions = wardsData && wardsData.length > 0
@@ -93,6 +95,7 @@ function CreateBedCabin() {
             type: "Bed",
             ward: "",
             price: 0,
+            show_in_admission: true,
         },
     })
 
@@ -202,7 +205,7 @@ function CreateBedCabin() {
                                                 const selectedOption = options.find(opt => opt.value === field.value);
                                                 return (
                                                     <FormItem>
-                                                        <FormLabel>Resource Type</FormLabel>
+                                                        <FormLabel>Bed/Cabin Type</FormLabel>
                                                         <Popover open={typeOpen} onOpenChange={setTypeOpen}>
                                                             <PopoverTrigger asChild>
                                                                 <FormControl>
@@ -222,7 +225,7 @@ function CreateBedCabin() {
                                                                 <Command>
                                                                     <CommandInput placeholder="Search type..." />
                                                                     <CommandList>
-                                                                        <CommandEmpty>No resource type found.</CommandEmpty>
+                                                                        <CommandEmpty>No bed & cabin type found.</CommandEmpty>
                                                                         <CommandGroup>
                                                                             {options.map((opt) => (
                                                                                 <CommandItem
@@ -340,6 +343,30 @@ function CreateBedCabin() {
                                                         The base daily billing amount.
                                                     </FormDescription>
                                                     <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="flex items-center space-x-2 pt-2">
+                                        <FormField
+                                            control={form.control}
+                                            name="show_in_admission"
+                                            render={({ field }) => (
+                                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 w-full">
+                                                    <FormControl>
+                                                        <Checkbox
+                                                            checked={field.value}
+                                                            onCheckedChange={field.onChange}
+                                                        />
+                                                    </FormControl>
+                                                    <div className="space-y-1 leading-none">
+                                                        <FormLabel className="cursor-pointer">
+                                                            To See into Admission form
+                                                        </FormLabel>
+                                                        <FormDescription className="text-xs">
+                                                            If checked, this Bed/Cabin will be visible and selectable in the new patient admission form allocation.
+                                                        </FormDescription>
+                                                    </div>
                                                 </FormItem>
                                             )}
                                         />

@@ -8,8 +8,6 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createFileRoute } from '@tanstack/react-router'
-
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ClerkRouteRouteImport } from './routes/clerk/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -262,8 +260,6 @@ import { Route as AuthenticatedDashboardPathologyHematologyAllEditIdIndexRouteIm
 import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/edit/$invoiceId/index'
 import { Route as AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/tests/edit/[$id]/index'
 
-const platformAdminRouteImport = createFileRoute('/(platform)/admin')()
-
 const ClerkRouteRoute = ClerkRouteRouteImport.update({
   id: '/clerk',
   path: '/clerk',
@@ -276,11 +272,6 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const platformAdminRoute = platformAdminRouteImport.update({
-  id: '/(platform)/admin',
-  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const platformRegisterRoute = platformRegisterRouteImport.update({
@@ -2335,7 +2326,6 @@ export interface FileRoutesById {
   '/(platform)/pricing': typeof platformPricingRoute
   '/(platform)/register': typeof platformRegisterRoute
   '/_authenticated/dashboard/settings': typeof AuthenticatedDashboardSettingsRouteRouteWithChildren
-  '/(platform)/admin': typeof platformAdminRouteWithChildren
   '/(platform)/admin/_layout': typeof platformAdminLayoutRoute
   '/(platform)/admin/admins': typeof platformAdminAdminsRoute
   '/(platform)/admin/billing': typeof platformAdminBillingRoute
@@ -3084,7 +3074,6 @@ export interface FileRouteTypes {
     | '/(platform)/pricing'
     | '/(platform)/register'
     | '/_authenticated/dashboard/settings'
-    | '/(platform)/admin'
     | '/(platform)/admin/_layout'
     | '/(platform)/admin/admins'
     | '/(platform)/admin/billing'
@@ -3335,7 +3324,6 @@ export interface RootRouteChildren {
   platformContactRoute: typeof platformContactRoute
   platformPricingRoute: typeof platformPricingRoute
   platformRegisterRoute: typeof platformRegisterRoute
-  platformAdminRoute: typeof platformAdminRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -3359,13 +3347,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(platform)/admin': {
-      id: '/(platform)/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof platformAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(platform)/register': {
@@ -3587,7 +3568,7 @@ declare module '@tanstack/react-router' {
     }
     '/(platform)/admin/_layout': {
       id: '/(platform)/admin/_layout'
-      path: '/admin'
+      path: ''
       fullPath: '/admin'
       preLoaderRoute: typeof platformAdminLayoutRouteImport
       parentRoute: typeof platformAdminRoute
@@ -5805,36 +5786,6 @@ const ClerkRouteRouteWithChildren = ClerkRouteRoute._addFileChildren(
   ClerkRouteRouteChildren,
 )
 
-interface platformAdminRouteChildren {
-  platformAdminLayoutRoute: typeof platformAdminLayoutRoute
-  platformAdminAdminsRoute: typeof platformAdminAdminsRoute
-  platformAdminBillingRoute: typeof platformAdminBillingRoute
-  platformAdminCompaniesRoute: typeof platformAdminCompaniesRoute
-  platformAdminLoginRoute: typeof platformAdminLoginRoute
-  platformAdminModulesRoute: typeof platformAdminModulesRoute
-  platformAdminPlansRoute: typeof platformAdminPlansRoute
-  platformAdminRegistrationsRoute: typeof platformAdminRegistrationsRoute
-  platformAdminSettingsRoute: typeof platformAdminSettingsRoute
-  platformAdminIndexRoute: typeof platformAdminIndexRoute
-}
-
-const platformAdminRouteChildren: platformAdminRouteChildren = {
-  platformAdminLayoutRoute: platformAdminLayoutRoute,
-  platformAdminAdminsRoute: platformAdminAdminsRoute,
-  platformAdminBillingRoute: platformAdminBillingRoute,
-  platformAdminCompaniesRoute: platformAdminCompaniesRoute,
-  platformAdminLoginRoute: platformAdminLoginRoute,
-  platformAdminModulesRoute: platformAdminModulesRoute,
-  platformAdminPlansRoute: platformAdminPlansRoute,
-  platformAdminRegistrationsRoute: platformAdminRegistrationsRoute,
-  platformAdminSettingsRoute: platformAdminSettingsRoute,
-  platformAdminIndexRoute: platformAdminIndexRoute,
-}
-
-const platformAdminRouteWithChildren = platformAdminRoute._addFileChildren(
-  platformAdminRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -5855,7 +5806,6 @@ const rootRouteChildren: RootRouteChildren = {
   platformContactRoute: platformContactRoute,
   platformPricingRoute: platformPricingRoute,
   platformRegisterRoute: platformRegisterRoute,
-  platformAdminRoute: platformAdminRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

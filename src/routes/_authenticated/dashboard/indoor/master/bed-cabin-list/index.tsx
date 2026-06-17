@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from '@/lib/cookies';
 import { PageHeader } from '@/components/layout/page-header';
+import { useCurrency } from '@/hooks/use-currency';
 
 const bedCabinSearchSchema = z.object({
     page: z.coerce.number().catch(1),
@@ -36,6 +37,7 @@ function BedCabinList() {
     const searchParams: any = Route.useSearch();
     const routeNavigate = Route.useNavigate();
     const token = getCookie('accessToken');
+    const { currencySymbol } = useCurrency();
 
     const page = Number(searchParams?.page) || 1;
     const limit = Number(searchParams?.limit) || 10;
@@ -141,10 +143,10 @@ function BedCabinList() {
         },
         {
             data: 'price',
-            title: 'Price/Day',
+            title: `Price/Day (${currencySymbol})`,
             render: (data: string) => {
                 const price = parseFloat(data);
-                return `<span class="font-semibold text-gray-700">৳ ${price.toLocaleString()}</span>`;
+                return `<span class="font-semibold text-gray-700">${price.toLocaleString()}</span>`;
             },
         },
         {
@@ -252,7 +254,7 @@ function BedCabinList() {
                             </li>
                             <li class="flex flex-col">
                                 <span class="text-gray-500">Price/Day</span>
-                                <span class="font-bold text-lg text-blue-600">৳${price}</span>
+                                <span class="font-bold text-lg text-blue-600">${currencySymbol} ${price}</span>
                             </li>
                             <li class="flex flex-col md:col-span-2">
                                 <span class="text-gray-500">Created By</span>

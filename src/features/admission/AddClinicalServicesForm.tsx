@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
     Sheet,
@@ -14,7 +14,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
+import { LayoutGrid, Search } from "lucide-react";
+import { useCurrency } from "@/hooks/use-currency";
 
 const serviceSchema = z.object({
     service_id: z.number().positive('Service is required'),
@@ -30,7 +31,7 @@ interface AddServiceFormProps {
     onAdd: (service: {
         id?: number
         service_id: number
-        note: string
+        note?: string
         amount: number
         service_name?: string
     }) => void
@@ -38,13 +39,13 @@ interface AddServiceFormProps {
     editService?: {
         id: number
         service_id: number
-        note: string
+        note?: string
         amount: number
     } | null
 }
 
 export function AddClinicalServicesForm({ open, setOpen, onAdd, services, editService }: AddServiceFormProps) {
-
+    const { currencySymbol } = useCurrency();
     const [searchTerm, setSearchTerm] = useState('')
 
     // Filter services based on search term
@@ -91,8 +92,16 @@ export function AddClinicalServicesForm({ open, setOpen, onAdd, services, editSe
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetContent side="right" className="max-w-[450px] w-full">
-                <SheetHeader>
-                    <SheetTitle>{editService ? 'Edit Service' : 'Add Service'}</SheetTitle>
+                <SheetHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-3 px-4 gap-0">
+                    <div className="flex items-center gap-2.5 pr-8">
+                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                            <LayoutGrid className="h-4 w-4" />
+                        </div>
+                        <div>
+                            <SheetTitle className="text-lg font-bold">{editService ? 'Edit Service' : 'Add Service'}</SheetTitle>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">Hospital clinical services, test charges, and utility bills</p>
+                        </div>
+                    </div>
                 </SheetHeader>
 
                 <div className="px-4">
@@ -107,7 +116,14 @@ export function AddClinicalServicesForm({ open, setOpen, onAdd, services, editSe
                                             <FormLabel>Service *</FormLabel>
                                             <FormControl>
                                                 <Select
-                                                    onValueChange={(value) => form.setValue('service_id', Number(value))}
+                                                    onValueChange={(value) => {
+                                                        const serviceId = Number(value)
+                                                        form.setValue('service_id', serviceId, { shouldValidate: true })
+                                                        const selectedService = services.find((s: any) => s.id === serviceId)
+                                                        if (selectedService && selectedService.price !== undefined && selectedService.price !== null) {
+                                                            form.setValue('amount', Number(selectedService.price), { shouldValidate: true })
+                                                        }
+                                                    }}
                                                     value={form.getValues('service_id')?.toString() || ''}
                                                 >
                                                     <SelectTrigger className="w-full">
@@ -131,7 +147,7 @@ export function AddClinicalServicesForm({ open, setOpen, onAdd, services, editSe
                                                         {filteredServices.length > 0 ? (
                                                             filteredServices.map((service: any) => (
                                                                 <SelectItem key={service.id} value={String(service.id)}>
-                                                                    {service.name}
+                                                                    {service.name} {service.price !== undefined && service.price !== null ? `(${currencySymbol} ${Number(service.price).toFixed(2)})` : ''}
                                                                 </SelectItem>
                                                             ))
                                                         ) : (
@@ -155,6 +171,7 @@ export function AddClinicalServicesForm({ open, setOpen, onAdd, services, editSe
                                             <FormControl>
                                                 <Input placeholder="Enter note..." {...field} value={field.value || ''} />
                                             </FormControl>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
@@ -164,7 +181,7 @@ export function AddClinicalServicesForm({ open, setOpen, onAdd, services, editSe
                                     name="amount"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Amount (৳) *</FormLabel>
+                                            <FormLabel>Amount ({currencySymbol}) *</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="number"

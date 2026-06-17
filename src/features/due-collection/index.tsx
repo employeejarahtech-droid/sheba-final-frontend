@@ -585,14 +585,14 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
     },
     {
       data: "total_amount",
-      title: "Total Amount",
+      title: `Total Amount (${currencySymbol})`,
       render: (data: any) => {
         return data ? parseFloat(data).toFixed(2) : '0.00';
       },
     },
     {
       data: "discount",
-      title: "Discount",
+      title: `Discount (${currencySymbol})`,
       render: (data: any) => {
         return data ? parseFloat(data).toFixed(2) : '0.00';
       },

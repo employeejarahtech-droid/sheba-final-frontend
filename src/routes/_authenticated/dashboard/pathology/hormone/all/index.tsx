@@ -139,7 +139,7 @@ function AllHormones() {
         // Split comma-separated test names and display as badges
         const names = testNames.split(',').filter(name => name.trim() !== '');
         return names.map((name) =>
-          <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1">${name.trim()}</span>
+          `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1">${name.trim()}</span>`
         ).join('');
       },
       orderable: false,
@@ -152,7 +152,7 @@ function AllHormones() {
       render: (data: any) => {
         const status = data as string;
         const statusColor = status === 'Completed' ? 'text-green-600' : 'text-yellow-600';
-        return <span class="${statusColor}">${status || `Pending`}</span>;
+        return `<span class="${statusColor}">${status || `Pending`}</span>`;
       },
       defaultContent: '',
     },
@@ -163,7 +163,7 @@ function AllHormones() {
       render: (_data: any, _type: string, row: ReportsItem) => {
         return `
           <div class="flex gap-2">
-            <a href="/dashboard/hormone/all/edit/${row.ReciptID}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+            <a href="/dashboard/pathology/hormone/all/edit/${row.ReciptID}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
               Edit
             </a>
           </div>
@@ -215,8 +215,8 @@ function AllHormones() {
 
       // Status badge
       const statusBadge = status === 'Completed'
-? <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Completed</span>
-        : <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">Pending</span>;
+        ? `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Completed</span>`
+        : `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">Pending</span>`;
 
       // Build the HTML content
       let htmlContent = `
@@ -263,11 +263,11 @@ function AllHormones() {
 
         <!-- Footer Actions -->
         <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-          <a href="/dashboard/hormone/all/report/${reciptId}"
+          <a href="/dashboard/pathology/hormone/all/report/${reciptId}"
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
             View Report
           </a>
-          <a href="/dashboard/hormone/all/edit/${reciptId}"
+          <a href="/dashboard/pathology/hormone/all/edit/${reciptId}"
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-violet-600 text-white hover:bg-violet-700 h-10 px-5 transition shadow-md">
             Edit
           </a>

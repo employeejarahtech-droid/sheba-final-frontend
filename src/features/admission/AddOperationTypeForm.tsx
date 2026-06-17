@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
     Sheet,
     SheetContent,
@@ -10,9 +11,12 @@ import {
     SheetFooter,
     SheetClose,
 } from "@/components/ui/sheet";
+import { Calendar } from "@/components/ui/calendar";
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
-import { Loader2, Search } from "lucide-react";
+import { Activity, CalendarIcon, Loader2, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useDateFormat } from "@/hooks/use-date-format";
 
 interface AddOperationTypeFormProps {
     open: boolean;
@@ -57,10 +61,19 @@ export function AddOperationTypeForm({ open, setOpen, onAdd, admissionId, editOp
     const form = useForm({
         defaultValues: {
             opType: "",
-            opDate: "",
-            opCharges: "",
+            opDate: new Date().toISOString().split('T')[0],
         },
     });
+
+    const { formatHint, formatDate, toISODate } = useDateFormat();
+
+    // Convert a stored ISO date (YYYY-MM-DD) into a local Date for the calendar,
+    // avoiding UTC/timezone off-by-one shifts.
+    const isoToDate = (iso: string): Date | undefined => {
+        if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return undefined;
+        const [y, m, d] = iso.split('-').map(Number);
+        return new Date(y, m - 1, d);
+    };
 
     // Reset form when editOperation changes
     useEffect(() => {
@@ -68,13 +81,11 @@ export function AddOperationTypeForm({ open, setOpen, onAdd, admissionId, editOp
             form.reset({
                 opType: editOperation.operation_type,
                 opDate: editOperation.operation_date,
-                opCharges: editOperation.charges.toString(),
             });
         } else {
             form.reset({
                 opType: "",
-                opDate: "",
-                opCharges: "",
+                opDate: new Date().toISOString().split('T')[0],
             });
         }
     }, [editOperation, form]);
@@ -169,8 +180,8 @@ export function AddOperationTypeForm({ open, setOpen, onAdd, admissionId, editOp
                 .find(row => row.startsWith('accessToken='))
                 ?.split('=')[1];
 
-            // Convert charges to number
-            const charges = parseFloat(data.opCharges) || 0;
+            // Operations are informational only — no price is captured.
+            const charges = 0;
 
             const isEdit = editOperation !== null && editOperation !== undefined;
             const url = isEdit && editOperation
@@ -228,8 +239,16 @@ export function AddOperationTypeForm({ open, setOpen, onAdd, admissionId, editOp
             {/* Drawer */}
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetContent side="right" className="max-w-[450px] w-full">
-                    <SheetHeader>
-                        <SheetTitle>{editOperation ? 'Edit Operation' : 'Add New Operation Type'}</SheetTitle>
+                    <SheetHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-3 px-4 gap-0">
+                        <div className="flex items-center gap-2.5 pr-8">
+                            <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                                <Activity className="h-4 w-4" />
+                            </div>
+                            <div>
+                                <SheetTitle className="text-lg font-bold">{editOperation ? 'Edit Operation' : 'Add New Operation Type'}</SheetTitle>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">Recorded operations and procedural charges</p>
+                            </div>
+                        </div>
                     </SheetHeader>
 
                     <div className="px-4">
@@ -337,27 +356,43 @@ export function AddOperationTypeForm({ open, setOpen, onAdd, admissionId, editOp
                                     <FormField
                                         control={form.control}
                                         name="opDate"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Operation Date</FormLabel>
-                                                <FormControl>
-                                                    <Input type="date" {...field} className="block" />
-                                                </FormControl>
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="opCharges"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Charges</FormLabel>
-                                                <FormControl>
-                                                    <Input type="number" placeholder="Enter amount" {...field} />
-                                                </FormControl>
-                                            </FormItem>
-                                        )}
+                                        render={({ field }) => {
+                                            const selectedDate = isoToDate(field.value);
+                                            return (
+                                                <FormItem className="flex flex-col gap-2">
+                                                    <FormLabel>
+                                                        Operation Date <span className="text-xs font-normal text-muted-foreground">({formatHint})</span>
+                                                    </FormLabel>
+                                                    <Popover>
+                                                        <PopoverTrigger asChild>
+                                                            <FormControl>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    className={cn(
+                                                                        "w-full justify-start text-left font-normal",
+                                                                        !field.value && "text-muted-foreground"
+                                                                    )}
+                                                                >
+                                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                                    {selectedDate ? formatDate(selectedDate) : "Pick a date"}
+                                                                </Button>
+                                                            </FormControl>
+                                                        </PopoverTrigger>
+                                                        <PopoverContent className="w-auto p-0" align="start">
+                                                            <Calendar
+                                                                mode="single"
+                                                                selected={selectedDate}
+                                                                onSelect={(date) => {
+                                                                    field.onChange(date ? toISODate(date) : "");
+                                                                }}
+                                                                initialFocus
+                                                            />
+                                                        </PopoverContent>
+                                                    </Popover>
+                                                </FormItem>
+                                            );
+                                        }}
                                     />
 
                                     <SheetFooter>

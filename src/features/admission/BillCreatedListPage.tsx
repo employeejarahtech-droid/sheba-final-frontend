@@ -569,15 +569,6 @@ export function BillCreatedListPage({ page, limit, search, setPage, setSearch }:
 
     // Setup expandable rows
     useEffect(() => {
-        const format = (value: number) => {
-            return new Intl.NumberFormat('en-BD', {
-                style: 'currency',
-                currency: 'BDT',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-            }).format(value)
-        }
-
         const createTimelineItem = (title: string, isCompleted: boolean, date: string | null, completedBy: string | null, id: string = '') => {
             const dotColor = isCompleted ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
             const textColor = isCompleted ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'

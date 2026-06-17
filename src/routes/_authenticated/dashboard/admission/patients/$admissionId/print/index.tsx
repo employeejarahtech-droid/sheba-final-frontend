@@ -6,16 +6,16 @@ import { Button } from '@/components/ui/button'
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
 import { useCurrency } from '@/hooks/use-currency'
-import { useState, useEffect } from 'react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
-type UserProfile = {
-  companyName?: string
-  avatar?: string
-  email?: string
-  phone?: string
-  address?: string
+type CompanySettings = {
+  company_name?: string
+  company_logo?: string | null
+  address1?: string | null
+  address2?: string | null
+  phone?: string | null
+  email?: string | null
 }
 
 type AdmissionData = {
@@ -76,27 +76,23 @@ function AdmissionPrintPage() {
     const { admissionId } = Route.useParams()
     const { format } = useCurrency()
 
-    const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
     const token = getCookie('accessToken')
 
-    // Fetch user profile to get logo and company name
-    useEffect(() => {
-        const fetchProfile = async () => {
-            if (!token) return
-            try {
-                const res = await fetch(`${API_URL}/api/users/profile`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                })
-                if (res.ok) {
-                    const data = await res.json()
-                    setUserProfile(data.data)
-                }
-            } catch (error) {
-                console.error('Failed to fetch profile:', error)
-            }
-        }
-        fetchProfile()
-    }, [token])
+    // Fetch company settings for logo, name and address
+    const { data: companySettings } = useQuery<CompanySettings>({
+        queryKey: ['company-settings'],
+        queryFn: async (): Promise<CompanySettings> => {
+            const res = await fetch(`${API_URL}/api/company-settings`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (!res.ok) return {} as CompanySettings
+            const data = await res.json()
+            return data.data
+        },
+        enabled: !!token,
+        retry: false,
+        refetchOnWindowFocus: false,
+    })
 
     const { data: admissionData, isLoading } = useQuery({
         queryKey: ['admission-detail', admissionId],
@@ -210,10 +206,10 @@ function AdmissionPrintPage() {
                     {/* Header */}
                     <div className="text-center border-b-2 border-blue-600 pb-6 mb-6">
                         <div className="flex items-center justify-center gap-3 mb-3">
-                            {userProfile?.avatar ? (
+                            {companySettings?.company_logo ? (
                                 <img
-                                    src={userProfile.avatar.startsWith('http') ? userProfile.avatar : `${API_URL}${userProfile.avatar}`}
-                                    alt="Hospital Logo"
+                                    src={companySettings.company_logo.startsWith('http') ? companySettings.company_logo : `${API_URL}${companySettings.company_logo}`}
+                                    alt="Company Logo"
                                     className="h-16 w-16 object-contain rounded-lg"
                                 />
                             ) : (
@@ -222,22 +218,24 @@ function AdmissionPrintPage() {
                                 </div>
                             )}
                             <div className="text-left">
-                                <h1 className="text-3xl font-bold text-gray-800">{userProfile?.companyName || ' Hospital'}</h1>
-                                <p className="text-sm text-gray-600">Healthcare Excellence</p>
+                                <h1 className="text-3xl font-bold text-gray-800">{companySettings?.company_name || 'Hospital'}</h1>
                             </div>
                         </div>
                         <div className="text-gray-600 text-sm space-y-1">
-                            {userProfile?.address && (
-                                <p className="font-medium">{userProfile.address}</p>
+                            {companySettings?.address1 && (
+                                <p className="font-medium">{companySettings.address1}</p>
                             )}
-                            {userProfile?.phone && <p className="text-xs">Phone: {userProfile.phone}</p>}
-                            {userProfile?.email && <p className="text-xs">Email: {userProfile.email}</p>}
+                            {companySettings?.address2 && (
+                                <p className="font-medium">{companySettings.address2}</p>
+                            )}
+                            {companySettings?.phone && <p className="text-xs">Phone: {companySettings.phone}</p>}
+                            {companySettings?.email && <p className="text-xs">Email: {companySettings.email}</p>}
                         </div>
                     </div>
 
                     {/* Title */}
                     <h1 className="text-xl font-bold text-center underline mb-6 tracking-wide uppercase">
-                        Hospital Admission Form
+                        Admission Form
                     </h1>
 
                     {/* Patient Information Table */}
@@ -294,62 +292,7 @@ function AdmissionPrintPage() {
                         </tbody>
                     </table>
 
-                    {/* Financial Information Table */}
-                    <table className="w-full text-sm border mb-6">
-                        <thead>
-                            <tr className="border-t border-b bg-row-blue">
-                                <th className="px-3 py-2 text-left w-[50%]">Financial Detail</th>
-                                <th className="px-3 py-2 text-left w-[50%]">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {admission.finalBill ? (
-                                <>
-                                    <tr className="border-b border-dashed">
-                                        <td className="px-3 py-2">Total Amount</td>
-                                        <td className="px-3 py-2">{format(admission.finalBill.total_discounted_amount)}</td>
-                                    </tr>
-                                    <tr className="border-b border-dashed">
-                                        <td className="px-3 py-2">Paid Amount</td>
-                                        <td className="px-3 py-2">{format(admission.finalBill.paid_amount)}</td>
-                                    </tr>
-                                    <tr className="border-b border-dashed">
-                                        <td className="px-3 py-2">Due Amount</td>
-                                        <td className="px-3 py-2">{format(admission.finalBill.due_amount)}</td>
-                                    </tr>
-                                    <tr className="border-b border-dashed">
-                                        <td className="px-3 py-2">Payment Status</td>
-                                        <td className="px-3 py-2">{admission.finalBill.status.charAt(0).toUpperCase() + admission.finalBill.status.slice(1)}</td>
-                                    </tr>
-                                    <tr className="border-b border-dashed">
-                                        <td className="px-3 py-2">Number of Payments</td>
-                                        <td className="px-3 py-2">{admission.finalBill.payment_count} payment{admission.finalBill.payment_count !== 1 ? 's' : ''}</td>
-                                    </tr>
-                                </>
-                            ) : admission.advancePayments && admission.advancePayments.payments && admission.advancePayments.payments.length > 0 ? (
-                                <>
-                                    {admission.advancePayments.payments.map((p, idx) => (
-                                        <tr key={idx} className="border-b border-dashed">
-                                            <td className="px-3 py-2">
-                                                {p.payment_date ? new Date(p.payment_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A'}
-                                                {p.payment_method && ` (${p.payment_method.replace(/_/g, ' ').toUpperCase()})`}
-                                                {p.notes && <><br/><span className="text-xs text-gray-500">Note: {p.notes}</span></>}
-                                            </td>
-                                            <td className="px-3 py-2">{format(p.amount)}</td>
-                                        </tr>
-                                    ))}
-                                    <tr className="border-b border-dashed">
-                                        <td className="px-3 py-2 font-semibold">Total Advance</td>
-                                        <td className="px-3 py-2 font-semibold">{format(admission.advancePayments.total_amount)}</td>
-                                    </tr>
-                                </>
-                            ) : (
-                                <tr className="border-b border-dashed">
-                                    <td className="px-3 py-2 text-center text-gray-500" colSpan={2}>No payments recorded yet</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+
 
                     {/* Record Information */}
                     <p className="text-sm mb-20">

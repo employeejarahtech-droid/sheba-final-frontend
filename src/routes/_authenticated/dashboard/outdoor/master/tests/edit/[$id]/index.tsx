@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Check, ChevronDown, ArrowLeft, FlaskConical, MapPin } from 'lucide-react'
+import { Check, ChevronDown, ArrowLeft, FlaskConical, MapPin, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -477,6 +477,20 @@ function EditTest() {
                                                                     <CommandInput placeholder="Search rooms..." />
                                                                     <CommandList>
                                                                         <CommandEmpty>No room found.</CommandEmpty>
+                                                                        {field.value ? (
+                                                                            <CommandGroup>
+                                                                                <CommandItem
+                                                                                    onSelect={() => {
+                                                                                        field.onChange(undefined);
+                                                                                        setRoomOpen(false);
+                                                                                    }}
+                                                                                    className="text-muted-foreground"
+                                                                                >
+                                                                                    <X className="h-4 w-4 mr-2" />
+                                                                                    Clear selection
+                                                                                </CommandItem>
+                                                                            </CommandGroup>
+                                                                        ) : null}
                                                                         <CommandGroup>
                                                                             {sampleRooms?.map((room: any) => (
                                                                                 <CommandItem

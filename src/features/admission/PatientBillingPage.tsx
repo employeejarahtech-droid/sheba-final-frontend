@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from '@tanstack/react-router'
@@ -6,11 +6,13 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { getCookie } from '@/lib/cookies'
-import { Plus, Trash2, ArrowLeft, Loader2, Save, FileText, Receipt, BedDouble, Eye, Repeat, Pencil, Printer, UserMinus, ChevronRight, CheckCircle2, Circle, ChevronDown, ChevronUp, Calculator, DoorOpen, Users, DollarSign, Zap } from 'lucide-react'
+import { Plus, Trash2, ArrowLeft, Loader2, Save, FileText, Receipt, BedDouble, Eye, Repeat, Pencil, Printer, UserMinus, ChevronRight, CheckCircle2, Circle, ChevronDown, ChevronUp, Calculator, DoorOpen, Users, DollarSign, Zap, LayoutGrid, Bed, Search, AlertCircle, Activity, HeartPulse, UserCheck } from 'lucide-react'
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
 import { PageHeader } from '@/components/layout/page-header'
 import { useCurrency } from '@/hooks/use-currency'
+import { useDateFormat } from '@/hooks/use-date-format'
+import { DateField } from '@/components/date-field'
 import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
@@ -19,6 +21,8 @@ import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
     Dialog,
     DialogContent,
@@ -191,11 +195,22 @@ const BILLING_STEPS: BillingStep[] = [
 ]
 
 export function PatientBillingPage() {
-    const { admissionId } = useParams({ from: '/_authenticated/admission/patients/$admissionId/billing/' })
+    const { admissionId } = useParams({ from: '/_authenticated/dashboard/admission/patients/$admissionId/billing/' })
     const navigate = useNavigate()
     const queryClient = useQueryClient()
     const token = getCookie('accessToken')
-    const { format } = useCurrency()
+    const { format, currencySymbol } = useCurrency()
+    const { formatDate } = useDateFormat()
+    const safeFormatDate = (dateVal: any) => {
+        if (!dateVal) return '-'
+        if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+            const [y, m, day] = dateVal.split('-').map(Number)
+            return formatDate(new Date(y, m - 1, day))
+        }
+        const d = new Date(dateVal)
+        if (isNaN(d.getTime())) return '-'
+        return formatDate(d)
+    }
 
     // Step Wizard State
     const [steps, setSteps] = useState<BillingStep[]>(BILLING_STEPS)
@@ -216,8 +231,98 @@ export function PatientBillingPage() {
     const [editAnesthesiologist, setEditAnesthesiologist] = useState<any>(null)
     const [selectedBedHistory, setSelectedBedHistory] = useState<any>(null)
     const [openChangeBedDialog, setOpenChangeBedDialog] = useState(false)
+    const [selectedNewBedId, setSelectedNewBedId] = useState<string>('')
+    const [isBoardOpen, setIsBoardOpen] = useState(false)
+    const [isBedDropdownOpen, setIsBedDropdownOpen] = useState(false)
+    const [bedSearchQuery, setBedSearchQuery] = useState('')
+    const [bedTypeFilter, setBedTypeFilter] = useState<'All' | 'Bed' | 'Cabin'>('All')
+    const [boardFilter, setBoardFilter] = useState<'all' | 'free' | 'booked' | 'maintenance'>('all')
+    const [boardSearch, setBoardSearch] = useState('')
+    const [changeBedDate, setChangeBedDate] = useState<string>(() => new Date().toISOString().split('T')[0])
+    const [bedBillingFromDate, setBedBillingFromDate] = useState<string>('')
+    const [bedBillingToDate, setBedBillingToDate] = useState<string>('')
+
+    // Fetch ALL beds/cabins for Status Board
+    const { data: allBedsData, isLoading: allBedsLoading } = useQuery({
+        queryKey: ['all-beds-cabins-board'],
+        queryFn: async () => {
+            const res = await fetch(
+                `${API_URL}/api/bed-cabin?limit=200`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            )
+            if (!res.ok) return { data: { items: [] } }
+            return res.json()
+        },
+        enabled: !!token && isBoardOpen,
+        staleTime: 10 * 1000,
+    })
+    const allBeds = allBedsData?.data?.items || allBedsData?.data?.rows || []
+
+    const filteredBoardBeds = useMemo(() => {
+        return allBeds.filter((bed: any) => {
+            const statusKey = String(bed.status || 'Available').toLowerCase().trim();
+            const isFree = statusKey === 'available' || statusKey === 'free';
+            const isBooked = statusKey === 'occupied' || statusKey === 'booked';
+            if (boardFilter === 'free' && !isFree) return false;
+            if (boardFilter === 'booked' && !isBooked) return false;
+            if (boardFilter === 'maintenance' && statusKey !== 'maintenance') return false;
+
+            if (boardSearch.trim() !== '') {
+                const searchLower = boardSearch.toLowerCase().trim();
+                const codeMatch = bed.code?.toLowerCase().includes(searchLower);
+                const wardMatch = bed.ward?.toLowerCase().includes(searchLower);
+                const typeMatch = bed.type?.toLowerCase().includes(searchLower);
+                return codeMatch || wardMatch || typeMatch;
+            }
+            return true;
+        });
+    }, [allBeds, boardFilter, boardSearch]);
     const [openBedBillingDialog, setOpenBedBillingDialog] = useState(false)
     const [editBedBilling, setEditBedBilling] = useState<any>(null)
+
+    // Fetch admission details
+    const { data: admissionData, isLoading: admissionLoading, error: admissionError } = useQuery({
+        queryKey: ['admission', admissionId],
+        queryFn: async () => {
+            console.log('Fetching admission:', admissionId)
+            const res = await fetch(`${API_URL}/api/admission/${admissionId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            console.log('Response status:', res.status)
+            if (!res.ok) {
+                let errorMsg = 'Failed to fetch admission'
+                try {
+                    const errorData = await res.json()
+                    errorMsg = errorData?.message || errorMsg
+                } catch (_) { }
+                throw new Error(errorMsg)
+            }
+            const data = await res.json()
+            console.log('Admission data:', data)
+            return data
+        },
+        enabled: !!token && !!admissionId,
+    })
+
+    useEffect(() => {
+        if (!openChangeBedDialog) {
+            setSelectedNewBedId('')
+            setChangeBedDate(new Date().toISOString().split('T')[0])
+        }
+    }, [openChangeBedDialog])
+
+    useEffect(() => {
+        if (openBedBillingDialog) {
+            setBedBillingFromDate(editBedBilling?.from_date || admissionData?.data?.admission_date || new Date().toISOString().split('T')[0])
+            setBedBillingToDate(editBedBilling?.to_date || new Date().toISOString().split('T')[0])
+        } else {
+            setBedBillingFromDate('')
+            setBedBillingToDate('')
+        }
+    }, [openBedBillingDialog, editBedBilling, admissionData])
+
     const [openFinalBillDialog, setOpenFinalBillDialog] = useState(false)
     const [openAutoCompleteDialog, setOpenAutoCompleteDialog] = useState(false)
     const [openDischargeDialog, setOpenDischargeDialog] = useState(false)
@@ -231,23 +336,6 @@ export function PatientBillingPage() {
     const [isDischarging, setIsDischarging] = useState(false)
     const [isDistributing, setIsDistributing] = useState(false)
     const [isBalanceDistributing, setIsBalanceDistributing] = useState(false)
-
-    // Fetch admission details
-    const { data: admissionData, isLoading: admissionLoading, error: admissionError } = useQuery({
-        queryKey: ['admission', admissionId],
-        queryFn: async () => {
-            console.log('Fetching admission:', admissionId)
-            const res = await fetch(`${API_URL}/api/admission/${admissionId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            console.log('Response status:', res.status)
-            const data = await res.json()
-            console.log('Admission data:', data)
-            if (!res.ok) throw new Error(data?.message || 'Failed to fetch admission')
-            return data
-        },
-        enabled: !!token && !!admissionId,
-    })
 
     // Fetch doctors for consultant dropdown
     const { data: doctorsData } = useQuery({
@@ -1329,7 +1417,7 @@ export function PatientBillingPage() {
     // Handle print billing
     const handlePrintBilling = () => {
         // Navigate to the billing print page
-        window.open(`/admission/patients/${admissionId}/billing-print`, '_blank')
+        window.open(`/dashboard/admission/patients/${admissionId}/billing-print`, '_blank')
     }
 
     // Note: Items are saved individually when added (operations, consultants)
@@ -1466,32 +1554,32 @@ export function PatientBillingPage() {
     return (
         <>
             <AppHeader fixed />
-            <Main className="p-6 lg:p-10 w-full flex-1 dark:bg-black/20">
+            <Main className=" w-full flex-1 dark:bg-black/20">
                 <div className="max-w-full mx-auto">
-                <PageHeader
-                    title="Patient Billing"
-                    subtitle={`${admissionData?.data?.patient_name || 'Unknown Patient'} • Admission #${admissionId}`}
-                    backButton={{
-                        onClick: () => navigate({ to: '/dashboard/admission/patients' }),
-                    }}
-                    actions={
-                        admissionData?.data?.bill_created === 1 ? (
-                            <div className="flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
-                                <span className="text-green-700 dark:text-green-300 text-sm font-medium">
-                                    Bill Created on {admissionData.data.bill_created_date ? new Date(admissionData.data.bill_created_date).toLocaleDateString() : 'N/A'}
-                                </span>
-                                <span className="text-green-700 dark:text-green-300 text-sm font-bold">
-                                    {format(Number(admissionData.data.total_bill_amount || 0))}
-                                </span>
-                            </div>
-                        ) : null
-                    }
-                />
+                    <PageHeader
+                        title="Patient Billing"
+                        subtitle={`${admissionData?.data?.patient_name || 'Unknown Patient'} • Admission #${admissionId}`}
+                        backButton={{
+                            onClick: () => navigate({ to: '/dashboard/admission/patients' }),
+                        }}
+                        actions={
+                            admissionData?.data?.bill_created === 1 ? (
+                                <div className="flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+                                    <span className="text-green-700 dark:text-green-300 text-sm font-medium">
+                                        Bill Created on {admissionData.data.bill_created_date ? safeFormatDate(admissionData.data.bill_created_date) : 'N/A'}
+                                    </span>
+                                    <span className="text-green-700 dark:text-green-300 text-sm font-bold">
+                                        {format(Number(admissionData.data.total_bill_amount || 0))}
+                                    </span>
+                                </div>
+                            ) : null
+                        }
+                    />
 
-                {/* Billing Layout */}
+                    {/* Billing Layout */}
                     <div>
                         <Form {...form}>
-                        <div className="space-y-6">
+                            <div className="space-y-6">
                                 {/* Hidden fields */}
                                 <FormField
                                     control={form.control}
@@ -1517,255 +1605,270 @@ export function PatientBillingPage() {
                                 />
 
                                 {/* Patient Information Card */}
-                                <Card>
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center gap-2">
-                                                <FileText className="h-5 w-5" />
-                                                Patient Information
-                                            </CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                                <div>
-                                                    <span className="text-sm text-muted-foreground">Patient Name</span>
-                                                    <p className="font-semibold">{admissionData?.data?.patient_name || '-'}</p>
-                                                </div>
-                                                <div>
-                                                    <span className="text-sm text-muted-foreground">Age/Sex</span>
-                                                    <p className="font-semibold">
-                                                        {admissionData?.data?.age || '-'}/{admissionData?.data?.sex?.toUpperCase() || '-'}
-                                                    </p>
-                                                </div>
-                                                <div>
-                                                    <span className="text-sm text-muted-foreground">Phone</span>
-                                                    <p className="font-semibold">{admissionData?.data?.phone || '-'}</p>
-                                                </div>
-                                                <div>
-                                                    <span className="text-sm text-muted-foreground">Admission Date</span>
-                                                    <p className="font-semibold">
-                                                        {admissionData?.data?.admission_date ? new Date(admissionData.data.admission_date).toLocaleDateString() : '-'}
-                                                    </p>
-                                                </div>
-                                                <div>
-                                                    <span className="text-sm text-muted-foreground">Bed/Cabin</span>
-                                                    <div className="flex items-center gap-2">
-                                                        <p className="font-semibold">
-                                                            {admissionData?.data?.bedCabin ? `${admissionData.data.bedCabin.code} (${admissionData.data.bedCabin.type})` : '-'}
-                                                        </p>
-                                                        {bedCharges.breakdown && bedCharges.breakdown.length > 1 && (
-                                                            <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 font-medium">
-                                                                {bedCharges.breakdown.length} changes
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <p className="text-xs text-gray-500">
-                                                        {admissionData?.data?.bedCabin?.ward} • {format(admissionData?.data?.bedCabin?.price || 0)}/day
-                                                    </p>
-                                                </div>
-                                                <div>
-                                                    <span className="text-sm text-muted-foreground">Doctor</span>
-                                                    <p className="font-semibold">
-                                                        {admissionData?.data?.doctor?.doctor_name || '-'}
-                                                    </p>
-                                                </div>
-                                                <div>
-                                                    <span className="text-sm text-muted-foreground">Diagnosis</span>
-                                                    <p className="font-semibold">{admissionData?.data?.diagnosis || '-'}</p>
-                                                </div>
-                                                <div>
-                                                    <span className="text-sm text-muted-foreground">Status</span>
-                                                    <p className="font-semibold">
-                                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                                            admissionData?.data?.status === 'active'
-                                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                                                                : admissionData?.data?.status === 'discharged'
-                                                                ? 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'
-                                                                : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-                                                        }`}>
-                                                            {admissionData?.data?.status?.charAt(0).toUpperCase() + admissionData?.data?.status?.slice(1) || 'Unknown'}
-                                                        </span>
-                                                    </p>
-                                                </div>
+                                <Card className="mt-3 overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                                                <FileText className="h-4 w-4" />
                                             </div>
-                                        </CardContent>
-                                    </Card>
+                                            <div>
+                                                <CardTitle className="text-lg font-bold">Patient Information</CardTitle>
+                                                <p className="text-xs text-gray-600 dark:text-gray-400">Key details about the patient and admission record</p>
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                            <div>
+                                                <span className="text-sm text-muted-foreground">Patient Name</span>
+                                                <p className="font-semibold">{admissionData?.data?.patient_name || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-sm text-muted-foreground">Age/Sex</span>
+                                                <p className="font-semibold">
+                                                    {admissionData?.data?.age || '-'}/{admissionData?.data?.sex?.toUpperCase() || '-'}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <span className="text-sm text-muted-foreground">Phone</span>
+                                                <p className="font-semibold">{admissionData?.data?.phone || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-sm text-muted-foreground">Admission Date</span>
+                                                <p className="font-semibold">
+                                                    {admissionData?.data?.admission_date ? safeFormatDate(admissionData.data.admission_date) : '-'}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <span className="text-sm text-muted-foreground">Bed/Cabin</span>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="font-semibold">
+                                                        {admissionData?.data?.bedCabin ? `${admissionData.data.bedCabin.code} (${admissionData.data.bedCabin.type})` : '-'}
+                                                    </p>
+                                                    {bedCharges.breakdown && bedCharges.breakdown.length > 1 && (
+                                                        <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 font-medium">
+                                                            {bedCharges.breakdown.length} changes
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-gray-500">
+                                                    {admissionData?.data?.bedCabin?.ward} • {format(admissionData?.data?.bedCabin?.price || 0)}/day
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <span className="text-sm text-muted-foreground">Doctor</span>
+                                                <p className="font-semibold">
+                                                    {admissionData?.data?.doctor?.doctor_name || '-'}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <span className="text-sm text-muted-foreground">Diagnosis</span>
+                                                <p className="font-semibold">{admissionData?.data?.diagnosis || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-sm text-muted-foreground">Status</span>
+                                                <p className="font-semibold">
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${admissionData?.data?.status === 'active'
+                                                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                                        : admissionData?.data?.status === 'discharged'
+                                                            ? 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'
+                                                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                                                        }`}>
+                                                        {admissionData?.data?.status?.charAt(0).toUpperCase() + admissionData?.data?.status?.slice(1) || 'Unknown'}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
 
                                 {/* Create Bill Content */}
                                 <div className="space-y-6">
-                                        {/* Step Actions */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            {/* Step 3: Create Bill */}
-                                            {!admissionData?.data?.bill_created && (
-                                                <Button
-                                                    onClick={() => createBillMutation.mutate()}
-                                                    disabled={grandTotal === 0 || createBillMutation.isPending}
-                                                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                                                >
-                                                    {createBillMutation.isPending ? (
-                                                        <>
-                                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                                            Creating...
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <FileText className="h-4 w-4 mr-2" />
-                                                            Create Bill 💰
-                                                        </>
-                                                    )}
-                                                </Button>
-                                            )}
-
-                                            {/* Step 5: Discharge */}
-                                            {admissionData?.data?.final_bill_created_at && admissionData?.data?.status === 'active' && (
-                                                <Button
-                                                    onClick={() => setOpenDischargeDialog(true)}
-                                                    className="bg-orange-600 hover:bg-orange-700 text-white"
-                                                >
-                                                    <DoorOpen className="h-4 w-4 mr-2" />
-                                                    Discharge 💰
-                                                </Button>
-                                            )}
-
-                                        </div>
-                                    </div>
-
-                        {/* Operation Types Card */}
-                        <Card>
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle>Operation Types</CardTitle>
-                                    {!admissionData?.data?.bill_created_at && (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => {
-                                                setEditOperation(null)
-                                                setOpenOperationForm(true)
-                                            }}
-                                        >
-                                            <Plus className="h-4 w-4 mr-2" />
-                                            Add Operation
-                                        </Button>
-                                    )}
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                {operations.length === 0 ? (
-                                    <p className="text-muted-foreground text-center py-8">
-                                        No operation types added yet
-                                    </p>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full border-collapse">
-                                            <thead>
-                                                <tr className="border-b">
-                                                    <th className="text-left p-3">Operation Type</th>
-                                                    <th className="text-left p-3">Date</th>
-                                                    <th className="text-right p-3">Charges</th>
-                                                    <th className="text-left p-3">Created At</th>
-                                                    <th className="text-center p-3">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {Array.isArray(operations) && operations.map((op) => (
-                                                    <tr key={op.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
-                                                        <td className="p-3">{op.operation_type}</td>
-                                                        <td className="p-3">{op.operation_date}</td>
-                                                        <td className="p-3 text-right">{format(Number(op.charges || 0))}</td>
-                                                        <td className="p-3 text-sm text-muted-foreground">{op.created_at ? new Date(op.created_at).toLocaleDateString() : '-'}</td>
-                                                        <td className="p-3 text-center flex gap-2 justify-center">
-                                                            {!admissionData?.data?.bill_created_at && (
-                                                                <>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => {
-                                                                            setEditOperation({ id: op.id!, operation_type: op.operation_type, operation_date: op.operation_date, charges: op.charges })
-                                                                            setOpenOperationForm(true)
-                                                                        }}
-                                                                        className="text-blue-500 hover:text-blue-700"
-                                                                        title="Edit"
-                                                                    >
-                                                                        <Pencil className="w-4 h-4" />
-                                                                    </button>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleRemoveOperation(op.id!)}
-                                                                        className="text-red-500 hover:text-red-700"
-                                                                        title="Delete"
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4" />
-                                                                    </button>
-                                                                </>
-                                                            )}
-                                                            {admissionData?.data?.bill_created_at && (
-                                                                <span className="text-xs text-gray-400 italic">Locked</span>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
-                                <AddOperationTypeForm
-                                    open={openOperationForm}
-                                    setOpen={setOpenOperationForm}
-                                    onAdd={handleAddOperation}
-                                    admissionId={admissionId}
-                                    editOperation={editOperation}
-                                />
-                            </CardContent>
-                        </Card>
-
-                        {/* Bed/Cabin Charges Card */}
-                        <Card>
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="flex items-center gap-2">
-                                        <BedDouble className="h-5 w-5" />
-                                        Bed/Cabin Charges
-                                    </CardTitle>
-                                    <div className="flex items-center gap-3">
-                                        {bedCharges.breakdown && bedCharges.breakdown.length > 1 && (
-                                            <span className="text-sm text-muted-foreground">
-                                                {bedCharges.breakdown.length} change{bedCharges.breakdown.length > 1 ? 's' : ''}
-                                            </span>
-                                        )}
-                                        {!admissionData?.data?.bill_created_at && (
+                                    {/* Step Actions */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {/* Step 3: Create Bill */}
+                                        {!admissionData?.data?.bill_created && (
                                             <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => setOpenChangeBedDialog(true)}
+                                                onClick={() => createBillMutation.mutate()}
+                                                disabled={grandTotal === 0 || createBillMutation.isPending}
+                                                className="bg-blue-600 hover:bg-blue-700 text-white"
                                             >
-                                                <Repeat className="h-4 w-4 mr-2" />
-                                                Change Bed/Cabin
+                                                {createBillMutation.isPending ? (
+                                                    <>
+                                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                        Creating...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <FileText className="h-4 w-4 mr-2" />
+                                                        Create Bill 💰
+                                                    </>
+                                                )}
                                             </Button>
                                         )}
+
+                                        {/* Step 5: Discharge */}
+                                        {admissionData?.data?.final_bill_created_at && admissionData?.data?.status === 'active' && (
+                                            <Button
+                                                onClick={() => setOpenDischargeDialog(true)}
+                                                className="bg-orange-600 hover:bg-orange-700 text-white"
+                                            >
+                                                <DoorOpen className="h-4 w-4 mr-2" />
+                                                Discharge 💰
+                                            </Button>
+                                        )}
+
                                     </div>
                                 </div>
-                            </CardHeader>
-                            <CardContent>
-                                {bedCharges.breakdown && bedCharges.breakdown.length > 0 ? (
-                                    <>
-                                        {/* Timeline */}
-                                        <div className="relative">
-                                            {/* Vertical Line */}
-                                            <div className="absolute left-[19px] top-0 bottom-0 w-0.5 bg-gray-300 dark:bg-gray-700"></div>
 
-                                            {/* Bed History Items */}
-                                            <div className="space-y-4">
-                                                {bedCharges.breakdown.map((bed: any, index: number) => {
-                                                    const isLast = index === bedCharges.breakdown.length - 1
-                                                    const isActive = bed.status === 'active'
-                                                    const fromDate = new Date(bed.from)
-                                                    const toDate = bed.to ? new Date(bed.to) : new Date()
+                                {/* Operation Types Card */}
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center justify-between w-full">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                                                    <Activity className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <CardTitle className="text-lg font-bold">Operation Types</CardTitle>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400">Recorded operations and procedures</p>
+                                                </div>
+                                            </div>
+                                            {!admissionData?.data?.bill_created_at && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setEditOperation(null)
+                                                        setOpenOperationForm(true)
+                                                    }}
+                                                >
+                                                    <Plus className="h-4 w-4 mr-2" />
+                                                    Add Operation
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {operations.length === 0 ? (
+                                            <p className="text-muted-foreground text-center py-8">
+                                                No operation types added yet
+                                            </p>
+                                        ) : (
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full border-collapse">
+                                                    <thead>
+                                                        <tr className="border-b">
+                                                            <th className="text-left p-3">Operation Type</th>
+                                                            <th className="text-left p-3">Date</th>
+                                                            <th className="text-left p-3">Created At</th>
+                                                            <th className="text-center p-3">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {Array.isArray(operations) && operations.map((op) => (
+                                                            <tr key={op.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
+                                                                <td className="p-3">{op.operation_type}</td>
+                                                                <td className="p-3">{safeFormatDate(op.operation_date)}</td>
+                                                                <td className="p-3 text-sm text-muted-foreground">{op.created_at ? safeFormatDate(op.created_at) : '-'}</td>
+                                                                <td className="p-3 text-center flex gap-2 justify-center">
+                                                                    {!admissionData?.data?.bill_created_at && (
+                                                                        <>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    setEditOperation({ id: op.id!, operation_type: op.operation_type, operation_date: op.operation_date, charges: op.charges })
+                                                                                    setOpenOperationForm(true)
+                                                                                }}
+                                                                                className="text-blue-500 hover:text-blue-700"
+                                                                                title="Edit"
+                                                                            >
+                                                                                <Pencil className="w-4 h-4" />
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleRemoveOperation(op.id!)}
+                                                                                className="text-red-500 hover:text-red-700"
+                                                                                title="Delete"
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4" />
+                                                                            </button>
+                                                                        </>
+                                                                    )}
+                                                                    {admissionData?.data?.bill_created_at && (
+                                                                        <span className="text-xs text-gray-400 italic">Locked</span>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+                                        <AddOperationTypeForm
+                                            open={openOperationForm}
+                                            setOpen={setOpenOperationForm}
+                                            onAdd={handleAddOperation}
+                                            admissionId={admissionId}
+                                            editOperation={editOperation}
+                                        />
+                                    </CardContent>
+                                </Card>
 
-                                                    return (
-                                                        <div key={bed.id || index} className="relative flex gap-4">
-                                                            {/* Timeline Dot */}
-                                                            <div className={`
+                                {/* Bed/Cabin Charges Card */}
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center justify-between w-full">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                                                    <Bed className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <CardTitle className="text-lg font-bold">Bed/Cabin Charges</CardTitle>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400">Timeline and daily rate breakdown for bed history</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                {bedCharges.breakdown && bedCharges.breakdown.length > 1 && (
+                                                    <span className="text-sm text-muted-foreground">
+                                                        {bedCharges.breakdown.length} change{bedCharges.breakdown.length > 1 ? 's' : ''}
+                                                    </span>
+                                                )}
+                                                {!admissionData?.data?.bill_created_at && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => setOpenChangeBedDialog(true)}
+                                                    >
+                                                        <Repeat className="h-4 w-4 mr-2" />
+                                                        Change Bed/Cabin
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {bedCharges.breakdown && bedCharges.breakdown.length > 0 ? (
+                                            <>
+                                                {/* Timeline */}
+                                                <div className="relative">
+                                                    {/* Vertical Line */}
+                                                    <div className="absolute left-[19px] top-0 bottom-0 w-0.5 bg-gray-300 dark:bg-gray-700"></div>
+
+                                                    {/* Bed History Items */}
+                                                    <div className="space-y-4">
+                                                        {bedCharges.breakdown.map((bed: any, index: number) => {
+                                                            const isLast = index === bedCharges.breakdown.length - 1
+                                                            const isActive = bed.status === 'active'
+                                                            const fromDate = new Date(bed.from)
+                                                            const toDate = bed.to ? new Date(bed.to) : new Date()
+
+                                                            return (
+                                                                <div key={bed.id || index} className="relative flex gap-4">
+                                                                    {/* Timeline Dot */}
+                                                                    <div className={`
                                                                 relative z-10 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center
                                                                         ${isActive
                                                                             ? 'bg-blue-500 text-white ring-4 ring-blue-200 dark:ring-blue-900'
@@ -1809,7 +1912,7 @@ export function PatientBillingPage() {
                                                                                 <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                                                                                     <span className="flex items-center gap-1">
                                                                                         <FileText className="h-3 w-3" />
-                                                                                        {fromDate.toLocaleDateString()}
+                                                                                        {safeFormatDate(fromDate)}
                                                                                         {isActive && toDate > fromDate && (
                                                                                             <>
                                                                                                 {' - '}Present
@@ -1817,7 +1920,7 @@ export function PatientBillingPage() {
                                                                                         )}
                                                                                         {!isActive && toDate && (
                                                                                             <>
-                                                                                                {' - '}{toDate.toLocaleDateString()}
+                                                                                                {' - '}{safeFormatDate(toDate)}
                                                                                             </>
                                                                                         )}
                                                                                     </span>
@@ -1864,925 +1967,1547 @@ export function PatientBillingPage() {
                                                     </div>
                                                 </div>
 
-                                        </>
-                                    ) : (
-                                        <p className="text-muted-foreground text-center py-8">
-                                            No bed/cabin assigned to this admission
-                                        </p>
-                                    )}
-                                </CardContent>
-                        </Card>
+                                            </>
+                                        ) : (
+                                            <p className="text-muted-foreground text-center py-8">
+                                                No bed/cabin assigned to this admission
+                                            </p>
+                                        )}
+                                    </CardContent>
+                                </Card>
 
-                        {/* Bed/Cabin Billing Card */}
-                        <Card>
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Receipt className="h-5 w-5" />
-                                        Bed/Cabin Bills
-                                    </CardTitle>
-                                    {!admissionData?.data?.bill_created_at && (
-                                        <Button
-                                            type="button"
-                                            variant="default"
-                                            size="sm"
-                                            onClick={() => setOpenBedBillingDialog(true)}
-                                            disabled={!bedCharges.breakdown || bedCharges.breakdown.length === 0}
-                                        >
-                                            <Receipt className="h-4 w-4 mr-2" />
-                                            Make Bill for Bed Cabin
-                                        </Button>
-                                    )}
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                {bedBillingData?.data && bedBillingData.data.length > 0 ? (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full border-collapse">
-                                            <thead>
-                                                <tr className="border-b">
-                                                    <th className="text-left p-3">SL</th>
-                                                    <th className="text-left p-3">Bed/Cabin</th>
-                                                    <th className="text-left p-3">From Date</th>
-                                                    <th className="text-left p-3">To Date</th>
-                                                    <th className="text-left p-3">Days</th>
-                                                    <th className="text-right p-3">Rate/Day</th>
-                                                    <th className="text-right p-3">Total</th>
-                                                    <th className="text-left p-3">Created At</th>
-                                                    <th className="text-center p-3">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {bedBillingData.data.map((bill: any, index: number) => (
-                                                    <tr key={bill.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
-                                                        <td className="p-3">{index + 1}</td>
-                                                        <td className="p-3">{bill.bed_code} ({bill.bed_type})</td>
-                                                        <td className="p-3">{bill.from_date}</td>
-                                                        <td className="p-3">{bill.to_date || 'Active'}</td>
-                                                        <td className="p-3">{bill.days}</td>
-                                                        <td className="p-3 text-right">{format(Number(bill.rate_per_day))}</td>
-                                                        <td className="p-3 text-right">{format(Number(bill.total_amount))}</td>
-                                                        <td className="p-3 text-sm text-muted-foreground">{bill.created_at ? new Date(bill.created_at).toLocaleDateString() : '-'}</td>
-                                                        <td className="p-3 text-center">
-                                                            <div className="flex items-center justify-center gap-2">
-                                                                {!admissionData?.data?.bill_created_at && (
-                                                                    <>
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => {
-                                                                                setEditBedBilling(bill)
-                                                                                setOpenBedBillingDialog(true)
-                                                                            }}
-                                                                            className="text-blue-500 hover:text-blue-700"
-                                                                            title="Edit"
-                                                                        >
-                                                                            <Pencil className="w-4 h-4" />
-                                                                        </button>
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => handleDeleteBedBilling(bill.id)}
-                                                                            className="text-red-500 hover:text-red-700"
-                                                                            title="Delete"
-                                                                        >
-                                                                            <Trash2 className="w-4 h-4" />
-                                                                        </button>
-                                                                    </>
-                                                                )}
-                                                                {admissionData?.data?.bill_created_at && (
-                                                                    <span className="text-xs text-gray-400 italic">Locked</span>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                ) : (
-                                    <p className="text-muted-foreground text-center py-8">
-                                        No bed/cabin bills generated yet. Click "Make Bill for Bed Cabin" to create billing records.
-                                    </p>
-                                )}
-                            </CardContent>
-                        </Card>
+                                {/* Bed/Cabin Billing Card */}
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center justify-between w-full">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                                                    <BedDouble className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <CardTitle className="text-lg font-bold">Bed Cabin Billing Records</CardTitle>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400">Logged billing transactions for patient stay duration</p>
+                                                </div>
+                                            </div>
+                                            {!admissionData?.data?.bill_created_at && (
+                                                <Button
+                                                    type="button"
+                                                    variant="default"
+                                                    size="sm"
+                                                    onClick={() => setOpenBedBillingDialog(true)}
+                                                    disabled={!bedCharges.breakdown || bedCharges.breakdown.length === 0}
+                                                >
+                                                    <Receipt className="h-4 w-4 mr-2" />
+                                                    Make Bill for Bed Cabin
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {bedBillingData?.data && bedBillingData.data.length > 0 ? (
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full border-collapse">
+                                                    <thead>
+                                                        <tr className="border-b">
+                                                            <th className="text-left p-3">SL</th>
+                                                            <th className="text-left p-3">Bed/Cabin</th>
+                                                            <th className="text-left p-3">From Date</th>
+                                                            <th className="text-left p-3">To Date</th>
+                                                            <th className="text-left p-3">Days</th>
+                                                            <th className="text-right p-3">Rate/Day</th>
+                                                            <th className="text-right p-3">Total</th>
+                                                            <th className="text-left p-3">Created At</th>
+                                                            <th className="text-center p-3">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {bedBillingData.data.map((bill: any, index: number) => (
+                                                            <tr key={bill.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
+                                                                <td className="p-3">{index + 1}</td>
+                                                                <td className="p-3">{bill.bed_code} ({bill.bed_type})</td>
+                                                                <td className="p-3">{safeFormatDate(bill.from_date)}</td>
+                                                                <td className="p-3">{bill.to_date ? safeFormatDate(bill.to_date) : 'Active'}</td>
+                                                                <td className="p-3">{bill.days}</td>
+                                                                <td className="p-3 text-right">{format(Number(bill.rate_per_day))}</td>
+                                                                <td className="p-3 text-right">{format(Number(bill.total_amount))}</td>
+                                                                <td className="p-3 text-sm text-muted-foreground">{bill.created_at ? safeFormatDate(bill.created_at) : '-'}</td>
+                                                                <td className="p-3 text-center">
+                                                                    <div className="flex items-center justify-center gap-2">
+                                                                        {!admissionData?.data?.bill_created_at && (
+                                                                            <>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => {
+                                                                                        setEditBedBilling(bill)
+                                                                                        setOpenBedBillingDialog(true)
+                                                                                    }}
+                                                                                    className="text-blue-500 hover:text-blue-700"
+                                                                                    title="Edit"
+                                                                                >
+                                                                                    <Pencil className="w-4 h-4" />
+                                                                                </button>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => handleDeleteBedBilling(bill.id)}
+                                                                                    className="text-red-500 hover:text-red-700"
+                                                                                    title="Delete"
+                                                                                >
+                                                                                    <Trash2 className="w-4 h-4" />
+                                                                                </button>
+                                                                            </>
+                                                                        )}
+                                                                        {admissionData?.data?.bill_created_at && (
+                                                                            <span className="text-xs text-gray-400 italic">Locked</span>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        ) : (
+                                            <p className="text-muted-foreground text-center py-8">
+                                                No bed/cabin bills generated yet. Click "Make Bill for Bed Cabin" to create billing records.
+                                            </p>
+                                        )}
+                                    </CardContent>
+                                </Card>
 
-                        {/* Consultants Card */}
+                                {/* Consultants Card */}
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center justify-between w-full">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                                                    <Users className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <CardTitle className="text-lg font-bold">Consultants</CardTitle>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400">Assigned consultants, visitation dates, and fees</p>
+                                                </div>
+                                            </div>
+                                            {!admissionData?.data?.bill_created_at && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setEditConsultant(null)
+                                                        setOpenConsultantForm(true)
+                                                    }}
+                                                >
+                                                    <Plus className="h-4 w-4 mr-2" />
+                                                    Add Consultant
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {consultants.length === 0 ? (
+                                            <p className="text-muted-foreground text-center py-8">
+                                                No consultants added yet
+                                            </p>
+                                        ) : (
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full border-collapse">
+                                                    <thead>
+                                                        <tr className="border-b">
+                                                            <th className="text-left p-3">SL</th>
+                                                            <th className="text-left p-3">Consultant Name</th>
+                                                            <th className="text-left p-3">Date</th>
+                                                            <th className="text-right p-3">Fees</th>
+                                                            <th className="text-left p-3">Created At</th>
+                                                            <th className="text-center p-3">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {consultants.map((cons, index) => (
+                                                            <tr key={cons.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
+                                                                <td className="p-3">{index + 1}</td>
+                                                                <td className="p-3">{cons.consultant_name}</td>
+                                                                <td className="p-3">{safeFormatDate(cons.visit_date)}</td>
+                                                                <td className="p-3 text-right">{format(cons.fees)}</td>
+                                                                <td className="p-3 text-sm text-muted-foreground">{cons.created_at ? safeFormatDate(cons.created_at) : '-'}</td>
+                                                                <td className="p-3 text-center flex gap-2 justify-center">
+                                                                    {!admissionData?.data?.bill_created_at && (
+                                                                        <>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    setEditConsultant({ id: cons.id!, consultant_id: cons.consultant_id, visit_date: cons.visit_date, fees: cons.fees })
+                                                                                    setOpenConsultantForm(true)
+                                                                                }}
+                                                                                className="text-blue-500 hover:text-blue-700"
+                                                                                title="Edit"
+                                                                            >
+                                                                                <Pencil className="w-4 h-4" />
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleRemoveConsultant(cons.id!)}
+                                                                                className="text-red-500 hover:text-red-700"
+                                                                                title="Delete"
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4" />
+                                                                            </button>
+                                                                        </>
+                                                                    )}
+                                                                    {admissionData?.data?.bill_created_at && (
+                                                                        <span className="text-xs text-gray-400 italic">Locked</span>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+                                        <AddConsultantForm
+                                            open={openConsultantForm}
+                                            setOpen={setOpenConsultantForm}
+                                            onAdd={handleAddConsultant}
+                                            doctors={doctors}
+                                            editConsultant={editConsultant}
+                                        />
+                                    </CardContent>
+                                </Card>
 
-                        {/* Consultants Card */}
-                        <Card>
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle>Consultants</CardTitle>
-                                    {!admissionData?.data?.bill_created_at && (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => {
-                                                setEditConsultant(null)
-                                                setOpenConsultantForm(true)
-                                            }}
-                                        >
-                                            <Plus className="h-4 w-4 mr-2" />
-                                            Add Consultant
-                                        </Button>
-                                    )}
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                {consultants.length === 0 ? (
-                                    <p className="text-muted-foreground text-center py-8">
-                                        No consultants added yet
-                                    </p>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full border-collapse">
-                                            <thead>
-                                                <tr className="border-b">
-                                                    <th className="text-left p-3">SL</th>
-                                                    <th className="text-left p-3">Consultant Name</th>
-                                                    <th className="text-left p-3">Date</th>
-                                                    <th className="text-right p-3">Fees</th>
-                                                    <th className="text-left p-3">Created At</th>
-                                                    <th className="text-center p-3">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {consultants.map((cons, index) => (
-                                                    <tr key={cons.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
-                                                        <td className="p-3">{index + 1}</td>
-                                                        <td className="p-3">{cons.consultant_name}</td>
-                                                        <td className="p-3">{cons.visit_date}</td>
-                                                        <td className="p-3 text-right">{format(cons.fees)}</td>
-                                                        <td className="p-3 text-sm text-muted-foreground">{cons.created_at ? new Date(cons.created_at).toLocaleDateString() : '-'}</td>
-                                                        <td className="p-3 text-center flex gap-2 justify-center">
-                                                            {!admissionData?.data?.bill_created_at && (
-                                                                <>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => {
-                                                                            setEditConsultant({ id: cons.id!, consultant_id: cons.consultant_id, visit_date: cons.visit_date, fees: cons.fees })
-                                                                            setOpenConsultantForm(true)
-                                                                        }}
-                                                                        className="text-blue-500 hover:text-blue-700"
-                                                                        title="Edit"
-                                                                    >
-                                                                        <Pencil className="w-4 h-4" />
-                                                                    </button>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleRemoveConsultant(cons.id!)}
-                                                                        className="text-red-500 hover:text-red-700"
-                                                                        title="Delete"
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4" />
-                                                                    </button>
-                                                                </>
-                                                            )}
-                                                            {admissionData?.data?.bill_created_at && (
-                                                                <span className="text-xs text-gray-400 italic">Locked</span>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
-                                <AddConsultantForm
-                                    open={openConsultantForm}
-                                    setOpen={setOpenConsultantForm}
-                                    onAdd={handleAddConsultant}
-                                    doctors={doctors}
-                                    editConsultant={editConsultant}
-                                />
-                            </CardContent>
-                        </Card>
+                                {/* Surgeons Card */}
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center justify-between w-full">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                                                    <HeartPulse className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <CardTitle className="text-lg font-bold">Surgeons</CardTitle>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400">Surgeon assignments and surgery fee distribution</p>
+                                                </div>
+                                            </div>
+                                            {!admissionData?.data?.bill_created_at && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setEditSurgeon(null)
+                                                        setOpenSurgeonForm(true)
+                                                    }}
+                                                >
+                                                    <Plus className="h-4 w-4 mr-2" />
+                                                    Add Surgeon
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {surgeons.length === 0 ? (
+                                            <p className="text-muted-foreground text-center py-8">
+                                                No surgeons added yet
+                                            </p>
+                                        ) : (
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full border-collapse">
+                                                    <thead>
+                                                        <tr className="border-b">
+                                                            <th className="text-left p-3">SL</th>
+                                                            <th className="text-left p-3">Surgeon Name</th>
+                                                            <th className="text-left p-3">Operation Date</th>
+                                                            <th className="text-right p-3">Fees</th>
+                                                            <th className="text-left p-3">Created At</th>
+                                                            <th className="text-center p-3">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {surgeons.map((surgeon, index) => (
+                                                            <tr key={surgeon.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
+                                                                <td className="p-3">{index + 1}</td>
+                                                                <td className="p-3">{surgeon.surgeon_name}</td>
+                                                                <td className="p-3">{safeFormatDate(surgeon.operation_date)}</td>
+                                                                <td className="p-3 text-right">{format(surgeon.fees)}</td>
+                                                                <td className="p-3 text-sm text-muted-foreground">{surgeon.created_at ? safeFormatDate(surgeon.created_at) : '-'}</td>
+                                                                <td className="p-3 text-center flex gap-2 justify-center">
+                                                                    {!admissionData?.data?.bill_created_at && (
+                                                                        <>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    setEditSurgeon({ id: surgeon.id!, surgeon_id: surgeon.surgeon_id, operation_date: surgeon.operation_date, fees: surgeon.fees })
+                                                                                    setOpenSurgeonForm(true)
+                                                                                }}
+                                                                                className="text-blue-500 hover:text-blue-700"
+                                                                                title="Edit"
+                                                                            >
+                                                                                <Pencil className="w-4 h-4" />
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleRemoveSurgeon(surgeon.id!)}
+                                                                                className="text-red-500 hover:text-red-700"
+                                                                                title="Delete"
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4" />
+                                                                            </button>
+                                                                        </>
+                                                                    )}
+                                                                    {admissionData?.data?.bill_created_at && (
+                                                                        <span className="text-xs text-gray-400 italic">Locked</span>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+                                        <AddSurgeonForm
+                                            open={openSurgeonForm}
+                                            setOpen={setOpenSurgeonForm}
+                                            onAdd={handleAddSurgeon}
+                                            doctors={doctors}
+                                            editSurgeon={editSurgeon}
+                                        />
+                                    </CardContent>
+                                </Card>
 
-                        {/* Surgeons Card */}
-                        <Card>
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle>Surgeons</CardTitle>
-                                    {!admissionData?.data?.bill_created_at && (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => {
-                                                setEditSurgeon(null)
-                                                setOpenSurgeonForm(true)
-                                            }}
-                                        >
-                                            <Plus className="h-4 w-4 mr-2" />
-                                            Add Surgeon
-                                        </Button>
-                                    )}
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                {surgeons.length === 0 ? (
-                                    <p className="text-muted-foreground text-center py-8">
-                                        No surgeons added yet
-                                    </p>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full border-collapse">
-                                            <thead>
-                                                <tr className="border-b">
-                                                    <th className="text-left p-3">SL</th>
-                                                    <th className="text-left p-3">Surgeon Name</th>
-                                                    <th className="text-left p-3">Operation Date</th>
-                                                    <th className="text-right p-3">Fees</th>
-                                                    <th className="text-left p-3">Created At</th>
-                                                    <th className="text-center p-3">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {surgeons.map((surgeon, index) => (
-                                                    <tr key={surgeon.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
-                                                        <td className="p-3">{index + 1}</td>
-                                                        <td className="p-3">{surgeon.surgeon_name}</td>
-                                                        <td className="p-3">{surgeon.operation_date}</td>
-                                                        <td className="p-3 text-right">{format(surgeon.fees)}</td>
-                                                        <td className="p-3 text-sm text-muted-foreground">{surgeon.created_at ? new Date(surgeon.created_at).toLocaleDateString() : '-'}</td>
-                                                        <td className="p-3 text-center flex gap-2 justify-center">
-                                                            {!admissionData?.data?.bill_created_at && (
-                                                                <>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => {
-                                                                            setEditSurgeon({ id: surgeon.id!, surgeon_id: surgeon.surgeon_id, operation_date: surgeon.operation_date, fees: surgeon.fees })
-                                                                            setOpenSurgeonForm(true)
-                                                                        }}
-                                                                        className="text-blue-500 hover:text-blue-700"
-                                                                        title="Edit"
-                                                                    >
-                                                                        <Pencil className="w-4 h-4" />
-                                                                    </button>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleRemoveSurgeon(surgeon.id!)}
-                                                                        className="text-red-500 hover:text-red-700"
-                                                                        title="Delete"
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4" />
-                                                                    </button>
-                                                                </>
-                                                            )}
-                                                            {admissionData?.data?.bill_created_at && (
-                                                                <span className="text-xs text-gray-400 italic">Locked</span>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
-                                <AddSurgeonForm
-                                    open={openSurgeonForm}
-                                    setOpen={setOpenSurgeonForm}
-                                    onAdd={handleAddSurgeon}
-                                    doctors={doctors}
-                                    editSurgeon={editSurgeon}
-                                />
-                            </CardContent>
-                        </Card>
+                                {/* Assistants Card */}
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center justify-between w-full">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                                                    <UserCheck className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <CardTitle className="text-lg font-bold">Assistants</CardTitle>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400">Assistant surgeon fees and details</p>
+                                                </div>
+                                            </div>
+                                            {!admissionData?.data?.bill_created_at && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setEditAssistant(null)
+                                                        setOpenAssistantForm(true)
+                                                    }}
+                                                >
+                                                    <Plus className="h-4 w-4 mr-2" />
+                                                    Add Assistant
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {assistants.length === 0 ? (
+                                            <p className="text-muted-foreground text-center py-8">
+                                                No assistants added yet
+                                            </p>
+                                        ) : (
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full border-collapse">
+                                                    <thead>
+                                                        <tr className="border-b">
+                                                            <th className="text-left p-3">SL</th>
+                                                            <th className="text-left p-3">Assistant Name</th>
+                                                            <th className="text-left p-3">Operation Date</th>
+                                                            <th className="text-right p-3">Fees</th>
+                                                            <th className="text-left p-3">Created At</th>
+                                                            <th className="text-center p-3">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {assistants.map((assistant, index) => (
+                                                            <tr key={assistant.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
+                                                                <td className="p-3">{index + 1}</td>
+                                                                <td className="p-3">{assistant.assistant_name}</td>
+                                                                <td className="p-3">{safeFormatDate(assistant.operation_date)}</td>
+                                                                <td className="p-3 text-right">{format(assistant.fees)}</td>
+                                                                <td className="p-3 text-sm text-muted-foreground">{assistant.created_at ? safeFormatDate(assistant.created_at) : '-'}</td>
+                                                                <td className="p-3 text-center flex gap-2 justify-center">
+                                                                    {!admissionData?.data?.bill_created_at && (
+                                                                        <>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    setEditAssistant({ id: assistant.id!, assistant_id: assistant.assistant_id, operation_date: assistant.operation_date, fees: assistant.fees })
+                                                                                    setOpenAssistantForm(true)
+                                                                                }}
+                                                                                className="text-blue-500 hover:text-blue-700"
+                                                                                title="Edit"
+                                                                            >
+                                                                                <Pencil className="w-4 h-4" />
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleRemoveAssistant(assistant.id!)}
+                                                                                className="text-red-500 hover:text-red-700"
+                                                                                title="Delete"
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4" />
+                                                                            </button>
+                                                                        </>
+                                                                    )}
+                                                                    {admissionData?.data?.bill_created_at && (
+                                                                        <span className="text-xs text-gray-400 italic">Locked</span>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+                                        <AddAssistantForm
+                                            open={openAssistantForm}
+                                            setOpen={setOpenAssistantForm}
+                                            onAdd={handleAddAssistant}
+                                            doctors={doctors}
+                                            editAssistant={editAssistant}
+                                        />
+                                    </CardContent>
+                                </Card>
 
-                        {/* Assistants Card */}
-                        <Card>
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle>Assistants</CardTitle>
-                                    {!admissionData?.data?.bill_created_at && (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => {
-                                                setEditAssistant(null)
-                                                setOpenAssistantForm(true)
-                                            }}
-                                        >
-                                            <Plus className="h-4 w-4 mr-2" />
-                                            Add Assistant
-                                        </Button>
-                                    )}
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                {assistants.length === 0 ? (
-                                    <p className="text-muted-foreground text-center py-8">
-                                        No assistants added yet
-                                    </p>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full border-collapse">
-                                            <thead>
-                                                <tr className="border-b">
-                                                    <th className="text-left p-3">SL</th>
-                                                    <th className="text-left p-3">Assistant Name</th>
-                                                    <th className="text-left p-3">Operation Date</th>
-                                                    <th className="text-right p-3">Fees</th>
-                                                    <th className="text-left p-3">Created At</th>
-                                                    <th className="text-center p-3">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {assistants.map((assistant, index) => (
-                                                    <tr key={assistant.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
-                                                        <td className="p-3">{index + 1}</td>
-                                                        <td className="p-3">{assistant.assistant_name}</td>
-                                                        <td className="p-3">{assistant.operation_date}</td>
-                                                        <td className="p-3 text-right">{format(assistant.fees)}</td>
-                                                        <td className="p-3 text-sm text-muted-foreground">{assistant.created_at ? new Date(assistant.created_at).toLocaleDateString() : '-'}</td>
-                                                        <td className="p-3 text-center flex gap-2 justify-center">
-                                                            {!admissionData?.data?.bill_created_at && (
-                                                                <>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => {
-                                                                            setEditAssistant({ id: assistant.id!, assistant_id: assistant.assistant_id, operation_date: assistant.operation_date, fees: assistant.fees })
-                                                                            setOpenAssistantForm(true)
-                                                                        }}
-                                                                        className="text-blue-500 hover:text-blue-700"
-                                                                        title="Edit"
-                                                                    >
-                                                                        <Pencil className="w-4 h-4" />
-                                                                    </button>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleRemoveAssistant(assistant.id!)}
-                                                                        className="text-red-500 hover:text-red-700"
-                                                                        title="Delete"
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4" />
-                                                                    </button>
-                                                                </>
-                                                            )}
-                                                            {admissionData?.data?.bill_created_at && (
-                                                                <span className="text-xs text-gray-400 italic">Locked</span>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
-                                <AddAssistantForm
-                                    open={openAssistantForm}
-                                    setOpen={setOpenAssistantForm}
-                                    onAdd={handleAddAssistant}
-                                    doctors={doctors}
-                                    editAssistant={editAssistant}
-                                />
-                            </CardContent>
-                        </Card>
+                                {/* Anesthesiologists Card */}
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center justify-between w-full">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                                                    <Zap className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <CardTitle className="text-lg font-bold">Anesthesiologists</CardTitle>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400">Anesthesia type, administration dates, and fees</p>
+                                                </div>
+                                            </div>
+                                            {!admissionData?.data?.bill_created_at && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setEditAnesthesiologist(null)
+                                                        setOpenAnesthesiologistForm(true)
+                                                    }}
+                                                >
+                                                    <Plus className="h-4 w-4 mr-2" />
+                                                    Add Anesthesiologist
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {anesthesiologists.length === 0 ? (
+                                            <p className="text-muted-foreground text-center py-8">
+                                                No anesthesiologists added yet
+                                            </p>
+                                        ) : (
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full border-collapse">
+                                                    <thead>
+                                                        <tr className="border-b">
+                                                            <th className="text-left p-3">SL</th>
+                                                            <th className="text-left p-3">Anesthesiologist Name</th>
+                                                            <th className="text-left p-3">Anesthesia Type</th>
+                                                            <th className="text-left p-3">Operation Date</th>
+                                                            <th className="text-right p-3">Fees</th>
+                                                            <th className="text-left p-3">Created At</th>
+                                                            <th className="text-center p-3">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {anesthesiologists.map((anesthesiologist, index) => (
+                                                            <tr key={anesthesiologist.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
+                                                                <td className="p-3">{index + 1}</td>
+                                                                <td className="p-3">{anesthesiologist.anesthesiologist_name}</td>
+                                                                <td className="p-3">
+                                                                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                                        {anesthesiologist.anesthesia_type || '-'}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="p-3">{safeFormatDate(anesthesiologist.operation_date)}</td>
+                                                                <td className="p-3 text-right">{format(anesthesiologist.fees)}</td>
+                                                                <td className="p-3 text-sm text-muted-foreground">{anesthesiologist.created_at ? safeFormatDate(anesthesiologist.created_at) : '-'}</td>
+                                                                <td className="p-3 text-center flex gap-2 justify-center">
+                                                                    {!admissionData?.data?.bill_created_at && (
+                                                                        <>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    setEditAnesthesiologist({ id: anesthesiologist.id!, anesthesiologist_id: anesthesiologist.anesthesiologist_id, anesthesia_type: anesthesiologist.anesthesia_type, operation_date: anesthesiologist.operation_date, fees: anesthesiologist.fees })
+                                                                                    setOpenAnesthesiologistForm(true)
+                                                                                }}
+                                                                                className="text-blue-500 hover:text-blue-700"
+                                                                                title="Edit"
+                                                                            >
+                                                                                <Pencil className="w-4 h-4" />
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleRemoveAnesthesiologist(anesthesiologist.id!)}
+                                                                                className="text-red-500 hover:text-red-700"
+                                                                                title="Delete"
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4" />
+                                                                            </button>
+                                                                        </>
+                                                                    )}
+                                                                    {admissionData?.data?.bill_created_at && (
+                                                                        <span className="text-xs text-gray-400 italic">Locked</span>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+                                        <AddAnesthesiologistForm
+                                            open={openAnesthesiologistForm}
+                                            setOpen={setOpenAnesthesiologistForm}
+                                            onAdd={handleAddAnesthesiologist}
+                                            doctors={doctors}
+                                            anesthesiaTypes={anesthesiaTypes}
+                                            editAnesthesiologist={editAnesthesiologist}
+                                        />
+                                    </CardContent>
+                                </Card>
 
-                        {/* Anesthesiologists Card */}
-                        <Card>
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle>Anesthesiologists</CardTitle>
-                                    {!admissionData?.data?.bill_created_at && (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => {
-                                                setEditAnesthesiologist(null)
-                                                setOpenAnesthesiologistForm(true)
-                                            }}
-                                        >
-                                            <Plus className="h-4 w-4 mr-2" />
-                                            Add Anesthesiologist
-                                        </Button>
-                                    )}
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                {anesthesiologists.length === 0 ? (
-                                    <p className="text-muted-foreground text-center py-8">
-                                        No anesthesiologists added yet
-                                    </p>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full border-collapse">
-                                            <thead>
-                                                <tr className="border-b">
-                                                    <th className="text-left p-3">SL</th>
-                                                    <th className="text-left p-3">Anesthesiologist Name</th>
-                                                    <th className="text-left p-3">Anesthesia Type</th>
-                                                    <th className="text-left p-3">Operation Date</th>
-                                                    <th className="text-right p-3">Fees</th>
-                                                    <th className="text-left p-3">Created At</th>
-                                                    <th className="text-center p-3">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {anesthesiologists.map((anesthesiologist, index) => (
-                                                    <tr key={anesthesiologist.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
-                                                        <td className="p-3">{index + 1}</td>
-                                                        <td className="p-3">{anesthesiologist.anesthesiologist_name}</td>
-                                                        <td className="p-3">
-                                                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                                                {anesthesiologist.anesthesia_type || '-'}
-                                                            </span>
-                                                        </td>
-                                                        <td className="p-3">{anesthesiologist.operation_date}</td>
-                                                        <td className="p-3 text-right">{format(anesthesiologist.fees)}</td>
-                                                        <td className="p-3 text-sm text-muted-foreground">{anesthesiologist.created_at ? new Date(anesthesiologist.created_at).toLocaleDateString() : '-'}</td>
-                                                        <td className="p-3 text-center flex gap-2 justify-center">
-                                                            {!admissionData?.data?.bill_created_at && (
-                                                                <>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => {
-                                                                            setEditAnesthesiologist({ id: anesthesiologist.id!, anesthesiologist_id: anesthesiologist.anesthesiologist_id, anesthesia_type: anesthesiologist.anesthesia_type, operation_date: anesthesiologist.operation_date, fees: anesthesiologist.fees })
-                                                                            setOpenAnesthesiologistForm(true)
-                                                                        }}
-                                                                        className="text-blue-500 hover:text-blue-700"
-                                                                        title="Edit"
-                                                                    >
-                                                                        <Pencil className="w-4 h-4" />
-                                                                    </button>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleRemoveAnesthesiologist(anesthesiologist.id!)}
-                                                                        className="text-red-500 hover:text-red-700"
-                                                                        title="Delete"
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4" />
-                                                                    </button>
-                                                                </>
-                                                            )}
-                                                            {admissionData?.data?.bill_created_at && (
-                                                                <span className="text-xs text-gray-400 italic">Locked</span>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
-                                <AddAnesthesiologistForm
-                                    open={openAnesthesiologistForm}
-                                    setOpen={setOpenAnesthesiologistForm}
-                                    onAdd={handleAddAnesthesiologist}
-                                    doctors={doctors}
-                                    anesthesiaTypes={anesthesiaTypes}
-                                    editAnesthesiologist={editAnesthesiologist}
-                                />
-                            </CardContent>
-                        </Card>
+                                {/* Services Card */}
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center justify-between w-full">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                                                    <LayoutGrid className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <CardTitle className="text-lg font-bold">Clinical Services</CardTitle>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400">Hospital clinical services, test charges, and utility bills</p>
+                                                </div>
+                                            </div>
+                                            {!admissionData?.data?.bill_created_at && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setEditService(null)
+                                                        setOpenServiceForm(true)
+                                                    }}
+                                                >
+                                                    <Plus className="h-4 w-4 mr-2" />
+                                                    Add Service
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {servicesList.length === 0 ? (
+                                            <p className="text-muted-foreground text-center py-8">
+                                                No services added yet
+                                            </p>
+                                        ) : (
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full border-collapse">
+                                                    <thead>
+                                                        <tr className="border-b">
+                                                            <th className="text-left p-3">Service</th>
+                                                            <th className="text-left p-3">Note</th>
+                                                            <th className="text-right p-3">Amount</th>
+                                                            <th className="text-left p-3">Created At</th>
+                                                            <th className="text-center p-3">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {servicesList.map((srv) => (
+                                                            <tr key={srv.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
+                                                                <td className="p-3">{srv.service_name}</td>
+                                                                <td className="p-3">{srv.note}</td>
+                                                                <td className="p-3 text-right">{format(srv.amount)}</td>
+                                                                <td className="p-3 text-sm text-muted-foreground">{srv.created_at ? safeFormatDate(srv.created_at) : '-'}</td>
+                                                                <td className="p-3 text-center flex gap-2 justify-center">
+                                                                    {!admissionData?.data?.bill_created_at && (
+                                                                        <>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    setEditService({ id: srv.id!, service_id: srv.service_id, note: srv.note, amount: srv.amount })
+                                                                                    setOpenServiceForm(true)
+                                                                                }}
+                                                                                className="text-blue-500 hover:text-blue-700"
+                                                                                title="Edit"
+                                                                            >
+                                                                                <Pencil className="w-4 h-4" />
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleRemoveService(srv.id!)}
+                                                                                className="text-red-500 hover:text-red-700"
+                                                                                title="Delete"
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4" />
+                                                                            </button>
+                                                                        </>
+                                                                    )}
+                                                                    {admissionData?.data?.bill_created_at && (
+                                                                        <span className="text-xs text-gray-400 italic">Locked</span>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+                                        <AddClinicalServicesForm
+                                            open={openServiceForm}
+                                            setOpen={setOpenServiceForm}
+                                            onAdd={handleAddService}
+                                            services={services}
+                                            editService={editService}
+                                        />
+                                    </CardContent>
+                                </Card>
 
-                        {/* Services Card */}
-                        <Card>
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle>Clinical Services</CardTitle>
-                                    {!admissionData?.data?.bill_created_at && (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => {
-                                                setEditService(null)
-                                                setOpenServiceForm(true)
-                                            }}
-                                        >
-                                            <Plus className="h-4 w-4 mr-2" />
-                                            Add Service
-                                        </Button>
-                                    )}
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                {servicesList.length === 0 ? (
-                                    <p className="text-muted-foreground text-center py-8">
-                                        No services added yet
-                                    </p>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full border-collapse">
-                                            <thead>
-                                                <tr className="border-b">
-                                                    <th className="text-left p-3">Service</th>
-                                                    <th className="text-left p-3">Note</th>
-                                                    <th className="text-right p-3">Amount</th>
-                                                    <th className="text-left p-3">Created At</th>
-                                                    <th className="text-center p-3">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {servicesList.map((srv) => (
-                                                    <tr key={srv.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
-                                                        <td className="p-3">{srv.service_name}</td>
-                                                        <td className="p-3">{srv.note}</td>
-                                                        <td className="p-3 text-right">{format(srv.amount)}</td>
-                                                        <td className="p-3 text-sm text-muted-foreground">{srv.created_at ? new Date(srv.created_at).toLocaleDateString() : '-'}</td>
-                                                        <td className="p-3 text-center flex gap-2 justify-center">
-                                                            {!admissionData?.data?.bill_created_at && (
-                                                                <>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => {
-                                                                            setEditService({ id: srv.id!, service_id: srv.service_id, note: srv.note, amount: srv.amount })
-                                                                            setOpenServiceForm(true)
-                                                                        }}
-                                                                        className="text-blue-500 hover:text-blue-700"
-                                                                        title="Edit"
+                                {/* Outdoor Bills Card */}
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                                                <Receipt className="h-4 w-4" />
+                                            </div>
+                                            <div>
+                                                <CardTitle className="text-lg font-bold">Outdoor Bills</CardTitle>
+                                                <p className="text-xs text-gray-600 dark:text-gray-400">Invoices and outstanding dues from outdoor department</p>
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {outdoorBills.length === 0 ? (
+                                            <p className="text-muted-foreground text-center py-8">
+                                                No outdoor bills found for this patient
+                                            </p>
+                                        ) : (
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full border-collapse">
+                                                    <thead>
+                                                        <tr className="border-b">
+                                                            <th className="text-left p-3">Invoice ID</th>
+                                                            <th className="text-left p-3">Invoice Date</th>
+                                                            <th className="text-right p-3">Total Amount ({currencySymbol})</th>
+                                                            <th className="text-right p-3">Discount ({currencySymbol})</th>
+                                                            <th className="text-right p-3">Total Bill</th>
+                                                            <th className="text-right p-3">Total Paid</th>
+                                                            <th className="text-right p-3">Total Due</th>
+                                                            <th className="text-center p-3">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {outdoorBills.map((bill: OutdoorBill) => (
+                                                            <tr key={bill.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
+                                                                <td className="p-3 font-semibold">#{bill.id}</td>
+                                                                <td className="p-3">
+                                                                    {bill.invoice_date ? safeFormatDate(bill.invoice_date) : '-'}
+                                                                </td>
+                                                                <td className="p-3 text-right">{format(Number(bill.total_amount || 0))}</td>
+                                                                <td className="p-3 text-right text-orange-600">{format(Number(bill.discount || 0))}</td>
+                                                                <td className="p-3 text-right font-semibold">{format(Number(bill.net_amount || 0))}</td>
+                                                                <td className="p-3 text-right text-green-600">{format(Number(bill.total_paid || 0))}</td>
+                                                                <td className="p-3 text-right font-semibold text-red-600">{format(Number(bill.due_amount || 0))}</td>
+                                                                <td className="p-3 text-center">
+                                                                    <a
+                                                                        href={`/outdoor/reception/due-collection/${bill.id}`}
+                                                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
                                                                     >
-                                                                        <Pencil className="w-4 h-4" />
-                                                                    </button>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleRemoveService(srv.id!)}
-                                                                        className="text-red-500 hover:text-red-700"
-                                                                        title="Delete"
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4" />
-                                                                    </button>
-                                                                </>
-                                                            )}
-                                                            {admissionData?.data?.bill_created_at && (
-                                                                <span className="text-xs text-gray-400 italic">Locked</span>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
-                                <AddClinicalServicesForm
-                                    open={openServiceForm}
-                                    setOpen={setOpenServiceForm}
-                                    onAdd={handleAddService}
-                                    services={services}
-                                    editService={editService}
-                                />
-                            </CardContent>
-                        </Card>
+                                                                        View Details
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
 
-                        {/* Outdoor Bills Card */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Receipt className="h-5 w-5" />
-                                    Outdoor Bills
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                {outdoorBills.length === 0 ? (
-                                    <p className="text-muted-foreground text-center py-8">
-                                        No outdoor bills found for this patient
-                                    </p>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full border-collapse">
-                                            <thead>
-                                                <tr className="border-b">
-                                                    <th className="text-left p-3">Invoice ID</th>
-                                                    <th className="text-left p-3">Invoice Date</th>
-                                                    <th className="text-right p-3">Total Amount</th>
-                                                    <th className="text-right p-3">Total Discount</th>
-                                                    <th className="text-right p-3">Total Bill</th>
-                                                    <th className="text-right p-3">Total Paid</th>
-                                                    <th className="text-right p-3">Total Due</th>
-                                                    <th className="text-center p-3">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {outdoorBills.map((bill: OutdoorBill) => (
-                                                    <tr key={bill.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
-                                                        <td className="p-3 font-semibold">#{bill.id}</td>
-                                                        <td className="p-3">
-                                                            {bill.invoice_date ? new Date(bill.invoice_date).toLocaleDateString() : '-'}
-                                                        </td>
-                                                        <td className="p-3 text-right">{format(Number(bill.total_amount || 0))}</td>
-                                                        <td className="p-3 text-right text-orange-600">{format(Number(bill.discount || 0))}</td>
-                                                        <td className="p-3 text-right font-semibold">{format(Number(bill.net_amount || 0))}</td>
-                                                        <td className="p-3 text-right text-green-600">{format(Number(bill.total_paid || 0))}</td>
-                                                        <td className="p-3 text-right font-semibold text-red-600">{format(Number(bill.due_amount || 0))}</td>
-                                                        <td className="p-3 text-center">
-                                                            <a
-                                                                href={`/outdoor/reception/due-collection/${bill.id}`}
-                                                                className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
-                                                            >
-                                                                View Details
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
+                                {/* Summary Card */}
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center justify-between w-full">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                                                    <Calculator className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <CardTitle className="text-lg font-bold">Billing Summary</CardTitle>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400">Subtotal, discounts, advances, and net due calculations</p>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={handlePrintBilling}
+                                                className="print:hidden bg-white dark:bg-black"
+                                            >
+                                                <Printer className="h-4 w-4 mr-2" />
+                                                Print
+                                            </Button>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center py-2 border-b">
+                                                <span>Bed/Cabin Charges ({displayBedChargesDays} days):</span>
+                                                <span className="font-bold">{format(totalBedCharges)}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center py-2 border-b">
+                                                <span>Consultant Fees:</span>
+                                                <span className="font-bold">{format(totalConsultants)}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center py-2 border-b">
+                                                <span>Surgeon Fees:</span>
+                                                <span className="font-bold">{format(totalSurgeons)}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center py-2 border-b">
+                                                <span>Assistant Fees:</span>
+                                                <span className="font-bold">{format(totalAssistants)}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center py-2 border-b">
+                                                <span>Anesthesiologist Fees:</span>
+                                                <span className="font-bold">{format(totalAnesthesiologists)}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center py-2 border-b">
+                                                <span>Services Charges:</span>
+                                                <span className="font-bold">{format(totalServices)}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center py-2">
+                                                <span className="text-lg font-bold">Grand Total:</span>
+                                                <span className="text-xl font-bold text-blue-600">{format(grandTotal)}</span>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
 
-                        {/* Summary Card */}
-                        <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle>Billing Summary</CardTitle>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={handlePrintBilling}
-                                        className="print:hidden"
-                                    >
-                                        <Printer className="h-4 w-4 mr-2" />
-                                        Print
-                                    </Button>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-3">
-                                    <div className="flex justify-between items-center py-2 border-b">
-                                        <span>Bed/Cabin Charges ({displayBedChargesDays} days):</span>
-                                        <span className="font-bold">{format(totalBedCharges)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2 border-b">
-                                        <span>Operation Types Charges:</span>
-                                        <span className="font-bold">{format(totalOperations)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2 border-b">
-                                        <span>Consultant Fees:</span>
-                                        <span className="font-bold">{format(totalConsultants)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2 border-b">
-                                        <span>Surgeon Fees:</span>
-                                        <span className="font-bold">{format(totalSurgeons)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2 border-b">
-                                        <span>Assistant Fees:</span>
-                                        <span className="font-bold">{format(totalAssistants)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2 border-b">
-                                        <span>Anesthesiologist Fees:</span>
-                                        <span className="font-bold">{format(totalAnesthesiologists)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2 border-b">
-                                        <span>Services Charges:</span>
-                                        <span className="font-bold">{format(totalServices)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2">
-                                        <span className="text-lg font-bold">Grand Total:</span>
-                                        <span className="text-xl font-bold text-blue-600">{format(grandTotal)}</span>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Payment History Section - Always show at bottom */}
-                        <PaymentHistoryView admissionId={admissionId} />
-                        </div>
+                                {/* Payment History Section - Always show at bottom */}
+                                <PaymentHistoryView admissionId={admissionId} />
+                            </div>
                         </Form>
                     </div>
 
-                {/* Dialogs - These are siblings to the billing content, inside max-w-full div */}
+                    {/* Dialogs - These are siblings to the billing content, inside max-w-full div */}
 
-                {/* Bed History Details Dialog */}
-                {selectedBedHistory && (
-                    <Dialog open={!!selectedBedHistory} onOpenChange={() => setSelectedBedHistory(null)}>
-                        <DialogContent className="sm:max-w-[500px]">
-                            <DialogHeader>
-                                <DialogTitle className="flex items-center gap-2">
-                                    <BedDouble className="h-5 w-5" />
-                                    Bed History Details
+                    {/* Bed Status Board Dialog */}
+                    <Dialog open={isBoardOpen} onOpenChange={setIsBoardOpen}>
+                        <DialogContent className="sm:max-w-[850px] max-w-[850px] w-[95vw] sm:w-full max-h-[85vh] overflow-y-auto p-6 rounded-2xl">
+                            <DialogHeader className="pb-4 border-b border-gray-100 dark:border-gray-800">
+                                <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                                    <Bed className="h-5 w-5 text-blue-500" />
+                                    <span>Bed & Cabin Status Board</span>
                                 </DialogTitle>
-                                <DialogDescription>
-                                    Billing details for {selectedBedHistory.bed_code} ({selectedBedHistory.bed_type})
-                                </DialogDescription>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    Real-time occupancy status. Select an available bed to change to.
+                                </p>
                             </DialogHeader>
 
-                            <div className="space-y-4 py-4">
-                                {/* Dates */}
-                                <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                                    <div>
-                                        <label className="text-xs text-muted-foreground">From Date</label>
-                                        <p className="font-semibold text-sm">
-                                            {new Date(selectedBedHistory.from).toLocaleDateString()} {selectedBedHistory.assigned_time || ''}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-muted-foreground">To Date</label>
-                                        <p className="font-semibold text-sm">
-                                            {selectedBedHistory.to
-                                                ? `${new Date(selectedBedHistory.to).toLocaleDateString()} ${selectedBedHistory.released_time || ''}`
-                                                : 'Present'}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Bed Info */}
-                                <div className="grid grid-cols-2 gap-4 p-4 bg-purple-50 dark:bg-purple-950/30 rounded-lg">
-                                    <div>
-                                        <label className="text-xs text-purple-700 dark:text-purple-300">Bed Code</label>
-                                        <p className="font-semibold text-sm">
-                                            {selectedBedHistory.bed_code}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-purple-700 dark:text-purple-300">Ward</label>
-                                        <p className="font-semibold text-sm">
-                                            {selectedBedHistory.bed_ward || 'N/A'}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Billing Summary */}
-                                <div className="grid grid-cols-3 gap-4 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
-                                    <div>
-                                        <label className="text-xs text-blue-700 dark:text-blue-300">Days</label>
-                                        <p className="text-xl font-bold text-blue-900 dark:text-blue-100">
-                                            {selectedBedHistory.days}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-blue-700 dark:text-blue-300">Daily Rate</label>
-                                        <p className="text-xl font-bold text-blue-900 dark:text-blue-100">
-                                            {format(selectedBedHistory.daily_rate)}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-blue-700 dark:text-blue-300">Total</label>
-                                        <p className="text-xl font-bold text-green-600">
-                                            {format(selectedBedHistory.charges)}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Calculation Details */}
-                                <div className="space-y-2 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                                    <h4 className="text-sm font-semibold">Calculation</h4>
-                                    <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                                        <p className="flex justify-between">
-                                            <span>Number of Days:</span>
-                                            <span className="font-medium">{selectedBedHistory.days}</span>
-                                        </p>
-                                        <p className="flex justify-between">
-                                            <span>Daily Rate:</span>
-                                            <span className="font-medium">{format(selectedBedHistory.daily_rate)}</span>
-                                        </p>
-                                        <p className="flex justify-between border-t pt-2 mt-2">
-                                            <span className="font-semibold">Total Charges:</span>
-                                            <span className="font-bold text-green-600">{format(selectedBedHistory.charges)}</span>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Status */}
-                                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                                    <span className="text-sm text-muted-foreground">Status</span>
-                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                        selectedBedHistory.status === 'active'
-                                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                                            : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
-                                    }`}>
-                                        {selectedBedHistory.status === 'active' ? 'Active' : 'Released'}
-                                    </span>
-                                </div>
-
-                                {/* Notes (if any) */}
-                                {selectedBedHistory.notes && (
-                                    <div className="p-3 bg-yellow-50 dark:bg-yellow-950/30 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                                        <label className="text-xs text-yellow-700 dark:text-yellow-300">Notes</label>
-                                        <p className="text-sm text-yellow-900 dark:text-yellow-100 mt-1">
-                                            {selectedBedHistory.notes}
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="flex justify-end">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setSelectedBedHistory(null)}
-                                >
-                                    Close
-                                </Button>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
-                )}
-
-                {/* Change Bed/Cabin Dialog */}
-                <Dialog open={openChangeBedDialog} onOpenChange={setOpenChangeBedDialog}>
-                    <DialogContent className="sm:max-w-[500px]">
-                        <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                                <Repeat className="h-5 w-5" />
-                                Change Bed/Cabin
-                            </DialogTitle>
-                            <DialogDescription>
-                                Add a new bed/cabin to the admission history. This will create a new entry in admission_bed_history.
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        <form
-                            onSubmit={(e) => {
-                                e.preventDefault()
-                                const formData = new FormData(e.currentTarget)
-                                const data = {
-                                    bed_cabin_id: Number(formData.get('bed_cabin_id')),
-                                    notes: formData.get('notes') as string || undefined,
-                                    change_date: formData.get('change_date') as string,
-                                    change_time: formData.get('change_time') as string,
-                                }
-                                if (!data.bed_cabin_id) {
-                                    toast.error('Please select a bed/cabin')
-                                    return
-                                }
-                                if (!data.change_date) {
-                                    toast.error('Please select change date')
-                                    return
-                                }
-                                if (!data.change_time) {
-                                    toast.error('Please select change time')
-                                    return
-                                }
-                                changeBedMutation.mutate(data)
-                            }}
-                        >
-                            <div className="space-y-4 py-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Current Bed/Cabin</label>
+                            {/* Search & Filters */}
+                            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between my-5">
+                                <div className="relative w-full sm:flex-1">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input
-                                        value={`${admissionData?.data?.bedCabin?.code || '-'} (${admissionData?.data?.bedCabin?.type || '-'})`}
-                                        disabled
-                                        className="bg-gray-100 dark:bg-gray-800"
+                                        placeholder="Search by code, ward, or type..."
+                                        value={boardSearch}
+                                        onChange={(e) => setBoardSearch(e.target.value)}
+                                        className="pl-9 h-10 w-full rounded-xl"
                                     />
                                 </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Select New Bed/Cabin *</label>
-                                    <Select name="bed_cabin_id" required>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select bed/cabin" />
+                                <div className="w-full sm:w-56">
+                                    <Select
+                                        value={boardFilter}
+                                        onValueChange={(val: any) => setBoardFilter(val)}
+                                    >
+                                        <SelectTrigger className="w-full h-10 rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 font-medium text-sm">
+                                            <SelectValue placeholder="Filter by status" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {bedsCabins.filter((b: any) => b.status === 'Available').map((bed: any) => (
-                                                <SelectItem key={bed.id} value={String(bed.id)}>
-                                                    {bed.code} ({bed.type}) - {bed.ward} - {format(bed.price)}/day
-                                                </SelectItem>
-                                            ))}
+                                            <SelectItem value="all">All Beds</SelectItem>
+                                            <SelectItem value="free">Available (Free)</SelectItem>
+                                            <SelectItem value="booked">Occupied (Booked)</SelectItem>
+                                            <SelectItem value="maintenance">Maintenance</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">Change Date *</label>
-                                        <Input
-                                            type="date"
-                                            name="change_date"
-                                            defaultValue={new Date().toISOString().split('T')[0]}
-                                            max={new Date().toISOString().split('T')[0]}
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">Change Time *</label>
-                                        <Input
-                                            type="time"
-                                            name="change_time"
-                                            defaultValue={new Date().toTimeString().slice(0, 5)}
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Notes (Optional)</label>
-                                    <Input
-                                        name="notes"
-                                        placeholder="Reason for bed change"
-                                    />
-                                </div>
                             </div>
 
-                            <div className="flex justify-end gap-3">
+                            {/* Grid Layout of Beds */}
+                            {allBedsLoading ? (
+                                <div className="flex flex-col items-center justify-center py-20 gap-3">
+                                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                                    <span className="text-sm font-medium text-muted-foreground">Loading status board...</span>
+                                </div>
+                            ) : filteredBoardBeds.length === 0 ? (
+                                <div className="text-center py-16 border-2 border-dashed rounded-2xl border-gray-200 dark:border-gray-800 w-full">
+                                    <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                                    <p className="text-sm font-semibold text-muted-foreground">No beds match your filter/search criteria.</p>
+                                </div>
+                            ) : (
+                                <div className="overflow-x-auto rounded-xl border border-gray-150 dark:border-gray-800 w-full">
+                                    <table className="w-full text-sm text-left border-collapse">
+                                        <thead className="bg-gray-50/70 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-xs uppercase font-semibold border-b border-gray-150 dark:border-gray-800">
+                                            <tr>
+                                                <th className="px-4 py-3">Bed / Cabin Code</th>
+                                                <th className="px-4 py-3">Type</th>
+                                                <th className="px-4 py-3">Ward / Department</th>
+                                                <th className="px-4 py-3">Price / Day</th>
+                                                <th className="px-4 py-3">Status</th>
+                                                <th className="px-4 py-3 text-right">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800/60">
+                                            {filteredBoardBeds.map((bed: any) => {
+                                                const statusKey = String(bed.status || 'Available').toLowerCase().trim();
+                                                const isAvailable = statusKey === 'available' || statusKey === 'free';
+                                                const isOccupied = statusKey === 'occupied' || statusKey === 'booked';
+                                                const isMaintenance = statusKey === 'maintenance';
+
+                                                return (
+                                                    <tr
+                                                        key={bed.id}
+                                                        className={cn(
+                                                            "hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors",
+                                                            isAvailable && "bg-green-50/5 dark:bg-green-950/2",
+                                                            isOccupied && "bg-red-50/5 dark:bg-red-950/2",
+                                                            isMaintenance && "bg-amber-50/5 dark:bg-amber-950/2"
+                                                        )}
+                                                    >
+                                                        <td className="px-4 py-3.5 font-bold text-gray-900 dark:text-white">{bed.code}</td>
+                                                        <td className="px-4 py-3.5 text-gray-600 dark:text-gray-400 font-medium">{bed.type}</td>
+                                                        <td className="px-4 py-3.5 text-gray-600 dark:text-gray-400 font-medium">{bed.ward}</td>
+                                                        <td className="px-4 py-3.5 font-semibold text-blue-600 dark:text-blue-400">{format(Number(bed.price))}</td>
+                                                        <td className="px-4 py-3.5">
+                                                            <span className={cn(
+                                                                "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border",
+                                                                isAvailable && "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-300 dark:border-green-800",
+                                                                isOccupied && "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-300 dark:border-red-800",
+                                                                isMaintenance && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-800"
+                                                            )}>
+                                                                {isAvailable ? 'Free' : isOccupied ? 'Booked' : 'Maintenance'}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-3.5 text-right">
+                                                            <Button
+                                                                type="button"
+                                                                size="sm"
+                                                                variant={isAvailable ? "default" : "outline"}
+                                                                className={cn(
+                                                                    "h-8 rounded-lg text-xs font-bold px-3 transition-all",
+                                                                    isAvailable
+                                                                        ? "bg-green-600 text-white hover:bg-green-700 dark:bg-green-600"
+                                                                        : "opacity-60 pointer-events-none"
+                                                                )}
+                                                                disabled={!isAvailable}
+                                                                onClick={() => {
+                                                                    setSelectedNewBedId(String(bed.id));
+                                                                    setIsBoardOpen(false);
+                                                                }}
+                                                            >
+                                                                Select
+                                                            </Button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Bed History Details Dialog */}
+                    {selectedBedHistory && (
+                        <Dialog open={!!selectedBedHistory} onOpenChange={() => setSelectedBedHistory(null)}>
+                            <DialogContent className="sm:max-w-[500px]">
+                                <DialogHeader>
+                                    <DialogTitle className="flex items-center gap-2">
+                                        <BedDouble className="h-5 w-5" />
+                                        Bed History Details
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        Billing details for {selectedBedHistory.bed_code} ({selectedBedHistory.bed_type})
+                                    </DialogDescription>
+                                </DialogHeader>
+
+                                <div className="space-y-4 py-4">
+                                    {/* Dates */}
+                                    <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                                        <div>
+                                            <label className="text-xs text-muted-foreground">From Date</label>
+                                            <p className="font-semibold text-sm">
+                                                {safeFormatDate(selectedBedHistory.from)} {selectedBedHistory.assigned_time || ''}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-muted-foreground">To Date</label>
+                                            <p className="font-semibold text-sm">
+                                                {selectedBedHistory.to
+                                                    ? `${safeFormatDate(selectedBedHistory.to)} ${selectedBedHistory.released_time || ''}`
+                                                    : 'Present'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Bed Info */}
+                                    <div className="grid grid-cols-2 gap-4 p-4 bg-purple-50 dark:bg-purple-950/30 rounded-lg">
+                                        <div>
+                                            <label className="text-xs text-purple-700 dark:text-purple-300">Bed Code</label>
+                                            <p className="font-semibold text-sm">
+                                                {selectedBedHistory.bed_code}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-purple-700 dark:text-purple-300">Ward</label>
+                                            <p className="font-semibold text-sm">
+                                                {selectedBedHistory.bed_ward || 'N/A'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Billing Summary */}
+                                    <div className="grid grid-cols-3 gap-4 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+                                        <div>
+                                            <label className="text-xs text-blue-700 dark:text-blue-300">Days</label>
+                                            <p className="text-xl font-bold text-blue-900 dark:text-blue-100">
+                                                {selectedBedHistory.days}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-blue-700 dark:text-blue-300">Daily Rate</label>
+                                            <p className="text-xl font-bold text-blue-900 dark:text-blue-100">
+                                                {format(selectedBedHistory.daily_rate)}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-blue-700 dark:text-blue-300">Total</label>
+                                            <p className="text-xl font-bold text-green-600">
+                                                {format(selectedBedHistory.charges)}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Calculation Details */}
+                                    <div className="space-y-2 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                                        <h4 className="text-sm font-semibold">Calculation</h4>
+                                        <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                                            <p className="flex justify-between">
+                                                <span>Number of Days:</span>
+                                                <span className="font-medium">{selectedBedHistory.days}</span>
+                                            </p>
+                                            <p className="flex justify-between">
+                                                <span>Daily Rate:</span>
+                                                <span className="font-medium">{format(selectedBedHistory.daily_rate)}</span>
+                                            </p>
+                                            <p className="flex justify-between border-t pt-2 mt-2">
+                                                <span className="font-semibold">Total Charges:</span>
+                                                <span className="font-bold text-green-600">{format(selectedBedHistory.charges)}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Status */}
+                                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                                        <span className="text-sm text-muted-foreground">Status</span>
+                                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${selectedBedHistory.status === 'active'
+                                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                                            : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+                                            }`}>
+                                            {selectedBedHistory.status === 'active' ? 'Active' : 'Released'}
+                                        </span>
+                                    </div>
+
+                                    {/* Notes (if any) */}
+                                    {selectedBedHistory.notes && (
+                                        <div className="p-3 bg-yellow-50 dark:bg-yellow-950/30 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                                            <label className="text-xs text-yellow-700 dark:text-yellow-300">Notes</label>
+                                            <p className="text-sm text-yellow-900 dark:text-yellow-100 mt-1">
+                                                {selectedBedHistory.notes}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex justify-end">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setSelectedBedHistory(null)}
+                                    >
+                                        Close
+                                    </Button>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    )}
+
+                    {/* Change Bed/Cabin Dialog */}
+                    <Dialog open={openChangeBedDialog} onOpenChange={setOpenChangeBedDialog}>
+                        <DialogContent className="sm:max-w-[750px] w-[95vw] sm:w-[750px] max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                    <Repeat className="h-5 w-5" />
+                                    Change Bed/Cabin
+                                </DialogTitle>
+                                <DialogDescription>
+                                    Add a new bed/cabin to the admission history. This will create a new entry in admission_bed_history.
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault()
+                                    const data = {
+                                        bed_cabin_id: Number(selectedNewBedId),
+                                        notes: new FormData(e.currentTarget).get('notes') as string || undefined,
+                                        change_date: new FormData(e.currentTarget).get('change_date') as string,
+                                        change_time: new FormData(e.currentTarget).get('change_time') as string,
+                                    }
+                                    if (!data.bed_cabin_id) {
+                                        toast.error('Please select a bed/cabin')
+                                        return
+                                    }
+                                    if (!data.change_date) {
+                                        toast.error('Please select change date')
+                                        return
+                                    }
+                                    if (!data.change_time) {
+                                        toast.error('Please select change time')
+                                        return
+                                    }
+                                    changeBedMutation.mutate(data)
+                                }}
+                            >
+                                <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Current Bed/Cabin</label>
+                                        <Input
+                                            value={`${admissionData?.data?.bedCabin?.code || '-'} (${admissionData?.data?.bedCabin?.type || '-'})`}
+                                            disabled
+                                            className="bg-gray-100 dark:bg-gray-800"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">Select New Bed/Cabin *</label>
+                                            <Popover open={isBedDropdownOpen} onOpenChange={setIsBedDropdownOpen}>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        role="combobox"
+                                                        className="w-full justify-between !h-auto min-h-9 !whitespace-normal py-1.5 text-left font-normal border-input"
+                                                    >
+                                                        {selectedNewBedId ? (
+                                                            (() => {
+                                                                const selectedBed = bedsCabins.find((b: any) => String(b.id) === selectedNewBedId);
+                                                                return selectedBed
+                                                                    ? `${selectedBed.code} (${selectedBed.type}) - ${selectedBed.ward} - ${format(selectedBed.price)}/day`
+                                                                    : "Select bed/cabin";
+                                                            })()
+                                                        ) : (
+                                                            <span className="text-muted-foreground">Select bed/cabin</span>
+                                                        )}
+                                                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-[330px] p-0" align="start">
+                                                    <div className="p-3 space-y-3 border-b">
+                                                        {/* Filter Options (Tabs/Buttons) */}
+                                                        <div className="flex rounded-lg bg-gray-100 dark:bg-gray-800 p-0.5 w-full">
+                                                            {(['All', 'Bed', 'Cabin'] as const).map((type) => (
+                                                                <button
+                                                                    key={type}
+                                                                    type="button"
+                                                                    className={cn(
+                                                                        "flex-1 text-xs py-1 rounded-md transition-all font-medium",
+                                                                        bedTypeFilter === type
+                                                                            ? "bg-white dark:bg-gray-700 shadow-sm text-foreground"
+                                                                            : "text-muted-foreground hover:text-foreground"
+                                                                    )}
+                                                                    onClick={() => setBedTypeFilter(type)}
+                                                                >
+                                                                    {type === 'All' ? 'All Types' : type === 'Bed' ? 'Beds' : 'Cabins'}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+
+                                                        {/* Search Input */}
+                                                        <div className="relative">
+                                                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                                                            <Input
+                                                                placeholder="Search code or ward..."
+                                                                value={bedSearchQuery}
+                                                                onChange={(e) => setBedSearchQuery(e.target.value)}
+                                                                className="pl-8 h-8 text-xs focus-visible:ring-1"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <ScrollArea className="h-[200px]">
+                                                        <div className="p-1">
+                                                            {(() => {
+                                                                const filteredBeds = bedsCabins.filter((bed: any) => {
+                                                                    if (bed.status !== 'Available') return false;
+
+                                                                    // Type filter
+                                                                    if (bedTypeFilter !== 'All' && bed.type !== bedTypeFilter) return false;
+
+                                                                    // Search filter
+                                                                    if (bedSearchQuery) {
+                                                                        const search = bedSearchQuery.toLowerCase();
+                                                                        const codeMatch = bed.code?.toLowerCase().includes(search);
+                                                                        const typeMatch = bed.type?.toLowerCase().includes(search);
+                                                                        const wardMatch = bed.ward?.toLowerCase().includes(search);
+                                                                        return codeMatch || typeMatch || wardMatch;
+                                                                    }
+                                                                    return true;
+                                                                });
+
+                                                                if (filteredBeds.length === 0) {
+                                                                    return (
+                                                                        <div className="py-6 text-center text-xs text-muted-foreground">
+                                                                            No available beds found
+                                                                        </div>
+                                                                    );
+                                                                }
+
+                                                                return filteredBeds.map((bed: any) => (
+                                                                    <button
+                                                                        key={bed.id}
+                                                                        type="button"
+                                                                        className={cn(
+                                                                            "w-full text-left flex flex-col gap-0.5 px-3 py-1.5 text-xs rounded-md hover:bg-accent transition-colors",
+                                                                            selectedNewBedId === String(bed.id) && "bg-accent font-medium"
+                                                                        )}
+                                                                        onClick={() => {
+                                                                            setSelectedNewBedId(String(bed.id));
+                                                                            setIsBedDropdownOpen(false);
+                                                                            setBedSearchQuery('');
+                                                                        }}
+                                                                    >
+                                                                        <div className="flex justify-between items-center w-full">
+                                                                            <span className="font-semibold text-blue-600 dark:text-blue-400">
+                                                                                {bed.code} ({bed.type})
+                                                                            </span>
+                                                                            <span className="text-gray-500 font-medium">
+                                                                                {format(bed.price)}/day
+                                                                            </span>
+                                                                        </div>
+                                                                        <span className="text-muted-foreground text-[10px]">
+                                                                            {bed.ward}
+                                                                        </span>
+                                                                    </button>
+                                                                ));
+                                                            })()}
+                                                        </div>
+                                                    </ScrollArea>
+                                                </PopoverContent>
+                                            </Popover>
+                                        </div>
+                                        <div className="space-y-2 flex flex-col justify-end">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                className="w-full h-9 flex items-center justify-center gap-1.5"
+                                                onClick={() => setIsBoardOpen(true)}
+                                                title="View Bed Status Board"
+                                            >
+                                                <LayoutGrid className="h-4 w-4 text-blue-500" />
+                                                <span>Status Board</span>
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2 flex flex-col justify-end">
+                                            <label className="text-sm font-medium">Change Date *</label>
+                                            <DateField
+                                                value={changeBedDate}
+                                                onChange={setChangeBedDate}
+                                                className="w-full h-10"
+                                            />
+                                            <input
+                                                type="hidden"
+                                                name="change_date"
+                                                value={changeBedDate}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">Change Time *</label>
+                                            <Input
+                                                type="time"
+                                                name="change_time"
+                                                defaultValue={new Date().toTimeString().slice(0, 5)}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Notes (Optional)</label>
+                                        <Input
+                                            name="notes"
+                                            placeholder="Reason for bed change"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end gap-3">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setOpenChangeBedDialog(false)}
+                                        disabled={changeBedMutation.isPending}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        disabled={changeBedMutation.isPending}
+                                    >
+                                        {changeBedMutation.isPending ? (
+                                            <>
+                                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                Processing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save className="h-4 w-4 mr-2" />
+                                                Change Bed
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Make Bill for Bed Cabin Dialog */}
+                    <Dialog open={openBedBillingDialog} onOpenChange={(open) => {
+                        setOpenBedBillingDialog(open)
+                        if (!open) setEditBedBilling(null)
+                    }}>
+                        <DialogContent className="sm:max-w-[500px]">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                    <Receipt className="h-5 w-5" />
+                                    {editBedBilling ? 'Edit Bed/Cabin Bill' : 'Make Bill for Bed Cabin Charges'}
+                                </DialogTitle>
+                                <DialogDescription>
+                                    {editBedBilling ? 'Update the billing record for bed/cabin charges.' : 'Create a billing record for bed/cabin charges. Fill in the details below.'}
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault()
+                                    console.log('Form submitted')
+
+                                    const formData = new FormData(e.currentTarget)
+                                    const bedCabinId = editBedBilling?.bed_cabin_id || admissionData?.data?.bedCabin?.id || 0
+                                    const data = {
+                                        id: editBedBilling?.id,
+                                        bed_cabin_id: bedCabinId,
+                                        from_date: formData.get('from_date') as string,
+                                        to_date: formData.get('to_date') as string,
+                                        days: Number(formData.get('total_days')),
+                                        rate_per_day: Number(formData.get('daily_rate')),
+                                        total_amount: Number(formData.get('total_amount')),
+                                    }
+
+                                    console.log('Form data:', data)
+
+                                    if (!data.from_date || !data.to_date) {
+                                        toast.error('Please select both from and to dates')
+                                        return
+                                    }
+
+                                    if (!data.days || data.days < 1) {
+                                        toast.error('Total days must be at least 1')
+                                        return
+                                    }
+
+                                    if (!data.rate_per_day || data.rate_per_day < 0) {
+                                        toast.error('Daily rate must be greater than 0')
+                                        return
+                                    }
+
+                                    if (!data.total_amount || data.total_amount < 0) {
+                                        toast.error('Total amount must be greater than 0')
+                                        return
+                                    }
+
+                                    // Create or update billing
+                                    console.log('Calling handler with data:', data)
+                                    handleAddBedBilling(data)
+                                }}
+                            >
+                                <div className="space-y-4 py-4">
+                                    {/* From Date & Time */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2 flex flex-col justify-end">
+                                            <label className="text-sm font-medium">From Date *</label>
+                                            <DateField
+                                                value={bedBillingFromDate}
+                                                onChange={setBedBillingFromDate}
+                                                className="w-full h-10"
+                                            />
+                                            <input
+                                                type="hidden"
+                                                name="from_date"
+                                                value={bedBillingFromDate}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">From Time *</label>
+                                            <Input
+                                                type="time"
+                                                name="from_time"
+                                                defaultValue="09:00"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* To Date & Time */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2 flex flex-col justify-end">
+                                            <label className="text-sm font-medium">To Date *</label>
+                                            <DateField
+                                                value={bedBillingToDate}
+                                                onChange={setBedBillingToDate}
+                                                className="w-full h-10"
+                                            />
+                                            <input
+                                                type="hidden"
+                                                name="to_date"
+                                                value={bedBillingToDate}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">To Time *</label>
+                                            <Input
+                                                type="time"
+                                                name="to_time"
+                                                defaultValue={new Date().toTimeString().slice(0, 5)}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Total Days */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Total Days *</label>
+                                        <Input
+                                            type="number"
+                                            name="total_days"
+                                            min="1"
+                                            defaultValue={editBedBilling?.days || 1}
+                                            onChange={(e) => {
+                                                const form = e.currentTarget.form
+                                                if (!form) return
+                                                const days = Number(e.target.value)
+                                                const dailyRate = Number((form.elements.namedItem('daily_rate') as HTMLInputElement)?.value) || 0
+                                                const totalAmountInput = form.elements.namedItem('total_amount') as HTMLInputElement
+                                                if (totalAmountInput) {
+                                                    totalAmountInput.value = String(days * dailyRate)
+                                                }
+                                            }}
+                                            required
+                                        />
+                                    </div>
+
+                                    {/* Daily Rate */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Daily Rate ({currencySymbol}) *</label>
+                                        <Input
+                                            type="number"
+                                            name="daily_rate"
+                                            min="0"
+                                            step="0.01"
+                                            defaultValue={editBedBilling?.rate_per_day || admissionData?.data?.bedCabin?.price || '0'}
+                                            onChange={(e) => {
+                                                const form = e.currentTarget.form
+                                                if (!form) return
+                                                const dailyRate = Number(e.target.value)
+                                                const days = Number((form.elements.namedItem('total_days') as HTMLInputElement)?.value) || 0
+                                                const totalAmountInput = form.elements.namedItem('total_amount') as HTMLInputElement
+                                                if (totalAmountInput) {
+                                                    totalAmountInput.value = String(days * dailyRate)
+                                                }
+                                            }}
+                                            required
+                                        />
+                                    </div>
+
+                                    {/* Total Amount */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Total Amount ({currencySymbol}) *</label>
+                                        <Input
+                                            type="number"
+                                            name="total_amount"
+                                            min="0"
+                                            step="0.01"
+                                            defaultValue={editBedBilling?.total_amount || admissionData?.data?.bedCabin?.price || '0'}
+                                            required
+                                        />
+                                    </div>
+
+                                    {/* Remarks */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Remarks</label>
+                                        <textarea
+                                            name="remarks"
+                                            className="w-full min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            placeholder="Enter any remarks or notes..."
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end gap-3">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => {
+                                            setOpenBedBillingDialog(false)
+                                            setEditBedBilling(null)
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                    >
+                                        <Save className="h-4 w-4 mr-2" />
+                                        {editBedBilling ? 'Update' : 'Submit'}
+                                    </Button>
+                                </div>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Final Bill & Discharge Dialog */}
+                    <Dialog open={openFinalBillDialog} onOpenChange={setOpenFinalBillDialog}>
+                        <DialogContent className="sm:max-w-lg">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                    <FileText className="h-5 w-5 text-green-600" />
+                                    Create Bill & {admissionData?.data?.status === 'active' ? 'Discharge Patient' : 'Complete Billing'}
+                                </DialogTitle>
+                                <DialogDescription>
+                                    {admissionData?.data?.status === 'active'
+                                        ? 'Review the bill summary and confirm discharge to create the final bill.'
+                                        : 'Review the bill summary to create the final bill.'}
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                                {/* Patient Info */}
+                                <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground">Patient</Label>
+                                        <p className="text-sm font-medium">{admissionData?.data?.patient_name || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground">Current Status</Label>
+                                        <p className="text-sm">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${admissionData?.data?.status === 'active'
+                                                ? 'bg-green-100 text-green-800'
+                                                : 'bg-gray-100 text-gray-800'
+                                                }`}>
+                                                {admissionData?.data?.status?.charAt(0).toUpperCase() + admissionData?.data?.status?.slice(1) || 'Unknown'}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground">Total Charges</Label>
+                                        <p className="text-sm font-bold text-lg">{format(grandTotal)}</p>
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground">Bill Items</Label>
+                                        <p className="text-sm font-medium">
+                                            {operations.length + consultants.length + surgeons.length + assistants.length + anesthesiologists.length + servicesList.length + (bedBillingData?.data?.length || 0)} items
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Discharge Date - Only show if patient is active */}
+                                {admissionData?.data?.status === 'active' && (
+                                    <div className="space-y-2 flex flex-col justify-end">
+                                        <Label htmlFor="finalBillDischargeDate">Discharge Date *</Label>
+                                        <DateField
+                                            value={finalBillDischargeDate}
+                                            onChange={setFinalBillDischargeDate}
+                                            className="w-full h-10"
+                                        />
+                                        <p className="text-xs text-muted-foreground">
+                                            Patient will be discharged on this date
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Bill Summary */}
+                                <div className="space-y-2">
+                                    <Label>Bill Summary</Label>
+                                    <div className="space-y-1 text-sm">
+                                        {operations.length > 0 && <div className="flex justify-between"><span>Operations:</span><span>{format(totalOperations)}</span></div>}
+                                        {consultants.length > 0 && <div className="flex justify-between"><span>Consultants:</span><span>{format(totalConsultants)}</span></div>}
+                                        {surgeons.length > 0 && <div className="flex justify-between"><span>Surgeons:</span><span>{format(totalSurgeons)}</span></div>}
+                                        {assistants.length > 0 && <div className="flex justify-between"><span>Assistants:</span><span>{format(totalAssistants)}</span></div>}
+                                        {anesthesiologists.length > 0 && <div className="flex justify-between"><span>Anesthesiologists:</span><span>{format(totalAnesthesiologists)}</span></div>}
+                                        {servicesList.length > 0 && <div className="flex justify-between"><span>Services:</span><span>{format(totalServices)}</span></div>}
+                                        {totalBedCharges > 0 && <div className="flex justify-between"><span>Bed Charges:</span><span>{format(totalBedCharges)}</span></div>}
+                                        <div className="flex justify-between font-bold pt-2 border-t">
+                                            <span>Total:</span>
+                                            <span>{format(grandTotal)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Info Note */}
+                                <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                                    <p className="text-xs text-blue-800 dark:text-blue-300">
+                                        <strong>What happens next:</strong>
+                                    </p>
+                                    <ul className="text-xs text-blue-700 dark:text-blue-400 mt-2 space-y-1 list-disc list-inside">
+                                        {admissionData?.data?.status === 'active' && (
+                                            <>
+                                                <li>Patient status will change to "Discharged"</li>
+                                                <li>Assigned bed/cabin will be released</li>
+                                            </>
+                                        )}
+                                        <li>Final bill will be created with all charges</li>
+                                        <li>Bill cannot be modified after creation</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <DialogFooter>
                                 <Button
-                                    type="button"
                                     variant="outline"
-                                    onClick={() => setOpenChangeBedDialog(false)}
-                                    disabled={changeBedMutation.isPending}
+                                    onClick={() => setOpenFinalBillDialog(false)}
+                                    disabled={finalBillMutation.isPending}
                                 >
                                     Cancel
                                 </Button>
                                 <Button
-                                    type="submit"
-                                    disabled={changeBedMutation.isPending}
+                                    onClick={() => finalBillMutation.mutate(finalBillDischargeDate)}
+                                    disabled={finalBillMutation.isPending || (admissionData?.data?.status === 'active' && !finalBillDischargeDate)}
+                                    className="bg-green-600 hover:bg-green-700"
                                 >
-                                    {changeBedMutation.isPending ? (
+                                    {finalBillMutation.isPending ? (
                                         <>
                                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                                             Processing...
@@ -2790,463 +3515,139 @@ export function PatientBillingPage() {
                                     ) : (
                                         <>
                                             <Save className="h-4 w-4 mr-2" />
-                                            Change Bed
+                                            {admissionData?.data?.status === 'active' ? 'Discharge & Create Bill' : 'Create Final Bill'}
                                         </>
                                     )}
                                 </Button>
-                            </div>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
 
-                {/* Make Bill for Bed Cabin Dialog */}
-                <Dialog open={openBedBillingDialog} onOpenChange={(open) => {
-                    setOpenBedBillingDialog(open)
-                    if (!open) setEditBedBilling(null)
-                }}>
-                    <DialogContent className="sm:max-w-[500px]">
-                        <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                                <Receipt className="h-5 w-5" />
-                                {editBedBilling ? 'Edit Bed/Cabin Bill' : 'Make Bill for Bed Cabin Charges'}
-                            </DialogTitle>
-                            <DialogDescription>
-                                {editBedBilling ? 'Update the billing record for bed/cabin charges.' : 'Create a billing record for bed/cabin charges. Fill in the details below.'}
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        <form
-                            onSubmit={(e) => {
-                                e.preventDefault()
-                                console.log('Form submitted')
-
-                                const formData = new FormData(e.currentTarget)
-                                const bedCabinId = editBedBilling?.bed_cabin_id || admissionData?.data?.bedCabin?.id || 0
-                                const data = {
-                                    id: editBedBilling?.id,
-                                    bed_cabin_id: bedCabinId,
-                                    from_date: formData.get('from_date') as string,
-                                    to_date: formData.get('to_date') as string,
-                                    days: Number(formData.get('total_days')),
-                                    rate_per_day: Number(formData.get('daily_rate')),
-                                    total_amount: Number(formData.get('total_amount')),
-                                }
-
-                                console.log('Form data:', data)
-
-                                if (!data.from_date || !data.to_date) {
-                                    toast.error('Please select both from and to dates')
-                                    return
-                                }
-
-                                if (!data.days || data.days < 1) {
-                                    toast.error('Total days must be at least 1')
-                                    return
-                                }
-
-                                if (!data.rate_per_day || data.rate_per_day < 0) {
-                                    toast.error('Daily rate must be greater than 0')
-                                    return
-                                }
-
-                                if (!data.total_amount || data.total_amount < 0) {
-                                    toast.error('Total amount must be greater than 0')
-                                    return
-                                }
-
-                                // Create or update billing
-                                console.log('Calling handler with data:', data)
-                                handleAddBedBilling(data)
-                            }}
-                        >
-                            <div className="space-y-4 py-4">
-                                {/* From Date & Time */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">From Date *</label>
-                                        <Input
-                                            type="date"
-                                            name="from_date"
-                                            defaultValue={editBedBilling?.from_date || admissionData?.data?.admission_date || new Date().toISOString().split('T')[0]}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">From Time *</label>
-                                        <Input
-                                            type="time"
-                                            name="from_time"
-                                            defaultValue="09:00"
-                                            required
-                                        />
+                    {/* Auto Complete Billing Cycle Dialog */}
+                    <Dialog open={openAutoCompleteDialog} onOpenChange={setOpenAutoCompleteDialog}>
+                        <DialogContent className="sm:max-w-lg">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                    <Loader2 className="h-5 w-5 text-purple-600" />
+                                    Auto Complete All Steps
+                                </DialogTitle>
+                                <DialogDescription>
+                                    This will automatically complete all billing cycle steps in sequence. Please verify before proceeding.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                                {/* Bill Summary */}
+                                <div className="bg-muted p-4 rounded-lg">
+                                    <p className="text-sm font-medium mb-3">Current Bill Summary:</p>
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between">
+                                            <span>Operations:</span>
+                                            <span className="font-semibold">{totalOperations.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Consultants:</span>
+                                            <span className="font-semibold">{totalConsultants.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Surgeons:</span>
+                                            <span className="font-semibold">{totalSurgeons.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Assistants:</span>
+                                            <span className="font-semibold">{totalAssistants.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Services:</span>
+                                            <span className="font-semibold">{totalServices.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between font-bold text-lg pt-2 border-t">
+                                            <span>Total:</span>
+                                            <span>{grandTotal.toFixed(2)}</span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* To Date & Time */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">To Date *</label>
-                                        <Input
-                                            type="date"
-                                            name="to_date"
-                                            defaultValue={editBedBilling?.to_date || new Date().toISOString().split('T')[0]}
-                                            required
-                                        />
+                                {/* Steps Overview */}
+                                <div className="space-y-2">
+                                    <p className="text-sm font-medium">Steps to be executed:</p>
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-xs font-bold">1</div>
+                                            <span>Discharge patient and release bed</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-xs font-bold">2</div>
+                                            <span>Create final bill with all charges</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-xs font-bold">3</div>
+                                            <span>Auto-distribute payments to providers</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-xs font-bold">4</div>
+                                            <span>Record all provider payments</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-xs font-bold">5</div>
+                                            <span>Confirm billing cycle complete</span>
+                                        </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">To Time *</label>
-                                        <Input
-                                            type="time"
-                                            name="to_time"
-                                            defaultValue={new Date().toTimeString().slice(0, 5)}
-                                            required
-                                        />
-                                    </div>
                                 </div>
 
-                                {/* Total Days */}
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Total Days *</label>
-                                    <Input
-                                        type="number"
-                                        name="total_days"
-                                        min="1"
-                                        defaultValue={editBedBilling?.days || 1}
-                                        onChange={(e) => {
-                                            const form = e.currentTarget.form
-                                            if (!form) return
-                                            const days = Number(e.target.value)
-                                            const dailyRate = Number((form.elements.namedItem('daily_rate') as HTMLInputElement)?.value) || 0
-                                            const totalAmountInput = form.elements.namedItem('total_amount') as HTMLInputElement
-                                            if (totalAmountInput) {
-                                                totalAmountInput.value = String(days * dailyRate)
-                                            }
-                                        }}
-                                        required
+                                {/* Discharge Date */}
+                                <div className="flex flex-col gap-2">
+                                    <Label>Discharge Date *</Label>
+                                    <DateField
+                                        value={autoCompleteDischargeDate}
+                                        onChange={setAutoCompleteDischargeDate}
+                                        className="w-full h-10"
                                     />
                                 </div>
 
-                                {/* Daily Rate */}
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Daily Rate (৳) *</label>
-                                    <Input
-                                        type="number"
-                                        name="daily_rate"
-                                        min="0"
-                                        step="0.01"
-                                        defaultValue={editBedBilling?.rate_per_day || admissionData?.data?.bedCabin?.price || '0'}
-                                        onChange={(e) => {
-                                            const form = e.currentTarget.form
-                                            if (!form) return
-                                            const dailyRate = Number(e.target.value)
-                                            const days = Number((form.elements.namedItem('total_days') as HTMLInputElement)?.value) || 0
-                                            const totalAmountInput = form.elements.namedItem('total_amount') as HTMLInputElement
-                                            if (totalAmountInput) {
-                                                totalAmountInput.value = String(days * dailyRate)
-                                            }
-                                        }}
-                                        required
-                                    />
-                                </div>
-
-                                {/* Total Amount */}
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Total Amount (৳) *</label>
-                                    <Input
-                                        type="number"
-                                        name="total_amount"
-                                        min="0"
-                                        step="0.01"
-                                        defaultValue={editBedBilling?.total_amount || admissionData?.data?.bedCabin?.price || '0'}
-                                        required
-                                    />
-                                </div>
-
-                                {/* Remarks */}
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Remarks</label>
-                                    <textarea
-                                        name="remarks"
-                                        className="w-full min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                        placeholder="Enter any remarks or notes..."
-                                    />
+                                {/* Warning Note */}
+                                <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded-lg p-3">
+                                    <p className="text-xs text-orange-800 dark:text-orange-300">
+                                        <strong>⚠️ Important:</strong> This action will:
+                                    </p>
+                                    <ul className="text-xs text-orange-700 dark:text-orange-400 mt-2 space-y-1 list-disc list-inside">
+                                        <li>Discharge the patient and release bed/cabin</li>
+                                        <li>Create final bill (cannot be modified after)</li>
+                                        <li>Auto-distribute payments to all providers</li>
+                                        <li>Record full payments to all providers</li>
+                                        <li>Complete the billing cycle</li>
+                                    </ul>
                                 </div>
                             </div>
-
-                            <div className="flex justify-end gap-3">
+                            <DialogFooter>
                                 <Button
-                                    type="button"
                                     variant="outline"
-                                    onClick={() => {
-                                        setOpenBedBillingDialog(false)
-                                        setEditBedBilling(null)
-                                    }}
+                                    onClick={() => setOpenAutoCompleteDialog(false)}
+                                    disabled={isAutoCompleting}
                                 >
                                     Cancel
                                 </Button>
                                 <Button
-                                    type="submit"
+                                    onClick={() => autoCompleteMutation.mutate(autoCompleteDischargeDate)}
+                                    disabled={isAutoCompleting || !autoCompleteDischargeDate || grandTotal === 0}
+                                    className="bg-purple-600 hover:bg-purple-700"
                                 >
-                                    <Save className="h-4 w-4 mr-2" />
-                                    {editBedBilling ? 'Update' : 'Submit'}
-                                </Button>
-                            </div>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-
-                {/* Final Bill & Discharge Dialog */}
-                <Dialog open={openFinalBillDialog} onOpenChange={setOpenFinalBillDialog}>
-                    <DialogContent className="sm:max-w-lg">
-                        <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                                <FileText className="h-5 w-5 text-green-600" />
-                                Create Bill & {admissionData?.data?.status === 'active' ? 'Discharge Patient' : 'Complete Billing'}
-                            </DialogTitle>
-                            <DialogDescription>
-                                {admissionData?.data?.status === 'active'
-                                    ? 'Review the bill summary and confirm discharge to create the final bill.'
-                                    : 'Review the bill summary to create the final bill.'}
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                            {/* Patient Info */}
-                            <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                                <div>
-                                    <Label className="text-xs text-muted-foreground">Patient</Label>
-                                    <p className="text-sm font-medium">{admissionData?.data?.patient_name || 'N/A'}</p>
-                                </div>
-                                <div>
-                                    <Label className="text-xs text-muted-foreground">Current Status</Label>
-                                    <p className="text-sm">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                            admissionData?.data?.status === 'active'
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-gray-100 text-gray-800'
-                                        }`}>
-                                            {admissionData?.data?.status?.charAt(0).toUpperCase() + admissionData?.data?.status?.slice(1) || 'Unknown'}
-                                        </span>
-                                    </p>
-                                </div>
-                                <div>
-                                    <Label className="text-xs text-muted-foreground">Total Charges</Label>
-                                    <p className="text-sm font-bold text-lg">{format(grandTotal)}</p>
-                                </div>
-                                <div>
-                                    <Label className="text-xs text-muted-foreground">Bill Items</Label>
-                                    <p className="text-sm font-medium">
-                                        {operations.length + consultants.length + surgeons.length + assistants.length + anesthesiologists.length + servicesList.length + (bedBillingData?.data?.length || 0)} items
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Discharge Date - Only show if patient is active */}
-                            {admissionData?.data?.status === 'active' && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="finalBillDischargeDate">Discharge Date *</Label>
-                                    <Input
-                                        id="finalBillDischargeDate"
-                                        type="date"
-                                        value={finalBillDischargeDate}
-                                        onChange={(e) => setFinalBillDischargeDate(e.target.value)}
-                                        max={new Date().toISOString().split('T')[0]}
-                                    />
-                                    <p className="text-xs text-muted-foreground">
-                                        Patient will be discharged on this date
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Bill Summary */}
-                            <div className="space-y-2">
-                                <Label>Bill Summary</Label>
-                                <div className="space-y-1 text-sm">
-                                    {operations.length > 0 && <div className="flex justify-between"><span>Operations:</span><span>{format(totalOperations)}</span></div>}
-                                    {consultants.length > 0 && <div className="flex justify-between"><span>Consultants:</span><span>{format(totalConsultants)}</span></div>}
-                                    {surgeons.length > 0 && <div className="flex justify-between"><span>Surgeons:</span><span>{format(totalSurgeons)}</span></div>}
-                                    {assistants.length > 0 && <div className="flex justify-between"><span>Assistants:</span><span>{format(totalAssistants)}</span></div>}
-                                    {anesthesiologists.length > 0 && <div className="flex justify-between"><span>Anesthesiologists:</span><span>{format(totalAnesthesiologists)}</span></div>}
-                                    {servicesList.length > 0 && <div className="flex justify-between"><span>Services:</span><span>{format(totalServices)}</span></div>}
-                                    {totalBedCharges > 0 && <div className="flex justify-between"><span>Bed Charges:</span><span>{format(totalBedCharges)}</span></div>}
-                                    <div className="flex justify-between font-bold pt-2 border-t">
-                                        <span>Total:</span>
-                                        <span>{format(grandTotal)}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Info Note */}
-                            <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-                                <p className="text-xs text-blue-800 dark:text-blue-300">
-                                    <strong>What happens next:</strong>
-                                </p>
-                                <ul className="text-xs text-blue-700 dark:text-blue-400 mt-2 space-y-1 list-disc list-inside">
-                                    {admissionData?.data?.status === 'active' && (
+                                    {isAutoCompleting ? (
                                         <>
-                                            <li>Patient status will change to "Discharged"</li>
-                                            <li>Assigned bed/cabin will be released</li>
+                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Loader2 className="h-4 w-4 mr-2" />
+                                            Start Auto Complete
                                         </>
                                     )}
-                                    <li>Final bill will be created with all charges</li>
-                                    <li>Bill cannot be modified after creation</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button
-                                variant="outline"
-                                onClick={() => setOpenFinalBillDialog(false)}
-                                disabled={finalBillMutation.isPending}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                onClick={() => finalBillMutation.mutate(finalBillDischargeDate)}
-                                disabled={finalBillMutation.isPending || (admissionData?.data?.status === 'active' && !finalBillDischargeDate)}
-                                className="bg-green-600 hover:bg-green-700"
-                            >
-                                {finalBillMutation.isPending ? (
-                                    <>
-                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                        Processing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save className="h-4 w-4 mr-2" />
-                                        {admissionData?.data?.status === 'active' ? 'Discharge & Create Bill' : 'Create Final Bill'}
-                                    </>
-                                )}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-
-                {/* Auto Complete Billing Cycle Dialog */}
-                <Dialog open={openAutoCompleteDialog} onOpenChange={setOpenAutoCompleteDialog}>
-                    <DialogContent className="sm:max-w-lg">
-                        <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                                <Loader2 className="h-5 w-5 text-purple-600" />
-                                Auto Complete All Steps
-                            </DialogTitle>
-                            <DialogDescription>
-                                This will automatically complete all billing cycle steps in sequence. Please verify before proceeding.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                            {/* Bill Summary */}
-                            <div className="bg-muted p-4 rounded-lg">
-                                <p className="text-sm font-medium mb-3">Current Bill Summary:</p>
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                        <span>Operations:</span>
-                                        <span className="font-semibold">{totalOperations.toFixed(2)}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Consultants:</span>
-                                        <span className="font-semibold">{totalConsultants.toFixed(2)}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Surgeons:</span>
-                                        <span className="font-semibold">{totalSurgeons.toFixed(2)}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Assistants:</span>
-                                        <span className="font-semibold">{totalAssistants.toFixed(2)}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Services:</span>
-                                        <span className="font-semibold">{totalServices.toFixed(2)}</span>
-                                    </div>
-                                    <div className="flex justify-between font-bold text-lg pt-2 border-t">
-                                        <span>Total:</span>
-                                        <span>{grandTotal.toFixed(2)}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Steps Overview */}
-                            <div className="space-y-2">
-                                <p className="text-sm font-medium">Steps to be executed:</p>
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-xs font-bold">1</div>
-                                        <span>Discharge patient and release bed</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-xs font-bold">2</div>
-                                        <span>Create final bill with all charges</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-xs font-bold">3</div>
-                                        <span>Auto-distribute payments to providers</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-xs font-bold">4</div>
-                                        <span>Record all provider payments</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-xs font-bold">5</div>
-                                        <span>Confirm billing cycle complete</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Discharge Date */}
-                            <div>
-                                <Label>Discharge Date *</Label>
-                                <Input
-                                    type="date"
-                                    value={autoCompleteDischargeDate}
-                                    onChange={(e) => setAutoCompleteDischargeDate(e.target.value)}
-                                    max={new Date().toISOString().split('T')[0]}
-                                />
-                            </div>
-
-                            {/* Warning Note */}
-                            <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded-lg p-3">
-                                <p className="text-xs text-orange-800 dark:text-orange-300">
-                                    <strong>⚠️ Important:</strong> This action will:
-                                </p>
-                                <ul className="text-xs text-orange-700 dark:text-orange-400 mt-2 space-y-1 list-disc list-inside">
-                                    <li>Discharge the patient and release bed/cabin</li>
-                                    <li>Create final bill (cannot be modified after)</li>
-                                    <li>Auto-distribute payments to all providers</li>
-                                    <li>Record full payments to all providers</li>
-                                    <li>Complete the billing cycle</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button
-                                variant="outline"
-                                onClick={() => setOpenAutoCompleteDialog(false)}
-                                disabled={isAutoCompleting}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                onClick={() => autoCompleteMutation.mutate(autoCompleteDischargeDate)}
-                                disabled={isAutoCompleting || !autoCompleteDischargeDate || grandTotal === 0}
-                                className="bg-purple-600 hover:bg-purple-700"
-                            >
-                                {isAutoCompleting ? (
-                                    <>
-                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                        Processing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Loader2 className="h-4 w-4 mr-2" />
-                                        Start Auto Complete
-                                    </>
-                                )}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            </div>
-        </Main>
-    </>
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </div>
+            </Main>
+        </>
     )
 }

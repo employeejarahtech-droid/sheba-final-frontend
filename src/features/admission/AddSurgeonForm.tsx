@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -12,9 +13,13 @@ import {
     SheetClose,
 } from '@/components/ui/sheet'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useEffect, useState } from 'react'
-import { Search } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { CalendarIcon, Check, ChevronDown, HeartPulse } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Calendar } from '@/components/ui/calendar'
+import { useCurrency } from '@/hooks/use-currency'
+import { useDateFormat } from '@/hooks/use-date-format'
 
 const surgeonSchema = z.object({
     surgeon_id: z.number().positive('Surgeon is required'),
@@ -44,13 +49,17 @@ interface AddSurgeonFormProps {
 }
 
 export function AddSurgeonForm({ open, setOpen, onAdd, doctors, editSurgeon }: AddSurgeonFormProps) {
-    const [searchTerm, setSearchTerm] = useState('')
+    const { currencySymbol } = useCurrency()
+    const { formatHint, formatDate, toISODate } = useDateFormat()
 
-    // Filter doctors based on search term
-    const filteredDoctors = doctors.filter((doctor: any) =>
-        doctor.doctor_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doctor.speciality?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    // Convert a stored ISO date (YYYY-MM-DD) into a local Date for the calendar,
+    // avoiding UTC/timezone off-by-one shifts.
+    const isoToDate = (iso: string): Date | undefined => {
+        if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return undefined
+        const [y, m, d] = iso.split('-').map(Number)
+        return new Date(y, m - 1, d)
+    }
+    const [surgeonOpen, setSurgeonOpen] = useState(false)
 
     const form = useForm<SurgeonFormData>({
         resolver: zodResolver(surgeonSchema),
@@ -76,7 +85,7 @@ export function AddSurgeonForm({ open, setOpen, onAdd, doctors, editSurgeon }: A
                 fees: 0,
             })
         }
-        setSearchTerm('') // Reset search when opening or changing edit mode
+        setSurgeonOpen(false) // Close dropdown when opening or changing edit mode
     }, [editSurgeon, form])
 
     const handleAddSurgeon = (data: SurgeonFormData) => {
@@ -94,8 +103,16 @@ export function AddSurgeonForm({ open, setOpen, onAdd, doctors, editSurgeon }: A
         <>
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetContent side="right" className="max-w-[450px] w-full">
-                    <SheetHeader>
-                        <SheetTitle>{editSurgeon ? 'Edit Surgeon' : 'Add Surgeon'}</SheetTitle>
+                    <SheetHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-3 px-4 gap-0">
+                        <div className="flex items-center gap-2.5 pr-8">
+                            <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                                <HeartPulse className="h-4 w-4" />
+                            </div>
+                            <div>
+                                <SheetTitle className="text-lg font-bold">{editSurgeon ? 'Edit Surgeon' : 'Add Surgeon'}</SheetTitle>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">Surgeon assignments and surgery fee distribution</p>
+                            </div>
+                        </div>
                     </SheetHeader>
 
                     <div className="px-4">
@@ -105,61 +122,144 @@ export function AddSurgeonForm({ open, setOpen, onAdd, doctors, editSurgeon }: A
                                     <FormField
                                         control={form.control}
                                         name="surgeon_id"
-                                        render={() => (
-                                            <FormItem>
-                                                <FormLabel>Surgeon *</FormLabel>
-                                                <FormControl>
-                                                    <Select
-                                                        onValueChange={(value) => form.setValue('surgeon_id', Number(value))}
-                                                        value={form.getValues('surgeon_id')?.toString()}
-                                                    >
-                                                        <SelectTrigger className="w-full">
-                                                            <SelectValue placeholder="Select surgeon..." />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {/* Search Input inside dropdown */}
-                                                            <div className="p-2 sticky top-0 bg-white dark:bg-gray-950 z-10 border-b">
-                                                                <div className="relative">
-                                                                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-                                                                    <Input
-                                                                        type="text"
-                                                                        placeholder="Search doctors..."
-                                                                        value={searchTerm}
-                                                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                                                        className="pl-8 h-8 text-sm"
-                                                                        onClick={(e) => e.stopPropagation()}
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                            {filteredDoctors.length > 0 ? (
-                                                                filteredDoctors.map((doctor: any) => (
-                                                                    <SelectItem key={doctor.id} value={String(doctor.id)}>
-                                                                        {doctor.doctor_name} - {doctor.speciality || 'General'}
-                                                                    </SelectItem>
-                                                                ))
-                                                            ) : (
-                                                                <div className="px-2 py-1.5 text-sm text-gray-500">
-                                                                    {searchTerm ? 'No results found' : 'No doctors available'}
-                                                                </div>
-                                                            )}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </FormControl>
-                                            </FormItem>
-                                        )}
+                                        render={({ field }) => {
+                                            const selectedDoctor = doctors.find(
+                                                (doc: any) => String(doc.id) === String(field.value)
+                                            )
+
+                                            return (
+                                                <FormItem className="flex flex-col gap-2">
+                                                    <FormLabel>Surgeon *</FormLabel>
+                                                    <Popover open={surgeonOpen} onOpenChange={setSurgeonOpen}>
+                                                        <PopoverTrigger asChild>
+                                                            <FormControl>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    role="combobox"
+                                                                    className={cn(
+                                                                        "w-full justify-between h-10 font-normal",
+                                                                        !field.value && "text-muted-foreground"
+                                                                    )}
+                                                                >
+                                                                    {selectedDoctor ? (
+                                                                        <div className="flex flex-col items-start">
+                                                                            <span className="font-medium">
+                                                                                Dr. {selectedDoctor.doctor_name}
+                                                                                {(selectedDoctor.qualification || selectedDoctor.title) && ` (${selectedDoctor.qualification || selectedDoctor.title})`}
+                                                                            </span>
+                                                                            {selectedDoctor.speciality && (
+                                                                                <span className="text-xs text-muted-foreground">
+                                                                                    {selectedDoctor.speciality}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                    ) : (
+                                                                        "Select surgeon..."
+                                                                    )}
+                                                                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                                </Button>
+                                                            </FormControl>
+                                                        </PopoverTrigger>
+                                                        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                                                            <Command
+                                                                filter={(value, search) => {
+                                                                    if (!search) return 1;
+                                                                    return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+                                                                }}
+                                                            >
+                                                                <CommandInput placeholder="Search doctor by name, qualification, or specialty..." className="h-9" />
+                                                                <CommandList className="max-h-[300px]">
+                                                                    <CommandEmpty>No doctor found.</CommandEmpty>
+                                                                    <CommandGroup>
+                                                                        {doctors.map((doctor: any) => {
+                                                                            const displayName = `Dr. ${doctor.doctor_name}`;
+                                                                            const subtitle = [
+                                                                                doctor.qualification || doctor.title,
+                                                                                doctor.speciality,
+                                                                            ].filter(Boolean).join(' - ');
+
+                                                                            return (
+                                                                                <CommandItem
+                                                                                    key={doctor.id}
+                                                                                    value={`${doctor.doctor_name} ${doctor.qualification || doctor.title || ''} ${doctor.speciality || ''} ${doctor.id}`}
+                                                                                    className="py-2.5 px-4 cursor-pointer"
+                                                                                    onSelect={() => {
+                                                                                        field.onChange(Number(doctor.id));
+                                                                                        setSurgeonOpen(false);
+                                                                                    }}
+                                                                                >
+                                                                                    <div className="flex items-center gap-2 w-full">
+                                                                                        <Check
+                                                                                            className={cn(
+                                                                                                "h-4 w-4 shrink-0",
+                                                                                                String(doctor.id) === String(field.value)
+                                                                                                    ? "opacity-100"
+                                                                                                    : "opacity-0"
+                                                                                            )}
+                                                                                        />
+                                                                                        <div className="flex flex-col">
+                                                                                            <span className="font-medium">{displayName}</span>
+                                                                                            {subtitle && (
+                                                                                                <span className="text-xs text-muted-foreground">
+                                                                                                    {subtitle}
+                                                                                                </span>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </CommandItem>
+                                                                            );
+                                                                        })}
+                                                                    </CommandGroup>
+                                                                </CommandList>
+                                                            </Command>
+                                                        </PopoverContent>
+                                                    </Popover>
+                                                </FormItem>
+                                            );
+                                        }}
                                     />
 
                                     <FormField
                                         control={form.control}
                                         name="operation_date"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Operation Date *</FormLabel>
-                                                <FormControl>
-                                                    <Input type="date" {...field} />
-                                                </FormControl>
-                                            </FormItem>
-                                        )}
+                                        render={({ field }) => {
+                                            const selectedDate = isoToDate(field.value)
+                                            return (
+                                                <FormItem className="flex flex-col gap-2">
+                                                    <FormLabel>
+                                                        Operation Date * <span className="text-xs font-normal text-muted-foreground">({formatHint})</span>
+                                                    </FormLabel>
+                                                    <Popover>
+                                                        <PopoverTrigger asChild>
+                                                            <FormControl>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    className={cn(
+                                                                        "w-full justify-start text-left font-normal",
+                                                                        !field.value && "text-muted-foreground"
+                                                                    )}
+                                                                >
+                                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                                    {selectedDate ? formatDate(selectedDate) : "Pick a date"}
+                                                                </Button>
+                                                            </FormControl>
+                                                        </PopoverTrigger>
+                                                        <PopoverContent className="w-auto p-0" align="start">
+                                                            <Calendar
+                                                                mode="single"
+                                                                selected={selectedDate}
+                                                                onSelect={(date) => {
+                                                                    field.onChange(date ? toISODate(date) : "")
+                                                                }}
+                                                                initialFocus
+                                                            />
+                                                        </PopoverContent>
+                                                    </Popover>
+                                                </FormItem>
+                                            )
+                                        }}
                                     />
 
                                     <FormField
@@ -167,7 +267,7 @@ export function AddSurgeonForm({ open, setOpen, onAdd, doctors, editSurgeon }: A
                                         name="fees"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Fees (৳) *</FormLabel>
+                                                <FormLabel>Fees ({currencySymbol}) *</FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         type="number"

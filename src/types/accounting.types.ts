@@ -298,3 +298,30 @@ export type DebitHeadByIdResponse = {
 export type PayrollResponse = {
     data: Payroll[];
 };
+
+// -------------------- CASH FLOW --------------------
+export type CashFlowItem = {
+    code: string;
+    name: string;
+    amount: number;
+};
+
+export type CashFlowSection = {
+    items: CashFlowItem[];
+    total: number;
+};
+
+export type CashFlowReport = {
+    operating: CashFlowSection;
+    investing: CashFlowSection;
+    financing: CashFlowSection;
+    opening_cash: number;
+    closing_cash: number;
+    net_cash_change: number;
+};
+
+export type CashFlowResponse = {
+    status: boolean;
+    message: string;
+    data: CashFlowReport;
+};

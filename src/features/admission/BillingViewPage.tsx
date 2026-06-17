@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { getCookie } from '@/lib/cookies'
+import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
 import { ArrowLeft, Printer, FileText, Calendar, User, Phone, Stethoscope, Activity, Home, Plus } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -64,9 +66,21 @@ type AdmissionDetails = {
 }
 
 export function BillingViewPage() {
-    const { billingId } = useParams({ from: '/_authenticated/admission/billing/$billingId/' })
+    const { billingId } = useParams({ from: '/_authenticated/dashboard/admission/billing/$billingId/' })
     const navigate = useNavigate()
     const token = getCookie('accessToken')
+    const { formatDate } = useDateFormat()
+    const { format } = useCurrency()
+    const safeFormatDate = (dateVal: any) => {
+        if (!dateVal) return '-'
+        if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+            const [y, m, day] = dateVal.split('-').map(Number)
+            return formatDate(new Date(y, m - 1, day))
+        }
+        const d = new Date(dateVal)
+        if (isNaN(d.getTime())) return '-'
+        return formatDate(d)
+    }
 
     // Fetch billing details
     const { data: billingData, isLoading, error } = useQuery({
@@ -179,7 +193,7 @@ export function BillingViewPage() {
                             </div>
                             <div className="text-right">
                                 <p className="text-sm text-blue-100">Bill Date</p>
-                                <p className="font-semibold">{new Date(billing.billing_date).toLocaleDateString()}</p>
+                                <p className="font-semibold">{safeFormatDate(billing.billing_date)}</p>
                             </div>
                         </div>
                     </CardHeader>
@@ -193,7 +207,7 @@ export function BillingViewPage() {
                             </div>
                             <div className="text-right">
                                 <span className="text-sm text-muted-foreground">Total Amount</span>
-                                <p className="text-3xl font-bold text-blue-600">৳{Number(billing.total_amount).toFixed(2)}</p>
+                                <p className="text-3xl font-bold text-blue-600">{format(Number(billing.total_amount))}</p>
                             </div>
                         </div>
                     </CardContent>
@@ -237,7 +251,7 @@ export function BillingViewPage() {
                                         <div>
                                             <span className="text-sm text-muted-foreground">Admission Date</span>
                                             <p className="font-semibold">
-                                                {new Date(billing.admission.admission_date).toLocaleDateString()}
+                                                {safeFormatDate(billing.admission.admission_date)}
                                             </p>
                                         </div>
                                     </div>
@@ -287,13 +301,13 @@ export function BillingViewPage() {
                                             <tr key={op.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
                                                 <td className="p-3">{index + 1}</td>
                                                 <td className="p-3">{op.operation_type}</td>
-                                                <td className="p-3">{op.operation_date}</td>
-                                                <td className="p-3 text-right">৳{Number(op.charges).toFixed(2)}</td>
+                                                <td className="p-3">{safeFormatDate(op.operation_date)}</td>
+                                                <td className="p-3 text-right">{format(Number(op.charges))}</td>
                                             </tr>
                                         ))}
                                         <tr className="border-b-2 border-gray-300 dark:border-gray-700 font-semibold">
                                             <td className="p-3" colSpan={3}>Total Operations</td>
-                                            <td className="p-3 text-right">৳{totalOperations.toFixed(2)}</td>
+                                            <td className="p-3 text-right">{format(totalOperations)}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -324,13 +338,13 @@ export function BillingViewPage() {
                                             <tr key={cons.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
                                                 <td className="p-3">{index + 1}</td>
                                                 <td className="p-3">{cons.consultant_name || '-'}</td>
-                                                <td className="p-3">{cons.visit_date}</td>
-                                                <td className="p-3 text-right">৳{Number(cons.fees).toFixed(2)}</td>
+                                                <td className="p-3">{safeFormatDate(cons.visit_date)}</td>
+                                                <td className="p-3 text-right">{format(Number(cons.fees))}</td>
                                             </tr>
                                         ))}
                                         <tr className="border-b-2 border-gray-300 dark:border-gray-700 font-semibold">
                                             <td className="p-3" colSpan={3}>Total Consultants</td>
-                                            <td className="p-3 text-right">৳{totalConsultants.toFixed(2)}</td>
+                                            <td className="p-3 text-right">{format(totalConsultants)}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -364,12 +378,12 @@ export function BillingViewPage() {
                                                 <td className="p-3">{srv.service_name || '-'}</td>
                                                 <td className="p-3">{srv.service_provider}</td>
                                                 <td className="p-3">{srv.service_against}</td>
-                                                <td className="p-3 text-right">৳{Number(srv.amount).toFixed(2)}</td>
+                                                <td className="p-3 text-right">{format(Number(srv.amount))}</td>
                                             </tr>
                                         ))}
                                         <tr className="border-b-2 border-gray-300 dark:border-gray-700 font-semibold">
                                             <td className="p-3" colSpan={4}>Total Services</td>
-                                            <td className="p-3 text-right">৳{totalServices.toFixed(2)}</td>
+                                            <td className="p-3 text-right">{format(totalServices)}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -388,24 +402,24 @@ export function BillingViewPage() {
                             {billing.operations && billing.operations.length > 0 && (
                                 <div className="flex justify-between items-center py-2 border-b">
                                     <span>Operation Types Charges:</span>
-                                    <span className="font-bold">৳{totalOperations.toFixed(2)}</span>
+                                    <span className="font-bold">{format(totalOperations)}</span>
                                 </div>
                             )}
                             {billing.consultants && billing.consultants.length > 0 && (
                                 <div className="flex justify-between items-center py-2 border-b">
                                     <span>Consultant Fees:</span>
-                                    <span className="font-bold">৳{totalConsultants.toFixed(2)}</span>
+                                    <span className="font-bold">{format(totalConsultants)}</span>
                                 </div>
                             )}
                             {billing.services && billing.services.length > 0 && (
                                 <div className="flex justify-between items-center py-2 border-b">
                                     <span>Services Charges:</span>
-                                    <span className="font-bold">৳{totalServices.toFixed(2)}</span>
+                                    <span className="font-bold">{format(totalServices)}</span>
                                 </div>
                             )}
                             <div className="flex justify-between items-center py-2">
                                 <span className="text-lg font-bold">Grand Total:</span>
-                                <span className="text-2xl font-bold text-blue-600">৳{Number(billing.total_amount).toFixed(2)}</span>
+                                <span className="text-2xl font-bold text-blue-600">{format(Number(billing.total_amount))}</span>
                             </div>
                         </div>
                     </CardContent>
