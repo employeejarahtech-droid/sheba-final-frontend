@@ -62,6 +62,8 @@ type OperationType = {
     operation_type: string
     operation_date: string
     charges: number
+    operation_time?: string
+    total_time_period?: string
     created_at?: string
 }
 
@@ -489,6 +491,8 @@ export function PatientBillingPage() {
                 operation_type: op.operation_type,
                 operation_date: op.operation_date,
                 charges: typeof op.charges === 'string' ? parseFloat(op.charges) : (op.charges || 0),
+                operation_time: op.operation_time || '',
+                total_time_period: op.total_time_period || '',
             }))
             setOperations(fetchedOps)
         }
@@ -1936,6 +1940,8 @@ export function PatientBillingPage() {
                                                         <tr className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
                                                             <th className="text-left px-3 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Operation Type</th>
                                                             <th className="text-left px-3 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Date</th>
+                                                            <th className="text-left px-3 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Time</th>
+                                                            <th className="text-left px-3 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Duration</th>
                                                             <th className="text-left px-3 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Created At</th>
                                                             <th className="text-center px-3 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Action</th>
                                                         </tr>
@@ -1945,6 +1951,8 @@ export function PatientBillingPage() {
                                                             <tr key={op.id} className={cn("hover:bg-blue-50/50 dark:hover:bg-blue-950/10 transition-colors", idx % 2 !== 0 ? "bg-gray-50/60 dark:bg-gray-900/20" : "")}>
                                                                 <td className="px-3 py-2.5 font-medium">{op.operation_type}</td>
                                                                 <td className="px-3 py-2.5 text-gray-600 dark:text-gray-400">{safeFormatDate(op.operation_date)}</td>
+                                                                <td className="px-3 py-2.5 text-gray-600 dark:text-gray-400">{op.operation_time || '-'}</td>
+                                                                <td className="px-3 py-2.5 text-gray-600 dark:text-gray-400">{op.total_time_period || '-'}</td>
                                                                 <td className="px-3 py-2.5 text-sm text-muted-foreground">{op.created_at ? safeFormatDate(op.created_at) : '-'}</td>
                                                                 <td className="px-3 py-2.5 text-center">
                                                                     <div className="flex gap-1.5 justify-center">
@@ -1953,7 +1961,7 @@ export function PatientBillingPage() {
                                                                             <button
                                                                                 type="button"
                                                                                 onClick={() => {
-                                                                                    setEditOperation({ id: op.id!, operation_type: op.operation_type, operation_date: op.operation_date, charges: op.charges })
+                                                                                    setEditOperation({ id: op.id!, operation_type: op.operation_type, operation_date: op.operation_date, charges: op.charges, operation_time: op.operation_time, total_time_period: op.total_time_period })
                                                                                     setOpenOperationForm(true)
                                                                                 }}
                                                                                 className="p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-500 hover:text-blue-700 transition-colors"

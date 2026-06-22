@@ -344,6 +344,16 @@ export function DischargedPatientListPage({ page, limit, search, setPage, setSea
                     </button>
                 `
  
+                if (billsDistributed === 0) {
+                    buttons += `
+                        <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/distribute-bill'"
+                                class="inline-flex items-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium shadow transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            Distribute
+                        </button>
+                    `
+                }
+
                 if (hasOverpayment) {
                     buttons += `
                         <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/billing'"

@@ -178,7 +178,7 @@ export const sidebarData: SidebarData = {
             { title: 'All Patients', url: '/dashboard/admission/patients', icon: ListFilter },
             { title: 'Active Patients', url: '/dashboard/admission/patients/active', icon: Activity },
             { title: 'Bill Created', url: '/dashboard/admission/patients/bill-created-list', icon: FilePlus },
-            { title: 'Final Bills', url: '/dashboard/admission/patients/final-bill-created-list', icon: Receipt },
+            { title: 'Final Bill Created', url: '/dashboard/admission/patients/final-bill-created-list', icon: Receipt },
             { title: 'Discharged List', url: '/dashboard/admission/patients/discharged-list', icon: LogOut },
             { title: 'Discharged & Paid', url: '/dashboard/admission/patients/discharged-paid-list', icon: CheckCircle2 },
             { title: 'Discharged & Due', url: '/dashboard/admission/patients/discharged-due-list', icon: AlertCircle },

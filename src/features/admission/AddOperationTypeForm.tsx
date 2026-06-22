@@ -28,6 +28,8 @@ interface AddOperationTypeFormProps {
         operation_type: string;
         operation_date: string;
         charges: number;
+        operation_time?: string;
+        total_time_period?: string;
     } | null;
 }
 
@@ -62,6 +64,8 @@ export function AddOperationTypeForm({ open, setOpen, onAdd, admissionId, editOp
         defaultValues: {
             opType: "",
             opDate: new Date().toISOString().split('T')[0],
+            opTime: "",
+            totalTimePeriod: "",
         },
     });
 
@@ -81,11 +85,15 @@ export function AddOperationTypeForm({ open, setOpen, onAdd, admissionId, editOp
             form.reset({
                 opType: editOperation.operation_type,
                 opDate: editOperation.operation_date,
+                opTime: editOperation.operation_time || "",
+                totalTimePeriod: editOperation.total_time_period || "",
             });
         } else {
             form.reset({
                 opType: "",
                 opDate: new Date().toISOString().split('T')[0],
+                opTime: "",
+                totalTimePeriod: "",
             });
         }
     }, [editOperation, form]);
@@ -194,6 +202,8 @@ export function AddOperationTypeForm({ open, setOpen, onAdd, admissionId, editOp
                 operation_type: data.opType,
                 operation_date: data.opDate,
                 charges: charges,
+                operation_time: data.opTime || null,
+                total_time_period: data.totalTimePeriod || null,
             };
 
             console.log("Saving to API:", payload);
@@ -221,6 +231,8 @@ export function AddOperationTypeForm({ open, setOpen, onAdd, admissionId, editOp
                 operation_type: data.opType,
                 operation_date: data.opDate,
                 charges: charges,
+                operation_time: data.opTime || null,
+                total_time_period: data.totalTimePeriod || null,
             });
 
             // Reset form and close
@@ -306,12 +318,12 @@ export function AddOperationTypeForm({ open, setOpen, onAdd, admissionId, editOp
                                                                 )}
                                                             </SelectContent>
                                                         </Select>
-                                                        {!isLoadingTypes && operationTypes.length === 0 && !showNewTypeInput && (
+                                                        {!isLoadingTypes && !showNewTypeInput && (
                                                             <Button
                                                                 type="button"
                                                                 variant="outline"
                                                                 size="sm"
-                                                                className="w-full"
+                                                                className="w-full mt-2"
                                                                 onClick={() => setShowNewTypeInput(true)}
                                                             >
                                                                 + Create New Operation Type
@@ -393,6 +405,40 @@ export function AddOperationTypeForm({ open, setOpen, onAdd, admissionId, editOp
                                                 </FormItem>
                                             );
                                         }}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="opTime"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Operation Time</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="e.g. 10:30 AM or 14:00"
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="totalTimePeriod"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Total Time Period</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="e.g. 2 hours or 90 mins"
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
                                     />
 
                                     <SheetFooter>
