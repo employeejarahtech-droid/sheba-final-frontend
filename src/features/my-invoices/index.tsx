@@ -733,14 +733,25 @@ export default function MyInvoices({ page, limit, search, statusFilter, from, to
             orderable: false,
             responsivePriority: 1,
             render: (_data: any, _type: string, row: InvoiceItem) => {
-                return `
-                    <div class="flex gap-2">
-                        <a href="/dashboard/outdoor/reception/invoices/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
-                            Print
-                        </a>
-                        <a href="/dashboard/outdoor/reception/due-collection/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 h-8 px-4 py-2">
+                const dueAmount = Number(row.due_amount || 0);
+                const isPaid = dueAmount === 0;
+                let payNowButton = "";
+                if (!isPaid) {
+                    payNowButton = `
+                        <a href="/dashboard/outdoor/reception/due-collection/${row.id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
                             Pay Now
                         </a>
+                    `;
+                }
+
+                return `
+                    <div class="flex gap-2">
+                        <a href="/dashboard/outdoor/reception/invoices/${row.id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+                            Print
+                        </a>
+                        ${payNowButton}
                     </div>
                 `;
             },

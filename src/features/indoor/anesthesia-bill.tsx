@@ -436,31 +436,11 @@ export function AnesthesiaBillPage({
       defaultContent: '',
     },
     {
-      data: 'final_bill',
-      title: `Final Bill (${currencySymbol})`,
-      orderable: true,
-      responsivePriority: 2,
-      render: (d: any) => `<span class="font-medium text-blue-600 dark:text-blue-400">${fmtAmt(d, currencySymbol)}</span>`,
-      defaultContent: '0.00',
-    },
-    {
       data: 'payable_now',
       title: `Payable Now (${currencySymbol})`,
       orderable: true,
       responsivePriority: 1,
       render: (d: any) => `<span class="font-bold text-violet-600 dark:text-violet-400">${fmtAmt(d, currencySymbol)}</span>`,
-      defaultContent: '0.00',
-    },
-    {
-      data: 'due_amount',
-      title: `Due (${currencySymbol})`,
-      orderable: true,
-      responsivePriority: 3,
-      render: (d: any) => {
-        const n = Number(d || 0)
-        const cls = n > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600'
-        return `<span class="font-medium ${cls}">${fmtAmt(d, currencySymbol)}</span>`
-      },
       defaultContent: '0.00',
     },
     {

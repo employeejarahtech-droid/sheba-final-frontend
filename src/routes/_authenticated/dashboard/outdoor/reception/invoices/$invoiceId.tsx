@@ -1,9 +1,7 @@
 
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
-
-
-
+import { useEffect, useRef } from 'react'
 import { amountToWords } from '@/lib/utils'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
@@ -21,6 +19,7 @@ export const Route = createFileRoute(
 function InvoiceDetails() {
     const { invoiceId } = Route.useParams();
     const token = getCookie('accessToken')
+    const hasPrinted = useRef(false);
 
     // Tenant date format (from company settings) — date portion only; time is
     // appended separately to preserve the existing "date + time" display.
@@ -98,6 +97,22 @@ function InvoiceDetails() {
 
     const dueAmount = Number(invoice?.net_amount) - Number(totalPayments);
 
+    // Auto-print only on initial load, not on refresh
+    useEffect(() => {
+        if (invoice && !hasPrinted.current) {
+            const printKey = `invoice-print-${invoiceId}`
+            const alreadyPrinted = sessionStorage.getItem(printKey)
+
+            if (!alreadyPrinted) {
+                hasPrinted.current = true
+                sessionStorage.setItem(printKey, 'true')
+                setTimeout(() => {
+                    window.print()
+                }, 500)
+            }
+        }
+    }, [invoice, invoiceId])
+
     return (
         <>
             {/* ===== Print Styles ===== */}
@@ -135,17 +150,17 @@ function InvoiceDetails() {
             `}</style>
 
             {/* ===== Top Heading ===== */}
-            <AppHeader fixed />
+            <AppHeader fixed className="print:hidden" />
             <Main>
                 {/* Back Button */}
                 <div className="max-w-3xl mx-auto w-full px-8 pt-6 print:hidden">
                     <Button
                         variant="outline"
                         className="mb-4"
-                        onClick={() => window.location.href = '/dashboard/outdoor/reception/invoices/list'}
+                        onClick={() => window.history.back()}
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
-                        Back to List
+                        Back
                     </Button>
                 </div>
 

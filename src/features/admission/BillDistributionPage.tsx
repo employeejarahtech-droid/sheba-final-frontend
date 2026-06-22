@@ -16,7 +16,8 @@ import {
     HandCoins,
     User,
     Receipt,
-    Save
+    Save,
+    Trash2
 } from 'lucide-react'
 import { useCurrency } from '@/hooks/use-currency'
 import { Button } from '@/components/ui/button'
@@ -145,6 +146,14 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
 
     // State for editable less amounts per service
     const [serviceLessAmounts, setServiceLessAmounts] = useState<Record<string, number>>({})
+
+    // State for dynamic custom services added inline
+    const [customRows, setCustomRows] = useState<{
+        tempId: string;
+        clinicServiceId: string;
+        amount: string;
+        notes: string;
+    }[]>([])
 
 
 
@@ -293,6 +302,23 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
         },
         enabled: !!token && !!admissionId,
     })
+
+    // Fetch clinic services list
+    const { data: clinicServicesData } = useQuery({
+        queryKey: ['clinic-services-list'],
+        queryFn: async () => {
+            const res = await fetch(`${API_URL}/api/clinic-services?limit=1000`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (!res.ok) throw new Error('Failed to fetch clinic services')
+            return res.json()
+        },
+        enabled: !!token,
+    })
+
+    const clinicServices = useMemo(() => {
+        return clinicServicesData?.data?.items || clinicServicesData?.data?.rows || []
+    }, [clinicServicesData])
 
     // Helper function to safely get array from data
     const getArray = (data: any) => {
@@ -492,18 +518,101 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
         return map
     }, [matchedDistributions, allBillItems])
 
+    const unmatchedSavedDistributionsItems = useMemo(() => {
+        const matchedIds = new Set(Array.from(distToItemMap.keys()))
+        return distributions
+            .filter(d => !matchedIds.has(d.id) && d.id !== clinicProfitRecord?.id && d.service_provided_by === 'Clinical Service')
+            .map(d => {
+                const providerDisplayName = d.doctor?.doctor_name || d.clinicService?.name || d.provider_name || 'Hospital'
+                return {
+                    id: `saved-unmatched-${d.id}`,
+                    type: 'Service' as const,
+                    service_name: d.notes || d.clinicService?.name || 'Clinic Service',
+                    date: d.created_at?.split('T')[0] || '-',
+                    amount: Number(d.bill_amount) || 0,
+                    provider_type: d.service_provided_by,
+                    provider_name: providerDisplayName,
+                    provider_id: d.provider_id || null,
+                    refId: d.provider_id || '-',
+                    discount: 0,
+                    netAmount: Number(d.bill_amount) || 0,
+                    isSavedUnmatched: true,
+                    distributionId: d.id,
+                    paymentStatus: d.payment_status,
+                    payableAmount: Number(d.final_bill) || 0,
+                    lessAmount: Number(d.less_amount) || 0
+                }
+            })
+    }, [distributions, distToItemMap, clinicProfitRecord])
+
+    const unsavedCustomItems = useMemo(() => {
+        return customRows.map((row) => {
+            const clinicService = clinicServices.find((s: any) => String(s.id) === String(row.clinicServiceId))
+            const serviceName = clinicService ? clinicService.name : ''
+            const amountNum = Number(row.amount) || 0
+            return {
+                id: row.tempId,
+                tempId: row.tempId,
+                type: 'Service' as const,
+                service_name: serviceName,
+                date: '-',
+                amount: amountNum,
+                provider_type: 'Clinical Service' as const,
+                provider_name: 'Hospital',
+                provider_id: row.clinicServiceId ? Number(row.clinicServiceId) : null,
+                refId: row.clinicServiceId || '-',
+                discount: 0,
+                netAmount: amountNum,
+                isUnsavedCustom: true,
+                clinicServiceId: row.clinicServiceId,
+                amountStr: row.amount,
+                notes: row.notes
+            }
+        })
+    }, [customRows, clinicServices])
+
+    const savedCustomServicesTotal = useMemo(() => {
+        return unmatchedSavedDistributionsItems.reduce((sum, item) => sum + item.payableAmount, 0)
+    }, [unmatchedSavedDistributionsItems])
+
+    const displayBillItems = useMemo(() => {
+        const items = [...allBillItems]
+
+        // Append saved unmatched custom clinic services
+        items.push(...unmatchedSavedDistributionsItems)
+
+        // Append unsaved custom clinic services
+        items.push(...unsavedCustomItems)
+
+        return items
+    }, [allBillItems, unmatchedSavedDistributionsItems, unsavedCustomItems])
+
     const totalPayableAmount = useMemo(() => {
-        return allBillItems.reduce((sum, item, index) => {
-            const uniqueKey = `${item.type}-${item.service_name}-${index}`.replace(/\s+/g, '-')
-            const isDistributed = !!matchedDistributions[index]
-            const lessAmount = serviceLessAmounts[uniqueKey] ?? 0
-            const netAmount = Number(item.netAmount) || 0
-            const payableAmount = isDistributed || serviceLessAmounts[uniqueKey] !== undefined
-                ? Math.max(0, netAmount - lessAmount)
-                : 0
-            return sum + payableAmount
+        return displayBillItems.reduce((sum, item) => {
+            if (item.isClinicProfit) {
+                return sum + item.netAmount
+            }
+            if (item.isSavedUnmatched) {
+                return sum + item.payableAmount
+            }
+            if (item.isUnsavedCustom) {
+                return sum + item.netAmount
+            }
+            // For standard items:
+            const idxInAllBillItems = allBillItems.findIndex(bi => bi.id === item.id && bi.type === item.type)
+            if (idxInAllBillItems !== -1) {
+                const uniqueKey = `${item.type}-${item.service_name}-${idxInAllBillItems}`.replace(/\s+/g, '-')
+                const isDistributed = !!matchedDistributions[idxInAllBillItems]
+                const lessAmount = serviceLessAmounts[uniqueKey] ?? 0
+                const netAmount = Number(item.netAmount) || 0
+                const payableAmount = isDistributed || serviceLessAmounts[uniqueKey] !== undefined
+                    ? Math.max(0, netAmount - lessAmount)
+                    : 0
+                return sum + payableAmount
+            }
+            return sum
         }, 0)
-    }, [allBillItems, serviceLessAmounts, matchedDistributions])
+    }, [displayBillItems, allBillItems, serviceLessAmounts, matchedDistributions])
 
     const totalLess = useMemo(() => {
         return Object.values(serviceLessAmounts).reduce((sum, val) => sum + val, 0)
@@ -535,10 +644,13 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
     }, [selectedDistribution, remainingPatientCash])
 
     const retentionProfit = useMemo(() => {
-        if (clinicProfitRecord) return Number(clinicProfitRecord.final_bill || 0)
-        if (!summary) return 0
-        return Number(summary.total_less_amount || 0)
-    }, [clinicProfitRecord, summary])
+        const isSaved = distributions.length > 0
+        if (isSaved) {
+            return clinicProfitRecord ? Number(clinicProfitRecord.final_bill || 0) : 0
+        }
+        const customRowsTotal = unsavedCustomItems.reduce((sum, item) => sum + item.amount, 0)
+        return Math.max(0, totalLess - savedCustomServicesTotal - customRowsTotal)
+    }, [distributions, clinicProfitRecord, totalLess, savedCustomServicesTotal, unsavedCustomItems])
 
     const sumProviderInputs = useMemo(() => {
         return distributions.reduce((sum, d) => sum + (Number(d.pay_now) || 0), 0)
@@ -763,6 +875,23 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                 throw new Error('❌ No billing services found.\nAdd services to the bill first.')
             }
 
+            // Validation 3: Check custom rows
+            for (let i = 0; i < customRows.length; i++) {
+                const row = customRows[i]
+                if (!row.clinicServiceId) {
+                    throw new Error('❌ Please select a clinic service for all added service rows.')
+                }
+                const amt = Number(row.amount) || 0
+                if (amt <= 0) {
+                    throw new Error('❌ Please enter an amount greater than 0 for all added service rows.')
+                }
+            }
+
+            const customRowsTotal = customRows.reduce((sum, r) => sum + (Number(r.amount) || 0), 0)
+            if (customRowsTotal > totalLess) {
+                throw new Error(`❌ Total amount for added services (${format(customRowsTotal)}) cannot exceed the Total Clinic Part (Profit) of ${format(totalLess)}.`)
+            }
+
             // Valid service provider types
             const validProviderTypes = [
                 'Surgeon', 'Anesthetist', 'Assistant', 'Consultant',
@@ -893,18 +1022,73 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                 }
             }
 
+            // Process unsaved custom rows
+            for (let i = 0; i < customRows.length; i++) {
+                const row = customRows[i]
+                const clinicService = clinicServices.find((s: any) => String(s.id) === String(row.clinicServiceId))
+                const serviceName = clinicService ? clinicService.name : 'Clinical Service'
+                const amountNum = Number(row.amount) || 0
+
+                const payload = {
+                    admission_id: Number(admissionId),
+                    final_bill_id: finalBill.id,
+                    service_provided_by: 'Clinical Service',
+                    provider_id: Number(row.clinicServiceId),
+                    bill_amount: amountNum,
+                    less_amount: 0,
+                    pay_now: 0,
+                    notes: row.notes || serviceName,
+                }
+
+                console.log(`✅ Creating custom service distribution for "${serviceName}":`, payload)
+
+                try {
+                    const res = await fetch(`${API_URL}/api/bill-distribution`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                        },
+                        body: JSON.stringify(payload),
+                    })
+
+                    if (res.ok) {
+                        results.push({ success: true, item: serviceName })
+                        console.log(`✅ Success custom row: ${serviceName}`)
+                    } else {
+                        const rawText = await res.text()
+                        console.error(`❌ Failed custom row ${serviceName} (${res.status}):`, rawText)
+                        errors.push({
+                            item: serviceName,
+                            error: `Failed to save custom service: ${rawText}`
+                        })
+                    }
+                } catch (err: any) {
+                    console.error(`❌ Network error for custom row ${serviceName}:`, err)
+                    errors.push({
+                        item: serviceName,
+                        error: err.message || 'Network error',
+                    })
+                }
+            }
+
             // If there's clinic profit, also save it
             const isClinicAlreadyDistributed = allDistributions.some((d: any) =>
                 d.notes === 'Clinic Part (Profit)'
             )
 
-            if (totalLess > 0 && !isClinicAlreadyDistributed) {
+            const remainingClinicProfit = Math.max(0, totalLess - customRowsTotal)
+
+            if (remainingClinicProfit > 0 && !isClinicAlreadyDistributed) {
+                const clinicProfitService = clinicServices.find((s: any) => s.name === 'Clinic Part (Profit)')
+                const clinicProfitId = clinicProfitService?.id || null
+
                 const clinicPayload = {
                     admission_id: Number(admissionId),
                     final_bill_id: finalBill.id,
                     service_provided_by: 'Other',
-                    provider_id: null,
-                    bill_amount: totalLess,
+                    provider_id: clinicProfitId,
+                    bill_amount: remainingClinicProfit,
                     less_amount: 0,
                     pay_now: 0,
                     notes: 'Clinic Part (Profit)',
@@ -987,6 +1171,7 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
             queryClient.invalidateQueries({ queryKey: ['distributions', admissionId] })
             queryClient.invalidateQueries({ queryKey: ['distribution-summary', admissionId] })
             setServiceLessAmounts({})
+            setCustomRows([])
         },
         onError: (error: Error) => {
             toast.error(error.message || 'Failed to save distributions', {
@@ -1440,7 +1625,16 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                                 <div className="bg-muted px-4 py-3 border-b flex justify-between items-center">
                                     <h3 className="text-sm font-semibold">All Services from Final Bill</h3>
                                     <span className="text-xs text-muted-foreground">
-                                        {allBillItems.filter((item, idx) => matchedDistributions[idx] || (Number(item.netAmount) || 0) <= 0).length} / {allBillItems.length} Distributed
+                                        {displayBillItems.filter((item) => {
+                                            if (item.isClinicProfit) return !!clinicProfitRecord
+                                            if (item.isSavedUnmatched) return true
+                                            if (item.isUnsavedCustom) return false
+                                            const idxInAllBillItems = allBillItems.findIndex(bi => bi.id === item.id && bi.type === item.type)
+                                            if (idxInAllBillItems !== -1) {
+                                                return !!matchedDistributions[idxInAllBillItems] || Number(item.netAmount) <= 0
+                                            }
+                                            return false
+                                        }).length} / {displayBillItems.length} Distributed
                                     </span>
                                 </div>
                                 <div className="min-w-[800px] overflow-x-auto">
@@ -1457,16 +1651,37 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
 
                                     {/* Grid Body */}
                                     <div className="divide-y divide-border">
-                                        {allBillItems.map((item, index) => {
-                                            const uniqueKey = `${item.type}-${item.service_name}-${index}`.replace(/\s+/g, '-')
-                                            const lessAmount = serviceLessAmounts[uniqueKey] ?? 0
+                                        {displayBillItems.map((item, index) => {
+                                            const isStandardItem = index < allBillItems.length
+                                            const uniqueKey = item.isUnsavedCustom
+                                                ? item.tempId
+                                                : item.isSavedUnmatched
+                                                    ? item.id
+                                                    : `${item.type}-${item.service_name}-${index}`.replace(/\s+/g, '-')
+
+                                            const lessAmount = (item.isClinicProfit || item.isSavedUnmatched || item.isUnsavedCustom)
+                                                ? 0
+                                                : (serviceLessAmounts[uniqueKey] ?? 0)
+
                                             const netAmount = Number(item.netAmount) || 0
 
-                                            const isDistributed = !!matchedDistributions[index] || netAmount <= 0
+                                            const isDistributed = item.isClinicProfit
+                                                ? !!clinicProfitRecord
+                                                : item.isSavedUnmatched
+                                                    ? true
+                                                    : item.isUnsavedCustom
+                                                        ? false
+                                                        : (isStandardItem ? (!!matchedDistributions[index] || netAmount <= 0) : false)
 
-                                            const payableAmount = isDistributed || serviceLessAmounts[uniqueKey] !== undefined
-                                                ? Math.max(0, netAmount - lessAmount)
-                                                : 0
+                                            const payableAmount = item.isClinicProfit
+                                                ? netAmount
+                                                : item.isSavedUnmatched
+                                                    ? item.payableAmount
+                                                    : item.isUnsavedCustom
+                                                        ? netAmount
+                                                        : (isDistributed || serviceLessAmounts[uniqueKey] !== undefined
+                                                            ? Math.max(0, netAmount - lessAmount)
+                                                            : 0)
 
                                             return (
                                                 <div
@@ -1484,35 +1699,94 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                                                             item.type === 'Surgeon' && "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-300 dark:border-green-800/30",
                                                             item.type === 'Assistant' && "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/30 dark:text-orange-300 dark:border-orange-800/30",
                                                             item.type === 'Bed Charges' && "bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-950/30 dark:text-teal-300 dark:border-teal-800/30",
-                                                            item.type === 'Service' && "bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950/30 dark:text-pink-300 dark:border-pink-800/30",
+                                                            item.type === 'Service' && !item.isClinicProfit && "bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950/30 dark:text-pink-300 dark:border-pink-800/30",
+                                                            item.isClinicProfit && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-800/30",
                                                             item.type === 'Outdoor Bill' && "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-950/30 dark:text-gray-300 dark:border-gray-800/30",
                                                             item.type === 'Anesthesiologist' && "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-300 dark:border-rose-800/30"
                                                         )}>
-                                                            {item.type === 'Service' ? 'Clinical Service' : item.type}
+                                                            {item.isClinicProfit ? 'Clinic Profit' : (item.type === 'Service' ? 'Clinical Service' : item.type)}
                                                         </span>
                                                         <span className="text-[10px] text-muted-foreground font-mono">
                                                             #{item.refId}
                                                         </span>
                                                     </div>
                                                     <div className="col-span-3">
-                                                        <p className="font-medium text-sm truncate" title={item.service_name}>{item.service_name}</p>
-                                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground mt-0.5">
-                                                            <span>{item.date}</span>
-                                                            {item.discount > 0 && (
-                                                                <span className="text-red-500 font-medium dark:text-red-400">
-                                                                    (Gross: {format(Number(item.amount) || 0)} • Disc: -{format(item.discount)})
-                                                                </span>
-                                                            )}
-                                                        </div>
+                                                        {item.isUnsavedCustom ? (
+                                                            <Select
+                                                                value={item.clinicServiceId}
+                                                                onValueChange={(val) => {
+                                                                    setCustomRows(prev => prev.map(row => 
+                                                                        row.tempId === item.tempId ? { ...row, clinicServiceId: val } : row
+                                                                    ))
+                                                                }}
+                                                            >
+                                                                <SelectTrigger className="w-full h-8 text-sm">
+                                                                    <SelectValue placeholder="Select Clinic Service" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {clinicServices.filter((s: any) => s.name !== 'Clinic Part (Profit)').map((s: any) => (
+                                                                        <SelectItem key={s.id} value={String(s.id)}>
+                                                                            {s.name}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        ) : (
+                                                            <>
+                                                                <p className="font-medium text-sm truncate" title={item.service_name}>{item.service_name}</p>
+                                                                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground mt-0.5">
+                                                                    <span>{item.date}</span>
+                                                                    {item.discount > 0 && (
+                                                                        <span className="text-red-500 font-medium dark:text-red-400">
+                                                                            (Gross: {format(Number(item.amount) || 0)} • Disc: -{format(item.discount)})
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </>
+                                                        )}
                                                     </div>
                                                     <div className="col-span-2">
-                                                        <p className="text-sm font-medium truncate" title={item.provider_name}>{item.provider_name}</p>
+                                                        {item.isUnsavedCustom ? (
+                                                            <Input
+                                                                type="text"
+                                                                className="w-full h-8 text-sm border-muted focus-visible:ring-1"
+                                                                value={item.notes}
+                                                                onChange={(e) => {
+                                                                    const val = e.target.value
+                                                                    setCustomRows(prev => prev.map(row => 
+                                                                        row.tempId === item.tempId ? { ...row, notes: val } : row
+                                                                    ))
+                                                                }}
+                                                                placeholder="Enter Note"
+                                                            />
+                                                        ) : (
+                                                            <p className="text-sm font-medium truncate" title={item.provider_name}>{item.provider_name}</p>
+                                                        )}
                                                     </div>
                                                     <div className="col-span-1 text-right font-medium">
-                                                        <p>{format(netAmount)}</p>
+                                                        {item.isUnsavedCustom ? (
+                                                            <Input
+                                                                type="number"
+                                                                min="0"
+                                                                step="0.01"
+                                                                className="w-full h-8 text-right text-sm border-muted focus-visible:ring-1"
+                                                                value={item.amountStr}
+                                                                onChange={(e) => {
+                                                                    const val = e.target.value
+                                                                    setCustomRows(prev => prev.map(row => 
+                                                                        row.tempId === item.tempId ? { ...row, amount: val } : row
+                                                                    ))
+                                                                }}
+                                                                placeholder="Amount"
+                                                            />
+                                                        ) : (
+                                                            <p>{format(netAmount)}</p>
+                                                        )}
                                                     </div>
-                                                    <div className="col-span-2">
-                                                        {isDistributed ? (
+                                                    <div className="col-span-2 text-right">
+                                                        {item.isClinicProfit || item.isSavedUnmatched || item.isUnsavedCustom ? (
+                                                            <span className="text-muted-foreground text-right pr-4 font-medium">—</span>
+                                                        ) : isDistributed ? (
                                                             <p className="text-sm text-muted-foreground text-right pr-4 font-mono">
                                                                 {lessAmount > 0 ? `-${format(lessAmount)}` : '0.00'}
                                                             </p>
@@ -1541,13 +1815,26 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                                                     <div className="col-span-1 text-right">
                                                         <p className={cn(
                                                             "font-bold text-sm",
-                                                            payableAmount < netAmount ? "text-orange-600 dark:text-orange-400" : "text-green-600 dark:text-green-400"
+                                                            payableAmount < netAmount && !item.isClinicProfit && !item.isSavedUnmatched && !item.isUnsavedCustom
+                                                                ? "text-orange-600 dark:text-orange-400"
+                                                                : "text-green-600 dark:text-green-400"
                                                         )}>
                                                             {format(payableAmount)}
                                                         </p>
                                                     </div>
                                                     <div className="col-span-1 flex justify-center">
-                                                        {isDistributed ? (
+                                                        {item.isUnsavedCustom ? (
+                                                            <Button
+                                                                size="icon"
+                                                                variant="ghost"
+                                                                className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
+                                                                onClick={() => {
+                                                                    setCustomRows(prev => prev.filter(row => row.tempId !== item.tempId))
+                                                                }}
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </Button>
+                                                        ) : isDistributed ? (
                                                             <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 dark:bg-green-950/30 dark:text-green-300 dark:border-green-800/30">
                                                                 <CheckCircle className="w-3 h-3" />
                                                                 Done
@@ -1570,20 +1857,47 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                                             <div className="col-span-7 text-right text-muted-foreground font-bold">Total Bill:</div>
                                             <div className="col-span-1 text-right font-bold">{format(totalBillAmount)}</div>
                                             <div className="col-span-2 text-right font-bold text-red-600 dark:text-red-400">
-                                                -{format(totalLess)}
+                                                -{format(retentionProfit)}
                                             </div>
                                             <div className="col-span-1 text-right font-bold text-green-600 dark:text-green-400">
                                                 {format(totalPayableAmount)}
                                             </div>
                                             <div className="col-span-1 text-center text-xs text-muted-foreground">
-                                                {allBillItems.filter((item, idx) => matchedDistributions[idx] || (Number(item.netAmount) || 0) <= 0).length} / {allBillItems.length}
+                                                {displayBillItems.filter((item) => {
+                                                    if (item.isClinicProfit) return !!clinicProfitRecord
+                                                    if (item.isSavedUnmatched) return true
+                                                    if (item.isUnsavedCustom) return false
+                                                    const idxInAllBillItems = allBillItems.findIndex(bi => bi.id === item.id && bi.type === item.type)
+                                                    if (idxInAllBillItems !== -1) {
+                                                        return !!matchedDistributions[idxInAllBillItems] || Number(item.netAmount) <= 0
+                                                    }
+                                                    return false
+                                                }).length} / {displayBillItems.length}
                                             </div>
                                         </div>
                                         {totalLess > 0 && (
-                                            <div className="border-t border-green-100 dark:border-green-900/30 p-3 text-center bg-green-50/30 dark:bg-green-950/10">
-                                                <p className="text-xs text-green-700 dark:text-green-300 font-semibold flex items-center justify-center gap-1">
+                                            <div className="border-t border-green-100 dark:border-green-900/30 p-3 flex items-center justify-between bg-green-50/30 dark:bg-green-950/10 px-4">
+                                                <p className="text-xs text-green-700 dark:text-green-300 font-semibold flex items-center gap-1">
                                                     <CheckCircle className="w-3.5 h-3.5" /> Total Clinic Part (Profit): {format(totalLess)}
                                                 </p>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="h-7 text-xs border-green-300 hover:bg-green-100/50 dark:hover:bg-green-950/50 text-green-700 dark:text-green-300 font-semibold"
+                                                    onClick={() => {
+                                                        setCustomRows(prev => [
+                                                            ...prev,
+                                                            {
+                                                                tempId: `custom-row-${Date.now()}-${Math.random()}`,
+                                                                clinicServiceId: '',
+                                                                amount: '',
+                                                                notes: ''
+                                                            }
+                                                        ])
+                                                    }}
+                                                >
+                                                    <Plus className="w-3.5 h-3.5 mr-1" /> Add Service
+                                                </Button>
                                             </div>
                                         )}
                                     </div>

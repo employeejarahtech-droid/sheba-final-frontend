@@ -278,6 +278,7 @@ import { Route as AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRouteImp
 import { Route as AuthenticatedDashboardIndoorMasterServicesEditIdRouteImport } from './routes/_authenticated/dashboard/indoor/master/services/edit/$id'
 import { Route as AuthenticatedDashboardEcgAllEditBuilderIdRouteImport } from './routes/_authenticated/dashboard/ecg/all/edit/builder/$id'
 import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/print/$step'
+import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId'
 import { Route as AuthenticatedDashboardPathologyImmunologyAllEditIdIndexRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/all/edit/[$id]/index'
 import { Route as AuthenticatedDashboardPathologyHormoneAllEditIdIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hormone/all/edit/[$id]/index'
 import { Route as AuthenticatedDashboardPathologyHematologyAllEditIdIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/all/edit/[$id]/index'
@@ -1955,6 +1956,14 @@ const AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute =
       getParentRoute: () => AuthenticatedRouteRoute,
     } as any,
   )
+const AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute =
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId',
+      path: '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardPathologyImmunologyAllEditIdIndexRoute =
   AuthenticatedDashboardPathologyImmunologyAllEditIdIndexRouteImport.update({
     id: '/dashboard/pathology/immunology/all/edit/$id/',
@@ -2200,6 +2209,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/payroll/attendance/$staffId': typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   '/dashboard/payroll/salary/$staffId': typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
   '/dashboard/admission/new-admission/index/bak': typeof AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute
+  '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute
   '/dashboard/admission/patients/$admissionId/print/$step': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
   '/dashboard/ecg/all/edit/builder/$id': typeof AuthenticatedDashboardEcgAllEditBuilderIdRoute
   '/dashboard/indoor/master/services/edit/$id': typeof AuthenticatedDashboardIndoorMasterServicesEditIdRoute
@@ -2470,6 +2480,7 @@ export interface FileRoutesByTo {
   '/dashboard/payroll/attendance/$staffId': typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   '/dashboard/payroll/salary/$staffId': typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
   '/dashboard/admission/new-admission/index/bak': typeof AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute
+  '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute
   '/dashboard/admission/patients/$admissionId/print/$step': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
   '/dashboard/ecg/all/edit/builder/$id': typeof AuthenticatedDashboardEcgAllEditBuilderIdRoute
   '/dashboard/indoor/master/services/edit/$id': typeof AuthenticatedDashboardIndoorMasterServicesEditIdRoute
@@ -2747,6 +2758,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/payroll/attendance/$staffId/': typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   '/_authenticated/dashboard/payroll/salary/$staffId/': typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
   '/_authenticated/dashboard/admission/new-admission/index/bak': typeof AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute
+  '/_authenticated/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute
   '/_authenticated/dashboard/admission/patients/$admissionId/print/$step': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
   '/_authenticated/dashboard/ecg/all/edit/builder/$id': typeof AuthenticatedDashboardEcgAllEditBuilderIdRoute
   '/_authenticated/dashboard/indoor/master/services/edit/$id': typeof AuthenticatedDashboardIndoorMasterServicesEditIdRoute
@@ -3021,6 +3033,7 @@ export interface FileRouteTypes {
     | '/dashboard/payroll/attendance/$staffId'
     | '/dashboard/payroll/salary/$staffId'
     | '/dashboard/admission/new-admission/index/bak'
+    | '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId'
     | '/dashboard/admission/patients/$admissionId/print/$step'
     | '/dashboard/ecg/all/edit/builder/$id'
     | '/dashboard/indoor/master/services/edit/$id'
@@ -3291,6 +3304,7 @@ export interface FileRouteTypes {
     | '/dashboard/payroll/attendance/$staffId'
     | '/dashboard/payroll/salary/$staffId'
     | '/dashboard/admission/new-admission/index/bak'
+    | '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId'
     | '/dashboard/admission/patients/$admissionId/print/$step'
     | '/dashboard/ecg/all/edit/builder/$id'
     | '/dashboard/indoor/master/services/edit/$id'
@@ -3567,6 +3581,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/payroll/attendance/$staffId/'
     | '/_authenticated/dashboard/payroll/salary/$staffId/'
     | '/_authenticated/dashboard/admission/new-admission/index/bak'
+    | '/_authenticated/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId'
     | '/_authenticated/dashboard/admission/patients/$admissionId/print/$step'
     | '/_authenticated/dashboard/ecg/all/edit/builder/$id'
     | '/_authenticated/dashboard/indoor/master/services/edit/$id'
@@ -5536,6 +5551,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId': {
+      id: '/_authenticated/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId'
+      path: '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId'
+      fullPath: '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/pathology/immunology/all/edit/$id/': {
       id: '/_authenticated/dashboard/pathology/immunology/all/edit/$id/'
       path: '/dashboard/pathology/immunology/all/edit/$id'
@@ -5779,6 +5801,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute: typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute: typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
   AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute: typeof AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute
   AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
   AuthenticatedDashboardEcgAllEditBuilderIdRoute: typeof AuthenticatedDashboardEcgAllEditBuilderIdRoute
   AuthenticatedDashboardIndoorMasterServicesEditIdRoute: typeof AuthenticatedDashboardIndoorMasterServicesEditIdRoute
@@ -6164,6 +6187,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute,
   AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute:
     AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute,
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute:
+    AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute,
   AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute:
     AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute,
   AuthenticatedDashboardEcgAllEditBuilderIdRoute:

@@ -1,12 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from '@tanstack/react-router'
-import { Loader2, ArrowLeft, FileText, Building2 } from 'lucide-react'
+import { useMemo } from 'react'
+import { Loader2, ArrowLeft, Printer } from 'lucide-react'
 import { getCookie } from '@/lib/cookies'
 import { useDateFormat } from '@/hooks/use-date-format'
 import { useCurrency } from '@/hooks/use-currency'
 import { Button } from '@/components/ui/button'
+import { amountToWords } from '@/lib/utils'
 
-const API_URL = import.meta.env.VITE_API_URL
+const API_URL = import.meta.env.VITE_API_URL || ''
 
 type BillingData = {
     patient_name: string
@@ -70,7 +72,8 @@ export function BillingPrintPage() {
     const { admissionId } = useParams({ from: '/_authenticated/dashboard/admission/patients/$admissionId/billing-print/' })
     const token = getCookie('accessToken')
     const { formatDate } = useDateFormat()
-    const { format } = useCurrency()
+    const { format, currencySymbol, locale } = useCurrency()
+    
     const safeFormatDate = (dateVal: any) => {
         if (!dateVal) return '-'
         if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
@@ -80,6 +83,11 @@ export function BillingPrintPage() {
         const d = new Date(dateVal)
         if (isNaN(d.getTime())) return '-'
         return formatDate(d)
+    }
+
+    const fmtNum = (val: number | string | null | undefined) => {
+        const n = typeof val === 'string' ? parseFloat(val) : (val ?? 0)
+        return isNaN(n) ? '0.00' : n.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     }
 
     // Fetch admission details
@@ -93,6 +101,19 @@ export function BillingPrintPage() {
             return res.json()
         },
         enabled: !!token && !!admissionId,
+    })
+
+    // Fetch company settings for company name, address and logo
+    const { data: companySettingsData } = useQuery({
+        queryKey: ["company-settings"],
+        queryFn: async () => {
+            const res = await fetch(`${API_URL}/api/company-settings`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) throw new Error("Failed to fetch company settings");
+            return res.json();
+        },
+        enabled: !!token,
     })
 
     // Fetch operations
@@ -210,23 +231,22 @@ export function BillingPrintPage() {
         enabled: !!token && !!admissionId,
     })
 
-    if (admissionLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-        )
-    }
-
     const admission = admissionData?.data as BillingData
+    const companySettings = companySettingsData?.data;
+    const companyLogo = companySettings?.company_logo
+        ? (companySettings.company_logo.startsWith('http') || companySettings.company_logo.startsWith('data:'))
+            ? companySettings.company_logo
+            : `${API_URL}${companySettings.company_logo}`
+        : null;
+    const companyName = companySettings?.company_name || 'Sheba Hospital';
     const operations = operationsData?.data || []
     const consultants = consultantsData?.data || []
     const surgeons = surgeonsData?.data || []
     const assistants = assistantsData?.data || []
     const services = servicesData?.data || []
     const bedBills = bedBillingData?.data || []
-
     const bedCharges = bedChargesData?.data || { total: 0, breakdown: [] }
+
     const totalBedCharges = bedBills.length > 0
         ? bedBills.reduce((sum: number, b: BedBill) => sum + Number(b.total_amount), 0)
         : bedCharges.total
@@ -238,294 +258,296 @@ export function BillingPrintPage() {
     const totalServices = services.reduce((sum: number, s: Service) => sum + Number(s.amount), 0)
     const grandTotal = totalBedCharges + totalOperations + totalConsultants + totalSurgeons + totalAssistants + totalServices
 
-    const handlePrint = () => {
-        window.print()
+    const consolidatedItems = useMemo(() => {
+        const list: {
+            category: string
+            description: string
+            note?: string
+            date?: string
+            qty: number
+            rate: number
+            amount: number
+        }[] = []
+
+        // 1. Bed charges
+        if (bedBills.length > 0) {
+            bedBills.forEach((b: BedBill) => {
+                list.push({
+                    category: 'Bed Charges',
+                    description: `${b.bed_code} (${b.bed_type})`,
+                    date: `${safeFormatDate(b.from_date)} to ${safeFormatDate(b.to_date)}`,
+                    qty: b.days,
+                    rate: Number(b.rate_per_day),
+                    amount: Number(b.total_amount)
+                })
+            })
+        } else if (bedCharges?.breakdown?.length > 0) {
+            bedCharges.breakdown.forEach((b: any) => {
+                list.push({
+                    category: 'Bed Charges',
+                    description: `${b.bed_code} (${b.bed_type})`,
+                    date: `${b.from ? safeFormatDate(b.from.split('T')[0]) : ''} to ${b.to ? safeFormatDate(b.to.split('T')[0]) : ''}`,
+                    qty: b.days,
+                    rate: Number(b.daily_rate),
+                    amount: Number(b.charges)
+                })
+            })
+        }
+
+        // 2. Operations
+        operations.forEach((op: Operation) => {
+            list.push({
+                category: 'Operation',
+                description: op.operation_type,
+                date: safeFormatDate(op.operation_date),
+                qty: 1,
+                rate: Number(op.charges),
+                amount: Number(op.charges)
+            })
+        })
+
+        // 3. Consultants
+        consultants.forEach((c: Consultant) => {
+            list.push({
+                category: 'Consultant',
+                description: c.consultant_name,
+                date: safeFormatDate(c.visit_date),
+                qty: 1,
+                rate: Number(c.fees),
+                amount: Number(c.fees)
+            })
+        })
+
+        // 4. Surgeons
+        surgeons.forEach((s: Surgeon) => {
+            list.push({
+                category: 'Surgeon',
+                description: s.surgeon_name,
+                date: safeFormatDate(s.operation_date),
+                qty: 1,
+                rate: Number(s.fees),
+                amount: Number(s.fees)
+            })
+        })
+
+        // 5. Assistants
+        assistants.forEach((a: Assistant) => {
+            list.push({
+                category: 'Assistant',
+                description: a.assistant_name,
+                date: safeFormatDate(a.operation_date),
+                qty: 1,
+                rate: Number(a.fees),
+                amount: Number(a.fees)
+            })
+        })
+
+        // 6. Clinical Services
+        services.forEach((s: Service) => {
+            list.push({
+                category: 'Clinical Service',
+                description: s.service_name,
+                note: s.note,
+                qty: 1,
+                rate: Number(s.amount),
+                amount: Number(s.amount)
+            })
+        })
+
+        return list
+    }, [bedBills, bedCharges, operations, consultants, surgeons, assistants, services])
+
+    if (admissionLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        )
     }
 
     return (
-        <div className="min-h-screen  p-0">
-            <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 print:shadow-none print:rounded-none">
-                {/* Print Button - Hidden when printing */}
-                <div className="flex justify-between items-center mb-6 print:hidden">
-                    <Button variant="outline" onClick={() => window.close()}>
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Back
-                    </Button>
-                    <Button onClick={handlePrint}>
-                        <FileText className="h-4 w-4 mr-2" />
-                        Print
-                    </Button>
-                </div>
+        <div className="invoice-print-area max-w-3xl mx-auto w-full p-8 bg-white mt-10 print:mt-0">
+            <style>{`
+              .bg-row-blue { background-color: #cfd2d8ff !important; }
+              @media print {
+                .bg-row-blue { background-color: #cfd2d8ff !important; }
+                * {
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                }
+                @page {
+                    size: A4 portrait;
+                    margin: 12mm;
+                }
+                html, body {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    background: #fff !important;
+                }
+                /* Hide app chrome on print */
+                .print\\:hidden {
+                    display: none !important;
+                }
+                /* Reset layout constraints for printing */
+                .invoice-print-area {
+                    max-width: 100% !important;
+                    width: 100% !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    box-shadow: none !important;
+                }
+                .invoice-print-area table {
+                    width: 100% !important;
+                }
+                /* Avoid breaking rows across pages */
+                tr, td, th {
+                    page-break-inside: avoid;
+                }
+                .border { border-color: oklch(0.929 0.013 255.508); }
+                .border-dashed { border-color: oklch(0.929 0.013 255.508); }
+              }
+            `}</style>
 
-                {/* Header */}
-                <div className="text-center border-b-2 border-blue-600 pb-6 mb-6">
-                    <div className="flex items-center justify-center gap-3 mb-3">
-                        <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-full shadow-lg">
-                            <Building2 className="h-8 w-8 text-white" />
-                        </div>
-                        <div className="text-left">
-                            <h1 className="text-3xl font-bold text-gray-800">Sheba Hospital</h1>
-                            <p className="text-sm text-gray-600">Healthcare Excellence</p>
-                        </div>
-                    </div>
-                    <div className="text-gray-600 text-sm space-y-1">
-                        <p className="font-medium">Providing Quality Healthcare Services</p>
-                    </div>
-                </div>
+            {/* Back & Print Buttons */}
+            <div className="flex justify-between items-center mb-6 print:hidden">
+                <Button variant="outline" size="sm" onClick={() => window.close()}>
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Close
+                </Button>
+                <Button size="sm" onClick={() => window.print()}>
+                    <Printer className="w-4 h-4 mr-2" />
+                    Print
+                </Button>
+            </div>
 
-                {/* Document Title */}
-                <div className="text-center bg-gray-50 rounded-lg py-3 mb-6 border border-gray-200">
-                    <h2 className="text-xl font-bold text-gray-800">Patient Billing Statement</h2>
-                    <p className="text-sm text-gray-600">Admission ID: {admissionId} | Generated: {safeFormatDate(new Date())}</p>
-                </div>
-
-                {/* Patient Information */}
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                    <h2 className="text-lg font-semibold mb-3">Patient Information</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                            <span className="text-gray-600">Name:</span>
-                            <p className="font-medium">{admission?.patient_name || '-'}</p>
-                        </div>
-                        <div>
-                            <span className="text-gray-600">Age/Sex:</span>
-                            <p className="font-medium">{admission?.age || '-'}/{admission?.sex?.toUpperCase() || '-'}</p>
-                        </div>
-                        <div>
-                            <span className="text-gray-600">Phone:</span>
-                            <p className="font-medium">{admission?.phone || '-'}</p>
-                        </div>
-                        <div>
-                            <span className="text-gray-600">Admission Date:</span>
-                            <p className="font-medium">
-                                {admission?.admission_date ? safeFormatDate(admission.admission_date) : '-'}
-                            </p>
-                        </div>
-                        <div>
-                            <span className="text-gray-600">Bed/Cabin:</span>
-                            <p className="font-medium">
-                                {admission?.bedCabin ? `${admission.bedCabin.code} (${admission.bedCabin.type})` : '-'}
-                            </p>
-                        </div>
-                        <div>
-                            <span className="text-gray-600">Doctor:</span>
-                            <p className="font-medium">{admission?.doctor?.doctor_name || '-'}</p>
-                        </div>
-                        <div className="col-span-2">
-                            <span className="text-gray-600">Diagnosis:</span>
-                            <p className="font-medium">{admission?.diagnosis || '-'}</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Charges Table */}
-                <div className="mb-6">
-                    <h2 className="text-lg font-semibold mb-3">Charges Details</h2>
-
-                    {bedBills.length > 0 || bedCharges.breakdown?.length > 0 ? (
-                        <div className="mb-4">
-                            <h3 className="font-medium text-md mb-2 text-blue-600">Bed/Cabin Charges</h3>
-                            <table className="w-full text-sm border-collapse">
-                                <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="border p-2 text-left">Description</th>
-                                        <th className="border p-2 text-center">Days</th>
-                                        <th className="border p-2 text-right">Rate</th>
-                                        <th className="border p-2 text-right">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {bedBills.length > 0 ? (
-                                        bedBills.map((bill: BedBill, idx: number) => (
-                                            <tr key={idx}>
-                                                <td className="border p-2">{bill.bed_code} ({bill.bed_type})</td>
-                                                <td className="border p-2 text-center">{bill.days}</td>
-                                                <td className="border p-2 text-right">{format(Number(bill.rate_per_day))}</td>
-                                                <td className="border p-2 text-right">{format(Number(bill.total_amount))}</td>
-                                            </tr>
-                                        ))
-                                    ) : bedCharges.breakdown?.map((bed: any, idx: number) => (
-                                        <tr key={idx}>
-                                            <td className="border p-2">{bed.bed_code} ({bed.bed_type})</td>
-                                            <td className="border p-2 text-center">{bed.days}</td>
-                                            <td className="border p-2 text-right">{format(Number(bed.daily_rate))}</td>
-                                            <td className="border p-2 text-right">{format(Number(bed.charges))}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+            {/* Header */}
+            <div className="mb-6">
+                <div className='flex justify-center items-center gap-8'>
+                    {companyLogo ? (
+                        <img
+                            src={companyLogo}
+                            alt="Company Logo"
+                            className="w-24 h-24 object-contain"
+                        />
                     ) : null}
 
-                    {operations.length > 0 && (
-                        <div className="mb-4">
-                            <h3 className="font-medium text-md mb-2 text-blue-600">Operation Types</h3>
-                            <table className="w-full text-sm border-collapse">
-                                <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="border p-2 text-left">Operation Type</th>
-                                        <th className="border p-2 text-left">Date</th>
-                                        <th className="border p-2 text-right">Charges</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {operations.map((op: Operation, idx: number) => (
-                                        <tr key={idx}>
-                                            <td className="border p-2">{op.operation_type}</td>
-                                            <td className="border p-2">{safeFormatDate(op.operation_date)}</td>
-                                            <td className="border p-2 text-right">{format(Number(op.charges))}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-
-                    {consultants.length > 0 && (
-                        <div className="mb-4">
-                            <h3 className="font-medium text-md mb-2 text-blue-600">Consultants</h3>
-                            <table className="w-full text-sm border-collapse">
-                                <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="border p-2 text-left">Consultant</th>
-                                        <th className="border p-2 text-left">Visit Date</th>
-                                        <th className="border p-2 text-right">Fees</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {consultants.map((c: Consultant, idx: number) => (
-                                        <tr key={idx}>
-                                            <td className="border p-2">{c.consultant_name}</td>
-                                            <td className="border p-2">{safeFormatDate(c.visit_date)}</td>
-                                            <td className="border p-2 text-right">{format(Number(c.fees))}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-
-                    {surgeons.length > 0 && (
-                        <div className="mb-4">
-                            <h3 className="font-medium text-md mb-2 text-blue-600">Surgeons</h3>
-                            <table className="w-full text-sm border-collapse">
-                                <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="border p-2 text-left">Surgeon</th>
-                                        <th className="border p-2 text-left">Operation Date</th>
-                                        <th className="border p-2 text-right">Fees</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {surgeons.map((s: Surgeon, idx: number) => (
-                                        <tr key={idx}>
-                                            <td className="border p-2">{s.surgeon_name}</td>
-                                            <td className="border p-2">{safeFormatDate(s.operation_date)}</td>
-                                            <td className="border p-2 text-right">{format(Number(s.fees))}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-
-                    {assistants.length > 0 && (
-                        <div className="mb-4">
-                            <h3 className="font-medium text-md mb-2 text-blue-600">Assistants</h3>
-                            <table className="w-full text-sm border-collapse">
-                                <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="border p-2 text-left">Assistant</th>
-                                        <th className="border p-2 text-left">Operation Date</th>
-                                        <th className="border p-2 text-right">Fees</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {assistants.map((a: Assistant, idx: number) => (
-                                        <tr key={idx}>
-                                            <td className="border p-2">{a.assistant_name}</td>
-                                            <td className="border p-2">{safeFormatDate(a.operation_date)}</td>
-                                            <td className="border p-2 text-right">{format(Number(a.fees))}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-
-                    {services.length > 0 && (
-                        <div className="mb-4">
-                            <h3 className="font-medium text-md mb-2 text-blue-600">Clinical Services</h3>
-                            <table className="w-full text-sm border-collapse">
-                                <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="border p-2 text-left">Service</th>
-                                        <th className="border p-2 text-left">Note</th>
-                                        <th className="border p-2 text-right">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {services.map((s: Service, idx: number) => (
-                                        <tr key={idx}>
-                                            <td className="border p-2">{s.service_name}</td>
-                                            <td className="border p-2">{s.note || '-'}</td>
-                                            <td className="border p-2 text-right">{format(Number(s.amount))}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </div>
-
-                {/* Summary */}
-                <div className="border-t pt-4">
-                    <h2 className="text-lg font-semibold mb-3">Summary</h2>
-                    <div className="space-y-2 text-sm">
-                        <div className="flex justify-between py-1">
-                            <span>Bed/Cabin Charges:</span>
-                            <span>{format(totalBedCharges)}</span>
-                        </div>
-                        {totalOperations > 0 && (
-                            <div className="flex justify-between py-1">
-                                <span>Operation Types Charges:</span>
-                                <span>{format(totalOperations)}</span>
-                            </div>
-                        )}
-                        {totalConsultants > 0 && (
-                            <div className="flex justify-between py-1">
-                                <span>Consultant Fees:</span>
-                                <span>{format(totalConsultants)}</span>
-                            </div>
-                        )}
-                        {totalSurgeons > 0 && (
-                            <div className="flex justify-between py-1">
-                                <span>Surgeon Fees:</span>
-                                <span>{format(totalSurgeons)}</span>
-                            </div>
-                        )}
-                        {totalAssistants > 0 && (
-                            <div className="flex justify-between py-1">
-                                <span>Assistant Fees:</span>
-                                <span>{format(totalAssistants)}</span>
-                            </div>
-                        )}
-                        {totalServices > 0 && (
-                            <div className="flex justify-between py-1">
-                                <span>Services Charges:</span>
-                                <span>{format(totalServices)}</span>
-                            </div>
-                        )}
-                        <div className="flex justify-between py-2 border-t-2 border-gray-800 font-bold text-lg">
-                            <span>Grand Total:</span>
-                            <span className="text-blue-600">{format(grandTotal)}</span>
-                        </div>
+                    <div className="text-center">
+                        <h1 className="text-2xl font-bold">{companyName}</h1>
+                        <p className="text-sm mt-1 leading-5">
+                            {[companySettings?.address1, companySettings?.address2].filter(Boolean).join(', ')}
+                        </p>
                     </div>
                 </div>
+            </div>
 
-                {/* Footer */}
-                <div className="mt-8 pt-4 border-t text-center text-sm text-gray-600">
-                    <p>Generated on {new Date().toLocaleString()}</p>
+            {/* ── Title ──────────────────────────────────────────────────────── */}
+            <h1 className="text-2xl font-bold text-center underline mb-6 tracking-wide uppercase">
+                PRELIMINARY BILLING STATEMENT
+            </h1>
+
+            {/* ── Patient Info Table ──────────────────────────────────────────── */}
+            <table className="w-full text-sm border">
+                <tbody>
+                    <tr className="border">
+                        <td className="border px-2 py-1 w-1/3">
+                            Admission ID: #{admissionId}
+                        </td>
+                        <td className="border px-2 py-1 w-1/3">
+                            Generated Date: {safeFormatDate(new Date())}
+                        </td>
+                        <td className="border px-2 py-1 w-1/3">
+                            Status: Preliminary
+                        </td>
+                    </tr>
+                    <tr className="border">
+                        <td className="border px-2 py-1" colSpan={2}>
+                            Patient Name: <strong>{admission?.patient_name || 'Unknown'}</strong>
+                            {admission?.age && admission?.sex
+                                ? ` — ${admission.age} yrs / ${admission.sex}`
+                                : ''}
+                        </td>
+                        <td className="border px-2 py-1">
+                            Phone: {admission?.phone || 'N/A'}
+                        </td>
+                    </tr>
+                    <tr className="border">
+                        <td className="border px-2 py-1">
+                            Admission Date: {admission?.admission_date ? safeFormatDate(admission.admission_date) : '-'}
+                        </td>
+                        <td className="border px-2 py-1">
+                            Attending Doctor: {admission?.doctor?.doctor_name ? `Dr. ${admission.doctor.doctor_name}` : 'N/A'}
+                        </td>
+                        <td className="border px-2 py-1">
+                            Bed/Cabin: {admission?.bedCabin ? `${admission.bedCabin.code} (${admission.bedCabin.type})` : 'N/A'}
+                        </td>
+                    </tr>
+                    {admission?.diagnosis && (
+                        <tr className="border">
+                            <td className="border px-2 py-1" colSpan={3}>
+                                Diagnosis: {admission.diagnosis}
+                            </td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+
+            {/* ── Bill Items Table ────────────────────────────────────────────── */}
+            <table className="w-full text-sm mt-6">
+                <thead>
+                    <tr className="border-t border-b bg-row-blue">
+                        <th className="px-2 py-1 text-left text-xs w-[4%]">#</th>
+                        <th className="px-2 py-1 text-left text-xs w-[20%]">Category</th>
+                        <th className="px-2 py-1 text-left text-xs w-[40%]">Description</th>
+                        <th className="px-2 py-1 text-center text-xs w-[10%]">Qty/Days</th>
+                        <th className="px-2 py-1 text-right text-xs w-[13%]">Rate ({currencySymbol})</th>
+                        <th className="px-2 py-1 text-right text-xs w-[13%]">Amount ({currencySymbol})</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {consolidatedItems.map((item, idx) => (
+                        <tr key={idx} className="border-b border-dashed">
+                            <td className="px-2 py-1 text-xs text-gray-500">{idx + 1}</td>
+                            <td className="px-2 py-1 text-xs font-semibold text-gray-700 uppercase">
+                                {item.category}
+                            </td>
+                            <td className="px-2 py-1 text-xs">
+                                {item.description}
+                                {item.note && <span className="block text-gray-500 mt-0.5">{item.note}</span>}
+                                {item.date && <span className="block text-gray-400 text-[10px] mt-0.5">{item.date}</span>}
+                            </td>
+                            <td className="px-2 py-1 text-center text-xs">{item.qty}</td>
+                            <td className="px-2 py-1 text-right text-xs">{fmtNum(item.rate)}</td>
+                            <td className="px-2 py-1 text-right text-xs font-semibold">{fmtNum(item.amount)}</td>
+                        </tr>
+                    ))}
+                    {/* Grand totals row */}
+                    <tr className="font-bold text-xs border-t-2 border-b border-gray-500">
+                        <td className="px-2 py-1" colSpan={4}>Total</td>
+                        <td className="px-2 py-1 text-right" colSpan={2}>{fmtNum(grandTotal)}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            {/* ── Bill Totals ─────────────────────────────────────────────────── */}
+            <table className="w-full text-sm mt-3">
+                <tbody>
+                    <tr className="border font-bold">
+                        <td className="border px-2 py-1 text-right" colSpan={4}>Grand Total Amount ({currencySymbol}):</td>
+                        <td className="border px-2 py-1 text-right" colSpan={1}>{fmtNum(grandTotal)}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p className="text-sm mt-6 italic">Total In Words: {amountToWords(grandTotal)}</p>
+
+            {/* ── Signature Row ───────────────────────────────────────────────── */}
+            <div className="grid grid-cols-2 mt-32 text-sm">
+                <div>
+                    <p className="border-t border-dashed w-40 pt-1 text-center">Prepared By:</p>
+                </div>
+                <div className="text-right">
+                    <p className="border-t border-dashed w-56 ml-auto pt-1">Authority Signature:</p>
                 </div>
             </div>
         </div>

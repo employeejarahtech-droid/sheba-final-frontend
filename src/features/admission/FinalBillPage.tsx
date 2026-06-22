@@ -244,7 +244,7 @@ export function FinalBillPage({ admissionId }: FinalBillPageProps) {
     const { data: doctorsData } = useQuery({
         queryKey: ['doctors'],
         queryFn: async () => {
-            const res = await fetch(`${API_URL}/api/doctor`, {
+            const res = await fetch(`${API_URL}/api/doctor?limit=1000`, {
                 headers: { Authorization: `Bearer ${token}` },
             })
             if (!res.ok) {
@@ -888,6 +888,15 @@ export function FinalBillPage({ admissionId }: FinalBillPageProps) {
                                         )}
                                     >
                                         {(() => {
+                                            if (isBillSaved && finalBill?.discountDoctor) {
+                                                return (
+                                                    <div className="flex flex-col items-start">
+                                                        <span className="font-medium">
+                                                            Dr. {finalBill.discountDoctor.doctor_name}
+                                                        </span>
+                                                    </div>
+                                                )
+                                            }
                                             const selectedDoctor = doctors.find((d: any) => String(d.id) === selectedDoctorId)
                                             if (!selectedDoctor) return "Select doctor..."
                                             return (

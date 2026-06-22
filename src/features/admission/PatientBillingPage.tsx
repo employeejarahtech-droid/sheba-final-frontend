@@ -6,7 +6,21 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { getCookie } from '@/lib/cookies'
-import { Plus, Trash2, ArrowLeft, Loader2, Save, FileText, Receipt, BedDouble, Eye, Repeat, Pencil, Printer, UserMinus, ChevronRight, CheckCircle2, Circle, ChevronDown, ChevronUp, Calculator, DoorOpen, Users, DollarSign, Zap, LayoutGrid, Bed, Search, AlertCircle, Activity, HeartPulse, UserCheck, Check } from 'lucide-react'
+import { Plus, Trash2, ArrowLeft, Loader2, Save, FileText, Receipt, BedDouble, Eye, Repeat, Pencil, Printer, UserMinus, ChevronRight, CheckCircle2, Circle, ChevronDown, ChevronUp, Calculator, DoorOpen, Users, DollarSign, Zap, LayoutGrid, Bed, Search, AlertCircle, Activity, HeartPulse, UserCheck, Check, GripVertical, ArrowUpDown } from 'lucide-react'
+import {
+    DndContext,
+    closestCenter,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core'
+import {
+    SortableContext,
+    useSortable,
+    verticalListSortingStrategy,
+    arrayMove,
+} from '@dnd-kit/sortable'
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
 import { PageHeader } from '@/components/layout/page-header'
@@ -136,7 +150,7 @@ const billingSchema = z.object({
 })
 
 // Step Wizard Types
-type StepId = 'admission' | 'create-bill' | 'discharge-finalise' | 'distribute' | 'confirm'
+type StepId = 'admission' | 'add-items' | 'create-bill' | 'final-bill' | 'discharge' | 'distribute' | 'balance-distribute' | 'confirm'
 
 type BillingStep = {
     id: StepId
@@ -333,8 +347,11 @@ export function PatientBillingPage() {
     }, [openBedBillingDialog, editBedBilling, admissionData])
 
     const [openFinalBillDialog, setOpenFinalBillDialog] = useState(false)
+    const [isEditingFinalBill, setIsEditingFinalBill] = useState(false)
     const [selectedDoctorId, setSelectedDoctorId] = useState<string>('')
     const [discountNotes, setDiscountNotes] = useState<string>('')
+    const [customRowOrderKeys, setCustomRowOrderKeys] = useState<string[] | null>(null)
+    const [customFinalBillItemsOrder, setCustomFinalBillItemsOrder] = useState<any[] | null>(null)
     const [isDoctorDropdownOpen, setIsDoctorDropdownOpen] = useState(false)
     const [doctorSearchQuery, setDoctorSearchQuery] = useState('')
     const [openDischargeDialog, setOpenDischargeDialog] = useState(false)
@@ -1325,6 +1342,39 @@ export function PatientBillingPage() {
     const gridDiscount = billGridRows.reduce((sum, r) => sum + (Number(rowDiscounts[r.key]) || 0), 0)
     const gridNet = Math.max(0, gridGross - gridDiscount)
 
+    const finalBillGross = useMemo(() => {
+        if (!finalBill?.items) return 0
+        return finalBill.items.reduce((sum: number, it: any) => sum + Number(it.total_amount), 0)
+    }, [finalBill])
+
+    const finalBillDiscount = useMemo(() => {
+        if (!finalBill?.items) return 0
+        return finalBill.items.reduce((sum: number, it: any) => sum + (Number(rowDiscounts[it.id]) || 0), 0)
+    }, [finalBill, rowDiscounts])
+
+    const finalBillNetVal = Math.max(0, finalBillGross - finalBillDiscount)
+
+    const sortedBillGridRows = useMemo(() => {
+        if (!customRowOrderKeys) return billGridRows
+        const keyToIndex = new Map(customRowOrderKeys.map((key, i) => [key, i]))
+        return [...billGridRows].sort((a, b) => {
+            const idxA = keyToIndex.has(a.key) ? keyToIndex.get(a.key)! : 9999
+            const idxB = keyToIndex.has(b.key) ? keyToIndex.get(b.key)! : 9999
+            return idxA - idxB
+        })
+    }, [billGridRows, customRowOrderKeys])
+
+    const displayFinalBillItems = useMemo(() => {
+        if (!finalBill?.items) return []
+        if (!customFinalBillItemsOrder) return finalBill.items
+        const idToIndex = new Map(customFinalBillItemsOrder.map((item, i) => [item.id, i]))
+        return [...finalBill.items].sort((a, b) => {
+            const idxA = idToIndex.has(a.id) ? idToIndex.get(a.id)! : 9999
+            const idxB = idToIndex.has(b.id) ? idToIndex.get(b.id)! : 9999
+            return idxA - idxB
+        })
+    }, [finalBill, customFinalBillItemsOrder])
+
 
     // Transactions-card money dialog (advance / payment / refund)
     const [txnDialogMode, setTxnDialogMode] = useState<'advance' | 'payment' | 'refund' | null>(null)
@@ -1345,8 +1395,9 @@ export function PatientBillingPage() {
                 throw new Error(err?.message || 'Failed to create final bill')
             }
 
-            // Step 2: if any per-line discount was entered, map rows → final_bill_items and apply
-            if (gridDiscount <= 0) return
+            // Step 2: if any per-line discount, note, doctor was entered, OR items were reordered, map rows → final_bill_items and apply
+            const hasOrderChanges = customRowOrderKeys !== null
+            if (gridDiscount <= 0 && !discountNotes && !selectedDoctorId && !hasOrderChanges) return
 
             const fbRes = await fetch(`${API_URL}/api/admission/${admissionId}/final-bill`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -1366,11 +1417,20 @@ export function PatientBillingPage() {
                 if (match) item_discounts[match.id] = disc
             })
 
+            const item_order: number[] = []
+            sortedBillGridRows.forEach((row) => {
+                const match = items.find((it: any) =>
+                    it.service_reference_table === row.refTable && Number(it.service_reference_id) === row.refId
+                )
+                if (match) item_order.push(match.id)
+            })
+
             const updateRes = await fetch(`${API_URL}/api/admission/${admissionId}/final-bill`, {
                 method: 'PUT',
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     item_discounts,
+                    item_order,
                     total_discount: gridDiscount,
                     total_discounted_amount: gridNet,
                     due_amount: Math.max(0, gridNet - paidAmount),
@@ -1393,6 +1453,78 @@ export function PatientBillingPage() {
             queryClient.invalidateQueries({ queryKey: ['final-bill', admissionId] })
         },
         onError: (error: Error) => toast.error(error.message || 'Failed to create final bill'),
+    })
+
+    // Update Final Bill mutation - Updates existing final bill item discounts and notes
+    const updateFinalBillMutation = useMutation({
+        mutationFn: async () => {
+            const item_discounts: Record<string, number> = {}
+            if (finalBill?.items) {
+                finalBill.items.forEach((item: any) => {
+                    item_discounts[item.id] = Number(rowDiscounts[item.id]) || 0
+                })
+            }
+
+            const computedTotalDiscount = Object.values(item_discounts).reduce((s, v) => s + v, 0)
+            const computedTotalBillAmount = (finalBill?.items || []).reduce((s: number, it: any) => s + Number(it.total_amount), 0)
+            const computedTotalDiscountedAmount = Math.max(0, computedTotalBillAmount - computedTotalDiscount)
+            const item_order = displayFinalBillItems.map((it: any) => it.id)
+
+            const res = await fetch(`${API_URL}/api/admission/${admissionId}/final-bill`, {
+                method: 'PUT',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    item_discounts,
+                    item_order,
+                    total_discount: computedTotalDiscount,
+                    total_discounted_amount: computedTotalDiscountedAmount,
+                    due_amount: Math.max(0, computedTotalDiscountedAmount - Number(finalBill?.paid_amount || 0)),
+                    notes: discountNotes,
+                    discounted_by_doctor_id: selectedDoctorId ? parseInt(selectedDoctorId) : null,
+                }),
+            })
+            if (!res.ok) {
+                const err = await res.json().catch(() => null)
+                throw new Error(err?.message || 'Failed to update final bill')
+            }
+            return res.json()
+        },
+        onSuccess: () => {
+            toast.success('Final bill updated successfully')
+            setOpenFinalBillDialog(false)
+            setIsEditingFinalBill(false)
+            queryClient.invalidateQueries({ queryKey: ['admission', admissionId] })
+            queryClient.invalidateQueries({ queryKey: ['final-bill', admissionId] })
+        },
+        onError: (error: Error) => toast.error(error.message || 'Failed to update final bill'),
+    })
+
+    // Update Final Bill Order mutation - Updates only the item order/serial
+    const updateFinalBillOrderMutation = useMutation({
+        mutationFn: async () => {
+            const item_order = displayFinalBillItems.map((it: any) => it.id)
+
+            const res = await fetch(`${API_URL}/api/admission/${admissionId}/final-bill`, {
+                method: 'PUT',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    item_order,
+                }),
+            })
+            if (!res.ok) {
+                const err = await res.json().catch(() => null)
+                throw new Error(err?.message || 'Failed to update order')
+            }
+            return res.json()
+        },
+        onSuccess: () => {
+            toast.success('Order updated successfully')
+            setOpenFinalBillDialog(false)
+            setIsEditingFinalBill(false)
+            queryClient.invalidateQueries({ queryKey: ['admission', admissionId] })
+            queryClient.invalidateQueries({ queryKey: ['final-bill', admissionId] })
+        },
+        onError: (error: Error) => toast.error(error.message || 'Failed to update order'),
     })
 
     // Unified money mutation for the Transactions dialog (advance / payment / refund)
@@ -3054,15 +3186,27 @@ export function PatientBillingPage() {
                                             {isCreateBillOpen && (
                                                 <CardContent className="p-4">
                                                     {admissionData?.data?.bill_created === 1 ? (
-                                                        <div className="text-sm text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-950/20 rounded-lg p-3">
-                                                            <p className="font-semibold flex items-center gap-1.5 mb-1">
-                                                                <CheckCircle2 className="h-4 w-4" />
-                                                                Preliminary Bill Created
-                                                            </p>
-                                                            <p className="text-xs text-green-600 dark:text-green-400">
-                                                                Created on {admissionData.data.bill_created_date ? safeFormatDate(admissionData.data.bill_created_date) : 'N/A'}
-                                                                {' '}· Amount: <strong>{format(grandTotal)}</strong>
-                                                            </p>
+                                                        <div className="text-sm text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-950/20 rounded-lg p-3 flex justify-between items-center">
+                                                            <div>
+                                                                <p className="font-semibold flex items-center gap-1.5 mb-1">
+                                                                    <CheckCircle2 className="h-4 w-4" />
+                                                                    Preliminary Bill Created
+                                                                </p>
+                                                                <p className="text-xs text-green-600 dark:text-green-400">
+                                                                    Created on {admissionData.data.bill_created_date ? safeFormatDate(admissionData.data.bill_created_date) : 'N/A'}
+                                                                    {' '}· Amount: <strong>{format(grandTotal)}</strong>
+                                                                </p>
+                                                            </div>
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={handlePrintBilling}
+                                                                className="text-xs border-indigo-300 hover:bg-indigo-100 hover:text-indigo-800 text-indigo-700 dark:border-indigo-800 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-300"
+                                                            >
+                                                                <Printer className="h-3.5 w-3.5 mr-1" />
+                                                                Print
+                                                            </Button>
                                                         </div>
                                                     ) : (
                                                         <div className="space-y-3">
@@ -3153,14 +3297,44 @@ export function PatientBillingPage() {
                                                                     Created on {safeFormatDate(admissionData.data.final_bill_created_date)}
                                                                 </p>
                                                             </div>
-                                                            <Button
-                                                                onClick={() => setOpenFinalBillDialog(true)}
-                                                                variant="outline"
-                                                                className="w-full text-sm h-9"
-                                                            >
-                                                                <Eye className="h-3.5 w-3.5 mr-2" />
-                                                                View Final Bill
-                                                            </Button>
+                                                            <div className="flex gap-2">
+                                                                <Button
+                                                                    onClick={() => {
+                                                                        setIsEditingFinalBill(false)
+                                                                        setOpenFinalBillDialog(true)
+                                                                    }}
+                                                                    variant="outline"
+                                                                    className="flex-1 text-sm h-9"
+                                                                >
+                                                                    <Eye className="h-3.5 w-3.5 mr-2" />
+                                                                    View Final Bill
+                                                                </Button>
+                                                                <Button
+                                                                    onClick={() => {
+                                                                        const initialDiscounts: Record<string, number> = {}
+                                                                        const existingDoctorId = finalBill?.discounted_by_doctor_id
+                                                                            ? String(finalBill.discounted_by_doctor_id)
+                                                                            : ''
+                                                                        const existingNotes = finalBill?.notes || ''
+                                                                        
+                                                                        if (finalBill?.items) {
+                                                                            finalBill.items.forEach((item: any) => {
+                                                                                initialDiscounts[item.id] = Number(item.total_discount) || 0
+                                                                            })
+                                                                        }
+                                                                        setRowDiscounts(initialDiscounts)
+                                                                        setSelectedDoctorId(existingDoctorId)
+                                                                        setDiscountNotes(existingNotes)
+                                                                        setIsEditingFinalBill(true)
+                                                                        setOpenFinalBillDialog(true)
+                                                                    }}
+                                                                    variant="outline"
+                                                                    className="flex-1 text-sm h-9 border-indigo-300 hover:bg-indigo-100 hover:text-indigo-800 text-indigo-700 dark:border-indigo-800 dark:hover:bg-indigo-900/30"
+                                                                >
+                                                                    <Pencil className="h-3.5 w-3.5 mr-2" />
+                                                                    Edit Final Bill
+                                                                </Button>
+                                                            </div>
                                                         </div>
                                                     ) : (
                                                         <div className="space-y-3">
@@ -3175,7 +3349,10 @@ export function PatientBillingPage() {
                                                                 </div>
                                                             )}
                                                             <Button
-                                                                onClick={() => setOpenFinalBillDialog(true)}
+                                                                onClick={() => {
+                                                                    setIsEditingFinalBill(false)
+                                                                    setOpenFinalBillDialog(true)
+                                                                }}
                                                                 disabled={gridGross === 0}
                                                                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm h-9"
                                                             >
@@ -4189,14 +4366,23 @@ export function PatientBillingPage() {
                             </DialogHeader>
 
                             <div className="space-y-3 py-2">
-                                {billGridRows.length === 0 ? (
+                                {(!admissionData?.data?.final_bill_created_date || isEditingFinalBill) && (billGridRows.length > 0 || (finalBill?.items && finalBill.items.length > 0)) && (
+                                    <div className="flex justify-between items-center px-1 py-0.5">
+                                        <span className="text-xs font-semibold text-muted-foreground">
+                                            {(!admissionData?.data?.final_bill_created_date || isEditingFinalBill) ? 'Drag handle next to description to reorder services' : 'Bill Line Items'}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {(admissionData?.data?.final_bill_created_date ? displayFinalBillItems.length : billGridRows.length) === 0 ? (
                                     <div className="text-sm text-muted-foreground bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 text-center">
                                         No billable charges yet. Add services first.
                                     </div>
                                 ) : (
                                     <div className="border rounded-lg overflow-hidden">
                                         <div className="grid grid-cols-12 gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-900/60 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-                                            <div className="col-span-6">Line</div>
+                                            <div className="col-span-1 text-center">SL</div>
+                                            <div className="col-span-5">Line</div>
                                             <div className="col-span-2 text-right">Amount ({currencySymbol})</div>
                                             <div className="col-span-2 text-right">Discount ({currencySymbol})</div>
                                             <div className="col-span-2 text-right">Net ({currencySymbol})</div>
@@ -4204,55 +4390,121 @@ export function PatientBillingPage() {
 
                                         {admissionData?.data?.final_bill_created_date ? (
                                             <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                                                {(finalBill?.items || []).map((it: any) => (
-                                                    <div key={it.id} className="grid grid-cols-12 gap-2 px-3 py-2 items-center text-sm">
-                                                        <div className="col-span-6 truncate" title={it.service_name}>{it.service_name}</div>
-                                                        <div className="col-span-2 text-right">{formatNumber(it.total_amount)}</div>
-                                                        <div className="col-span-2 text-right text-orange-600">{formatNumber(it.total_discount)}</div>
-                                                        <div className="col-span-2 text-right font-semibold">{formatNumber(it.final_amount)}</div>
-                                                    </div>
-                                                ))}
+                                                <DndContext
+                                                    collisionDetection={closestCenter}
+                                                    onDragEnd={(event: DragEndEvent) => {
+                                                        const { active, over } = event
+                                                        if (over && active.id !== over.id) {
+                                                            setCustomFinalBillItemsOrder((prev) => {
+                                                                const items = prev ? [...prev] : [...displayFinalBillItems]
+                                                                const oldIndex = items.findIndex((item) => String(item.id) === String(active.id))
+                                                                const newIndex = items.findIndex((item) => String(item.id) === String(over.id))
+                                                                if (oldIndex !== -1 && newIndex !== -1) {
+                                                                    return arrayMove(items, oldIndex, newIndex)
+                                                                }
+                                                                return items
+                                                            })
+                                                        }
+                                                    }}
+                                                >
+                                                    <SortableContext
+                                                        items={displayFinalBillItems.map(it => String(it.id))}
+                                                        strategy={verticalListSortingStrategy}
+                                                    >
+                                                        {displayFinalBillItems.map((it: any, idx: number) => (
+                                                            <SortableDialogRow
+                                                                key={String(it.id)}
+                                                                id={String(it.id)}
+                                                                idx={idx}
+                                                                label={it.service_name}
+                                                                amount={Number(it.total_amount)}
+                                                                discount={Number(rowDiscounts[it.id]) || 0}
+                                                                onChangeDiscount={
+                                                                    isEditingFinalBill
+                                                                        ? (val) => setRowDiscounts((prev) => ({ ...prev, [it.id]: val }))
+                                                                        : undefined
+                                                                }
+                                                                isPending={updateFinalBillMutation.isPending}
+                                                                isEditable={isEditingFinalBill}
+                                                                formatNumber={formatNumber}
+                                                            />
+                                                        ))}
+                                                    </SortableContext>
+                                                </DndContext>
                                             </div>
                                         ) : (
                                             <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                                                {billGridRows.map((row) => {
-                                                    const disc = Number(rowDiscounts[row.key]) || 0
-                                                    const net = Math.max(0, row.amount - disc)
-                                                    return (
-                                                        <div key={row.key} className="grid grid-cols-12 gap-2 px-3 py-2 items-center text-sm">
-                                                            <div className="col-span-6 truncate" title={row.label}>{row.label}</div>
-                                                            <div className="col-span-2 text-right">{formatNumber(row.amount)}</div>
-                                                            <div className="col-span-2">
-                                                                <Input
-                                                                    type="number"
-                                                                    min={0}
-                                                                    value={disc || ''}
-                                                                    onChange={(e) => setRowDiscounts((prev) => ({ ...prev, [row.key]: Number(e.target.value) || 0 }))}
-                                                                    placeholder="0"
-                                                                    disabled={finalizeWithDiscountMutation.isPending}
-                                                                    className="h-8 text-sm text-right px-2"
-                                                                />
-                                                            </div>
-                                                            <div className="col-span-2 text-right font-semibold">{formatNumber(net)}</div>
-                                                        </div>
-                                                    )
-                                                })}
+                                                <DndContext
+                                                    collisionDetection={closestCenter}
+                                                    onDragEnd={(event: DragEndEvent) => {
+                                                        const { active, over } = event
+                                                        if (over && active.id !== over.id) {
+                                                            setCustomRowOrderKeys((prev) => {
+                                                                const items = prev ? [...prev] : sortedBillGridRows.map(r => r.key)
+                                                                const oldIndex = items.indexOf(String(active.id))
+                                                                const newIndex = items.indexOf(String(over.id))
+                                                                if (oldIndex !== -1 && newIndex !== -1) {
+                                                                    return arrayMove(items, oldIndex, newIndex)
+                                                                }
+                                                                return items
+                                                            })
+                                                        }
+                                                    }}
+                                                >
+                                                    <SortableContext
+                                                        items={sortedBillGridRows.map(row => String(row.key))}
+                                                        strategy={verticalListSortingStrategy}
+                                                    >
+                                                        {sortedBillGridRows.map((row, idx) => (
+                                                            <SortableDialogRow
+                                                                key={String(row.key)}
+                                                                id={String(row.key)}
+                                                                idx={idx}
+                                                                label={row.label}
+                                                                amount={row.amount}
+                                                                discount={Number(rowDiscounts[row.key]) || 0}
+                                                                onChangeDiscount={(val) => setRowDiscounts((prev) => ({ ...prev, [row.key]: val }))}
+                                                                isPending={finalizeWithDiscountMutation.isPending}
+                                                                isEditable={true}
+                                                                formatNumber={formatNumber}
+                                                            />
+                                                        ))}
+                                                    </SortableContext>
+                                                </DndContext>
                                             </div>
                                         )}
 
                                         <div className="grid grid-cols-12 gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-900/60 text-sm font-semibold border-t">
                                             <div className="col-span-6">Total</div>
-                                            <div className="col-span-2 text-right">{formatNumber(admissionData?.data?.final_bill_created_date ? Number(finalBill?.total_bill_amount || 0) : gridGross)}</div>
-                                            <div className="col-span-2 text-right text-orange-600">{formatNumber(admissionData?.data?.final_bill_created_date ? Number(finalBill?.total_discount || 0) : gridDiscount)}</div>
-                                            <div className="col-span-2 text-right text-green-700 dark:text-green-300">{formatNumber(admissionData?.data?.final_bill_created_date ? Number(finalBill?.total_discounted_amount || 0) : gridNet)}</div>
+                                            <div className="col-span-2 text-right">
+                                                {formatNumber(
+                                                    admissionData?.data?.final_bill_created_date
+                                                        ? (isEditingFinalBill ? finalBillGross : Number(finalBill?.total_bill_amount || 0))
+                                                        : gridGross
+                                                )}
+                                            </div>
+                                            <div className="col-span-2 text-right text-orange-600">
+                                                {formatNumber(
+                                                    admissionData?.data?.final_bill_created_date
+                                                        ? (isEditingFinalBill ? finalBillDiscount : Number(finalBill?.total_discount || 0))
+                                                        : gridDiscount
+                                                )}
+                                            </div>
+                                            <div className="col-span-2 text-right text-green-700 dark:text-green-300">
+                                                {formatNumber(
+                                                    admissionData?.data?.final_bill_created_date
+                                                        ? (isEditingFinalBill ? finalBillNetVal : Number(finalBill?.total_discounted_amount || 0))
+                                                        : gridNet
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 )}
 
-                                {!admissionData?.data?.final_bill_created_date && gridDiscount > 0 && (
+                                {(!admissionData?.data?.final_bill_created_date || isEditingFinalBill) && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border p-3 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border-gray-100 dark:border-gray-800 animate-in fade-in duration-200 mt-3">
                                         <div className="space-y-1.5 flex flex-col justify-start">
-                                            <Label htmlFor="auth-doctor" className="text-xs font-semibold">Authorizing Doctor</Label>
+                                            <Label htmlFor="auth-doctor" className="text-xs font-semibold">Authorizing Doctor (Discounted By)</Label>
                                             <Popover open={isDoctorDropdownOpen} onOpenChange={setIsDoctorDropdownOpen}>
                                                 <PopoverTrigger asChild>
                                                     <Button
@@ -4308,10 +4560,10 @@ export function PatientBillingPage() {
                                             </Popover>
                                         </div>
                                         <div className="space-y-1.5">
-                                            <Label htmlFor="disc-notes" className="text-xs font-semibold">Discount Reason / Notes</Label>
+                                            <Label htmlFor="disc-notes" className="text-xs font-semibold">Bill Notes / Remarks</Label>
                                             <Textarea
                                                 id="disc-notes"
-                                                placeholder="Enter note or reason for discount..."
+                                                placeholder="Enter final bill notes or remarks..."
                                                 value={discountNotes}
                                                 onChange={(e) => setDiscountNotes(e.target.value)}
                                                 rows={2}
@@ -4320,26 +4572,87 @@ export function PatientBillingPage() {
                                         </div>
                                     </div>
                                 )}
-
+ 
                                 {admissionData?.data?.final_bill_created_date && (
-                                    <div className="grid grid-cols-2 gap-2 text-xs">
-                                        <div className="flex justify-between p-2 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-100 dark:border-green-900/30">
-                                            <span className="text-muted-foreground">Paid</span>
-                                            <span className="font-semibold text-green-700 dark:text-green-300">{format(Number(finalBill?.paid_amount || 0))}</span>
+                                    <div className="space-y-3">
+                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                            <div className="flex justify-between p-2 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-100 dark:border-green-900/30">
+                                                <span className="text-muted-foreground">Paid</span>
+                                                <span className="font-semibold text-green-700 dark:text-green-300">{format(Number(finalBill?.paid_amount || 0))}</span>
+                                            </div>
+                                            <div className="flex justify-between p-2 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-100 dark:border-orange-900/30">
+                                                <span className="text-muted-foreground">Due</span>
+                                                <span className="font-semibold text-orange-700 dark:text-orange-300">{format(Number(finalBill?.due_amount || 0))}</span>
+                                            </div>
                                         </div>
-                                        <div className="flex justify-between p-2 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-100 dark:border-orange-900/30">
-                                            <span className="text-muted-foreground">Due</span>
-                                            <span className="font-semibold text-orange-700 dark:text-orange-300">{format(Number(finalBill?.due_amount || 0))}</span>
-                                        </div>
+                                        {!isEditingFinalBill && (finalBill?.discountDoctor?.doctor_name || finalBill?.notes) && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border p-3 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border-gray-100 dark:border-gray-800 text-xs mt-3">
+                                                {finalBill?.discountDoctor?.doctor_name && (
+                                                    <div className="space-y-1">
+                                                        <span className="font-semibold text-muted-foreground block">Authorizing Doctor (Discounted By)</span>
+                                                        <p className="font-medium text-gray-800 dark:text-gray-200">Dr. {finalBill.discountDoctor.doctor_name}</p>
+                                                    </div>
+                                                )}
+                                                {finalBill?.notes && (
+                                                    <div className="space-y-1">
+                                                        <span className="font-semibold text-muted-foreground block">Bill Notes / Remarks</span>
+                                                        <p className="font-medium text-gray-800 dark:text-gray-200">{finalBill.notes}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
 
                             <DialogFooter>
-                                <Button variant="outline" onClick={() => setOpenFinalBillDialog(false)} disabled={finalizeWithDiscountMutation.isPending}>
-                                    {admissionData?.data?.final_bill_created_date ? 'Close' : 'Cancel'}
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setOpenFinalBillDialog(false)}
+                                    disabled={finalizeWithDiscountMutation.isPending || updateFinalBillMutation.isPending || updateFinalBillOrderMutation.isPending}
+                                >
+                                    {admissionData?.data?.final_bill_created_date && !isEditingFinalBill ? 'Close' : 'Cancel'}
                                 </Button>
-                                {!admissionData?.data?.final_bill_created_date && (
+                                
+                                {isEditingFinalBill && admissionData?.data?.final_bill_created_date ? (
+                                    <>
+                                        <Button
+                                            onClick={() => updateFinalBillOrderMutation.mutate()}
+                                            disabled={updateFinalBillOrderMutation.isPending || updateFinalBillMutation.isPending}
+                                            variant="outline"
+                                            className="border-indigo-600 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 dark:border-indigo-500 dark:text-indigo-400 dark:hover:bg-indigo-950/30"
+                                        >
+                                            {updateFinalBillOrderMutation.isPending ? (
+                                                <>
+                                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                    Ordering...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <ArrowUpDown className="h-4 w-4 mr-2" />
+                                                    Update Order
+                                                </>
+                                            )}
+                                        </Button>
+                                        <Button
+                                            onClick={() => updateFinalBillMutation.mutate()}
+                                            disabled={updateFinalBillMutation.isPending || updateFinalBillOrderMutation.isPending}
+                                            className="bg-indigo-600 hover:bg-indigo-700"
+                                        >
+                                            {updateFinalBillMutation.isPending ? (
+                                                <>
+                                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                    Updating...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Save className="h-4 w-4 mr-2" />
+                                                    Update Bill
+                                                </>
+                                            )}
+                                        </Button>
+                                    </>
+                                ) : !admissionData?.data?.final_bill_created_date ? (
                                     <Button
                                         onClick={() => finalizeWithDiscountMutation.mutate()}
                                         disabled={gridGross === 0 || finalizeWithDiscountMutation.isPending}
@@ -4357,7 +4670,7 @@ export function PatientBillingPage() {
                                             </>
                                         )}
                                     </Button>
-                                )}
+                                ) : null}
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
@@ -4493,3 +4806,101 @@ export function PatientBillingPage() {
         </>
     )
 }
+
+interface SortableDialogRowProps {
+    id: string
+    idx: number
+    label: string
+    amount: number
+    discount: number
+    onChangeDiscount?: (val: number) => void
+    isPending?: boolean
+    isEditable?: boolean
+    formatNumber: (val: number) => string
+}
+
+function SortableDialogRow({
+    id,
+    idx,
+    label,
+    amount,
+    discount,
+    onChangeDiscount,
+    isPending,
+    isEditable = false,
+    formatNumber,
+}: SortableDialogRowProps) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id })
+
+    const style = {
+        transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+        transition,
+        zIndex: isDragging ? 50 : undefined,
+    }
+
+    const net = amount - discount
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className={cn(
+                "grid grid-cols-12 gap-2 px-3 py-2 text-xs items-center transition-all bg-white dark:bg-slate-950 border-b last:border-b-0",
+                isDragging ? "opacity-50 border-indigo-500 scale-[1.01] bg-indigo-50/10 dark:bg-indigo-950/20" : "hover:bg-slate-50 dark:hover:bg-slate-900/40"
+            )}
+        >
+            <div className="col-span-1 flex items-center justify-center gap-1">
+                {isEditable && (
+                    <button
+                        type="button"
+                        className="cursor-grab text-muted-foreground hover:text-indigo-600 focus:outline-none p-0.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+                        {...attributes}
+                        {...listeners}
+                    >
+                        <GripVertical className="h-3.5 w-3.5" />
+                    </button>
+                )}
+                <span className="font-medium text-slate-500">{idx + 1}</span>
+            </div>
+            
+            <div className="col-span-5 font-medium text-slate-800 dark:text-slate-200 truncate" title={label}>
+                {label}
+            </div>
+            
+            <div className="col-span-2 text-right text-slate-700 dark:text-slate-300">
+                {formatNumber(amount)}
+            </div>
+            
+            <div className="col-span-2 text-right">
+                {isEditable && onChangeDiscount ? (
+                    <Input
+                        type="number"
+                        min={0}
+                        max={amount}
+                        value={discount || ''}
+                        onChange={(e) => {
+                            const val = Math.min(amount, Math.max(0, Number(e.target.value) || 0))
+                            onChangeDiscount(val)
+                        }}
+                        disabled={isPending}
+                        className="h-7 text-right text-xs py-0.5 px-1.5 w-full bg-white dark:bg-slate-950"
+                    />
+                ) : (
+                    <span className="text-orange-600">{formatNumber(discount)}</span>
+                )}
+            </div>
+            
+            <div className="col-span-2 text-right font-medium text-slate-900 dark:text-slate-100">
+                {formatNumber(net)}
+            </div>
+        </div>
+    )
+}
+

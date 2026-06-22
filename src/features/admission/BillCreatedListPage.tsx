@@ -527,7 +527,7 @@ export function BillCreatedListPage({ page, limit, search, setPage, setSearch }:
                 const hasDue = dueAmount > 0
                 const hasOverpayment = dueAmount < 0
                 const hasFinalBill = !!row.finalBill
-
+ 
                 let buttons = `
                     <button onclick="window.location.href='/dashboard/admission/patients/${row.id}'"
                             class="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow transition-colors">
@@ -535,10 +535,10 @@ export function BillCreatedListPage({ page, limit, search, setPage, setSearch }:
                         View
                     </button>
                 `
-
+ 
                 if (!hasFinalBill) {
                     buttons += `
-                        <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/final-bill'"
+                        <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/billing'"
                                 class="inline-flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium shadow transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" x2="12" y1="18" y2="12"/><line x1="9" x2="15" y1="15" y2="15"/></svg>
                             Create Final Bill
@@ -562,7 +562,30 @@ export function BillCreatedListPage({ page, limit, search, setPage, setSearch }:
                     `
                 }
 
-                return `<div class="flex items-center gap-2">${buttons}</div>`
+                buttons += `
+                    <button onclick="window.open('/dashboard/admission/patients/${row.id}/print', '_blank')"
+                            class="inline-flex items-center gap-2 px-3 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-sm font-medium shadow transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                        Admission Paper
+                    </button>
+                    <button onclick="window.open('/dashboard/admission/patients/${row.id}/billing-print', '_blank')"
+                            class="inline-flex items-center gap-2 px-3 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-sm font-medium shadow transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+                        Bill Print
+                    </button>
+                    <button onclick="window.open('/dashboard/admission/patients/${row.id}/final-bill-print', '_blank')"
+                            class="inline-flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8H8"/><path d="M16 12H8"/><path d="M15 16H8"/></svg>
+                        Final Bill Print
+                    </button>
+                    <button onclick="window.open('/dashboard/admission/patients/${row.id}/print/discharged', '_blank')"
+                            class="inline-flex items-center gap-2 px-3 py-2 bg-fuchsia-600 hover:bg-fuchsia-700 text-white rounded-lg text-sm font-medium shadow transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3"/></svg>
+                        Discharge Paper Print
+                    </button>
+                `
+ 
+                return `<div class="flex flex-wrap items-center gap-2 w-[500px]">${buttons}</div>`
             },
         },
     ], [])

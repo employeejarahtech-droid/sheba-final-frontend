@@ -788,20 +788,81 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             orderable: false,
             responsivePriority: 1,
             render: (_data: any, _type: string, row: AdmissionItem) => {
-                return `
-                    <div class="flex items-center gap-2">
-                        <a href="/dashboard/admission/patients/${row.id}/print" 
-                           target="_blank"
-                           class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded transition shadow-sm no-underline">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                                <rect x="6" y="14" width="12" height="8"></rect>
-                            </svg>
-                            Print
-                        </a>
-                    </div>
+                const dueAmount = row.finalBill?.due_amount ? parseFloat(String(row.finalBill.due_amount)) : 0;
+                const hasOverpayment = dueAmount < 0;
+
+                let buttons = `
+                    <button onclick="window.location.href='/dashboard/admission/patients/${row.id}'"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        View
+                    </button>
+                    <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/billing'"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                        Billing
+                    </button>
                 `;
+
+                if (row.discharged == 1 && row.bills_distributed != 1) {
+                    buttons += `
+                        <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/distribute-bill'"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            Distribute
+                        </button>
+                    `;
+                }
+
+                if (hasOverpayment) {
+                    buttons += `
+                        <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/billing'"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded text-xs font-semibold shadow transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+                            Refund
+                        </button>
+                    `;
+                }
+
+                buttons += `
+                    <button onclick="window.open('/dashboard/admission/patients/${row.id}/print', '_blank')"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-slate-600 hover:bg-slate-700 text-white rounded transition shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                        Admission Paper
+                    </button>
+                `;
+
+                if (row.bill_created == 1) {
+                    buttons += `
+                        <button onclick="window.open('/dashboard/admission/patients/${row.id}/billing-print', '_blank')"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-cyan-600 hover:bg-cyan-700 text-white rounded transition shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+                            Bill Print
+                        </button>
+                    `;
+                }
+
+                if (row.final_bill_created == 1) {
+                    buttons += `
+                        <button onclick="window.open('/dashboard/admission/patients/${row.id}/final-bill-print', '_blank')"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded transition shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8H8"/><path d="M16 12H8"/><path d="M15 16H8"/></svg>
+                            Final Bill Print
+                        </button>
+                    `;
+                }
+
+                if (row.discharged == 1) {
+                    buttons += `
+                        <button onclick="window.open('/dashboard/admission/patients/${row.id}/print/discharged', '_blank')"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-fuchsia-600 hover:bg-fuchsia-700 text-white rounded transition shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3"/></svg>
+                            Discharge Paper Print
+                        </button>
+                    `;
+                }
+
+                return `<div class="flex flex-wrap items-center gap-2 w-[500px]">${buttons}</div>`;
             },
             defaultContent: "",
         },

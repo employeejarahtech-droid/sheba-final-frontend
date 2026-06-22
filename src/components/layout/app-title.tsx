@@ -67,7 +67,7 @@ export function AppTitle() {
           asChild
         >
           <Link to="/" onClick={() => setOpenMobile(false)}>
-            <div className="flex aspect-square justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground items-center size-8 shrink-0 group-data-[collapsible=icon]:size-8">
+            <div className="flex aspect-square justify-center rounded-lg text-sidebar-primary-foreground items-center size-8 shrink-0 group-data-[collapsible=icon]:size-8">
               {profileImage ? (
                 <img
                   src={profileImage}

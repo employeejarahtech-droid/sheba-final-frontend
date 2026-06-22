@@ -198,7 +198,7 @@ function AdmissionStepPrintPage() {
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <div className="text-center">
                     <p className="text-red-600 text-lg font-semibold mb-4">Invalid Step Type</p>
-                    <Link to="/dashboard/patients">
+                    <Link to="/dashboard/admission/patients">
                         <Button variant="outline">Back to Admissions</Button>
                     </Link>
                 </div>
@@ -275,7 +275,7 @@ function AdmissionStepPrintPage() {
 
                     {/* Header Buttons */}
                     <div className="print:hidden flex items-center justify-between gap-4 mb-6">
-                        <Link to="/dashboard/patients">
+                        <Link to="/dashboard/admission/patients">
                             <Button variant="outline" size="sm">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
                                 Back to Admissions

@@ -264,7 +264,7 @@ export function FinalBillPrintPage({
                 <tbody>
                     {items.map((item, idx) => (
                         <tr key={item.id} className="border-b border-dashed">
-                            <td className="px-2 py-1 text-xs text-gray-500">{idx + 1}</td>
+                            <td className="px-2 py-1 text-xs text-gray-500">{item.serial_no || idx + 1}</td>
                             <td className="px-2 py-1 text-xs">
                                 <span className="font-semibold text-gray-700 uppercase">
                                     {SERVICE_TYPE_LABELS[item.service_type] || item.service_type}{' '}
