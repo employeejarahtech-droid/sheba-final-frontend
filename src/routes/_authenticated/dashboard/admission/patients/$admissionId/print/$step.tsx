@@ -132,7 +132,26 @@ function AdmissionStepPrintPage() {
         enabled: !!token,
     })
 
+    const { data: companySettings } = useQuery({
+        queryKey: ["company-settings"],
+        queryFn: async () => {
+            const res = await fetch(`${API_URL}/api/company-settings`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) throw new Error("Failed to fetch company settings");
+            const result = await res.json();
+            return result.data;
+        },
+        enabled: !!token,
+    })
+
     const admission = admissionData?.data
+    const companyLogo = companySettings?.company_logo
+        ? (companySettings.company_logo.startsWith('http') || companySettings.company_logo.startsWith('data:'))
+            ? companySettings.company_logo
+            : `${API_URL}${companySettings.company_logo}`
+        : null;
+    const companyName = companySettings?.company_name || 'Sheba Hospital';
 
     // Get step info
     const stepConfig: Record<string, { title: string; description: string; getStatus: () => boolean; getDate: () => string | null; getUser: () => string | null }> = {
@@ -233,10 +252,10 @@ function AdmissionStepPrintPage() {
 
     return (
         <>
-            <AppHeader fixed />
+            <AppHeader fixed className="print:hidden" />
 
             <Main>
-                <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5  print:w-[850px] print-report" style={{ paddingTop: '0px' }}>
+                <div className="invoice-print-area max-w-3xl mx-auto w-full p-8 bg-white mt-10 print:mt-0 shadow-sm print:shadow-none border border-slate-100 print:border-none rounded-lg print:rounded-none">
                     <style>{`
                         .bg-row-blue {
                             background-color: #cfd2d8ff !important;
@@ -250,12 +269,29 @@ function AdmissionStepPrintPage() {
                                 print-color-adjust: exact !important;
                                 color-adjust: exact !important;
                             }
-                            .bg-background {
-                                background-color: #fff;
+                            html, body {
+                                margin: 0 !important;
+                                padding: 0 !important;
+                                background: #fff !important;
                             }
-                            body {
-                                color: #000;
-                                background-color: #fff;
+                            /* Hide app chrome on print */
+                            .print\\:hidden {
+                                display: none !important;
+                            }
+                            /* Reset layout constraints for printing */
+                            .invoice-print-area {
+                                max-width: 100% !important;
+                                width: 100% !important;
+                                margin: 0 !important;
+                                padding: 0 !important;
+                                box-shadow: none !important;
+                            }
+                            .invoice-print-area table {
+                                width: 100% !important;
+                            }
+                            /* Avoid breaking rows across pages */
+                            tr, td, th {
+                                page-break-inside: avoid;
                             }
                             .border {
                                 border-color: oklch(0.929 0.013 255.508);
@@ -263,127 +299,158 @@ function AdmissionStepPrintPage() {
                             .border-dashed {
                                 border-color: oklch(0.929 0.013 255.508);
                             }
-                            .no-print {
-                                display: none !important;
-                            }
                         }
                         @page {
-                            margin: 1cm;
-                            size: A4;
+                            margin: 12mm;
+                            size: A4 portrait;
                         }
                     `}</style>
 
-                    {/* Header Buttons */}
-                    <div className="print:hidden flex items-center justify-between gap-4 mb-6">
-                        <Link to="/dashboard/admission/patients">
-                            <Button variant="outline" size="sm">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Back to Admissions
-                            </Button>
-                        </Link>
-                        <Button variant="outline" size="sm" onClick={() => window.print()}>
-                            <Printer className="h-4 w-4" />
+                    {/* Back & Print Buttons */}
+                    <div className="flex justify-between items-center mb-6 print:hidden">
+                        <Button variant="outline" size="sm" onClick={() => window.history.back()}>
+                            <ArrowLeft className="w-4 h-4 mr-2" />
+                            Back
+                        </Button>
+                        <Button size="sm" onClick={() => window.print()}>
+                            <Printer className="w-4 h-4 mr-2" />
                             Print
                         </Button>
                     </div>
 
                     {/* Header */}
-                    <div className="text-center border-b-2 border-blue-600 pb-6 mb-6">
-                        <div className="flex items-center justify-center gap-3 mb-3">
-                            <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-full shadow-lg">
-                                <Building2 className="h-8 w-8 text-white" />
+                    <div className="mb-6">
+                        <div className='flex justify-center items-center gap-8'>
+                            {companyLogo ? (
+                                <img
+                                    src={companyLogo}
+                                    alt="Company Logo"
+                                    className="w-24 h-24 object-contain"
+                                />
+                            ) : null}
+
+                            <div className="text-center">
+                                <h1 className="text-2xl font-bold text-slate-900">{companyName}</h1>
+                                <p className="text-sm mt-1 leading-5 text-slate-600">
+                                    {[companySettings?.address1, companySettings?.address2].filter(Boolean).join(', ')}
+                                </p>
                             </div>
-                            <div className="text-left">
-                                <h1 className="text-3xl font-bold text-gray-800">Sheba Hospital</h1>
-                                <p className="text-sm text-gray-600">Healthcare Excellence</p>
-                            </div>
-                        </div>
-                        <div className="text-gray-600 text-sm space-y-1">
-                            <p className="font-medium">Providing Quality Healthcare Services</p>
                         </div>
                     </div>
 
                     {/* Title */}
-                    <h1 className="text-xl font-bold text-center underline mb-2 tracking-wide uppercase">
+                    <h2 className="text-xl font-bold text-center underline mb-1 tracking-wide uppercase text-slate-800">
                         {currentStep.title}
-                    </h1>
-                    <p className="text-center text-gray-600 text-sm mb-6">
+                    </h2>
+                    <p className="text-center text-slate-500 text-xs mb-6 uppercase tracking-wider font-semibold">
                         {currentStep.description}
                     </p>
 
-                    {/* Step Status Banner */}
-                    <div className={`mb-6 p-4 rounded-lg border ${isCompleted ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
-                        <div className="flex items-center justify-between">
+                    {/* Verification Status */}
+                    <div className="border border-slate-200 rounded-lg p-4 bg-slate-50/50 mb-6 text-sm">
+                        <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <p className="font-semibold text-lg">
-                                    Status: {isCompleted ? '✅ Completed' : '⏳ Pending'}
-                                </p>
-                                {isCompleted && (
-                                    <p className="text-sm text-gray-600 mt-1">
-                                        Completed on: {formattedDate}
-                                        {stepUser && ` • By: ${stepUser}`}
-                                    </p>
-                                )}
+                                <span className="text-slate-500 block text-xs uppercase tracking-wider font-semibold">Verification Status</span>
+                                <span className="font-bold text-slate-800 text-sm flex items-center gap-1.5 mt-1">
+                                    {isCompleted ? (
+                                        <>
+                                            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                                            Completed
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="w-2 h-2 rounded-full bg-amber-500 inline-block animate-pulse"></span>
+                                            Pending
+                                        </>
+                                    )}
+                                </span>
                             </div>
+                            {isCompleted && (
+                                <div>
+                                    <span className="text-slate-500 block text-xs uppercase tracking-wider font-semibold">Completion Details</span>
+                                    <span className="text-slate-700 block text-xs mt-1">
+                                        Date: <strong>{formattedDate}</strong> {stepUser && <>• By: <strong>{stepUser}</strong></>}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     </div>
 
                     {/* Patient Information Table */}
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Patient Details</h3>
                     <table className="w-full text-sm border mb-6">
                         <tbody>
                             <tr className="border">
-                                <td className="border px-3 py-2 w-1/4">Admission ID : {admission.admission_prefix || `ADM-${admission.id}`}</td>
-                                <td className="border px-3 py-2 w-1/4">Date: {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
-                                <td className="border px-3 py-2 w-1/4">Age: {admission.age || 'N/A'}</td>
+                                <td className="border px-2 py-1 w-1/3">
+                                    Admission ID: <strong>{admission.admission_prefix || `ADM-${admission.id}`}</strong>
+                                </td>
+                                <td className="border px-2 py-1 w-1/3">
+                                    Generated Date: {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                </td>
+                                <td className="border px-2 py-1 w-1/3">
+                                    Patient Status: <strong style={{ color: statusStyle.color }}>{admission.status.charAt(0).toUpperCase() + admission.status.slice(1)}</strong>
+                                </td>
                             </tr>
                             <tr className="border">
-                                <td className="border px-3 py-2" colSpan={2}>Patient Name: {admission.patient_name || 'N/A'}</td>
-                                <td className="border px-3 py-2">Sex: {admission.sex?.toUpperCase() || 'N/A'}</td>
+                                <td className="border px-2 py-1" colSpan={2}>
+                                    Patient Name: <strong>{admission.patient_name || 'N/A'}</strong>
+                                    {admission.age || admission.sex ? ` — ${admission.age ? `${admission.age} yrs` : ''}${admission.age && admission.sex ? ' / ' : ''}${admission.sex ? admission.sex.toUpperCase() : ''}` : ''}
+                                </td>
+                                <td className="border px-2 py-1">
+                                    Phone: {admission.phone || 'N/A'}
+                                </td>
                             </tr>
                             <tr className="border">
-                                <td className="border px-3 py-2">Phone: {admission.phone || 'N/A'}</td>
-                                <td className="border px-3 py-2">Status: <span style={{ background: statusStyle.bg, color: statusStyle.color, padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 'bold' }}>{admission.status.charAt(0).toUpperCase() + admission.status.slice(1)}</span></td>
-                                <td className="border px-3 py-2">Ward: {admission.bedCabin?.ward || 'N/A'}</td>
+                                <td className="border px-2 py-1">
+                                    Bed/Cabin: {bedCabinInfo}
+                                </td>
+                                <td className="border px-2 py-1">
+                                    Ward: {admission.bedCabin?.ward || 'N/A'}
+                                </td>
+                                <td className="border px-2 py-1">
+                                    Attending Doctor: <strong>{doctorName}</strong>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
 
                     {/* Admission Details Table */}
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Admission Details</h3>
                     <table className="w-full text-sm border mb-6">
                         <thead>
                             <tr className="border-t border-b bg-row-blue">
-                                <th className="px-3 py-2 text-left w-[50%]">Detail</th>
-                                <th className="px-3 py-2 text-left w-[50%]">Information</th>
+                                <th className="px-2 py-1 text-left text-xs uppercase w-[50%]">Detail</th>
+                                <th className="px-2 py-1 text-left text-xs uppercase w-[50%]">Information</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr className="border-b border-dashed">
-                                <td className="px-3 py-2">Admission Date and Time</td>
-                                <td className="px-3 py-2">{admissionDateAndTime}</td>
+                                <td className="px-2 py-1 text-xs">Admission Date and Time</td>
+                                <td className="px-2 py-1 text-xs font-semibold">{admissionDateAndTime}</td>
                             </tr>
                             <tr className="border-b border-dashed">
-                                <td className="px-3 py-2">Discharge Date</td>
-                                <td className="px-3 py-2">{dischargeDate}</td>
+                                <td className="px-2 py-1 text-xs">Discharge Date</td>
+                                <td className="px-2 py-1 text-xs font-semibold">{dischargeDate}</td>
                             </tr>
                             <tr className="border-b border-dashed">
-                                <td className="px-3 py-2">Bed/Cabin</td>
-                                <td className="px-3 py-2">{bedCabinInfo}</td>
+                                <td className="px-2 py-1 text-xs">Bed/Cabin Info</td>
+                                <td className="px-2 py-1 text-xs font-semibold">{bedCabinInfo}</td>
                             </tr>
                             <tr className="border-b border-dashed">
-                                <td className="px-3 py-2">Attending Doctor</td>
-                                <td className="px-3 py-2">{doctorName}</td>
+                                <td className="px-2 py-1 text-xs">Attending Doctor</td>
+                                <td className="px-2 py-1 text-xs font-semibold">{doctorName}</td>
                             </tr>
                             {admission.diagnosis && (
                                 <tr className="border-b border-dashed">
-                                    <td className="px-3 py-2">Diagnosis</td>
-                                    <td className="px-3 py-2">{admission.diagnosis}</td>
+                                    <td className="px-2 py-1 text-xs">Diagnosis</td>
+                                    <td className="px-2 py-1 text-xs font-semibold">{admission.diagnosis}</td>
                                 </tr>
                             )}
                             {/* Show bill amount if bill created */}
                             {step === 'bill-created' && admission.total_bill_amount && (
-                                <tr className="border-b border-dashed bg-blue-50">
-                                    <td className="px-3 py-2 font-semibold">Total Bill Amount</td>
-                                    <td className="px-3 py-2 font-semibold text-blue-700">{format(admission.total_bill_amount)}</td>
+                                <tr className="border-b-2 font-bold bg-slate-50">
+                                    <td className="px-2 py-1 text-xs">Total Bill Amount</td>
+                                    <td className="px-2 py-1 text-xs text-slate-900 font-semibold">{format(admission.total_bill_amount)}</td>
                                 </tr>
                             )}
                         </tbody>
@@ -391,41 +458,44 @@ function AdmissionStepPrintPage() {
 
                     {/* Financial Information if final bill */}
                     {(step === 'final-bill' || step === 'payment-completed') && admission.finalBill && (
-                        <table className="w-full text-sm border mb-6">
-                            <thead>
-                                <tr className="border-t border-b bg-row-blue">
-                                    <th className="px-3 py-2 text-left w-[50%]">Financial Detail</th>
-                                    <th className="px-3 py-2 text-left w-[50%]">Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr className="border-b border-dashed">
-                                    <td className="px-3 py-2">Total Amount</td>
-                                    <td className="px-3 py-2">{format(admission.finalBill.total_discounted_amount)}</td>
-                                </tr>
-                                <tr className="border-b border-dashed">
-                                    <td className="px-3 py-2">Paid Amount</td>
-                                    <td className="px-3 py-2">{format(admission.finalBill.paid_amount)}</td>
-                                </tr>
-                                <tr className="border-b border-dashed">
-                                    <td className="px-3 py-2">Due Amount</td>
-                                    <td className="px-3 py-2">{format(admission.finalBill.due_amount)}</td>
-                                </tr>
-                                <tr className="border-b border-dashed">
-                                    <td className="px-3 py-2">Payment Status</td>
-                                    <td className="px-3 py-2">{admission.finalBill.status.charAt(0).toUpperCase() + admission.finalBill.status.slice(1)}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <>
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Financial Summary</h3>
+                            <table className="w-full text-sm border mb-6">
+                                <thead>
+                                    <tr className="border-t border-b bg-row-blue">
+                                        <th className="px-2 py-1 text-left text-xs uppercase w-[50%]">Financial Detail</th>
+                                        <th className="px-2 py-1 text-right text-xs uppercase w-[50%]">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr className="border-b border-dashed">
+                                        <td className="px-2 py-1 text-xs">Total Amount</td>
+                                        <td className="px-2 py-1 text-xs text-right font-semibold">{format(admission.finalBill.total_discounted_amount)}</td>
+                                    </tr>
+                                    <tr className="border-b border-dashed">
+                                        <td className="px-2 py-1 text-xs">Paid Amount</td>
+                                        <td className="px-2 py-1 text-xs text-right font-semibold">{format(admission.finalBill.paid_amount)}</td>
+                                    </tr>
+                                    <tr className="border-b border-dashed">
+                                        <td className="px-2 py-1 text-xs">Due Amount</td>
+                                        <td className="px-2 py-1 text-xs text-right font-semibold">{format(admission.finalBill.due_amount)}</td>
+                                    </tr>
+                                    <tr className="border-b-2 font-bold bg-slate-50">
+                                        <td className="px-2 py-1 text-xs">Payment Status</td>
+                                        <td className="px-2 py-1 text-xs text-right uppercase tracking-wider">{admission.finalBill.status}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </>
                     )}
 
                     {/* Footer Signatures */}
-                    <div className="grid grid-cols-2 text-sm mt-20">
+                    <div className="grid grid-cols-2 text-sm mt-24">
                         <div>
-                            <p className="border-t border-dashed w-40 pt-1 text-center">Processed By:</p>
+                            <p className="border-t border-dashed w-40 pt-1 text-center text-xs">Processed By:</p>
                         </div>
                         <div className="text-right">
-                            <p className="border-t border-dashed w-56 ml-auto pt-1">
+                            <p className="border-t border-dashed w-56 ml-auto pt-1 text-center text-xs">
                                 Authorized By:
                             </p>
                         </div>

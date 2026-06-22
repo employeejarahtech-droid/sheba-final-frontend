@@ -104,14 +104,15 @@ export function BillingPrintPage() {
     })
 
     // Fetch company settings for company name, address and logo
-    const { data: companySettingsData } = useQuery({
+    const { data: companySettings } = useQuery({
         queryKey: ["company-settings"],
         queryFn: async () => {
             const res = await fetch(`${API_URL}/api/company-settings`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!res.ok) throw new Error("Failed to fetch company settings");
-            return res.json();
+            const result = await res.json();
+            return result.data;
         },
         enabled: !!token,
     })
@@ -232,7 +233,6 @@ export function BillingPrintPage() {
     })
 
     const admission = admissionData?.data as BillingData
-    const companySettings = companySettingsData?.data;
     const companyLogo = companySettings?.company_logo
         ? (companySettings.company_logo.startsWith('http') || companySettings.company_logo.startsWith('data:'))
             ? companySettings.company_logo
@@ -366,7 +366,7 @@ export function BillingPrintPage() {
     }
 
     return (
-        <div className="invoice-print-area max-w-3xl mx-auto w-full p-8 bg-white mt-10 print:mt-0">
+        <div className="invoice-print-area max-w-3xl mx-auto w-full p-8 bg-white mt-10 print:mt-0 shadow-sm print:shadow-none border border-slate-100 print:border-none rounded-lg print:rounded-none">
             <style>{`
               .bg-row-blue { background-color: #cfd2d8ff !important; }
               @media print {
