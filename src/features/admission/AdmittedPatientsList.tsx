@@ -141,9 +141,10 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
     const navigate = useNavigate()
     const location = useLocation()
 
+    const cleanPathname = location.pathname.replace(/\/$/, '')
     // Detect status from URL path (/active or /discharged)
-    const pathStatus = location.pathname.endsWith('/active') ? 'active'
-        : location.pathname.endsWith('/discharged') ? 'discharged'
+    const pathStatus = cleanPathname.endsWith('/active') ? 'active'
+        : cleanPathname.endsWith('/discharged') ? 'discharged'
         : ''
     const urlStatus = pathStatus || ""
     const validStatuses = ["active", "discharged", "critical"]
@@ -151,8 +152,8 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
     const [openFilter, setOpenFilter] = useState(false)
 
     // Detect payment filter from URL path (/paid or /due)
-    const pathPaymentFilter = location.pathname.endsWith('/paid') ? 'paid'
-        : location.pathname.endsWith('/due') ? 'due'
+    const pathPaymentFilter = cleanPathname.endsWith('/paid') ? 'paid'
+        : cleanPathname.endsWith('/due') ? 'due'
         : ''
 
     // Sync status filter with URL changes
@@ -163,6 +164,19 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             setStatusFilter("all")
         }
     }, [urlStatus])
+
+    // Set title and description dynamically based on the current active view/filter
+    const viewTitle = cleanPathname.endsWith('/active') ? 'Active Patients'
+        : cleanPathname.endsWith('/discharged') ? 'Discharged Patients'
+        : cleanPathname.endsWith('/paid') ? 'Paid Patients'
+        : cleanPathname.endsWith('/due') ? 'Due Patients'
+        : 'Admitted Patients'
+
+    const viewDescription = cleanPathname.endsWith('/active') ? 'Patient notyet discharged list'
+        : cleanPathname.endsWith('/discharged') ? 'Monitor all discharged patients'
+        : cleanPathname.endsWith('/paid') ? 'List of patients with completed payments'
+        : cleanPathname.endsWith('/due') ? 'List of patients with outstanding final bills'
+        : 'Manage and monitor all admitted patients'
 
     // Advance payment modal state
     const [advancePaymentModal, setAdvancePaymentModal] = useState<{
@@ -563,47 +577,7 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             render: (_data: any, _type: string, row: AdmissionItem) => {
                 return row.created_by_user?.name || '-'
             },
-            defaultContent: "-",
-        },
-        // ── Discharge columns ────────────────────────────────────────────
-        {
-            data: null,
-            title: "Discharge Status",
-            orderable: false,
-            responsivePriority: 6,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
-                // eslint-disable-next-line eqeqeq
-                const isDischarged = row.discharged == 1
-                return isDischarged
-                    ? '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">Yes</span>'
-                    : '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">No</span>'
-            },
-            defaultContent: '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">No</span>',
-        },
-        {
-            data: null,
-            title: "Discharge Date & Time",
-            orderable: false,
-            responsivePriority: 7,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
-                if (!row.discharged_date) return '<span class="text-muted-foreground text-xs">—</span>'
-                const parts = row.discharged_date.split('T')[0].split('-')
-                const dateStr = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : row.discharged_date.split('T')[0]
-                return `<span>${dateStr}</span>`
-            },
-            defaultContent: '<span class="text-muted-foreground text-xs">—</span>',
-        },
-        {
-            data: null,
-            title: "Discharged By",
-            orderable: false,
-            responsivePriority: 7,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
-                return row.discharged_by_user?.name
-                    ? `<span class="text-xs">${row.discharged_by_user.name}</span>`
-                    : '<span class="text-muted-foreground text-xs">—</span>'
-            },
-            defaultContent: '<span class="text-muted-foreground text-xs">—</span>',
+                        defaultContent: "-",
         },
         // ── Bill Created columns ─────────────────────────────────────────
         {
@@ -713,6 +687,46 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             },
             defaultContent: '<span class="text-muted-foreground text-xs">—</span>',
         },
+        // ── Discharge columns ────────────────────────────────────────────
+        {
+            data: null,
+            title: "Discharge Status",
+            orderable: false,
+            responsivePriority: 6,
+            render: (_data: any, _type: string, row: AdmissionItem) => {
+                // eslint-disable-next-line eqeqeq
+                const isDischarged = row.discharged == 1
+                return isDischarged
+                    ? '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">Yes</span>'
+                    : '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">No</span>'
+            },
+            defaultContent: '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">No</span>',
+        },
+        {
+            data: null,
+            title: "Discharge Date & Time",
+            orderable: false,
+            responsivePriority: 7,
+            render: (_data: any, _type: string, row: AdmissionItem) => {
+                if (!row.discharged_date) return '<span class="text-muted-foreground text-xs">—</span>'
+                const parts = row.discharged_date.split('T')[0].split('-')
+                const dateStr = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : row.discharged_date.split('T')[0]
+                return `<span>${dateStr}</span>`
+            },
+            defaultContent: '<span class="text-muted-foreground text-xs">—</span>',
+        },
+        {
+            data: null,
+            title: "Discharged By",
+            orderable: false,
+            responsivePriority: 7,
+            render: (_data: any, _type: string, row: AdmissionItem) => {
+                return row.discharged_by_user?.name
+                    ? `<span class="text-xs">${row.discharged_by_user.name}</span>`
+                    : '<span class="text-muted-foreground text-xs">—</span>'
+            },
+            defaultContent: '<span class="text-muted-foreground text-xs">—</span>',
+        },
         // ── Payment columns ──────────────────────────────────────────────
         {
             data: null,
@@ -767,6 +781,29 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                 return `<span class="px-2 py-1 rounded-full text-xs font-semibold ${statusColors[s] || statusColors.pending}">${label}</span>`
             },
             defaultContent: '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">Pending</span>',
+        },
+        {
+            data: null,
+            title: "Actions",
+            orderable: false,
+            responsivePriority: 1,
+            render: (_data: any, _type: string, row: AdmissionItem) => {
+                return `
+                    <div class="flex items-center gap-2">
+                        <a href="/dashboard/admission/patients/${row.id}/print" 
+                           target="_blank"
+                           class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded transition shadow-sm no-underline">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                                <rect x="6" y="14" width="12" height="8"></rect>
+                            </svg>
+                            Print
+                        </a>
+                    </div>
+                `;
+            },
+            defaultContent: "",
         },
     ], [page, limit])
 
@@ -1060,7 +1097,7 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                 let printUrl = ''
                 if (isCompleted && id) {
                     const stepKey = title.toLowerCase().replace(/\s+/g, '-')
-                    printUrl = `/admission/patients/${id}/print/${stepKey}`
+                    printUrl = `/dashboard/admission/patients/${id}/print/${stepKey}`
                 }
 
                 return `
@@ -1725,10 +1762,10 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                     <div className="flex flex-wrap justify-between items-start gap-4">
                         <div className="">
                             <h1 className="text-2xl font-bold ">
-                                Admitted Patients
+                                {viewTitle}
                             </h1>
                             <p className="">
-                                Manage and monitor all admitted patients
+                                {viewDescription}
                             </p>
                         </div>
                         <Button

@@ -639,6 +639,7 @@ export default function UserInvoices({ page, limit, search, statusFilter, select
             data: "phone",
             title: "Phone",
             orderable: true,
+            className: "dt-head-left dt-body-left",
             responsivePriority: 2,
             defaultContent: "-",
         },

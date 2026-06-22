@@ -4,6 +4,7 @@ import { DataTable } from "@/components/DataTable";
 import { EditBloodForBTCTForm } from '@/features/pathology/hematology/blood-for-bt-ct/_components/EditBloodForBTCTForm';
 import { useState, useEffect } from 'react';
 import { getCookie } from '@/lib/cookies';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
 import { FileText, Droplets, Clock, Users } from 'lucide-react';
@@ -25,6 +26,7 @@ type BTCTItem = {
   id: number;
   invoice_id: number;
   patient_name: string;
+  ref_doctor?: string | null;
   bleeding_time: number | null;
   clotting_time: number | null;
   created_at: string;
@@ -53,6 +55,9 @@ function BloodForBTCT() {
   };
 
   const token = getCookie('accessToken');
+
+  // Tenant date format (from company settings) + 12h time — matches the rest of the app.
+  const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data, isFetching } = useQuery({
     queryKey: ["btct", page, limit, search],
@@ -243,7 +248,7 @@ function BloodForBTCT() {
 
                 ${reportData.test_carried_out_by ? `
                   <div class="mt-4 pt-4 border-t text-sm">
-                    <span class="text-gray-500">Test Carried out by:</span>
+                    <span class="text-gray-500">Test Carried Out By:</span>
                     <span class="font-medium text-gray-800 ml-2">${reportData.test_carried_out_by}</span>
                   </div>
                 ` : ''}
@@ -289,11 +294,7 @@ function BloodForBTCT() {
       orderable: true,
       responsivePriority: 2,
       render: (data: any, _type: string, row: BTCTItem) => {
-        const date = row.created_at ? new Date(row.created_at).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }) : '-';
+        const date = fmtDateTime(row.created_at);
         return `
           <div class="flex items-center gap-2">
             <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
@@ -316,23 +317,30 @@ function BloodForBTCT() {
       defaultContent: "",
     },
     {
+      data: "ref_doctor",
+      title: "Ref. Doctor",
+      defaultContent: "-",
+    },
+    {
       data: "created_at",
       title: "Date",
       orderable: true,
       responsivePriority: 3,
       render: (_data: any, _type: string, row: BTCTItem) => {
-        const iso = row.created_at;
-        const date = new Date(iso);
-
-        const formatted = date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-
-        return `<div>${formatted}</div>`;
+        return `<div>${fmtDateTime(row.created_at)}</div>`;
       },
       defaultContent: "",
+    },
+    {
+      data: null,
+      title: "Actions",
+      orderable: false,
+      render: (_data: any, _type: string, row: any) => `
+        <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
+          <button type="button" onclick="window.editBloodForBTCT(${row.id}, ${row.invoice_id})" title="Edit" class="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-xs font-medium h-8 px-2.5 transition">Edit</button>
+          <a href="/dashboard/pathology/hematology/blood-for-bt-ct/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print" class="inline-flex items-center gap-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium h-8 px-2.5 transition">Print</a>
+        </div>
+      `,
     },
   ];
 

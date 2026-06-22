@@ -4,6 +4,7 @@ import { DataTable } from "@/components/DataTable";
 import { useEffect, useState } from 'react';
 import { EditOccultBloodTestForm } from '@/features/pathology/stool/EditOcultBloodTestForm';
 import { getCookie } from '@/lib/cookies';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
 import { FileText, FlaskConical, Clock, Users } from 'lucide-react';
@@ -25,6 +26,7 @@ type ReportsItem = {
   id: number;
   invoice_id: number;
   patient_name: string | null;
+  ref_doctor?: string | null;
   created_at: string | null;
   status: string | null;
   test_carried_out_by: string | null;
@@ -54,6 +56,7 @@ function OcultBloodTest() {
   };
 
   const token = getCookie('accessToken');
+  const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data, isFetching } = useQuery({
     queryKey: ["occult-blood", page, limit, search],
@@ -98,11 +101,7 @@ function OcultBloodTest() {
       className: 'font-mono text-sm',
       orderable: true,
       render: (data: any, _type: string, row: ReportsItem) => {
-        const date = row.created_at ? new Date(row.created_at).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        }) : '-';
+        const date = fmtDateTime(row.created_at);
         const status = row.status || 'Pending';
         const testCarriedOutBy = row.test_carried_out_by || '-';
         return `
@@ -133,16 +132,16 @@ function OcultBloodTest() {
       defaultContent: '',
     },
     {
+      data: 'ref_doctor',
+      title: 'Ref. Doctor',
+      defaultContent: '-',
+    },
+    {
       data: 'created_at',
       title: 'Date',
       orderable: true,
       render: (_data: any, _type: string, row: ReportsItem) => {
-        const date = row.created_at;
-        return date ? new Date(date).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        }) : '-';
+        return fmtDateTime(row.created_at);
       },
       defaultContent: '',
     },
@@ -169,9 +168,22 @@ function OcultBloodTest() {
             ? 'bg-red-500'
             : 'bg-yellow-500';
 
-        return <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-white ${color}">${status || `Pending`}</span>;
+        return `<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-white ${color}">${status || `Pending`}</span>`;
       },
       defaultContent: '',
+    },
+    {
+      data: null,
+      title: "Actions",
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return `
+          <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
+            <button onclick="window.editOccultBlood(${row.id}, ${row.invoice_id})" class="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-xs font-medium h-8 px-2.5 transition">Edit</button>
+            <a href="/dashboard/pathology/stool/ocult-blood-test/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print" class="inline-flex items-center gap-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium h-8 px-2.5 transition">Print</a>
+          </div>
+        `;
+      },
     },
   ];
 
@@ -217,10 +229,10 @@ function OcultBloodTest() {
 
       // Status badge
       const statusBadge = status === 'passed'
-? <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Passed</span>
+? `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Passed</span>`
         : status === 'failed'
-? <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Failed</span>
-          : <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Pending</span>;
+? `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Failed</span>`
+          : `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Pending</span>`;
 
       // Build the HTML content
       let htmlContent = `
@@ -267,7 +279,7 @@ function OcultBloodTest() {
 
         <!-- Footer Actions -->
         <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-          <a href="/dashboard/stool/ocult-blood-test/report/${reportId}"
+          <a href="/dashboard/pathology/stool/ocult-blood-test/report/${reportId}"
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
             View Report
           </a>
@@ -331,7 +343,7 @@ function OcultBloodTest() {
 
                 ${reportData.test_carried_out_by ? `
                   <div class="mt-4 pt-4 border-t text-sm">
-                    <span class="text-gray-500">Test Carried out by:</span>
+                    <span class="text-gray-500">Test Carried Out By:</span>
                     <span class="font-medium text-gray-800 ml-2">${reportData.test_carried_out_by}</span>
                   </div>
                 ` : ''}

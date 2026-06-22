@@ -4,6 +4,7 @@ import { DataTable } from "@/components/DataTable";
 import { useState, useEffect } from 'react';
 import { EditMTForm } from '@/features/pathology/immunology/EditMTForm';
 import { getCookie } from '@/lib/cookies';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
 import { FileText, Syringe, Clock, Users } from 'lucide-react';
@@ -25,6 +26,7 @@ type ReportItem = {
   id: number;
   invoice_id: number;
   patient_name: string;
+  ref_doctor?: string | null;
   test_result: string | null;
   induration_size: number | null;
   remarks: string | null;
@@ -57,6 +59,7 @@ function MT() {
   };
 
   const token = getCookie('accessToken');
+  const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data, isFetching } = useQuery({
     queryKey: ["mt", page, limit, search],
@@ -97,11 +100,7 @@ function MT() {
       title: 'Invoice ID',
       className: 'font-mono text-sm',
       render: (data: any, _type: string, row: ReportItem) => {
-        const date = row.created_at ? new Date(row.created_at).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }) : '-';
+        const date = fmtDateTime(row.created_at);
         const status = row.status || 'Pending';
         const rowData = JSON.stringify(row).replace(/"/g, '&quot;');
         return `
@@ -126,6 +125,11 @@ function MT() {
       data: 'patient_name',
       title: 'Patient Name',
       className: 'font-medium',
+    },
+    {
+      data: 'ref_doctor',
+      title: 'Ref. Doctor',
+      defaultContent: '-',
     },
     {
       data: 'test_result',
@@ -155,13 +159,7 @@ function MT() {
       data: 'created_at',
       title: 'Date',
       render: (data: any) => {
-        const iso = data as string;
-        const date = new Date(iso);
-        const formatted = date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
+        const formatted = fmtDateTime(data);
         return `<div class="text-sm">${formatted}</div>`;
       },
     },
@@ -177,7 +175,21 @@ function MT() {
               ? "bg-red-500"
               : "bg-yellow-500";
 
-        return <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${color} text-white border-transparent">${status || `Pending`}</span>;
+        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${color} text-white border-transparent">${status || `Pending`}</span>`;
+      },
+    },
+    {
+      data: null,
+      title: 'Actions',
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportItem) => {
+        const rowData = JSON.stringify(row).replace(/"/g, '&quot;');
+        return `
+          <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
+            <button class="edit-mt-btn inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-xs font-medium h-8 px-2.5 transition" data-row="${rowData}">Edit</button>
+            <a href="/dashboard/pathology/immunology/mt/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print" class="inline-flex items-center gap-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium h-8 px-2.5 transition">Print</a>
+          </div>
+        `;
       },
     },
   ];
@@ -276,7 +288,7 @@ function MT() {
 
         <!-- Footer Actions -->
         <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-          <a href="/dashboard/immunology/mt/report/${reportId}"
+          <a href="/dashboard/pathology/immunology/mt/report/${reportId}"
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
             View Report
           </a>
@@ -344,7 +356,7 @@ function MT() {
 
                 ${reportData.test_carried_out_by ? `
                   <div class="mt-4 pt-4 border-t text-sm">
-                    <span class="text-gray-500">Test Carried out by:</span>
+                    <span class="text-gray-500">Test Carried Out By:</span>
                     <span class="font-medium text-gray-800 ml-2">${reportData.test_carried_out_by}</span>
                   </div>
                 ` : ''}

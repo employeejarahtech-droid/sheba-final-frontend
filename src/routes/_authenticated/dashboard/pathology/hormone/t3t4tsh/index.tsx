@@ -4,6 +4,7 @@ import { DataTable } from "@/components/DataTable";
 import { useEffect, useState } from "react";
 import { ThyroidFunctionTestForm } from '@/features/pathology/special/EditT3T4TshForm';
 import { getCookie } from '@/lib/cookies';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
 import { FileText, FlaskConical, Clock, Users } from 'lucide-react';
@@ -27,6 +28,7 @@ type ReportsItem = {
   invoice_id: number;
   patient_name: string | null;
   created_at: string | null;
+  ref_doctor?: string | null;
 };
 
 function T3T4TSH() {
@@ -44,6 +46,7 @@ function T3T4TSH() {
   const setLimit = (newLimit: number) => { navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) }); };
 
   const token = getCookie('accessToken');
+  const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data: t3t4tshReports, isFetching } = useQuery({
     queryKey: ["t3t4tsh", page, limit, search],
@@ -89,11 +92,7 @@ function T3T4TSH() {
       render: (data: any, _type: string, row: ReportsItem) => {
         const invoiceId = row.invoice_id || '-';
         const patientName = row.patient_name || '-';
-        const date = row.created_at ? new Date(row.created_at).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        }) : '-';
+        const date = fmtDateTime(row.created_at);
         return `
           <div class="flex items-center gap-2">
             <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
@@ -125,16 +124,37 @@ function T3T4TSH() {
       defaultContent: '',
     },
     {
+      data: 'ref_doctor',
+      title: 'Ref. Doctor',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => row.ref_doctor || '-',
+      defaultContent: '',
+    },
+    {
       data: 'created_at',
       title: 'Date',
       orderable: true,
       render: (_data: any, _type: string, row: ReportsItem) => {
         const date = row.created_at;
-        return date ? new Date(date).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        }) : '-';
+        return date ? fmtDateTime(date) : '-';
+      },
+      defaultContent: '',
+    },
+    {
+      data: null,
+      title: 'Actions',
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return `
+          <div class="flex gap-2">
+            <button onclick="window.editT3T4TSH(${row.id}, ${row.invoice_id})" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+              Edit
+            </button>
+            <a href="/dashboard/pathology/hormone/t3t4tsh/report/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+              Print
+            </a>
+          </div>
+        `;
       },
       defaultContent: '',
     },
@@ -222,7 +242,7 @@ function T3T4TSH() {
 
         <!-- Footer Actions -->
         <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-          <a href="/dashboard/hormone/t3t4tsh/report/${id}"
+          <a href="/dashboard/pathology/hormone/t3t4tsh/report/${id}"
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
             View Report
           </a>
@@ -296,7 +316,7 @@ function T3T4TSH() {
 
                 ${reportData.test_carried_out_by ? `
                   <div class="mt-4 pt-4 border-t text-sm">
-                    <span class="text-gray-500">Test Carried out by:</span>
+                    <span class="text-gray-500">Test Carried Out By:</span>
                     <span class="font-medium text-gray-800 ml-2">${reportData.test_carried_out_by}</span>
                   </div>
                 ` : ''}
@@ -317,7 +337,7 @@ function T3T4TSH() {
       newRow.className = 'child-row-detail';
       const cell = document.createElement('td');
       cell.className = 'p-4 bg-gray-50';
-      cell.colSpan = 5;
+      cell.colSpan = 6;
       cell.appendChild(details);
       newRow.appendChild(cell);
 

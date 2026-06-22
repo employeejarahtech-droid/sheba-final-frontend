@@ -8,6 +8,7 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
+import { FlaskConical } from "lucide-react";
 
 import {
     Form,
@@ -44,22 +45,22 @@ const reducingSubstanceSchema = z.object({
     machineId: z.string().optional(),
 });
 
-type UrineReducingSubstanceFormValues = z.infer<typeof reducingSubstanceSchema>;
+type StoolReducingSubstanceFormValues = z.infer<typeof reducingSubstanceSchema>;
 
-interface UrineReducingSubstanceFormProps {
+interface StoolReducingSubstanceFormProps {
     open: boolean;
     setOpen: (open: boolean) => void;
     reportId: number;
     invoiceId: number;
 }
 
-export function EditStoolReducingSubstanceForm({ open, setOpen, reportId, invoiceId }: UrineReducingSubstanceFormProps) {
+export function EditStoolReducingSubstanceForm({ open, setOpen, reportId, invoiceId }: StoolReducingSubstanceFormProps) {
     const navigate = useNavigate();
 
     const token = getCookie('accessToken');
     const queryClient = useQueryClient();
 
-    const form = useForm<UrineReducingSubstanceFormValues>({
+    const form = useForm<StoolReducingSubstanceFormValues>({
         resolver: zodResolver(reducingSubstanceSchema),
         defaultValues: {
             result: "",
@@ -102,7 +103,7 @@ export function EditStoolReducingSubstanceForm({ open, setOpen, reportId, invoic
     //PUT api call
 
     const updateReducingSubstanceMutation = useMutation({
-        mutationFn: async (payload: UrineReducingSubstanceFormValues) => {
+        mutationFn: async (payload: StoolReducingSubstanceFormValues) => {
             const res = await fetch(`${import.meta.env.VITE_API_URL}/api/reducing-substance/${reportId}`, {
                 method: "PUT",
                 headers: {
@@ -144,13 +145,16 @@ export function EditStoolReducingSubstanceForm({ open, setOpen, reportId, invoic
     });
 
 
-    function onSubmit(values: UrineReducingSubstanceFormValues) {
-        console.log("Urine Reducing Substance Report:", values);
+    function onSubmit(values: StoolReducingSubstanceFormValues) {
+        console.log("Stool Reducing Substance Report:", values);
         updateReducingSubstanceMutation.mutate(values);
         setOpen(false);
     }
 
-    const handleView = () => alert("View triggered.");
+    const handleView = () => {
+        setOpen(false);
+        navigate({ to: "/dashboard/pathology/stool/reducing-substance" });
+    };
 
     // Fetch machines from API
     const { data: machinesData } = useQuery({
@@ -172,18 +176,26 @@ export function EditStoolReducingSubstanceForm({ open, setOpen, reportId, invoic
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
-            <SheetContent className="max-w-[450px] w-full overflow-y-auto">
-                <SheetHeader>
-                    <SheetTitle>Edit Urine Reducing Substance Test</SheetTitle>
+            <SheetContent side="right" className="max-w-[400px] sm:max-w-[450px] w-full overflow-y-auto p-0">
+                <SheetHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-3 px-4 gap-0 mb-4">
+                    <div className="flex items-center gap-2.5 pr-8">
+                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                            <FlaskConical className="h-4 w-4" />
+                        </div>
+                        <div>
+                            <SheetTitle className="text-lg font-bold">Edit Stool Reducing Substance Test</SheetTitle>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">Update reducing substance level and remarks</p>
+                        </div>
+                    </div>
                 </SheetHeader>
 
                 <div className="px-4">
                     <PatientInvoiceInfo
                         invoiceInfo={{
-                            invoiceNo: "RPT-1014",
-                            patientName: "Rumana Akter",
-                            age: "28 Years",
-                            gender: "Female",
+                            invoiceNo: reducingSubstanceData?.invoice_id ? `RPT-${reducingSubstanceData.invoice_id}` : "—",
+                            patientName: reducingSubstanceData?.outdoor_invoice?.patient_name || "—",
+                            age: reducingSubstanceData?.outdoor_invoice?.age ? `${reducingSubstanceData.outdoor_invoice.age} Years` : "—",
+                            gender: reducingSubstanceData?.outdoor_invoice?.sex || "—",
                         }}
                     />
                 </div>
@@ -191,7 +203,7 @@ export function EditStoolReducingSubstanceForm({ open, setOpen, reportId, invoic
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-6 mt-4 p-4"
+                        className="space-y-6 p-4"
                     >
 
                         {/* Result */}
@@ -230,7 +242,7 @@ export function EditStoolReducingSubstanceForm({ open, setOpen, reportId, invoic
                             name="testCarriedOutBy"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormLabel>Test Carried Out By</FormLabel>
                                     <FormControl>
                                         <Select
                                             onValueChange={(value) => {
@@ -261,22 +273,23 @@ export function EditStoolReducingSubstanceForm({ open, setOpen, reportId, invoic
                         />
 
                         {/* Buttons */}
-                        <div className="flex justify-center gap-2 pt-4">
+                        <div className="flex justify-between gap-3 pt-4">
                             <Button
                                 type="submit"
                                 variant="success"
+                                className="flex-1"
                                 disabled={form.formState.isSubmitting}
                             >
                                 {form.formState.isSubmitting ? "Saving..." : "Save"}
                             </Button>
 
-                            <Link to={`/pathology/stool/reducing-substance/report/$reportId`} params={{ reportId: reportId.toString() }}>
-                                <Button type="button" variant="warning">
+                            <Link to="/dashboard/pathology/stool/reducing-substance/report/$reportId" params={{ reportId: reportId.toString() }} className="flex-1">
+                                <Button type="button" variant="warning" className="w-full">
                                     Print Preview
                                 </Button>
                             </Link>
 
-                            <Button type="button" variant="info" onClick={handleView}>
+                            <Button type="button" variant="info" className="flex-1" onClick={handleView}>
                                 View
                             </Button>
                         </div>

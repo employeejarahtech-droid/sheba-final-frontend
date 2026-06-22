@@ -568,6 +568,7 @@ export default function PaidInvoices({ page, limit, search, from, to, setPage, s
       data: "phone",
       title: "Phone",
       orderable: true,
+      className: "dt-head-left dt-body-left",
       responsivePriority: 2,
       defaultContent: "-",
     },

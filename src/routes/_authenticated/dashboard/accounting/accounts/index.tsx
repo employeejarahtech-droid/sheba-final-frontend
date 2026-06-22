@@ -629,6 +629,7 @@ function ChartOfAccounts() {
                             onSearchChange={setSearch}
                             search={search}
                             isLoading={isFetching}
+                            defaultOrder={[[0, 'asc']]}
                         />
                 </div>
             </main>

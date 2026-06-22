@@ -8,6 +8,7 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
+import { Syringe } from "lucide-react";
 
 import {
     Form,
@@ -170,8 +171,16 @@ export function EditMTForm({ open, setOpen, reportId, invoiceId }: TuberculinTes
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetContent className="max-w-[450px] w-full overflow-y-auto">
-                <SheetHeader>
-                    <SheetTitle>Edit Tuberculin (MT) Test</SheetTitle>
+                <SheetHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-3 px-4 gap-0">
+                    <div className="flex items-center gap-2.5 pr-8">
+                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                            <Syringe className="h-4 w-4" />
+                        </div>
+                        <div>
+                            <SheetTitle className="text-lg font-bold">Edit Tuberculin (MT) Test</SheetTitle>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">Update tuberculin (MT) test results</p>
+                        </div>
+                    </div>
                 </SheetHeader>
 
                 <div className="px-4">
@@ -242,7 +251,7 @@ export function EditMTForm({ open, setOpen, reportId, invoiceId }: TuberculinTes
                             name="testCarriedOutBy"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormLabel>Test Carried Out By</FormLabel>
                                     <FormControl>
                                         <Select
                                             onValueChange={(value) => {
@@ -282,7 +291,7 @@ export function EditMTForm({ open, setOpen, reportId, invoiceId }: TuberculinTes
                                 {form.formState.isSubmitting ? "Saving..." : "Save"}
                             </Button>
 
-                            <Link to={`/pathology/immunology/mt/report/$reportId`} params={{ reportId: String(reportId) }}>
+                            <Link to={`/dashboard/pathology/immunology/mt/report/$reportId`} params={{ reportId: String(reportId) }}>
                                 <Button type="button" variant="warning">
                                     Print Preview
                                 </Button>

@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
 import { useEffect } from 'react';
 import { getCookie } from '@/lib/cookies';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
 import { FileText, FlaskConical, Clock, Users } from 'lucide-react';
@@ -29,6 +30,7 @@ type ReportsItem = {
   Tests: string;
   TestNames: string;
   Status: string;
+  RefDoctor?: string | null;
 };
 
 function ReportsImmunology() {
@@ -50,6 +52,9 @@ function ReportsImmunology() {
   };
 
   const token = getCookie('accessToken');
+
+  // Tenant date format (from company settings) + 12h time — matches the rest of the app.
+  const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data, isFetching } = useQuery({
     queryKey: ["immunology-all", page, limit, search],
@@ -170,11 +175,11 @@ function ReportsImmunology() {
 
         <!-- Footer Actions -->
         <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-          <a href="/dashboard/immunology/all/report/${reciptId}"
+          <a href="/dashboard/pathology/immunology/all/report/${reciptId}"
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
             View Report
           </a>
-          <a href="/dashboard/immunology/all/edit/${reciptId}"
+          <a href="/dashboard/pathology/immunology/all/edit/${reciptId}"
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-cyan-600 text-white hover:bg-cyan-700 h-10 px-5 transition shadow-md">
             Edit
           </a>
@@ -277,11 +282,7 @@ function ReportsImmunology() {
       title: "Receipt ID",
       orderable: true,
       render: (data: any, _type: string, row: ReportsItem) => {
-        const date = row.Date ? new Date(row.Date).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }) : '-';
+        const date = fmtDateTime(row.Date);
         return `
           <div class="flex items-center gap-2">
             <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
@@ -318,15 +319,14 @@ function ReportsImmunology() {
       orderable: true,
       responsivePriority: 2,
       defaultContent: "",
-      render: (data: any) => {
-        if (!data) return '-';
-        const date = new Date(data);
-        return date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-      }
+      render: (data: any) => fmtDateTime(data)
+    },
+    {
+      data: "RefDoctor",
+      title: "Ref. Doctor",
+      orderable: true,
+      defaultContent: "",
+      render: (data: any) => data || '-'
     },
     {
       data: "TestNames",
@@ -357,6 +357,30 @@ function ReportsImmunology() {
         const color = status === 'Completed' ? 'bg-green-500' : 'bg-yellow-500';
         return `<span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status}</span>`;
       }
+    },
+    {
+      data: null,
+      title: "Actions",
+      orderable: false,
+      searchable: false,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        const id = row.ReciptID;
+        return `
+          <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
+            <a href="/dashboard/pathology/immunology/all/edit/${id}" title="Edit report"
+               class="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-xs font-medium h-8 px-2.5 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+              Edit
+            </a>
+            <a href="/dashboard/pathology/immunology/all/report/${id}" target="_blank" rel="noopener noreferrer" title="Print / view report"
+               class="inline-flex items-center gap-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium h-8 px-2.5 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V2h12v7"/><path d="M6 14h12v8H6z"/></svg>
+              Print
+            </a>
+          </div>
+        `;
+      },
+      defaultContent: "",
     },
   ];
 

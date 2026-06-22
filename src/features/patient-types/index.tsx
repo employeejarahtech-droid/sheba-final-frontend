@@ -260,6 +260,21 @@ export default function PatientTypes({ page, limit, search, setPage, setLimit, s
                 return `<span class="text-sm text-muted-foreground">${name}</span>`;
             },
         },
+        {
+            data: null,
+            title: "Actions",
+            orderable: false,
+            render: (_data: any, _type: string, row: PatientTypeItem) => {
+                return `
+                    <div class="flex items-center gap-2">
+                        <button data-action="edit" data-id="${row.id}"
+                                class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-cyan-600 text-white hover:bg-cyan-700 h-8 px-4 transition">
+                            Edit
+                        </button>
+                    </div>
+                `;
+            },
+        },
     ];
 
     // Handle button clicks via event delegation

@@ -578,7 +578,7 @@ export function BillCreatedListPage({ page, limit, search, setPage, setSearch }:
             let printUrl = ''
             if (isCompleted && id) {
                 const stepKey = title.toLowerCase().replace(/\s+/g, '-')
-                printUrl = `/admission/patients/${id}/print/${stepKey}`
+                printUrl = `/dashboard/admission/patients/${id}/print/${stepKey}`
             }
 
             return `

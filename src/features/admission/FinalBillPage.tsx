@@ -4,7 +4,7 @@ import { useNavigate, Link } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { getCookie } from '@/lib/cookies'
 import { cn } from '@/lib/utils'
-import { FileText, Loader2, ArrowLeft, Printer, CheckCircle, DollarSign, User, Save, X, GripVertical, UserCircle2, Check, Search, Calculator, DoorOpen } from 'lucide-react'
+import { FileText, Loader2, ArrowLeft, Printer, CheckCircle, DollarSign, User, Save, X, GripVertical, UserCircle2, Check, ChevronDown, Calculator, DoorOpen } from 'lucide-react'
 import { useCurrency } from '@/hooks/use-currency'
 import {
     DndContext,
@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -120,41 +120,39 @@ function SortableBillItem({ item, serviceTypeLabel, discount, itemDiscounts, onD
     const finalAmount = originalAmount - discount
 
     return (
-        <div ref={setNodeRef} style={style} className={`px-4 py-3 ${isDragging ? 'opacity-50 bg-muted/50' : ''}`}>
+        <div ref={setNodeRef} style={style} className={`px-4 py-3 hover:bg-muted/30 transition-colors ${isDragging ? 'opacity-50 bg-muted/50' : ''}`}>
             <div className="grid grid-cols-12 gap-4 items-center">
-                <div className="col-span-5 flex items-start gap-2">
+                <div className="col-span-5 flex items-center gap-2">
                     {!isBillSaved && (
                         <button
-                            className="cursor-grab text-muted-foreground hover:text-foreground mt-1"
+                            className="cursor-grab text-muted-foreground hover:text-foreground mt-0.5"
                             {...attributes}
                             {...listeners}
                         >
-                            <GripVertical className="w-4 h-4" />
+                            <GripVertical className="w-4 h-4 animate-pulse" />
                         </button>
                     )}
                     <div>
-                        <p className="font-medium">{item.service_name}</p>
+                        <p className="font-medium text-sm">{item.service_name}</p>
                         {item.service_note && (
-                            <p className="text-sm text-muted-foreground">{item.service_note}</p>
+                            <p className="text-xs text-muted-foreground">{item.service_note}</p>
                         )}
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                             {serviceTypeLabel} • Qty: {item.quantity}
                         </p>
                     </div>
                 </div>
                 <div className="col-span-2 text-right">
-                    <Label className="text-xs">Amount</Label>
-                    <p className="font-medium">{format(originalAmount)}</p>
+                    <p className="font-medium text-sm">{format(originalAmount)}</p>
                 </div>
                 <div className="col-span-2">
-                    <Label className="text-xs">Discount</Label>
-                    <div className="flex items-center gap-1">
-                        <span className="text-sm">{currencySymbol}</span>
+                    <div className="flex items-center gap-1.5 justify-center max-w-[140px] mx-auto">
+                        <span className="text-xs text-muted-foreground font-medium">{currencySymbol}</span>
                         <Input
                             type="number"
                             value={itemDiscounts[item.id] || '0'}
                             onChange={(e) => onDiscountChange(item.id, e.target.value)}
-                            className="h-8"
+                            className="h-8 py-1 text-sm text-center"
                             min="0"
                             max={originalAmount}
                             step="0.01"
@@ -163,14 +161,15 @@ function SortableBillItem({ item, serviceTypeLabel, discount, itemDiscounts, onD
                     </div>
                 </div>
                 <div className="col-span-2 text-right">
-                    <Label className="text-xs">Final</Label>
-                    <p className="font-bold text-blue-600">{format(finalAmount)}</p>
+                    <p className="font-bold text-sm text-blue-600">{format(finalAmount)}</p>
                 </div>
-                <div className="col-span-1 text-right">
-                    {discount > 0 && (
-                        <Badge variant="destructive" className="text-xs">
+                <div className="col-span-1 text-center">
+                    {discount > 0 ? (
+                        <Badge variant="destructive" className="text-[10px] font-semibold px-1.5 py-0.5">
                             -{Math.round((discount / originalAmount) * 100)}%
                         </Badge>
+                    ) : (
+                        <span className="text-xs text-muted-foreground">-</span>
                     )}
                 </div>
             </div>
@@ -622,6 +621,7 @@ export function FinalBillPage({ admissionId }: FinalBillPageProps) {
                             {isPatientActive ? (
                                 <Button
                                     onClick={() => setDischargeModalOpen(true)}
+                                    disabled={!admissionData?.data?.bill_created}
                                     size="lg"
                                     className="bg-orange-600 hover:bg-orange-700"
                                 >
@@ -637,7 +637,7 @@ export function FinalBillPage({ admissionId }: FinalBillPageProps) {
 
                             <Button
                                 onClick={() => createFinalBillMutation.mutate()}
-                                disabled={isCreatingBill}
+                                disabled={isCreatingBill || !admissionData?.data?.bill_created}
                                 size="lg"
                                 className="bg-green-600 hover:bg-green-700"
                             >
@@ -654,6 +654,12 @@ export function FinalBillPage({ admissionId }: FinalBillPageProps) {
                                 )}
                             </Button>
                         </div>
+
+                        {!admissionData?.data?.bill_created && (
+                            <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg p-4 text-sm font-medium">
+                                <strong>Required:</strong> A preliminary bill must be created first before you can generate the final bill. Please manage billing items to create the preliminary bill.
+                            </div>
+                        )}
 
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                             <p className="text-sm text-blue-800">
@@ -681,16 +687,19 @@ export function FinalBillPage({ admissionId }: FinalBillPageProps) {
     return (
         <div className="max-w-[1000px] mx-auto space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold">Final Bill</h1>
-                    <p className="text-muted-foreground">Bill #{finalBill.id} • Admission #{finalBill.admission_id}</p>
+            <div className="flex flex-wrap justify-between items-start gap-4">
+                <div className="flex items-center gap-4">
+                    <Button variant="ghost" size="icon" onClick={handleBack}>
+                        <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                    <div>
+                        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                            Final Bill
+                        </h1>
+                        <p className="text-muted-foreground text-sm">Bill #{finalBill.id} • Admission #{finalBill.admission_id}</p>
+                    </div>
                 </div>
                 <div className="flex gap-3">
-                    <Button variant="outline" onClick={handleBack}>
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back
-                    </Button>
                     <Link
                         to="/dashboard/admission/patients/$admissionId/final-bill-print"
                         params={{ admissionId: String(admissionId) }}
@@ -704,14 +713,19 @@ export function FinalBillPage({ admissionId }: FinalBillPageProps) {
             </div>
 
             {/* Section 1: Patient Details */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <User className="w-5 h-5" />
-                        Patient Details
-                    </CardTitle>
+            <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                    <div className="flex items-center gap-2.5">
+                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                            <User className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                            <CardTitle className="text-lg font-bold">Patient Details</CardTitle>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">Admission and patient information</p>
+                        </div>
+                    </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div>
                             <Label className="text-muted-foreground">Patient Name</Label>
@@ -746,10 +760,18 @@ export function FinalBillPage({ admissionId }: FinalBillPageProps) {
             </Card>
 
             {/* Section 2: Bill Items with Drag and Drop */}
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <CardTitle>Bill Items (Drag to Reorder)</CardTitle>
+            <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                    <div className="flex flex-wrap items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                <FileText className="w-4 h-4 text-white" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-lg font-bold">Bill Items</CardTitle>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">Drag to reorder • Apply discounts</p>
+                            </div>
+                        </div>
                         <div className="flex items-center gap-2">
                             <Input
                                 type="number"
@@ -781,61 +803,74 @@ export function FinalBillPage({ admissionId }: FinalBillPageProps) {
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {isBillSaved ? (
-                            <div className="space-y-2">
-                                {items.map((item) => (
-                                    <div key={item.id} className="border rounded-lg overflow-hidden bg-background">
-                                        <SortableBillItem
-                                            item={item}
-                                            serviceTypeLabel={getServiceTypeLabel(item.service_type)}
-                                            discount={Number(itemDiscounts[item.id]) || 0}
-                                            itemDiscounts={itemDiscounts}
-                                            onDiscountChange={handleItemDiscountChange}
-                                            isBillSaved={isBillSaved}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <DndContext
-                                sensors={sensors}
-                                collisionDetection={closestCenter}
-                                onDragEnd={handleDragEnd}
-                            >
-                                <SortableContext
-                                    items={orderedItems.map(item => String(item.id))}
-                                    strategy={verticalListSortingStrategy}
+                <CardContent className="p-4">
+                    <div className="border rounded-lg overflow-hidden bg-background shadow-sm">
+                        {/* Table Header */}
+                        <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-muted/60 font-bold text-xs uppercase tracking-wider text-muted-foreground border-b items-center">
+                            <div className="col-span-5">Service / Item Details</div>
+                            <div className="col-span-2 text-right">Original Amount</div>
+                            <div className="col-span-2 text-center">Discount</div>
+                            <div className="col-span-2 text-right">Final Amount</div>
+                            <div className="col-span-1 text-center">Saving %</div>
+                        </div>
+
+                        {/* Table Body */}
+                        <div className="divide-y">
+                            {isBillSaved ? (
+                                items.map((item) => (
+                                    <SortableBillItem
+                                        key={item.id}
+                                        item={item}
+                                        serviceTypeLabel={getServiceTypeLabel(item.service_type)}
+                                        discount={Number(itemDiscounts[item.id]) || 0}
+                                        itemDiscounts={itemDiscounts}
+                                        onDiscountChange={handleItemDiscountChange}
+                                        isBillSaved={isBillSaved}
+                                    />
+                                ))
+                            ) : (
+                                <DndContext
+                                    sensors={sensors}
+                                    collisionDetection={closestCenter}
+                                    onDragEnd={handleDragEnd}
                                 >
-                                {items.map((item) => (
-                                    <div key={item.id} className="border rounded-lg overflow-hidden bg-background">
-                                        <SortableBillItem
-                                            item={item}
-                                            serviceTypeLabel={getServiceTypeLabel(item.service_type)}
-                                            discount={Number(itemDiscounts[item.id]) || 0}
-                                            itemDiscounts={itemDiscounts}
-                                            onDiscountChange={handleItemDiscountChange}
-                                            isBillSaved={isBillSaved}
-                                        />
-                                    </div>
-                                ))}
-                                </SortableContext>
-                            </DndContext>
-                        )}
+                                    <SortableContext
+                                        items={orderedItems.map(item => String(item.id))}
+                                        strategy={verticalListSortingStrategy}
+                                    >
+                                        {items.map((item) => (
+                                            <SortableBillItem
+                                                key={item.id}
+                                                item={item}
+                                                serviceTypeLabel={getServiceTypeLabel(item.service_type)}
+                                                discount={Number(itemDiscounts[item.id]) || 0}
+                                                itemDiscounts={itemDiscounts}
+                                                onDiscountChange={handleItemDiscountChange}
+                                                isBillSaved={isBillSaved}
+                                            />
+                                        ))}
+                                    </SortableContext>
+                                </DndContext>
+                            )}
+                        </div>
                     </div>
                 </CardContent>
             </Card>
 
             {/* Section 3: Discount Information */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <UserCircle2 className="w-5 h-5" />
-                        Discount Information
-                    </CardTitle>
+            <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                    <div className="flex items-center gap-2.5">
+                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                            <UserCircle2 className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                            <CardTitle className="text-lg font-bold">Discount Information</CardTitle>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">Approving doctor and discount notes</p>
+                        </div>
+                    </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <Label htmlFor="doctor">Discount Approved By (Doctor)</Label>
@@ -843,85 +878,88 @@ export function FinalBillPage({ admissionId }: FinalBillPageProps) {
                                 <PopoverTrigger asChild>
                                     <Button
                                         id="doctor"
+                                        type="button"
                                         variant="outline"
                                         role="combobox"
                                         disabled={isBillSaved}
                                         className={cn(
-                                            "w-full justify-between",
+                                            "w-full justify-between h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-all shadow-sm text-sm",
                                             !selectedDoctorId && "text-muted-foreground"
                                         )}
                                     >
-                                        {selectedDoctorId
-                                            ? doctors.find((d: any) => String(d.id) === selectedDoctorId)?.doctor_name
-                                            : "Select a doctor..."}
-                                        <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        {(() => {
+                                            const selectedDoctor = doctors.find((d: any) => String(d.id) === selectedDoctorId)
+                                            if (!selectedDoctor) return "Select doctor..."
+                                            return (
+                                                <div className="flex flex-col items-start">
+                                                    <span className="font-medium">
+                                                        Dr. {selectedDoctor.doctor_name}
+                                                        {(selectedDoctor.qualification || selectedDoctor.title) && ` (${selectedDoctor.qualification || selectedDoctor.title})`}
+                                                    </span>
+                                                    {selectedDoctor.speciality && (
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {selectedDoctor.speciality}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )
+                                        })()}
+                                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                     </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-full p-0" align="start">
-                                    <div className="p-3">
-                                        <div className="relative">
-                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                            <Input
-                                                placeholder="Search doctor by name or speciality..."
-                                                value={doctorSearchQuery}
-                                                onChange={(e) => setDoctorSearchQuery(e.target.value)}
-                                                className="pl-9"
-                                            />
-                                        </div>
-                                    </div>
-                                    <ScrollArea className="h-[200px]">
-                                        <div className="p-1">
-                                            {doctors
-                                                .filter((doctor: any) => {
-                                                    const search = doctorSearchQuery.toLowerCase()
+                                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                                    <Command
+                                        filter={(value, search) => {
+                                            if (!search) return 1;
+                                            return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+                                        }}
+                                        className="border border-gray-100 dark:border-gray-800"
+                                    >
+                                        <CommandInput placeholder="Search doctor by name, qualification, or specialty..." className="h-10" value={doctorSearchQuery} onValueChange={setDoctorSearchQuery} />
+                                        <CommandList className="max-h-[300px]">
+                                            <CommandEmpty>No doctor found.</CommandEmpty>
+                                            <CommandGroup>
+                                                {doctors.map((doctor: any) => {
+                                                    const displayName = `Dr. ${doctor.doctor_name}`;
+                                                    const subtitle = [
+                                                        doctor.qualification || doctor.title,
+                                                        doctor.speciality
+                                                    ].filter(Boolean).join(" - ");
+
                                                     return (
-                                                        doctor.doctor_name?.toLowerCase().includes(search) ||
-                                                        doctor.speciality?.toLowerCase().includes(search)
-                                                    )
-                                                })
-                                                .length === 0 ? (
-                                                <div className="py-6 text-center text-sm text-muted-foreground">
-                                                    No doctors found
-                                                </div>
-                                            ) : (
-                                                doctors
-                                                    .filter((doctor: any) => {
-                                                        const search = doctorSearchQuery.toLowerCase()
-                                                        return (
-                                                            doctor.doctor_name?.toLowerCase().includes(search) ||
-                                                            doctor.speciality?.toLowerCase().includes(search)
-                                                        )
-                                                    })
-                                                    .map((doctor: any) => (
-                                                        <button
+                                                        <CommandItem
                                                             key={doctor.id}
-                                                            className={cn(
-                                                                "w-full flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors",
-                                                                selectedDoctorId === String(doctor.id) && "bg-accent"
-                                                            )}
-                                                            onClick={() => {
+                                                            value={`${doctor.doctor_name} ${doctor.qualification || doctor.title || ''} ${doctor.speciality || ''} ${doctor.id}`}
+                                                            className="py-2.5 px-4 cursor-pointer"
+                                                            onSelect={() => {
                                                                 setSelectedDoctorId(String(doctor.id))
                                                                 setIsDoctorDropdownOpen(false)
                                                                 setDoctorSearchQuery('')
                                                                 setHasChanges(true)
                                                             }}
                                                         >
-                                                            <div className="flex flex-col items-start">
-                                                                <span className="font-medium">{doctor.doctor_name}</span>
-                                                                {doctor.speciality && (
-                                                                    <span className="text-xs text-muted-foreground">
-                                                                        {doctor.speciality}
-                                                                    </span>
-                                                                )}
+                                                            <div className="flex items-center gap-2 w-full">
+                                                                <Check
+                                                                    className={cn(
+                                                                        "h-4 w-4 shrink-0",
+                                                                        String(doctor.id) === selectedDoctorId ? "opacity-100" : "opacity-0"
+                                                                    )}
+                                                                />
+                                                                <div className="flex flex-col">
+                                                                    <span className="font-medium">{displayName}</span>
+                                                                    {subtitle && (
+                                                                        <span className="text-xs text-muted-foreground">
+                                                                            {subtitle}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                             </div>
-                                                            {selectedDoctorId === String(doctor.id) && (
-                                                                <Check className="h-4 w-4 text-primary" />
-                                                            )}
-                                                        </button>
-                                                    ))
-                                            )}
-                                        </div>
-                                    </ScrollArea>
+                                                        </CommandItem>
+                                                    );
+                                                })}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
                                 </PopoverContent>
                             </Popover>
                         </div>
@@ -942,18 +980,26 @@ export function FinalBillPage({ admissionId }: FinalBillPageProps) {
             </Card>
 
             {/* Section 4: Final Bill Summary */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                        <span>Final Bill Summary</span>
+            <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                    <div className="flex items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                <Calculator className="w-4 h-4 text-white" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-lg font-bold">Final Bill Summary</CardTitle>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">Totals, payments, and balance</p>
+                            </div>
+                        </div>
                         {!isBillSaved && hasChanges && (
                             <span className="text-sm font-normal text-orange-600">
                                 Unsaved changes
                             </span>
                         )}
-                    </CardTitle>
+                    </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-4">
                     <div className="max-w-md mx-auto space-y-3">
                         <div className="flex justify-between items-center py-2">
                             <span className="text-muted-foreground">Total Bill Amount:</span>

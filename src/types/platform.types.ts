@@ -17,7 +17,7 @@ export interface PlatformAdminUser {
   email: string
   name: string
   role: 'super_admin' | 'admin' | 'viewer'
-  permissions: Record<string, boolean>
+  permissions: Record<string, boolean> | string
   is_active: boolean
   profile_image?: string | null
   thumb_url?: string | null
@@ -154,6 +154,79 @@ export interface PlatformRevenueStat {
   successful_count: number
   failed_count: number
   total_count: number
+}
+
+// ── Contact (Landing Page Submission) ───────────────────────────────────
+export interface PlatformContact {
+  id: number
+  first_name: string
+  last_name: string
+  email: string
+  phone: string | null
+  company: string | null
+  subject: string | null
+  message: string
+  status: 'new' | 'in_progress' | 'resolved' | 'closed'
+  notes: string | null
+  assigned_to: number | null
+  assigned_to_name?: string | null
+  assigned_to_email?: string | null
+  created_at: string
+  updated_at?: string
+}
+
+// ── Subscription (derived from company) ─────────────────────────────────
+export interface PlatformSubscription {
+  id: number
+  name: string
+  email?: string | null
+  subdomain: string
+  plan_id: number | null
+  plan_name?: string
+  plan_slug?: string
+  subscription_status: string
+  subscription_expires_at: string | null
+  stripe_customer_id?: string | null
+  stripe_subscription_id?: string | null
+  is_active?: number
+  created_at?: string
+}
+
+// ── Invoice ─────────────────────────────────────────────────────────────
+export interface PlatformInvoice {
+  id: number
+  company_id: number
+  company_name?: string
+  company_subdomain?: string
+  plan_id: number | null
+  plan_name?: string
+  stripe_invoice_id: string | null
+  amount: string | number
+  tax: string | number
+  total: string | number
+  currency: string
+  status: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
+  invoice_pdf: string | null
+  period_start: string | null
+  period_end: string | null
+  payment_gateway: string | null
+  created_at: string
+}
+
+// ── Stripe ──────────────────────────────────────────────────────────────
+export interface PlatformStripeOverview {
+  customers: number
+  subscriptions: number
+  revenue: string | number
+}
+
+export interface PlatformStripeCustomer {
+  id: number
+  name: string
+  email?: string | null
+  subdomain: string
+  stripe_customer_id: string
+  subscription_status: string
 }
 
 // ── Dashboard ───────────────────────────────────────────────────────────

@@ -6,6 +6,7 @@ import { Activity, Clock, FileText, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from "react";
 import { EditLipidProfileForm } from '@/features/pathology/biochemical/lipid-profile/components/EditLipidProfileForm';
 import { getCookie } from '@/lib/cookies';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
 
@@ -28,6 +29,7 @@ type LipidProfileItem = {
   patient_name: string;
   created_at: string;
   status: string;
+  ref_doctor?: string | null;
 };
 
 function LipidProfile() {
@@ -53,6 +55,9 @@ function LipidProfile() {
   };
 
   const token = getCookie('accessToken');
+
+  // Tenant date format (from company settings) + 12h time — matches the rest of the app.
+  const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data, isFetching } = useQuery({
     queryKey: ["lipid-profile", page, limit, search],
@@ -137,10 +142,10 @@ function LipidProfile() {
 
       // Status badge
       const statusBadge = status === 'passed'
-? <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Passed</span>
+        ? `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Passed</span>`
         : status === 'failed'
-? <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Failed</span>
-          : <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">Pending</span>;
+          ? `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Failed</span>`
+          : `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">Pending</span>`;
 
       // Build the HTML content
       let htmlContent = `
@@ -270,7 +275,7 @@ function LipidProfile() {
 
                 ${reportData.test_carried_out_by ? `
                   <div class="mt-4 pt-4 border-t text-sm">
-                    <span class="text-gray-500">Test Carried out by:</span>
+                    <span class="text-gray-500">Test Carried Out By:</span>
                     <span class="font-medium text-gray-800 ml-2">${reportData.test_carried_out_by}</span>
                   </div>
                 ` : ''}
@@ -316,11 +321,7 @@ function LipidProfile() {
       orderable: true,
       responsivePriority: 2,
       render: (data: any, _type: string, row: LipidProfileItem) => {
-        const date = row.created_at ? new Date(row.created_at).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }) : '-';
+        const date = fmtDateTime(row.created_at);
         return `
           <div class="flex items-center gap-2">
             <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
@@ -345,21 +346,22 @@ function LipidProfile() {
     },
 
     {
+      data: "ref_doctor",
+      title: "Ref. Doctor",
+      orderable: true,
+      defaultContent: "",
+      render: (_data: any, _type: string, row: LipidProfileItem) => {
+        return row.ref_doctor ? `<span class="text-sm text-gray-700 dark:text-gray-300">${row.ref_doctor}</span>` : `<span class="text-sm text-gray-400">-</span>`;
+      },
+    },
+
+    {
       data: "created_at",
       title: "Date",
       orderable: true,
       responsivePriority: 3,
       render: (_data: any, _type: string, row: LipidProfileItem) => {
-        const iso = row.created_at;
-        const date = new Date(iso);
-
-        const formatted = date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-
-        return `<div>${formatted}</div>`;
+        return `<div>${fmtDateTime(row.created_at)}</div>`;
       },
       defaultContent: "",
     },
@@ -378,7 +380,30 @@ function LipidProfile() {
               ? "bg-red-500"
               : "bg-yellow-500";
 
-        return <span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status || `Pending`}</span>;
+        return `<span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status || `Pending`}</span>`;
+      },
+      defaultContent: "",
+    },
+    {
+      data: null,
+      title: "Actions",
+      orderable: false,
+      searchable: false,
+      render: (_data: any, _type: string, row: LipidProfileItem) => {
+        return `
+          <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
+            <button type="button" onclick="window.editLipidProfile(${row.id}, ${row.invoice_id})" title="Edit"
+              class="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-xs font-medium h-8 px-2.5 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+              Edit
+            </button>
+            <a href="/dashboard/pathology/biochemical/lipid-profile/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print / view report"
+              class="inline-flex items-center gap-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium h-8 px-2.5 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V2h12v7"/><path d="M6 14h12v8H6z"/></svg>
+              Print
+            </a>
+          </div>
+        `;
       },
       defaultContent: "",
     },

@@ -11,6 +11,7 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { useAuthStore } from '@/stores/auth-store'
 import { getSubdomainInfo } from '@/lib/subdomain'
+import { useShortcuts } from '@/hooks/use-shortcuts'
 
 function LayoutHeader() {
   const user = useAuthStore((state) => state.user)
@@ -57,6 +58,7 @@ type AuthenticatedLayoutProps = {
 
 export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
   const defaultOpen = getCookie('sidebar_state') !== 'false'
+  useShortcuts()
   return (
     <CurrencyProvider>
       <SearchProvider>

@@ -79,7 +79,7 @@ function UrineForAlbuminReport() {
     <AppHeader fixed />
       <Main>
         <div className="print:hidden flex items-center justify-between gap-4">
-          <Link to="/dashboard/urine/urine-for-albumin">
+          <Link to="/dashboard/pathology/urine/urine-for-albumin">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Urine For Albumin Tests

@@ -10,12 +10,12 @@ import { useCurrency } from '@/hooks/use-currency'
 const API_URL = import.meta.env.VITE_API_URL
 
 type CompanySettings = {
-  company_name?: string
-  company_logo?: string | null
-  address1?: string | null
-  address2?: string | null
-  phone?: string | null
-  email?: string | null
+    company_name?: string
+    company_logo?: string | null
+    address1?: string | null
+    address2?: string | null
+    phone?: string | null
+    email?: string | null
 }
 
 type AdmissionData = {
@@ -136,7 +136,15 @@ function AdmissionPrintPage() {
         )
     }
 
-    const admissionDate = admission.admission_date ? new Date(admission.admission_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A'
+    const formattedAdmissionDate = admission.admission_date 
+        ? new Date(admission.admission_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) 
+        : 'N/A'
+    const formattedAdmissionTime = admission.created_at
+        ? new Date(admission.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+        : ''
+    const admissionDateAndTime = formattedAdmissionTime 
+        ? `${formattedAdmissionDate} ${formattedAdmissionTime}` 
+        : formattedAdmissionDate
     const dischargeDate = admission.discharge_date ? new Date(admission.discharge_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A'
     const bedCabinInfo = admission.bedCabin ? `${admission.bedCabin.code} (${admission.bedCabin.type})` : 'N/A'
     const doctorName = admission.doctor?.doctor_name || 'N/A'
@@ -204,7 +212,7 @@ function AdmissionPrintPage() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-center border-b-2 border-blue-600 pb-6 mb-6">
+                    <div className="text-center pb-6 mb-6">
                         <div className="flex items-center justify-center gap-3 mb-3">
                             {companySettings?.company_logo ? (
                                 <img
@@ -218,18 +226,18 @@ function AdmissionPrintPage() {
                                 </div>
                             )}
                             <div className="text-left">
-                                <h1 className="text-3xl font-bold text-gray-800">{companySettings?.company_name || 'Hospital'}</h1>
+                                <h1 className="text-3xl font-bold text-gray-800 leading-tight">{companySettings?.company_name || 'Hospital'}</h1>
+                                <div className="text-gray-600 text-sm space-y-0.5 mt-1">
+                                    {companySettings?.address1 && (
+                                        <p className="font-medium">{companySettings.address1}</p>
+                                    )}
+                                    {companySettings?.address2 && (
+                                        <p className="font-medium">{companySettings.address2}</p>
+                                    )}
+                                    {companySettings?.phone && <p className="text-xs">Phone: {companySettings.phone}</p>}
+                                    {companySettings?.email && <p className="text-xs">Email: {companySettings.email}</p>}
+                                </div>
                             </div>
-                        </div>
-                        <div className="text-gray-600 text-sm space-y-1">
-                            {companySettings?.address1 && (
-                                <p className="font-medium">{companySettings.address1}</p>
-                            )}
-                            {companySettings?.address2 && (
-                                <p className="font-medium">{companySettings.address2}</p>
-                            )}
-                            {companySettings?.phone && <p className="text-xs">Phone: {companySettings.phone}</p>}
-                            {companySettings?.email && <p className="text-xs">Email: {companySettings.email}</p>}
                         </div>
                     </div>
 
@@ -268,12 +276,8 @@ function AdmissionPrintPage() {
                         </thead>
                         <tbody>
                             <tr className="border-b border-dashed">
-                                <td className="px-3 py-2">Admission Date</td>
-                                <td className="px-3 py-2">{admissionDate}</td>
-                            </tr>
-                            <tr className="border-b border-dashed">
-                                <td className="px-3 py-2">Discharge Date</td>
-                                <td className="px-3 py-2">{dischargeDate}</td>
+                                <td className="px-3 py-2">Admission Date and Time</td>
+                                <td className="px-3 py-2">{admissionDateAndTime}</td>
                             </tr>
                             <tr className="border-b border-dashed">
                                 <td className="px-3 py-2">Bed/Cabin</td>

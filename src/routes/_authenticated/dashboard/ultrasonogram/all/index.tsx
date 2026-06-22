@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
 import { useMemo, useEffect } from 'react';
 import { getCookie } from '@/lib/cookies';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
 import { FileText, Clock, Users, ScanLine } from 'lucide-react';
@@ -50,6 +51,7 @@ function AllUltrasonogramReports() {
   };
 
   const token = getCookie('accessToken');
+  const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data: ultrasonogramAllReports, isFetching } = useQuery({
     queryKey: ["ultrasonogram-all", page, limit, search],
@@ -81,11 +83,7 @@ function AllUltrasonogramReports() {
       title: "Receipt ID",
       orderable: true,
       render: (data: any, _type: string, row: ReportsItem) => {
-        const date = row.Date ? new Date(row.Date).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        }) : '-';
+        const date = fmtDateTime(row.Date);
         const status = row.Status || 'Pending';
         return `
           <div class="flex items-center gap-2">
@@ -122,7 +120,7 @@ function AllUltrasonogramReports() {
       title: "Date",
       orderable: true,
       defaultContent: "",
-      render: (data: any) => data ? new Date(data).toLocaleDateString() : '-',
+      render: (data: any) => fmtDateTime(data),
     },
     {
       data: "TestNames",

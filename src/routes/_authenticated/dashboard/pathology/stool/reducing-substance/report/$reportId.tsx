@@ -79,7 +79,7 @@ function ReducingSubstanceReport() {
             <AppHeader fixed />
             <Main>
                 <div className="print:hidden flex items-center justify-between gap-4">
-                    <Link to="/dashboard/stool/reducing-substance">
+                    <Link to="/dashboard/pathology/stool/reducing-substance">
                         <Button variant="outline" size="sm">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Reducing Substance Tests

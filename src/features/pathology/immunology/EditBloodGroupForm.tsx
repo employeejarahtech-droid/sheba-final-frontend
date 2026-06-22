@@ -8,6 +8,7 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
+import { Droplets } from "lucide-react";
 
 import {
     Form,
@@ -172,8 +173,16 @@ export function EditBloodGroupForm({ open, setOpen, reportId, invoiceId }: Blood
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetContent className="max-w-[450px] w-full overflow-y-auto">
-                <SheetHeader>
-                    <SheetTitle>Edit Blood Group</SheetTitle>
+                <SheetHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-3 px-4 gap-0">
+                    <div className="flex items-center gap-2.5 pr-8">
+                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                            <Droplets className="h-4 w-4" />
+                        </div>
+                        <div>
+                            <SheetTitle className="text-lg font-bold">Edit Blood Group</SheetTitle>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">Update blood group & Rh factor</p>
+                        </div>
+                    </div>
                 </SheetHeader>
 
                 <div className="px-4">
@@ -244,7 +253,7 @@ export function EditBloodGroupForm({ open, setOpen, reportId, invoiceId }: Blood
                             name="testCarriedOutBy"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormLabel>Test Carried Out By</FormLabel>
                                     <FormControl>
                                         <Select
                                             onValueChange={(value) => {
@@ -284,7 +293,7 @@ export function EditBloodGroupForm({ open, setOpen, reportId, invoiceId }: Blood
                                 {form.formState.isSubmitting ? "Saving..." : "Save"}
                             </Button>
 
-                            <Link to={`/pathology/immunology/blood-group/report/$reportId`} params={{ reportId: reportId.toString() }}>
+                            <Link to={`/dashboard/pathology/immunology/blood-group/report/$reportId`} params={{ reportId: reportId.toString() }}>
                                 <Button type="button" variant="warning">
                                     Print Preview
                                 </Button>

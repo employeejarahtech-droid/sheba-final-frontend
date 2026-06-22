@@ -8,8 +8,6 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createFileRoute } from '@tanstack/react-router'
-
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ClerkRouteRouteImport } from './routes/clerk/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -32,20 +30,20 @@ import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-p
 import { Route as authAuthCallbackRouteImport } from './routes/(auth)/auth-callback'
 import { Route as ClerkAuthenticatedRouteRouteImport } from './routes/clerk/_authenticated/route'
 import { Route as ClerkauthRouteRouteImport } from './routes/clerk/(auth)/route'
+import { Route as platformAdminRouteRouteImport } from './routes/(platform)/admin/route'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as platformAdminIndexRouteImport } from './routes/(platform)/admin/index'
 import { Route as ClerkAuthenticatedUserManagementRouteImport } from './routes/clerk/_authenticated/user-management'
 import { Route as ClerkauthSignUpRouteImport } from './routes/clerk/(auth)/sign-up'
 import { Route as ClerkauthSignInRouteImport } from './routes/clerk/(auth)/sign-in'
+import { Route as platformAdminSubscriptionsRouteImport } from './routes/(platform)/admin/subscriptions'
 import { Route as platformAdminSettingsRouteImport } from './routes/(platform)/admin/settings'
 import { Route as platformAdminRegistrationsRouteImport } from './routes/(platform)/admin/registrations'
-import { Route as platformAdminPlansRouteImport } from './routes/(platform)/admin/plans'
+import { Route as platformAdminProfileRouteImport } from './routes/(platform)/admin/profile'
 import { Route as platformAdminModulesRouteImport } from './routes/(platform)/admin/modules'
 import { Route as platformAdminLoginRouteImport } from './routes/(platform)/admin/login'
-import { Route as platformAdminCompaniesRouteImport } from './routes/(platform)/admin/companies'
-import { Route as platformAdminBillingRouteImport } from './routes/(platform)/admin/billing'
+import { Route as platformAdminContactsRouteImport } from './routes/(platform)/admin/contacts'
 import { Route as platformAdminAdminsRouteImport } from './routes/(platform)/admin/admins'
-import { Route as platformAdminLayoutRouteImport } from './routes/(platform)/admin/_layout'
 import { Route as AuthenticatedDashboardSettingsRouteRouteImport } from './routes/_authenticated/dashboard/settings/route'
 import { Route as AuthenticatedDashboardUsersIndexRouteImport } from './routes/_authenticated/dashboard/users/index'
 import { Route as AuthenticatedDashboardTasksIndexRouteImport } from './routes/_authenticated/dashboard/tasks/index'
@@ -64,6 +62,9 @@ import { Route as AuthenticatedDashboardBackupsIndexRouteImport } from './routes
 import { Route as AuthenticatedDashboardBackupSettingsIndexRouteImport } from './routes/_authenticated/dashboard/backup-settings/index'
 import { Route as AuthenticatedDashboardAppsIndexRouteImport } from './routes/_authenticated/dashboard/apps/index'
 import { Route as AuthenticatedDashboardAccountingIndexRouteImport } from './routes/_authenticated/dashboard/accounting/index'
+import { Route as platformAdminPlansIndexRouteImport } from './routes/(platform)/admin/plans/index'
+import { Route as platformAdminCompaniesIndexRouteImport } from './routes/(platform)/admin/companies/index'
+import { Route as platformAdminBillingIndexRouteImport } from './routes/(platform)/admin/billing/index'
 import { Route as AuthenticatedDashboardSettingsPrefixRouteImport } from './routes/_authenticated/dashboard/settings/prefix'
 import { Route as AuthenticatedDashboardSettingsPaymentAccountsRouteImport } from './routes/_authenticated/dashboard/settings/payment-accounts'
 import { Route as AuthenticatedDashboardSettingsNotificationsRouteImport } from './routes/_authenticated/dashboard/settings/notifications'
@@ -73,8 +74,12 @@ import { Route as AuthenticatedDashboardSettingsAppearanceRouteImport } from './
 import { Route as AuthenticatedDashboardSettingsAccountRouteImport } from './routes/_authenticated/dashboard/settings/account'
 import { Route as AuthenticatedDashboardNotificationsIdRouteImport } from './routes/_authenticated/dashboard/notifications/$id'
 import { Route as AuthenticatedDashboardErrorsErrorRouteImport } from './routes/_authenticated/dashboard/errors/$error'
+import { Route as platformAdminPlansAddRouteImport } from './routes/(platform)/admin/plans/add'
+import { Route as platformAdminCompaniesCompanyIdRouteImport } from './routes/(platform)/admin/companies/$companyId'
+import { Route as platformAdminBillingStripeRouteImport } from './routes/(platform)/admin/billing/stripe'
 import { Route as AuthenticatedDashboardXRayAllIndexRouteImport } from './routes/_authenticated/dashboard/x-ray/all/index'
 import { Route as AuthenticatedDashboardUltrasonogramAllIndexRouteImport } from './routes/_authenticated/dashboard/ultrasonogram/all/index'
+import { Route as AuthenticatedDashboardSettingsReportSettingsIndexRouteImport } from './routes/_authenticated/dashboard/settings/report-settings/index'
 import { Route as AuthenticatedDashboardRolesCreateIndexRouteImport } from './routes/_authenticated/dashboard/roles/create/index'
 import { Route as AuthenticatedDashboardPayrollOverviewIndexRouteImport } from './routes/_authenticated/dashboard/payroll/overview/index'
 import { Route as AuthenticatedDashboardPayrollEmployeesIndexRouteImport } from './routes/_authenticated/dashboard/payroll/employees/index'
@@ -83,9 +88,11 @@ import { Route as AuthenticatedDashboardBanksBankWithdrawalsIndexRouteImport } f
 import { Route as AuthenticatedDashboardBanksBankTransactionsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-transactions/index'
 import { Route as AuthenticatedDashboardBanksBankDepositsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-deposits/index'
 import { Route as AuthenticatedDashboardBanksBankAccountsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-accounts/index'
+import { Route as AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRouteImport } from './routes/_authenticated/dashboard/admission/user-wise-collections/index'
 import { Route as AuthenticatedDashboardAdmissionSecondTimeBillIndexRouteImport } from './routes/_authenticated/dashboard/admission/second-time-bill/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/index'
 import { Route as AuthenticatedDashboardAdmissionNewAdmissionIndexRouteImport } from './routes/_authenticated/dashboard/admission/new-admission/index'
+import { Route as AuthenticatedDashboardAdmissionMyCollectionsIndexRouteImport } from './routes/_authenticated/dashboard/admission/my-collections/index'
 import { Route as AuthenticatedDashboardAdmissionInvoiceIndexRouteImport } from './routes/_authenticated/dashboard/admission/invoice/index'
 import { Route as AuthenticatedDashboardAdmissionFirstTimeServiceIndexRouteImport } from './routes/_authenticated/dashboard/admission/first-time-service/index'
 import { Route as AuthenticatedDashboardAdmissionFirstTimeBillIndexRouteImport } from './routes/_authenticated/dashboard/admission/first-time-bill/index'
@@ -93,6 +100,7 @@ import { Route as AuthenticatedDashboardAdmissionFinaliseServicesIndexRouteImpor
 import { Route as AuthenticatedDashboardAdmissionFinalBillsIndexRouteImport } from './routes/_authenticated/dashboard/admission/final-bills/index'
 import { Route as AuthenticatedDashboardAdmissionDueCollectionIndexRouteImport } from './routes/_authenticated/dashboard/admission/due-collection/index'
 import { Route as AuthenticatedDashboardAdmissionBedCabinChargeIndexRouteImport } from './routes/_authenticated/dashboard/admission/bed-cabin-charge/index'
+import { Route as AuthenticatedDashboardAdmissionAllCollectionsIndexRouteImport } from './routes/_authenticated/dashboard/admission/all-collections/index'
 import { Route as AuthenticatedDashboardAdmissionAdvancePaymentIndexRouteImport } from './routes/_authenticated/dashboard/admission/advance-payment/index'
 import { Route as AuthenticatedDashboardAccountsPayToSurgeonIndexRouteImport } from './routes/_authenticated/dashboard/accounts/pay-to-surgeon/index'
 import { Route as AuthenticatedDashboardAccountsPayToConsultantIndexRouteImport } from './routes/_authenticated/dashboard/accounts/pay-to-consultant/index'
@@ -107,6 +115,7 @@ import { Route as AuthenticatedDashboardAccountingExpensesIndexRouteImport } fro
 import { Route as AuthenticatedDashboardAccountingExpenseIndexRouteImport } from './routes/_authenticated/dashboard/accounting/expense/index'
 import { Route as AuthenticatedDashboardAccountingAccountsIndexRouteImport } from './routes/_authenticated/dashboard/accounting/accounts/index'
 import { Route as AuthenticatedDashboardRolesEditIdRouteImport } from './routes/_authenticated/dashboard/roles/edit/$id'
+import { Route as platformAdminPlansEditPlanIdRouteImport } from './routes/(platform)/admin/plans/edit.$planId'
 import { Route as AuthenticatedDashboardAdmissionNewAdmissionIndexBakRouteImport } from './routes/_authenticated/dashboard/admission/new-admission/index.bak'
 import { Route as AuthenticatedDashboardPayrollSalaryStaffIdIndexRouteImport } from './routes/_authenticated/dashboard/payroll/salary/$staffId/index'
 import { Route as AuthenticatedDashboardPayrollAttendanceStaffIdIndexRouteImport } from './routes/_authenticated/dashboard/payroll/attendance/$staffId/index'
@@ -136,11 +145,15 @@ import { Route as AuthenticatedDashboardPathologyHematologyBloodForBtCtIndexRout
 import { Route as AuthenticatedDashboardPathologyHematologyAllIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/all/index'
 import { Route as AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRouteImport } from './routes/_authenticated/dashboard/pathology/biochemical/lipid-profile/index'
 import { Route as AuthenticatedDashboardPathologyBiochemicalAllIndexRouteImport } from './routes/_authenticated/dashboard/pathology/biochemical/all/index'
+import { Route as AuthenticatedDashboardOutdoorReceptionUserWiseCollectionsIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/user-wise-collections/index'
 import { Route as AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/user-invoices/index'
 import { Route as AuthenticatedDashboardOutdoorReceptionPatientsIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/patients/index'
+import { Route as AuthenticatedDashboardOutdoorReceptionPatientsByReferrerIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/patients-by-referrer/index'
 import { Route as AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/paid-invoices/index'
 import { Route as AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/my-invoices/index'
+import { Route as AuthenticatedDashboardOutdoorReceptionMyCollectionsIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/my-collections/index'
 import { Route as AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/due-collection/index'
+import { Route as AuthenticatedDashboardOutdoorReceptionAllCollectionsIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/all-collections/index'
 import { Route as AuthenticatedDashboardOutdoorMasterTestsIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/tests/index'
 import { Route as AuthenticatedDashboardOutdoorMasterTestTablesIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/test-tables/index'
 import { Route as AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/sample-collection-rooms/index'
@@ -159,18 +172,27 @@ import { Route as AuthenticatedDashboardIndoorMasterBedResourceTypesIndexRouteIm
 import { Route as AuthenticatedDashboardIndoorMasterBedCabinTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/bed-cabin-types/index'
 import { Route as AuthenticatedDashboardIndoorMasterBedCabinListIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/bed-cabin-list/index'
 import { Route as AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/anasthesia-types/index'
+import { Route as AuthenticatedDashboardIndoorManagementSurgeonBillIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/surgeon-bill/index'
 import { Route as AuthenticatedDashboardIndoorManagementDoctorReferredIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/doctor-referred/index'
 import { Route as AuthenticatedDashboardIndoorManagementDistributionsIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/distributions/index'
+import { Route as AuthenticatedDashboardIndoorManagementClinicalBillsIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/clinical-bills/index'
+import { Route as AuthenticatedDashboardIndoorManagementAssistantBillIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/assistant-bill/index'
+import { Route as AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/anesthesia-bill/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/payment-completed-list/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsPaidIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/paid/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/final-bill-created-list/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsDueIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/due/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsDischargedIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/discharged/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsDischargedPaidListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/discharged-paid-list/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsDischargedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/discharged-list/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsDischargedDueListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/discharged-due-list/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsBillNotDistributedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/bill-not-distributed-list/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsBillDistributedPartialListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/bill-distributed-partial-list/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/bill-distributed-list/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/bill-created-list/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/balance-distributed-list/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsActiveIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/active/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/index'
 import { Route as AuthenticatedDashboardAdmissionInvoiceListIndexRouteImport } from './routes/_authenticated/dashboard/admission/invoice/list/index'
 import { Route as AuthenticatedDashboardAdmissionInvoiceCreateIndexRouteImport } from './routes/_authenticated/dashboard/admission/invoice/create/index'
 import { Route as AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRouteImport } from './routes/_authenticated/dashboard/admission/discharged-patients/bill-does-not-created/index'
@@ -262,8 +284,6 @@ import { Route as AuthenticatedDashboardPathologyHematologyAllEditIdIndexRouteIm
 import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/edit/$invoiceId/index'
 import { Route as AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/tests/edit/[$id]/index'
 
-const platformAdminRouteImport = createFileRoute('/(platform)/admin')()
-
 const ClerkRouteRoute = ClerkRouteRouteImport.update({
   id: '/clerk',
   path: '/clerk',
@@ -276,11 +296,6 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const platformAdminRoute = platformAdminRouteImport.update({
-  id: '/(platform)/admin',
-  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const platformRegisterRoute = platformRegisterRouteImport.update({
@@ -370,6 +385,11 @@ const ClerkauthRouteRoute = ClerkauthRouteRouteImport.update({
   id: '/(auth)',
   getParentRoute: () => ClerkRouteRoute,
 } as any)
+const platformAdminRouteRoute = platformAdminRouteRouteImport.update({
+  id: '/(platform)/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedDashboardIndexRoute =
   AuthenticatedDashboardIndexRouteImport.update({
     id: '/dashboard/',
@@ -379,7 +399,7 @@ const AuthenticatedDashboardIndexRoute =
 const platformAdminIndexRoute = platformAdminIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => platformAdminRoute,
+  getParentRoute: () => platformAdminRouteRoute,
 } as any)
 const ClerkAuthenticatedUserManagementRoute =
   ClerkAuthenticatedUserManagementRouteImport.update({
@@ -397,50 +417,47 @@ const ClerkauthSignInRoute = ClerkauthSignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => ClerkauthRouteRoute,
 } as any)
+const platformAdminSubscriptionsRoute =
+  platformAdminSubscriptionsRouteImport.update({
+    id: '/subscriptions',
+    path: '/subscriptions',
+    getParentRoute: () => platformAdminRouteRoute,
+  } as any)
 const platformAdminSettingsRoute = platformAdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => platformAdminRoute,
+  getParentRoute: () => platformAdminRouteRoute,
 } as any)
 const platformAdminRegistrationsRoute =
   platformAdminRegistrationsRouteImport.update({
     id: '/registrations',
     path: '/registrations',
-    getParentRoute: () => platformAdminRoute,
+    getParentRoute: () => platformAdminRouteRoute,
   } as any)
-const platformAdminPlansRoute = platformAdminPlansRouteImport.update({
-  id: '/plans',
-  path: '/plans',
-  getParentRoute: () => platformAdminRoute,
+const platformAdminProfileRoute = platformAdminProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => platformAdminRouteRoute,
 } as any)
 const platformAdminModulesRoute = platformAdminModulesRouteImport.update({
   id: '/modules',
   path: '/modules',
-  getParentRoute: () => platformAdminRoute,
+  getParentRoute: () => platformAdminRouteRoute,
 } as any)
 const platformAdminLoginRoute = platformAdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => platformAdminRoute,
+  getParentRoute: () => platformAdminRouteRoute,
 } as any)
-const platformAdminCompaniesRoute = platformAdminCompaniesRouteImport.update({
-  id: '/companies',
-  path: '/companies',
-  getParentRoute: () => platformAdminRoute,
-} as any)
-const platformAdminBillingRoute = platformAdminBillingRouteImport.update({
-  id: '/billing',
-  path: '/billing',
-  getParentRoute: () => platformAdminRoute,
+const platformAdminContactsRoute = platformAdminContactsRouteImport.update({
+  id: '/contacts',
+  path: '/contacts',
+  getParentRoute: () => platformAdminRouteRoute,
 } as any)
 const platformAdminAdminsRoute = platformAdminAdminsRouteImport.update({
   id: '/admins',
   path: '/admins',
-  getParentRoute: () => platformAdminRoute,
-} as any)
-const platformAdminLayoutRoute = platformAdminLayoutRouteImport.update({
-  id: '/_layout',
-  getParentRoute: () => platformAdminRoute,
+  getParentRoute: () => platformAdminRouteRoute,
 } as any)
 const AuthenticatedDashboardSettingsRouteRoute =
   AuthenticatedDashboardSettingsRouteRouteImport.update({
@@ -550,6 +567,23 @@ const AuthenticatedDashboardAccountingIndexRoute =
     path: '/dashboard/accounting/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const platformAdminPlansIndexRoute = platformAdminPlansIndexRouteImport.update({
+  id: '/plans/',
+  path: '/plans/',
+  getParentRoute: () => platformAdminRouteRoute,
+} as any)
+const platformAdminCompaniesIndexRoute =
+  platformAdminCompaniesIndexRouteImport.update({
+    id: '/companies/',
+    path: '/companies/',
+    getParentRoute: () => platformAdminRouteRoute,
+  } as any)
+const platformAdminBillingIndexRoute =
+  platformAdminBillingIndexRouteImport.update({
+    id: '/billing/',
+    path: '/billing/',
+    getParentRoute: () => platformAdminRouteRoute,
+  } as any)
 const AuthenticatedDashboardSettingsPrefixRoute =
   AuthenticatedDashboardSettingsPrefixRouteImport.update({
     id: '/prefix',
@@ -604,6 +638,23 @@ const AuthenticatedDashboardErrorsErrorRoute =
     path: '/dashboard/errors/$error',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const platformAdminPlansAddRoute = platformAdminPlansAddRouteImport.update({
+  id: '/plans/add',
+  path: '/plans/add',
+  getParentRoute: () => platformAdminRouteRoute,
+} as any)
+const platformAdminCompaniesCompanyIdRoute =
+  platformAdminCompaniesCompanyIdRouteImport.update({
+    id: '/companies/$companyId',
+    path: '/companies/$companyId',
+    getParentRoute: () => platformAdminRouteRoute,
+  } as any)
+const platformAdminBillingStripeRoute =
+  platformAdminBillingStripeRouteImport.update({
+    id: '/billing/stripe',
+    path: '/billing/stripe',
+    getParentRoute: () => platformAdminRouteRoute,
+  } as any)
 const AuthenticatedDashboardXRayAllIndexRoute =
   AuthenticatedDashboardXRayAllIndexRouteImport.update({
     id: '/dashboard/x-ray/all/',
@@ -615,6 +666,12 @@ const AuthenticatedDashboardUltrasonogramAllIndexRoute =
     id: '/dashboard/ultrasonogram/all/',
     path: '/dashboard/ultrasonogram/all/',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardSettingsReportSettingsIndexRoute =
+  AuthenticatedDashboardSettingsReportSettingsIndexRouteImport.update({
+    id: '/report-settings/',
+    path: '/report-settings/',
+    getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
   } as any)
 const AuthenticatedDashboardRolesCreateIndexRoute =
   AuthenticatedDashboardRolesCreateIndexRouteImport.update({
@@ -664,6 +721,12 @@ const AuthenticatedDashboardBanksBankAccountsIndexRoute =
     path: '/dashboard/banks/bank-accounts/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute =
+  AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRouteImport.update({
+    id: '/dashboard/admission/user-wise-collections/',
+    path: '/dashboard/admission/user-wise-collections/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute =
   AuthenticatedDashboardAdmissionSecondTimeBillIndexRouteImport.update({
     id: '/dashboard/admission/second-time-bill/',
@@ -680,6 +743,12 @@ const AuthenticatedDashboardAdmissionNewAdmissionIndexRoute =
   AuthenticatedDashboardAdmissionNewAdmissionIndexRouteImport.update({
     id: '/dashboard/admission/new-admission/',
     path: '/dashboard/admission/new-admission/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAdmissionMyCollectionsIndexRoute =
+  AuthenticatedDashboardAdmissionMyCollectionsIndexRouteImport.update({
+    id: '/dashboard/admission/my-collections/',
+    path: '/dashboard/admission/my-collections/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardAdmissionInvoiceIndexRoute =
@@ -722,6 +791,12 @@ const AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute =
   AuthenticatedDashboardAdmissionBedCabinChargeIndexRouteImport.update({
     id: '/dashboard/admission/bed-cabin-charge/',
     path: '/dashboard/admission/bed-cabin-charge/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAdmissionAllCollectionsIndexRoute =
+  AuthenticatedDashboardAdmissionAllCollectionsIndexRouteImport.update({
+    id: '/dashboard/admission/all-collections/',
+    path: '/dashboard/admission/all-collections/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute =
@@ -807,6 +882,12 @@ const AuthenticatedDashboardRolesEditIdRoute =
     id: '/dashboard/roles/edit/$id',
     path: '/dashboard/roles/edit/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const platformAdminPlansEditPlanIdRoute =
+  platformAdminPlansEditPlanIdRouteImport.update({
+    id: '/plans/edit/$planId',
+    path: '/plans/edit/$planId',
+    getParentRoute: () => platformAdminRouteRoute,
   } as any)
 const AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute =
   AuthenticatedDashboardAdmissionNewAdmissionIndexBakRouteImport.update({
@@ -990,6 +1071,14 @@ const AuthenticatedDashboardPathologyBiochemicalAllIndexRoute =
     path: '/dashboard/pathology/biochemical/all/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardOutdoorReceptionUserWiseCollectionsIndexRoute =
+  AuthenticatedDashboardOutdoorReceptionUserWiseCollectionsIndexRouteImport.update(
+    {
+      id: '/dashboard/outdoor/reception/user-wise-collections/',
+      path: '/dashboard/outdoor/reception/user-wise-collections/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute =
   AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRouteImport.update({
     id: '/dashboard/outdoor/reception/user-invoices/',
@@ -1002,6 +1091,14 @@ const AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute =
     path: '/dashboard/outdoor/reception/patients/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardOutdoorReceptionPatientsByReferrerIndexRoute =
+  AuthenticatedDashboardOutdoorReceptionPatientsByReferrerIndexRouteImport.update(
+    {
+      id: '/dashboard/outdoor/reception/patients-by-referrer/',
+      path: '/dashboard/outdoor/reception/patients-by-referrer/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute =
   AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRouteImport.update({
     id: '/dashboard/outdoor/reception/paid-invoices/',
@@ -1014,10 +1111,22 @@ const AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute =
     path: '/dashboard/outdoor/reception/my-invoices/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardOutdoorReceptionMyCollectionsIndexRoute =
+  AuthenticatedDashboardOutdoorReceptionMyCollectionsIndexRouteImport.update({
+    id: '/dashboard/outdoor/reception/my-collections/',
+    path: '/dashboard/outdoor/reception/my-collections/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute =
   AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRouteImport.update({
     id: '/dashboard/outdoor/reception/due-collection/',
     path: '/dashboard/outdoor/reception/due-collection/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardOutdoorReceptionAllCollectionsIndexRoute =
+  AuthenticatedDashboardOutdoorReceptionAllCollectionsIndexRouteImport.update({
+    id: '/dashboard/outdoor/reception/all-collections/',
+    path: '/dashboard/outdoor/reception/all-collections/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardOutdoorMasterTestsIndexRoute =
@@ -1130,6 +1239,12 @@ const AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute =
     path: '/dashboard/indoor/master/anasthesia-types/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute =
+  AuthenticatedDashboardIndoorManagementSurgeonBillIndexRouteImport.update({
+    id: '/dashboard/indoor/management/surgeon-bill/',
+    path: '/dashboard/indoor/management/surgeon-bill/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute =
   AuthenticatedDashboardIndoorManagementDoctorReferredIndexRouteImport.update({
     id: '/dashboard/indoor/management/doctor-referred/',
@@ -1140,6 +1255,24 @@ const AuthenticatedDashboardIndoorManagementDistributionsIndexRoute =
   AuthenticatedDashboardIndoorManagementDistributionsIndexRouteImport.update({
     id: '/dashboard/indoor/management/distributions/',
     path: '/dashboard/indoor/management/distributions/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute =
+  AuthenticatedDashboardIndoorManagementClinicalBillsIndexRouteImport.update({
+    id: '/dashboard/indoor/management/clinical-bills/',
+    path: '/dashboard/indoor/management/clinical-bills/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute =
+  AuthenticatedDashboardIndoorManagementAssistantBillIndexRouteImport.update({
+    id: '/dashboard/indoor/management/assistant-bill/',
+    path: '/dashboard/indoor/management/assistant-bill/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute =
+  AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRouteImport.update({
+    id: '/dashboard/indoor/management/anesthesia-bill/',
+    path: '/dashboard/indoor/management/anesthesia-bill/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute =
@@ -1176,12 +1309,44 @@ const AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute =
     path: '/dashboard/admission/patients/discharged/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardAdmissionPatientsDischargedPaidListIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsDischargedPaidListIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/discharged-paid-list/',
+      path: '/dashboard/admission/patients/discharged-paid-list/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute =
   AuthenticatedDashboardAdmissionPatientsDischargedListIndexRouteImport.update({
     id: '/dashboard/admission/patients/discharged-list/',
     path: '/dashboard/admission/patients/discharged-list/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardAdmissionPatientsDischargedDueListIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsDischargedDueListIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/discharged-due-list/',
+      path: '/dashboard/admission/patients/discharged-due-list/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardAdmissionPatientsBillNotDistributedListIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsBillNotDistributedListIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/bill-not-distributed-list/',
+      path: '/dashboard/admission/patients/bill-not-distributed-list/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardAdmissionPatientsBillDistributedPartialListIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsBillDistributedPartialListIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/bill-distributed-partial-list/',
+      path: '/dashboard/admission/patients/bill-distributed-partial-list/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute =
   AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRouteImport.update(
     {
@@ -1210,6 +1375,12 @@ const AuthenticatedDashboardAdmissionPatientsActiveIndexRoute =
   AuthenticatedDashboardAdmissionPatientsActiveIndexRouteImport.update({
     id: '/dashboard/admission/patients/active/',
     path: '/dashboard/admission/patients/active/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAdmissionPatientsAdmissionIdIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdIndexRouteImport.update({
+    id: '/dashboard/admission/patients/$admissionId/',
+    path: '/dashboard/admission/patients/$admissionId/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardAdmissionInvoiceListIndexRoute =
@@ -1820,6 +1991,7 @@ const AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/clerk': typeof ClerkAuthenticatedRouteRouteWithChildren
+  '/admin': typeof platformAdminRouteRouteWithChildren
   '/auth-callback': typeof authAuthCallbackRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
@@ -1836,20 +2008,22 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof platformPricingRoute
   '/register': typeof platformRegisterRoute
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRouteRouteWithChildren
-  '/admin': typeof platformAdminLayoutRoute
   '/admin/admins': typeof platformAdminAdminsRoute
-  '/admin/billing': typeof platformAdminBillingRoute
-  '/admin/companies': typeof platformAdminCompaniesRoute
+  '/admin/contacts': typeof platformAdminContactsRoute
   '/admin/login': typeof platformAdminLoginRoute
   '/admin/modules': typeof platformAdminModulesRoute
-  '/admin/plans': typeof platformAdminPlansRoute
+  '/admin/profile': typeof platformAdminProfileRoute
   '/admin/registrations': typeof platformAdminRegistrationsRoute
   '/admin/settings': typeof platformAdminSettingsRoute
+  '/admin/subscriptions': typeof platformAdminSubscriptionsRoute
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
   '/admin/': typeof platformAdminIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/admin/billing/stripe': typeof platformAdminBillingStripeRoute
+  '/admin/companies/$companyId': typeof platformAdminCompaniesCompanyIdRoute
+  '/admin/plans/add': typeof platformAdminPlansAddRoute
   '/dashboard/errors/$error': typeof AuthenticatedDashboardErrorsErrorRoute
   '/dashboard/notifications/$id': typeof AuthenticatedDashboardNotificationsIdRoute
   '/dashboard/settings/account': typeof AuthenticatedDashboardSettingsAccountRoute
@@ -1859,6 +2033,9 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/notifications': typeof AuthenticatedDashboardSettingsNotificationsRoute
   '/dashboard/settings/payment-accounts': typeof AuthenticatedDashboardSettingsPaymentAccountsRoute
   '/dashboard/settings/prefix': typeof AuthenticatedDashboardSettingsPrefixRoute
+  '/admin/billing': typeof platformAdminBillingIndexRoute
+  '/admin/companies': typeof platformAdminCompaniesIndexRoute
+  '/admin/plans': typeof platformAdminPlansIndexRoute
   '/dashboard/accounting': typeof AuthenticatedDashboardAccountingIndexRoute
   '/dashboard/apps': typeof AuthenticatedDashboardAppsIndexRoute
   '/dashboard/backup-settings': typeof AuthenticatedDashboardBackupSettingsIndexRoute
@@ -1876,6 +2053,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionIndexRoute
   '/dashboard/tasks': typeof AuthenticatedDashboardTasksIndexRoute
   '/dashboard/users': typeof AuthenticatedDashboardUsersIndexRoute
+  '/admin/plans/edit/$planId': typeof platformAdminPlansEditPlanIdRoute
   '/dashboard/roles/edit/$id': typeof AuthenticatedDashboardRolesEditIdRoute
   '/dashboard/accounting/accounts': typeof AuthenticatedDashboardAccountingAccountsIndexRoute
   '/dashboard/accounting/expense': typeof AuthenticatedDashboardAccountingExpenseIndexRoute
@@ -1890,6 +2068,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/accounts/pay-to-consultant': typeof AuthenticatedDashboardAccountsPayToConsultantIndexRoute
   '/dashboard/accounts/pay-to-surgeon': typeof AuthenticatedDashboardAccountsPayToSurgeonIndexRoute
   '/dashboard/admission/advance-payment': typeof AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute
+  '/dashboard/admission/all-collections': typeof AuthenticatedDashboardAdmissionAllCollectionsIndexRoute
   '/dashboard/admission/bed-cabin-charge': typeof AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute
   '/dashboard/admission/due-collection': typeof AuthenticatedDashboardAdmissionDueCollectionIndexRoute
   '/dashboard/admission/final-bills': typeof AuthenticatedDashboardAdmissionFinalBillsIndexRoute
@@ -1897,9 +2076,11 @@ export interface FileRoutesByFullPath {
   '/dashboard/admission/first-time-bill': typeof AuthenticatedDashboardAdmissionFirstTimeBillIndexRoute
   '/dashboard/admission/first-time-service': typeof AuthenticatedDashboardAdmissionFirstTimeServiceIndexRoute
   '/dashboard/admission/invoice': typeof AuthenticatedDashboardAdmissionInvoiceIndexRoute
+  '/dashboard/admission/my-collections': typeof AuthenticatedDashboardAdmissionMyCollectionsIndexRoute
   '/dashboard/admission/new-admission': typeof AuthenticatedDashboardAdmissionNewAdmissionIndexRoute
   '/dashboard/admission/patients': typeof AuthenticatedDashboardAdmissionPatientsIndexRoute
   '/dashboard/admission/second-time-bill': typeof AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute
+  '/dashboard/admission/user-wise-collections': typeof AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute
   '/dashboard/banks/bank-accounts': typeof AuthenticatedDashboardBanksBankAccountsIndexRoute
   '/dashboard/banks/bank-deposits': typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
   '/dashboard/banks/bank-transactions': typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
@@ -1908,6 +2089,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/payroll/employees': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
   '/dashboard/payroll/overview': typeof AuthenticatedDashboardPayrollOverviewIndexRoute
   '/dashboard/roles/create': typeof AuthenticatedDashboardRolesCreateIndexRoute
+  '/dashboard/settings/report-settings': typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
   '/dashboard/ultrasonogram/all': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   '/dashboard/x-ray/all': typeof AuthenticatedDashboardXRayAllIndexRoute
   '/dashboard/accounting/reports/ledger/print': typeof AuthenticatedDashboardAccountingReportsLedgerPrintRoute
@@ -1941,18 +2123,27 @@ export interface FileRoutesByFullPath {
   '/dashboard/admission/discharged-patients/bill-does-not-created': typeof AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
   '/dashboard/admission/invoice/create': typeof AuthenticatedDashboardAdmissionInvoiceCreateIndexRoute
   '/dashboard/admission/invoice/list': typeof AuthenticatedDashboardAdmissionInvoiceListIndexRoute
+  '/dashboard/admission/patients/$admissionId': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdIndexRoute
   '/dashboard/admission/patients/active': typeof AuthenticatedDashboardAdmissionPatientsActiveIndexRoute
   '/dashboard/admission/patients/balance-distributed-list': typeof AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRoute
   '/dashboard/admission/patients/bill-created-list': typeof AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRoute
   '/dashboard/admission/patients/bill-distributed-list': typeof AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute
+  '/dashboard/admission/patients/bill-distributed-partial-list': typeof AuthenticatedDashboardAdmissionPatientsBillDistributedPartialListIndexRoute
+  '/dashboard/admission/patients/bill-not-distributed-list': typeof AuthenticatedDashboardAdmissionPatientsBillNotDistributedListIndexRoute
+  '/dashboard/admission/patients/discharged-due-list': typeof AuthenticatedDashboardAdmissionPatientsDischargedDueListIndexRoute
   '/dashboard/admission/patients/discharged-list': typeof AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute
+  '/dashboard/admission/patients/discharged-paid-list': typeof AuthenticatedDashboardAdmissionPatientsDischargedPaidListIndexRoute
   '/dashboard/admission/patients/discharged': typeof AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute
   '/dashboard/admission/patients/due': typeof AuthenticatedDashboardAdmissionPatientsDueIndexRoute
   '/dashboard/admission/patients/final-bill-created-list': typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
   '/dashboard/admission/patients/paid': typeof AuthenticatedDashboardAdmissionPatientsPaidIndexRoute
   '/dashboard/admission/patients/payment-completed-list': typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
+  '/dashboard/indoor/management/anesthesia-bill': typeof AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute
+  '/dashboard/indoor/management/assistant-bill': typeof AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute
+  '/dashboard/indoor/management/clinical-bills': typeof AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute
   '/dashboard/indoor/management/distributions': typeof AuthenticatedDashboardIndoorManagementDistributionsIndexRoute
   '/dashboard/indoor/management/doctor-referred': typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
+  '/dashboard/indoor/management/surgeon-bill': typeof AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute
   '/dashboard/indoor/master/anasthesia-types': typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   '/dashboard/indoor/master/bed-cabin-list': typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
   '/dashboard/indoor/master/bed-cabin-types': typeof AuthenticatedDashboardIndoorMasterBedCabinTypesIndexRoute
@@ -1971,11 +2162,15 @@ export interface FileRoutesByFullPath {
   '/dashboard/outdoor/master/sample-collection-rooms': typeof AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRoute
   '/dashboard/outdoor/master/test-tables': typeof AuthenticatedDashboardOutdoorMasterTestTablesIndexRoute
   '/dashboard/outdoor/master/tests': typeof AuthenticatedDashboardOutdoorMasterTestsIndexRoute
+  '/dashboard/outdoor/reception/all-collections': typeof AuthenticatedDashboardOutdoorReceptionAllCollectionsIndexRoute
   '/dashboard/outdoor/reception/due-collection': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute
+  '/dashboard/outdoor/reception/my-collections': typeof AuthenticatedDashboardOutdoorReceptionMyCollectionsIndexRoute
   '/dashboard/outdoor/reception/my-invoices': typeof AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute
   '/dashboard/outdoor/reception/paid-invoices': typeof AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute
+  '/dashboard/outdoor/reception/patients-by-referrer': typeof AuthenticatedDashboardOutdoorReceptionPatientsByReferrerIndexRoute
   '/dashboard/outdoor/reception/patients': typeof AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute
   '/dashboard/outdoor/reception/user-invoices': typeof AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute
+  '/dashboard/outdoor/reception/user-wise-collections': typeof AuthenticatedDashboardOutdoorReceptionUserWiseCollectionsIndexRoute
   '/dashboard/pathology/biochemical/all': typeof AuthenticatedDashboardPathologyBiochemicalAllIndexRoute
   '/dashboard/pathology/biochemical/lipid-profile': typeof AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRoute
   '/dashboard/pathology/hematology/all': typeof AuthenticatedDashboardPathologyHematologyAllIndexRoute
@@ -2083,19 +2278,22 @@ export interface FileRoutesByTo {
   '/contact': typeof platformContactRoute
   '/pricing': typeof platformPricingRoute
   '/register': typeof platformRegisterRoute
-  '/admin': typeof platformAdminIndexRoute
   '/admin/admins': typeof platformAdminAdminsRoute
-  '/admin/billing': typeof platformAdminBillingRoute
-  '/admin/companies': typeof platformAdminCompaniesRoute
+  '/admin/contacts': typeof platformAdminContactsRoute
   '/admin/login': typeof platformAdminLoginRoute
   '/admin/modules': typeof platformAdminModulesRoute
-  '/admin/plans': typeof platformAdminPlansRoute
+  '/admin/profile': typeof platformAdminProfileRoute
   '/admin/registrations': typeof platformAdminRegistrationsRoute
   '/admin/settings': typeof platformAdminSettingsRoute
+  '/admin/subscriptions': typeof platformAdminSubscriptionsRoute
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
+  '/admin': typeof platformAdminIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/admin/billing/stripe': typeof platformAdminBillingStripeRoute
+  '/admin/companies/$companyId': typeof platformAdminCompaniesCompanyIdRoute
+  '/admin/plans/add': typeof platformAdminPlansAddRoute
   '/dashboard/errors/$error': typeof AuthenticatedDashboardErrorsErrorRoute
   '/dashboard/notifications/$id': typeof AuthenticatedDashboardNotificationsIdRoute
   '/dashboard/settings/account': typeof AuthenticatedDashboardSettingsAccountRoute
@@ -2105,6 +2303,9 @@ export interface FileRoutesByTo {
   '/dashboard/settings/notifications': typeof AuthenticatedDashboardSettingsNotificationsRoute
   '/dashboard/settings/payment-accounts': typeof AuthenticatedDashboardSettingsPaymentAccountsRoute
   '/dashboard/settings/prefix': typeof AuthenticatedDashboardSettingsPrefixRoute
+  '/admin/billing': typeof platformAdminBillingIndexRoute
+  '/admin/companies': typeof platformAdminCompaniesIndexRoute
+  '/admin/plans': typeof platformAdminPlansIndexRoute
   '/dashboard/accounting': typeof AuthenticatedDashboardAccountingIndexRoute
   '/dashboard/apps': typeof AuthenticatedDashboardAppsIndexRoute
   '/dashboard/backup-settings': typeof AuthenticatedDashboardBackupSettingsIndexRoute
@@ -2122,6 +2323,7 @@ export interface FileRoutesByTo {
   '/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionIndexRoute
   '/dashboard/tasks': typeof AuthenticatedDashboardTasksIndexRoute
   '/dashboard/users': typeof AuthenticatedDashboardUsersIndexRoute
+  '/admin/plans/edit/$planId': typeof platformAdminPlansEditPlanIdRoute
   '/dashboard/roles/edit/$id': typeof AuthenticatedDashboardRolesEditIdRoute
   '/dashboard/accounting/accounts': typeof AuthenticatedDashboardAccountingAccountsIndexRoute
   '/dashboard/accounting/expense': typeof AuthenticatedDashboardAccountingExpenseIndexRoute
@@ -2136,6 +2338,7 @@ export interface FileRoutesByTo {
   '/dashboard/accounts/pay-to-consultant': typeof AuthenticatedDashboardAccountsPayToConsultantIndexRoute
   '/dashboard/accounts/pay-to-surgeon': typeof AuthenticatedDashboardAccountsPayToSurgeonIndexRoute
   '/dashboard/admission/advance-payment': typeof AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute
+  '/dashboard/admission/all-collections': typeof AuthenticatedDashboardAdmissionAllCollectionsIndexRoute
   '/dashboard/admission/bed-cabin-charge': typeof AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute
   '/dashboard/admission/due-collection': typeof AuthenticatedDashboardAdmissionDueCollectionIndexRoute
   '/dashboard/admission/final-bills': typeof AuthenticatedDashboardAdmissionFinalBillsIndexRoute
@@ -2143,9 +2346,11 @@ export interface FileRoutesByTo {
   '/dashboard/admission/first-time-bill': typeof AuthenticatedDashboardAdmissionFirstTimeBillIndexRoute
   '/dashboard/admission/first-time-service': typeof AuthenticatedDashboardAdmissionFirstTimeServiceIndexRoute
   '/dashboard/admission/invoice': typeof AuthenticatedDashboardAdmissionInvoiceIndexRoute
+  '/dashboard/admission/my-collections': typeof AuthenticatedDashboardAdmissionMyCollectionsIndexRoute
   '/dashboard/admission/new-admission': typeof AuthenticatedDashboardAdmissionNewAdmissionIndexRoute
   '/dashboard/admission/patients': typeof AuthenticatedDashboardAdmissionPatientsIndexRoute
   '/dashboard/admission/second-time-bill': typeof AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute
+  '/dashboard/admission/user-wise-collections': typeof AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute
   '/dashboard/banks/bank-accounts': typeof AuthenticatedDashboardBanksBankAccountsIndexRoute
   '/dashboard/banks/bank-deposits': typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
   '/dashboard/banks/bank-transactions': typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
@@ -2154,6 +2359,7 @@ export interface FileRoutesByTo {
   '/dashboard/payroll/employees': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
   '/dashboard/payroll/overview': typeof AuthenticatedDashboardPayrollOverviewIndexRoute
   '/dashboard/roles/create': typeof AuthenticatedDashboardRolesCreateIndexRoute
+  '/dashboard/settings/report-settings': typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
   '/dashboard/ultrasonogram/all': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   '/dashboard/x-ray/all': typeof AuthenticatedDashboardXRayAllIndexRoute
   '/dashboard/accounting/reports/ledger/print': typeof AuthenticatedDashboardAccountingReportsLedgerPrintRoute
@@ -2187,18 +2393,27 @@ export interface FileRoutesByTo {
   '/dashboard/admission/discharged-patients/bill-does-not-created': typeof AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
   '/dashboard/admission/invoice/create': typeof AuthenticatedDashboardAdmissionInvoiceCreateIndexRoute
   '/dashboard/admission/invoice/list': typeof AuthenticatedDashboardAdmissionInvoiceListIndexRoute
+  '/dashboard/admission/patients/$admissionId': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdIndexRoute
   '/dashboard/admission/patients/active': typeof AuthenticatedDashboardAdmissionPatientsActiveIndexRoute
   '/dashboard/admission/patients/balance-distributed-list': typeof AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRoute
   '/dashboard/admission/patients/bill-created-list': typeof AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRoute
   '/dashboard/admission/patients/bill-distributed-list': typeof AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute
+  '/dashboard/admission/patients/bill-distributed-partial-list': typeof AuthenticatedDashboardAdmissionPatientsBillDistributedPartialListIndexRoute
+  '/dashboard/admission/patients/bill-not-distributed-list': typeof AuthenticatedDashboardAdmissionPatientsBillNotDistributedListIndexRoute
+  '/dashboard/admission/patients/discharged-due-list': typeof AuthenticatedDashboardAdmissionPatientsDischargedDueListIndexRoute
   '/dashboard/admission/patients/discharged-list': typeof AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute
+  '/dashboard/admission/patients/discharged-paid-list': typeof AuthenticatedDashboardAdmissionPatientsDischargedPaidListIndexRoute
   '/dashboard/admission/patients/discharged': typeof AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute
   '/dashboard/admission/patients/due': typeof AuthenticatedDashboardAdmissionPatientsDueIndexRoute
   '/dashboard/admission/patients/final-bill-created-list': typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
   '/dashboard/admission/patients/paid': typeof AuthenticatedDashboardAdmissionPatientsPaidIndexRoute
   '/dashboard/admission/patients/payment-completed-list': typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
+  '/dashboard/indoor/management/anesthesia-bill': typeof AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute
+  '/dashboard/indoor/management/assistant-bill': typeof AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute
+  '/dashboard/indoor/management/clinical-bills': typeof AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute
   '/dashboard/indoor/management/distributions': typeof AuthenticatedDashboardIndoorManagementDistributionsIndexRoute
   '/dashboard/indoor/management/doctor-referred': typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
+  '/dashboard/indoor/management/surgeon-bill': typeof AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute
   '/dashboard/indoor/master/anasthesia-types': typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   '/dashboard/indoor/master/bed-cabin-list': typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
   '/dashboard/indoor/master/bed-cabin-types': typeof AuthenticatedDashboardIndoorMasterBedCabinTypesIndexRoute
@@ -2217,11 +2432,15 @@ export interface FileRoutesByTo {
   '/dashboard/outdoor/master/sample-collection-rooms': typeof AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRoute
   '/dashboard/outdoor/master/test-tables': typeof AuthenticatedDashboardOutdoorMasterTestTablesIndexRoute
   '/dashboard/outdoor/master/tests': typeof AuthenticatedDashboardOutdoorMasterTestsIndexRoute
+  '/dashboard/outdoor/reception/all-collections': typeof AuthenticatedDashboardOutdoorReceptionAllCollectionsIndexRoute
   '/dashboard/outdoor/reception/due-collection': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute
+  '/dashboard/outdoor/reception/my-collections': typeof AuthenticatedDashboardOutdoorReceptionMyCollectionsIndexRoute
   '/dashboard/outdoor/reception/my-invoices': typeof AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute
   '/dashboard/outdoor/reception/paid-invoices': typeof AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute
+  '/dashboard/outdoor/reception/patients-by-referrer': typeof AuthenticatedDashboardOutdoorReceptionPatientsByReferrerIndexRoute
   '/dashboard/outdoor/reception/patients': typeof AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute
   '/dashboard/outdoor/reception/user-invoices': typeof AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute
+  '/dashboard/outdoor/reception/user-wise-collections': typeof AuthenticatedDashboardOutdoorReceptionUserWiseCollectionsIndexRoute
   '/dashboard/pathology/biochemical/all': typeof AuthenticatedDashboardPathologyBiochemicalAllIndexRoute
   '/dashboard/pathology/biochemical/lipid-profile': typeof AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRoute
   '/dashboard/pathology/hematology/all': typeof AuthenticatedDashboardPathologyHematologyAllIndexRoute
@@ -2316,6 +2535,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/clerk': typeof ClerkRouteRouteWithChildren
+  '/(platform)/admin': typeof platformAdminRouteRouteWithChildren
   '/clerk/(auth)': typeof ClerkauthRouteRouteWithChildren
   '/clerk/_authenticated': typeof ClerkAuthenticatedRouteRouteWithChildren
   '/(auth)/auth-callback': typeof authAuthCallbackRoute
@@ -2335,21 +2555,22 @@ export interface FileRoutesById {
   '/(platform)/pricing': typeof platformPricingRoute
   '/(platform)/register': typeof platformRegisterRoute
   '/_authenticated/dashboard/settings': typeof AuthenticatedDashboardSettingsRouteRouteWithChildren
-  '/(platform)/admin': typeof platformAdminRouteWithChildren
-  '/(platform)/admin/_layout': typeof platformAdminLayoutRoute
   '/(platform)/admin/admins': typeof platformAdminAdminsRoute
-  '/(platform)/admin/billing': typeof platformAdminBillingRoute
-  '/(platform)/admin/companies': typeof platformAdminCompaniesRoute
+  '/(platform)/admin/contacts': typeof platformAdminContactsRoute
   '/(platform)/admin/login': typeof platformAdminLoginRoute
   '/(platform)/admin/modules': typeof platformAdminModulesRoute
-  '/(platform)/admin/plans': typeof platformAdminPlansRoute
+  '/(platform)/admin/profile': typeof platformAdminProfileRoute
   '/(platform)/admin/registrations': typeof platformAdminRegistrationsRoute
   '/(platform)/admin/settings': typeof platformAdminSettingsRoute
+  '/(platform)/admin/subscriptions': typeof platformAdminSubscriptionsRoute
   '/clerk/(auth)/sign-in': typeof ClerkauthSignInRoute
   '/clerk/(auth)/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/_authenticated/user-management': typeof ClerkAuthenticatedUserManagementRoute
   '/(platform)/admin/': typeof platformAdminIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/(platform)/admin/billing/stripe': typeof platformAdminBillingStripeRoute
+  '/(platform)/admin/companies/$companyId': typeof platformAdminCompaniesCompanyIdRoute
+  '/(platform)/admin/plans/add': typeof platformAdminPlansAddRoute
   '/_authenticated/dashboard/errors/$error': typeof AuthenticatedDashboardErrorsErrorRoute
   '/_authenticated/dashboard/notifications/$id': typeof AuthenticatedDashboardNotificationsIdRoute
   '/_authenticated/dashboard/settings/account': typeof AuthenticatedDashboardSettingsAccountRoute
@@ -2359,6 +2580,9 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/settings/notifications': typeof AuthenticatedDashboardSettingsNotificationsRoute
   '/_authenticated/dashboard/settings/payment-accounts': typeof AuthenticatedDashboardSettingsPaymentAccountsRoute
   '/_authenticated/dashboard/settings/prefix': typeof AuthenticatedDashboardSettingsPrefixRoute
+  '/(platform)/admin/billing/': typeof platformAdminBillingIndexRoute
+  '/(platform)/admin/companies/': typeof platformAdminCompaniesIndexRoute
+  '/(platform)/admin/plans/': typeof platformAdminPlansIndexRoute
   '/_authenticated/dashboard/accounting/': typeof AuthenticatedDashboardAccountingIndexRoute
   '/_authenticated/dashboard/apps/': typeof AuthenticatedDashboardAppsIndexRoute
   '/_authenticated/dashboard/backup-settings/': typeof AuthenticatedDashboardBackupSettingsIndexRoute
@@ -2376,6 +2600,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/subscription/': typeof AuthenticatedDashboardSubscriptionIndexRoute
   '/_authenticated/dashboard/tasks/': typeof AuthenticatedDashboardTasksIndexRoute
   '/_authenticated/dashboard/users/': typeof AuthenticatedDashboardUsersIndexRoute
+  '/(platform)/admin/plans/edit/$planId': typeof platformAdminPlansEditPlanIdRoute
   '/_authenticated/dashboard/roles/edit/$id': typeof AuthenticatedDashboardRolesEditIdRoute
   '/_authenticated/dashboard/accounting/accounts/': typeof AuthenticatedDashboardAccountingAccountsIndexRoute
   '/_authenticated/dashboard/accounting/expense/': typeof AuthenticatedDashboardAccountingExpenseIndexRoute
@@ -2390,6 +2615,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/accounts/pay-to-consultant/': typeof AuthenticatedDashboardAccountsPayToConsultantIndexRoute
   '/_authenticated/dashboard/accounts/pay-to-surgeon/': typeof AuthenticatedDashboardAccountsPayToSurgeonIndexRoute
   '/_authenticated/dashboard/admission/advance-payment/': typeof AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute
+  '/_authenticated/dashboard/admission/all-collections/': typeof AuthenticatedDashboardAdmissionAllCollectionsIndexRoute
   '/_authenticated/dashboard/admission/bed-cabin-charge/': typeof AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute
   '/_authenticated/dashboard/admission/due-collection/': typeof AuthenticatedDashboardAdmissionDueCollectionIndexRoute
   '/_authenticated/dashboard/admission/final-bills/': typeof AuthenticatedDashboardAdmissionFinalBillsIndexRoute
@@ -2397,9 +2623,11 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/admission/first-time-bill/': typeof AuthenticatedDashboardAdmissionFirstTimeBillIndexRoute
   '/_authenticated/dashboard/admission/first-time-service/': typeof AuthenticatedDashboardAdmissionFirstTimeServiceIndexRoute
   '/_authenticated/dashboard/admission/invoice/': typeof AuthenticatedDashboardAdmissionInvoiceIndexRoute
+  '/_authenticated/dashboard/admission/my-collections/': typeof AuthenticatedDashboardAdmissionMyCollectionsIndexRoute
   '/_authenticated/dashboard/admission/new-admission/': typeof AuthenticatedDashboardAdmissionNewAdmissionIndexRoute
   '/_authenticated/dashboard/admission/patients/': typeof AuthenticatedDashboardAdmissionPatientsIndexRoute
   '/_authenticated/dashboard/admission/second-time-bill/': typeof AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute
+  '/_authenticated/dashboard/admission/user-wise-collections/': typeof AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute
   '/_authenticated/dashboard/banks/bank-accounts/': typeof AuthenticatedDashboardBanksBankAccountsIndexRoute
   '/_authenticated/dashboard/banks/bank-deposits/': typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
   '/_authenticated/dashboard/banks/bank-transactions/': typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
@@ -2408,6 +2636,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/payroll/employees/': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
   '/_authenticated/dashboard/payroll/overview/': typeof AuthenticatedDashboardPayrollOverviewIndexRoute
   '/_authenticated/dashboard/roles/create/': typeof AuthenticatedDashboardRolesCreateIndexRoute
+  '/_authenticated/dashboard/settings/report-settings/': typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
   '/_authenticated/dashboard/ultrasonogram/all/': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   '/_authenticated/dashboard/x-ray/all/': typeof AuthenticatedDashboardXRayAllIndexRoute
   '/_authenticated/dashboard/accounting/reports/ledger/print': typeof AuthenticatedDashboardAccountingReportsLedgerPrintRoute
@@ -2441,18 +2670,27 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/admission/discharged-patients/bill-does-not-created/': typeof AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
   '/_authenticated/dashboard/admission/invoice/create/': typeof AuthenticatedDashboardAdmissionInvoiceCreateIndexRoute
   '/_authenticated/dashboard/admission/invoice/list/': typeof AuthenticatedDashboardAdmissionInvoiceListIndexRoute
+  '/_authenticated/dashboard/admission/patients/$admissionId/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdIndexRoute
   '/_authenticated/dashboard/admission/patients/active/': typeof AuthenticatedDashboardAdmissionPatientsActiveIndexRoute
   '/_authenticated/dashboard/admission/patients/balance-distributed-list/': typeof AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRoute
   '/_authenticated/dashboard/admission/patients/bill-created-list/': typeof AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRoute
   '/_authenticated/dashboard/admission/patients/bill-distributed-list/': typeof AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute
+  '/_authenticated/dashboard/admission/patients/bill-distributed-partial-list/': typeof AuthenticatedDashboardAdmissionPatientsBillDistributedPartialListIndexRoute
+  '/_authenticated/dashboard/admission/patients/bill-not-distributed-list/': typeof AuthenticatedDashboardAdmissionPatientsBillNotDistributedListIndexRoute
+  '/_authenticated/dashboard/admission/patients/discharged-due-list/': typeof AuthenticatedDashboardAdmissionPatientsDischargedDueListIndexRoute
   '/_authenticated/dashboard/admission/patients/discharged-list/': typeof AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute
+  '/_authenticated/dashboard/admission/patients/discharged-paid-list/': typeof AuthenticatedDashboardAdmissionPatientsDischargedPaidListIndexRoute
   '/_authenticated/dashboard/admission/patients/discharged/': typeof AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute
   '/_authenticated/dashboard/admission/patients/due/': typeof AuthenticatedDashboardAdmissionPatientsDueIndexRoute
   '/_authenticated/dashboard/admission/patients/final-bill-created-list/': typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
   '/_authenticated/dashboard/admission/patients/paid/': typeof AuthenticatedDashboardAdmissionPatientsPaidIndexRoute
   '/_authenticated/dashboard/admission/patients/payment-completed-list/': typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
+  '/_authenticated/dashboard/indoor/management/anesthesia-bill/': typeof AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute
+  '/_authenticated/dashboard/indoor/management/assistant-bill/': typeof AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute
+  '/_authenticated/dashboard/indoor/management/clinical-bills/': typeof AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute
   '/_authenticated/dashboard/indoor/management/distributions/': typeof AuthenticatedDashboardIndoorManagementDistributionsIndexRoute
   '/_authenticated/dashboard/indoor/management/doctor-referred/': typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
+  '/_authenticated/dashboard/indoor/management/surgeon-bill/': typeof AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute
   '/_authenticated/dashboard/indoor/master/anasthesia-types/': typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   '/_authenticated/dashboard/indoor/master/bed-cabin-list/': typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
   '/_authenticated/dashboard/indoor/master/bed-cabin-types/': typeof AuthenticatedDashboardIndoorMasterBedCabinTypesIndexRoute
@@ -2471,11 +2709,15 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/outdoor/master/sample-collection-rooms/': typeof AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRoute
   '/_authenticated/dashboard/outdoor/master/test-tables/': typeof AuthenticatedDashboardOutdoorMasterTestTablesIndexRoute
   '/_authenticated/dashboard/outdoor/master/tests/': typeof AuthenticatedDashboardOutdoorMasterTestsIndexRoute
+  '/_authenticated/dashboard/outdoor/reception/all-collections/': typeof AuthenticatedDashboardOutdoorReceptionAllCollectionsIndexRoute
   '/_authenticated/dashboard/outdoor/reception/due-collection/': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute
+  '/_authenticated/dashboard/outdoor/reception/my-collections/': typeof AuthenticatedDashboardOutdoorReceptionMyCollectionsIndexRoute
   '/_authenticated/dashboard/outdoor/reception/my-invoices/': typeof AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute
   '/_authenticated/dashboard/outdoor/reception/paid-invoices/': typeof AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute
+  '/_authenticated/dashboard/outdoor/reception/patients-by-referrer/': typeof AuthenticatedDashboardOutdoorReceptionPatientsByReferrerIndexRoute
   '/_authenticated/dashboard/outdoor/reception/patients/': typeof AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute
   '/_authenticated/dashboard/outdoor/reception/user-invoices/': typeof AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute
+  '/_authenticated/dashboard/outdoor/reception/user-wise-collections/': typeof AuthenticatedDashboardOutdoorReceptionUserWiseCollectionsIndexRoute
   '/_authenticated/dashboard/pathology/biochemical/all/': typeof AuthenticatedDashboardPathologyBiochemicalAllIndexRoute
   '/_authenticated/dashboard/pathology/biochemical/lipid-profile/': typeof AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRoute
   '/_authenticated/dashboard/pathology/hematology/all/': typeof AuthenticatedDashboardPathologyHematologyAllIndexRoute
@@ -2570,6 +2812,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/clerk'
+    | '/admin'
     | '/auth-callback'
     | '/forgot-password'
     | '/login'
@@ -2586,20 +2829,22 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/register'
     | '/dashboard/settings'
-    | '/admin'
     | '/admin/admins'
-    | '/admin/billing'
-    | '/admin/companies'
+    | '/admin/contacts'
     | '/admin/login'
     | '/admin/modules'
-    | '/admin/plans'
+    | '/admin/profile'
     | '/admin/registrations'
     | '/admin/settings'
+    | '/admin/subscriptions'
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
     | '/admin/'
     | '/dashboard'
+    | '/admin/billing/stripe'
+    | '/admin/companies/$companyId'
+    | '/admin/plans/add'
     | '/dashboard/errors/$error'
     | '/dashboard/notifications/$id'
     | '/dashboard/settings/account'
@@ -2609,6 +2854,9 @@ export interface FileRouteTypes {
     | '/dashboard/settings/notifications'
     | '/dashboard/settings/payment-accounts'
     | '/dashboard/settings/prefix'
+    | '/admin/billing'
+    | '/admin/companies'
+    | '/admin/plans'
     | '/dashboard/accounting'
     | '/dashboard/apps'
     | '/dashboard/backup-settings'
@@ -2626,6 +2874,7 @@ export interface FileRouteTypes {
     | '/dashboard/subscription'
     | '/dashboard/tasks'
     | '/dashboard/users'
+    | '/admin/plans/edit/$planId'
     | '/dashboard/roles/edit/$id'
     | '/dashboard/accounting/accounts'
     | '/dashboard/accounting/expense'
@@ -2640,6 +2889,7 @@ export interface FileRouteTypes {
     | '/dashboard/accounts/pay-to-consultant'
     | '/dashboard/accounts/pay-to-surgeon'
     | '/dashboard/admission/advance-payment'
+    | '/dashboard/admission/all-collections'
     | '/dashboard/admission/bed-cabin-charge'
     | '/dashboard/admission/due-collection'
     | '/dashboard/admission/final-bills'
@@ -2647,9 +2897,11 @@ export interface FileRouteTypes {
     | '/dashboard/admission/first-time-bill'
     | '/dashboard/admission/first-time-service'
     | '/dashboard/admission/invoice'
+    | '/dashboard/admission/my-collections'
     | '/dashboard/admission/new-admission'
     | '/dashboard/admission/patients'
     | '/dashboard/admission/second-time-bill'
+    | '/dashboard/admission/user-wise-collections'
     | '/dashboard/banks/bank-accounts'
     | '/dashboard/banks/bank-deposits'
     | '/dashboard/banks/bank-transactions'
@@ -2658,6 +2910,7 @@ export interface FileRouteTypes {
     | '/dashboard/payroll/employees'
     | '/dashboard/payroll/overview'
     | '/dashboard/roles/create'
+    | '/dashboard/settings/report-settings'
     | '/dashboard/ultrasonogram/all'
     | '/dashboard/x-ray/all'
     | '/dashboard/accounting/reports/ledger/print'
@@ -2691,18 +2944,27 @@ export interface FileRouteTypes {
     | '/dashboard/admission/discharged-patients/bill-does-not-created'
     | '/dashboard/admission/invoice/create'
     | '/dashboard/admission/invoice/list'
+    | '/dashboard/admission/patients/$admissionId'
     | '/dashboard/admission/patients/active'
     | '/dashboard/admission/patients/balance-distributed-list'
     | '/dashboard/admission/patients/bill-created-list'
     | '/dashboard/admission/patients/bill-distributed-list'
+    | '/dashboard/admission/patients/bill-distributed-partial-list'
+    | '/dashboard/admission/patients/bill-not-distributed-list'
+    | '/dashboard/admission/patients/discharged-due-list'
     | '/dashboard/admission/patients/discharged-list'
+    | '/dashboard/admission/patients/discharged-paid-list'
     | '/dashboard/admission/patients/discharged'
     | '/dashboard/admission/patients/due'
     | '/dashboard/admission/patients/final-bill-created-list'
     | '/dashboard/admission/patients/paid'
     | '/dashboard/admission/patients/payment-completed-list'
+    | '/dashboard/indoor/management/anesthesia-bill'
+    | '/dashboard/indoor/management/assistant-bill'
+    | '/dashboard/indoor/management/clinical-bills'
     | '/dashboard/indoor/management/distributions'
     | '/dashboard/indoor/management/doctor-referred'
+    | '/dashboard/indoor/management/surgeon-bill'
     | '/dashboard/indoor/master/anasthesia-types'
     | '/dashboard/indoor/master/bed-cabin-list'
     | '/dashboard/indoor/master/bed-cabin-types'
@@ -2721,11 +2983,15 @@ export interface FileRouteTypes {
     | '/dashboard/outdoor/master/sample-collection-rooms'
     | '/dashboard/outdoor/master/test-tables'
     | '/dashboard/outdoor/master/tests'
+    | '/dashboard/outdoor/reception/all-collections'
     | '/dashboard/outdoor/reception/due-collection'
+    | '/dashboard/outdoor/reception/my-collections'
     | '/dashboard/outdoor/reception/my-invoices'
     | '/dashboard/outdoor/reception/paid-invoices'
+    | '/dashboard/outdoor/reception/patients-by-referrer'
     | '/dashboard/outdoor/reception/patients'
     | '/dashboard/outdoor/reception/user-invoices'
+    | '/dashboard/outdoor/reception/user-wise-collections'
     | '/dashboard/pathology/biochemical/all'
     | '/dashboard/pathology/biochemical/lipid-profile'
     | '/dashboard/pathology/hematology/all'
@@ -2833,19 +3099,22 @@ export interface FileRouteTypes {
     | '/contact'
     | '/pricing'
     | '/register'
-    | '/admin'
     | '/admin/admins'
-    | '/admin/billing'
-    | '/admin/companies'
+    | '/admin/contacts'
     | '/admin/login'
     | '/admin/modules'
-    | '/admin/plans'
+    | '/admin/profile'
     | '/admin/registrations'
     | '/admin/settings'
+    | '/admin/subscriptions'
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
+    | '/admin'
     | '/dashboard'
+    | '/admin/billing/stripe'
+    | '/admin/companies/$companyId'
+    | '/admin/plans/add'
     | '/dashboard/errors/$error'
     | '/dashboard/notifications/$id'
     | '/dashboard/settings/account'
@@ -2855,6 +3124,9 @@ export interface FileRouteTypes {
     | '/dashboard/settings/notifications'
     | '/dashboard/settings/payment-accounts'
     | '/dashboard/settings/prefix'
+    | '/admin/billing'
+    | '/admin/companies'
+    | '/admin/plans'
     | '/dashboard/accounting'
     | '/dashboard/apps'
     | '/dashboard/backup-settings'
@@ -2872,6 +3144,7 @@ export interface FileRouteTypes {
     | '/dashboard/subscription'
     | '/dashboard/tasks'
     | '/dashboard/users'
+    | '/admin/plans/edit/$planId'
     | '/dashboard/roles/edit/$id'
     | '/dashboard/accounting/accounts'
     | '/dashboard/accounting/expense'
@@ -2886,6 +3159,7 @@ export interface FileRouteTypes {
     | '/dashboard/accounts/pay-to-consultant'
     | '/dashboard/accounts/pay-to-surgeon'
     | '/dashboard/admission/advance-payment'
+    | '/dashboard/admission/all-collections'
     | '/dashboard/admission/bed-cabin-charge'
     | '/dashboard/admission/due-collection'
     | '/dashboard/admission/final-bills'
@@ -2893,9 +3167,11 @@ export interface FileRouteTypes {
     | '/dashboard/admission/first-time-bill'
     | '/dashboard/admission/first-time-service'
     | '/dashboard/admission/invoice'
+    | '/dashboard/admission/my-collections'
     | '/dashboard/admission/new-admission'
     | '/dashboard/admission/patients'
     | '/dashboard/admission/second-time-bill'
+    | '/dashboard/admission/user-wise-collections'
     | '/dashboard/banks/bank-accounts'
     | '/dashboard/banks/bank-deposits'
     | '/dashboard/banks/bank-transactions'
@@ -2904,6 +3180,7 @@ export interface FileRouteTypes {
     | '/dashboard/payroll/employees'
     | '/dashboard/payroll/overview'
     | '/dashboard/roles/create'
+    | '/dashboard/settings/report-settings'
     | '/dashboard/ultrasonogram/all'
     | '/dashboard/x-ray/all'
     | '/dashboard/accounting/reports/ledger/print'
@@ -2937,18 +3214,27 @@ export interface FileRouteTypes {
     | '/dashboard/admission/discharged-patients/bill-does-not-created'
     | '/dashboard/admission/invoice/create'
     | '/dashboard/admission/invoice/list'
+    | '/dashboard/admission/patients/$admissionId'
     | '/dashboard/admission/patients/active'
     | '/dashboard/admission/patients/balance-distributed-list'
     | '/dashboard/admission/patients/bill-created-list'
     | '/dashboard/admission/patients/bill-distributed-list'
+    | '/dashboard/admission/patients/bill-distributed-partial-list'
+    | '/dashboard/admission/patients/bill-not-distributed-list'
+    | '/dashboard/admission/patients/discharged-due-list'
     | '/dashboard/admission/patients/discharged-list'
+    | '/dashboard/admission/patients/discharged-paid-list'
     | '/dashboard/admission/patients/discharged'
     | '/dashboard/admission/patients/due'
     | '/dashboard/admission/patients/final-bill-created-list'
     | '/dashboard/admission/patients/paid'
     | '/dashboard/admission/patients/payment-completed-list'
+    | '/dashboard/indoor/management/anesthesia-bill'
+    | '/dashboard/indoor/management/assistant-bill'
+    | '/dashboard/indoor/management/clinical-bills'
     | '/dashboard/indoor/management/distributions'
     | '/dashboard/indoor/management/doctor-referred'
+    | '/dashboard/indoor/management/surgeon-bill'
     | '/dashboard/indoor/master/anasthesia-types'
     | '/dashboard/indoor/master/bed-cabin-list'
     | '/dashboard/indoor/master/bed-cabin-types'
@@ -2967,11 +3253,15 @@ export interface FileRouteTypes {
     | '/dashboard/outdoor/master/sample-collection-rooms'
     | '/dashboard/outdoor/master/test-tables'
     | '/dashboard/outdoor/master/tests'
+    | '/dashboard/outdoor/reception/all-collections'
     | '/dashboard/outdoor/reception/due-collection'
+    | '/dashboard/outdoor/reception/my-collections'
     | '/dashboard/outdoor/reception/my-invoices'
     | '/dashboard/outdoor/reception/paid-invoices'
+    | '/dashboard/outdoor/reception/patients-by-referrer'
     | '/dashboard/outdoor/reception/patients'
     | '/dashboard/outdoor/reception/user-invoices'
+    | '/dashboard/outdoor/reception/user-wise-collections'
     | '/dashboard/pathology/biochemical/all'
     | '/dashboard/pathology/biochemical/lipid-profile'
     | '/dashboard/pathology/hematology/all'
@@ -3065,6 +3355,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/clerk'
+    | '/(platform)/admin'
     | '/clerk/(auth)'
     | '/clerk/_authenticated'
     | '/(auth)/auth-callback'
@@ -3084,21 +3375,22 @@ export interface FileRouteTypes {
     | '/(platform)/pricing'
     | '/(platform)/register'
     | '/_authenticated/dashboard/settings'
-    | '/(platform)/admin'
-    | '/(platform)/admin/_layout'
     | '/(platform)/admin/admins'
-    | '/(platform)/admin/billing'
-    | '/(platform)/admin/companies'
+    | '/(platform)/admin/contacts'
     | '/(platform)/admin/login'
     | '/(platform)/admin/modules'
-    | '/(platform)/admin/plans'
+    | '/(platform)/admin/profile'
     | '/(platform)/admin/registrations'
     | '/(platform)/admin/settings'
+    | '/(platform)/admin/subscriptions'
     | '/clerk/(auth)/sign-in'
     | '/clerk/(auth)/sign-up'
     | '/clerk/_authenticated/user-management'
     | '/(platform)/admin/'
     | '/_authenticated/dashboard/'
+    | '/(platform)/admin/billing/stripe'
+    | '/(platform)/admin/companies/$companyId'
+    | '/(platform)/admin/plans/add'
     | '/_authenticated/dashboard/errors/$error'
     | '/_authenticated/dashboard/notifications/$id'
     | '/_authenticated/dashboard/settings/account'
@@ -3108,6 +3400,9 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/settings/notifications'
     | '/_authenticated/dashboard/settings/payment-accounts'
     | '/_authenticated/dashboard/settings/prefix'
+    | '/(platform)/admin/billing/'
+    | '/(platform)/admin/companies/'
+    | '/(platform)/admin/plans/'
     | '/_authenticated/dashboard/accounting/'
     | '/_authenticated/dashboard/apps/'
     | '/_authenticated/dashboard/backup-settings/'
@@ -3125,6 +3420,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/subscription/'
     | '/_authenticated/dashboard/tasks/'
     | '/_authenticated/dashboard/users/'
+    | '/(platform)/admin/plans/edit/$planId'
     | '/_authenticated/dashboard/roles/edit/$id'
     | '/_authenticated/dashboard/accounting/accounts/'
     | '/_authenticated/dashboard/accounting/expense/'
@@ -3139,6 +3435,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/accounts/pay-to-consultant/'
     | '/_authenticated/dashboard/accounts/pay-to-surgeon/'
     | '/_authenticated/dashboard/admission/advance-payment/'
+    | '/_authenticated/dashboard/admission/all-collections/'
     | '/_authenticated/dashboard/admission/bed-cabin-charge/'
     | '/_authenticated/dashboard/admission/due-collection/'
     | '/_authenticated/dashboard/admission/final-bills/'
@@ -3146,9 +3443,11 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/admission/first-time-bill/'
     | '/_authenticated/dashboard/admission/first-time-service/'
     | '/_authenticated/dashboard/admission/invoice/'
+    | '/_authenticated/dashboard/admission/my-collections/'
     | '/_authenticated/dashboard/admission/new-admission/'
     | '/_authenticated/dashboard/admission/patients/'
     | '/_authenticated/dashboard/admission/second-time-bill/'
+    | '/_authenticated/dashboard/admission/user-wise-collections/'
     | '/_authenticated/dashboard/banks/bank-accounts/'
     | '/_authenticated/dashboard/banks/bank-deposits/'
     | '/_authenticated/dashboard/banks/bank-transactions/'
@@ -3157,6 +3456,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/payroll/employees/'
     | '/_authenticated/dashboard/payroll/overview/'
     | '/_authenticated/dashboard/roles/create/'
+    | '/_authenticated/dashboard/settings/report-settings/'
     | '/_authenticated/dashboard/ultrasonogram/all/'
     | '/_authenticated/dashboard/x-ray/all/'
     | '/_authenticated/dashboard/accounting/reports/ledger/print'
@@ -3190,18 +3490,27 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/admission/discharged-patients/bill-does-not-created/'
     | '/_authenticated/dashboard/admission/invoice/create/'
     | '/_authenticated/dashboard/admission/invoice/list/'
+    | '/_authenticated/dashboard/admission/patients/$admissionId/'
     | '/_authenticated/dashboard/admission/patients/active/'
     | '/_authenticated/dashboard/admission/patients/balance-distributed-list/'
     | '/_authenticated/dashboard/admission/patients/bill-created-list/'
     | '/_authenticated/dashboard/admission/patients/bill-distributed-list/'
+    | '/_authenticated/dashboard/admission/patients/bill-distributed-partial-list/'
+    | '/_authenticated/dashboard/admission/patients/bill-not-distributed-list/'
+    | '/_authenticated/dashboard/admission/patients/discharged-due-list/'
     | '/_authenticated/dashboard/admission/patients/discharged-list/'
+    | '/_authenticated/dashboard/admission/patients/discharged-paid-list/'
     | '/_authenticated/dashboard/admission/patients/discharged/'
     | '/_authenticated/dashboard/admission/patients/due/'
     | '/_authenticated/dashboard/admission/patients/final-bill-created-list/'
     | '/_authenticated/dashboard/admission/patients/paid/'
     | '/_authenticated/dashboard/admission/patients/payment-completed-list/'
+    | '/_authenticated/dashboard/indoor/management/anesthesia-bill/'
+    | '/_authenticated/dashboard/indoor/management/assistant-bill/'
+    | '/_authenticated/dashboard/indoor/management/clinical-bills/'
     | '/_authenticated/dashboard/indoor/management/distributions/'
     | '/_authenticated/dashboard/indoor/management/doctor-referred/'
+    | '/_authenticated/dashboard/indoor/management/surgeon-bill/'
     | '/_authenticated/dashboard/indoor/master/anasthesia-types/'
     | '/_authenticated/dashboard/indoor/master/bed-cabin-list/'
     | '/_authenticated/dashboard/indoor/master/bed-cabin-types/'
@@ -3220,11 +3529,15 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/outdoor/master/sample-collection-rooms/'
     | '/_authenticated/dashboard/outdoor/master/test-tables/'
     | '/_authenticated/dashboard/outdoor/master/tests/'
+    | '/_authenticated/dashboard/outdoor/reception/all-collections/'
     | '/_authenticated/dashboard/outdoor/reception/due-collection/'
+    | '/_authenticated/dashboard/outdoor/reception/my-collections/'
     | '/_authenticated/dashboard/outdoor/reception/my-invoices/'
     | '/_authenticated/dashboard/outdoor/reception/paid-invoices/'
+    | '/_authenticated/dashboard/outdoor/reception/patients-by-referrer/'
     | '/_authenticated/dashboard/outdoor/reception/patients/'
     | '/_authenticated/dashboard/outdoor/reception/user-invoices/'
+    | '/_authenticated/dashboard/outdoor/reception/user-wise-collections/'
     | '/_authenticated/dashboard/pathology/biochemical/all/'
     | '/_authenticated/dashboard/pathology/biochemical/lipid-profile/'
     | '/_authenticated/dashboard/pathology/hematology/all/'
@@ -3319,6 +3632,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   ClerkRouteRoute: typeof ClerkRouteRouteWithChildren
+  platformAdminRouteRoute: typeof platformAdminRouteRouteWithChildren
   authAuthCallbackRoute: typeof authAuthCallbackRoute
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authLoginRoute: typeof authLoginRoute
@@ -3335,7 +3649,6 @@ export interface RootRouteChildren {
   platformContactRoute: typeof platformContactRoute
   platformPricingRoute: typeof platformPricingRoute
   platformRegisterRoute: typeof platformRegisterRoute
-  platformAdminRoute: typeof platformAdminRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -3359,13 +3672,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(platform)/admin': {
-      id: '/(platform)/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof platformAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(platform)/register': {
@@ -3494,6 +3800,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClerkauthRouteRouteImport
       parentRoute: typeof ClerkRouteRoute
     }
+    '/(platform)/admin': {
+      id: '/(platform)/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof platformAdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard/': {
       id: '/_authenticated/dashboard/'
       path: '/dashboard'
@@ -3506,7 +3819,7 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof platformAdminIndexRouteImport
-      parentRoute: typeof platformAdminRoute
+      parentRoute: typeof platformAdminRouteRoute
     }
     '/clerk/_authenticated/user-management': {
       id: '/clerk/_authenticated/user-management'
@@ -3529,68 +3842,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClerkauthSignInRouteImport
       parentRoute: typeof ClerkauthRouteRoute
     }
+    '/(platform)/admin/subscriptions': {
+      id: '/(platform)/admin/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/admin/subscriptions'
+      preLoaderRoute: typeof platformAdminSubscriptionsRouteImport
+      parentRoute: typeof platformAdminRouteRoute
+    }
     '/(platform)/admin/settings': {
       id: '/(platform)/admin/settings'
       path: '/settings'
       fullPath: '/admin/settings'
       preLoaderRoute: typeof platformAdminSettingsRouteImport
-      parentRoute: typeof platformAdminRoute
+      parentRoute: typeof platformAdminRouteRoute
     }
     '/(platform)/admin/registrations': {
       id: '/(platform)/admin/registrations'
       path: '/registrations'
       fullPath: '/admin/registrations'
       preLoaderRoute: typeof platformAdminRegistrationsRouteImport
-      parentRoute: typeof platformAdminRoute
+      parentRoute: typeof platformAdminRouteRoute
     }
-    '/(platform)/admin/plans': {
-      id: '/(platform)/admin/plans'
-      path: '/plans'
-      fullPath: '/admin/plans'
-      preLoaderRoute: typeof platformAdminPlansRouteImport
-      parentRoute: typeof platformAdminRoute
+    '/(platform)/admin/profile': {
+      id: '/(platform)/admin/profile'
+      path: '/profile'
+      fullPath: '/admin/profile'
+      preLoaderRoute: typeof platformAdminProfileRouteImport
+      parentRoute: typeof platformAdminRouteRoute
     }
     '/(platform)/admin/modules': {
       id: '/(platform)/admin/modules'
       path: '/modules'
       fullPath: '/admin/modules'
       preLoaderRoute: typeof platformAdminModulesRouteImport
-      parentRoute: typeof platformAdminRoute
+      parentRoute: typeof platformAdminRouteRoute
     }
     '/(platform)/admin/login': {
       id: '/(platform)/admin/login'
       path: '/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof platformAdminLoginRouteImport
-      parentRoute: typeof platformAdminRoute
+      parentRoute: typeof platformAdminRouteRoute
     }
-    '/(platform)/admin/companies': {
-      id: '/(platform)/admin/companies'
-      path: '/companies'
-      fullPath: '/admin/companies'
-      preLoaderRoute: typeof platformAdminCompaniesRouteImport
-      parentRoute: typeof platformAdminRoute
-    }
-    '/(platform)/admin/billing': {
-      id: '/(platform)/admin/billing'
-      path: '/billing'
-      fullPath: '/admin/billing'
-      preLoaderRoute: typeof platformAdminBillingRouteImport
-      parentRoute: typeof platformAdminRoute
+    '/(platform)/admin/contacts': {
+      id: '/(platform)/admin/contacts'
+      path: '/contacts'
+      fullPath: '/admin/contacts'
+      preLoaderRoute: typeof platformAdminContactsRouteImport
+      parentRoute: typeof platformAdminRouteRoute
     }
     '/(platform)/admin/admins': {
       id: '/(platform)/admin/admins'
       path: '/admins'
       fullPath: '/admin/admins'
       preLoaderRoute: typeof platformAdminAdminsRouteImport
-      parentRoute: typeof platformAdminRoute
-    }
-    '/(platform)/admin/_layout': {
-      id: '/(platform)/admin/_layout'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof platformAdminLayoutRouteImport
-      parentRoute: typeof platformAdminRoute
+      parentRoute: typeof platformAdminRouteRoute
     }
     '/_authenticated/dashboard/settings': {
       id: '/_authenticated/dashboard/settings'
@@ -3718,6 +4024,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardAccountingIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/(platform)/admin/plans/': {
+      id: '/(platform)/admin/plans/'
+      path: '/plans'
+      fullPath: '/admin/plans'
+      preLoaderRoute: typeof platformAdminPlansIndexRouteImport
+      parentRoute: typeof platformAdminRouteRoute
+    }
+    '/(platform)/admin/companies/': {
+      id: '/(platform)/admin/companies/'
+      path: '/companies'
+      fullPath: '/admin/companies'
+      preLoaderRoute: typeof platformAdminCompaniesIndexRouteImport
+      parentRoute: typeof platformAdminRouteRoute
+    }
+    '/(platform)/admin/billing/': {
+      id: '/(platform)/admin/billing/'
+      path: '/billing'
+      fullPath: '/admin/billing'
+      preLoaderRoute: typeof platformAdminBillingIndexRouteImport
+      parentRoute: typeof platformAdminRouteRoute
+    }
     '/_authenticated/dashboard/settings/prefix': {
       id: '/_authenticated/dashboard/settings/prefix'
       path: '/prefix'
@@ -3781,6 +4108,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardErrorsErrorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/(platform)/admin/plans/add': {
+      id: '/(platform)/admin/plans/add'
+      path: '/plans/add'
+      fullPath: '/admin/plans/add'
+      preLoaderRoute: typeof platformAdminPlansAddRouteImport
+      parentRoute: typeof platformAdminRouteRoute
+    }
+    '/(platform)/admin/companies/$companyId': {
+      id: '/(platform)/admin/companies/$companyId'
+      path: '/companies/$companyId'
+      fullPath: '/admin/companies/$companyId'
+      preLoaderRoute: typeof platformAdminCompaniesCompanyIdRouteImport
+      parentRoute: typeof platformAdminRouteRoute
+    }
+    '/(platform)/admin/billing/stripe': {
+      id: '/(platform)/admin/billing/stripe'
+      path: '/billing/stripe'
+      fullPath: '/admin/billing/stripe'
+      preLoaderRoute: typeof platformAdminBillingStripeRouteImport
+      parentRoute: typeof platformAdminRouteRoute
+    }
     '/_authenticated/dashboard/x-ray/all/': {
       id: '/_authenticated/dashboard/x-ray/all/'
       path: '/dashboard/x-ray/all'
@@ -3794,6 +4142,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/ultrasonogram/all'
       preLoaderRoute: typeof AuthenticatedDashboardUltrasonogramAllIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/settings/report-settings/': {
+      id: '/_authenticated/dashboard/settings/report-settings/'
+      path: '/report-settings'
+      fullPath: '/dashboard/settings/report-settings'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsReportSettingsIndexRouteImport
+      parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
     }
     '/_authenticated/dashboard/roles/create/': {
       id: '/_authenticated/dashboard/roles/create/'
@@ -3851,6 +4206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardBanksBankAccountsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/admission/user-wise-collections/': {
+      id: '/_authenticated/dashboard/admission/user-wise-collections/'
+      path: '/dashboard/admission/user-wise-collections'
+      fullPath: '/dashboard/admission/user-wise-collections'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/admission/second-time-bill/': {
       id: '/_authenticated/dashboard/admission/second-time-bill/'
       path: '/dashboard/admission/second-time-bill'
@@ -3870,6 +4232,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/admission/new-admission'
       fullPath: '/dashboard/admission/new-admission'
       preLoaderRoute: typeof AuthenticatedDashboardAdmissionNewAdmissionIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/admission/my-collections/': {
+      id: '/_authenticated/dashboard/admission/my-collections/'
+      path: '/dashboard/admission/my-collections'
+      fullPath: '/dashboard/admission/my-collections'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionMyCollectionsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/admission/invoice/': {
@@ -3919,6 +4288,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/admission/bed-cabin-charge'
       fullPath: '/dashboard/admission/bed-cabin-charge'
       preLoaderRoute: typeof AuthenticatedDashboardAdmissionBedCabinChargeIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/admission/all-collections/': {
+      id: '/_authenticated/dashboard/admission/all-collections/'
+      path: '/dashboard/admission/all-collections'
+      fullPath: '/dashboard/admission/all-collections'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionAllCollectionsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/admission/advance-payment/': {
@@ -4018,6 +4394,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/roles/edit/$id'
       preLoaderRoute: typeof AuthenticatedDashboardRolesEditIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/(platform)/admin/plans/edit/$planId': {
+      id: '/(platform)/admin/plans/edit/$planId'
+      path: '/plans/edit/$planId'
+      fullPath: '/admin/plans/edit/$planId'
+      preLoaderRoute: typeof platformAdminPlansEditPlanIdRouteImport
+      parentRoute: typeof platformAdminRouteRoute
     }
     '/_authenticated/dashboard/admission/new-admission/index/bak': {
       id: '/_authenticated/dashboard/admission/new-admission/index/bak'
@@ -4222,6 +4605,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardPathologyBiochemicalAllIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/outdoor/reception/user-wise-collections/': {
+      id: '/_authenticated/dashboard/outdoor/reception/user-wise-collections/'
+      path: '/dashboard/outdoor/reception/user-wise-collections'
+      fullPath: '/dashboard/outdoor/reception/user-wise-collections'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionUserWiseCollectionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/outdoor/reception/user-invoices/': {
       id: '/_authenticated/dashboard/outdoor/reception/user-invoices/'
       path: '/dashboard/outdoor/reception/user-invoices'
@@ -4234,6 +4624,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/outdoor/reception/patients'
       fullPath: '/dashboard/outdoor/reception/patients'
       preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionPatientsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/outdoor/reception/patients-by-referrer/': {
+      id: '/_authenticated/dashboard/outdoor/reception/patients-by-referrer/'
+      path: '/dashboard/outdoor/reception/patients-by-referrer'
+      fullPath: '/dashboard/outdoor/reception/patients-by-referrer'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionPatientsByReferrerIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/outdoor/reception/paid-invoices/': {
@@ -4250,11 +4647,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/outdoor/reception/my-collections/': {
+      id: '/_authenticated/dashboard/outdoor/reception/my-collections/'
+      path: '/dashboard/outdoor/reception/my-collections'
+      fullPath: '/dashboard/outdoor/reception/my-collections'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionMyCollectionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/outdoor/reception/due-collection/': {
       id: '/_authenticated/dashboard/outdoor/reception/due-collection/'
       path: '/dashboard/outdoor/reception/due-collection'
       fullPath: '/dashboard/outdoor/reception/due-collection'
       preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/outdoor/reception/all-collections/': {
+      id: '/_authenticated/dashboard/outdoor/reception/all-collections/'
+      path: '/dashboard/outdoor/reception/all-collections'
+      fullPath: '/dashboard/outdoor/reception/all-collections'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionAllCollectionsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/outdoor/master/tests/': {
@@ -4383,6 +4794,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/indoor/management/surgeon-bill/': {
+      id: '/_authenticated/dashboard/indoor/management/surgeon-bill/'
+      path: '/dashboard/indoor/management/surgeon-bill'
+      fullPath: '/dashboard/indoor/management/surgeon-bill'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorManagementSurgeonBillIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/indoor/management/doctor-referred/': {
       id: '/_authenticated/dashboard/indoor/management/doctor-referred/'
       path: '/dashboard/indoor/management/doctor-referred'
@@ -4395,6 +4813,27 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/indoor/management/distributions'
       fullPath: '/dashboard/indoor/management/distributions'
       preLoaderRoute: typeof AuthenticatedDashboardIndoorManagementDistributionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/indoor/management/clinical-bills/': {
+      id: '/_authenticated/dashboard/indoor/management/clinical-bills/'
+      path: '/dashboard/indoor/management/clinical-bills'
+      fullPath: '/dashboard/indoor/management/clinical-bills'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorManagementClinicalBillsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/indoor/management/assistant-bill/': {
+      id: '/_authenticated/dashboard/indoor/management/assistant-bill/'
+      path: '/dashboard/indoor/management/assistant-bill'
+      fullPath: '/dashboard/indoor/management/assistant-bill'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorManagementAssistantBillIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/indoor/management/anesthesia-bill/': {
+      id: '/_authenticated/dashboard/indoor/management/anesthesia-bill/'
+      path: '/dashboard/indoor/management/anesthesia-bill'
+      fullPath: '/dashboard/indoor/management/anesthesia-bill'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/admission/patients/payment-completed-list/': {
@@ -4432,11 +4871,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsDischargedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/admission/patients/discharged-paid-list/': {
+      id: '/_authenticated/dashboard/admission/patients/discharged-paid-list/'
+      path: '/dashboard/admission/patients/discharged-paid-list'
+      fullPath: '/dashboard/admission/patients/discharged-paid-list'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsDischargedPaidListIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/admission/patients/discharged-list/': {
       id: '/_authenticated/dashboard/admission/patients/discharged-list/'
       path: '/dashboard/admission/patients/discharged-list'
       fullPath: '/dashboard/admission/patients/discharged-list'
       preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsDischargedListIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/admission/patients/discharged-due-list/': {
+      id: '/_authenticated/dashboard/admission/patients/discharged-due-list/'
+      path: '/dashboard/admission/patients/discharged-due-list'
+      fullPath: '/dashboard/admission/patients/discharged-due-list'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsDischargedDueListIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/admission/patients/bill-not-distributed-list/': {
+      id: '/_authenticated/dashboard/admission/patients/bill-not-distributed-list/'
+      path: '/dashboard/admission/patients/bill-not-distributed-list'
+      fullPath: '/dashboard/admission/patients/bill-not-distributed-list'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsBillNotDistributedListIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/admission/patients/bill-distributed-partial-list/': {
+      id: '/_authenticated/dashboard/admission/patients/bill-distributed-partial-list/'
+      path: '/dashboard/admission/patients/bill-distributed-partial-list'
+      fullPath: '/dashboard/admission/patients/bill-distributed-partial-list'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsBillDistributedPartialListIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/admission/patients/bill-distributed-list/': {
@@ -4465,6 +4932,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/admission/patients/active'
       fullPath: '/dashboard/admission/patients/active'
       preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsActiveIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/admission/patients/$admissionId/': {
+      id: '/_authenticated/dashboard/admission/patients/$admissionId/'
+      path: '/dashboard/admission/patients/$admissionId'
+      fullPath: '/dashboard/admission/patients/$admissionId'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/admission/invoice/list/': {
@@ -5109,6 +5583,7 @@ interface AuthenticatedDashboardSettingsRouteRouteChildren {
   AuthenticatedDashboardSettingsPaymentAccountsRoute: typeof AuthenticatedDashboardSettingsPaymentAccountsRoute
   AuthenticatedDashboardSettingsPrefixRoute: typeof AuthenticatedDashboardSettingsPrefixRoute
   AuthenticatedDashboardSettingsIndexRoute: typeof AuthenticatedDashboardSettingsIndexRoute
+  AuthenticatedDashboardSettingsReportSettingsIndexRoute: typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
 }
 
 const AuthenticatedDashboardSettingsRouteRouteChildren: AuthenticatedDashboardSettingsRouteRouteChildren =
@@ -5129,6 +5604,8 @@ const AuthenticatedDashboardSettingsRouteRouteChildren: AuthenticatedDashboardSe
       AuthenticatedDashboardSettingsPrefixRoute,
     AuthenticatedDashboardSettingsIndexRoute:
       AuthenticatedDashboardSettingsIndexRoute,
+    AuthenticatedDashboardSettingsReportSettingsIndexRoute:
+      AuthenticatedDashboardSettingsReportSettingsIndexRoute,
   }
 
 const AuthenticatedDashboardSettingsRouteRouteWithChildren =
@@ -5171,6 +5648,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardAccountsPayToConsultantIndexRoute: typeof AuthenticatedDashboardAccountsPayToConsultantIndexRoute
   AuthenticatedDashboardAccountsPayToSurgeonIndexRoute: typeof AuthenticatedDashboardAccountsPayToSurgeonIndexRoute
   AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute: typeof AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute
+  AuthenticatedDashboardAdmissionAllCollectionsIndexRoute: typeof AuthenticatedDashboardAdmissionAllCollectionsIndexRoute
   AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute: typeof AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute
   AuthenticatedDashboardAdmissionDueCollectionIndexRoute: typeof AuthenticatedDashboardAdmissionDueCollectionIndexRoute
   AuthenticatedDashboardAdmissionFinalBillsIndexRoute: typeof AuthenticatedDashboardAdmissionFinalBillsIndexRoute
@@ -5178,9 +5656,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardAdmissionFirstTimeBillIndexRoute: typeof AuthenticatedDashboardAdmissionFirstTimeBillIndexRoute
   AuthenticatedDashboardAdmissionFirstTimeServiceIndexRoute: typeof AuthenticatedDashboardAdmissionFirstTimeServiceIndexRoute
   AuthenticatedDashboardAdmissionInvoiceIndexRoute: typeof AuthenticatedDashboardAdmissionInvoiceIndexRoute
+  AuthenticatedDashboardAdmissionMyCollectionsIndexRoute: typeof AuthenticatedDashboardAdmissionMyCollectionsIndexRoute
   AuthenticatedDashboardAdmissionNewAdmissionIndexRoute: typeof AuthenticatedDashboardAdmissionNewAdmissionIndexRoute
   AuthenticatedDashboardAdmissionPatientsIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsIndexRoute
   AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute: typeof AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute
+  AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute: typeof AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute
   AuthenticatedDashboardBanksBankAccountsIndexRoute: typeof AuthenticatedDashboardBanksBankAccountsIndexRoute
   AuthenticatedDashboardBanksBankDepositsIndexRoute: typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
   AuthenticatedDashboardBanksBankTransactionsIndexRoute: typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
@@ -5222,18 +5702,27 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute: typeof AuthenticatedDashboardAdmissionDischargedPatientsBillDoesNotCreatedIndexRoute
   AuthenticatedDashboardAdmissionInvoiceCreateIndexRoute: typeof AuthenticatedDashboardAdmissionInvoiceCreateIndexRoute
   AuthenticatedDashboardAdmissionInvoiceListIndexRoute: typeof AuthenticatedDashboardAdmissionInvoiceListIndexRoute
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdIndexRoute
   AuthenticatedDashboardAdmissionPatientsActiveIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsActiveIndexRoute
   AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRoute
   AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRoute
   AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute
+  AuthenticatedDashboardAdmissionPatientsBillDistributedPartialListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsBillDistributedPartialListIndexRoute
+  AuthenticatedDashboardAdmissionPatientsBillNotDistributedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsBillNotDistributedListIndexRoute
+  AuthenticatedDashboardAdmissionPatientsDischargedDueListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsDischargedDueListIndexRoute
   AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute
+  AuthenticatedDashboardAdmissionPatientsDischargedPaidListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsDischargedPaidListIndexRoute
   AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute
   AuthenticatedDashboardAdmissionPatientsDueIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsDueIndexRoute
   AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
   AuthenticatedDashboardAdmissionPatientsPaidIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsPaidIndexRoute
   AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
+  AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute: typeof AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute
+  AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute: typeof AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute
+  AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute: typeof AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute
   AuthenticatedDashboardIndoorManagementDistributionsIndexRoute: typeof AuthenticatedDashboardIndoorManagementDistributionsIndexRoute
   AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute: typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
+  AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute: typeof AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute
   AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
   AuthenticatedDashboardIndoorMasterBedCabinTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinTypesIndexRoute
@@ -5252,11 +5741,15 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRoute: typeof AuthenticatedDashboardOutdoorMasterSampleCollectionRoomsIndexRoute
   AuthenticatedDashboardOutdoorMasterTestTablesIndexRoute: typeof AuthenticatedDashboardOutdoorMasterTestTablesIndexRoute
   AuthenticatedDashboardOutdoorMasterTestsIndexRoute: typeof AuthenticatedDashboardOutdoorMasterTestsIndexRoute
+  AuthenticatedDashboardOutdoorReceptionAllCollectionsIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionAllCollectionsIndexRoute
   AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute
+  AuthenticatedDashboardOutdoorReceptionMyCollectionsIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionMyCollectionsIndexRoute
   AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute
   AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute
+  AuthenticatedDashboardOutdoorReceptionPatientsByReferrerIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionPatientsByReferrerIndexRoute
   AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute
   AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute
+  AuthenticatedDashboardOutdoorReceptionUserWiseCollectionsIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionUserWiseCollectionsIndexRoute
   AuthenticatedDashboardPathologyBiochemicalAllIndexRoute: typeof AuthenticatedDashboardPathologyBiochemicalAllIndexRoute
   AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRoute: typeof AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRoute
   AuthenticatedDashboardPathologyHematologyAllIndexRoute: typeof AuthenticatedDashboardPathologyHematologyAllIndexRoute
@@ -5409,6 +5902,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardAccountsPayToSurgeonIndexRoute,
   AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute:
     AuthenticatedDashboardAdmissionAdvancePaymentIndexRoute,
+  AuthenticatedDashboardAdmissionAllCollectionsIndexRoute:
+    AuthenticatedDashboardAdmissionAllCollectionsIndexRoute,
   AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute:
     AuthenticatedDashboardAdmissionBedCabinChargeIndexRoute,
   AuthenticatedDashboardAdmissionDueCollectionIndexRoute:
@@ -5423,12 +5918,16 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardAdmissionFirstTimeServiceIndexRoute,
   AuthenticatedDashboardAdmissionInvoiceIndexRoute:
     AuthenticatedDashboardAdmissionInvoiceIndexRoute,
+  AuthenticatedDashboardAdmissionMyCollectionsIndexRoute:
+    AuthenticatedDashboardAdmissionMyCollectionsIndexRoute,
   AuthenticatedDashboardAdmissionNewAdmissionIndexRoute:
     AuthenticatedDashboardAdmissionNewAdmissionIndexRoute,
   AuthenticatedDashboardAdmissionPatientsIndexRoute:
     AuthenticatedDashboardAdmissionPatientsIndexRoute,
   AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute:
     AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute,
+  AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute:
+    AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute,
   AuthenticatedDashboardBanksBankAccountsIndexRoute:
     AuthenticatedDashboardBanksBankAccountsIndexRoute,
   AuthenticatedDashboardBanksBankDepositsIndexRoute:
@@ -5511,6 +6010,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardAdmissionInvoiceCreateIndexRoute,
   AuthenticatedDashboardAdmissionInvoiceListIndexRoute:
     AuthenticatedDashboardAdmissionInvoiceListIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsAdmissionIdIndexRoute,
   AuthenticatedDashboardAdmissionPatientsActiveIndexRoute:
     AuthenticatedDashboardAdmissionPatientsActiveIndexRoute,
   AuthenticatedDashboardAdmissionPatientsBalanceDistributedListIndexRoute:
@@ -5519,8 +6020,16 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardAdmissionPatientsBillCreatedListIndexRoute,
   AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute:
     AuthenticatedDashboardAdmissionPatientsBillDistributedListIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsBillDistributedPartialListIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsBillDistributedPartialListIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsBillNotDistributedListIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsBillNotDistributedListIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsDischargedDueListIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsDischargedDueListIndexRoute,
   AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute:
     AuthenticatedDashboardAdmissionPatientsDischargedListIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsDischargedPaidListIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsDischargedPaidListIndexRoute,
   AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute:
     AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute,
   AuthenticatedDashboardAdmissionPatientsDueIndexRoute:
@@ -5531,10 +6040,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardAdmissionPatientsPaidIndexRoute,
   AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute:
     AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute,
+  AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute:
+    AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute,
+  AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute:
+    AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute,
+  AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute:
+    AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute,
   AuthenticatedDashboardIndoorManagementDistributionsIndexRoute:
     AuthenticatedDashboardIndoorManagementDistributionsIndexRoute,
   AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute:
     AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute,
+  AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute:
+    AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute,
   AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute:
     AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute,
   AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute:
@@ -5571,16 +6088,24 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardOutdoorMasterTestTablesIndexRoute,
   AuthenticatedDashboardOutdoorMasterTestsIndexRoute:
     AuthenticatedDashboardOutdoorMasterTestsIndexRoute,
+  AuthenticatedDashboardOutdoorReceptionAllCollectionsIndexRoute:
+    AuthenticatedDashboardOutdoorReceptionAllCollectionsIndexRoute,
   AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute:
     AuthenticatedDashboardOutdoorReceptionDueCollectionIndexRoute,
+  AuthenticatedDashboardOutdoorReceptionMyCollectionsIndexRoute:
+    AuthenticatedDashboardOutdoorReceptionMyCollectionsIndexRoute,
   AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute:
     AuthenticatedDashboardOutdoorReceptionMyInvoicesIndexRoute,
   AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute:
     AuthenticatedDashboardOutdoorReceptionPaidInvoicesIndexRoute,
+  AuthenticatedDashboardOutdoorReceptionPatientsByReferrerIndexRoute:
+    AuthenticatedDashboardOutdoorReceptionPatientsByReferrerIndexRoute,
   AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute:
     AuthenticatedDashboardOutdoorReceptionPatientsIndexRoute,
   AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute:
     AuthenticatedDashboardOutdoorReceptionUserInvoicesIndexRoute,
+  AuthenticatedDashboardOutdoorReceptionUserWiseCollectionsIndexRoute:
+    AuthenticatedDashboardOutdoorReceptionUserWiseCollectionsIndexRoute,
   AuthenticatedDashboardPathologyBiochemicalAllIndexRoute:
     AuthenticatedDashboardPathologyBiochemicalAllIndexRoute,
   AuthenticatedDashboardPathologyBiochemicalLipidProfileIndexRoute:
@@ -5805,40 +6330,52 @@ const ClerkRouteRouteWithChildren = ClerkRouteRoute._addFileChildren(
   ClerkRouteRouteChildren,
 )
 
-interface platformAdminRouteChildren {
-  platformAdminLayoutRoute: typeof platformAdminLayoutRoute
+interface platformAdminRouteRouteChildren {
   platformAdminAdminsRoute: typeof platformAdminAdminsRoute
-  platformAdminBillingRoute: typeof platformAdminBillingRoute
-  platformAdminCompaniesRoute: typeof platformAdminCompaniesRoute
+  platformAdminContactsRoute: typeof platformAdminContactsRoute
   platformAdminLoginRoute: typeof platformAdminLoginRoute
   platformAdminModulesRoute: typeof platformAdminModulesRoute
-  platformAdminPlansRoute: typeof platformAdminPlansRoute
+  platformAdminProfileRoute: typeof platformAdminProfileRoute
   platformAdminRegistrationsRoute: typeof platformAdminRegistrationsRoute
   platformAdminSettingsRoute: typeof platformAdminSettingsRoute
+  platformAdminSubscriptionsRoute: typeof platformAdminSubscriptionsRoute
   platformAdminIndexRoute: typeof platformAdminIndexRoute
+  platformAdminBillingStripeRoute: typeof platformAdminBillingStripeRoute
+  platformAdminCompaniesCompanyIdRoute: typeof platformAdminCompaniesCompanyIdRoute
+  platformAdminPlansAddRoute: typeof platformAdminPlansAddRoute
+  platformAdminBillingIndexRoute: typeof platformAdminBillingIndexRoute
+  platformAdminCompaniesIndexRoute: typeof platformAdminCompaniesIndexRoute
+  platformAdminPlansIndexRoute: typeof platformAdminPlansIndexRoute
+  platformAdminPlansEditPlanIdRoute: typeof platformAdminPlansEditPlanIdRoute
 }
 
-const platformAdminRouteChildren: platformAdminRouteChildren = {
-  platformAdminLayoutRoute: platformAdminLayoutRoute,
+const platformAdminRouteRouteChildren: platformAdminRouteRouteChildren = {
   platformAdminAdminsRoute: platformAdminAdminsRoute,
-  platformAdminBillingRoute: platformAdminBillingRoute,
-  platformAdminCompaniesRoute: platformAdminCompaniesRoute,
+  platformAdminContactsRoute: platformAdminContactsRoute,
   platformAdminLoginRoute: platformAdminLoginRoute,
   platformAdminModulesRoute: platformAdminModulesRoute,
-  platformAdminPlansRoute: platformAdminPlansRoute,
+  platformAdminProfileRoute: platformAdminProfileRoute,
   platformAdminRegistrationsRoute: platformAdminRegistrationsRoute,
   platformAdminSettingsRoute: platformAdminSettingsRoute,
+  platformAdminSubscriptionsRoute: platformAdminSubscriptionsRoute,
   platformAdminIndexRoute: platformAdminIndexRoute,
+  platformAdminBillingStripeRoute: platformAdminBillingStripeRoute,
+  platformAdminCompaniesCompanyIdRoute: platformAdminCompaniesCompanyIdRoute,
+  platformAdminPlansAddRoute: platformAdminPlansAddRoute,
+  platformAdminBillingIndexRoute: platformAdminBillingIndexRoute,
+  platformAdminCompaniesIndexRoute: platformAdminCompaniesIndexRoute,
+  platformAdminPlansIndexRoute: platformAdminPlansIndexRoute,
+  platformAdminPlansEditPlanIdRoute: platformAdminPlansEditPlanIdRoute,
 }
 
-const platformAdminRouteWithChildren = platformAdminRoute._addFileChildren(
-  platformAdminRouteChildren,
-)
+const platformAdminRouteRouteWithChildren =
+  platformAdminRouteRoute._addFileChildren(platformAdminRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   ClerkRouteRoute: ClerkRouteRouteWithChildren,
+  platformAdminRouteRoute: platformAdminRouteRouteWithChildren,
   authAuthCallbackRoute: authAuthCallbackRoute,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authLoginRoute: authLoginRoute,
@@ -5855,7 +6392,6 @@ const rootRouteChildren: RootRouteChildren = {
   platformContactRoute: platformContactRoute,
   platformPricingRoute: platformPricingRoute,
   platformRegisterRoute: platformRegisterRoute,
-  platformAdminRoute: platformAdminRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

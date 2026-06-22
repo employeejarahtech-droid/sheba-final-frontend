@@ -79,7 +79,7 @@ function BetaHCGReport() {
             <AppHeader fixed />
             <Main>
                 <div className="mb-4 print:hidden flex items-center justify-between gap-4">
-                    <Link to="/dashboard/immunology/beta-hcg">
+                    <Link to="/dashboard/pathology/immunology/beta-hcg">
                         <Button variant="outline" size="sm">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Beta HCG Tests

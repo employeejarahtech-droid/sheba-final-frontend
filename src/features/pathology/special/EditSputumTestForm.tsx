@@ -35,6 +35,7 @@ import { getCookie } from "@/lib/cookies";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
+import { FlaskConical } from "lucide-react";
 
 // --- Schema ---
 const sputumTestSchema = z.object({
@@ -172,8 +173,16 @@ export function EditSputumTestForm({ open, setOpen, reportId, invoiceId }: Sputu
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetContent className="max-w-[450px] w-full overflow-y-auto">
-                <SheetHeader>
-                    <SheetTitle>Edit Sputum Test</SheetTitle>
+                <SheetHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border-b py-3 px-4 gap-0">
+                    <div className="flex items-center gap-2.5 pr-8">
+                        <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg shadow-md text-white">
+                            <FlaskConical className="h-4 w-4" />
+                        </div>
+                        <div>
+                            <SheetTitle className="text-lg font-bold">Edit Sputum Test</SheetTitle>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">Update sputum test results and remarks</p>
+                        </div>
+                    </div>
                 </SheetHeader>
 
                 <div className="px-4">
@@ -229,7 +238,7 @@ export function EditSputumTestForm({ open, setOpen, reportId, invoiceId }: Sputu
                             name="testCarriedOutBy"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormLabel>Test Carried Out By</FormLabel>
                                     <FormControl>
                                         <Select
                                             onValueChange={(value) => {

@@ -4,6 +4,7 @@ import { DataTable } from "@/components/DataTable";
 import { EditProthrombinTimeForm } from '@/features/pathology/hematology/prothom-bin-time/EditProthomBinTimeForm';
 import { useState, useEffect } from 'react';
 import { getCookie } from '@/lib/cookies';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
 import { FileText, Timer, Clock, Users } from 'lucide-react';
@@ -27,6 +28,7 @@ type ReportsItem = {
   invoice_id: number;
   patientName: string;
   patient_name: string;
+  ref_doctor?: string | null;
   tests: string[];
   date: string;
   created_at: string;
@@ -56,6 +58,9 @@ function ProthomBinTimeFull() {
   };
 
   const token = getCookie('accessToken');
+
+  // Tenant date format (from company settings) + 12h time — matches the rest of the app.
+  const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data, isFetching } = useQuery({
     queryKey: ["prothombin-time", page, limit, search],
@@ -263,7 +268,7 @@ function ProthomBinTimeFull() {
 
                 ${reportData.test_carried_out_by ? `
                   <div class="mt-4 pt-4 border-t text-sm">
-                    <span class="text-gray-500">Test Carried out by:</span>
+                    <span class="text-gray-500">Test Carried Out By:</span>
                     <span class="font-medium text-gray-800 ml-2">${reportData.test_carried_out_by}</span>
                   </div>
                 ` : ''}
@@ -309,11 +314,7 @@ function ProthomBinTimeFull() {
       orderable: true,
       responsivePriority: 2,
       render: (data: any, _type: string, row: ReportsItem) => {
-        const date = row.created_at ? new Date(row.created_at).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }) : '-';
+        const date = fmtDateTime(row.created_at);
         const status = row.status || 'Pending';
         return `
           <div class="flex items-center gap-2">
@@ -338,21 +339,17 @@ function ProthomBinTimeFull() {
       defaultContent: "",
     },
     {
+      data: "ref_doctor",
+      title: "Ref. Doctor",
+      defaultContent: "-",
+    },
+    {
       data: "created_at",
       title: "Date",
       orderable: true,
       responsivePriority: 3,
       render: (_data: any, _type: string, row: ReportsItem) => {
-        const iso = row.created_at;
-        const date = new Date(iso);
-
-        const formatted = date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-
-        return `<div>${formatted}</div>`;
+        return `<div>${fmtDateTime(row.created_at)}</div>`;
       },
       defaultContent: "",
     },
@@ -370,9 +367,20 @@ function ProthomBinTimeFull() {
               ? "bg-red-500"
               : "bg-yellow-500";
 
-        return <span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status}</span>;
+        return `<span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status}</span>`;
       },
       defaultContent: "",
+    },
+    {
+      data: null,
+      title: "Actions",
+      orderable: false,
+      render: (_data: any, _type: string, row: any) => `
+        <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
+          <button type="button" onclick="window.editProthrombinTime(${row.id}, ${row.invoice_id})" title="Edit" class="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-xs font-medium h-8 px-2.5 transition">Edit</button>
+          <a href="/dashboard/pathology/hematology/prothom-bin-time-full/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print" class="inline-flex items-center gap-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium h-8 px-2.5 transition">Print</a>
+        </div>
+      `,
     },
   ];
 

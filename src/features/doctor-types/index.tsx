@@ -260,6 +260,21 @@ export default function DoctorTypes({ page, limit, search, setPage, setLimit, se
                 return `<span class="text-sm text-muted-foreground">${name}</span>`;
             },
         },
+        {
+            data: null,
+            title: "Actions",
+            orderable: false,
+            render: (_data: any, _type: string, row: DoctorTypeItem) => {
+                return `
+                    <div class="flex items-center gap-2">
+                        <button data-action="edit" data-id="${row.id}"
+                                class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-purple-600 text-white hover:bg-purple-700 h-8 px-4 transition">
+                            Edit
+                        </button>
+                    </div>
+                `;
+            },
+        },
     ];
 
     // Handle button clicks via event delegation
@@ -291,7 +306,7 @@ export default function DoctorTypes({ page, limit, search, setPage, setLimit, se
     return <>
         <AppHeader fixed />
 
-        <main className="p-4">
+        <main className="">
             <div className="space-y-4">
                 {/* Statistics Cards */}
                 <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-2'>

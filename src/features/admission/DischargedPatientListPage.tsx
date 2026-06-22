@@ -121,18 +121,37 @@ interface DischargedPatientListPageProps {
     setPage: (page: number) => void;
     setLimit: (limit: number) => void;
     setSearch: (search: string) => void;
+    /** Lock the page to a specific payment status (hides the Payment dropdown). */
+    paymentStatus?: 'all' | 'has_due' | 'fully_paid';
+    /** Lock the page to a bills_distributed flag (e.g. 0 = not yet distributed). */
+    billsDistributed?: number;
 }
 
-export function DischargedPatientListPage({ page, limit, search, setPage, setSearch }: DischargedPatientListPageProps) {
+export function DischargedPatientListPage({ page, limit, search, setPage, setSearch, paymentStatus, billsDistributed }: DischargedPatientListPageProps) {
     const navigate = useNavigate()
     const token = getCookie('accessToken')
     const { format } = useCurrency()
     const [statusFilter, setStatusFilter] = useState<string>('all')
-    const [paymentFilter, setPaymentFilter] = useState<string>('all')
+    const [paymentFilter, setPaymentFilter] = useState<string>(paymentStatus ?? 'all')
+
+    const pageTitle = billsDistributed === 0
+        ? 'Bills Not Distributed'
+        : paymentStatus === 'has_due'
+            ? 'Discharged — Due'
+            : paymentStatus === 'fully_paid'
+                ? 'Discharged — Paid'
+                : 'Discharged Patient List'
+    const pageDescription = billsDistributed === 0
+        ? 'Discharged patients whose bills are not yet distributed'
+        : paymentStatus === 'has_due'
+            ? 'Discharged patients with an outstanding due'
+            : paymentStatus === 'fully_paid'
+                ? 'Discharged patients who are fully paid'
+                : 'Patients who have been discharged'
 
     // Fetch all admissions and filter by discharged = 1
     const { data: allAdmissionsData, isFetching } = useQuery({
-        queryKey: ['admissions', 'discharged', page, limit, search, statusFilter, paymentFilter],
+        queryKey: ['admissions', 'discharged', page, limit, search, statusFilter, paymentFilter, billsDistributed],
         queryFn: async () => {
             const params = new URLSearchParams({
                 page: page.toString(),
@@ -140,6 +159,7 @@ export function DischargedPatientListPage({ page, limit, search, setPage, setSea
                 ...(search && { search }),
                 ...(statusFilter && statusFilter !== 'all' && { status: statusFilter }),
                 ...(paymentFilter && paymentFilter !== 'all' && { payment_status: paymentFilter }),
+                ...(billsDistributed !== undefined && { bills_distributed: String(billsDistributed) }),
             })
             const res = await fetch(`${API_URL}/api/admission/discharged?${params}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -309,7 +329,6 @@ export function DischargedPatientListPage({ page, limit, search, setPage, setSea
             responsivePriority: 11,
             render: (_data: any, _type: string, row: AdmissionItem) => {
                 const dueAmount = row.finalBill?.due_amount ? parseFloat(row.finalBill.due_amount) : 0
-                const hasDue = dueAmount > 0
                 const hasOverpayment = dueAmount < 0
 
                 let buttons = `
@@ -318,17 +337,14 @@ export function DischargedPatientListPage({ page, limit, search, setPage, setSea
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         View
                     </button>
+                    <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/billing'"
+                            class="inline-flex items-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium shadow transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                        Billing
+                    </button>
                 `
-
-                if (hasDue) {
-                    buttons += `
-                        <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/billing'"
-                                class="inline-flex items-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium shadow transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
-                            Pay Due
-                        </button>
-                    `
-                } else if (hasOverpayment) {
+ 
+                if (hasOverpayment) {
                     buttons += `
                         <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/billing'"
                                 class="inline-flex items-center gap-2 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium shadow transition-colors">
@@ -337,7 +353,7 @@ export function DischargedPatientListPage({ page, limit, search, setPage, setSea
                         </button>
                     `
                 }
-
+ 
                 return `<div class="flex items-center gap-2">${buttons}</div>`
             },
         },
@@ -539,8 +555,8 @@ export function DischargedPatientListPage({ page, limit, search, setPage, setSea
             <Main fluid>
                 <div className="flex-1 space-y-8 px-4 py-6 overflow-auto w-full">
                 <PageHeader
-                    title="Discharged Patient List"
-                    description="Patients who have been discharged"
+                    title={pageTitle}
+                    description={pageDescription}
                     backTo="/admission/patients"
                     backLabel="Back to Patients"
                 />
@@ -610,31 +626,33 @@ export function DischargedPatientListPage({ page, limit, search, setPage, setSea
                                 </Select>
                             </div>
 
-                            {/* Payment Status Filter */}
-                            <div className="flex items-center gap-2">
-                                <Label className="text-sm whitespace-nowrap">Payment:</Label>
-                                <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-                                    <SelectTrigger className="h-8 w-[140px]">
-                                        <SelectValue placeholder="All" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All</SelectItem>
-                                        <SelectItem value="has_due">Has Due</SelectItem>
-                                        <SelectItem value="fully_paid">Fully Paid</SelectItem>
-                                        <SelectItem value="overpaid">Overpaid</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                            {/* Payment Status Filter (hidden when locked to a paymentStatus) */}
+                            {!paymentStatus && (
+                                <div className="flex items-center gap-2">
+                                    <Label className="text-sm whitespace-nowrap">Payment:</Label>
+                                    <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+                                        <SelectTrigger className="h-8 w-[140px]">
+                                            <SelectValue placeholder="All" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All</SelectItem>
+                                            <SelectItem value="has_due">Has Due</SelectItem>
+                                            <SelectItem value="fully_paid">Fully Paid</SelectItem>
+                                            <SelectItem value="overpaid">Overpaid</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
 
                             {/* Clear Filters */}
-                            {(statusFilter !== 'all' || paymentFilter !== 'all') && (
+                            {(statusFilter !== 'all' || (!paymentStatus && paymentFilter !== 'all')) && (
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     className="h-8"
                                     onClick={() => {
                                         setStatusFilter('all')
-                                        setPaymentFilter('all')
+                                        if (!paymentStatus) setPaymentFilter('all')
                                     }}
                                 >
                                     <X className="h-4 w-4 mr-1" />

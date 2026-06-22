@@ -3,9 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { CalendarIcon, Check, ChevronDown, Trash2Icon, CircleCheck, PenLine, User, Activity, Clock, FlaskConical, ChevronsUpDown, ArrowLeft } from "lucide-react";
+import { CalendarIcon, Check, ChevronDown, ChevronLeft, ChevronRight, Trash2Icon, CircleCheck, PenLine, User, Activity, Clock, FlaskConical, ChevronsUpDown, ArrowLeft, Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getCookie } from "@/lib/cookies";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +15,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useDateFormat } from "@/hooks/use-date-format";
+import { useCurrency } from "@/hooks/use-currency";
 import { useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { toast } from "sonner";
@@ -151,6 +153,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
   const [selectedAdmission, setSelectedAdmission] = useState<AdmissionItem | null>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { currencySymbol } = useCurrency();
 
   // Tenant date format from company settings (display in this format; submit ISO).
   const { dateFormat, formatHint, formatDate, parseDate, toISODate } = useDateFormat();
@@ -158,8 +161,10 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
   // selection when the date format loads/reloads from settings.
   const dateTouchedRef = useRef(false);
 
-  const [page] = useState(1);
+  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [testDrawerOpen, setTestDrawerOpen] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const limit = 10;
 
   const token = getCookie('accessToken');
@@ -167,12 +172,13 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
   const debouncedSearch = useDebounce(search, 400);
   const debouncedDoctorSearch = useDebounce(doctorSearch, 400);
 
-  const { data } = useQuery<TestsResponse>({
-    queryKey: ["tests", page, debouncedSearch],
+  const { data, isFetching } = useQuery<TestsResponse>({
+    queryKey: ["tests", page, debouncedSearch, categoryFilter],
 
     queryFn: async () => {
+      const categoryParam = categoryFilter !== "all" ? `&category_id=${categoryFilter}` : "";
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/tests?page=${page}&limit=${limit}&search=${encodeURIComponent(debouncedSearch)}`,
+        `${import.meta.env.VITE_API_URL}/api/tests?page=${page}&limit=${limit}&search=${encodeURIComponent(debouncedSearch)}${categoryParam}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -259,7 +265,12 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
     }
   }
 
-  const { data: roomsData } = useQuery<SampleCollectionRoomsResponse>({
+  const { 
+    data: roomsData, 
+    isLoading: isLoadingRooms, 
+    error: roomsError, 
+    refetch: refetchRooms 
+  } = useQuery<SampleCollectionRoomsResponse>({
     queryKey: ["sample-collection-rooms"],
     queryFn: async () => {
       const res = await fetch(
@@ -274,6 +285,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
       return result.data || { items: [], meta: { page: 1, total: 0, limit: 100 } };
     },
     enabled: !!token,
+    refetchOnWindowFocus: true,
   });
 
   // Fetch payment methods from settings
@@ -1421,76 +1433,183 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
             </CardHeader>
             <CardContent className="p-4 md:p-6 space-y-6">
               <div className="space-y-2">
-                <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Select Tests
-                </FormLabel>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* col-6: Select Tests */}
+                  <div className="space-y-2">
+                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Select Tests
+                    </FormLabel>
 
-                {/* SEARCHABLE MULTI SELECT */}
-                <Select>
-                  <SelectTrigger className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" style={{height: '40px'}}>
-                    <SelectValue
-                      placeholder="Search and select tests..."
-                      children={
-                        selectedTests.length
-                          ? `${selectedTests.length} tests selected`
-                          : "Search and select tests..."
-                      }
-                    />
-                  </SelectTrigger>
+                    {/* SELECT TESTS — DRAWER */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setTestDrawerOpen(true)}
+                      className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm justify-start font-normal"
+                      style={{ height: '40px' }}
+                    >
+                      <Activity className="h-4 w-4 text-blue-500 mr-2 shrink-0" />
+                      <span className={cn("truncate", !selectedTests.length && "text-muted-foreground")}>
+                        {selectedTests.length
+                          ? `${selectedTests.length} test${selectedTests.length !== 1 ? 's' : ''} selected`
+                          : "Search and select tests..."}
+                      </span>
+                      <ChevronDown className="ml-auto h-4 w-4 opacity-50 shrink-0" />
+                    </Button>
+                  </div>
 
-                  <SelectContent className="max-h-[400px]">
-                    {/* Search bar */}
-                    <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-800 sticky top-0 bg-popover z-10">
+                  {/* col-6: Category filter */}
+                  <div className="space-y-2">
+                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Category
+                    </FormLabel>
+                    <Select
+                      value={categoryFilter}
+                      onValueChange={(v) => { setCategoryFilter(v); setPage(1); }}
+                    >
+                      <SelectTrigger className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" style={{ height: '40px' }}>
+                        <SelectValue placeholder="All Categories" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {categoriesData?.data?.items?.map((cat) => (
+                          <SelectItem key={cat.id} value={String(cat.id)}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <Sheet open={testDrawerOpen} onOpenChange={setTestDrawerOpen}>
+                  <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
+                    <SheetHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b px-4 py-3 gap-0">
+                      <SheetTitle className="flex items-center gap-2.5 pr-8">
+                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md">
+                          <FlaskConical className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-left">Select Tests</div>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 font-normal text-left">Search and choose tests to add</p>
+                        </div>
+                      </SheetTitle>
+                    </SheetHeader>
+
+                    {/* Filters: category + search */}
+                    <div className="p-3 border-b border-gray-100 dark:border-gray-800 space-y-2">
+                      <Select
+                        value={categoryFilter}
+                        onValueChange={(v) => { setCategoryFilter(v); setPage(1); }}
+                      >
+                        <SelectTrigger className="w-full h-9 rounded-md border-gray-200 dark:border-gray-800 bg-transparent">
+                          <SelectValue placeholder="All Categories" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Categories</SelectItem>
+                          {categoriesData?.data?.items?.map((cat) => (
+                            <SelectItem key={cat.id} value={String(cat.id)}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
                       <div className="relative">
+                        <Activity className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                           placeholder="Search tests..."
                           value={search}
-                          onChange={(e) => setSearch(e.target.value)}
-                          className="h-9 pl-8 border-gray-200"
+                          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                          className="h-10 pl-9 border-gray-200 dark:border-gray-800"
+                          autoFocus
                         />
-                        <Activity className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                       </div>
                     </div>
 
                     {/* Test list */}
-                    <div className="py-2">
+                    <div className="flex-1 overflow-y-auto">
                       {data?.data?.items?.length === 0 ? (
-                        <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                        <div className="px-4 py-12 text-center text-sm text-muted-foreground">
                           No tests found matching your search.
                         </div>
                       ) : (
                         data?.data?.items?.map((test) => {
                           const category = categoriesData?.data?.items?.find(c => c.id === test.category_id);
                           const department = category?.department_name || 'N/A';
+                          const isChecked = selectedTests.some((t) => t.id === test.id);
 
                           return (
                             <div
                               key={test.id}
-                              className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group"
+                              className={cn(
+                                "flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors border-b border-gray-50 dark:border-gray-800/60",
+                                isChecked && "bg-blue-50/60 dark:bg-blue-900/20"
+                              )}
                               onClick={() => toggleTest(test)}
                             >
                               <Checkbox
-                                checked={selectedTests.some((t) => t.id === test.id)}
+                                checked={isChecked}
                                 className="border-gray-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                               />
-                              <div className="flex flex-col flex-1">
-                                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{test.name}</span>
+                              <div className="flex flex-col flex-1 min-w-0">
+                                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{test.name}</span>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                  <span className="font-mono">{test.price}</span>
+                                  <span className="font-mono">{currencySymbol} {Number(test.price).toLocaleString()}</span>
                                   <span>•</span>
-                                  <span>{department}</span>
+                                  <span className="truncate">{department}</span>
                                 </div>
                               </div>
-                              {selectedTests.some((t) => t.id === test.id) && (
-                                <Check className="ml-auto h-4 w-4 text-blue-600" />
-                              )}
+                              {isChecked && <Check className="ml-auto h-4 w-4 text-blue-600 shrink-0" />}
                             </div>
                           );
                         })
                       )}
                     </div>
-                  </SelectContent>
-                </Select>
+
+                    {/* Pagination */}
+                    {(() => {
+                      const meta = data?.data?.meta;
+                      const total = meta?.total ?? 0;
+                      const totalPages = Math.max(1, Math.ceil(total / limit));
+                      const from = total === 0 ? 0 : (page - 1) * limit + 1;
+                      const to = Math.min(page * limit, total);
+                      return (
+                        <div className="flex items-center justify-between gap-2 px-4 py-2 border-t border-gray-100 dark:border-gray-800">
+                          <span className="text-xs text-muted-foreground">
+                            {total > 0 ? `${from}–${to} of ${total}` : 'No tests'}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              disabled={page <= 1 || isFetching}
+                              onClick={() => setPage((p) => Math.max(1, p - 1))}
+                            >
+                              <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <span className="text-xs text-muted-foreground px-1 min-w-[70px] text-center">
+                              Page {page} / {totalPages}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              disabled={page >= totalPages || isFetching}
+                              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                  </SheetContent>
+                </Sheet>
               </div>
 
               {/* TABLE */}
@@ -1584,7 +1703,26 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
               </div>
             </CardHeader>
             <CardContent className="p-4 md:p-6">
-              {roomsData?.items && roomsData.items.length > 0 ? (
+              {isLoadingRooms ? (
+                <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                  <Loader2 className="h-8 w-8 animate-spin text-teal-500 mb-2" />
+                  <p className="text-sm">Loading sample collection rooms...</p>
+                </div>
+              ) : roomsError ? (
+                <div className="text-center py-8 text-red-500">
+                  <p className="text-sm font-semibold mb-2">Failed to load sample collection rooms</p>
+                  <p className="text-xs text-muted-foreground mb-4">{(roomsError as any)?.message || "Network error"}</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => refetchRooms()}
+                    className="border-red-200 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400"
+                  >
+                    Retry Loading
+                  </Button>
+                </div>
+              ) : roomsData?.items && roomsData.items.length > 0 ? (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {roomsData.items
@@ -1606,12 +1744,12 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                               id={`room-${room.id}`}
                               checked={isSelected}
                               onCheckedChange={(checked) => {
-                                if (typeof checked === 'boolean') {
-                                  const updatedRooms = checked
-                                    ? [...selectedRooms, roomId]
-                                    : selectedRooms.filter((r) => r !== roomId);
-                                  setValue("sample_collection_rooms", updatedRooms, { shouldValidate: true });
-                                }
+                                  if (typeof checked === 'boolean') {
+                                    const updatedRooms = checked
+                                      ? [...selectedRooms, roomId]
+                                      : selectedRooms.filter((r) => r !== roomId);
+                                    setValue("sample_collection_rooms", updatedRooms, { shouldValidate: true });
+                                  }
                               }}
                               className="mt-0.5 border-gray-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                             />
@@ -1654,6 +1792,15 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                 <div className="text-center py-8 text-muted-foreground">
                   <FlaskConical className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p className="text-sm">No sample collection rooms available</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => refetchRooms()}
+                    className="mt-4"
+                  >
+                    Refresh Rooms
+                  </Button>
                 </div>
               )}
             </CardContent>

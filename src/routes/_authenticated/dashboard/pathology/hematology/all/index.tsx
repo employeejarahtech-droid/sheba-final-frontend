@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
 import { useEffect } from 'react';
 import { getCookie } from '@/lib/cookies';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
 import { FileText, CheckCircle, Clock, AlertCircle } from 'lucide-react';
@@ -27,6 +28,7 @@ type ReportsItem = {
   Tests: string;
   TestNames: string;
   Status: string;
+  RefDoctor?: string | null;
 };
 
 function AllReportsHematology() {
@@ -49,6 +51,9 @@ function AllReportsHematology() {
   };
 
   const token = getCookie('accessToken');
+
+  // Tenant date format (from company settings) + 12h time — matches the rest of the app.
+  const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data: hematologyAllReports, isFetching } = useQuery({
     queryKey: ["hematology-all", page, limit, search],
@@ -275,7 +280,7 @@ function AllReportsHematology() {
       title: "Receipt ID",
       orderable: true,
       render: (data: any, _type: string, row: ReportsItem) => {
-        const date = row.Date ? new Date(row.Date).toLocaleDateString() : '-';
+        const date = fmtDateTime(row.Date);
         return `
           <div class="flex items-center gap-2">
             <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
@@ -312,8 +317,15 @@ function AllReportsHematology() {
       title: "Date",
       orderable: true,
       render: (_data: any, _type: string, row: ReportsItem) => {
-        return row.Date ? new Date(row.Date).toLocaleDateString() : '-';
+        return fmtDateTime(row.Date);
       },
+      defaultContent: "",
+    },
+    {
+      data: "RefDoctor",
+      title: "Ref. Doctor",
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => row.RefDoctor || '-',
       defaultContent: "",
     },
     {

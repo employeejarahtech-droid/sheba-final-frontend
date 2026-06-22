@@ -77,7 +77,7 @@ function SkinScrappingForFungusReport() {
            <AppHeader fixed />
             <Main>
                 <div className="print:hidden flex items-center justify-between gap-4">
-                    <Link to="/dashboard/hormone/skin-scrapping-for-fungus">
+                    <Link to="/dashboard/pathology/hormone/skin-scrapping-for-fungus">
                         <Button variant="outline" size="sm">
                             <ArrowLeft className="h-4 w-4" />
                             Back to Skin Scraping for Fungus Tests

@@ -19,7 +19,7 @@ import { useCurrency } from "@/hooks/use-currency";
 
 const serviceSchema = z.object({
     service_id: z.number().positive('Service is required'),
-    note: z.string().min(1, 'Note is required'),
+    note: z.string().optional(),
     amount: z.number().nonnegative('Amount must be non-negative'),
 })
 
@@ -167,7 +167,7 @@ export function AddClinicalServicesForm({ open, setOpen, onAdd, services, editSe
                                     name="note"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Note *</FormLabel>
+                                            <FormLabel>Note</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="Enter note..." {...field} value={field.value || ''} />
                                             </FormControl>

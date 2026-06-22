@@ -23,6 +23,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { getCookie } from "@/lib/cookies";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/layout/app-header";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, FlaskConical, User } from "lucide-react";
 
 export const Route = createFileRoute(
   '/_authenticated/dashboard/pathology/hematology/cbc-short/edit/$id',
@@ -209,264 +211,307 @@ function EditCBCShort() {
       {/* Header */}
       <AppHeader fixed />
       {/* Main Content */}
-      <Main className="px-6 py-8 max-w-5xl mx-auto">
-        <div className="max-w-[800px] mx-auto">
-          <h1 className="text-2xl font-bold mb-6">Edit Blood For CBC Report</h1>
-
-          {/* Invoice + Patient Section */}
-          <div className="bg-white shadow rounded-xl p-6 border mb-8">
-            <PatientInvoiceInfo
-              invoiceInfo={{
-                invoiceNo: "INV-2002",
-                patientName: "Rahim Uddin",
-                age: "29 Years",
-                gender: "Male",
-              }}
-            />
+      <Main className="flex flex-1 flex-col gap-6">
+        <div className="w-full min-w-[650px] max-w-[800px] mx-auto px-4 space-y-5">
+          {/* Header */}
+          <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate({ to: '/dashboard/pathology/hematology/cbc-short' })}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  Edit Blood For CBC Report
+                </h1>
+                <p className="text-muted-foreground text-sm">Review and update CBC laboratory findings</p>
+              </div>
+            </div>
           </div>
 
-          {/* CBC Form */}
-          <div className="bg-white shadow rounded-xl p-6 border">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                {/* Group: Basic CBC */}
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">Hematology Indices</h2>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField control={form.control} name="hemoglobin" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Hemoglobin (g/dL)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. 14.5" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-
-                    <FormField control={form.control} name="rbc_count" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>RBC Count (million/cmm)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. 5.2" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-
-                    <FormField control={form.control} name="wbc_count" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>WBC Count (/cmm)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. 7800" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-
-                    <FormField control={form.control} name="platelets" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Platelets (/cmm)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. 250000" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-
-                  </div>
+          {/* Patient Information */}
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                  <User className="w-4 h-4 text-white" />
                 </div>
-
                 <div>
-                  <h2 className="text-xl font-semibold mb-4 mt-8">RBC Indices</h2>
+                  <CardTitle className="text-lg font-bold">Patient Information</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Invoice and patient details</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <PatientInvoiceInfo
+                invoiceInfo={{
+                  invoiceNo: cbcData?.invoice_id ? `RPT-${cbcData.invoice_id}` : "—",
+                  patientName: cbcData?.outdoor_invoice?.patient_name || "—",
+                  age: cbcData?.outdoor_invoice?.age ? `${cbcData.outdoor_invoice.age} ${cbcData.outdoor_invoice.age_text || 'Years'}` : "—",
+                  gender: cbcData?.outdoor_invoice?.sex || "—",
+                }}
+              />
+            </CardContent>
+          </Card>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField control={form.control} name="hct" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>HCT (%)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. 42.5" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+          {/* CBC Form Card */}
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                  <FlaskConical className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold">CBC Test Results</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Enter findings for each test parameter</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                  {/* Group: Basic CBC */}
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">Hematology Indices</h2>
 
-                    <FormField control={form.control} name="mcv" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>MCV (fL)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. 88.0" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField control={form.control} name="hemoglobin" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Hemoglobin (g/dL)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. 14.5" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
 
-                    <FormField control={form.control} name="mch" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>MCH (pg)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. 29.5" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+                      <FormField control={form.control} name="rbc_count" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>RBC Count (million/cmm)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. 5.2" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
 
-                    <FormField control={form.control} name="mchc" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>MCHC (g/dL)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. 33.5" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+                      <FormField control={form.control} name="wbc_count" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>WBC Count (/cmm)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. 7800" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
 
+                      <FormField control={form.control} name="platelets" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Platelets (/cmm)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. 250000" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+
+                    </div>
                   </div>
 
-                </div>
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4 mt-8 text-gray-800 border-b pb-2">RBC Indices</h2>
 
-                {/* Group: Differential Count */}
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">
-                    Differential Count
-                  </h2>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Neutrophils */}
-                    <FormField
-                      control={form.control}
-                      name="neutrophils"
-                      render={({ field }) => (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField control={form.control} name="hct" render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Neutrophils (%)</FormLabel>
+                          <FormLabel>HCT (%)</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. 60" {...field} />
+                            <Input placeholder="e.g. 42.5" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
-                      )}
-                    />
+                      )} />
 
-                    {/* Lymphocytes */}
-                    <FormField
-                      control={form.control}
-                      name="lymphocytes"
-                      render={({ field }) => (
+                      <FormField control={form.control} name="mcv" render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Lymphocytes (%)</FormLabel>
+                          <FormLabel>MCV (fL)</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. 30" {...field} />
+                            <Input placeholder="e.g. 88.0" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
-                      )}
-                    />
+                      )} />
 
-                    {/* Monocytes */}
-                    <FormField
-                      control={form.control}
-                      name="monocytes"
-                      render={({ field }) => (
+                      <FormField control={form.control} name="mch" render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Monocytes (%)</FormLabel>
+                          <FormLabel>MCH (pg)</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. 6" {...field} />
+                            <Input placeholder="e.g. 29.5" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
-                      )}
-                    />
+                      )} />
 
-                    {/* Eosinophils */}
-                    <FormField
-                      control={form.control}
-                      name="eosinophils"
-                      render={({ field }) => (
+                      <FormField control={form.control} name="mchc" render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Eosinophils (%)</FormLabel>
+                          <FormLabel>MCHC (g/dL)</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. 3" {...field} />
+                            <Input placeholder="e.g. 33.5" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
-                      )}
-                    />
+                      )} />
 
-                    {/* Basophils */}
+                    </div>
+
+                  </div>
+
+                  {/* Group: Differential Count */}
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
+                      Differential Count
+                    </h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Neutrophils */}
+                      <FormField
+                        control={form.control}
+                        name="neutrophils"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Neutrophils (%)</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g. 60" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Lymphocytes */}
+                      <FormField
+                        control={form.control}
+                        name="lymphocytes"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Lymphocytes (%)</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g. 30" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Monocytes */}
+                      <FormField
+                        control={form.control}
+                        name="monocytes"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Monocytes (%)</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g. 6" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Eosinophils */}
+                      <FormField
+                        control={form.control}
+                        name="eosinophils"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Eosinophils (%)</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g. 3" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Basophils */}
+                      <FormField
+                        control={form.control}
+                        name="basophils"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Basophils (%)</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g. 1" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Test Carried Out By */}
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4 mt-8 text-gray-800 border-b pb-2">Test Information</h2>
                     <FormField
                       control={form.control}
-                      name="basophils"
+                      name="testCarriedOutBy"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Basophils (%)</FormLabel>
+                          <FormLabel>Test Carried Out By</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. 1" {...field} />
+                            <Select
+                              onValueChange={(value) => {
+                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                if (selectedMachine) {
+                                  field.onChange(value);
+                                  form.setValue('machineId', String(selectedMachine.id));
+                                }
+                              }}
+                              value={field.value}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select machine" />
+                              </SelectTrigger>
+
+                              <SelectContent>
+                                {machineList.map((machine: any) => (
+                                  <SelectItem key={machine.id} value={machine.name}>
+                                    {machine.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
-                </div>
 
-                {/* Test Carried Out By */}
-                <div>
-                  <h2 className="text-xl font-semibold mb-4 mt-8">Test Information</h2>
-                  <FormField
-                    control={form.control}
-                    name="testCarriedOutBy"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Test carried out by</FormLabel>
-                        <FormControl>
-                          <Select
-                            onValueChange={(value) => {
-                              const selectedMachine = machineList.find((m: any) => m.name === value);
-                              if (selectedMachine) {
-                                field.onChange(value);
-                                form.setValue('machineId', String(selectedMachine.id));
-                              }
-                            }}
-                            value={field.value}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select machine" />
-                            </SelectTrigger>
-
-                            <SelectContent>
-                              {machineList.map((machine: any) => (
-                                <SelectItem key={machine.id} value={machine.name}>
-                                  {machine.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Buttons */}
-                <div className="flex justify-between gap-3 pt-4">
-                  <Button type="submit" variant="success" className="flex-1">
-                    Save Report
-                  </Button>
-
-                  <Link to="/dashboard/hematology/cbc-short/report/$reportId" params={{ reportId: id }}>
-                    <Button type="button" variant="warning" className="flex-1">
-                      Print Preview
+                  {/* Buttons */}
+                  <div className="flex justify-between gap-3 pt-4">
+                    <Button type="submit" variant="success" className="flex-1">
+                      Save Report
                     </Button>
-                  </Link>
 
-                  <Button type="button" variant="info" className="flex-1">
-                    View
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </div>
+                    <Link to="/dashboard/pathology/hematology/cbc-short/report/$reportId" params={{ reportId: id }}>
+                      <Button type="button" variant="warning" className="flex-1">
+                        Print Preview
+                      </Button>
+                    </Link>
+
+                    <Button type="button" variant="info" className="flex-1" onClick={() => navigate({ to: '/dashboard/pathology/hematology/cbc-short' })}>
+                      View
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
         </div>
       </Main>
     </>

@@ -41,7 +41,22 @@ function FinalBillPrintRoute() {
         enabled: !!token && !!admissionId,
     })
 
+    // Fetch distributions (bill heads)
+    const { data: distributionsData } = useQuery({
+        queryKey: ['distributions-print', admissionId],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/bill-distribution/admission/${admissionId}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            )
+            if (!res.ok) return { data: [] }
+            return res.json()
+        },
+        enabled: !!token && !!admissionId,
+    })
+
     const finalBill = finalBillData?.data || null
+    const distributions: any[] = distributionsData?.data || []
 
     if (isLoading) {
         return (
@@ -115,7 +130,11 @@ function FinalBillPrintRoute() {
                         </Button>
                     </div>
                 </div>
-                <FinalBillPrintPage finalBill={finalBill} paddingTop={paddingTop} />
+                <FinalBillPrintPage
+                    finalBill={finalBill}
+                    distributions={distributions}
+                    paddingTop={paddingTop}
+                />
             </Main>
         </>
     )

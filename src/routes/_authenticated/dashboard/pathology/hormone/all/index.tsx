@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { DataTable } from "@/components/DataTable";
 import { useEffect, useState } from 'react';
 import { getCookie } from '@/lib/cookies';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
 import { FileText, FlaskConical, Clock, Users } from 'lucide-react';
@@ -29,6 +30,7 @@ type ReportsItem = {
   Tests: string;
   TestNames: string;
   Status: string;
+  RefDoctor?: string | null;
 };
 
 function AllHormones() {
@@ -43,6 +45,7 @@ function AllHormones() {
   const setLimit = (newLimit: number) => { navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) }); };
 
   const token = getCookie('accessToken');
+  const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data: hormoneAllReports, isFetching } = useQuery({
     queryKey: ["hormon-all", page, limit, search],
@@ -77,11 +80,7 @@ function AllHormones() {
       title: 'Receipt ID',
       orderable: true,
       render: (data: any, _type: string, row: ReportsItem) => {
-        const date = row.Date ? new Date(row.Date).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        }) : '-';
+        const date = fmtDateTime(row.Date);
         const status = row.Status || 'Pending';
         return `
           <div class="flex items-center gap-2">
@@ -121,12 +120,15 @@ function AllHormones() {
       orderable: true,
       render: (_data: any, _type: string, row: ReportsItem) => {
         const date = row.Date;
-        return date ? new Date(date).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        }) : '-';
+        return date ? fmtDateTime(date) : '-';
       },
+      defaultContent: '',
+    },
+    {
+      data: 'RefDoctor',
+      title: 'Ref. Doctor',
+      orderable: true,
+      render: (_data: any, _type: string, row: ReportsItem) => row.RefDoctor || '-',
       defaultContent: '',
     },
     {
@@ -165,6 +167,9 @@ function AllHormones() {
           <div class="flex gap-2">
             <a href="/dashboard/pathology/hormone/all/edit/${row.ReciptID}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
               Edit
+            </a>
+            <a href="/dashboard/pathology/hormone/all/report/${row.ReciptID}" target="_blank" rel="noopener noreferrer" title="Print" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700 h-8 px-4 py-2">
+              Print
             </a>
           </div>
         `;

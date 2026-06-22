@@ -78,7 +78,7 @@ function T3T4TSHReport() {
             <AppHeader fixed />
             <Main>
                 <div className="print:hidden flex items-center justify-between gap-4">
-                    <Link to="/dashboard/hormone/t3t4tsh">
+                    <Link to="/dashboard/pathology/hormone/t3t4tsh">
                         <Button variant="outline" size="sm">
                             <ArrowLeft className="h-4 w-4" />
                             Back to T3T4TSH Tests

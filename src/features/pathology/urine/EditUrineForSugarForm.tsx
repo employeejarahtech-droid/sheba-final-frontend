@@ -8,6 +8,7 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
+import { FlaskConical } from "lucide-react";
 
 import {
     Form,
@@ -146,7 +147,10 @@ export function EditUrineForSugarForm({ open, setOpen, reportId, invoiceId }: Ur
         setOpen(false);
     }
 
-    const handleView = () => alert("View triggered.");
+    const handleView = () => {
+        setOpen(false);
+        navigate({ to: "/dashboard/pathology/urine/urine-for-sugar" });
+    };
 
     // Fetch machines from API
     const { data: machinesData } = useQuery({
@@ -168,18 +172,26 @@ export function EditUrineForSugarForm({ open, setOpen, reportId, invoiceId }: Ur
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
-            <SheetContent className="max-w-[450px] w-full overflow-y-auto">
-                <SheetHeader>
-                    <SheetTitle>Edit Urine for Sugar</SheetTitle>
+            <SheetContent side="right" className="max-w-[400px] sm:max-w-[450px] w-full overflow-y-auto p-0">
+                <SheetHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-3 px-4 gap-0 mb-4">
+                    <div className="flex items-center gap-2.5 pr-8">
+                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                            <FlaskConical className="h-4 w-4" />
+                        </div>
+                        <div>
+                            <SheetTitle className="text-lg font-bold">Edit Urine for Sugar</SheetTitle>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">Update glucose level and remarks</p>
+                        </div>
+                    </div>
                 </SheetHeader>
 
                 <div className="px-4">
                     <PatientInvoiceInfo
                         invoiceInfo={{
-                            invoiceNo: "RPT-1011",
-                            patientName: "Sadia Rahman",
-                            age: "35 Years",
-                            gender: "Female",
+                            invoiceNo: urineSugarGData?.invoice_id ? `RPT-${urineSugarGData.invoice_id}` : "—",
+                            patientName: urineSugarGData?.outdoor_invoice?.patient_name || "—",
+                            age: urineSugarGData?.outdoor_invoice?.age ? `${urineSugarGData.outdoor_invoice.age} Years` : "—",
+                            gender: urineSugarGData?.outdoor_invoice?.sex || "—",
                         }}
                     />
                 </div>
@@ -187,7 +199,7 @@ export function EditUrineForSugarForm({ open, setOpen, reportId, invoiceId }: Ur
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-6 mt-4 p-4"
+                        className="space-y-6 p-4"
                     >
 
                         {/* Glucose Level */}
@@ -226,7 +238,7 @@ export function EditUrineForSugarForm({ open, setOpen, reportId, invoiceId }: Ur
                             name="testCarriedOutBy"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormLabel>Test Carried Out By</FormLabel>
                                     <FormControl>
                                         <Select
                                             onValueChange={(value) => {
@@ -257,22 +269,23 @@ export function EditUrineForSugarForm({ open, setOpen, reportId, invoiceId }: Ur
                         />
 
                         {/* Buttons */}
-                        <div className="flex justify-center gap-2 pt-4">
+                        <div className="flex justify-between gap-3 pt-4">
                             <Button
                                 type="submit"
                                 variant="success"
+                                className="flex-1"
                                 disabled={form.formState.isSubmitting}
                             >
                                 {form.formState.isSubmitting ? "Saving..." : "Save"}
                             </Button>
 
-                            <Link to={`/pathology/urine/urine-for-sugar/report/$reportId`} params={{ reportId: reportId.toString() }}>
-                                <Button type="button" variant="warning">
+                            <Link to="/dashboard/pathology/urine/urine-for-sugar/report/$reportId" params={{ reportId: reportId.toString() }} className="flex-1">
+                                <Button type="button" variant="warning" className="w-full">
                                     Print Preview
                                 </Button>
                             </Link>
 
-                            <Button type="button" variant="info" onClick={handleView}>
+                            <Button type="button" variant="info" className="flex-1" onClick={handleView}>
                                 View
                             </Button>
                         </div>

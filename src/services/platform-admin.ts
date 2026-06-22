@@ -17,6 +17,11 @@ import type {
   PlatformBillingOverview,
   PlatformTransaction,
   PlatformRevenueStat,
+  PlatformContact,
+  PlatformSubscription,
+  PlatformInvoice,
+  PlatformStripeOverview,
+  PlatformStripeCustomer,
   PaginatedResponse,
   ApiResponse,
 } from '@/types/platform.types'
@@ -274,4 +279,190 @@ export async function fetchBillingTransactions(params?: {
   if (params?.dateTo) query.set('dateTo', params.dateTo)
   const qs = query.toString()
   return platformFetchJson(`/api/admin/billing/transactions${qs ? `?${qs}` : ''}`)
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  BILLING — INVOICES & STRIPE
+// ═══════════════════════════════════════════════════════════════════════
+
+export async function fetchBillingInvoices(params?: {
+  page?: number
+  limit?: number
+  status?: string
+  companyId?: number
+}): Promise<PaginatedResponse<PlatformInvoice>> {
+  const query = new URLSearchParams()
+  if (params?.page) query.set('page', String(params.page))
+  if (params?.limit) query.set('limit', String(params.limit))
+  if (params?.status) query.set('status', params.status)
+  if (params?.companyId) query.set('companyId', String(params.companyId))
+  const qs = query.toString()
+  return platformFetchJson(`/api/admin/billing/invoices${qs ? `?${qs}` : ''}`)
+}
+
+export async function fetchBillingInvoice(id: number): Promise<ApiResponse<PlatformInvoice>> {
+  return platformFetchJson(`/api/admin/billing/invoices/${id}`)
+}
+
+export async function fetchStripeOverview(): Promise<ApiResponse<PlatformStripeOverview>> {
+  return platformFetchJson('/api/admin/billing/stripe/overview')
+}
+
+export async function fetchStripeCustomers(limit?: number): Promise<ApiResponse<PlatformStripeCustomer[]>> {
+  const qs = limit ? `?limit=${limit}` : ''
+  return platformFetchJson(`/api/admin/billing/stripe/customers${qs}`)
+}
+
+export async function fetchStripeSubscriptions(): Promise<ApiResponse<PlatformSubscription[]>> {
+  return platformFetchJson('/api/admin/billing/stripe/subscriptions')
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  SUBSCRIPTIONS
+// ═══════════════════════════════════════════════════════════════════════
+
+export async function fetchSubscriptions(params?: {
+  page?: number
+  limit?: number
+  search?: string
+  status?: string
+}): Promise<PaginatedResponse<PlatformSubscription>> {
+  const query = new URLSearchParams()
+  if (params?.page) query.set('page', String(params.page))
+  if (params?.limit) query.set('limit', String(params.limit))
+  if (params?.search) query.set('search', params.search)
+  if (params?.status) query.set('status', params.status)
+  const qs = query.toString()
+  return platformFetchJson(`/api/admin/subscriptions${qs ? `?${qs}` : ''}`)
+}
+
+export async function fetchSubscription(companyId: number): Promise<ApiResponse<PlatformSubscription>> {
+  return platformFetchJson(`/api/admin/subscriptions/${companyId}`)
+}
+
+export async function updateSubscription(
+  companyId: number,
+  data: { status?: string; subscription_expires_at?: string | null; plan_id?: number | null }
+): Promise<ApiResponse<PlatformSubscription>> {
+  return platformFetchJson(`/api/admin/subscriptions/${companyId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  })
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  CONTACTS
+// ═══════════════════════════════════════════════════════════════════════
+
+export async function fetchContacts(params?: {
+  page?: number
+  limit?: number
+  search?: string
+  status?: string
+}): Promise<PaginatedResponse<PlatformContact>> {
+  const query = new URLSearchParams()
+  if (params?.page) query.set('page', String(params.page))
+  if (params?.limit) query.set('limit', String(params.limit))
+  if (params?.search) query.set('search', params.search)
+  if (params?.status) query.set('status', params.status)
+  const qs = query.toString()
+  return platformFetchJson(`/api/admin/contacts${qs ? `?${qs}` : ''}`)
+}
+
+export async function fetchContact(id: number): Promise<ApiResponse<PlatformContact>> {
+  return platformFetchJson(`/api/admin/contacts/${id}`)
+}
+
+export async function updateContactStatus(id: number, status: string): Promise<ApiResponse<PlatformContact>> {
+  return platformFetchJson(`/api/admin/contacts/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  })
+}
+
+export async function assignContact(id: number, assignedTo: number | null): Promise<ApiResponse<PlatformContact>> {
+  return platformFetchJson(`/api/admin/contacts/${id}/assign`, {
+    method: 'PATCH',
+    body: JSON.stringify({ assigned_to: assignedTo }),
+  })
+}
+
+export async function updateContactNotes(id: number, notes: string): Promise<ApiResponse<PlatformContact>> {
+  return platformFetchJson(`/api/admin/contacts/${id}/notes`, {
+    method: 'PATCH',
+    body: JSON.stringify({ notes }),
+  })
+}
+
+export async function deleteContact(id: number): Promise<ApiResponse<void>> {
+  return platformFetchJson(`/api/admin/contacts/${id}`, { method: 'DELETE' })
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  ADMIN PROFILE & PASSWORD
+// ═══════════════════════════════════════════════════════════════════════
+
+export async function fetchAdminProfile(): Promise<ApiResponse<PlatformAdminUser>> {
+  return platformFetchJson('/api/admin/profile')
+}
+
+export async function updateAdminProfile(data: { name?: string; email?: string }): Promise<ApiResponse<PlatformAdminUser>> {
+  return platformFetchJson('/api/admin/profile', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function changeAdminPassword(data: {
+  oldPassword: string
+  newPassword: string
+}): Promise<ApiResponse<void>> {
+  return platformFetchJson('/api/admin/change-password', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function toggleAdminActive(id: number): Promise<ApiResponse<PlatformAdminUser>> {
+  return platformFetchJson(`/api/admin/users/${id}/toggle-active`, { method: 'PATCH' })
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  PLANS — single (for edit page)
+// ═══════════════════════════════════════════════════════════════════════
+
+export async function fetchPlan(id: number): Promise<ApiResponse<PlatformSubscriptionPlan>> {
+  return platformFetchJson(`/api/admin/plans/${id}`)
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  REGISTRATIONS — manual create + delete
+// ═══════════════════════════════════════════════════════════════════════
+
+export async function createRegistration(data: {
+  email: string
+  name?: string
+  company_name: string
+  subdomain: string
+  plan_id?: number | null
+  cycle?: string
+  phone?: string
+  admin_password?: string
+}): Promise<ApiResponse<PlatformRegistration>> {
+  return platformFetchJson('/api/admin/registrations', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function deleteRegistration(id: number): Promise<ApiResponse<void>> {
+  return platformFetchJson(`/api/admin/registrations/${id}`, { method: 'DELETE' })
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  PUBLIC — subdomain check (used by registrations page)
+// ═══════════════════════════════════════════════════════════════════════
+
+export async function checkSubdomain(subdomain: string): Promise<ApiResponse<{ available: boolean }>> {
+  return platformFetchJson(`/api/public/check-subdomain/${encodeURIComponent(subdomain)}`)
 }

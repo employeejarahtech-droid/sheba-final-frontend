@@ -76,7 +76,7 @@ function StoolForREReport() {
       <AppHeader fixed />
       <Main>
         <div className="print:hidden flex items-center justify-between gap-4">
-          <Link to="/dashboard/stool/stool-re">
+          <Link to="/dashboard/pathology/stool/stool-re">
             <Button variant="outline" size="sm">
               <ArrowLeft className="h-4 w-4" />
               Back to Stool R/E Reports

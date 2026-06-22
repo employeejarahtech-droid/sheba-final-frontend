@@ -1,3 +1,5 @@
+import { ReportFooter } from '@/components/pathology/ReportFooter'
+
 interface WidalTestData {
   id: number;
   invoice_id: number;
@@ -158,22 +160,11 @@ export default function WidalTestReportDetails({ data, paddingTop = 40 }: WidalT
 
       {/* Tested By */}
       <p className="text-sm mt-4">
-        <span className="font-semibold">Test Carried out by:</span> &nbsp;
+        <span className="font-semibold">Test Carried Out By:</span> &nbsp;
         {data.test_carried_out_by || 'N/A'}
       </p>
 
-      {/* Footer Signatures */}
-      <div className="grid grid-cols-2 mt-32 text-sm">
-        <div>
-          <p className="border-t border-dashed w-40 pt-1 text-center">Checked By:</p>
-        </div>
-
-        <div className="text-center">
-          <p className="border-t border-dashed w-56 ml-auto pt-1">
-            Medical Technologist (Lab):
-          </p>
-        </div>
-      </div>
+      <ReportFooter />
     </div>
   );
 }

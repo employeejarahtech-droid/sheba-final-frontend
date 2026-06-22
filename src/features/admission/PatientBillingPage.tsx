@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { getCookie } from '@/lib/cookies'
-import { Plus, Trash2, ArrowLeft, Loader2, Save, FileText, Receipt, BedDouble, Eye, Repeat, Pencil, Printer, UserMinus, ChevronRight, CheckCircle2, Circle, ChevronDown, ChevronUp, Calculator, DoorOpen, Users, DollarSign, Zap, LayoutGrid, Bed, Search, AlertCircle, Activity, HeartPulse, UserCheck } from 'lucide-react'
+import { Plus, Trash2, ArrowLeft, Loader2, Save, FileText, Receipt, BedDouble, Eye, Repeat, Pencil, Printer, UserMinus, ChevronRight, CheckCircle2, Circle, ChevronDown, ChevronUp, Calculator, DoorOpen, Users, DollarSign, Zap, LayoutGrid, Bed, Search, AlertCircle, Activity, HeartPulse, UserCheck, Check } from 'lucide-react'
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
 import { PageHeader } from '@/components/layout/page-header'
@@ -22,6 +22,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Textarea } from '@/components/ui/textarea'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
     Dialog,
@@ -199,8 +201,13 @@ export function PatientBillingPage() {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
     const token = getCookie('accessToken')
-    const { format, currencySymbol } = useCurrency()
-    const { formatDate } = useDateFormat()
+    const { format, currencySymbol, locale } = useCurrency()
+    // Number-only formatter (no currency code) — for grid cells where the currency is in the heading
+    const formatNumber = (amount: number | string) => {
+        const n = typeof amount === 'string' ? parseFloat(amount) : amount
+        return n.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    }
+    const { formatDate, formatDateTime } = useDateFormat()
     const safeFormatDate = (dateVal: any) => {
         if (!dateVal) return '-'
         if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
@@ -324,18 +331,23 @@ export function PatientBillingPage() {
     }, [openBedBillingDialog, editBedBilling, admissionData])
 
     const [openFinalBillDialog, setOpenFinalBillDialog] = useState(false)
-    const [openAutoCompleteDialog, setOpenAutoCompleteDialog] = useState(false)
+    const [selectedDoctorId, setSelectedDoctorId] = useState<string>('')
+    const [discountNotes, setDiscountNotes] = useState<string>('')
+    const [isDoctorDropdownOpen, setIsDoctorDropdownOpen] = useState(false)
+    const [doctorSearchQuery, setDoctorSearchQuery] = useState('')
     const [openDischargeDialog, setOpenDischargeDialog] = useState(false)
     const [openDistributeDialog, setOpenDistributeDialog] = useState(false)
     const [openBalanceDistributeDialog, setOpenBalanceDistributeDialog] = useState(false)
-    const [autoCompleteDischargeDate, setAutoCompleteDischargeDate] = useState(new Date().toISOString().split('T')[0])
-    const [finalBillDischargeDate, setFinalBillDischargeDate] = useState(new Date().toISOString().split('T')[0])
     const [dischargeDate, setDischargeDate] = useState(new Date().toISOString().split('T')[0])
-    const [isCreatingFinalBill, setIsCreatingFinalBill] = useState(false)
-    const [isAutoCompleting, setIsAutoCompleting] = useState(false)
     const [isDischarging, setIsDischarging] = useState(false)
     const [isDistributing, setIsDistributing] = useState(false)
     const [isBalanceDistributing, setIsBalanceDistributing] = useState(false)
+
+    // Lifecycle sidebar card open/close states
+    const [isCreateBillOpen, setIsCreateBillOpen] = useState(true)
+    const [isFinalBillOpen, setIsFinalBillOpen] = useState(true)
+    const [isDischargeOpen, setIsDischargeOpen] = useState(true)
+    const [isDistributeOpen, setIsDistributeOpen] = useState(true)
 
     // Fetch doctors for consultant dropdown
     const { data: doctorsData } = useQuery({
@@ -1144,6 +1156,269 @@ export function PatientBillingPage() {
     const totalServices = servicesList.reduce((sum, s) => sum + Number(s.amount), 0)
     const grandTotal = totalOperations + totalConsultants + totalSurgeons + totalAssistants + totalAnesthesiologists + totalServices + totalBedCharges
 
+    // ── Final bill + payments data ──
+    const { data: finalBillData } = useQuery({
+        queryKey: ['final-bill', admissionId],
+        queryFn: async () => {
+            const res = await fetch(`${API_URL}/api/admission/${admissionId}/final-bill`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (!res.ok) return { data: null }
+            return res.json()
+        },
+        enabled: !!token && !!admissionId && !!admissionData?.data?.final_bill_created,
+    })
+    const finalBill = finalBillData?.data || null
+
+    const { data: paymentsData } = useQuery({
+        queryKey: ['payments', admissionId],
+        queryFn: async () => {
+            const res = await fetch(`${API_URL}/api/admission/${admissionId}/payments`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (!res.ok) return { data: [] }
+            return res.json()
+        },
+        enabled: !!token && !!admissionId && !!admissionData?.data?.final_bill_created_date,
+    })
+    const payments = paymentsData?.data || []
+
+    // Derived billing summary (prefer saved final bill, fall back to live calc)
+    const finalBillNet = Number(finalBill?.total_discounted_amount || 0)
+    const totalPaid = Number(finalBill?.paid_amount || 0)
+    const totalDue = Number(finalBill?.due_amount || 0)
+    const advancePayments: any[] = admissionData?.data?.advancePayments?.payments || []
+    const totalAdvance = Number(admissionData?.data?.advancePayments?.total_amount || 0)
+
+    const billingSummaryMap = useMemo(() => {
+        const summary: Record<string, { original: number; discount: number; net: number }> = {
+            bed_charges: { original: totalBedCharges, discount: 0, net: totalBedCharges },
+            operation: { original: totalOperations, discount: 0, net: totalOperations },
+            consultant: { original: totalConsultants, discount: 0, net: totalConsultants },
+            surgeon: { original: totalSurgeons, discount: 0, net: totalSurgeons },
+            assistant: { original: totalAssistants, discount: 0, net: totalAssistants },
+            anesthesia: { original: totalAnesthesiologists, discount: 0, net: totalAnesthesiologists },
+            service: { original: totalServices, discount: 0, net: totalServices },
+            medicine: { original: 0, discount: 0, net: 0 },
+            other: { original: 0, discount: 0, net: 0 },
+        }
+
+        if (finalBill?.items) {
+            Object.keys(summary).forEach(key => {
+                summary[key] = { original: 0, discount: 0, net: 0 }
+            })
+            
+            finalBill.items.forEach((item: any) => {
+                let type = item.service_type;
+                if (item.service_reference_table === 'indoor_billing_anesthesiologists') {
+                    type = 'anesthesia';
+                }
+                if (!summary[type]) {
+                    summary[type] = { original: 0, discount: 0, net: 0 }
+                }
+                summary[type].original += Number(item.total_amount || 0)
+                summary[type].discount += Number(item.total_discount || 0)
+                summary[type].net += Number(item.final_amount || 0)
+            })
+        }
+
+        return summary
+    }, [finalBill, totalBedCharges, totalOperations, totalConsultants, totalSurgeons, totalAssistants, totalAnesthesiologists, totalServices])
+
+    // Transactions ledger: advances + final-bill charge + payments, with a running due.
+    // running > 0 => Due; running < 0 => Balance (credit); 0 => Settled.
+    const transactions = useMemo(() => {
+        const items: { id: string; date: string; label: string; amount: number; kind: 'charge' | 'credit' }[] = []
+        advancePayments.forEach((p: any) => items.push({
+            id: `adv-${p.id}`,
+            date: p.payment_date || p.created_at,
+            label: 'Advance',
+            amount: Number(p.amount) || 0,
+            kind: 'credit',
+        }))
+        if (finalBill) {
+            items.push({
+                id: `fb-${finalBill.id}`,
+                date: finalBill.discounted_bill_created_date || finalBill.created_at,
+                label: 'Final Bill',
+                amount: Number(finalBill.total_discounted_amount) || Number(finalBill.total_bill_amount) || 0,
+                kind: 'charge',
+            })
+        }
+        payments.forEach((p: any) => items.push({
+            id: `pay-${p.id}`,
+            date: p.payment_date || p.created_at,
+            label: p.final_bill_id ? 'Payment' : 'Advance',
+            amount: Number(p.amount) || 0,
+            kind: 'credit',
+        }))
+
+        items.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+
+        let running = 0
+        return items.map((it) => {
+            running += it.kind === 'charge' ? it.amount : -it.amount
+            return { ...it, running }
+        })
+    }, [advancePayments, finalBill, payments])
+    const currentRunning = transactions.length ? transactions[transactions.length - 1].running : 0
+    const txnBilled = transactions.filter((t: any) => t.kind === 'charge').reduce((s: number, t: any) => s + t.amount, 0)
+    const txnPaid = transactions.filter((t: any) => t.kind === 'credit').reduce((s: number, t: any) => s + t.amount, 0)
+    const maxPayment = Math.max(0, currentRunning)   // cannot pay more than the due
+    const maxRefund = Math.max(0, -currentRunning)    // cannot refund more than the overpayment
+
+    // Final-bill editable grid: one row per charge line the final bill snapshots
+    // (bed/cabin, operations, consultants, surgeons, assistants, services — mirrors create-final-bill)
+    const billGridRows = useMemo(() => {
+        const rows: { key: string; label: string; refTable: string; refId: number; qty: number; amount: number }[] = []
+        bedBills.forEach((b: any) => rows.push({
+            key: `indoor_billing_bed_cabin:${b.id}`,
+            label: `${b.bed_code || 'Bed'} (${b.bed_type || 'Bed'})`,
+            refTable: 'indoor_billing_bed_cabin', refId: b.id,
+            qty: Number(b.days) || 1, amount: Number(b.total_amount) || 0,
+        }))
+        operations.forEach((o: any) => rows.push({
+            key: `indoor_billing_operations:${o.id}`,
+            label: o.operation_type || 'Operation',
+            refTable: 'indoor_billing_operations', refId: o.id,
+            qty: 1, amount: Number(o.charges) || 0,
+        }))
+        consultants.forEach((c: any) => rows.push({
+            key: `indoor_billing_consultants:${c.id}`,
+            label: `Consultation - ${c.consultant_name || 'Unknown'}`,
+            refTable: 'indoor_billing_consultants', refId: c.id,
+            qty: 1, amount: Number(c.fees) || 0,
+        }))
+        surgeons.forEach((s: any) => rows.push({
+            key: `indoor_billing_surgeons:${s.id}`,
+            label: `Surgeon Fee - ${s.surgeon_name || 'Unknown'}`,
+            refTable: 'indoor_billing_surgeons', refId: s.id,
+            qty: 1, amount: Number(s.fees) || 0,
+        }))
+        assistants.forEach((a: any) => rows.push({
+            key: `indoor_billing_assistants:${a.id}`,
+            label: `Assistant Fee - ${a.assistant_name || 'Unknown'}`,
+            refTable: 'indoor_billing_assistants', refId: a.id,
+            qty: 1, amount: Number(a.fees) || 0,
+        }))
+        anesthesiologists.forEach((a: any) => rows.push({
+            key: `indoor_billing_anesthesiologists:${a.id}`,
+            label: `Anesthesia - ${a.anesthesiologist_name || 'Unknown'}`,
+            refTable: 'indoor_billing_anesthesiologists', refId: a.id,
+            qty: 1, amount: Number(a.fees) || 0,
+        }))
+        servicesList.forEach((sv: any) => rows.push({
+            key: `indoor_billing_services:${sv.id}`,
+            label: sv.note || 'Service',
+            refTable: 'indoor_billing_services', refId: sv.id,
+            qty: 1, amount: Number(sv.amount) || 0,
+        }))
+        return rows
+    }, [bedBills, operations, consultants, surgeons, assistants, anesthesiologists, servicesList])
+
+    const gridGross = billGridRows.reduce((sum, r) => sum + r.amount, 0)
+    const [rowDiscounts, setRowDiscounts] = useState<Record<string, number>>({})
+    const gridDiscount = billGridRows.reduce((sum, r) => sum + (Number(rowDiscounts[r.key]) || 0), 0)
+    const gridNet = Math.max(0, gridGross - gridDiscount)
+
+
+    // Transactions-card money dialog (advance / payment / refund)
+    const [txnDialogMode, setTxnDialogMode] = useState<'advance' | 'payment' | 'refund' | null>(null)
+    const [txnAmount, setTxnAmount] = useState<number>(0)
+    const [txnMethod, setTxnMethod] = useState<string>('cash')
+    const [txnNotes, setTxnNotes] = useState<string>('')
+
+    // Create Final Bill from the editable grid (apply per-line discounts)
+    const finalizeWithDiscountMutation = useMutation({
+        mutationFn: async () => {
+            // Step 1: create the final bill snapshot
+            const createRes = await fetch(`${API_URL}/api/admission/${admissionId}/create-final-bill`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            })
+            if (!createRes.ok) {
+                const err = await createRes.json().catch(() => null)
+                throw new Error(err?.message || 'Failed to create final bill')
+            }
+
+            // Step 2: if any per-line discount was entered, map rows → final_bill_items and apply
+            if (gridDiscount <= 0) return
+
+            const fbRes = await fetch(`${API_URL}/api/admission/${admissionId}/final-bill`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (!fbRes.ok) throw new Error('Failed to load final bill for discounting')
+            const fbJson = await fbRes.json()
+            const items: any[] = fbJson?.data?.items || []
+            const paidAmount = Number(fbJson?.data?.paid_amount || 0)
+
+            const item_discounts: Record<string, number> = {}
+            billGridRows.forEach((row) => {
+                const disc = Number(rowDiscounts[row.key]) || 0
+                if (disc <= 0) return
+                const match = items.find((it: any) =>
+                    it.service_reference_table === row.refTable && Number(it.service_reference_id) === row.refId
+                )
+                if (match) item_discounts[match.id] = disc
+            })
+
+            const updateRes = await fetch(`${API_URL}/api/admission/${admissionId}/final-bill`, {
+                method: 'PUT',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    item_discounts,
+                    total_discount: gridDiscount,
+                    total_discounted_amount: gridNet,
+                    due_amount: Math.max(0, gridNet - paidAmount),
+                    notes: discountNotes,
+                    discounted_by_doctor_id: selectedDoctorId ? parseInt(selectedDoctorId) : null,
+                }),
+            })
+            if (!updateRes.ok) {
+                const err = await updateRes.json().catch(() => null)
+                throw new Error(err?.message || 'Failed to apply discounts')
+            }
+        },
+        onSuccess: () => {
+            toast.success('Final bill created successfully')
+            setOpenFinalBillDialog(false)
+            setRowDiscounts({})
+            setSelectedDoctorId('')
+            setDiscountNotes('')
+            queryClient.invalidateQueries({ queryKey: ['admission', admissionId] })
+            queryClient.invalidateQueries({ queryKey: ['final-bill', admissionId] })
+        },
+        onError: (error: Error) => toast.error(error.message || 'Failed to create final bill'),
+    })
+
+    // Unified money mutation for the Transactions dialog (advance / payment / refund)
+    const recordTxnMutation = useMutation({
+        mutationFn: async () => {
+            const mode = txnDialogMode
+            const endpoint = mode === 'advance' ? 'advance-payment' : mode === 'refund' ? 'final-bill/refund' : 'final-bill/payment'
+            const methodKey = mode === 'refund' ? 'refund_method' : 'payment_method'
+            const res = await fetch(`${API_URL}/api/admission/${admissionId}/${endpoint}`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: Number(txnAmount), notes: txnNotes || undefined, [methodKey]: txnMethod }),
+            })
+            if (!res.ok) {
+                const err = await res.json().catch(() => null)
+                throw new Error(err?.message || `Failed to record ${mode || 'transaction'}`)
+            }
+            return res.json()
+        },
+        onSuccess: () => {
+            const label = txnDialogMode === 'advance' ? 'Advance' : txnDialogMode === 'refund' ? 'Refund' : 'Payment'
+            toast.success(`${label} recorded successfully`)
+            setTxnDialogMode(null); setTxnAmount(0); setTxnNotes('')
+            queryClient.invalidateQueries({ queryKey: ['admission', admissionId] })
+            queryClient.invalidateQueries({ queryKey: ['final-bill', admissionId] })
+            queryClient.invalidateQueries({ queryKey: ['payments', admissionId] })
+        },
+        onError: (error: Error) => toast.error(error.message || 'Failed to record transaction'),
+    })
+
     // Create Bill mutation - Creates final bill without discharging
     const createBillMutation = useMutation({
         mutationFn: async () => {
@@ -1173,96 +1448,26 @@ export function PatientBillingPage() {
         },
     })
 
-    // Combined Discharge & Create Final Bill mutation
-    const finalBillMutation = useMutation({
-        mutationFn: async (date: string) => {
-            setIsCreatingFinalBill(true)
-            try {
-                // Step 1: Discharge patient if not already discharged
-                if (admissionData?.data?.status === 'active') {
-                    const dischargeRes = await fetch(`${API_URL}/api/admission/${admissionId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            discharge_date: date,
-                            status: 'discharged',
-                        }),
-                    })
-                    if (!dischargeRes.ok) {
-                        const error = await dischargeRes.json()
-                        throw new Error(error?.message || 'Failed to discharge patient')
-                    }
-                }
-
-                // Step 2: Create final bill
-                const billRes = await fetch(`${API_URL}/api/admission/${admissionId}/create-final-bill`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                })
-                if (!billRes.ok) {
-                    const error = await billRes.json()
-                    throw new Error(error?.message || 'Failed to create final bill')
-                }
-
-                return await billRes.json()
-            } finally {
-                setIsCreatingFinalBill(false)
+    // Standalone discharge (locks the admission — nothing can change after this)
+    const dischargePatientMutation = useMutation({
+        mutationFn: async () => {
+            const res = await fetch(`${API_URL}/api/admission/${admissionId}`, {
+                method: 'PUT',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ discharge_date: dischargeDate, status: 'discharged' }),
+            })
+            if (!res.ok) {
+                const err = await res.json().catch(() => null)
+                throw new Error(err?.message || 'Failed to discharge patient')
             }
+            return res.json()
         },
         onSuccess: () => {
-            toast.success('Patient discharged and final bill created successfully')
-            setOpenFinalBillDialog(false)
+            toast.success('Patient discharged successfully')
+            setOpenDischargeDialog(false)
             queryClient.invalidateQueries({ queryKey: ['admission', admissionId] })
         },
-        onError: (error: Error) => {
-            toast.error(error.message || 'Failed to complete final bill process')
-        },
-    })
-
-    // Auto Complete Billing Cycle mutation
-    const autoCompleteMutation = useMutation({
-        mutationFn: async (dischargeDate: string) => {
-            setIsAutoCompleting(true)
-            try {
-                const res = await fetch(`${API_URL}/api/admission/${admissionId}/auto-complete-cycle`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        discharge_date: dischargeDate,
-                    }),
-                })
-                if (!res.ok) {
-                    const error = await res.json()
-                    throw new Error(error?.message || 'Failed to auto-complete billing cycle')
-                }
-
-                return await res.json()
-            } finally {
-                setIsAutoCompleting(false)
-            }
-        },
-        onSuccess: (data) => {
-            toast.success('Billing cycle completed successfully!')
-            setOpenAutoCompleteDialog(false)
-            queryClient.invalidateQueries({ queryKey: ['admission', admissionId] })
-            queryClient.invalidateQueries({ queryKey: ['final-bill', admissionId] })
-            // Navigate to confirm balance page after a short delay
-            setTimeout(() => {
-                navigate({ to: '/dashboard/admission/patients/$admissionId/confirm-balance', params: { admissionId: String(admissionId) } })
-            }, 1500)
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || 'Failed to complete billing cycle')
-        },
+        onError: (error: Error) => toast.error(error.message || 'Failed to discharge patient'),
     })
 
     // Step Wizard Helper Functions
@@ -1333,7 +1538,7 @@ export function PatientBillingPage() {
             case 'final-bill':
                 return admissionData?.data?.bill_created_at
             case 'discharge':
-                return admissionData?.data?.final_bill_created_at
+                return admissionData?.data?.final_bill_created_date
             case 'distribute':
                 return admissionData?.data?.status === 'discharged'
             case 'balance-distribute':
@@ -1383,7 +1588,7 @@ export function PatientBillingPage() {
             }
 
             // Step 4 (final-bill): Check if final bill created
-            const hasFinalBill = admissionData?.data?.final_bill_created_at
+            const hasFinalBill = admissionData?.data?.final_bill_created_date
             newSteps[3] = {
                 ...newSteps[3],
                 status: hasFinalBill ? 'completed' : (hasPreliminaryBill && currentStepId === 'final-bill' ? 'in-progress' : 'pending')
@@ -1563,16 +1768,18 @@ export function PatientBillingPage() {
                             onClick: () => navigate({ to: '/dashboard/admission/patients' }),
                         }}
                         actions={
-                            admissionData?.data?.bill_created === 1 ? (
-                                <div className="flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
-                                    <span className="text-green-700 dark:text-green-300 text-sm font-medium">
-                                        Bill Created on {admissionData.data.bill_created_date ? safeFormatDate(admissionData.data.bill_created_date) : 'N/A'}
-                                    </span>
-                                    <span className="text-green-700 dark:text-green-300 text-sm font-bold">
-                                        {format(Number(admissionData.data.total_bill_amount || 0))}
-                                    </span>
-                                </div>
-                            ) : null
+                            <div className="flex items-center gap-3">
+                                {admissionData?.data?.bill_created === 1 && (
+                                    <div className="flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+                                        <span className="text-green-700 dark:text-green-300 text-sm font-medium">
+                                            Bill Created on {admissionData.data.bill_created_date ? safeFormatDate(admissionData.data.bill_created_date) : 'N/A'}
+                                        </span>
+                                        <span className="text-green-700 dark:text-green-300 text-sm font-bold">
+                                            {format(grandTotal)}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
                         }
                     />
 
@@ -1612,7 +1819,7 @@ export function PatientBillingPage() {
                                                 <FileText className="h-4 w-4" />
                                             </div>
                                             <div>
-                                                <CardTitle className="text-lg font-bold">Patient Information</CardTitle>
+                                                <CardTitle className="text-base font-bold">Patient Information</CardTitle>
                                                 <p className="text-xs text-gray-600 dark:text-gray-400">Key details about the patient and admission record</p>
                                             </div>
                                         </div>
@@ -1682,46 +1889,13 @@ export function PatientBillingPage() {
                                     </CardContent>
                                 </Card>
 
-                                {/* Create Bill Content */}
-                                <div className="space-y-6">
-                                    {/* Step Actions */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {/* Step 3: Create Bill */}
-                                        {!admissionData?.data?.bill_created && (
-                                            <Button
-                                                onClick={() => createBillMutation.mutate()}
-                                                disabled={grandTotal === 0 || createBillMutation.isPending}
-                                                className="bg-blue-600 hover:bg-blue-700 text-white"
-                                            >
-                                                {createBillMutation.isPending ? (
-                                                    <>
-                                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                                        Creating...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <FileText className="h-4 w-4 mr-2" />
-                                                        Create Bill 💰
-                                                    </>
-                                                )}
-                                            </Button>
-                                        )}
+                                {/* ===== TWO-COLUMN BILLING LAYOUT ===== */}
+                                <div className="grid grid-cols-1 xl:grid-cols-[1fr_560px] gap-5 items-start">
 
-                                        {/* Step 5: Discharge */}
-                                        {admissionData?.data?.final_bill_created_at && admissionData?.data?.status === 'active' && (
-                                            <Button
-                                                onClick={() => setOpenDischargeDialog(true)}
-                                                className="bg-orange-600 hover:bg-orange-700 text-white"
-                                            >
-                                                <DoorOpen className="h-4 w-4 mr-2" />
-                                                Discharge 💰
-                                            </Button>
-                                        )}
+                                    {/* ===== LEFT COLUMN: Billing Item Tables ===== */}
+                                    <div className="space-y-4">
 
-                                    </div>
-                                </div>
 
-                                {/* Operation Types Card */}
                                 <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
                                     <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
                                         <div className="flex items-center justify-between w-full">
@@ -1730,7 +1904,7 @@ export function PatientBillingPage() {
                                                     <Activity className="h-4 w-4" />
                                                 </div>
                                                 <div>
-                                                    <CardTitle className="text-lg font-bold">Operation Types</CardTitle>
+                                                    <CardTitle className="text-base font-bold">Operation Types</CardTitle>
                                                     <p className="text-xs text-gray-600 dark:text-gray-400">Recorded operations and procedures</p>
                                                 </div>
                                             </div>
@@ -1757,22 +1931,23 @@ export function PatientBillingPage() {
                                             </p>
                                         ) : (
                                             <div className="overflow-x-auto">
-                                                <table className="w-full border-collapse">
+                                                <table className="w-full text-xs">
                                                     <thead>
-                                                        <tr className="border-b">
-                                                            <th className="text-left p-3">Operation Type</th>
-                                                            <th className="text-left p-3">Date</th>
-                                                            <th className="text-left p-3">Created At</th>
-                                                            <th className="text-center p-3">Action</th>
+                                                        <tr className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                                                            <th className="text-left px-3 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Operation Type</th>
+                                                            <th className="text-left px-3 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Date</th>
+                                                            <th className="text-left px-3 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Created At</th>
+                                                            <th className="text-center px-3 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Action</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody>
-                                                        {Array.isArray(operations) && operations.map((op) => (
-                                                            <tr key={op.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
-                                                                <td className="p-3">{op.operation_type}</td>
-                                                                <td className="p-3">{safeFormatDate(op.operation_date)}</td>
-                                                                <td className="p-3 text-sm text-muted-foreground">{op.created_at ? safeFormatDate(op.created_at) : '-'}</td>
-                                                                <td className="p-3 text-center flex gap-2 justify-center">
+                                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800/60">
+                                                        {Array.isArray(operations) && operations.map((op, idx) => (
+                                                            <tr key={op.id} className={cn("hover:bg-blue-50/50 dark:hover:bg-blue-950/10 transition-colors", idx % 2 !== 0 ? "bg-gray-50/60 dark:bg-gray-900/20" : "")}>
+                                                                <td className="px-3 py-2.5 font-medium">{op.operation_type}</td>
+                                                                <td className="px-3 py-2.5 text-gray-600 dark:text-gray-400">{safeFormatDate(op.operation_date)}</td>
+                                                                <td className="px-3 py-2.5 text-sm text-muted-foreground">{op.created_at ? safeFormatDate(op.created_at) : '-'}</td>
+                                                                <td className="px-3 py-2.5 text-center">
+                                                                    <div className="flex gap-1.5 justify-center">
                                                                     {!admissionData?.data?.bill_created_at && (
                                                                         <>
                                                                             <button
@@ -1781,24 +1956,25 @@ export function PatientBillingPage() {
                                                                                     setEditOperation({ id: op.id!, operation_type: op.operation_type, operation_date: op.operation_date, charges: op.charges })
                                                                                     setOpenOperationForm(true)
                                                                                 }}
-                                                                                className="text-blue-500 hover:text-blue-700"
+                                                                                className="p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-500 hover:text-blue-700 transition-colors"
                                                                                 title="Edit"
                                                                             >
-                                                                                <Pencil className="w-4 h-4" />
+                                                                                <Pencil className="w-3.5 h-3.5" />
                                                                             </button>
                                                                             <button
                                                                                 type="button"
                                                                                 onClick={() => handleRemoveOperation(op.id!)}
-                                                                                className="text-red-500 hover:text-red-700"
+                                                                                className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500 hover:text-red-700 transition-colors"
                                                                                 title="Delete"
                                                                             >
-                                                                                <Trash2 className="w-4 h-4" />
+                                                                                <Trash2 className="w-3.5 h-3.5" />
                                                                             </button>
                                                                         </>
                                                                     )}
                                                                     {admissionData?.data?.bill_created_at && (
                                                                         <span className="text-xs text-gray-400 italic">Locked</span>
                                                                     )}
+                                                                    </div>
                                                                 </td>
                                                             </tr>
                                                         ))}
@@ -1825,7 +2001,7 @@ export function PatientBillingPage() {
                                                     <Bed className="h-4 w-4" />
                                                 </div>
                                                 <div>
-                                                    <CardTitle className="text-lg font-bold">Bed/Cabin Charges</CardTitle>
+                                                    <CardTitle className="text-base font-bold">Bed/Cabin Charges</CardTitle>
                                                     <p className="text-xs text-gray-600 dark:text-gray-400">Timeline and daily rate breakdown for bed history</p>
                                                 </div>
                                             </div>
@@ -1985,7 +2161,7 @@ export function PatientBillingPage() {
                                                     <BedDouble className="h-4 w-4" />
                                                 </div>
                                                 <div>
-                                                    <CardTitle className="text-lg font-bold">Bed Cabin Billing Records</CardTitle>
+                                                    <CardTitle className="text-base font-bold">Bed Cabin Billing Records</CardTitle>
                                                     <p className="text-xs text-gray-600 dark:text-gray-400">Logged billing transactions for patient stay duration</p>
                                                 </div>
                                             </div>
@@ -2006,7 +2182,7 @@ export function PatientBillingPage() {
                                     <CardContent>
                                         {bedBillingData?.data && bedBillingData.data.length > 0 ? (
                                             <div className="overflow-x-auto">
-                                                <table className="w-full border-collapse">
+                                                <table className="w-full text-xs border-collapse">
                                                     <thead>
                                                         <tr className="border-b">
                                                             <th className="text-left p-3">SL</th>
@@ -2083,7 +2259,7 @@ export function PatientBillingPage() {
                                                     <Users className="h-4 w-4" />
                                                 </div>
                                                 <div>
-                                                    <CardTitle className="text-lg font-bold">Consultants</CardTitle>
+                                                    <CardTitle className="text-base font-bold">Consultants</CardTitle>
                                                     <p className="text-xs text-gray-600 dark:text-gray-400">Assigned consultants, visitation dates, and fees</p>
                                                 </div>
                                             </div>
@@ -2110,7 +2286,7 @@ export function PatientBillingPage() {
                                             </p>
                                         ) : (
                                             <div className="overflow-x-auto">
-                                                <table className="w-full border-collapse">
+                                                <table className="w-full text-xs border-collapse">
                                                     <thead>
                                                         <tr className="border-b">
                                                             <th className="text-left p-3">SL</th>
@@ -2182,7 +2358,7 @@ export function PatientBillingPage() {
                                                     <HeartPulse className="h-4 w-4" />
                                                 </div>
                                                 <div>
-                                                    <CardTitle className="text-lg font-bold">Surgeons</CardTitle>
+                                                    <CardTitle className="text-base font-bold">Surgeons</CardTitle>
                                                     <p className="text-xs text-gray-600 dark:text-gray-400">Surgeon assignments and surgery fee distribution</p>
                                                 </div>
                                             </div>
@@ -2209,7 +2385,7 @@ export function PatientBillingPage() {
                                             </p>
                                         ) : (
                                             <div className="overflow-x-auto">
-                                                <table className="w-full border-collapse">
+                                                <table className="w-full text-xs border-collapse">
                                                     <thead>
                                                         <tr className="border-b">
                                                             <th className="text-left p-3">SL</th>
@@ -2281,7 +2457,7 @@ export function PatientBillingPage() {
                                                     <UserCheck className="h-4 w-4" />
                                                 </div>
                                                 <div>
-                                                    <CardTitle className="text-lg font-bold">Assistants</CardTitle>
+                                                    <CardTitle className="text-base font-bold">Assistants</CardTitle>
                                                     <p className="text-xs text-gray-600 dark:text-gray-400">Assistant surgeon fees and details</p>
                                                 </div>
                                             </div>
@@ -2308,7 +2484,7 @@ export function PatientBillingPage() {
                                             </p>
                                         ) : (
                                             <div className="overflow-x-auto">
-                                                <table className="w-full border-collapse">
+                                                <table className="w-full text-xs border-collapse">
                                                     <thead>
                                                         <tr className="border-b">
                                                             <th className="text-left p-3">SL</th>
@@ -2380,7 +2556,7 @@ export function PatientBillingPage() {
                                                     <Zap className="h-4 w-4" />
                                                 </div>
                                                 <div>
-                                                    <CardTitle className="text-lg font-bold">Anesthesiologists</CardTitle>
+                                                    <CardTitle className="text-base font-bold">Anesthesiologists</CardTitle>
                                                     <p className="text-xs text-gray-600 dark:text-gray-400">Anesthesia type, administration dates, and fees</p>
                                                 </div>
                                             </div>
@@ -2407,7 +2583,7 @@ export function PatientBillingPage() {
                                             </p>
                                         ) : (
                                             <div className="overflow-x-auto">
-                                                <table className="w-full border-collapse">
+                                                <table className="w-full text-xs border-collapse">
                                                     <thead>
                                                         <tr className="border-b">
                                                             <th className="text-left p-3">SL</th>
@@ -2486,7 +2662,7 @@ export function PatientBillingPage() {
                                                     <LayoutGrid className="h-4 w-4" />
                                                 </div>
                                                 <div>
-                                                    <CardTitle className="text-lg font-bold">Clinical Services</CardTitle>
+                                                    <CardTitle className="text-base font-bold">Clinical Services</CardTitle>
                                                     <p className="text-xs text-gray-600 dark:text-gray-400">Hospital clinical services, test charges, and utility bills</p>
                                                 </div>
                                             </div>
@@ -2513,7 +2689,7 @@ export function PatientBillingPage() {
                                             </p>
                                         ) : (
                                             <div className="overflow-x-auto">
-                                                <table className="w-full border-collapse">
+                                                <table className="w-full text-xs border-collapse">
                                                     <thead>
                                                         <tr className="border-b">
                                                             <th className="text-left p-3">Service</th>
@@ -2582,7 +2758,7 @@ export function PatientBillingPage() {
                                                 <Receipt className="h-4 w-4" />
                                             </div>
                                             <div>
-                                                <CardTitle className="text-lg font-bold">Outdoor Bills</CardTitle>
+                                                <CardTitle className="text-base font-bold">Outdoor Bills</CardTitle>
                                                 <p className="text-xs text-gray-600 dark:text-gray-400">Invoices and outstanding dues from outdoor department</p>
                                             </div>
                                         </div>
@@ -2594,7 +2770,7 @@ export function PatientBillingPage() {
                                             </p>
                                         ) : (
                                             <div className="overflow-x-auto">
-                                                <table className="w-full border-collapse">
+                                                <table className="w-full text-xs border-collapse">
                                                     <thead>
                                                         <tr className="border-b">
                                                             <th className="text-left p-3">Invoice ID</th>
@@ -2636,67 +2812,655 @@ export function PatientBillingPage() {
                                     </CardContent>
                                 </Card>
 
-                                {/* Summary Card */}
-                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
-                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
-                                        <div className="flex items-center justify-between w-full">
-                                            <div className="flex items-center gap-2.5">
-                                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
-                                                    <Calculator className="h-4 w-4" />
-                                                </div>
-                                                <div>
-                                                    <CardTitle className="text-lg font-bold">Billing Summary</CardTitle>
-                                                    <p className="text-xs text-gray-600 dark:text-gray-400">Subtotal, discounts, advances, and net due calculations</p>
-                                                </div>
-                                            </div>
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={handlePrintBilling}
-                                                className="print:hidden bg-white dark:bg-black"
-                                            >
-                                                <Printer className="h-4 w-4 mr-2" />
-                                                Print
-                                            </Button>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between items-center py-2 border-b">
-                                                <span>Bed/Cabin Charges ({displayBedChargesDays} days):</span>
-                                                <span className="font-bold">{format(totalBedCharges)}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center py-2 border-b">
-                                                <span>Consultant Fees:</span>
-                                                <span className="font-bold">{format(totalConsultants)}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center py-2 border-b">
-                                                <span>Surgeon Fees:</span>
-                                                <span className="font-bold">{format(totalSurgeons)}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center py-2 border-b">
-                                                <span>Assistant Fees:</span>
-                                                <span className="font-bold">{format(totalAssistants)}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center py-2 border-b">
-                                                <span>Anesthesiologist Fees:</span>
-                                                <span className="font-bold">{format(totalAnesthesiologists)}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center py-2 border-b">
-                                                <span>Services Charges:</span>
-                                                <span className="font-bold">{format(totalServices)}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center py-2">
-                                                <span className="text-lg font-bold">Grand Total:</span>
-                                                <span className="text-xl font-bold text-blue-600">{format(grandTotal)}</span>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-
-                                {/* Payment History Section - Always show at bottom */}
+                                {/* Payment History Section */}
                                 <PaymentHistoryView admissionId={admissionId} />
+
+
+                                    </div>{/* ===== END LEFT COLUMN ===== */}
+
+                                    {/* ===== RIGHT COLUMN: Lifecycle Action Panel (Sticky) ===== */}
+                                    <div className="sticky top-4 space-y-4">
+
+                                        {/* Billing Summary Widget */}
+                                        <Card className="overflow-hidden shadow-none border bg-gradient-to-br from-slate-50 to-blue-50/50 dark:from-slate-950/50 dark:to-blue-950/20 p-0">
+                                            <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 py-3 px-4 gap-0">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="p-1.5 bg-white/20 rounded-lg">
+                                                            <Calculator className="h-3.5 w-3.5 text-white" />
+                                                        </div>
+                                                        <CardTitle className="text-sm font-bold text-white">Billing Summary</CardTitle>
+                                                    </div>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={handlePrintBilling}
+                                                        className="h-7 text-xs bg-white/20 border-white/30 text-white hover:bg-white/30 print:hidden"
+                                                    >
+                                                        <Printer className="h-3 w-3 mr-1" />
+                                                        Print
+                                                    </Button>
+                                                </div>
+                                            </CardHeader>
+                                            <CardContent className="p-0">
+                                                <div className="divide-y divide-gray-100 dark:divide-gray-800/60">
+                                                    {billingSummaryMap.bed_charges.original > 0 && (
+                                                        <div className="flex justify-between items-center px-4 py-2.5">
+                                                            <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                                                                <Bed className="h-3.5 w-3.5 text-blue-500" />
+                                                                Bed/Cabin ({displayBedChargesDays}d)
+                                                            </span>
+                                                            <div className="text-right">
+                                                                {billingSummaryMap.bed_charges.discount > 0 && (
+                                                                    <span className="text-xs text-red-500 mr-2 line-through">{format(billingSummaryMap.bed_charges.original)}</span>
+                                                                )}
+                                                                <span className="text-sm font-semibold tabular-nums">{format(billingSummaryMap.bed_charges.net)}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {billingSummaryMap.consultant.original > 0 && (
+                                                        <div className="flex justify-between items-center px-4 py-2.5">
+                                                            <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                                                                <UserCheck className="h-3.5 w-3.5 text-purple-500" />
+                                                                Consultants
+                                                            </span>
+                                                            <div className="text-right">
+                                                                {billingSummaryMap.consultant.discount > 0 && (
+                                                                    <span className="text-xs text-red-500 mr-2 line-through">{format(billingSummaryMap.consultant.original)}</span>
+                                                                )}
+                                                                <span className="text-sm font-semibold tabular-nums">{format(billingSummaryMap.consultant.net)}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {billingSummaryMap.operation.original > 0 && (
+                                                        <div className="flex justify-between items-center px-4 py-2.5">
+                                                            <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                                                                <HeartPulse className="h-3.5 w-3.5 text-red-500" />
+                                                                Operations
+                                                            </span>
+                                                            <div className="text-right">
+                                                                {billingSummaryMap.operation.discount > 0 && (
+                                                                    <span className="text-xs text-red-500 mr-2 line-through">{format(billingSummaryMap.operation.original)}</span>
+                                                                )}
+                                                                <span className="text-sm font-semibold tabular-nums">{format(billingSummaryMap.operation.net)}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {billingSummaryMap.surgeon.original > 0 && (
+                                                        <div className="flex justify-between items-center px-4 py-2.5">
+                                                            <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                                                                <HeartPulse className="h-3.5 w-3.5 text-red-500" />
+                                                                Surgeons
+                                                            </span>
+                                                            <div className="text-right">
+                                                                {billingSummaryMap.surgeon.discount > 0 && (
+                                                                    <span className="text-xs text-red-500 mr-2 line-through">{format(billingSummaryMap.surgeon.original)}</span>
+                                                                )}
+                                                                <span className="text-sm font-semibold tabular-nums">{format(billingSummaryMap.surgeon.net)}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {billingSummaryMap.assistant.original > 0 && (
+                                                        <div className="flex justify-between items-center px-4 py-2.5">
+                                                            <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                                                                <Users className="h-3.5 w-3.5 text-green-500" />
+                                                                Assistants
+                                                            </span>
+                                                            <div className="text-right">
+                                                                {billingSummaryMap.assistant.discount > 0 && (
+                                                                    <span className="text-xs text-red-500 mr-2 line-through">{format(billingSummaryMap.assistant.original)}</span>
+                                                                )}
+                                                                <span className="text-sm font-semibold tabular-nums">{format(billingSummaryMap.assistant.net)}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {billingSummaryMap.anesthesia.original > 0 && (
+                                                        <div className="flex justify-between items-center px-4 py-2.5">
+                                                            <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                                                                <Zap className="h-3.5 w-3.5 text-amber-500" />
+                                                                Anesthesia
+                                                            </span>
+                                                            <div className="text-right">
+                                                                {billingSummaryMap.anesthesia.discount > 0 && (
+                                                                    <span className="text-xs text-red-500 mr-2 line-through">{format(billingSummaryMap.anesthesia.original)}</span>
+                                                                )}
+                                                                <span className="text-sm font-semibold tabular-nums">{format(billingSummaryMap.anesthesia.net)}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {billingSummaryMap.service.original > 0 && (
+                                                        <div className="flex justify-between items-center px-4 py-2.5">
+                                                            <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                                                                <LayoutGrid className="h-3.5 w-3.5 text-teal-500" />
+                                                                Services
+                                                            </span>
+                                                            <div className="text-right">
+                                                                {billingSummaryMap.service.discount > 0 && (
+                                                                    <span className="text-xs text-red-500 mr-2 line-through">{format(billingSummaryMap.service.original)}</span>
+                                                                )}
+                                                                <span className="text-sm font-semibold tabular-nums">{format(billingSummaryMap.service.net)}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {billingSummaryMap.medicine && billingSummaryMap.medicine.original > 0 && (
+                                                        <div className="flex justify-between items-center px-4 py-2.5">
+                                                            <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                                                                <LayoutGrid className="h-3.5 w-3.5 text-teal-500" />
+                                                                Medicine
+                                                            </span>
+                                                            <div className="text-right">
+                                                                {billingSummaryMap.medicine.discount > 0 && (
+                                                                    <span className="text-xs text-red-500 mr-2 line-through">{format(billingSummaryMap.medicine.original)}</span>
+                                                                )}
+                                                                <span className="text-sm font-semibold tabular-nums">{format(billingSummaryMap.medicine.net)}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {billingSummaryMap.other && billingSummaryMap.other.original > 0 && (
+                                                        <div className="flex justify-between items-center px-4 py-2.5">
+                                                            <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                                                                <LayoutGrid className="h-3.5 w-3.5 text-slate-500" />
+                                                                Other Charges
+                                                            </span>
+                                                            <div className="text-right">
+                                                                {billingSummaryMap.other.discount > 0 && (
+                                                                    <span className="text-xs text-red-500 mr-2 line-through">{format(billingSummaryMap.other.original)}</span>
+                                                                )}
+                                                                <span className="text-sm font-semibold tabular-nums">{format(billingSummaryMap.other.net)}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {finalBill ? (
+                                                        <>
+                                                            <div className="flex justify-between items-center px-4 py-2 bg-slate-100 dark:bg-slate-900 border-t border-gray-200 dark:border-gray-800">
+                                                                <span className="text-xs font-medium text-slate-500">Gross Bill</span>
+                                                                <span className="text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-300">{format(Number(finalBill.total_bill_amount))}</span>
+                                                            </div>
+                                                            {Number(finalBill.total_discount || 0) > 0 && (
+                                                                <div className="flex justify-between items-center px-4 py-2 bg-slate-100 dark:bg-slate-900 border-t border-gray-200 dark:border-gray-800 text-red-500">
+                                                                    <span className="text-xs font-medium">Total Discount</span>
+                                                                    <span className="text-xs font-semibold tabular-nums">-{format(Number(finalBill.total_discount))}</span>
+                                                                </div>
+                                                            )}
+                                                            <div className="flex justify-between items-center px-4 py-3 bg-blue-600 dark:bg-blue-700 rounded-b-lg">
+                                                                <span className="text-sm font-bold text-white">Net Final Bill</span>
+                                                                <span className="text-lg font-extrabold text-white tabular-nums">{format(Number(finalBill.total_discounted_amount))}</span>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <div className="flex justify-between items-center px-4 py-3 bg-blue-600 dark:bg-blue-700 rounded-b-lg">
+                                                            <span className="text-sm font-bold text-white">Grand Total</span>
+                                                            <span className="text-lg font-extrabold text-white tabular-nums">{format(grandTotal)}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+
+                                        {/* CARD 1: Create Preliminary Bill */}
+                                        <Card className={cn(
+                                            "overflow-hidden shadow-none border transition-all p-0",
+                                            admissionData?.data?.bill_created === 1
+                                                ? "border-green-200 dark:border-green-800/60 bg-green-50/30 dark:bg-green-950/10"
+                                                : "border-blue-200 dark:border-blue-800/60"
+                                        )}>
+                                            <CardHeader
+                                                className={cn(
+                                                    "py-3 px-4 flex flex-row items-center justify-between cursor-pointer select-none gap-0",
+                                                    admissionData?.data?.bill_created === 1
+                                                        ? "bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/20 border-b border-green-100 dark:border-green-900/40"
+                                                        : "bg-gradient-to-r from-blue-50 to-indigo-50/70 dark:from-blue-950/20 dark:to-indigo-950/10 border-b border-blue-100 dark:border-blue-900/40"
+                                                )}
+                                                onClick={() => setIsCreateBillOpen(!isCreateBillOpen)}
+                                            >
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className={cn(
+                                                        "p-1.5 rounded-lg",
+                                                        admissionData?.data?.bill_created === 1
+                                                            ? "bg-green-500"
+                                                            : "bg-blue-500"
+                                                    )}>
+                                                        {admissionData?.data?.bill_created === 1
+                                                            ? <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+                                                            : <FileText className="h-3.5 w-3.5 text-white" />
+                                                        }
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[13px] font-bold leading-none">1. Create Bill</p>
+                                                        <p className="text-[11px] text-muted-foreground mt-0.5">Preliminary bill generation</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={cn(
+                                                        "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide",
+                                                        admissionData?.data?.bill_created === 1
+                                                            ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                                                            : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                                                    )}>
+                                                        {admissionData?.data?.bill_created === 1 ? "Done" : "Pending"}
+                                                    </span>
+                                                    {isCreateBillOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                                                </div>
+                                            </CardHeader>
+                                            {isCreateBillOpen && (
+                                                <CardContent className="p-4">
+                                                    {admissionData?.data?.bill_created === 1 ? (
+                                                        <div className="text-sm text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-950/20 rounded-lg p-3">
+                                                            <p className="font-semibold flex items-center gap-1.5 mb-1">
+                                                                <CheckCircle2 className="h-4 w-4" />
+                                                                Preliminary Bill Created
+                                                            </p>
+                                                            <p className="text-xs text-green-600 dark:text-green-400">
+                                                                Created on {admissionData.data.bill_created_date ? safeFormatDate(admissionData.data.bill_created_date) : 'N/A'}
+                                                                {' '}· Amount: <strong>{format(grandTotal)}</strong>
+                                                            </p>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-3">
+                                                            <p className="text-xs text-muted-foreground">
+                                                                Generate the preliminary bill based on all items added so far.
+                                                            </p>
+                                                            <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-100 dark:border-blue-900/30">
+                                                                <span className="text-xs font-medium text-blue-800 dark:text-blue-300">Estimated Total</span>
+                                                                <span className="text-sm font-extrabold text-blue-700 dark:text-blue-300">{format(grandTotal)}</span>
+                                                            </div>
+                                                            <Button
+                                                                onClick={() => createBillMutation.mutate()}
+                                                                disabled={grandTotal === 0 || createBillMutation.isPending}
+                                                                className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm h-9"
+                                                            >
+                                                                {createBillMutation.isPending ? (
+                                                                    <><Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />Creating...</>
+                                                                ) : (
+                                                                    <><FileText className="h-3.5 w-3.5 mr-2" />Create Preliminary Bill</>
+                                                                )}
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </CardContent>
+                                            )}
+                                        </Card>
+
+                                        {/* CARD 2: Create Final Bill */}
+                                        <Card className={cn(
+                                            "overflow-hidden shadow-none border transition-all p-0",
+                                            admissionData?.data?.final_bill_created_date
+                                                ? "border-green-200 dark:border-green-800/60 bg-green-50/30 dark:bg-green-950/10"
+                                                : admissionData?.data?.bill_created === 1
+                                                    ? "border-indigo-200 dark:border-indigo-800/60"
+                                                    : "border-gray-200 dark:border-gray-800/60 opacity-60"
+                                        )}>
+                                            <CardHeader
+                                                className={cn(
+                                                    "py-3 px-4 flex flex-row items-center justify-between gap-0",
+                                                    admissionData?.data?.bill_created === 1 ? "cursor-pointer select-none" : "cursor-not-allowed select-none",
+                                                    admissionData?.data?.final_bill_created_date
+                                                        ? "bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/20 border-b border-green-100 dark:border-green-900/40"
+                                                        : "bg-gradient-to-r from-indigo-50/60 to-purple-50/40 dark:from-indigo-950/20 dark:to-purple-950/10 border-b border-indigo-100 dark:border-indigo-900/30"
+                                                )}
+                                                onClick={() => admissionData?.data?.bill_created === 1 && setIsFinalBillOpen(!isFinalBillOpen)}
+                                            >
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className={cn(
+                                                        "p-1.5 rounded-lg",
+                                                        admissionData?.data?.final_bill_created_date ? "bg-green-500" : "bg-indigo-500"
+                                                    )}>
+                                                        {admissionData?.data?.final_bill_created_date
+                                                            ? <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+                                                            : <Receipt className="h-3.5 w-3.5 text-white" />
+                                                        }
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[13px] font-bold leading-none">2. Final Bill</p>
+                                                        <p className="text-[11px] text-muted-foreground mt-0.5">Finalize and lock billing</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={cn(
+                                                        "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide",
+                                                        admissionData?.data?.final_bill_created_date
+                                                            ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                                                            : admissionData?.data?.bill_created === 1
+                                                                ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                                                                : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                                                    )}>
+                                                        {admissionData?.data?.final_bill_created_date ? "Done" : admissionData?.data?.bill_created === 1 ? "Pending" : "Locked"}
+                                                    </span>
+                                                    {admissionData?.data?.bill_created === 1 && (
+                                                        isFinalBillOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                                    )}
+                                                </div>
+                                            </CardHeader>
+                                            {isFinalBillOpen && admissionData?.data?.bill_created === 1 && (
+                                                <CardContent className="p-4">
+                                                    {admissionData?.data?.final_bill_created_date ? (
+                                                        <div className="space-y-3">
+                                                            <div className="text-sm text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-950/20 rounded-lg p-3">
+                                                                <p className="font-semibold flex items-center gap-1.5 mb-1">
+                                                                    <CheckCircle2 className="h-4 w-4" />
+                                                                    Final Bill Created
+                                                                </p>
+                                                                <p className="text-xs text-green-600 dark:text-green-400">
+                                                                    Created on {safeFormatDate(admissionData.data.final_bill_created_date)}
+                                                                </p>
+                                                            </div>
+                                                            <Button
+                                                                onClick={() => setOpenFinalBillDialog(true)}
+                                                                variant="outline"
+                                                                className="w-full text-sm h-9"
+                                                            >
+                                                                <Eye className="h-3.5 w-3.5 mr-2" />
+                                                                View Final Bill
+                                                            </Button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-3">
+                                                            <div className="flex items-center justify-between p-3 bg-indigo-50 dark:bg-indigo-950/20 rounded-lg border border-indigo-100 dark:border-indigo-900/30">
+                                                                <span className="text-xs font-medium text-indigo-800 dark:text-indigo-300">Gross Amount</span>
+                                                                <span className="text-sm font-extrabold text-indigo-700 dark:text-indigo-300">{format(gridGross)}</span>
+                                                            </div>
+                                                            {gridDiscount > 0 && (
+                                                                <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-100 dark:border-green-900/30">
+                                                                    <span className="text-xs font-medium text-green-800 dark:text-green-300">After Discount</span>
+                                                                    <span className="text-sm font-extrabold text-green-700 dark:text-green-300">{format(gridNet)}</span>
+                                                                </div>
+                                                            )}
+                                                            <Button
+                                                                onClick={() => setOpenFinalBillDialog(true)}
+                                                                disabled={gridGross === 0}
+                                                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm h-9"
+                                                            >
+                                                                <Receipt className="h-3.5 w-3.5 mr-2" />
+                                                                {gridDiscount > 0 ? 'Review & Finalize' : 'Create Final Bill'}
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </CardContent>
+                                            )}
+                                        </Card>
+
+                                        {/* Transactions Ledger */}
+                                        <Card className="overflow-hidden shadow-none border p-0">
+                                            <CardHeader className="py-3 px-4 flex flex-row items-center justify-between gap-0 bg-gradient-to-r from-indigo-50/60 to-slate-50/40 dark:from-indigo-950/20 dark:to-slate-950/10 border-b border-indigo-100 dark:border-indigo-900/30">
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className="p-1.5 rounded-lg bg-indigo-500">
+                                                        <Receipt className="h-3.5 w-3.5 text-white" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[13px] font-bold leading-none">Transactions</p>
+                                                        <p className="text-[11px] text-muted-foreground mt-0.5">Ledger &amp; running due</p>
+                                                    </div>
+                                                </div>
+                                                <span className={cn(
+                                                    "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide whitespace-nowrap",
+                                                    currentRunning > 0
+                                                        ? "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300"
+                                                        : currentRunning < 0
+                                                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                                                            : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                                                )}>
+                                                    {currentRunning > 0 ? `Due ${formatNumber(currentRunning)}` : currentRunning < 0 ? `Bal ${formatNumber(Math.abs(currentRunning))}` : 'Settled'}
+                                                </span>
+                                            </CardHeader>
+                                            <CardContent className="p-3 space-y-3">
+                                                {transactions.length === 0 ? (
+                                                    <p className="text-xs text-muted-foreground text-center py-4">No transactions yet.</p>
+                                                ) : (
+                                                    <div className="space-y-1.5">
+                                                        {transactions.map((t: any) => (
+                                                            <div key={t.id} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800">
+                                                                <div className="flex items-center gap-2 min-w-0">
+                                                                    <span className={cn(
+                                                                        "h-2 w-2 rounded-full flex-shrink-0",
+                                                                        t.kind === 'charge' ? 'bg-indigo-500' : 'bg-emerald-500'
+                                                                    )} />
+                                                                    <div className="min-w-0">
+                                                                        <p className="text-xs font-semibold truncate">{t.label}</p>
+                                                                        <p className="text-[10px] text-muted-foreground">{formatDateTime(t.date)}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="text-right flex-shrink-0">
+                                                                    <p className={cn(
+                                                                        "text-xs font-bold",
+                                                                        t.kind === 'charge' ? 'text-indigo-600 dark:text-indigo-400' : 'text-emerald-600 dark:text-emerald-400'
+                                                                    )}>
+                                                                        {t.kind === 'charge' ? '+' : '−'}{formatNumber(t.amount)}
+                                                                    </p>
+                                                                    <p className={cn(
+                                                                        "text-[10px] font-medium",
+                                                                        t.running > 0 ? 'text-orange-600' : t.running < 0 ? 'text-emerald-600' : 'text-muted-foreground'
+                                                                    )}>
+                                                                        {t.running > 0 ? `Due ${formatNumber(t.running)}` : t.running < 0 ? `Bal ${formatNumber(Math.abs(t.running))}` : 'Settled'}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {/* Summary footer */}
+                                                <div className="grid grid-cols-3 gap-2 text-center">
+                                                    <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30">
+                                                        <p className="text-[9px] text-muted-foreground uppercase tracking-wide">Billed</p>
+                                                        <p className="text-xs font-bold text-indigo-700 dark:text-indigo-300">{formatNumber(txnBilled)}</p>
+                                                    </div>
+                                                    <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
+                                                        <p className="text-[9px] text-muted-foreground uppercase tracking-wide">Paid</p>
+                                                        <p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">{formatNumber(txnPaid)}</p>
+                                                    </div>
+                                                    <div className="p-2 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30">
+                                                        <p className="text-[9px] text-muted-foreground uppercase tracking-wide">Due</p>
+                                                        <p className="text-xs font-bold text-orange-700 dark:text-orange-300">{formatNumber(Math.max(0, currentRunning))}</p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Actions: Advance (any) · Payment (≤ due) · Refund (≤ refundable) */}
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    <Button
+                                                        onClick={() => { setTxnAmount(0); setTxnNotes(''); setTxnDialogMode('advance') }}
+                                                        disabled={!!admissionData?.data?.final_bill_created_date}
+                                                        className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs"
+                                                    >
+                                                        <Plus className="h-3 w-3 mr-1" /> Advance
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => { setTxnAmount(maxPayment); setTxnNotes(''); setTxnDialogMode('payment') }}
+                                                        disabled={maxPayment <= 0}
+                                                        className="h-8 bg-green-600 hover:bg-green-700 text-white text-xs"
+                                                    >
+                                                        <DollarSign className="h-3 w-3 mr-1" /> Payment
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => { setTxnAmount(maxRefund); setTxnNotes(''); setTxnDialogMode('refund') }}
+                                                        disabled={maxRefund <= 0}
+                                                        className="h-8 bg-rose-600 hover:bg-rose-700 text-white text-xs"
+                                                    >
+                                                        <Repeat className="h-3 w-3 mr-1" /> Refund
+                                                    </Button>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+
+                                        {/* CARD 4: Discharge Patient */}
+                                        <Card className={cn(
+                                            "overflow-hidden shadow-none border transition-all p-0",
+                                            admissionData?.data?.status === 'discharged'
+                                                ? "border-green-200 dark:border-green-800/60 bg-green-50/30 dark:bg-green-950/10"
+                                                : admissionData?.data?.final_bill_created_date
+                                                    ? "border-orange-200 dark:border-orange-800/60"
+                                                    : "border-gray-200 dark:border-gray-800/60 opacity-60"
+                                        )}>
+                                            <CardHeader
+                                                className={cn(
+                                                    "py-3 px-4 flex flex-row items-center justify-between gap-0",
+                                                    admissionData?.data?.final_bill_created_date ? "cursor-pointer select-none" : "cursor-not-allowed select-none",
+                                                    admissionData?.data?.status === 'discharged'
+                                                        ? "bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/20 border-b border-green-100 dark:border-green-900/40"
+                                                        : "bg-gradient-to-r from-orange-50/60 to-amber-50/40 dark:from-orange-950/20 dark:to-amber-950/10 border-b border-orange-100 dark:border-orange-900/30"
+                                                )}
+                                                onClick={() => admissionData?.data?.final_bill_created_date && setIsDischargeOpen(!isDischargeOpen)}
+                                            >
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className={cn(
+                                                        "p-1.5 rounded-lg",
+                                                        admissionData?.data?.status === 'discharged' ? "bg-green-500" : "bg-orange-500"
+                                                    )}>
+                                                        {admissionData?.data?.status === 'discharged'
+                                                            ? <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+                                                            : <DoorOpen className="h-3.5 w-3.5 text-white" />
+                                                        }
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[13px] font-bold leading-none">4. Discharge</p>
+                                                        <p className="text-[11px] text-muted-foreground mt-0.5">Release patient from hospital</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={cn(
+                                                        "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide",
+                                                        admissionData?.data?.status === 'discharged'
+                                                            ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                                                            : admissionData?.data?.final_bill_created_date
+                                                                ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                                                                : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                                                    )}>
+                                                        {admissionData?.data?.status === 'discharged' ? "Done" : admissionData?.data?.final_bill_created_date ? "Pending" : "Locked"}
+                                                    </span>
+                                                    {admissionData?.data?.final_bill_created_date && (
+                                                        isDischargeOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                                    )}
+                                                </div>
+                                            </CardHeader>
+                                            {isDischargeOpen && admissionData?.data?.final_bill_created_date && (
+                                                <CardContent className="p-4">
+                                                    {admissionData?.data?.status === 'discharged' ? (
+                                                        <div className="text-sm text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-950/20 rounded-lg p-3">
+                                                            <p className="font-semibold flex items-center gap-1.5 mb-1">
+                                                                <CheckCircle2 className="h-4 w-4" />
+                                                                Patient Discharged
+                                                            </p>
+                                                            <p className="text-xs text-green-600 dark:text-green-400">
+                                                                Discharged on {admissionData.data.discharge_date ? safeFormatDate(admissionData.data.discharge_date) : 'N/A'}
+                                                            </p>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-3">
+                                                            <p className="text-xs text-muted-foreground">
+                                                                Formally discharge the patient and release the bed/cabin.
+                                                            </p>
+                                                            <Button
+                                                                onClick={() => setOpenDischargeDialog(true)}
+                                                                className="w-full bg-orange-600 hover:bg-orange-700 text-white text-sm h-9"
+                                                            >
+                                                                <DoorOpen className="h-3.5 w-3.5 mr-2" />
+                                                                Discharge Patient
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </CardContent>
+                                            )}
+                                        </Card>
+
+                                        {/* CARD 4: Distribute Bill */}
+                                        <Card className={cn(
+                                            "overflow-hidden shadow-none border transition-all p-0",
+                                            distributionsData?.data?.length > 0
+                                                ? "border-green-200 dark:border-green-800/60 bg-green-50/30 dark:bg-green-950/10"
+                                                : admissionData?.data?.final_bill_created_date
+                                                    ? "border-purple-200 dark:border-purple-800/60"
+                                                    : "border-gray-200 dark:border-gray-800/60 opacity-60"
+                                        )}>
+                                            <CardHeader
+                                                className={cn(
+                                                    "py-3 px-4 flex flex-row items-center justify-between gap-0",
+                                                    admissionData?.data?.final_bill_created_date ? "cursor-pointer select-none" : "cursor-not-allowed select-none",
+                                                    distributionsData?.data?.length > 0
+                                                        ? "bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/20 border-b border-green-100 dark:border-green-900/40"
+                                                        : "bg-gradient-to-r from-purple-50/60 to-violet-50/40 dark:from-purple-950/20 dark:to-violet-950/10 border-b border-purple-100 dark:border-purple-900/30"
+                                                )}
+                                                onClick={() => admissionData?.data?.final_bill_created_date && setIsDistributeOpen(!isDistributeOpen)}
+                                            >
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className={cn(
+                                                        "p-1.5 rounded-lg",
+                                                        distributionsData?.data?.length > 0 ? "bg-green-500" : "bg-purple-500"
+                                                    )}>
+                                                        {distributionsData?.data?.length > 0
+                                                            ? <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+                                                            : <DollarSign className="h-3.5 w-3.5 text-white" />
+                                                        }
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[13px] font-bold leading-none">5. Distribute</p>
+                                                        <p className="text-[11px] text-muted-foreground mt-0.5">Distribute payables to providers</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={cn(
+                                                        "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide",
+                                                        distributionsData?.data?.length > 0
+                                                            ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                                                            : admissionData?.data?.final_bill_created_date
+                                                                ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                                                                : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                                                    )}>
+                                                        {distributionsData?.data?.length > 0
+                                                            ? `${distributionsData.data.length} entries`
+                                                            : admissionData?.data?.final_bill_created_date ? "Pending" : "Locked"}
+                                                    </span>
+                                                    {admissionData?.data?.final_bill_created_date && (
+                                                        isDistributeOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                                    )}
+                                                </div>
+                                            </CardHeader>
+                                            {isDistributeOpen && admissionData?.data?.final_bill_created_date && (
+                                                <CardContent className="p-4 space-y-4">
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Distribute the final bill amount to surgeons, consultants, and other providers. You can create multiple distributions over time.
+                                                    </p>
+
+                                                    {/* Existing Distributions */}
+                                                    {distributionsData?.data?.length > 0 && (
+                                                        <div className="space-y-2">
+                                                            <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Distributions</p>
+                                                            {distributionsData.data.map((dist: any) => (
+                                                                <div key={dist.id} className="flex justify-between items-center p-2.5 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-100 dark:border-gray-800 text-sm">
+                                                                    <div>
+                                                                        <p className="font-semibold text-xs">{dist.service_provided_by}</p>
+                                                                        <p className="text-[11px] text-muted-foreground">
+                                                                            Payable: {format(Number(dist.final_bill))} · Paid: {format(Number(dist.pay_now || 0))}
+                                                                        </p>
+                                                                    </div>
+                                                                    <span className={cn(
+                                                                        "text-[10px] font-bold px-2 py-0.5 rounded-full",
+                                                                        Number(dist.due_amount) <= 0
+                                                                            ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                                                                            : "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300"
+                                                                    )}>
+                                                                        {Number(dist.due_amount) <= 0 ? "Paid" : `Due: ${format(Number(dist.due_amount))}`}
+                                                                    </span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+
+                                                    {/* Distribute Action */}
+                                                    <Button
+                                                        onClick={() => setOpenDistributeDialog(true)}
+                                                        className="w-full bg-purple-600 hover:bg-purple-700 text-white text-sm h-9"
+                                                    >
+                                                        <DollarSign className="h-3.5 w-3.5 mr-2" />
+                                                        {distributionsData?.data?.length > 0 ? "Add More Distribution" : "Distribute Bill"}
+                                                    </Button>
+                                                </CardContent>
+                                            )}
+                                        </Card>
+
+                                    </div>{/* ===== END RIGHT COLUMN ===== */}
+
+                                </div>{/* ===== END TWO-COLUMN GRID ===== */}
+
                             </div>
                         </Form>
                     </div>
@@ -2758,7 +3522,7 @@ export function PatientBillingPage() {
                                 </div>
                             ) : (
                                 <div className="overflow-x-auto rounded-xl border border-gray-150 dark:border-gray-800 w-full">
-                                    <table className="w-full text-sm text-left border-collapse">
+                                    <table className="w-full text-xs text-left border-collapse">
                                         <thead className="bg-gray-50/70 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-xs uppercase font-semibold border-b border-gray-150 dark:border-gray-800">
                                             <tr>
                                                 <th className="px-4 py-3">Bed / Cabin Code</th>
@@ -2833,7 +3597,7 @@ export function PatientBillingPage() {
                     {/* Bed History Details Dialog */}
                     {selectedBedHistory && (
                         <Dialog open={!!selectedBedHistory} onOpenChange={() => setSelectedBedHistory(null)}>
-                            <DialogContent className="sm:max-w-[500px]">
+                            <DialogContent className="sm:max-w-[600px]">
                                 <DialogHeader>
                                     <DialogTitle className="flex items-center gap-2">
                                         <BedDouble className="h-5 w-5" />
@@ -2880,7 +3644,7 @@ export function PatientBillingPage() {
                                     </div>
 
                                     {/* Billing Summary */}
-                                    <div className="grid grid-cols-3 gap-4 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+                                    <div className="grid grid-cols-3 gap-4 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg p-0">
                                         <div>
                                             <label className="text-xs text-blue-700 dark:text-blue-300">Days</label>
                                             <p className="text-xl font-bold text-blue-900 dark:text-blue-100">
@@ -3401,251 +4165,321 @@ export function PatientBillingPage() {
                     </Dialog>
 
                     {/* Final Bill & Discharge Dialog */}
+                    {/* Final Bill Modal (editable grid before lock, read-only after) */}
                     <Dialog open={openFinalBillDialog} onOpenChange={setOpenFinalBillDialog}>
-                        <DialogContent className="sm:max-w-lg">
+                        <DialogContent className="w-[95vw] sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
                                 <DialogTitle className="flex items-center gap-2">
-                                    <FileText className="h-5 w-5 text-green-600" />
-                                    Create Bill & {admissionData?.data?.status === 'active' ? 'Discharge Patient' : 'Complete Billing'}
+                                    <Receipt className="h-5 w-5 text-indigo-600" />
+                                    Final Bill
                                 </DialogTitle>
                                 <DialogDescription>
-                                    {admissionData?.data?.status === 'active'
-                                        ? 'Review the bill summary and confirm discharge to create the final bill.'
-                                        : 'Review the bill summary to create the final bill.'}
+                                    {admissionData?.data?.final_bill_created_date
+                                        ? 'The final bill is locked. Discounts cannot be changed after creation.'
+                                        : 'Adjust the discount on any line, then create the final bill.'}
                                 </DialogDescription>
                             </DialogHeader>
-                            <div className="space-y-4 py-4">
-                                {/* Patient Info */}
-                                <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                                    <div>
-                                        <Label className="text-xs text-muted-foreground">Patient</Label>
-                                        <p className="text-sm font-medium">{admissionData?.data?.patient_name || 'N/A'}</p>
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs text-muted-foreground">Current Status</Label>
-                                        <p className="text-sm">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${admissionData?.data?.status === 'active'
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-gray-100 text-gray-800'
-                                                }`}>
-                                                {admissionData?.data?.status?.charAt(0).toUpperCase() + admissionData?.data?.status?.slice(1) || 'Unknown'}
-                                            </span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs text-muted-foreground">Total Charges</Label>
-                                        <p className="text-sm font-bold text-lg">{format(grandTotal)}</p>
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs text-muted-foreground">Bill Items</Label>
-                                        <p className="text-sm font-medium">
-                                            {operations.length + consultants.length + surgeons.length + assistants.length + anesthesiologists.length + servicesList.length + (bedBillingData?.data?.length || 0)} items
-                                        </p>
-                                    </div>
-                                </div>
 
-                                {/* Discharge Date - Only show if patient is active */}
-                                {admissionData?.data?.status === 'active' && (
-                                    <div className="space-y-2 flex flex-col justify-end">
-                                        <Label htmlFor="finalBillDischargeDate">Discharge Date *</Label>
-                                        <DateField
-                                            value={finalBillDischargeDate}
-                                            onChange={setFinalBillDischargeDate}
-                                            className="w-full h-10"
-                                        />
-                                        <p className="text-xs text-muted-foreground">
-                                            Patient will be discharged on this date
-                                        </p>
+                            <div className="space-y-3 py-2">
+                                {billGridRows.length === 0 ? (
+                                    <div className="text-sm text-muted-foreground bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 text-center">
+                                        No billable charges yet. Add services first.
+                                    </div>
+                                ) : (
+                                    <div className="border rounded-lg overflow-hidden">
+                                        <div className="grid grid-cols-12 gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-900/60 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                                            <div className="col-span-6">Line</div>
+                                            <div className="col-span-2 text-right">Amount ({currencySymbol})</div>
+                                            <div className="col-span-2 text-right">Discount ({currencySymbol})</div>
+                                            <div className="col-span-2 text-right">Net ({currencySymbol})</div>
+                                        </div>
+
+                                        {admissionData?.data?.final_bill_created_date ? (
+                                            <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                                                {(finalBill?.items || []).map((it: any) => (
+                                                    <div key={it.id} className="grid grid-cols-12 gap-2 px-3 py-2 items-center text-sm">
+                                                        <div className="col-span-6 truncate" title={it.service_name}>{it.service_name}</div>
+                                                        <div className="col-span-2 text-right">{formatNumber(it.total_amount)}</div>
+                                                        <div className="col-span-2 text-right text-orange-600">{formatNumber(it.total_discount)}</div>
+                                                        <div className="col-span-2 text-right font-semibold">{formatNumber(it.final_amount)}</div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                                                {billGridRows.map((row) => {
+                                                    const disc = Number(rowDiscounts[row.key]) || 0
+                                                    const net = Math.max(0, row.amount - disc)
+                                                    return (
+                                                        <div key={row.key} className="grid grid-cols-12 gap-2 px-3 py-2 items-center text-sm">
+                                                            <div className="col-span-6 truncate" title={row.label}>{row.label}</div>
+                                                            <div className="col-span-2 text-right">{formatNumber(row.amount)}</div>
+                                                            <div className="col-span-2">
+                                                                <Input
+                                                                    type="number"
+                                                                    min={0}
+                                                                    value={disc || ''}
+                                                                    onChange={(e) => setRowDiscounts((prev) => ({ ...prev, [row.key]: Number(e.target.value) || 0 }))}
+                                                                    placeholder="0"
+                                                                    disabled={finalizeWithDiscountMutation.isPending}
+                                                                    className="h-8 text-sm text-right px-2"
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-2 text-right font-semibold">{formatNumber(net)}</div>
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                        )}
+
+                                        <div className="grid grid-cols-12 gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-900/60 text-sm font-semibold border-t">
+                                            <div className="col-span-6">Total</div>
+                                            <div className="col-span-2 text-right">{formatNumber(admissionData?.data?.final_bill_created_date ? Number(finalBill?.total_bill_amount || 0) : gridGross)}</div>
+                                            <div className="col-span-2 text-right text-orange-600">{formatNumber(admissionData?.data?.final_bill_created_date ? Number(finalBill?.total_discount || 0) : gridDiscount)}</div>
+                                            <div className="col-span-2 text-right text-green-700 dark:text-green-300">{formatNumber(admissionData?.data?.final_bill_created_date ? Number(finalBill?.total_discounted_amount || 0) : gridNet)}</div>
+                                        </div>
                                     </div>
                                 )}
 
-                                {/* Bill Summary */}
-                                <div className="space-y-2">
-                                    <Label>Bill Summary</Label>
-                                    <div className="space-y-1 text-sm">
-                                        {operations.length > 0 && <div className="flex justify-between"><span>Operations:</span><span>{format(totalOperations)}</span></div>}
-                                        {consultants.length > 0 && <div className="flex justify-between"><span>Consultants:</span><span>{format(totalConsultants)}</span></div>}
-                                        {surgeons.length > 0 && <div className="flex justify-between"><span>Surgeons:</span><span>{format(totalSurgeons)}</span></div>}
-                                        {assistants.length > 0 && <div className="flex justify-between"><span>Assistants:</span><span>{format(totalAssistants)}</span></div>}
-                                        {anesthesiologists.length > 0 && <div className="flex justify-between"><span>Anesthesiologists:</span><span>{format(totalAnesthesiologists)}</span></div>}
-                                        {servicesList.length > 0 && <div className="flex justify-between"><span>Services:</span><span>{format(totalServices)}</span></div>}
-                                        {totalBedCharges > 0 && <div className="flex justify-between"><span>Bed Charges:</span><span>{format(totalBedCharges)}</span></div>}
-                                        <div className="flex justify-between font-bold pt-2 border-t">
-                                            <span>Total:</span>
-                                            <span>{format(grandTotal)}</span>
+                                {!admissionData?.data?.final_bill_created_date && gridDiscount > 0 && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border p-3 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border-gray-100 dark:border-gray-800 animate-in fade-in duration-200 mt-3">
+                                        <div className="space-y-1.5 flex flex-col justify-start">
+                                            <Label htmlFor="auth-doctor" className="text-xs font-semibold">Authorizing Doctor</Label>
+                                            <Popover open={isDoctorDropdownOpen} onOpenChange={setIsDoctorDropdownOpen}>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        id="auth-doctor"
+                                                        variant="outline"
+                                                        role="combobox"
+                                                        aria-expanded={isDoctorDropdownOpen}
+                                                        className="w-full justify-between h-9 text-xs bg-white dark:bg-slate-950 font-normal"
+                                                    >
+                                                        {selectedDoctorId ? (
+                                                            <span>Dr. {doctors.find((d: any) => String(d.id) === selectedDoctorId)?.doctor_name}</span>
+                                                        ) : (
+                                                            <span className="text-muted-foreground">Select Authorizing Doctor</span>
+                                                        )}
+                                                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-[300px] p-0" align="start">
+                                                    <Command
+                                                        filter={(value, search) => {
+                                                            if (!search) return 1;
+                                                            return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+                                                        }}
+                                                    >
+                                                        <CommandInput placeholder="Search doctor..." className="h-8 text-xs" value={doctorSearchQuery} onValueChange={setDoctorSearchQuery} />
+                                                        <CommandList className="max-h-[200px]">
+                                                            <CommandEmpty>No doctor found.</CommandEmpty>
+                                                            <CommandGroup>
+                                                                {doctors.map((doctor: any) => (
+                                                                    <CommandItem
+                                                                        key={doctor.id}
+                                                                        value={`${doctor.doctor_name} ${doctor.id}`}
+                                                                        onSelect={() => {
+                                                                            setSelectedDoctorId(String(doctor.id))
+                                                                            setIsDoctorDropdownOpen(false)
+                                                                            setDoctorSearchQuery('')
+                                                                        }}
+                                                                        className="text-xs py-1.5 px-3 cursor-pointer"
+                                                                    >
+                                                                        <Check
+                                                                            className={cn(
+                                                                                "mr-2 h-3.5 w-3.5 shrink-0",
+                                                                                String(doctor.id) === selectedDoctorId ? "opacity-100" : "opacity-0"
+                                                                            )}
+                                                                        />
+                                                                        Dr. {doctor.doctor_name}
+                                                                    </CommandItem>
+                                                                ))}
+                                                            </CommandGroup>
+                                                        </CommandList>
+                                                    </Command>
+                                                </PopoverContent>
+                                            </Popover>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="disc-notes" className="text-xs font-semibold">Discount Reason / Notes</Label>
+                                            <Textarea
+                                                id="disc-notes"
+                                                placeholder="Enter note or reason for discount..."
+                                                value={discountNotes}
+                                                onChange={(e) => setDiscountNotes(e.target.value)}
+                                                rows={2}
+                                                className="text-xs resize-none bg-white dark:bg-slate-950 min-h-[36px] py-1.5 h-[36px]"
+                                            />
                                         </div>
                                     </div>
-                                </div>
+                                )}
 
-                                {/* Info Note */}
-                                <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-                                    <p className="text-xs text-blue-800 dark:text-blue-300">
-                                        <strong>What happens next:</strong>
-                                    </p>
-                                    <ul className="text-xs text-blue-700 dark:text-blue-400 mt-2 space-y-1 list-disc list-inside">
-                                        {admissionData?.data?.status === 'active' && (
+                                {admissionData?.data?.final_bill_created_date && (
+                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                        <div className="flex justify-between p-2 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-100 dark:border-green-900/30">
+                                            <span className="text-muted-foreground">Paid</span>
+                                            <span className="font-semibold text-green-700 dark:text-green-300">{format(Number(finalBill?.paid_amount || 0))}</span>
+                                        </div>
+                                        <div className="flex justify-between p-2 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-100 dark:border-orange-900/30">
+                                            <span className="text-muted-foreground">Due</span>
+                                            <span className="font-semibold text-orange-700 dark:text-orange-300">{format(Number(finalBill?.due_amount || 0))}</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setOpenFinalBillDialog(false)} disabled={finalizeWithDiscountMutation.isPending}>
+                                    {admissionData?.data?.final_bill_created_date ? 'Close' : 'Cancel'}
+                                </Button>
+                                {!admissionData?.data?.final_bill_created_date && (
+                                    <Button
+                                        onClick={() => finalizeWithDiscountMutation.mutate()}
+                                        disabled={gridGross === 0 || finalizeWithDiscountMutation.isPending}
+                                        className="bg-indigo-600 hover:bg-indigo-700"
+                                    >
+                                        {finalizeWithDiscountMutation.isPending ? (
                                             <>
-                                                <li>Patient status will change to "Discharged"</li>
-                                                <li>Assigned bed/cabin will be released</li>
+                                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                Processing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Receipt className="h-4 w-4 mr-2" />
+                                                Create Final Bill
                                             </>
                                         )}
-                                        <li>Final bill will be created with all charges</li>
-                                        <li>Bill cannot be modified after creation</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setOpenFinalBillDialog(false)}
-                                    disabled={finalBillMutation.isPending}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    onClick={() => finalBillMutation.mutate(finalBillDischargeDate)}
-                                    disabled={finalBillMutation.isPending || (admissionData?.data?.status === 'active' && !finalBillDischargeDate)}
-                                    className="bg-green-600 hover:bg-green-700"
-                                >
-                                    {finalBillMutation.isPending ? (
-                                        <>
-                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                            Processing...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Save className="h-4 w-4 mr-2" />
-                                            {admissionData?.data?.status === 'active' ? 'Discharge & Create Bill' : 'Create Final Bill'}
-                                        </>
-                                    )}
-                                </Button>
+                                    </Button>
+                                )}
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
 
-                    {/* Auto Complete Billing Cycle Dialog */}
-                    <Dialog open={openAutoCompleteDialog} onOpenChange={setOpenAutoCompleteDialog}>
-                        <DialogContent className="sm:max-w-lg">
+                    {/* Transaction (Advance / Payment / Refund) Dialog */}
+                    <Dialog open={txnDialogMode !== null} onOpenChange={(open) => { if (!open) setTxnDialogMode(null) }}>
+                        <DialogContent className="sm:max-w-md">
                             <DialogHeader>
                                 <DialogTitle className="flex items-center gap-2">
-                                    <Loader2 className="h-5 w-5 text-purple-600" />
-                                    Auto Complete All Steps
+                                    {txnDialogMode === 'advance'
+                                        ? <Plus className="h-5 w-5 text-emerald-600" />
+                                        : txnDialogMode === 'refund'
+                                            ? <Repeat className="h-5 w-5 text-rose-600" />
+                                            : <DollarSign className="h-5 w-5 text-green-600" />}
+                                    {txnDialogMode === 'advance' ? 'Add Advance' : txnDialogMode === 'refund' ? 'Refund Overpayment' : 'Add Payment'}
                                 </DialogTitle>
                                 <DialogDescription>
-                                    This will automatically complete all billing cycle steps in sequence. Please verify before proceeding.
+                                    {txnDialogMode === 'advance'
+                                        ? 'Record an advance payment before the final bill is created.'
+                                        : txnDialogMode === 'refund'
+                                            ? 'Refund the overpaid balance back to the patient.'
+                                            : 'Record a payment against the due amount.'}
                                 </DialogDescription>
                             </DialogHeader>
-                            <div className="space-y-4">
-                                {/* Bill Summary */}
-                                <div className="bg-muted p-4 rounded-lg">
-                                    <p className="text-sm font-medium mb-3">Current Bill Summary:</p>
-                                    <div className="space-y-2 text-sm">
-                                        <div className="flex justify-between">
-                                            <span>Operations:</span>
-                                            <span className="font-semibold">{totalOperations.toFixed(2)}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span>Consultants:</span>
-                                            <span className="font-semibold">{totalConsultants.toFixed(2)}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span>Surgeons:</span>
-                                            <span className="font-semibold">{totalSurgeons.toFixed(2)}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span>Assistants:</span>
-                                            <span className="font-semibold">{totalAssistants.toFixed(2)}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span>Services:</span>
-                                            <span className="font-semibold">{totalServices.toFixed(2)}</span>
-                                        </div>
-                                        <div className="flex justify-between font-bold text-lg pt-2 border-t">
-                                            <span>Total:</span>
-                                            <span>{grandTotal.toFixed(2)}</span>
-                                        </div>
+                            <div className="space-y-3 py-2">
+                                <div className="space-y-1">
+                                    <div className="flex items-center justify-between">
+                                        <Label>Amount ({currencySymbol}) *</Label>
+                                        {txnDialogMode === 'payment' && <span className="text-[10px] text-muted-foreground">Max {formatNumber(maxPayment)}</span>}
+                                        {txnDialogMode === 'refund' && <span className="text-[10px] text-muted-foreground">Max {formatNumber(maxRefund)}</span>}
                                     </div>
-                                </div>
-
-                                {/* Steps Overview */}
-                                <div className="space-y-2">
-                                    <p className="text-sm font-medium">Steps to be executed:</p>
-                                    <div className="space-y-2 text-sm">
-                                        <div className="flex items-center gap-2">
-                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-xs font-bold">1</div>
-                                            <span>Discharge patient and release bed</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-xs font-bold">2</div>
-                                            <span>Create final bill with all charges</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-xs font-bold">3</div>
-                                            <span>Auto-distribute payments to providers</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-xs font-bold">4</div>
-                                            <span>Record all provider payments</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 text-xs font-bold">5</div>
-                                            <span>Confirm billing cycle complete</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Discharge Date */}
-                                <div className="flex flex-col gap-2">
-                                    <Label>Discharge Date *</Label>
-                                    <DateField
-                                        value={autoCompleteDischargeDate}
-                                        onChange={setAutoCompleteDischargeDate}
-                                        className="w-full h-10"
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        max={txnDialogMode === 'payment' ? maxPayment : txnDialogMode === 'refund' ? maxRefund : undefined}
+                                        value={txnAmount || ''}
+                                        onChange={(e) => setTxnAmount(Number(e.target.value) || 0)}
+                                        disabled={recordTxnMutation.isPending}
                                     />
+                                    {txnDialogMode === 'payment' && txnAmount > maxPayment && (
+                                        <p className="text-[10px] text-rose-600">Amount cannot exceed the due ({formatNumber(maxPayment)}).</p>
+                                    )}
+                                    {txnDialogMode === 'refund' && txnAmount > maxRefund && (
+                                        <p className="text-[10px] text-rose-600">Amount cannot exceed the refundable ({formatNumber(maxRefund)}).</p>
+                                    )}
                                 </div>
-
-                                {/* Warning Note */}
-                                <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded-lg p-3">
-                                    <p className="text-xs text-orange-800 dark:text-orange-300">
-                                        <strong>⚠️ Important:</strong> This action will:
-                                    </p>
-                                    <ul className="text-xs text-orange-700 dark:text-orange-400 mt-2 space-y-1 list-disc list-inside">
-                                        <li>Discharge the patient and release bed/cabin</li>
-                                        <li>Create final bill (cannot be modified after)</li>
-                                        <li>Auto-distribute payments to all providers</li>
-                                        <li>Record full payments to all providers</li>
-                                        <li>Complete the billing cycle</li>
-                                    </ul>
+                                <div className="space-y-1">
+                                    <Label>Method</Label>
+                                    <Select value={txnMethod} onValueChange={setTxnMethod}>
+                                        <SelectTrigger><SelectValue placeholder="Method" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="cash">Cash</SelectItem>
+                                            <SelectItem value="card">Card</SelectItem>
+                                            <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                                            <SelectItem value="mobile_banking">Mobile Banking</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-1">
+                                    <Label>Notes</Label>
+                                    <Input value={txnNotes} onChange={(e) => setTxnNotes(e.target.value)} placeholder="Optional" disabled={recordTxnMutation.isPending} />
                                 </div>
                             </div>
                             <DialogFooter>
+                                <Button variant="outline" onClick={() => setTxnDialogMode(null)} disabled={recordTxnMutation.isPending}>Cancel</Button>
                                 <Button
-                                    variant="outline"
-                                    onClick={() => setOpenAutoCompleteDialog(false)}
-                                    disabled={isAutoCompleting}
+                                    onClick={() => recordTxnMutation.mutate()}
+                                    disabled={!txnAmount || txnAmount <= 0 || recordTxnMutation.isPending || (txnDialogMode === 'payment' && txnAmount > maxPayment) || (txnDialogMode === 'refund' && txnAmount > maxRefund)}
+                                    className={cn(
+                                        'text-white',
+                                        txnDialogMode === 'advance' ? 'bg-emerald-600 hover:bg-emerald-700'
+                                            : txnDialogMode === 'refund' ? 'bg-rose-600 hover:bg-rose-700'
+                                                : 'bg-green-600 hover:bg-green-700'
+                                    )}
                                 >
+                                    {recordTxnMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                                    {txnDialogMode === 'advance' ? 'Save Advance' : txnDialogMode === 'refund' ? 'Save Refund' : 'Save Payment'}
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Discharge Patient Dialog */}
+                    <Dialog open={openDischargeDialog} onOpenChange={setOpenDischargeDialog}>
+                        <DialogContent className="sm:max-w-md">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                    <DoorOpen className="h-5 w-5 text-orange-600" />
+                                    Discharge Patient
+                                </DialogTitle>
+                                <DialogDescription>
+                                    Formally discharge the patient and release the bed/cabin. Nothing on this bill can be changed afterwards.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <Label>Discharge Date *</Label>
+                                    <DateField value={dischargeDate} onChange={setDischargeDate} className="w-full h-10" />
+                                </div>
+                                <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded-lg p-3">
+                                    <p className="text-xs text-orange-800 dark:text-orange-300">
+                                        Patient status will change to <strong>Discharged</strong>, the bed/cabin will be released, and all billing will be locked.
+                                    </p>
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setOpenDischargeDialog(false)} disabled={dischargePatientMutation.isPending}>
                                     Cancel
                                 </Button>
                                 <Button
-                                    onClick={() => autoCompleteMutation.mutate(autoCompleteDischargeDate)}
-                                    disabled={isAutoCompleting || !autoCompleteDischargeDate || grandTotal === 0}
-                                    className="bg-purple-600 hover:bg-purple-700"
+                                    onClick={() => dischargePatientMutation.mutate()}
+                                    disabled={dischargePatientMutation.isPending || !dischargeDate}
+                                    className="bg-orange-600 hover:bg-orange-700"
                                 >
-                                    {isAutoCompleting ? (
+                                    {dischargePatientMutation.isPending ? (
                                         <>
                                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                            Processing...
+                                            Discharging...
                                         </>
                                     ) : (
                                         <>
-                                            <Loader2 className="h-4 w-4 mr-2" />
-                                            Start Auto Complete
+                                            <DoorOpen className="h-4 w-4 mr-2" />
+                                            Confirm Discharge
                                         </>
                                     )}
                                 </Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
+
                 </div>
             </Main>
         </>

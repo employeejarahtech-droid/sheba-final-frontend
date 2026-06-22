@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
 import { useEffect, useState } from 'react';
 import { getCookie } from '@/lib/cookies';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
 import { FileText, Droplets, Clock, Users } from 'lucide-react';
@@ -24,6 +25,7 @@ type ReportsItem = {
   id: number;
   invoice_id: number;
   patient_name: string | null;
+  ref_doctor?: string | null;
   created_at: string | null;
 };
 
@@ -46,6 +48,7 @@ function UrineForReFull() {
   };
 
   const token = getCookie('accessToken');
+  const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data: urineReData, isFetching } = useQuery({
     queryKey: ["urine-re", page, limit, search],
@@ -81,11 +84,7 @@ function UrineForReFull() {
       title: "Invoice ID",
       orderable: true,
       render: (data: any, _type: string, row: ReportsItem) => {
-        const date = row.created_at ? new Date(row.created_at).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }) : '-';
+        const date = fmtDateTime(row.created_at);
         return `
           <div class="flex items-center gap-2">
             <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
@@ -111,18 +110,31 @@ function UrineForReFull() {
       defaultContent: "",
     },
     {
+      data: "ref_doctor",
+      title: "Ref. Doctor",
+      defaultContent: "-",
+    },
+    {
       data: "created_at",
       title: "Date",
       orderable: true,
       render: (_data: any, _type: string, row: ReportsItem) => {
-        const date = row.created_at;
-        return date ? new Date(date).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }) : '-';
+        return fmtDateTime(row.created_at);
       },
       defaultContent: "",
+    },
+    {
+      data: null,
+      title: "Actions",
+      orderable: false,
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        return `
+          <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
+            <a href="/dashboard/pathology/urine/urine-for-re-full/edit/${row.id}" class="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-xs font-medium h-8 px-2.5 transition">Edit</a>
+            <a href="/dashboard/pathology/urine/urine-for-re-full/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print" class="inline-flex items-center gap-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium h-8 px-2.5 transition">Print</a>
+          </div>
+        `;
+      },
     },
   ];
 
@@ -208,11 +220,11 @@ function UrineForReFull() {
 
         <!-- Footer Actions -->
         <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-          <a href="/dashboard/urine/urine-for-re-full/report/${reportId}"
+          <a href="/dashboard/pathology/urine/urine-for-re-full/report/${reportId}"
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
             View Report
           </a>
-          <a href="/dashboard/urine/urine-for-re-full/edit/${reportId}"
+          <a href="/dashboard/pathology/urine/urine-for-re-full/edit/${reportId}"
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-teal-600 text-white hover:bg-teal-700 h-10 px-5 transition shadow-md">
             Edit
           </a>
@@ -337,7 +349,7 @@ function UrineForReFull() {
 
                 ${reportData.test_carried_out_by ? `
                   <div class="mt-4 pt-4 border-t text-sm">
-                    <span class="text-gray-500">Test Carried out by:</span>
+                    <span class="text-gray-500">Test Carried Out By:</span>
                     <span class="font-medium text-gray-800 ml-2">${reportData.test_carried_out_by}</span>
                   </div>
                 ` : ''}

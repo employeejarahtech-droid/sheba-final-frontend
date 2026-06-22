@@ -14,8 +14,10 @@ import {
     CheckCircle2,
     Menu,
     Map,
+    Keyboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SHORTCUTS, SHORTCUT_CATEGORIES } from "@/hooks/use-shortcuts";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
@@ -335,7 +337,14 @@ const helpData = [
                 ]
             }
         ]
-    }
+    },
+    {
+        id: "shortcuts",
+        title: "Keyboard Shortcuts",
+        icon: Keyboard,
+        description: "Quick navigation shortcuts available across the app.",
+        tasks: [],
+    },
 ];
 
 export default function Help() {
@@ -497,9 +506,47 @@ export default function Help() {
 
                                     <div className="h-px bg-border w-full" />
 
+                                    {/* Keyboard Shortcuts reference */}
+                                    {selectedModule.id === "shortcuts" && (
+                                        <div className="space-y-6">
+                                            <p className="text-sm text-muted-foreground">
+                                                Use these shortcuts anywhere in the app (they are ignored while typing in input fields).
+                                                On macOS, <kbd className="rounded border bg-background px-1.5 py-0.5 text-xs font-semibold">Ctrl</kbd> can also be the <kbd className="rounded border bg-background px-1.5 py-0.5 text-xs font-semibold">⌘ Cmd</kbd> key.
+                                            </p>
+                                            {SHORTCUT_CATEGORIES.map((cat) => {
+                                                const items = SHORTCUTS.filter((s) => s.category === cat);
+                                                if (items.length === 0) return null;
+                                                return (
+                                                    <div key={cat} className="space-y-3">
+                                                        <h3 className="text-lg font-semibold text-foreground">{cat}</h3>
+                                                        <div className="grid gap-2 sm:grid-cols-2">
+                                                            {items.map((s, i) => {
+                                                                const parts: string[] = [];
+                                                                if (s.combo.ctrl) parts.push("Ctrl");
+                                                                if (s.combo.alt) parts.push("Alt");
+                                                                if (s.combo.shift) parts.push("Shift");
+                                                                parts.push(s.combo.key.toUpperCase());
+                                                                return (
+                                                                    <div key={i} className="flex items-center gap-3 rounded-lg border border-muted/60 bg-muted/20 px-4 py-2.5">
+                                                                        <div className="flex gap-1">
+                                                                            {parts.map((p, j) => (
+                                                                                <kbd key={j} className="rounded border bg-background px-2 py-0.5 text-xs font-semibold text-foreground shadow-sm">{p}</kbd>
+                                                                            ))}
+                                                                        </div>
+                                                                        <span className="text-sm text-muted-foreground">{s.label}</span>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+
                                     {/* Tasks Section */}
                                     <div className="space-y-6">
-                                        <h3 className="text-xl font-semibold">Common Tasks</h3>
+                                        {selectedModule.tasks.length > 0 && <h3 className="text-xl font-semibold">Common Tasks</h3>}
                                         <div className="grid gap-4">
                                             {selectedModule.tasks.map((task, index) => (
                                                 <Card key={index} className="overflow-hidden border-muted/60 shadow-sm hover:shadow-md transition-shadow">

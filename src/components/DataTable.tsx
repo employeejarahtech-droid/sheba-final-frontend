@@ -139,12 +139,18 @@ export function DataTable<TData extends Record<string, any>>({
 
     const table = $(tableRef.current).DataTable({
       data: data,
-      columns: columns.map((_col: any) => ({
+      columns: columns.map((_col: any, idx: number) => ({
         data: _col.data,
         title: _col.title,
         render: (data: any, type: string, row: TData, dtMeta: any) => {
-          if (_col.render) {
-            return _col.render(data, type, row, dtMeta);
+          // Read the latest render fn from the ref so values that load after
+          // init (e.g. the tenant date format, which arrives via a separate
+          // async settings query) aren't frozen at the default captured on the
+          // first render.
+          const live = columnsRef.current[idx];
+          const renderFn = live && live.render ? live.render : _col.render;
+          if (renderFn) {
+            return renderFn(data, type, row, dtMeta);
           }
           return data;
         },
@@ -220,6 +226,16 @@ export function DataTable<TData extends Record<string, any>>({
         headerCell.textContent = col.title ?? col.data ?? '';
       }
     });
+  }, [columns]);
+
+  // Re-render the rows when column definitions change. Combined with the live
+  // render lookups above, this keeps cell values (e.g. dates using the tenant
+  // date format, which loads after the table is first drawn) in sync — so a
+  // page reload shows the settings format, not the default.
+  useEffect(() => {
+    const table = dataTableRef.current;
+    if (!table) return;
+    table.draw(false);
   }, [columns]);
 
   // Update pageLength when limit changes

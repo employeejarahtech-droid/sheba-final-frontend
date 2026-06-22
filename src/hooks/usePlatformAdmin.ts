@@ -15,14 +15,25 @@ const KEYS = {
   companies: (params?: Record<string, unknown>) => ['platform-admin', 'companies', params] as const,
   company: (id: number) => ['platform-admin', 'companies', id] as const,
   plans: (params?: Record<string, unknown>) => ['platform-admin', 'plans', params] as const,
+  plan: (id: number) => ['platform-admin', 'plans', id] as const,
   registrations: (params?: Record<string, unknown>) => ['platform-admin', 'registrations', params] as const,
   admins: (params?: Record<string, unknown>) => ['platform-admin', 'admins', params] as const,
+  profile: ['platform-admin', 'profile'] as const,
   settings: () => ['platform-admin', 'settings'] as const,
   settingsCategory: (cat: string) => ['platform-admin', 'settings', cat] as const,
   modules: (params?: Record<string, unknown>) => ['platform-admin', 'modules', params] as const,
+  contacts: (params?: Record<string, unknown>) => ['platform-admin', 'contacts', params] as const,
+  contact: (id: number) => ['platform-admin', 'contacts', id] as const,
+  subscriptions: (params?: Record<string, unknown>) => ['platform-admin', 'subscriptions', params] as const,
+  subscription: (companyId: number) => ['platform-admin', 'subscriptions', companyId] as const,
   billingOverview: ['platform-admin', 'billing', 'overview'] as const,
   billingRevenue: (period?: string) => ['platform-admin', 'billing', 'revenue', period] as const,
   billingTransactions: (params?: Record<string, unknown>) => ['platform-admin', 'billing', 'transactions', params] as const,
+  billingInvoices: (params?: Record<string, unknown>) => ['platform-admin', 'billing', 'invoices', params] as const,
+  billingInvoice: (id: number) => ['platform-admin', 'billing', 'invoices', id] as const,
+  stripeOverview: ['platform-admin', 'billing', 'stripe', 'overview'] as const,
+  stripeCustomers: ['platform-admin', 'billing', 'stripe', 'customers'] as const,
+  stripeSubscriptions: ['platform-admin', 'billing', 'stripe', 'subscriptions'] as const,
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -276,7 +287,7 @@ export function useUpdateSettings() {
 //  MODULES
 // ═══════════════════════════════════════════════════════════════════════
 
-export function useModules(params?: { status?: string; category?: string; search?: string }) {
+export function useModules(params?: { status?: string; category?: string; search?: string; page?: number; limit?: number }) {
   return useQuery({
     queryKey: KEYS.modules(params),
     queryFn: () => adminService.fetchModules(params).then((r) => r.data),
@@ -349,5 +360,223 @@ export function useBillingTransactions(params?: {
   return useQuery({
     queryKey: KEYS.billingTransactions(params),
     queryFn: () => adminService.fetchBillingTransactions(params),
+  })
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  BILLING — INVOICES & STRIPE
+// ═══════════════════════════════════════════════════════════════════════
+
+export function useBillingInvoices(params?: { page?: number; limit?: number; status?: string; companyId?: number }) {
+  return useQuery({
+    queryKey: KEYS.billingInvoices(params),
+    queryFn: () => adminService.fetchBillingInvoices(params),
+  })
+}
+
+export function useBillingInvoice(id: number) {
+  return useQuery({
+    queryKey: KEYS.billingInvoice(id),
+    queryFn: () => adminService.fetchBillingInvoice(id).then((r) => r.data),
+    enabled: !!id,
+  })
+}
+
+export function useStripeOverview() {
+  return useQuery({
+    queryKey: KEYS.stripeOverview,
+    queryFn: () => adminService.fetchStripeOverview().then((r) => r.data),
+  })
+}
+
+export function useStripeCustomers(limit?: number) {
+  return useQuery({
+    queryKey: KEYS.stripeCustomers,
+    queryFn: () => adminService.fetchStripeCustomers(limit).then((r) => r.data),
+  })
+}
+
+export function useStripeSubscriptions() {
+  return useQuery({
+    queryKey: KEYS.stripeSubscriptions,
+    queryFn: () => adminService.fetchStripeSubscriptions().then((r) => r.data),
+  })
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  SUBSCRIPTIONS
+// ═══════════════════════════════════════════════════════════════════════
+
+export function useSubscriptions(params?: { page?: number; limit?: number; search?: string; status?: string }) {
+  return useQuery({
+    queryKey: KEYS.subscriptions(params),
+    queryFn: () => adminService.fetchSubscriptions(params),
+  })
+}
+
+export function useSubscription(companyId: number) {
+  return useQuery({
+    queryKey: KEYS.subscription(companyId),
+    queryFn: () => adminService.fetchSubscription(companyId).then((r) => r.data),
+    enabled: !!companyId,
+  })
+}
+
+export function useUpdateSubscription() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ companyId, data }: { companyId: number; data: Record<string, unknown> }) =>
+      adminService.updateSubscription(companyId, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'subscriptions'] })
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'companies'] })
+      toast.success('Subscription updated')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  CONTACTS
+// ═══════════════════════════════════════════════════════════════════════
+
+export function useContacts(params?: { page?: number; limit?: number; search?: string; status?: string }) {
+  return useQuery({
+    queryKey: KEYS.contacts(params),
+    queryFn: () => adminService.fetchContacts(params),
+  })
+}
+
+export function useUpdateContactStatus() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, status }: { id: number; status: string }) =>
+      adminService.updateContactStatus(id, status),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'contacts'] })
+      toast.success('Contact status updated')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+export function useAssignContact() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, assignedTo }: { id: number; assignedTo: number | null }) =>
+      adminService.assignContact(id, assignedTo),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'contacts'] })
+      toast.success('Contact assigned')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+export function useUpdateContactNotes() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, notes }: { id: number; notes: string }) =>
+      adminService.updateContactNotes(id, notes),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'contacts'] })
+      toast.success('Notes saved')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+export function useDeleteContact() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: adminService.deleteContact,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'contacts'] })
+      toast.success('Contact deleted')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  ADMIN PROFILE & PASSWORD
+// ═══════════════════════════════════════════════════════════════════════
+
+export function useAdminProfile() {
+  return useQuery({
+    queryKey: KEYS.profile,
+    queryFn: () => adminService.fetchAdminProfile().then((r) => r.data),
+  })
+}
+
+export function useUpdateAdminProfile() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (data: { name?: string; email?: string }) => adminService.updateAdminProfile(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEYS.profile })
+      toast.success('Profile updated')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+export function useChangeAdminPassword() {
+  return useMutation({
+    mutationFn: (data: { oldPassword: string; newPassword: string }) => adminService.changeAdminPassword(data),
+    onSuccess: () => toast.success('Password changed successfully'),
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+export function useToggleAdminActive() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: adminService.toggleAdminActive,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'admins'] })
+      toast.success('Admin status updated')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  PLAN — single (edit page)
+// ═══════════════════════════════════════════════════════════════════════
+
+export function usePlan(id: number) {
+  return useQuery({
+    queryKey: KEYS.plan(id),
+    queryFn: () => adminService.fetchPlan(id).then((r) => r.data),
+    enabled: !!id,
+  })
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  REGISTRATIONS — manual create + delete
+// ═══════════════════════════════════════════════════════════════════════
+
+export function useCreateRegistration() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: adminService.createRegistration,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'registrations'] })
+      toast.success('Registration created')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+export function useDeleteRegistration() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: adminService.deleteRegistration,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'registrations'] })
+      toast.success('Registration deleted')
+    },
+    onError: (err: Error) => toast.error(err.message),
   })
 }

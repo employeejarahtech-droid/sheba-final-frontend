@@ -129,6 +129,17 @@ export function useDateFormat() {
     /** Lowercased pattern for UI hints, e.g. "dd/mm/yyyy" */
     formatHint: dateFormat.toLowerCase(),
     formatDate: (date: Date) => formatDateWith(date, dateFormat),
+    /**
+     * Settings date + 12h time for display, e.g. "14/06/2026 03:45 PM".
+     * Accepts a Date, a date/ISO string, or null/empty (returns '-').
+     */
+    formatDateTime: (value: Date | string | null) => {
+      if (!value) return '-';
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) return '-';
+      const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      return `${formatDateWith(date, dateFormat)} ${timeStr}`;
+    },
     parseDate: (input: string) => parseDateWith(input, dateFormat),
     toISODate,
   }

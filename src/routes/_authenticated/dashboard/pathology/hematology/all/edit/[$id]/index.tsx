@@ -3,11 +3,12 @@ import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { Button } from "@/components/ui/button";
 import { Main } from '@/components/layout/main';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getCookie } from '@/lib/cookies';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { AppHeader } from '@/components/layout/app-header';
-import { ArrowLeft, FlaskConical, Sparkles, Trash2, User } from 'lucide-react';
+import { ArrowLeft, FlaskConical, Sparkles, User, Activity } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const Route = createFileRoute(
@@ -22,6 +23,8 @@ type LabTest = {
   test_id: number | null
   test_name: string | null
   test_result: string | null
+  machine_id: number | null
+  test_carried_out_by: string | null
   created_at: string | null
   updated_at: string | null
 }
@@ -147,6 +150,8 @@ function EditReportHematology() {
 
 
   const [testResults, setTestResults] = useState<Record<number, string>>({});
+  const [testCarriedOutBy, setTestCarriedOutBy] = useState('');
+  const [machineId, setMachineId] = useState('');
 
   // Fetch Hematology data for this invoice (includes invoice info + Hematology records)
   const { data: invoiceData, isLoading } = useQuery({
@@ -169,6 +174,20 @@ function EditReportHematology() {
     enabled: !!token,
   });
 
+  // Fetch machines for "Test Carried Out By"
+  const { data: machinesData } = useQuery({
+    queryKey: ["machine"],
+    queryFn: async () => {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/machine`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch machines");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+  const machineList = machinesData?.data?.items || [];
+
   // Initialize test results when data loads
   useEffect(() => {
     if (invoiceData?.hematology_all_info) {
@@ -179,6 +198,9 @@ function EditReportHematology() {
         }
       });
       setTestResults(initialResults);
+      const first = invoiceData.hematology_all_info[0];
+      setTestCarriedOutBy(first?.test_carried_out_by || '');
+      setMachineId(first?.machine_id ? String(first.machine_id) : '');
     }
   }, [invoiceData]);
 
@@ -194,6 +216,8 @@ function EditReportHematology() {
           },
           body: JSON.stringify({
             test_result: testResults[hematologyId],
+            machine_id: machineId ? parseInt(machineId) : null,
+            test_carried_out_by: testCarriedOutBy || null,
           }),
         }
       );
@@ -217,7 +241,10 @@ function EditReportHematology() {
   };
 
   const handlePrint = () => {
-    window.print();
+    router.navigate({
+      to: '/dashboard/pathology/hematology/all/report/$reportId',
+      params: { reportId: id },
+    });
   };
 
   const getNormalValue = (testName: string | null) => {
@@ -327,6 +354,44 @@ function EditReportHematology() {
             </Card>
           )}
 
+          {/* Test Carried Out By */}
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                  <Activity className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold">Test Carried Out By</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Select the machine used for these tests</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <Select
+                value={testCarriedOutBy}
+                onValueChange={(value) => {
+                  const selectedMachine = machineList.find((m: any) => m.name === value);
+                  if (selectedMachine) {
+                    setTestCarriedOutBy(value);
+                    setMachineId(String(selectedMachine.id));
+                  }
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select machine" />
+                </SelectTrigger>
+                <SelectContent>
+                  {machineList.map((machine: any) => (
+                    <SelectItem key={machine.id} value={machine.name}>
+                      {machine.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+
           {/* Test Results */}
           <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
             <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
@@ -366,8 +431,7 @@ function EditReportHematology() {
                     <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[15%]">Record ID</th>
                     <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[25%]">Test Name</th>
                     <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[25%]">Reference Range</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[25%]">Test Result</th>
-                    <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b w-[10%]">Actions</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[35%]">Test Result</th>
                   </tr>
                 </thead>
 
@@ -407,36 +471,7 @@ function EditReportHematology() {
                           />
                         </td>
 
-                        {/* Quick Actions */}
-                        <td className="px-4 py-3 text-sm border-b text-center">
-                          <div className="flex justify-center items-center gap-1.5">
-                            {normalInfo && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 px-2 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 gap-1"
-                                onClick={() => handleFillNormalValue(test.id, test.test_name)}
-                                title="Set to Normal Value"
-                              >
-                                <Sparkles className="h-3 w-3" />
-                                Normal
-                              </Button>
-                            )}
-                            {testResults[test.id] && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
-                                onClick={() => setTestResults(prev => ({ ...prev, [test.id]: '' }))}
-                                title="Clear result"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            )}
-                          </div>
-                        </td>
+
                       </tr>
                     );
                   })}

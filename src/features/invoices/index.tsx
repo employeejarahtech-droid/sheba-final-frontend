@@ -28,6 +28,11 @@ type InvoicesProps = {
     setStatusFilter: (status: string) => void;
     setFrom: (from: string) => void;
     setTo: (to: string) => void;
+    // Optional referrer (reference doctor) filter — used by the "Patients by Referrer" page.
+    doctorId?: string;
+    setDoctorId?: (v: string) => void;
+    showReferrerFilter?: boolean;
+    tableTitle?: string;
 };
 
 type InvoiceItem = {
@@ -69,23 +74,42 @@ type InvoiceItem = {
     }>;
 };
 
-export default function Invoices({ page, limit, search, statusFilter, from, to, setPage, setLimit, setSearch, setStatusFilter, setFrom, setTo }: InvoicesProps) {
+export default function Invoices({ page, limit, search, statusFilter, from, to, setPage, setLimit, setSearch, setStatusFilter, setFrom, setTo, doctorId, setDoctorId, showReferrerFilter, tableTitle }: InvoicesProps) {
     const [openFilter, setOpenFilter] = useState(false);
+    const [openReferrer, setOpenReferrer] = useState(false);
 
     const token = getCookie('accessToken');
     const { currency, currencySymbol, format } = useCurrency();
     const fmtNum = (v: any) => Number(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const { dateFormat, formatDate: fmtDate } = useDateFormat();
 
+    // Referrer (reference doctor) options — only doctors that have already referred
+    // at least one patient (sourced from invoices). Fetched when the referrer filter is shown.
+    const { data: doctorsData } = useQuery({
+        queryKey: ["referrers-for-filter"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/outdoor-invoice/referrers`,
+                { headers: { Authorization: `Bearer ${token}` } },
+            );
+            if (!res.ok) throw new Error("Failed to fetch referrers");
+            return res.json();
+        },
+        enabled: !!token && !!showReferrerFilter,
+    });
+    const doctors = doctorsData?.data || [];
+    const selectedDoctor = doctors.find((d: any) => String(d.id) === String(doctorId));
+
     const { data, isFetching } = useQuery({
-        queryKey: ["invoices", page, limit, search, statusFilter, from, to],
+        queryKey: ["invoices", page, limit, search, statusFilter, from, to, doctorId],
 
         queryFn: async () => {
             const statusParam = statusFilter !== "all" ? `&status=${statusFilter}` : "";
             const fromParam = from ? `&from=${encodeURIComponent(from)}` : "";
             const toParam = to ? `&to=${encodeURIComponent(to)}` : "";
+            const doctorParam = doctorId ? `&doctor_id=${encodeURIComponent(doctorId)}` : "";
             const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/outdoor-invoice?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}`,
+                `${import.meta.env.VITE_API_URL}/api/outdoor-invoice?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}${doctorParam}`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
@@ -452,7 +476,7 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
                             </div>
                             <div>
                                 <p class="text-gray-500">Age / Sex</p>
-                                <p class="font-semibold text-gray-800">${invoice.age ? `${invoice.age} ${invoice.age_text || ''}` : '-'} / ${invoice.sex?.toUpperCase() || '-'}</p>
+                                <p class="font-semibold text-gray-800">${invoice.age_text || invoice.age || '-'} / ${invoice.sex?.toUpperCase() || '-'}</p>
                             </div>
                             <div>
                                 <p class="text-gray-500">Reference Doctor</p>
@@ -685,8 +709,10 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
             data: "phone",
             title: "Phone",
             orderable: true,
-            responsivePriority: 2, // Hide on small screens
+            className: "dt-head-left dt-body-left",
+            responsivePriority: 2,
             defaultContent: "-",
+            render: (data: any) => `<span style="text-align:left;display:block">${data || '-'}</span>`,
         },
         {
             data: null, // Use null for computed fields
@@ -872,7 +898,7 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
 
             <DataTable
                 key={dateFormat}
-                tableTitle="List of Invoices"
+                tableTitle={tableTitle || "List of Invoices"}
                 hideExport
                 columns={columns}
                 data={data?.data?.items || []}
@@ -920,6 +946,43 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
                                 </Command>
                             </PopoverContent>
                         </Popover>
+                        {showReferrerFilter && (
+                            <Popover open={openReferrer} onOpenChange={setOpenReferrer}>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" size="sm" className="w-[220px] justify-start font-normal">
+                                        <Filter className="mr-2 h-4 w-4 shrink-0" />
+                                        <span className="truncate">{doctorId && selectedDoctor ? selectedDoctor.doctor_name : "All Referrers"}</span>
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[260px] p-0" align="start">
+                                    <Command>
+                                        <CommandInput placeholder="Search referrer..." />
+                                        <CommandList>
+                                            <CommandEmpty>No referrer found.</CommandEmpty>
+                                            <CommandGroup>
+                                                <CommandItem
+                                                    value="all referrers"
+                                                    onSelect={() => { setDoctorId?.(""); setOpenReferrer(false); }}
+                                                >
+                                                    <Check className={cn("mr-2 h-4 w-4", !doctorId ? "opacity-100" : "opacity-0")} />
+                                                    All Referrers
+                                                </CommandItem>
+                                                {doctors.map((d: any) => (
+                                                    <CommandItem
+                                                        key={d.id}
+                                                        value={`${d.doctor_name} ${d.id}`}
+                                                        onSelect={() => { setDoctorId?.(String(d.id)); setOpenReferrer(false); }}
+                                                    >
+                                                        <Check className={cn("mr-2 h-4 w-4", String(d.id) === String(doctorId) ? "opacity-100" : "opacity-0")} />
+                                                        {d.doctor_name} ({d.patient_count})
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                        )}
                         <div className="flex items-center gap-1.5">
                             <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>
                                 <SelectTrigger className="w-[140px] h-9 rounded-md border-gray-200 dark:border-gray-700 bg-transparent text-sm">

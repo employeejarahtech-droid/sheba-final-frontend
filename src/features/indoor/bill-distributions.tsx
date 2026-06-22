@@ -39,9 +39,13 @@ const API_URL = import.meta.env.VITE_API_URL
 type BillDistribution = {
   id: number
   admission_id: number
-  bill_id: number
+  final_bill_id: number
   service_provided_by: 'Surgeon' | 'Anesthetist' | 'Assistant' | 'Consultant' | 'Clinical Service' | 'Other' | 'Operation'
   provider_id?: number
+  doctor?: {
+    id: number
+    doctor_name: string
+  }
   bill_amount: number
   less_amount: number
   final_bill: number
@@ -100,7 +104,7 @@ export function BillDistributionsPage() {
   // Form state
   const [formData, setFormData] = useState({
     admission_id: '',
-    bill_id: '',
+    final_bill_id: '',
     service_provided_by: '',
     provider_id: '',
     bill_amount: '',
@@ -162,7 +166,7 @@ export function BillDistributionsPage() {
         body: JSON.stringify({
           ...data,
           admission_id: Number(data.admission_id),
-          bill_id: Number(data.bill_id),
+          final_bill_id: Number(data.final_bill_id),
           bill_amount: Number(data.bill_amount),
           less_amount: Number(data.less_amount),
           pay_now: Number(data.pay_now),
@@ -284,7 +288,7 @@ export function BillDistributionsPage() {
   const resetForm = () => {
     setFormData({
       admission_id: '',
-      bill_id: '',
+      final_bill_id: '',
       service_provided_by: '',
       provider_id: '',
       bill_amount: '',
@@ -295,7 +299,7 @@ export function BillDistributionsPage() {
   }
 
   const handleCreate = () => {
-    if (!formData.admission_id || !formData.bill_id || !formData.service_provided_by || !formData.bill_amount) {
+    if (!formData.admission_id || !formData.final_bill_id || !formData.service_provided_by || !formData.bill_amount) {
       toast.error('Please fill in all required fields')
       return
     }
@@ -322,7 +326,7 @@ export function BillDistributionsPage() {
     setSelectedDistribution(distribution)
     setFormData({
       admission_id: String(distribution.admission_id),
-      bill_id: String(distribution.bill_id),
+      final_bill_id: String(distribution.final_bill_id),
       service_provided_by: distribution.service_provided_by,
       provider_id: String(distribution.provider_id || ''),
       bill_amount: String(distribution.bill_amount),
@@ -496,8 +500,14 @@ export function BillDistributionsPage() {
                             <span className="text-2xl">{getProviderIcon(distribution.service_provided_by)}</span>
                             <div>
                               <div className="font-medium">{distribution.service_provided_by}</div>
-                              {distribution.provider_id && (
-                                <div className="text-xs text-muted-foreground">ID: {distribution.provider_id}</div>
+                              {distribution.provider_id ? (
+                                <div className="text-xs text-muted-foreground">
+                                  {distribution.doctor?.doctor_name || `ID: ${distribution.provider_id}`}
+                                </div>
+                              ) : (
+                                (distribution.service_provided_by === 'Clinical Service' || distribution.service_provided_by === 'Other') && (
+                                  <div className="text-xs text-muted-foreground">Hospital</div>
+                                )
                               )}
                             </div>
                           </div>
@@ -588,8 +598,8 @@ export function BillDistributionsPage() {
               <div>
                 <Label>Bill ID *</Label>
                 <Input
-                  value={formData.bill_id}
-                  onChange={(e) => setFormData({ ...formData, bill_id: e.target.value })}
+                  value={formData.final_bill_id}
+                  onChange={(e) => setFormData({ ...formData, final_bill_id: e.target.value })}
                   placeholder="Enter bill ID"
                 />
               </div>

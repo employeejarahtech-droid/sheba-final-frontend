@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
@@ -30,6 +30,10 @@ type Distribution = {
     id: number
     service_provided_by: string
     provider_name?: string
+    doctor?: {
+        id: number
+        doctor_name: string
+    }
     bill_amount: number
     less_amount: number
     final_bill: number
@@ -123,7 +127,8 @@ export function ConfirmBalancePage({ admissionId }: ConfirmBalancePageProps) {
         enabled: !!token && !!admissionId,
     })
 
-    const distributions: Distribution[] = distributionsData?.data || []
+    const allDistributions: Distribution[] = useMemo(() => distributionsData?.data || [], [distributionsData?.data])
+    const distributions = useMemo(() => allDistributions.filter(d => d.notes !== 'Clinic Part (Profit)'), [allDistributions])
 
     // Confirm completion mutation
     const confirmMutation = useMutation({
@@ -347,8 +352,12 @@ export function ConfirmBalancePage({ admissionId }: ConfirmBalancePageProps) {
                                         <span className="text-2xl">{icon}</span>
                                         <div>
                                             <p className="font-medium">{dist.service_provided_by}</p>
-                                            {dist.provider_name && (
-                                                <p className="text-sm text-muted-foreground">{dist.provider_name}</p>
+                                            {dist.service_provided_by === 'Clinical Service' || dist.service_provided_by === 'Other' ? (
+                                                <p className="text-sm text-muted-foreground">Hospital</p>
+                                            ) : (
+                                                (dist.doctor?.doctor_name || dist.provider_name) && (
+                                                    <p className="text-sm text-muted-foreground">{dist.doctor?.doctor_name || dist.provider_name}</p>
+                                                )
                                             )}
                                         </div>
                                     </div>
@@ -429,8 +438,13 @@ export function ConfirmBalancePage({ admissionId }: ConfirmBalancePageProps) {
                         </div>
                         <Separator />
                         <div className="text-center py-4 bg-green-50 dark:bg-green-950/30 rounded-lg">
-                            <p className="text-sm text-green-800 dark:text-green-300">Company Retention (Deductions from Bills)</p>
-                            <p className="text-3xl font-bold text-green-600">{format(summary?.total_less_amount || 0)}</p>
+                            <p className="text-sm text-green-800 dark:text-green-300">Clinic Part (Profit)</p>
+                            <p className="text-3xl font-bold text-green-600">
+                                {format(summary?.total_less_amount || 0)}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Clinic profit share
+                            </p>
                         </div>
                     </div>
                 </CardContent>
@@ -508,7 +522,7 @@ export function ConfirmBalancePage({ admissionId }: ConfirmBalancePageProps) {
                             </div>
                             <div className="flex items-center gap-3">
                                 <CheckCircle className="h-5 w-5 text-green-600" />
-                                <span>Company retains: <strong>{format(summary?.total_less_amount || 0)}</strong></span>
+                                <span>Clinic Part (Profit): <strong>{format(summary?.total_less_amount || 0)}</strong></span>
                             </div>
                         </div>
                         <div className="bg-green-50 dark:bg-green-950/30 p-4 rounded-lg">

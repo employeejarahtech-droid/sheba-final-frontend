@@ -29,10 +29,17 @@ type AdmissionItem = {
     phone: string
     admission_date: string
     doctor?: { doctor_name: string }
-    finalBill?: { total_discounted_amount: number; paid_amount: number; due_amount: number }
+    finalBill?: { 
+        total_bill_amount: number; 
+        total_discount: number; 
+        total_discounted_amount: number; 
+        paid_amount: number; 
+        due_amount: number 
+    }
     bills_distributed?: number
     bills_distributed_date?: string | null
     balance_distributed?: number
+    total_distributed?: number
 }
 
 export function BillsDistributedListPage() {
@@ -94,9 +101,27 @@ export function BillsDistributedListPage() {
         },
         {
             data: "bill_amount",
-            title: "Total Bill",
+            title: "Bill",
             render: (_: any, __: any, row: AdmissionItem) =>
-                row.finalBill ? format(parseFloat(row.finalBill.total_discounted_amount)) : '-'
+                row.finalBill ? format(Number(row.finalBill.total_bill_amount)) : '-'
+        },
+        {
+            data: "discount",
+            title: "Discount",
+            render: (_: any, __: any, row: AdmissionItem) =>
+                row.finalBill ? format(Number(row.finalBill.total_discount)) : '-'
+        },
+        {
+            data: "final_bill",
+            title: "Final Bill",
+            render: (_: any, __: any, row: AdmissionItem) =>
+                row.finalBill ? format(Number(row.finalBill.total_discounted_amount)) : '-'
+        },
+        {
+            data: "distributed_amount",
+            title: "Distributed Amount",
+            render: (_: any, __: any, row: AdmissionItem) =>
+                row.total_distributed !== undefined ? format(Number(row.total_distributed)) : '-'
         },
         {
             data: "actions",

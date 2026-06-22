@@ -1,11 +1,13 @@
 /**
- * Admin Layout — Protected layout for all admin pages
+ * Admin Route (layout) — Protected layout for all admin pages
  *
  * Checks adminAccessToken in beforeLoad, redirects to /admin/login if missing.
  * Renders SidebarProvider + AdminSidebar + Outlet (mirrors AuthenticatedLayout).
+ *
+ * Uses route.tsx (not _layout.tsx) so it wraps all sibling admin pages as children.
  */
 
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
+import { createFileRoute, Outlet, redirect, useRouterState } from '@tanstack/react-router'
 import { getCookie } from '@/lib/cookies'
 import { cn } from '@/lib/utils'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
@@ -14,8 +16,11 @@ import { usePlatformAuthStore } from '@/stores/platform-auth-store'
 import { Button } from '@/components/ui/button'
 import { LogOut, User } from 'lucide-react'
 
-export const Route = createFileRoute('/(platform)/admin/_layout')({
-  beforeLoad: () => {
+export const Route = createFileRoute('/(platform)/admin')({
+  beforeLoad: ({ location }) => {
+    if (location.pathname === '/admin/login') {
+      return
+    }
     const token = getCookie('adminAccessToken')
     if (!token) {
       throw redirect({ to: '/admin/login' })
@@ -26,6 +31,13 @@ export const Route = createFileRoute('/(platform)/admin/_layout')({
 
 function AdminLayout() {
   const { user, logout } = usePlatformAuthStore()
+  const routerState = useRouterState()
+
+  const isLoginPage = routerState.location.pathname === '/admin/login'
+
+  if (isLoginPage) {
+    return <Outlet />
+  }
 
   const handleLogout = () => {
     logout()

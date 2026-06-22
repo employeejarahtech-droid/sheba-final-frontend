@@ -571,9 +571,8 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
     {
       data: "phone",
       title: "Phone",
-      render: (data: any) => {
-        return data || '-';
-      },
+      className: "dt-head-left dt-body-left",
+      render: (data: any) => data || '-',
     },
     {
       data: null,
@@ -687,7 +686,7 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
     <>
       <AppHeader fixed />
 
-      <main className='p-4'>
+      <main className=''>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mb-6">
           {stats.map((item, idx) => (

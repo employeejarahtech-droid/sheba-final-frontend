@@ -393,7 +393,7 @@ export function BillingViewPage() {
                 )}
 
                 {/* Summary Card */}
-                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 print:bg-white print:dark:bg-white">
+                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 print:bg-white print:dark:bg-white p-0">
                     <CardHeader>
                         <CardTitle>Billing Summary</CardTitle>
                     </CardHeader>

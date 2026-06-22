@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { ReportFooter } from '@/components/pathology/ReportFooter'
 
 interface ImmunologyReportProps {
   invoice: {
@@ -9,6 +10,7 @@ interface ImmunologyReportProps {
       sex: string;
       invoice_date: string;
       phone: string;
+      ref_doctor?: string | null;
     } | null;
     immunology_all_info: Array<{
       id: number;
@@ -16,6 +18,7 @@ interface ImmunologyReportProps {
       test_id: number | null;
       test_name: string | null;
       test_result: string | null;
+      test_carried_out_by?: string | null;
       created_at: string | null;
       updated_at: string | null;
     }>;
@@ -94,8 +97,11 @@ export default function ImmunologyReportDetails({ invoice, testName = "IMMUNOLOG
             <td className="border px-3 py-2">Sex: {patientInfo?.sex || '-'}</td>
           </tr>
           <tr className="border">
-            <td className="border px-3 py-2" colSpan={3}>
+            <td className="border px-3 py-2">
               Phone: {patientInfo?.phone || '-'}
+            </td>
+            <td className="border px-3 py-2" colSpan={2}>
+              Ref. Doctor: {patientInfo?.ref_doctor || '-'}
             </td>
           </tr>
         </tbody>
@@ -122,22 +128,11 @@ export default function ImmunologyReportDetails({ invoice, testName = "IMMUNOLOG
 
       {/* Tested By */}
       <p className="text-sm mt-4">
-        <span className="font-semibold">Test Carried out by:</span> &nbsp;
-        Humalyzer 3000 Biochemistry Analyser
+        <span className="font-semibold">Test Carried Out By:</span> &nbsp;
+        {tests[0]?.test_carried_out_by || '-'}
       </p>
 
-      {/* Footer Signatures */}
-      <div className="grid grid-cols-2 mt-32 text-sm">
-        <div>
-          <p className="border-t border-dashed w-40 pt-1 text-center">Checked By:</p>
-        </div>
-
-        <div className="text-center">
-          <p className="border-t border-dashed w-56 ml-auto pt-1">
-            Medical Technologist (Lab):
-          </p>
-        </div>
-      </div>
+      <ReportFooter />
 
     
     </div>

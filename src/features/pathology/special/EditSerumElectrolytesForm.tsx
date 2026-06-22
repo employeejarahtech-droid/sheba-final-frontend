@@ -8,6 +8,7 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
+import { FlaskConical } from "lucide-react";
 
 import {
     Form,
@@ -185,8 +186,16 @@ export function EditSerumElectrolytesForm({ open, setOpen, reportId, invoiceId }
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetContent className="max-w-[450px] w-full overflow-y-auto">
-                <SheetHeader>
-                    <SheetTitle>Edit Serum Electrolytes Test</SheetTitle>
+                <SheetHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-3 px-4 gap-0">
+                    <div className="flex items-center gap-2.5 pr-8">
+                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                            <FlaskConical className="h-4 w-4" />
+                        </div>
+                        <div>
+                            <SheetTitle className="text-lg font-bold">Edit Serum Electrolytes Test</SheetTitle>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">Update serum electrolytes results</p>
+                        </div>
+                    </div>
                 </SheetHeader>
 
                 <div className="px-4">
@@ -287,7 +296,7 @@ export function EditSerumElectrolytesForm({ open, setOpen, reportId, invoiceId }
                             name="testCarriedOutBy"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Test carried out by</FormLabel>
+                                    <FormLabel>Test Carried Out By</FormLabel>
                                     <FormControl>
                                         <Select
                                             onValueChange={(value) => {

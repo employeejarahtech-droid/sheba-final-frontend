@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
 import { getCookie } from '@/lib/cookies';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { AppHeader } from '@/components/layout/app-header';
@@ -24,6 +25,7 @@ type CBCItem = {
   id: number;
   invoice_id: number;
   patient_name: string;
+  ref_doctor?: string | null;
   created_at: string;
 };
 
@@ -47,6 +49,9 @@ function CBCShort() {
   };
 
   const token = getCookie('accessToken');
+
+  // Tenant date format (from company settings) + 12h time — matches the rest of the app.
+  const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data, isFetching } = useQuery({
     queryKey: ["cbc", page, limit, search],
@@ -165,11 +170,11 @@ function CBCShort() {
 
         <!-- Footer Actions -->
         <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-          <a href="/dashboard/hematology/cbc-short/report/${reportId}"
+          <a href="/dashboard/pathology/hematology/cbc-short/report/${reportId}"
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
             View Report
           </a>
-          <a href="/dashboard/hematology/cbc-short/edit/${reportId}"
+          <a href="/dashboard/pathology/hematology/cbc-short/edit/${reportId}"
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-orange-600 text-white hover:bg-orange-700 h-10 px-5 transition shadow-md">
             Edit
           </a>
@@ -283,7 +288,7 @@ function CBCShort() {
 
                 ${reportData.test_carried_out_by ? `
                   <div class="mt-4 pt-4 border-t text-sm">
-                    <span class="text-gray-500">Test Carried out by:</span>
+                    <span class="text-gray-500">Test Carried Out By:</span>
                     <span class="font-medium text-gray-800 ml-2">${reportData.test_carried_out_by}</span>
                   </div>
                 ` : ''}
@@ -329,11 +334,7 @@ function CBCShort() {
       orderable: true,
       responsivePriority: 2,
       render: (data: any, _type: string, row: CBCItem) => {
-        const date = row.created_at ? new Date(row.created_at).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }) : '-';
+        const date = fmtDateTime(row.created_at);
         return `
           <div class="flex items-center gap-2">
             <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
@@ -356,23 +357,30 @@ function CBCShort() {
       defaultContent: "",
     },
     {
+      data: "ref_doctor",
+      title: "Ref. Doctor",
+      defaultContent: "-",
+    },
+    {
       data: "created_at",
       title: "Date",
       orderable: true,
       responsivePriority: 3,
       render: (_data: any, _type: string, row: CBCItem) => {
-        const iso = row.created_at;
-        const date = new Date(iso);
-
-        const formatted = date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-
-        return `<div>${formatted}</div>`;
+        return `<div>${fmtDateTime(row.created_at)}</div>`;
       },
       defaultContent: "",
+    },
+    {
+      data: null,
+      title: "Actions",
+      orderable: false,
+      render: (_data: any, _type: string, row: any) => `
+        <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
+          <a href="/dashboard/pathology/hematology/cbc-short/edit/${row.id}" title="Edit" class="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-xs font-medium h-8 px-2.5 transition">Edit</a>
+          <a href="/dashboard/pathology/hematology/cbc-short/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print" class="inline-flex items-center gap-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium h-8 px-2.5 transition">Print</a>
+        </div>
+      `,
     },
   ];
 

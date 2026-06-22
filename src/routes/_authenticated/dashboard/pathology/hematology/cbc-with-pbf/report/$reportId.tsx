@@ -57,7 +57,7 @@ function CBCWithPBFReport() {
             <AppHeader fixed />
             <Main>
                 <div className="print:hidden flex items-center justify-between gap-4">
-                    <Link to="/dashboard/hematology/cbc-with-pbf">
+                    <Link to="/dashboard/pathology/hematology/cbc-with-pbf">
                         <Button variant="outline" size="sm">
                             <ArrowLeft className="h-4 w-4" />
                             Back to CBC with PBF

@@ -77,7 +77,7 @@ function ImmunologyAllReports() {
       <AppHeader fixed />
       <Main>
         <div className="print:hidden flex items-center justify-between gap-4">
-          <Link to="/dashboard/immunology/all">
+          <Link to="/dashboard/pathology/immunology/all">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to All Reports

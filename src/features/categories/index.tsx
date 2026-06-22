@@ -356,7 +356,7 @@ export default function Categories({ page, limit, search, departmentId, setPage,
     return <>
         <AppHeader fixed />
 
-        <main className="p-4">
+        <main className="">
             <div className="space-y-4">
                 {/* Statistics Cards */}
                 <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-4'>

@@ -80,7 +80,7 @@ function CBCShortReport() {
             <AppHeader fixed />
             <Main>
                 <div className="print:hidden flex items-center justify-between gap-4">
-                    <Link to="/dashboard/hematology/cbc-short">
+                    <Link to="/dashboard/pathology/hematology/cbc-short">
                         <Button variant="outline" size="sm">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to CBC Short

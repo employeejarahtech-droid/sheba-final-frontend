@@ -211,7 +211,15 @@ function AdmissionStepPrintPage() {
     const stepUser = currentStep.getUser()
     const formattedDate = stepDate ? new Date(stepDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A'
 
-    const admissionDate = admission.admission_date ? new Date(admission.admission_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A'
+    const formattedAdmissionDate = admission.admission_date 
+        ? new Date(admission.admission_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) 
+        : 'N/A'
+    const formattedAdmissionTime = admission.created_at
+        ? new Date(admission.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+        : ''
+    const admissionDateAndTime = formattedAdmissionTime 
+        ? `${formattedAdmissionDate} ${formattedAdmissionTime}` 
+        : formattedAdmissionDate
     const dischargeDate = admission.discharge_date ? new Date(admission.discharge_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A'
     const bedCabinInfo = admission.bedCabin ? `${admission.bedCabin.code} (${admission.bedCabin.type})` : 'N/A'
     const doctorName = admission.doctor?.doctor_name || 'N/A'
@@ -228,7 +236,7 @@ function AdmissionStepPrintPage() {
             <AppHeader fixed />
 
             <Main>
-                <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: '40px' }}>
+                <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5  print:w-[850px] print-report" style={{ paddingTop: '0px' }}>
                     <style>{`
                         .bg-row-blue {
                             background-color: #cfd2d8ff !important;
@@ -350,8 +358,8 @@ function AdmissionStepPrintPage() {
                         </thead>
                         <tbody>
                             <tr className="border-b border-dashed">
-                                <td className="px-3 py-2">Admission Date</td>
-                                <td className="px-3 py-2">{admissionDate}</td>
+                                <td className="px-3 py-2">Admission Date and Time</td>
+                                <td className="px-3 py-2">{admissionDateAndTime}</td>
                             </tr>
                             <tr className="border-b border-dashed">
                                 <td className="px-3 py-2">Discharge Date</td>

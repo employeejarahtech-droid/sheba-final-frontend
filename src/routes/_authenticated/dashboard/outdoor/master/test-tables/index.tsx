@@ -273,7 +273,7 @@ function TestTables() {
   return <>
     <AppHeader fixed />
 
-  <main className='p-4'>
+  <main className=''>
       <div className="flex flex-wrap items-end justify-between gap-2 mb-4">
         <h1 className="text-2xl font-bold tracking-tight">List of Test Tables</h1>
         <CreateTestTableForm refetchTestTables={refetchTestTables} />

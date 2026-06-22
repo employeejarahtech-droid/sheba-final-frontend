@@ -11,6 +11,8 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, FlaskConical, User } from "lucide-react";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -221,35 +223,77 @@ function EditUrineForReFull() {
       {/* HEADER */}
       <AppHeader fixed />
       {/* MAIN */}
-      <Main className="px-6 py-8 max-w-4xl mx-auto">
-        <div className="max-w-[800px] mx-auto">
-          <h1 className="text-2xl font-bold mb-6">Edit Urine Examination Report</h1>
+      <Main className="flex flex-1 flex-col gap-6">
+        <div className="w-full min-w-[650px] max-w-[1100px] mx-auto px-4 space-y-5">
+          {/* Header */}
+          <div className="flex flex-wrap justify-between items-start gap-4">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate({ to: '/dashboard/pathology/urine/urine-for-re-full' })}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  Edit Urine Examination Report
+                </h1>
+                <p className="text-muted-foreground text-sm">Review and update urine examination findings</p>
+              </div>
+            </div>
+          </div>
 
           {/* Loading State */}
           {!urineReData && (
-            <div className="flex items-center justify-center p-8">
-              <p className="text-gray-500">Loading report data...</p>
-            </div>
+            <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+              <CardContent className="p-4">
+                <p className="text-gray-500">Loading report data...</p>
+              </CardContent>
+            </Card>
           )}
 
-          {/* INVOICE */}
-          <div className="bg-white shadow rounded-xl p-6 border mb-8">
-            <PatientInvoiceInfo
-              invoiceInfo={{
-                invoiceNo: "UEX-4021",
-                patientName: "Hasina Begum",
-                age: "29 Years",
-                gender: "Female",
-              }}
-            />
-          </div>
+          {/* Patient Information */}
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                  <User className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold">Patient Information</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Invoice and patient details</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <PatientInvoiceInfo
+                invoiceInfo={{
+                  invoiceNo: "UEX-4021",
+                  patientName: "Hasina Begum",
+                  age: "29 Years",
+                  gender: "Female",
+                }}
+              />
+            </CardContent>
+          </Card>
 
-          {/* FORM */}
-          <div className="bg-white shadow rounded-xl p-6 border">
-            <h2 className="text-xl font-semibold mb-4">Test Results</h2>
-
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+          {/* Test Results */}
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                  <FlaskConical className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold">Test Results</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Enter urine examination findings</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
 
                 {/* ------------------------------- */}
                 {/* PHYSICAL EXAMINATION            */}
@@ -468,28 +512,29 @@ function EditUrineForReFull() {
 
 
 
-                {/* BUTTONS */}
-                <div className="flex justify-between gap-3 pt-4">
-                  <Button
-                    type="submit"
-                    variant="success"
-                    className="flex-1"
-                    disabled={updateUrineReMutation.isPending || !urineReData}
-                  >
-                    {updateUrineReMutation.isPending ? "Saving..." : "Save Report"}
+                {/* Action Buttons */}
+                <div className="flex items-center justify-end gap-3 pt-6">
+                  <Button type="button" variant="outline" size="lg" onClick={handleView}>
+                    View
                   </Button>
-                  <Link to="/dashboard/urine/urine-for-re-full/report/$reportId" params={{ reportId: id }}>
-                      <Button type="button" variant="warning" className="flex-1">
+                  <Link to="/dashboard/pathology/urine/urine-for-re-full/report/$reportId" params={{ reportId: id }}>
+                    <Button type="button" variant="outline" size="lg">
                       Print Preview
                     </Button>
                   </Link>
-                  <Button type="button" variant="info" className="flex-1" onClick={handleView}>
-                    View
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={updateUrineReMutation.isPending || !urineReData}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white min-w-[200px]"
+                  >
+                    {updateUrineReMutation.isPending ? "Saving..." : "Save Report"}
                   </Button>
                 </div>
               </form>
-            </Form>
-          </div>
+              </Form>
+            </CardContent>
+          </Card>
         </div>
       </Main>
     </>

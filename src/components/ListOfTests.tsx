@@ -62,6 +62,24 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
 
     const token = getCookie('accessToken');
 
+    // Fetch test tables FIRST (needed to resolve match_table_name → display_name)
+    const { data: testTablesData } = useQuery({
+        queryKey: ["test-tables-list"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/test-tables?limit=1000`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            if (!res.ok) throw new Error("Failed to fetch test tables");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+    const testTables = testTablesData?.data?.items || [];
+
+    // Fetch tests — gated on testTables loaded so display names resolve on first render
     const { data, isFetching } = useQuery({
         queryKey: ["tests", page, limit, search, categoryId],
         queryFn: async () => {
@@ -81,7 +99,7 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
             if (!res.ok) throw new Error("Failed to fetch tests");
             return res.json();
         },
-        enabled: !!token,
+        enabled: !!token && testTables.length > 0,
     });
 
     // Fetch categories for filter dropdown
@@ -100,24 +118,6 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
         },
         enabled: !!token,
     });
-
-    // Fetch test tables list to resolve match_table_name to display_name
-    const { data: testTablesData } = useQuery({
-        queryKey: ["test-tables-list"],
-        queryFn: async () => {
-            const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/test-tables?limit=1000`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-            if (!res.ok) throw new Error("Failed to fetch test tables");
-            return res.json();
-        },
-        enabled: !!token,
-    });
-
-    const testTables = testTablesData?.data?.items || [];
 
     // Calculate stats
     const stats = useMemo(() => {
@@ -331,7 +331,7 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
         },
         {
             data: "match_table_name",
-            title: "Match Table Name",
+            title: "Report Template Format",
             orderable: true,
             responsivePriority: 5,
             render: (_data: any, _type: string, row: TestItem) => {
@@ -420,7 +420,7 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
     return <>
         <AppHeader fixed />
 
-        <main className='p-4'>
+        <main className=''>
             <div className="flex flex-wrap items-end justify-between gap-2 mb-3">
                 <h1 className="text-2xl font-bold tracking-tight">List of Tests</h1>
                 <Link to="/dashboard/outdoor/master/tests/create"><Button>Create New Test</Button></Link>
@@ -459,6 +459,7 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
             </div>
 
             <DataTable
+                key={`tt-${testTables.length}`}
                 columns={columns}
                 data={data?.data?.items || []}
                 meta={data?.data?.meta}

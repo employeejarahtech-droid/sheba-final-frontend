@@ -1,18 +1,24 @@
 /**
  * Admin Sidebar Data — Navigation items for the platform admin panel
  *
+ * Grouped layout ported from the reference admin panel:
+ *  Overview · Platform Management · Finance · Communication · System
+ *
  * Follows the SidebarData type from src/components/layout/types.ts
  */
 
 import {
   LayoutDashboard,
   Building2,
+  Users,
   CreditCard,
-  UserPlus,
-  Shield,
-  Settings,
-  Blocks,
   Receipt,
+  Puzzle,
+  Package,
+  ClipboardList,
+  Mail,
+  Settings,
+  UserCircle,
 } from 'lucide-react'
 import type { SidebarData } from '@/components/layout/types'
 
@@ -22,56 +28,37 @@ export const adminSidebarData: SidebarData = {
     {
       title: 'Overview',
       items: [
-        {
-          title: 'Dashboard',
-          url: '/admin',
-          icon: LayoutDashboard,
-        },
+        { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
       ],
     },
     {
-      title: 'Management',
+      title: 'Platform Management',
       items: [
-        {
-          title: 'Companies',
-          url: '/admin/companies',
-          icon: Building2,
-        },
-        {
-          title: 'Plans',
-          url: '/admin/plans',
-          icon: CreditCard,
-        },
-        {
-          title: 'Registrations',
-          url: '/admin/registrations',
-          icon: UserPlus,
-        },
-        {
-          title: 'Admins',
-          url: '/admin/admins',
-          icon: Shield,
-        },
+        { title: 'Companies', url: '/admin/companies', icon: Building2 },
+        { title: 'Admins', url: '/admin/admins', icon: Users },
+        { title: 'Plans', url: '/admin/plans', icon: CreditCard },
+        { title: 'Subscriptions', url: '/admin/subscriptions', icon: Receipt },
+        { title: 'Modules', url: '/admin/modules', icon: Puzzle },
       ],
     },
     {
-      title: 'Configuration',
+      title: 'Finance',
       items: [
-        {
-          title: 'Settings',
-          url: '/admin/settings',
-          icon: Settings,
-        },
-        {
-          title: 'Modules',
-          url: '/admin/modules',
-          icon: Blocks,
-        },
-        {
-          title: 'Billing',
-          url: '/admin/billing',
-          icon: Receipt,
-        },
+        { title: 'Billing', url: '/admin/billing', icon: Package },
+      ],
+    },
+    {
+      title: 'Communication',
+      items: [
+        { title: 'Registrations', url: '/admin/registrations', icon: ClipboardList },
+        { title: 'Contacts', url: '/admin/contacts', icon: Mail },
+      ],
+    },
+    {
+      title: 'System',
+      items: [
+        { title: 'Settings', url: '/admin/settings', icon: Settings },
+        { title: 'Profile', url: '/admin/profile', icon: UserCircle },
       ],
     },
   ],
