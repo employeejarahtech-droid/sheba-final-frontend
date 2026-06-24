@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect, useMemo } from 'react';
 import { EditBloodGroupForm } from '@/features/pathology/immunology/EditBloodGroupForm';
 import { getCookie } from '@/lib/cookies';
@@ -428,6 +429,22 @@ function BloodGroup() {
     };
   }, [token]);
 
+  // Stats cards (same design as List of Tests)
+  const todayCount = items.filter((i: any) => {
+    if (!i.created_at) return false;
+    const d = new Date(i.created_at);
+    const now = new Date();
+    return d.toDateString() === now.toDateString();
+  }).length;
+  const uniquePatients = new Set(items.map((i: any) => i.patient_name)).size;
+
+  const stats = [
+    { label: "Total Reports", value: data?.data?.meta?.total || 0, icon: FileText, grad: "from-pink-500 to-rose-500" },
+    { label: "Blood Groups", value: items.length || 0, icon: Droplets, grad: "from-rose-500 to-red-500" },
+    { label: "Recent", value: todayCount, icon: Clock, grad: "from-amber-500 to-orange-500" },
+    { label: "Patients", value: uniquePatients, icon: Users, grad: "from-indigo-500 to-purple-500" },
+  ];
+
   return (
     <>
       <AppHeader fixed />
@@ -435,89 +452,25 @@ function BloodGroup() {
         <div className="p-4 space-y-3">
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {/* Total Reports */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-600 to-pink-400 p-6 shadow-lg shadow-pink-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-              <div className="relative flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Reports</p>
-                  <h3 className="mt-2 text-2xl font-bold text-white">{data?.data?.meta?.total || 0}</h3>
-                </div>
-                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div className="relative flex justify-between text-white/90 text-sm">
-                <span>All Time</span>
-                <span className="font-semibold">Records</span>
-              </div>
-            </div>
-
-            {/* Blood Groups */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-600 to-rose-400 p-6 shadow-lg shadow-rose-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-              <div className="relative flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Blood Groups</p>
-                  <h3 className="mt-2 text-2xl font-bold text-white">{items?.length || 0}</h3>
-                </div>
-                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                  <Droplets className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div className="relative flex justify-between text-white/90 text-sm">
-                <span>Current</span>
-                <span className="font-semibold">Page</span>
-              </div>
-            </div>
-
-            {/* Recent */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-600 to-amber-400 p-6 shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-              <div className="relative flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Recent</p>
-                  <h3 className="mt-2 text-2xl font-bold text-white">
-                    {items?.filter((i: any) => {
-                      if (!i.created_at) return false;
-                      const d = new Date(i.created_at);
-                      const now = new Date();
-                      return d.toDateString() === now.toDateString();
-                    }).length || 0}
-                  </h3>
-                </div>
-                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                  <Clock className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div className="relative flex justify-between text-white/90 text-sm">
-                <span>Today</span>
-                <span className="font-semibold">Added</span>
-              </div>
-            </div>
-
-            {/* Patients */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-400 p-6 shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-              <div className="relative flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Patients</p>
-                  <h3 className="mt-2 text-2xl font-bold text-white">{new Set(items?.map((i: any) => i.patient_name)).size || 0}</h3>
-                </div>
-                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                  <Users className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div className="relative flex justify-between text-white/90 text-sm">
-                <span>Unique</span>
-                <span className="font-semibold">Patients</span>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            {stats.map((card) => {
+              const Icon = card.icon;
+              return (
+                <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                  <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
+                        <Icon className="w-4 h-4 text-white" />
+                      </div>
+                      <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <h3 className="text-2xl font-bold">{card.value || 0}</h3>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
           <DataTable

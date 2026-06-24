@@ -6,7 +6,7 @@ import { DataTable } from '@/components/DataTable'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { getCookie } from '@/lib/cookies'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FolderOpen, Activity, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useCurrency } from '@/hooks/use-currency'
@@ -90,18 +90,14 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
         {
             title: 'Total Services',
             value: stats.totalServices || 0,
-            icon: <FolderOpen className='h-6 w-6' />,
-            gradient: 'from-blue-600 to-indigo-600',
-            shadow: 'shadow-blue-500/20',
-            label: 'All Services'
+            icon: FolderOpen,
+            grad: 'from-blue-500 to-indigo-500',
         },
         {
             title: 'Active Services',
             value: stats.activeServices || 0,
-            icon: <Activity className='h-6 w-6' />,
-            gradient: 'from-green-600 to-emerald-600',
-            shadow: 'shadow-green-500/20',
-            label: 'Currently Available'
+            icon: Activity,
+            grad: 'from-emerald-500 to-teal-500',
         },
     ];
 
@@ -350,27 +346,25 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
         <main className="p-4">
             <div className="space-y-4">
                 {/* Statistics Cards */}
-                <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-2'>
-                    {statCards.map((card, idx) => (
-                        <Card key={idx} className={`p-3 relative overflow-hidden border-none text-white shadow-xl ${card.shadow} bg-gradient-to-br ${card.gradient}`}>
-                            <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
-                            <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-                            <CardContent className='p-3'>
-                                <div className='flex items-center justify-between relative z-10'>
-                                    <div className='space-y-1'>
-                                        <p className='text-sm font-medium text-white/80'>{card.title}</p>
-                                        <h3 className='text-3xl font-bold tracking-tighter'>
-                                            {card.value}
-                                        </h3>
-                                        <p className='text-[10px] font-bold uppercase tracking-wider text-white/60'>{card.label}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {statCards.map((card) => {
+                        const Icon = card.icon;
+                        return (
+                            <Card key={card.title} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
+                                            <Icon className="w-4 h-4 text-white" />
+                                        </div>
+                                        <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.title}</CardTitle>
                                     </div>
-                                    <div className='rounded-2xl bg-white/20 p-4 backdrop-blur-md border border-white/20 shadow-inner'>
-                                        {card.icon}
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+                                </CardHeader>
+                                <CardContent className="p-4">
+                                    <h3 className="text-2xl font-bold">{card.value}</h3>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
                 </div>
 
                 {/* Header & Table */}

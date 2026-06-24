@@ -8,6 +8,7 @@ import { Main } from '@/components/layout/main'
 import { DataTable } from '@/components/DataTable'
 import { PageHeader } from '@/components/layout/page-header'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { getCookie } from '@/lib/cookies'
 import { useCurrency } from '@/hooks/use-currency'
@@ -608,6 +609,33 @@ export function DischargedPatientListPage({ page, limit, search, setPage, setSea
         }
     }, [format, page, limit, search])
 
+    const statsCards = useMemo(() => [
+        {
+            label: 'Total Discharged',
+            value: meta.total,
+            icon: CheckCircle,
+            grad: 'from-gray-600 to-gray-400',
+        },
+        {
+            label: 'With Final Bill',
+            value: admissions.filter((a: any) => a.final_bill_created === 1).length,
+            icon: FileText,
+            grad: 'from-blue-600 to-blue-400',
+        },
+        {
+            label: 'Payment Completed',
+            value: admissions.filter((a: any) => a.payment_completed === 1).length,
+            icon: DollarSign,
+            grad: 'from-green-600 to-green-400',
+        },
+        {
+            label: 'Total Amount',
+            value: format(admissions.reduce((sum: number, a: any) => sum + (a.finalBill?.total_discounted_amount || 0), 0)),
+            icon: DollarSign,
+            grad: 'from-purple-600 to-purple-400',
+        },
+    ], [meta.total, admissions, format])
+
     return (
         <>
             <AppHeader />
@@ -620,43 +648,25 @@ export function DischargedPatientListPage({ page, limit, search, setPage, setSea
                     backLabel="Back to Patients"
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div className={`bg-gradient-to-r from-gray-600 to-gray-400 rounded-2xl p-6 text-white shadow-lg shadow-gray-500/30`}>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-gray-100 text-sm font-medium">Total Discharged</p>
-                                <p className="text-3xl font-bold">{meta.total}</p>
-                            </div>
-                            <CheckCircle className="w-12 h-12 text-white opacity-90" />
-                        </div>
-                    </div>
-                    <div className={`bg-gradient-to-r from-blue-600 to-blue-400 rounded-2xl p-6 text-white shadow-lg shadow-blue-500/30`}>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-blue-100 text-sm font-medium">With Final Bill</p>
-                                <p className="text-3xl font-bold">{admissions.filter((a: any) => a.final_bill_created === 1).length}</p>
-                            </div>
-                            <FileText className="w-12 h-12 text-white opacity-90" />
-                        </div>
-                    </div>
-                    <div className={`bg-gradient-to-r from-green-600 to-green-400 rounded-2xl p-6 text-white shadow-lg shadow-green-500/30`}>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-green-100 text-sm font-medium">Payment Completed</p>
-                                <p className="text-3xl font-bold">{admissions.filter((a: any) => a.payment_completed === 1).length}</p>
-                            </div>
-                            <DollarSign className="w-12 h-12 text-white opacity-90" />
-                        </div>
-                    </div>
-                    <div className={`bg-gradient-to-r from-purple-600 to-purple-400 rounded-2xl p-6 text-white shadow-lg shadow-purple-500/30`}>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-purple-100 text-sm font-medium">Total Amount</p>
-                                <p className="text-3xl font-bold">{format(admissions.reduce((sum: number, a: any) => sum + (a.finalBill?.total_discounted_amount || 0), 0))}</p>
-                            </div>
-                            <DollarSign className="w-12 h-12 text-white opacity-90" />
-                        </div>
-                    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {statsCards.map((card) => {
+                        const Icon = card.icon;
+                        return (
+                            <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
+                                            <Icon className="w-4 h-4 text-white" />
+                                        </div>
+                                        <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="p-4">
+                                    <h3 className="text-2xl font-bold">{card.value}</h3>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
                 </div>
 
                 <DataTable

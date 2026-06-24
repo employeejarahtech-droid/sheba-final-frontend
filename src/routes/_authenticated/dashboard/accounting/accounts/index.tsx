@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import React from "react";
-import { Plus, TrendingUp, TrendingDown, Scale } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Scale, ChevronDown, ChevronRight, Folder, FolderOpen, FileText, Lock, Edit, Trash2, Search, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
     Dialog,
     DialogContent,
@@ -25,6 +26,7 @@ import {
 
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { createFileRoute } from '@tanstack/react-router';
 
 import CreateExpenseHeadForm from "@/components/accounting/CreateExpenseHead";
@@ -101,7 +103,8 @@ function ChartOfAccounts() {
         navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
     };
 
-    const { data: accountsData, isFetching } = useGetAccountingAccountsQuery({ page, limit, search });
+    // Fetch all accounts to build visual hierarchy tree (limit: 1000)
+    const { data: accountsData, isFetching } = useGetAccountingAccountsQuery({ page: 1, limit: 1000 });
     const { data: trialBalanceData } = useGetTrialBalanceQuery();
 
     const balanceMap = React.useMemo(() => {
@@ -119,12 +122,153 @@ function ChartOfAccounts() {
         return map;
     }, [trialBalanceData]);
 
-    const accountsWithBalances = React.useMemo(() => {
-        return accountsData?.data?.map((account) => {
-            const balance = balanceMap.get(account.name);
-            return { ...account, debit: balance?.debit, credit: balance?.credit, balance: balance?.balance };
-        }) || [];
+    const treeData = React.useMemo(() => {
+        const rawAccounts = accountsData?.data || [];
+        const nodeMap = new Map<number, any>();
+        
+        rawAccounts.forEach((acc) => {
+            const balanceInfo = balanceMap.get(acc.name) || { debit: 0, credit: 0, balance: 0 };
+            nodeMap.set(acc.id, {
+                id: acc.id,
+                name: acc.name,
+                code: acc.code,
+                type: acc.type,
+                parent_id: acc.parent_id,
+                is_active: acc.is_active !== false,
+                is_protected: !!acc.is_protected,
+                description: (acc as any).description || "",
+                debit: balanceInfo.debit,
+                credit: balanceInfo.credit,
+                balance: balanceInfo.balance,
+                children: [],
+                level: 0,
+            });
+        });
+
+        const roots: any[] = [];
+        nodeMap.forEach((node) => {
+            if (node.parent_id && nodeMap.has(node.parent_id)) {
+                nodeMap.get(node.parent_id)!.children.push(node);
+            } else {
+                roots.push(node);
+            }
+        });
+
+        const processNode = (node: any, level: number): { debit: number; credit: number; balance: number } => {
+            node.level = level;
+            let childrenDebit = 0;
+            let childrenCredit = 0;
+            let childrenBalance = 0;
+
+            node.children.forEach((child: any) => {
+                const childTotals = processNode(child, level + 1);
+                childrenDebit += childTotals.debit;
+                childrenCredit += childTotals.credit;
+                childrenBalance += childTotals.balance;
+            });
+
+            node.debit += childrenDebit;
+            node.credit += childrenCredit;
+            node.balance += childrenBalance;
+
+            node.children.sort((a: any, b: any) => a.code.localeCompare(b.code));
+
+            return {
+                debit: node.debit,
+                credit: node.credit,
+                balance: node.balance
+            };
+        };
+
+        roots.forEach((root) => processNode(root, 0));
+        roots.sort((a, b) => a.code.localeCompare(b.code));
+
+        return roots;
     }, [accountsData, balanceMap]);
+
+    const filteredTreeData = React.useMemo(() => {
+        if (!search) return treeData;
+        const q = search.toLowerCase();
+
+        const checkMatch = (node: any): boolean => {
+            const nameMatch = node.name.toLowerCase().includes(q);
+            const codeMatch = node.code.toLowerCase().includes(q);
+            const childMatch = node.children.some((child: any) => checkMatch(child));
+            return nameMatch || codeMatch || childMatch;
+        };
+
+        const filterNodes = (nodes: any[]): any[] => {
+            return nodes
+                .filter(node => checkMatch(node))
+                .map(node => ({
+                    ...node,
+                    children: filterNodes(node.children),
+                }));
+        };
+
+        return filterNodes(treeData);
+    }, [treeData, search]);
+
+    const [expandedNodes, setExpandedNodes] = useState<Set<number>>(new Set());
+
+    const toggleNode = (nodeId: number) => {
+        setExpandedNodes(prev => {
+            const next = new Set(prev);
+            if (next.has(nodeId)) next.delete(nodeId); else next.add(nodeId);
+            return next;
+        });
+    };
+
+    const expandAll = () => {
+        const allIds = new Set<number>();
+        const collectIds = (nodes: any[]) => {
+            nodes.forEach((n) => {
+                if (n.children.length > 0) {
+                    allIds.add(n.id);
+                    collectIds(n.children);
+                }
+            });
+        };
+        collectIds(treeData);
+        setExpandedNodes(allIds);
+    };
+
+    const collapseAll = () => {
+        setExpandedNodes(new Set());
+    };
+
+    // Auto-expand matches on search
+    useEffect(() => {
+        if (search) {
+            const matchIds = new Set<number>();
+            const collectExpanded = (nodes: any[]) => {
+                nodes.forEach(node => {
+                    if (node.children.length > 0) {
+                        matchIds.add(node.id);
+                        collectExpanded(node.children);
+                    }
+                });
+            };
+            collectExpanded(filteredTreeData);
+            setExpandedNodes(matchIds);
+        }
+    }, [search, filteredTreeData]);
+
+    const assetsTree = React.useMemo(() => filteredTreeData.filter(n => n.type.toUpperCase() === "ASSET"), [filteredTreeData]);
+    const liabilitiesTree = React.useMemo(() => filteredTreeData.filter(n => n.type.toUpperCase() === "LIABILITY"), [filteredTreeData]);
+    const equityTree = React.useMemo(() => filteredTreeData.filter(n => n.type.toUpperCase() === "EQUITY"), [filteredTreeData]);
+    const incomeTree = React.useMemo(() => filteredTreeData.filter(n => n.type.toUpperCase() === "INCOME"), [filteredTreeData]);
+    const expenseTree = React.useMemo(() => filteredTreeData.filter(n => n.type.toUpperCase() === "EXPENSE"), [filteredTreeData]);
+
+    const getVisibleNodes = (nodes: any[], list: any[] = []): any[] => {
+        nodes.forEach((node) => {
+            list.push(node);
+            if (expandedNodes.has(node.id) && node.children.length > 0) {
+                getVisibleNodes(node.children, list);
+            }
+        });
+        return list;
+    };
 
     const { mutateAsync: addAccountingAccount, isPending: isAdding } = useAddAccountingAccountMutation();
     const { mutateAsync: updateAccountingAccount, isPending: isUpdating } = useUpdateAccountingAccountMutation();
@@ -247,114 +391,157 @@ function ChartOfAccounts() {
         setAutoType(null);
     };
 
-    const accountColumns = [
-        {
-            data: "code",
-            title: "Code",
-            render: (_data: any) => `<span class="font-mono text-xs text-muted-foreground">${_data || ''}</span>`,
-        },
-        {
-            data: "name",
-            title: "Account Name",
-            render: (_data: any, _type: string, row: ChartOfAccount) => {
-                const padding = (row.level || 0) * 20;
-                // prefix must be an HTML STRING (render returns HTML), not a JSX element,
-                // otherwise it coerces to "[object Object]".
-                const prefix = (row.level || 0) > 0 ? `<span class="mr-2 text-muted-foreground">└─</span>` : ``;
-                const fontClass = (row.level || 0) === 0 ? "font-semibold" : "";
-                const protectedBadge = row.is_protected
-                    ? `<span class="ml-2 inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">🔒 Protected</span>`
-                    : ``;
-                const inactiveBadge = (row as any).is_active === false
-                    ? `<span class="ml-2 inline-flex items-center rounded-full border border-muted-foreground/30 bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Inactive</span>`
-                    : ``;
-                return `<div class="flex items-center" style="padding-left: ${padding}px">${prefix}<span class="${fontClass}">${row.name}</span>${protectedBadge}${inactiveBadge}</div>`;
-            },
-        },
-        {
-            data: "type",
-            title: "Type",
-            render: (_data: any) => {
-                const cfg = TYPE_CONFIG[(_data || '').toUpperCase()];
-                const classes = cfg
-                    ? `${cfg.color} bg-secondary/60`
-                    : 'text-secondary-foreground bg-secondary';
-                return `<span class="inline-flex items-center rounded-full border border-transparent px-2.5 py-0.5 text-xs font-semibold ${classes}">${cfg ? cfg.label : (_data || '')}</span>`;
-            },
-        },
-        {
-            data: "debit",
-            title: "Debit",
-            className: "text-right",
-            render: (_data: any) => {
-                const val = parseFloat(_data) || 0;
-                return `<div class="font-medium text-emerald-600">${val.toFixed(2)}</div>`;
-            },
-        },
-        {
-            data: "credit",
-            title: "Credit",
-            className: "text-right",
-            render: (_data: any) => {
-                const val = parseFloat(_data) || 0;
-                return `<div class="font-medium text-red-600">${val.toFixed(2)}</div>`;
-            },
-        },
-        {
-            data: "balance",
-            title: "Balance",
-            className: "text-right",
-            render: (_data: any, _type: string, row: ChartOfAccount) => {
-                const balance = row.balance || 0;
-                const balanceClass = balance > 0 ? "text-emerald-600" : balance < 0 ? "text-red-600" : "text-muted-foreground";
-                return `<div class="font-semibold ${balanceClass}">${balance.toFixed(2)}</div>`;
-            },
-        },
-        {
-            data: null,
-            title: "Actions",
-            orderable: false,
-            className: "text-right",
-            render: (_data: any, _type: string, row: ChartOfAccount) => {
-                // Protected heads: locked, no edit/delete
-                if (row.is_protected) {
-                    return `<div class="flex justify-end"><span class="inline-flex items-center justify-center h-9 w-9 text-muted-foreground" title="Protected account — cannot edit or delete"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span></div>`;
-                }
-                const editBtn = `<button class="edit-account-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-9 w-9" data-id="${row.id}" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>`;
-                const deleteBtn = `<button class="delete-account-btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-destructive/10 hover:text-destructive text-destructive h-9 w-9" data-id="${row.id}" title="Delete"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg></button>`;
-                return `<div class="flex justify-end gap-2">${editBtn}${deleteBtn}</div>`;
-            },
-        },
-    ];
 
-    useEffect(() => {
-        const handleClick = (e: any) => {
-            const editBtn = (e.target as HTMLElement).closest('.edit-account-btn');
-            if (editBtn) {
-                const id = editBtn.getAttribute('data-id');
-                const account = accountsWithBalances.find(a => String(a.id) === id);
-                if (account) onEdit(account);
-                return;
-            }
-            const deleteBtn = (e.target as HTMLElement).closest('.delete-account-btn');
-            if (deleteBtn) {
-                const id = deleteBtn.getAttribute('data-id');
-                const account = accountsWithBalances.find(a => String(a.id) === id);
-                if (account) onDelete(account);
-            }
-        };
-        document.addEventListener('click', handleClick);
-        return () => document.removeEventListener('click', handleClick);
-    }, [accountsWithBalances]);
 
     // Determine if selected parent is bank-related (code starts with 11)
     const isBankParent = selectedParent?.code?.startsWith("11") && selectedParent?.type?.toUpperCase() === "ASSET";
+
+    const renderCategorySection = (title: string, roots: any[], type: string) => {
+        const visibleNodes = getVisibleNodes(roots);
+        const totalCategoryBalance = roots.reduce((sum, root) => sum + root.balance, 0);
+        const cfg = TYPE_CONFIG[type.toUpperCase()] || { label: title, color: "text-gray-600", hint: "" };
+
+        return (
+            <Card className="border shadow-none overflow-hidden p-0 gap-0">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 py-2.5 px-4 flex flex-row items-center justify-between border-b gap-0">
+                    <div className="flex items-center gap-2">
+                        <span className={cn("text-sm font-semibold uppercase tracking-wider", cfg.color)}>
+                            {title}
+                        </span>
+                        <span className="text-xs text-muted-foreground bg-secondary/80 px-2 py-0.5 rounded-full font-medium">
+                            {roots.length} Head{roots.length !== 1 && "s"}
+                        </span>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-xs text-muted-foreground mr-1">Total:</span>
+                        <span className="font-semibold text-sm">
+                            {currencySymbol} {totalCategoryBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                    </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                    {visibleNodes.length === 0 ? (
+                        <div className="py-6 text-center text-sm text-muted-foreground">
+                            No accounts found in this category.
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b bg-muted/30 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                        <th className="py-2 px-4 text-left w-24">Code</th>
+                                        <th className="py-2 px-4 text-left">Account Name</th>
+                                        <th className="py-2 px-4 text-right w-44">Balance</th>
+                                        <th className="py-2 px-4 text-right w-24">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y">
+                                    {visibleNodes.map((node) => {
+                                        const hasChildren = node.children.length > 0;
+                                        const isExpanded = expandedNodes.has(node.id);
+                                        const paddingLeft = node.level * 24 + 16;
+                                        const isInactive = node.is_active === false;
+
+                                        return (
+                                            <tr
+                                                key={node.id}
+                                                className={cn(
+                                                    "hover:bg-muted/40 transition-colors",
+                                                    node.level === 0 ? "font-semibold bg-muted/5 text-foreground" : "text-muted-foreground hover:text-foreground"
+                                                )}
+                                            >
+                                                <td className="py-2 px-4 font-mono text-xs text-muted-foreground align-middle">
+                                                    {node.code}
+                                                </td>
+                                                <td className="py-2 px-4 align-middle" style={{ paddingLeft: `${paddingLeft}px` }}>
+                                                    <div className="flex items-center gap-1.5">
+                                                        {hasChildren ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => toggleNode(node.id)}
+                                                                className="p-0.5 rounded-sm hover:bg-muted text-muted-foreground shrink-0"
+                                                            >
+                                                                {isExpanded ? (
+                                                                    <ChevronDown className="w-3.5 h-3.5" />
+                                                                ) : (
+                                                                    <ChevronRight className="w-3.5 h-3.5" />
+                                                                )}
+                                                            </button>
+                                                        ) : (
+                                                            <span className="w-4.5 shrink-0" />
+                                                        )}
+                                                        
+                                                        {hasChildren ? (
+                                                            isExpanded ? (
+                                                                <FolderOpen className="w-4 h-4 text-amber-500 shrink-0" />
+                                                            ) : (
+                                                                <Folder className="w-4 h-4 text-amber-500 shrink-0" />
+                                                            )
+                                                        ) : (
+                                                            <FileText className="w-4 h-4 text-blue-400 shrink-0" />
+                                                        )}
+
+                                                        <span className={cn("truncate", isInactive && "line-through opacity-50")}>
+                                                            {node.name}
+                                                        </span>
+
+                                                        {node.is_protected && (
+                                                            <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[9px] font-semibold text-amber-700 shrink-0">
+                                                                🔒 Protected
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="py-2 px-4 text-right font-mono font-semibold align-middle">
+                                                    <span className={node.balance > 0 ? "text-emerald-600" : node.balance < 0 ? "text-red-600" : "text-muted-foreground"}>
+                                                        {currencySymbol} {node.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                    </span>
+                                                </td>
+                                                <td className="py-2 px-4 text-right align-middle">
+                                                    <div className="flex justify-end gap-1">
+                                                        {node.is_protected ? (
+                                                            <span className="inline-flex items-center justify-center h-8 w-8 text-muted-foreground" title="Protected account">
+                                                                <Lock className="w-3.5 h-3.5" />
+                                                            </span>
+                                                        ) : (
+                                                            <>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                                                    onClick={() => onEdit(node)}
+                                                                >
+                                                                    <Edit className="w-3.5 h-3.5" />
+                                                                </Button>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                                                    onClick={() => onDelete(node)}
+                                                                >
+                                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                                </Button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+        );
+    };
 
     return (
         <>
             <AppHeader fixed />
 
-            <main className='p-4'>
+            <main className="space-y-6">
                 <div className="flex justify-between items-center mb-3">
                     <div>
                         <h2 className="text-3xl font-bold tracking-tight">Chart of Accounts</h2>
@@ -551,87 +738,87 @@ function ChartOfAccounts() {
 
                 {/* Stat Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Total Debit */}
-                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-400 p-6 shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-                        <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-                        <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-                        <div className="relative flex items-start justify-between mb-4">
-                            <div>
-                                <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Debit</p>
-                                <h3 className="mt-2 text-2xl font-bold text-white">
-                                    {currencySymbol} {(trialBalanceData?.data?.total_debit ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </h3>
-                            </div>
-                            <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                                <TrendingUp className="w-6 h-6 text-white" />
-                            </div>
-                        </div>
-                        <div className="relative flex justify-between text-white/90 text-sm">
-                            <span>Sum of all</span>
-                            <span className="font-semibold">Debit Balances</span>
-                        </div>
-                    </div>
-
-                    {/* Total Credit */}
-                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-600 to-rose-400 p-6 shadow-lg shadow-rose-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-                        <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-                        <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-                        <div className="relative flex items-start justify-between mb-4">
-                            <div>
-                                <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Credit</p>
-                                <h3 className="mt-2 text-2xl font-bold text-white">
-                                    {currencySymbol} {(trialBalanceData?.data?.total_credit ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </h3>
-                            </div>
-                            <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                                <TrendingDown className="w-6 h-6 text-white" />
-                            </div>
-                        </div>
-                        <div className="relative flex justify-between text-white/90 text-sm">
-                            <span>Sum of all</span>
-                            <span className="font-semibold">Credit Balances</span>
-                        </div>
-                    </div>
-
-                    {/* Net Balance */}
-                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 to-violet-400 p-6 shadow-lg shadow-violet-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-                        <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-                        <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-                        <div className="relative flex items-start justify-between mb-4">
-                            <div>
-                                <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Net Balance</p>
-                                <h3 className="mt-2 text-2xl font-bold text-white">
-                                    {currencySymbol} {((trialBalanceData?.data?.total_debit ?? 0) - (trialBalanceData?.data?.total_credit ?? 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </h3>
-                            </div>
-                            <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                                <Scale className="w-6 h-6 text-white" />
-                            </div>
-                        </div>
-                        <div className="relative flex justify-between text-white/90 text-sm">
-                            <span>Debit - Credit</span>
-                            <span className="font-semibold">Balance</span>
-                        </div>
-                    </div>
+                    {[
+                        {
+                            label: "Total Debit",
+                            value: (trialBalanceData?.data?.total_debit ?? 0),
+                            icon: TrendingUp,
+                            grad: "from-emerald-500 to-teal-500",
+                            sub: "Sum of all debit balances"
+                        },
+                        {
+                            label: "Total Credit",
+                            value: (trialBalanceData?.data?.total_credit ?? 0),
+                            icon: TrendingDown,
+                            grad: "from-rose-500 to-red-500",
+                            sub: "Sum of all credit balances"
+                        },
+                        {
+                            label: "Net Balance",
+                            value: ((trialBalanceData?.data?.total_debit ?? 0) - (trialBalanceData?.data?.total_credit ?? 0)),
+                            icon: Scale,
+                            grad: "from-violet-500 to-purple-500",
+                            sub: "Debit - Credit balance"
+                        }
+                    ].map((card) => {
+                        const Icon = card.icon;
+                        return (
+                            <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className={cn("p-2 bg-gradient-to-br rounded-lg shadow-lg", card.grad)}>
+                                            <Icon className="w-4 h-4 text-white" />
+                                        </div>
+                                        <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="p-4">
+                                    <h3 className="text-2xl font-bold">
+                                        {currencySymbol} {card.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </h3>
+                                    <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
                 </div>
 
-                <div className="">
-                        <DataTable
-                            columns={accountColumns}
-                            data={accountsWithBalances}
-                            meta={{
-                                page,
-                                limit,
-                                total: accountsData?.pagination?.total || 0
-                            }}
-                            onPageChange={setPage}
-                            onLimitChange={setLimit}
-                            onSearchChange={setSearch}
-                            search={search}
-                            isLoading={isFetching}
-                            defaultOrder={[[0, 'asc']]}
+                {/* Toolbar */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/40 p-3 rounded-lg border">
+                    <div className="relative flex-1 max-w-md">
+                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search by code, name..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="pl-9 h-9 bg-background"
                         />
+                    </div>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={expandAll} className="h-9">
+                            Expand All
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={collapseAll} className="h-9">
+                            Collapse All
+                        </Button>
+                    </div>
                 </div>
+
+                {/* Categories Trees */}
+                {isFetching ? (
+                    <div className="flex items-center justify-center h-64 text-gray-500">
+                        <Loader2 className="mr-2 h-6 w-6 animate-spin text-muted-foreground" />
+                        Loading Chart of Accounts...
+                    </div>
+                ) : (
+                    <div className="space-y-6">
+                        {renderCategorySection("Assets", assetsTree, "ASSET")}
+                        {renderCategorySection("Liabilities", liabilitiesTree, "LIABILITY")}
+                        {renderCategorySection("Equity", equityTree, "EQUITY")}
+                        {renderCategorySection("Income", incomeTree, "INCOME")}
+                        {renderCategorySection("Expenses", expenseTree, "EXPENSE")}
+                    </div>
+                )}
             </main>
         </>
     );

@@ -9,6 +9,7 @@ import { useDateFormat } from '@/hooks/use-date-format'
 import { FileText, DollarSign, CheckCircle } from 'lucide-react'
 import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 type PaidInvoicesProps = {
   page: number;
@@ -83,16 +84,14 @@ export default function PaidInvoices({ page, limit, search, from, to, setPage, s
       {
         label: "Paid Invoices",
         value: totalPaidInvoices,
-        gradient: "from-emerald-600 to-emerald-400",
-        shadow: "shadow-emerald-500/30",
-        icon: <CheckCircle className="w-6 h-6 text-white" />,
+        icon: CheckCircle,
+        grad: "from-emerald-500 to-teal-500",
       },
       {
         label: `Total Collected (${currency})`,
         value: fmtNum(totalPaidAmount),
-        gradient: "from-blue-600 to-blue-400",
-        shadow: "shadow-blue-500/30",
-        icon: <DollarSign className="w-6 h-6 text-white" />,
+        icon: DollarSign,
+        grad: "from-blue-500 to-indigo-500",
       },
     ];
   }, [data, currencySymbol]);
@@ -680,29 +679,25 @@ export default function PaidInvoices({ page, limit, search, from, to, setPage, s
       <main className='p-4'>
        
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6 mb-6">
-          {stats.map((item, idx) => (
-            <div
-              key={idx}
-              className={`relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br ${item.gradient} p-4 md:p-6 shadow-lg ${item.shadow} transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]`}
-            >
-              <div className="absolute -right-4 md:-right-6 -top-4 md:-top-6 h-16 w-16 md:h-24 md:w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-4 md:-bottom-6 -left-4 md:-left-6 h-16 w-16 md:h-24 md:w-24 rounded-full bg-black/10 blur-2xl" />
-
-              <div className="relative flex items-center justify-between gap-2 md:gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-[0.6rem] md:text-[0.65rem] lg:text-xs xl:text-sm font-medium text-white/90 leading-tight">{item.label}</p>
-                  <h3 className="mt-1 md:mt-2 text-[0.9rem] md:text-[1.1rem] lg:text-lg xl:text-2xl font-bold text-white leading-tight break-words">
-                    {item.value || 0}
-                  </h3>
-                </div>
-              </div>
-
-              <div className="mt-3 md:mt-4 h-1 w-full rounded-full bg-black/10">
-                <div className="h-full w-full rounded-full bg-white/40" />
-              </div>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {stats.map((card) => {
+            const Icon = card.icon;
+            return (
+              <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
+                      <Icon className="w-4 h-4 text-white" />
+                    </div>
+                    <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <h3 className="text-2xl font-bold">{card.value}</h3>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         <DataTable

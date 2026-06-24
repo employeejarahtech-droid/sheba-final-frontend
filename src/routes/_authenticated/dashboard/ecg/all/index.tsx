@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMemo, useEffect } from 'react';
 import { getCookie } from '@/lib/cookies';
 import { useDateFormat } from '@/hooks/use-date-format';
@@ -130,7 +131,7 @@ function AllECGReports() {
         if (!testNames) return '-';
         const names = testNames.split(',').filter((name: string) => name.trim() !== '');
         return names.map((name: string) =>
-          <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1">${name.trim()}</span>
+          `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1">${name.trim()}</span>`
         ).join('');
       },
     },
@@ -140,8 +141,9 @@ function AllECGReports() {
       orderable: true,
       defaultContent: "",
       render: (data: any) => {
+        if (!data) return '-';
         const statusColor = data === 'Completed' ? 'text-green-600' : 'text-yellow-600';
-        return <span class="${statusColor}">${data}</span>;
+        return `<span class="${statusColor} font-medium">${data}</span>`;
       },
     },
   ], []);
@@ -207,10 +209,10 @@ function AllECGReports() {
               <p class="font-medium text-gray-800 whitespace-pre-wrap">${test.test_result || "Pending..."}</p>
             </div>
             <div class="flex gap-2 pt-3 border-t">
-              <a href="/dashboard/all/edit/builder/${test.serial_id || test.id}" class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 h-8 px-4 transition shadow-sm">
+              <a href="/dashboard/ecg/all/edit/builder/${test.serial_id || test.id}" class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 h-8 px-4 transition shadow-sm">
                 Edit
               </a>
-              <a href="/dashboard/all/print/${test.serial_id || test.id}" class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 h-8 px-4 transition shadow-sm">
+              <a href="/dashboard/ecg/all/print/${test.serial_id || test.id}" class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 h-8 px-4 transition shadow-sm">
                 Print
               </a>
             </div>
@@ -224,8 +226,8 @@ function AllECGReports() {
         const formattedDate = invoiceInfo.invoice_date ? new Date(invoiceInfo.invoice_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : btn.dataset.date || '-';
         const status = btn.dataset.status || 'Pending';
         const statusBadge = status === 'Completed'
-? <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Completed</span>
-          : <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">Pending</span>;
+          ? `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Completed</span>`
+          : `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">Pending</span>`;
 
         // Create card-style details HTML
         const details = document.createElement('div');
@@ -276,7 +278,7 @@ function AllECGReports() {
 
           <!-- Footer Actions -->
           <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-            <a href="/dashboard/all/edit/${reciptId}"
+            <a href="/dashboard/ecg/all/edit/${reciptId}"
                class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-rose-600 text-white hover:bg-rose-700 h-10 px-5 transition shadow-md">
               Edit All
             </a>
@@ -311,6 +313,23 @@ function AllECGReports() {
     };
   }, [token]);
 
+  // Stats cards (same design as List of Tests)
+  const items = ecgAllReports?.data?.items || [];
+  const todayCount = items.filter((i: any) => {
+    if (!i.Date) return false;
+    const d = new Date(i.Date);
+    const now = new Date();
+    return d.toDateString() === now.toDateString();
+  }).length;
+  const uniquePatients = new Set(items.map((i: any) => i.PatientName).filter(Boolean)).size;
+
+  const stats = [
+    { label: "Total Reports", value: ecgAllReports?.data?.meta?.total || 0, icon: FileText, grad: "from-rose-500 to-pink-500" },
+    { label: "ECG", value: items.length, icon: HeartPulse, grad: "from-pink-500 to-rose-500" },
+    { label: "Recent", value: todayCount, icon: Clock, grad: "from-red-500 to-rose-500" },
+    { label: "Patients", value: uniquePatients, icon: Users, grad: "from-indigo-500 to-purple-500" },
+  ];
+
   return (
     <>
       <AppHeader fixed />
@@ -318,89 +337,25 @@ function AllECGReports() {
         <div className="p-4 space-y-3">
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {/* Total Reports */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-600 to-rose-400 p-6 shadow-lg shadow-rose-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-              <div className="relative flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Reports</p>
-                  <h3 className="mt-2 text-2xl font-bold text-white">{ecgAllReports?.data?.meta?.total || 0}</h3>
-                </div>
-                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div className="relative flex justify-between text-white/90 text-sm">
-                <span>All Time</span>
-                <span className="font-semibold">Records</span>
-              </div>
-            </div>
-
-            {/* ECG Tests */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-600 to-pink-400 p-6 shadow-lg shadow-pink-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-              <div className="relative flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">ECG</p>
-                  <h3 className="mt-2 text-2xl font-bold text-white">{ecgAllReports?.data?.items?.length || 0}</h3>
-                </div>
-                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                  <HeartPulse className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div className="relative flex justify-between text-white/90 text-sm">
-                <span>Current</span>
-                <span className="font-semibold">Page</span>
-              </div>
-            </div>
-
-            {/* Recent */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 to-rose-400 p-6 shadow-lg shadow-rose-400/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-              <div className="relative flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Recent</p>
-                  <h3 className="mt-2 text-2xl font-bold text-white">
-                    {ecgAllReports?.data?.items?.filter((i: any) => {
-                      if (!i.Date) return false;
-                      const d = new Date(i.Date);
-                      const now = new Date();
-                      return d.toDateString() === now.toDateString();
-                    }).length || 0}
-                  </h3>
-                </div>
-                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                  <Clock className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div className="relative flex justify-between text-white/90 text-sm">
-                <span>Today</span>
-                <span className="font-semibold">Added</span>
-              </div>
-            </div>
-
-            {/* Patients */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-500 to-pink-400 p-6 shadow-lg shadow-pink-400/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-              <div className="relative flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Patients</p>
-                  <h3 className="mt-2 text-2xl font-bold text-white">{new Set(ecgAllReports?.data?.items?.map((i: any) => i.PatientName)).size || 0}</h3>
-                </div>
-                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                  <Users className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div className="relative flex justify-between text-white/90 text-sm">
-                <span>Unique</span>
-                <span className="font-semibold">Patients</span>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            {stats.map((card) => {
+              const Icon = card.icon;
+              return (
+                <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                  <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
+                        <Icon className="w-4 h-4 text-white" />
+                      </div>
+                      <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <h3 className="text-2xl font-bold">{card.value || 0}</h3>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
           <DataTable

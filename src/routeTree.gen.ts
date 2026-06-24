@@ -81,8 +81,12 @@ import { Route as AuthenticatedDashboardXRayAllIndexRouteImport } from './routes
 import { Route as AuthenticatedDashboardUltrasonogramAllIndexRouteImport } from './routes/_authenticated/dashboard/ultrasonogram/all/index'
 import { Route as AuthenticatedDashboardSettingsReportSettingsIndexRouteImport } from './routes/_authenticated/dashboard/settings/report-settings/index'
 import { Route as AuthenticatedDashboardRolesCreateIndexRouteImport } from './routes/_authenticated/dashboard/roles/create/index'
+import { Route as AuthenticatedDashboardPayrollSalaryStructureIndexRouteImport } from './routes/_authenticated/dashboard/payroll/salary-structure/index'
 import { Route as AuthenticatedDashboardPayrollOverviewIndexRouteImport } from './routes/_authenticated/dashboard/payroll/overview/index'
 import { Route as AuthenticatedDashboardPayrollEmployeesIndexRouteImport } from './routes/_authenticated/dashboard/payroll/employees/index'
+import { Route as AuthenticatedDashboardPayrollAttendanceListIndexRouteImport } from './routes/_authenticated/dashboard/payroll/attendance-list/index'
+import { Route as AuthenticatedDashboardPayrollAllPayrollsIndexRouteImport } from './routes/_authenticated/dashboard/payroll/all-payrolls/index'
+import { Route as AuthenticatedDashboardFinancePaymentsIndexRouteImport } from './routes/_authenticated/dashboard/finance/payments/index'
 import { Route as AuthenticatedDashboardEcgAllIndexRouteImport } from './routes/_authenticated/dashboard/ecg/all/index'
 import { Route as AuthenticatedDashboardBanksBankWithdrawalsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-withdrawals/index'
 import { Route as AuthenticatedDashboardBanksBankTransactionsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-transactions/index'
@@ -680,6 +684,12 @@ const AuthenticatedDashboardRolesCreateIndexRoute =
     path: '/dashboard/roles/create/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardPayrollSalaryStructureIndexRoute =
+  AuthenticatedDashboardPayrollSalaryStructureIndexRouteImport.update({
+    id: '/dashboard/payroll/salary-structure/',
+    path: '/dashboard/payroll/salary-structure/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardPayrollOverviewIndexRoute =
   AuthenticatedDashboardPayrollOverviewIndexRouteImport.update({
     id: '/dashboard/payroll/overview/',
@@ -690,6 +700,24 @@ const AuthenticatedDashboardPayrollEmployeesIndexRoute =
   AuthenticatedDashboardPayrollEmployeesIndexRouteImport.update({
     id: '/dashboard/payroll/employees/',
     path: '/dashboard/payroll/employees/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPayrollAttendanceListIndexRoute =
+  AuthenticatedDashboardPayrollAttendanceListIndexRouteImport.update({
+    id: '/dashboard/payroll/attendance-list/',
+    path: '/dashboard/payroll/attendance-list/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPayrollAllPayrollsIndexRoute =
+  AuthenticatedDashboardPayrollAllPayrollsIndexRouteImport.update({
+    id: '/dashboard/payroll/all-payrolls/',
+    path: '/dashboard/payroll/all-payrolls/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardFinancePaymentsIndexRoute =
+  AuthenticatedDashboardFinancePaymentsIndexRouteImport.update({
+    id: '/dashboard/finance/payments/',
+    path: '/dashboard/finance/payments/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardEcgAllIndexRoute =
@@ -2095,8 +2123,12 @@ export interface FileRoutesByFullPath {
   '/dashboard/banks/bank-transactions': typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
   '/dashboard/banks/bank-withdrawals': typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
   '/dashboard/ecg/all': typeof AuthenticatedDashboardEcgAllIndexRoute
+  '/dashboard/finance/payments': typeof AuthenticatedDashboardFinancePaymentsIndexRoute
+  '/dashboard/payroll/all-payrolls': typeof AuthenticatedDashboardPayrollAllPayrollsIndexRoute
+  '/dashboard/payroll/attendance-list': typeof AuthenticatedDashboardPayrollAttendanceListIndexRoute
   '/dashboard/payroll/employees': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
   '/dashboard/payroll/overview': typeof AuthenticatedDashboardPayrollOverviewIndexRoute
+  '/dashboard/payroll/salary-structure': typeof AuthenticatedDashboardPayrollSalaryStructureIndexRoute
   '/dashboard/roles/create': typeof AuthenticatedDashboardRolesCreateIndexRoute
   '/dashboard/settings/report-settings': typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
   '/dashboard/ultrasonogram/all': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
@@ -2366,8 +2398,12 @@ export interface FileRoutesByTo {
   '/dashboard/banks/bank-transactions': typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
   '/dashboard/banks/bank-withdrawals': typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
   '/dashboard/ecg/all': typeof AuthenticatedDashboardEcgAllIndexRoute
+  '/dashboard/finance/payments': typeof AuthenticatedDashboardFinancePaymentsIndexRoute
+  '/dashboard/payroll/all-payrolls': typeof AuthenticatedDashboardPayrollAllPayrollsIndexRoute
+  '/dashboard/payroll/attendance-list': typeof AuthenticatedDashboardPayrollAttendanceListIndexRoute
   '/dashboard/payroll/employees': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
   '/dashboard/payroll/overview': typeof AuthenticatedDashboardPayrollOverviewIndexRoute
+  '/dashboard/payroll/salary-structure': typeof AuthenticatedDashboardPayrollSalaryStructureIndexRoute
   '/dashboard/roles/create': typeof AuthenticatedDashboardRolesCreateIndexRoute
   '/dashboard/settings/report-settings': typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
   '/dashboard/ultrasonogram/all': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
@@ -2644,8 +2680,12 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/banks/bank-transactions/': typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
   '/_authenticated/dashboard/banks/bank-withdrawals/': typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
   '/_authenticated/dashboard/ecg/all/': typeof AuthenticatedDashboardEcgAllIndexRoute
+  '/_authenticated/dashboard/finance/payments/': typeof AuthenticatedDashboardFinancePaymentsIndexRoute
+  '/_authenticated/dashboard/payroll/all-payrolls/': typeof AuthenticatedDashboardPayrollAllPayrollsIndexRoute
+  '/_authenticated/dashboard/payroll/attendance-list/': typeof AuthenticatedDashboardPayrollAttendanceListIndexRoute
   '/_authenticated/dashboard/payroll/employees/': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
   '/_authenticated/dashboard/payroll/overview/': typeof AuthenticatedDashboardPayrollOverviewIndexRoute
+  '/_authenticated/dashboard/payroll/salary-structure/': typeof AuthenticatedDashboardPayrollSalaryStructureIndexRoute
   '/_authenticated/dashboard/roles/create/': typeof AuthenticatedDashboardRolesCreateIndexRoute
   '/_authenticated/dashboard/settings/report-settings/': typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
   '/_authenticated/dashboard/ultrasonogram/all/': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
@@ -2919,8 +2959,12 @@ export interface FileRouteTypes {
     | '/dashboard/banks/bank-transactions'
     | '/dashboard/banks/bank-withdrawals'
     | '/dashboard/ecg/all'
+    | '/dashboard/finance/payments'
+    | '/dashboard/payroll/all-payrolls'
+    | '/dashboard/payroll/attendance-list'
     | '/dashboard/payroll/employees'
     | '/dashboard/payroll/overview'
+    | '/dashboard/payroll/salary-structure'
     | '/dashboard/roles/create'
     | '/dashboard/settings/report-settings'
     | '/dashboard/ultrasonogram/all'
@@ -3190,8 +3234,12 @@ export interface FileRouteTypes {
     | '/dashboard/banks/bank-transactions'
     | '/dashboard/banks/bank-withdrawals'
     | '/dashboard/ecg/all'
+    | '/dashboard/finance/payments'
+    | '/dashboard/payroll/all-payrolls'
+    | '/dashboard/payroll/attendance-list'
     | '/dashboard/payroll/employees'
     | '/dashboard/payroll/overview'
+    | '/dashboard/payroll/salary-structure'
     | '/dashboard/roles/create'
     | '/dashboard/settings/report-settings'
     | '/dashboard/ultrasonogram/all'
@@ -3467,8 +3515,12 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/banks/bank-transactions/'
     | '/_authenticated/dashboard/banks/bank-withdrawals/'
     | '/_authenticated/dashboard/ecg/all/'
+    | '/_authenticated/dashboard/finance/payments/'
+    | '/_authenticated/dashboard/payroll/all-payrolls/'
+    | '/_authenticated/dashboard/payroll/attendance-list/'
     | '/_authenticated/dashboard/payroll/employees/'
     | '/_authenticated/dashboard/payroll/overview/'
+    | '/_authenticated/dashboard/payroll/salary-structure/'
     | '/_authenticated/dashboard/roles/create/'
     | '/_authenticated/dashboard/settings/report-settings/'
     | '/_authenticated/dashboard/ultrasonogram/all/'
@@ -4172,6 +4224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRolesCreateIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/payroll/salary-structure/': {
+      id: '/_authenticated/dashboard/payroll/salary-structure/'
+      path: '/dashboard/payroll/salary-structure'
+      fullPath: '/dashboard/payroll/salary-structure'
+      preLoaderRoute: typeof AuthenticatedDashboardPayrollSalaryStructureIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/payroll/overview/': {
       id: '/_authenticated/dashboard/payroll/overview/'
       path: '/dashboard/payroll/overview'
@@ -4184,6 +4243,27 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/payroll/employees'
       fullPath: '/dashboard/payroll/employees'
       preLoaderRoute: typeof AuthenticatedDashboardPayrollEmployeesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/payroll/attendance-list/': {
+      id: '/_authenticated/dashboard/payroll/attendance-list/'
+      path: '/dashboard/payroll/attendance-list'
+      fullPath: '/dashboard/payroll/attendance-list'
+      preLoaderRoute: typeof AuthenticatedDashboardPayrollAttendanceListIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/payroll/all-payrolls/': {
+      id: '/_authenticated/dashboard/payroll/all-payrolls/'
+      path: '/dashboard/payroll/all-payrolls'
+      fullPath: '/dashboard/payroll/all-payrolls'
+      preLoaderRoute: typeof AuthenticatedDashboardPayrollAllPayrollsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/finance/payments/': {
+      id: '/_authenticated/dashboard/finance/payments/'
+      path: '/dashboard/finance/payments'
+      fullPath: '/dashboard/finance/payments'
+      preLoaderRoute: typeof AuthenticatedDashboardFinancePaymentsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/ecg/all/': {
@@ -5688,8 +5768,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardBanksBankTransactionsIndexRoute: typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
   AuthenticatedDashboardBanksBankWithdrawalsIndexRoute: typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
   AuthenticatedDashboardEcgAllIndexRoute: typeof AuthenticatedDashboardEcgAllIndexRoute
+  AuthenticatedDashboardFinancePaymentsIndexRoute: typeof AuthenticatedDashboardFinancePaymentsIndexRoute
+  AuthenticatedDashboardPayrollAllPayrollsIndexRoute: typeof AuthenticatedDashboardPayrollAllPayrollsIndexRoute
+  AuthenticatedDashboardPayrollAttendanceListIndexRoute: typeof AuthenticatedDashboardPayrollAttendanceListIndexRoute
   AuthenticatedDashboardPayrollEmployeesIndexRoute: typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
   AuthenticatedDashboardPayrollOverviewIndexRoute: typeof AuthenticatedDashboardPayrollOverviewIndexRoute
+  AuthenticatedDashboardPayrollSalaryStructureIndexRoute: typeof AuthenticatedDashboardPayrollSalaryStructureIndexRoute
   AuthenticatedDashboardRolesCreateIndexRoute: typeof AuthenticatedDashboardRolesCreateIndexRoute
   AuthenticatedDashboardUltrasonogramAllIndexRoute: typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   AuthenticatedDashboardXRayAllIndexRoute: typeof AuthenticatedDashboardXRayAllIndexRoute
@@ -5961,10 +6045,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardBanksBankWithdrawalsIndexRoute,
   AuthenticatedDashboardEcgAllIndexRoute:
     AuthenticatedDashboardEcgAllIndexRoute,
+  AuthenticatedDashboardFinancePaymentsIndexRoute:
+    AuthenticatedDashboardFinancePaymentsIndexRoute,
+  AuthenticatedDashboardPayrollAllPayrollsIndexRoute:
+    AuthenticatedDashboardPayrollAllPayrollsIndexRoute,
+  AuthenticatedDashboardPayrollAttendanceListIndexRoute:
+    AuthenticatedDashboardPayrollAttendanceListIndexRoute,
   AuthenticatedDashboardPayrollEmployeesIndexRoute:
     AuthenticatedDashboardPayrollEmployeesIndexRoute,
   AuthenticatedDashboardPayrollOverviewIndexRoute:
     AuthenticatedDashboardPayrollOverviewIndexRoute,
+  AuthenticatedDashboardPayrollSalaryStructureIndexRoute:
+    AuthenticatedDashboardPayrollSalaryStructureIndexRoute,
   AuthenticatedDashboardRolesCreateIndexRoute:
     AuthenticatedDashboardRolesCreateIndexRoute,
   AuthenticatedDashboardUltrasonogramAllIndexRoute:

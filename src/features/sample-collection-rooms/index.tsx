@@ -7,7 +7,7 @@ import { CreateSampleCollectionRoomForm } from './components/CreateSampleCollect
 import { EditSampleCollectionRoomForm } from './components/EditSampleCollectionRoomForm'
 import { useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FlaskConical, Building2, TrendingUp } from 'lucide-react'
 
 
@@ -91,28 +91,22 @@ export default function SampleCollectionRooms({ page, limit, search, setPage, se
 
     const statCards = [
         {
-            title: 'Total Rooms',
+            label: 'Total Rooms',
             value: stats.totalRooms || 0,
-            icon: <FlaskConical className='h-6 w-6' />,
-            gradient: 'from-blue-600 to-indigo-600',
-            shadow: 'shadow-blue-500/20',
-            label: 'Registered Rooms'
+            icon: FlaskConical,
+            grad: 'from-blue-500 to-indigo-500',
         },
         {
-            title: 'Active Rooms',
+            label: 'Active Rooms',
             value: stats.activeRooms || 0,
-            icon: <Building2 className='h-6 w-6' />,
-            gradient: 'from-emerald-600 to-teal-600',
-            shadow: 'shadow-emerald-500/20',
-            label: 'Currently Active'
+            icon: Building2,
+            grad: 'from-emerald-500 to-teal-500',
         },
         {
-            title: 'Total Collections',
+            label: 'Total Collections',
             value: stats.totalCollections || 0,
-            icon: <TrendingUp className='h-6 w-6' />,
-            gradient: 'from-amber-600 to-orange-600',
-            shadow: 'shadow-amber-500/20',
-            label: 'Sample Collections'
+            icon: TrendingUp,
+            grad: 'from-amber-500 to-orange-500',
         }
     ];
 
@@ -346,27 +340,25 @@ export default function SampleCollectionRooms({ page, limit, search, setPage, se
         <main className="">
             <div className="space-y-4">
                 {/* Statistics Cards */}
-                <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
-                    {statCards.map((card, idx) => (
-                        <Card key={idx} className={`p-3 relative overflow-hidden border-none text-white shadow-xl ${card.shadow} bg-gradient-to-br ${card.gradient}`}>
-                            <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
-                            <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-                            <CardContent className='p-3'>
-                                <div className='flex items-center justify-between relative z-10'>
-                                    <div className='space-y-1'>
-                                        <p className='text-sm font-medium text-white/80'>{card.title}</p>
-                                        <h3 className='text-3xl font-bold tracking-tighter'>
-                                            {card.value}
-                                        </h3>
-                                        <p className='text-[10px] font-bold uppercase tracking-wider text-white/60'>{card.label}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    {statCards.map((card) => {
+                        const Icon = card.icon;
+                        return (
+                            <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
+                                            <Icon className="w-4 h-4 text-white" />
+                                        </div>
+                                        <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
                                     </div>
-                                    <div className='rounded-2xl bg-white/20 p-4 backdrop-blur-md border border-white/20 shadow-inner'>
-                                        {card.icon}
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+                                </CardHeader>
+                                <CardContent className="p-4">
+                                    <h3 className="text-2xl font-bold">{card.value || 0}</h3>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
                 </div>
 
                 {/* Header & Table */}

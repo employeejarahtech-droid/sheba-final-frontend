@@ -9,7 +9,7 @@ import { CreateBedWardForm } from './components/CreateBedWardForm'
 import { EditBedWardForm } from './components/EditBedWardForm'
 import { useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { BedDouble, Layers } from 'lucide-react'
 
 type BedWardItem = {
@@ -83,18 +83,14 @@ export default function BedWards({ page, limit, search, setPage, setLimit, setSe
         {
             title: 'Total Wards / Departments',
             value: stats.totalWards || 0,
-            icon: <Layers className='h-6 w-6' />,
-            gradient: 'from-blue-600 to-indigo-600',
-            shadow: 'shadow-blue-500/20',
-            label: 'Active Wards'
+            icon: Layers,
+            grad: 'from-blue-500 to-indigo-500',
         },
         {
             title: 'Total Bed/Cabin Capacity',
             value: stats.totalBeds || 0,
-            icon: <BedDouble className='h-6 w-6' />,
-            gradient: 'from-violet-600 to-purple-600',
-            shadow: 'shadow-purple-500/20',
-            label: 'Beds & Cabins'
+            icon: BedDouble,
+            grad: 'from-purple-500 to-indigo-500',
         },
     ];
 
@@ -297,27 +293,25 @@ export default function BedWards({ page, limit, search, setPage, setLimit, setSe
         <main className="p-4">
             <div className="space-y-4">
                 {/* Statistics Cards */}
-                <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-2'>
-                    {statCards.map((card, idx) => (
-                        <Card key={idx} className={`p-3 relative overflow-hidden border-none text-white shadow-xl ${card.shadow} bg-gradient-to-br ${card.gradient}`}>
-                            <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
-                            <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-                            <CardContent className='p-3'>
-                                <div className='flex items-center justify-between relative z-10'>
-                                    <div className='space-y-1'>
-                                        <p className='text-sm font-medium text-white/80'>{card.title}</p>
-                                        <h3 className='text-3xl font-bold tracking-tighter'>
-                                            {card.value}
-                                        </h3>
-                                        <p className='text-[10px] font-bold uppercase tracking-wider text-white/60'>{card.label}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {statCards.map((card) => {
+                        const Icon = card.icon;
+                        return (
+                            <Card key={card.title} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
+                                            <Icon className="w-4 h-4 text-white" />
+                                        </div>
+                                        <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.title}</CardTitle>
                                     </div>
-                                    <div className='rounded-2xl bg-white/20 p-4 backdrop-blur-md border border-white/20 shadow-inner'>
-                                        {card.icon}
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+                                </CardHeader>
+                                <CardContent className="p-4">
+                                    <h3 className="text-2xl font-bold">{card.value}</h3>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
                 </div>
 
                 {/* Header & Table */}

@@ -6,7 +6,9 @@ import { getCookie } from '@/lib/cookies';
 import { useDateFormat } from '@/hooks/use-date-format';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
-import { FileText, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { FileText, CheckCircle, Clock, AlertCircle, Users } from 'lucide-react';
+import { cn } from "@/lib/utils";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const hematologySearchSchema = z.object({
   page: z.coerce.number().catch(1),
@@ -388,81 +390,56 @@ function AllReportsHematology() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {/* Total Reports */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-blue-400 p-6 shadow-lg shadow-blue-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-              <div className="relative flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Reports</p>
-                  <h3 className="mt-2 text-2xl font-bold text-white">{hematologyAllReports?.data?.meta?.total || 0}</h3>
-                </div>
-                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div className="relative flex justify-between text-white/90 text-sm">
-                <span>All Time</span>
-                <span className="font-semibold">Records</span>
-              </div>
-            </div>
-
-            {/* Completed */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-400 p-6 shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-              <div className="relative flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Completed</p>
-                  <h3 className="mt-2 text-2xl font-bold text-white">{hematologyAllReports?.data?.items?.filter((i: any) => i.Status === "Completed").length || 0}</h3>
-                </div>
-                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                  <CheckCircle className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div className="relative flex justify-between text-white/90 text-sm">
-                <span>Status</span>
-                <span className="font-semibold">Done</span>
-              </div>
-            </div>
-
-            {/* Pending */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-600 to-amber-400 p-6 shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-              <div className="relative flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Pending</p>
-                  <h3 className="mt-2 text-2xl font-bold text-white">{hematologyAllReports?.data?.items?.filter((i: any) => !i.Status || i.Status === "Pending").length || 0}</h3>
-                </div>
-                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                  <Clock className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div className="relative flex justify-between text-white/90 text-sm">
-                <span>Status</span>
-                <span className="font-semibold">Awaiting</span>
-              </div>
-            </div>
-
-            {/* Patients */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-600 to-rose-400 p-6 shadow-lg shadow-rose-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-              <div className="relative flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Patients</p>
-                  <h3 className="mt-2 text-2xl font-bold text-white">{new Set(hematologyAllReports?.data?.items?.map((i: any) => i.PatientId)).size || 0}</h3>
-                </div>
-                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                  <AlertCircle className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div className="relative flex justify-between text-white/90 text-sm">
-                <span>Unique</span>
-                <span className="font-semibold">Patients</span>
-              </div>
-            </div>
+            {[
+              {
+                label: "Total Reports",
+                value: hematologyAllReports?.data?.meta?.total || 0,
+                icon: FileText,
+                grad: "from-blue-500 to-indigo-500",
+                sub: "All time records"
+              },
+              {
+                label: "Completed",
+                value: hematologyAllReports?.data?.items?.filter((i: any) => i.Status === "Completed").length || 0,
+                icon: CheckCircle,
+                grad: "from-emerald-500 to-teal-500",
+                sub: "Status Done"
+              },
+              {
+                label: "Pending",
+                value: hematologyAllReports?.data?.items?.filter((i: any) => !i.Status || i.Status === "Pending").length || 0,
+                icon: Clock,
+                grad: "from-amber-500 to-orange-500",
+                sub: "Status Awaiting"
+              },
+              {
+                label: "Patients",
+                value: new Set(hematologyAllReports?.data?.items?.map((i: any) => i.PatientId)).size || 0,
+                icon: Users,
+                grad: "from-purple-500 to-pink-500",
+                sub: "Unique patients"
+              }
+            ].map((card) => {
+              const Icon = card.icon;
+              return (
+                <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                  <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                    <div className="flex items-center gap-2.5">
+                      <div className={cn("p-2 bg-gradient-to-br rounded-lg shadow-lg", card.grad)}>
+                        <Icon className="w-4 h-4 text-white" />
+                      </div>
+                      <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <h3 className="text-2xl font-bold">
+                      {card.value.toLocaleString(undefined, { minimumFractionDigits: 0 })}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
           <DataTable

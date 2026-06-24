@@ -16,6 +16,8 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 
 interface OutdoorAllCollectionsProps {
     page: number
@@ -113,12 +115,13 @@ export default function OutdoorAllCollections({
     const stats = useMemo(() => {
         const s = data?.data?.stats || {}
         return [
-            { label: 'Total Payments', value: s.payment_count || 0, gradient: 'from-blue-600 to-blue-400', shadow: 'shadow-blue-500/30', icon: <CreditCard className="w-6 h-6 text-white" /> },
-            { label: `Total Collected (${currencySymbol || currency})`, value: fmtNum(s.total_collected || 0), gradient: 'from-emerald-600 to-emerald-400', shadow: 'shadow-emerald-500/30', icon: <DollarSign className="w-6 h-6 text-white" /> },
-            { label: `Total Discount (${currencySymbol || currency})`, value: fmtNum(s.total_discount || 0), gradient: 'from-orange-600 to-orange-400', shadow: 'shadow-orange-500/30', icon: <TrendingUp className="w-6 h-6 text-white" /> },
-            { label: `Gross Bill (${currencySymbol || currency})`, value: fmtNum(s.total_bill || 0), gradient: 'from-purple-600 to-purple-400', shadow: 'shadow-purple-500/30', icon: <FileText className="w-6 h-6 text-white" /> },
+            { label: 'Total Payments', value: s.payment_count || 0, icon: CreditCard, grad: 'from-blue-500 to-indigo-500' },
+            { label: `Total Collected (${currencySymbol || currency})`, value: fmtNum(s.total_collected || 0), icon: DollarSign, grad: 'from-emerald-500 to-teal-500' },
+            { label: `Total Discount (${currencySymbol || currency})`, value: fmtNum(s.total_discount || 0), icon: TrendingUp, grad: 'from-amber-500 to-orange-500' },
+            { label: `Gross Bill (${currencySymbol || currency})`, value: fmtNum(s.total_bill || 0), icon: FileText, grad: 'from-purple-500 to-indigo-500' },
         ]
     }, [data, currencySymbol, currency])
+
 
     // ---- Date filter presets (mirrors invoices list) ----
     const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
@@ -314,19 +317,25 @@ export default function OutdoorAllCollections({
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
-                    {stats.map((item, idx) => (
-                        <div key={idx} className={`relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br ${item.gradient} p-4 md:p-6 shadow-lg ${item.shadow}`}>
-                            <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-                            <div className="relative flex items-center justify-between gap-2">
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-medium text-white/90">{item.label}</p>
-                                    <h3 className="mt-2 text-lg xl:text-2xl font-bold text-white">{item.value || 0}</h3>
-                                </div>
-                                <div className="hidden xl:block rounded-xl bg-white/20 p-2.5">{item.icon}</div>
-                            </div>
-                        </div>
-                    ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    {stats.map((card) => {
+                        const Icon = card.icon;
+                        return (
+                            <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
+                                            <Icon className="w-4 h-4 text-white" />
+                                        </div>
+                                        <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="p-4">
+                                    <h3 className="text-2xl font-bold">{card.value}</h3>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
                 </div>
 
                 {isLoading ? (

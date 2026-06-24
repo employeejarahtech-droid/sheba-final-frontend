@@ -1,0 +1,2897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart of Accounts Hierarchy — Sheba HMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --primary: #6366f1;
+            --primary-light: #e0e7ff;
+            --primary-hover: #4f46e5;
+            
+            --asset-color: #10b981;
+            --asset-bg: #ecfdf5;
+            --liability-color: #f97316;
+            --liability-bg: #fff7ed;
+            --equity-color: #8b5cf6;
+            --equity-bg: #f5f3ff;
+            --income-color: #06b6d4;
+            --income-bg: #ecfeff;
+            --expense-color: #ef4444;
+            --expense-bg: #fef2f2;
+            
+            --transition-speed: 0.25s;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.03);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0b0f19;
+            --bg-card: #151b2a;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border-color: #1e293b;
+            --primary: #818cf8;
+            --primary-light: #1e1b4b;
+            --primary-hover: #6366f1;
+            
+            --asset-bg: #022c22;
+            --liability-bg: #2c1605;
+            --equity-bg: #1e113a;
+            --income-bg: #082f49;
+            --expense-bg: #3b0712;
+            
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        [data-theme="dark"] header {
+            background-color: rgba(21, 27, 42, 0.8);
+        }
+
+        .header-left h1 {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--primary), #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-left p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .theme-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all var(--transition-speed);
+        }
+
+        .theme-btn:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        main {
+            flex: 1;
+            padding: 40px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 40px;
+        }
+
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+            transition: all var(--transition-speed);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: var(--bg-card);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            width: 16px;
+            height: 16px;
+            pointer-events: none;
+        }
+
+        .stats-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .stat-item.asset { background-color: var(--asset-bg); color: var(--asset-color); }
+        .stat-item.liability { background-color: var(--liability-bg); color: var(--liability-color); }
+        .stat-item.equity { background-color: var(--equity-bg); color: var(--equity-color); }
+        .stat-item.income { background-color: var(--income-bg); color: var(--income-color); }
+        .stat-item.expense { background-color: var(--expense-bg); color: var(--expense-color); }
+
+        .stat-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .category-group {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: box-shadow var(--transition-speed);
+        }
+
+        .category-group:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .category-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .category-header.asset { border-left: 4px solid var(--asset-color); }
+        .category-header.liability { border-left: 4px solid var(--liability-color); }
+        .category-header.equity { border-left: 4px solid var(--equity-color); }
+        .category-header.income { border-left: 4px solid var(--income-color); }
+        .category-header.expense { border-left: 4px solid var(--expense-color); }
+
+        .category-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .category-header.asset .category-title { color: var(--asset-color); }
+        .category-header.liability .category-title { color: var(--liability-color); }
+        .category-header.equity .category-title { color: var(--equity-color); }
+        .category-header.income .category-title { color: var(--income-color); }
+        .category-header.expense .category-title { color: var(--expense-color); }
+
+        .category-badge {
+            font-size: 11px;
+            background-color: var(--bg-primary);
+            color: var(--text-secondary);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            border: 1px solid var(--border-color);
+        }
+
+        .category-content {
+            padding: 10px 0;
+        }
+
+        .tree-node {
+            list-style: none;
+        }
+
+        .node-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 24px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color var(--transition-speed);
+        }
+
+        .node-row:hover {
+            background-color: var(--bg-primary);
+        }
+
+        .node-indent {
+            display: flex;
+            align-items: center;
+        }
+
+        .indent-bar {
+            width: 24px;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        .expand-toggle {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 4px;
+            color: var(--text-secondary);
+            transition: background-color var(--transition-speed);
+            margin-right: 6px;
+        }
+
+        .expand-toggle:hover {
+            background-color: var(--border-color);
+        }
+
+        .node-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .node-icon.folder { color: #f59e0b; }
+        .node-icon.file { color: #3b82f6; }
+
+        .node-code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-right: 12px;
+            font-weight: 500;
+            width: 44px;
+            flex-shrink: 0;
+        }
+
+        .node-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .node-badges {
+            display: flex;
+            gap: 6px;
+            margin-left: 12px;
+        }
+
+        .badge {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .badge.protected {
+            background-color: #fffbeb;
+            color: #b45309;
+            border: 1px solid #fef3c7;
+        }
+        [data-theme="dark"] .badge.protected {
+            background-color: #78350f;
+            color: #fef3c7;
+            border: none;
+        }
+
+        .badge.inactive {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #e5e7eb;
+        }
+        [data-theme="dark"] .badge.inactive {
+            background-color: #374151;
+            color: #d1d5db;
+            border: none;
+        }
+
+        .node-children {
+            margin: 0;
+            padding: 0;
+            display: block;
+        }
+
+        .node-children.collapsed {
+            display: none;
+        }
+
+        .highlight {
+            background-color: rgba(253, 224, 71, 0.4);
+            color: #854d0e;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        [data-theme="dark"] .highlight {
+            background-color: rgba(234, 179, 8, 0.3);
+            color: #fef08a;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <h1>📊 Chart of Accounts Hierarchy</h1>
+            <p>Interactive tree visualization of Sheba HMS accounts database</p>
+        </div>
+        <div class="header-right">
+            <button class="theme-btn" id="themeToggle">
+                <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                Theme Toggle
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="sidebar">
+            <div class="card">
+                <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 12px;">Search Accounts</h3>
+                <div class="search-box">
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" id="searchInput" placeholder="Search by name or code...">
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">Structure Toolbar</h3>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Quickly expand/collapse folder levels.</p>
+                <div class="btn-group">
+                    <button class="btn" id="expandAllBtn">Expand All</button>
+                    <button class="btn" id="collapseAllBtn">Collapse All</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size: 15px; font-weight: 700;">Account Counts</h3>
+                <div class="stats-list" id="statsList"></div>
+            </div>
+        </div>
+
+        <div class="content-area" id="contentArea"></div>
+    </main>
+
+    <script>
+        const rawAccounts = [
+  {
+    "id": 19,
+    "code": "1000",
+    "name": "Current Assets",
+    "type": "ASSET",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 20,
+    "code": "1100",
+    "name": "Cash & Cash Equivalents",
+    "type": "ASSET",
+    "parent_id": 19,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 110,
+    "code": "1110",
+    "name": "Cash in Hand (Counter)",
+    "type": "ASSET",
+    "parent_id": 20,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 111,
+    "code": "1120",
+    "name": "Petty Cash",
+    "type": "ASSET",
+    "parent_id": 20,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 112,
+    "code": "1130",
+    "name": "Cash in Transit / Undeposited",
+    "type": "ASSET",
+    "parent_id": 20,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 21,
+    "code": "1200",
+    "name": "Bank Balances",
+    "type": "ASSET",
+    "parent_id": 19,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 113,
+    "code": "1210",
+    "name": "Bank — Operating Account",
+    "type": "ASSET",
+    "parent_id": 21,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 114,
+    "code": "1220",
+    "name": "Bank — Payroll Account",
+    "type": "ASSET",
+    "parent_id": 21,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 115,
+    "code": "1230",
+    "name": "Bank — Short-term Deposit / Investment",
+    "type": "ASSET",
+    "parent_id": 21,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 116,
+    "code": "1240",
+    "name": "Bank — Foreign Currency Account",
+    "type": "ASSET",
+    "parent_id": 21,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 22,
+    "code": "1300",
+    "name": "Receivables",
+    "type": "ASSET",
+    "parent_id": 19,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 117,
+    "code": "1310",
+    "name": "Outdoor / Walk-in Patient Receivable",
+    "type": "ASSET",
+    "parent_id": 22,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 118,
+    "code": "1320",
+    "name": "Indoor / IPD Patient Receivable",
+    "type": "ASSET",
+    "parent_id": 22,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 119,
+    "code": "1330",
+    "name": "Insurance / TPA Receivable",
+    "type": "ASSET",
+    "parent_id": 22,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 120,
+    "code": "1340",
+    "name": "Corporate / Panel / Embassy Receivable",
+    "type": "ASSET",
+    "parent_id": 22,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 121,
+    "code": "1350",
+    "name": "Government / National Scheme Receivable",
+    "type": "ASSET",
+    "parent_id": 22,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 122,
+    "code": "1360",
+    "name": "Staff Receivable",
+    "type": "ASSET",
+    "parent_id": 22,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 123,
+    "code": "1370",
+    "name": "Allowance for Doubtful Accounts",
+    "type": "ASSET",
+    "parent_id": 22,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 124,
+    "code": "1400",
+    "name": "Notes, Advances & Prepayments",
+    "type": "ASSET",
+    "parent_id": 19,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 125,
+    "code": "1410",
+    "name": "Staff Loans & Advances",
+    "type": "ASSET",
+    "parent_id": 124,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 126,
+    "code": "1420",
+    "name": "Security Deposits Given",
+    "type": "ASSET",
+    "parent_id": 124,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 127,
+    "code": "1430",
+    "name": "Prepaid Expenses",
+    "type": "ASSET",
+    "parent_id": 124,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 128,
+    "code": "1431",
+    "name": "Prepaid Insurance",
+    "type": "ASSET",
+    "parent_id": 127,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 129,
+    "code": "1432",
+    "name": "Prepaid Rent",
+    "type": "ASSET",
+    "parent_id": 127,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 130,
+    "code": "1433",
+    "name": "Prepaid Maintenance / AMC",
+    "type": "ASSET",
+    "parent_id": 127,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 131,
+    "code": "1440",
+    "name": "Advances to Suppliers",
+    "type": "ASSET",
+    "parent_id": 124,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 132,
+    "code": "1500",
+    "name": "Inventory / Stores",
+    "type": "ASSET",
+    "parent_id": 19,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 133,
+    "code": "1510",
+    "name": "Pharmacy / Medicine Stock",
+    "type": "ASSET",
+    "parent_id": 132,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 134,
+    "code": "1520",
+    "name": "Medical Consumables & Disposables",
+    "type": "ASSET",
+    "parent_id": 132,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 135,
+    "code": "1530",
+    "name": "Surgical / OT Supplies",
+    "type": "ASSET",
+    "parent_id": 132,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 136,
+    "code": "1540",
+    "name": "Lab Reagents & Supplies",
+    "type": "ASSET",
+    "parent_id": 132,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 137,
+    "code": "1550",
+    "name": "Radiology Film & Contrast",
+    "type": "ASSET",
+    "parent_id": 132,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 138,
+    "code": "1560",
+    "name": "Implants & Prosthetics",
+    "type": "ASSET",
+    "parent_id": 132,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 139,
+    "code": "1570",
+    "name": "Blood & Blood Products",
+    "type": "ASSET",
+    "parent_id": 132,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 140,
+    "code": "1580",
+    "name": "General Store / Housekeeping Supplies",
+    "type": "ASSET",
+    "parent_id": 132,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 141,
+    "code": "1590",
+    "name": "Oxygen & Medical Gases",
+    "type": "ASSET",
+    "parent_id": 132,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 142,
+    "code": "1595",
+    "name": "Inventory Variance / Adjustment",
+    "type": "ASSET",
+    "parent_id": 132,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 143,
+    "code": "1600",
+    "name": "Non-current Assets",
+    "type": "ASSET",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 144,
+    "code": "1610",
+    "name": "Fixed Assets",
+    "type": "ASSET",
+    "parent_id": 143,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 145,
+    "code": "1620",
+    "name": "Land",
+    "type": "ASSET",
+    "parent_id": 144,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 146,
+    "code": "1630",
+    "name": "Building & Civil Works",
+    "type": "ASSET",
+    "parent_id": 144,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 147,
+    "code": "1640",
+    "name": "Medical Equipment",
+    "type": "ASSET",
+    "parent_id": 144,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 148,
+    "code": "1650",
+    "name": "Furniture & Fixtures",
+    "type": "ASSET",
+    "parent_id": 144,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 149,
+    "code": "1660",
+    "name": "Vehicles (Ambulance & Transport)",
+    "type": "ASSET",
+    "parent_id": 144,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 150,
+    "code": "1670",
+    "name": "Office Equipment & Computers",
+    "type": "ASSET",
+    "parent_id": 144,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 151,
+    "code": "1680",
+    "name": "Software / Hospital Information System",
+    "type": "ASSET",
+    "parent_id": 144,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 152,
+    "code": "1690",
+    "name": "Medical Gas Pipeline / Installations",
+    "type": "ASSET",
+    "parent_id": 144,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 153,
+    "code": "1700",
+    "name": "Accumulated Depreciation",
+    "type": "ASSET",
+    "parent_id": 143,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 154,
+    "code": "1710",
+    "name": "Acc. Depreciation — Building",
+    "type": "ASSET",
+    "parent_id": 153,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 155,
+    "code": "1720",
+    "name": "Acc. Depreciation — Medical Equipment",
+    "type": "ASSET",
+    "parent_id": 153,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 156,
+    "code": "1730",
+    "name": "Acc. Depreciation — Furniture",
+    "type": "ASSET",
+    "parent_id": 153,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 157,
+    "code": "1740",
+    "name": "Acc. Depreciation — Vehicles",
+    "type": "ASSET",
+    "parent_id": 153,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 158,
+    "code": "1750",
+    "name": "Acc. Depreciation — Office Equipment",
+    "type": "ASSET",
+    "parent_id": 153,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 159,
+    "code": "1800",
+    "name": "Capital Work-in-Progress",
+    "type": "ASSET",
+    "parent_id": 143,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 160,
+    "code": "1900",
+    "name": "Other Non-current Assets",
+    "type": "ASSET",
+    "parent_id": 143,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 161,
+    "code": "1910",
+    "name": "Long-term Staff Loans",
+    "type": "ASSET",
+    "parent_id": 160,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 162,
+    "code": "1920",
+    "name": "Intangible Assets (Goodwill / Licenses)",
+    "type": "ASSET",
+    "parent_id": 160,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 163,
+    "code": "1930",
+    "name": "Deferred Tax Asset",
+    "type": "ASSET",
+    "parent_id": 160,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 164,
+    "code": "1940",
+    "name": "Long-term Deposits",
+    "type": "ASSET",
+    "parent_id": 160,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 23,
+    "code": "2000",
+    "name": "Current Liabilities",
+    "type": "LIABILITY",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 24,
+    "code": "2100",
+    "name": "Trade Payables",
+    "type": "LIABILITY",
+    "parent_id": 23,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 25,
+    "code": "2110",
+    "name": "Pharmacy / Medicine Suppliers Payable",
+    "type": "LIABILITY",
+    "parent_id": 24,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 26,
+    "code": "2120",
+    "name": "Consumables / Disposables Suppliers Payable",
+    "type": "LIABILITY",
+    "parent_id": 24,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 27,
+    "code": "2130",
+    "name": "Equipment & Capital Suppliers Payable",
+    "type": "LIABILITY",
+    "parent_id": 24,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 28,
+    "code": "2140",
+    "name": "General Suppliers Payable",
+    "type": "LIABILITY",
+    "parent_id": 24,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 165,
+    "code": "2200",
+    "name": "Payable to Doctors / Consultants",
+    "type": "LIABILITY",
+    "parent_id": 23,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 29,
+    "code": "2210",
+    "name": "Payable — Surgeon",
+    "type": "LIABILITY",
+    "parent_id": 165,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 166,
+    "code": "2220",
+    "name": "Payable — Consultant",
+    "type": "LIABILITY",
+    "parent_id": 165,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 167,
+    "code": "2230",
+    "name": "Payable — Anaesthetist",
+    "type": "LIABILITY",
+    "parent_id": 165,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 168,
+    "code": "2240",
+    "name": "Payable — Assistant",
+    "type": "LIABILITY",
+    "parent_id": 165,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 169,
+    "code": "2250",
+    "name": "Payable — Visiting / External Doctor",
+    "type": "LIABILITY",
+    "parent_id": 165,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 170,
+    "code": "2300",
+    "name": "Patient Deposits & Advances Received",
+    "type": "LIABILITY",
+    "parent_id": 23,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 171,
+    "code": "2310",
+    "name": "IPD Admission Deposit / Advance",
+    "type": "LIABILITY",
+    "parent_id": 170,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 172,
+    "code": "2320",
+    "name": "Health Package Advance Received",
+    "type": "LIABILITY",
+    "parent_id": 170,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 173,
+    "code": "2400",
+    "name": "Statutory Dues",
+    "type": "LIABILITY",
+    "parent_id": 23,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 174,
+    "code": "2410",
+    "name": "Consumption Tax Payable (VAT/GST/Sales/Service)",
+    "type": "LIABILITY",
+    "parent_id": 173,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 175,
+    "code": "2420",
+    "name": "Withholding / Advance Income Tax (TDS/AIT)",
+    "type": "LIABILITY",
+    "parent_id": 173,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 176,
+    "code": "2430",
+    "name": "Payroll Statutory Dues (PF/Social Security/NHF)",
+    "type": "LIABILITY",
+    "parent_id": 173,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 177,
+    "code": "2440",
+    "name": "Corporate / Income Tax Payable",
+    "type": "LIABILITY",
+    "parent_id": 173,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 178,
+    "code": "2450",
+    "name": "Customs Duty Payable",
+    "type": "LIABILITY",
+    "parent_id": 173,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 179,
+    "code": "2500",
+    "name": "Employee-related Liabilities",
+    "type": "LIABILITY",
+    "parent_id": 23,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 180,
+    "code": "2510",
+    "name": "Salary / Wages Payable",
+    "type": "LIABILITY",
+    "parent_id": 179,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 181,
+    "code": "2520",
+    "name": "Bonus / Gratuity Payable",
+    "type": "LIABILITY",
+    "parent_id": 179,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 182,
+    "code": "2530",
+    "name": "Leave Encashment Payable",
+    "type": "LIABILITY",
+    "parent_id": 179,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 183,
+    "code": "2540",
+    "name": "Provident Fund / Pension Payable",
+    "type": "LIABILITY",
+    "parent_id": 179,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 184,
+    "code": "2600",
+    "name": "Other Current Liabilities",
+    "type": "LIABILITY",
+    "parent_id": 23,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 185,
+    "code": "2610",
+    "name": "Advances from Customers",
+    "type": "LIABILITY",
+    "parent_id": 184,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 186,
+    "code": "2620",
+    "name": "Accrued Expenses",
+    "type": "LIABILITY",
+    "parent_id": 184,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 187,
+    "code": "2630",
+    "name": "Income Received in Advance / Deferred",
+    "type": "LIABILITY",
+    "parent_id": 184,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 188,
+    "code": "2640",
+    "name": "Security Deposits Received",
+    "type": "LIABILITY",
+    "parent_id": 184,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 189,
+    "code": "2650",
+    "name": "Suspense / Holding Account",
+    "type": "LIABILITY",
+    "parent_id": 184,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 190,
+    "code": "2700",
+    "name": "Non-current Liabilities",
+    "type": "LIABILITY",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 191,
+    "code": "2710",
+    "name": "Bank Term Loan",
+    "type": "LIABILITY",
+    "parent_id": 190,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 192,
+    "code": "2720",
+    "name": "Vehicle Loan",
+    "type": "LIABILITY",
+    "parent_id": 190,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 193,
+    "code": "2730",
+    "name": "Equipment Loan / Finance Lease",
+    "type": "LIABILITY",
+    "parent_id": 190,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 194,
+    "code": "2740",
+    "name": "Mortgage / Building Loan",
+    "type": "LIABILITY",
+    "parent_id": 190,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 195,
+    "code": "2800",
+    "name": "Provisions",
+    "type": "LIABILITY",
+    "parent_id": 190,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 196,
+    "code": "2810",
+    "name": "Provision for Gratuity",
+    "type": "LIABILITY",
+    "parent_id": 195,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 197,
+    "code": "2820",
+    "name": "Provision for Leave Encashment",
+    "type": "LIABILITY",
+    "parent_id": 195,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 198,
+    "code": "2830",
+    "name": "Provision for Bad Debts",
+    "type": "LIABILITY",
+    "parent_id": 195,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 199,
+    "code": "2840",
+    "name": "Provision for Warranty / Litigation",
+    "type": "LIABILITY",
+    "parent_id": 195,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 200,
+    "code": "2900",
+    "name": "Deferred Tax Liability",
+    "type": "LIABILITY",
+    "parent_id": 190,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 30,
+    "code": "3000",
+    "name": "Owner / Share Capital",
+    "type": "EQUITY",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 201,
+    "code": "3100",
+    "name": "Partner / Shareholder Accounts",
+    "type": "EQUITY",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 202,
+    "code": "3110",
+    "name": "Partner A Capital",
+    "type": "EQUITY",
+    "parent_id": 201,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 203,
+    "code": "3120",
+    "name": "Partner B Capital",
+    "type": "EQUITY",
+    "parent_id": 201,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 204,
+    "code": "3200",
+    "name": "Drawings & Dividends",
+    "type": "EQUITY",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 205,
+    "code": "3210",
+    "name": "Partner A Drawings",
+    "type": "EQUITY",
+    "parent_id": 204,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 206,
+    "code": "3220",
+    "name": "Partner B Drawings",
+    "type": "EQUITY",
+    "parent_id": 204,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 207,
+    "code": "3230",
+    "name": "Dividends Declared / Payable",
+    "type": "EQUITY",
+    "parent_id": 204,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 208,
+    "code": "3300",
+    "name": "Reserves",
+    "type": "EQUITY",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 209,
+    "code": "3310",
+    "name": "Share Premium",
+    "type": "EQUITY",
+    "parent_id": 208,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 210,
+    "code": "3320",
+    "name": "General Reserve",
+    "type": "EQUITY",
+    "parent_id": 208,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 211,
+    "code": "3330",
+    "name": "Revaluation Reserve",
+    "type": "EQUITY",
+    "parent_id": 208,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 212,
+    "code": "3340",
+    "name": "Foreign Currency Translation Reserve",
+    "type": "EQUITY",
+    "parent_id": 208,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 213,
+    "code": "3400",
+    "name": "Retained Earnings",
+    "type": "EQUITY",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 214,
+    "code": "3500",
+    "name": "Current Year Profit / Loss",
+    "type": "EQUITY",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 215,
+    "code": "3600",
+    "name": "Opening Balance Equity",
+    "type": "EQUITY",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 31,
+    "code": "4000",
+    "name": "Outpatient / OPD Income",
+    "type": "INCOME",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 32,
+    "code": "4010",
+    "name": "Registration Fee",
+    "type": "INCOME",
+    "parent_id": 31,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 33,
+    "code": "4020",
+    "name": "Consultation Fee",
+    "type": "INCOME",
+    "parent_id": 31,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 216,
+    "code": "4030",
+    "name": "OPD Procedure / Minor OT",
+    "type": "INCOME",
+    "parent_id": 31,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 217,
+    "code": "4040",
+    "name": "Chamber Rent / Doctor Visit Fee",
+    "type": "INCOME",
+    "parent_id": 31,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 218,
+    "code": "4100",
+    "name": "Diagnostic Income",
+    "type": "INCOME",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 219,
+    "code": "4110",
+    "name": "Laboratory / Pathology",
+    "type": "INCOME",
+    "parent_id": 218,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 220,
+    "code": "4120",
+    "name": "Radiology / X-Ray",
+    "type": "INCOME",
+    "parent_id": 218,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 221,
+    "code": "4130",
+    "name": "CT Scan / MRI",
+    "type": "INCOME",
+    "parent_id": 218,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 222,
+    "code": "4140",
+    "name": "Ultrasonogram",
+    "type": "INCOME",
+    "parent_id": 218,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 223,
+    "code": "4150",
+    "name": "Cardiology (ECG/Echo/TMT)",
+    "type": "INCOME",
+    "parent_id": 218,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 224,
+    "code": "4160",
+    "name": "Endoscopy / Colonoscopy",
+    "type": "INCOME",
+    "parent_id": 218,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 225,
+    "code": "4170",
+    "name": "Mammography",
+    "type": "INCOME",
+    "parent_id": 218,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 226,
+    "code": "4200",
+    "name": "Specialty Department Income",
+    "type": "INCOME",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 227,
+    "code": "4210",
+    "name": "Dental",
+    "type": "INCOME",
+    "parent_id": 226,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 228,
+    "code": "4220",
+    "name": "Ophthalmology (Eye)",
+    "type": "INCOME",
+    "parent_id": 226,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 229,
+    "code": "4230",
+    "name": "ENT",
+    "type": "INCOME",
+    "parent_id": 226,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 230,
+    "code": "4240",
+    "name": "Physiotherapy",
+    "type": "INCOME",
+    "parent_id": 226,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 231,
+    "code": "4250",
+    "name": "Dialysis",
+    "type": "INCOME",
+    "parent_id": 226,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 232,
+    "code": "4260",
+    "name": "Dermatology",
+    "type": "INCOME",
+    "parent_id": 226,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 233,
+    "code": "4270",
+    "name": "Orthopaedic",
+    "type": "INCOME",
+    "parent_id": 226,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 234,
+    "code": "4300",
+    "name": "Inpatient / IPD Income",
+    "type": "INCOME",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 235,
+    "code": "4310",
+    "name": "Bed / Cabin / Room Charges",
+    "type": "INCOME",
+    "parent_id": 234,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 236,
+    "code": "4320",
+    "name": "ICU / CCU / NICU Charges",
+    "type": "INCOME",
+    "parent_id": 234,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 237,
+    "code": "4330",
+    "name": "Operation Theatre Charges",
+    "type": "INCOME",
+    "parent_id": 234,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 238,
+    "code": "4340",
+    "name": "Consultant Fee Income (Indoor)",
+    "type": "INCOME",
+    "parent_id": 234,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 239,
+    "code": "4350",
+    "name": "Surgeon Fee Income",
+    "type": "INCOME",
+    "parent_id": 234,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 240,
+    "code": "4360",
+    "name": "Anaesthesia Charges",
+    "type": "INCOME",
+    "parent_id": 234,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 241,
+    "code": "4370",
+    "name": "Assistant Charges",
+    "type": "INCOME",
+    "parent_id": 234,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 242,
+    "code": "4380",
+    "name": "Nursing / Indoor Service Charges",
+    "type": "INCOME",
+    "parent_id": 234,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 243,
+    "code": "4390",
+    "name": "Indoor Procedure Charges",
+    "type": "INCOME",
+    "parent_id": 234,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 244,
+    "code": "4400",
+    "name": "Ancillary Service Income",
+    "type": "INCOME",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 245,
+    "code": "4410",
+    "name": "Pharmacy — Retail / OPD Sales",
+    "type": "INCOME",
+    "parent_id": 244,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 246,
+    "code": "4420",
+    "name": "Pharmacy — IPD Sales",
+    "type": "INCOME",
+    "parent_id": 244,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 247,
+    "code": "4430",
+    "name": "Ambulance / Transport",
+    "type": "INCOME",
+    "parent_id": 244,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 248,
+    "code": "4440",
+    "name": "Emergency Services",
+    "type": "INCOME",
+    "parent_id": 244,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 249,
+    "code": "4450",
+    "name": "Blood Bank",
+    "type": "INCOME",
+    "parent_id": 244,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 250,
+    "code": "4460",
+    "name": "Patient Diet / Catering",
+    "type": "INCOME",
+    "parent_id": 244,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 251,
+    "code": "4500",
+    "name": "Packages & Preventive Care",
+    "type": "INCOME",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 252,
+    "code": "4510",
+    "name": "Health Checkup Packages",
+    "type": "INCOME",
+    "parent_id": 251,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 253,
+    "code": "4520",
+    "name": "Vaccination / Immunization",
+    "type": "INCOME",
+    "parent_id": 251,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 254,
+    "code": "4530",
+    "name": "Maternity Packages",
+    "type": "INCOME",
+    "parent_id": 251,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 255,
+    "code": "4900",
+    "name": "Other / Non-operating Income",
+    "type": "INCOME",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 256,
+    "code": "4910",
+    "name": "Interest / Bank Income",
+    "type": "INCOME",
+    "parent_id": 255,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 257,
+    "code": "4920",
+    "name": "Donation / Grant Received",
+    "type": "INCOME",
+    "parent_id": 255,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 258,
+    "code": "4930",
+    "name": "Scrap / Waste Sale",
+    "type": "INCOME",
+    "parent_id": 255,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 259,
+    "code": "4940",
+    "name": "Rent / Concession / Canteen Income",
+    "type": "INCOME",
+    "parent_id": 255,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 260,
+    "code": "4950",
+    "name": "Foreign Exchange Gain",
+    "type": "INCOME",
+    "parent_id": 255,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 261,
+    "code": "4960",
+    "name": "Discount Received",
+    "type": "INCOME",
+    "parent_id": 255,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 262,
+    "code": "4970",
+    "name": "Insurance Claim Recovery / Adjustment",
+    "type": "INCOME",
+    "parent_id": 255,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 263,
+    "code": "5000",
+    "name": "Cost of Services (COGS)",
+    "type": "EXPENSE",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 264,
+    "code": "5010",
+    "name": "Pharmacy Purchase / COGS",
+    "type": "EXPENSE",
+    "parent_id": 263,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 265,
+    "code": "5020",
+    "name": "Medical Consumables / Disposables",
+    "type": "EXPENSE",
+    "parent_id": 263,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 266,
+    "code": "5030",
+    "name": "Surgical / OT Supplies",
+    "type": "EXPENSE",
+    "parent_id": 263,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 267,
+    "code": "5040",
+    "name": "Lab Reagents",
+    "type": "EXPENSE",
+    "parent_id": 263,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 268,
+    "code": "5050",
+    "name": "Radiology Film & Contrast",
+    "type": "EXPENSE",
+    "parent_id": 263,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 269,
+    "code": "5060",
+    "name": "Implants & Prosthetics",
+    "type": "EXPENSE",
+    "parent_id": 263,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 270,
+    "code": "5070",
+    "name": "Oxygen & Medical Gases",
+    "type": "EXPENSE",
+    "parent_id": 263,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 271,
+    "code": "5080",
+    "name": "Blood & Blood Products",
+    "type": "EXPENSE",
+    "parent_id": 263,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 272,
+    "code": "5090",
+    "name": "Inventory Wastage / Expiry / Breakage",
+    "type": "EXPENSE",
+    "parent_id": 263,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 273,
+    "code": "5200",
+    "name": "Professional / Doctor Payments",
+    "type": "EXPENSE",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 274,
+    "code": "5210",
+    "name": "Surgeon Fee Paid",
+    "type": "EXPENSE",
+    "parent_id": 273,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 275,
+    "code": "5220",
+    "name": "Consultant Fee Paid",
+    "type": "EXPENSE",
+    "parent_id": 273,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 276,
+    "code": "5230",
+    "name": "Anaesthetist Fee Paid",
+    "type": "EXPENSE",
+    "parent_id": 273,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 277,
+    "code": "5240",
+    "name": "Assistant Fee Paid",
+    "type": "EXPENSE",
+    "parent_id": 273,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 278,
+    "code": "5250",
+    "name": "Visiting / External Doctor Fee",
+    "type": "EXPENSE",
+    "parent_id": 273,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 279,
+    "code": "5260",
+    "name": "Referral Fee / Commission Paid",
+    "type": "EXPENSE",
+    "parent_id": 273,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 280,
+    "code": "5400",
+    "name": "Payroll & HR",
+    "type": "EXPENSE",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 281,
+    "code": "5410",
+    "name": "Salaries — Medical / Doctor Staff",
+    "type": "EXPENSE",
+    "parent_id": 280,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 282,
+    "code": "5420",
+    "name": "Salaries — Nursing Staff",
+    "type": "EXPENSE",
+    "parent_id": 280,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 283,
+    "code": "5430",
+    "name": "Salaries — Admin / Support Staff",
+    "type": "EXPENSE",
+    "parent_id": 280,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 284,
+    "code": "5440",
+    "name": "Overtime / Allowances",
+    "type": "EXPENSE",
+    "parent_id": 280,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 285,
+    "code": "5450",
+    "name": "Bonus / Festival Bonus",
+    "type": "EXPENSE",
+    "parent_id": 280,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 286,
+    "code": "5460",
+    "name": "Staff Welfare / Refreshment",
+    "type": "EXPENSE",
+    "parent_id": 280,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 287,
+    "code": "5470",
+    "name": "Staff Training & Development",
+    "type": "EXPENSE",
+    "parent_id": 280,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 288,
+    "code": "5480",
+    "name": "Staff Uniform & Protective Gear",
+    "type": "EXPENSE",
+    "parent_id": 280,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 289,
+    "code": "5490",
+    "name": "Recruitment / Other Staff Benefits",
+    "type": "EXPENSE",
+    "parent_id": 280,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 290,
+    "code": "5600",
+    "name": "Utilities",
+    "type": "EXPENSE",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 291,
+    "code": "5610",
+    "name": "Electricity",
+    "type": "EXPENSE",
+    "parent_id": 290,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 292,
+    "code": "5620",
+    "name": "Water",
+    "type": "EXPENSE",
+    "parent_id": 290,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 293,
+    "code": "5630",
+    "name": "Gas",
+    "type": "EXPENSE",
+    "parent_id": 290,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 294,
+    "code": "5640",
+    "name": "Telephone & Internet",
+    "type": "EXPENSE",
+    "parent_id": 290,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 295,
+    "code": "5650",
+    "name": "Generator / Diesel / Fuel",
+    "type": "EXPENSE",
+    "parent_id": 290,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 296,
+    "code": "5660",
+    "name": "Central Oxygen / Vacuum / HVAC",
+    "type": "EXPENSE",
+    "parent_id": 290,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 297,
+    "code": "5800",
+    "name": "Premises & Maintenance",
+    "type": "EXPENSE",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 298,
+    "code": "5810",
+    "name": "Rent / Building Lease",
+    "type": "EXPENSE",
+    "parent_id": 297,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 299,
+    "code": "5820",
+    "name": "Building Repair & Maintenance",
+    "type": "EXPENSE",
+    "parent_id": 297,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 300,
+    "code": "5830",
+    "name": "Medical Equipment Maintenance / AMC",
+    "type": "EXPENSE",
+    "parent_id": 297,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 301,
+    "code": "5840",
+    "name": "IT / Software Maintenance & AMC",
+    "type": "EXPENSE",
+    "parent_id": 297,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 302,
+    "code": "5850",
+    "name": "Biomedical Waste Disposal",
+    "type": "EXPENSE",
+    "parent_id": 297,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 303,
+    "code": "5860",
+    "name": "Housekeeping & Cleaning",
+    "type": "EXPENSE",
+    "parent_id": 297,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 304,
+    "code": "5870",
+    "name": "Linen & Laundry",
+    "type": "EXPENSE",
+    "parent_id": 297,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 305,
+    "code": "5880",
+    "name": "Security Services",
+    "type": "EXPENSE",
+    "parent_id": 297,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 306,
+    "code": "5890",
+    "name": "Pest Control / Garden / Landscaping",
+    "type": "EXPENSE",
+    "parent_id": 297,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 307,
+    "code": "6000",
+    "name": "Administrative & General",
+    "type": "EXPENSE",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 308,
+    "code": "6010",
+    "name": "Stationery & Printing",
+    "type": "EXPENSE",
+    "parent_id": 307,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 309,
+    "code": "6020",
+    "name": "Travel & Conveyance",
+    "type": "EXPENSE",
+    "parent_id": 307,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 310,
+    "code": "6030",
+    "name": "Marketing & Advertising",
+    "type": "EXPENSE",
+    "parent_id": 307,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 311,
+    "code": "6040",
+    "name": "Professional Fees (Legal/Audit/Consultancy)",
+    "type": "EXPENSE",
+    "parent_id": 307,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 312,
+    "code": "6050",
+    "name": "Bank Charges",
+    "type": "EXPENSE",
+    "parent_id": 307,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 313,
+    "code": "6060",
+    "name": "Insurance Premium (Malpractice/Property)",
+    "type": "EXPENSE",
+    "parent_id": 307,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 314,
+    "code": "6070",
+    "name": "Licenses, Permits & Subscriptions",
+    "type": "EXPENSE",
+    "parent_id": 307,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 315,
+    "code": "6080",
+    "name": "Office Supplies & Courier",
+    "type": "EXPENSE",
+    "parent_id": 307,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 316,
+    "code": "6090",
+    "name": "Staff Canteen / Meals",
+    "type": "EXPENSE",
+    "parent_id": 307,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 317,
+    "code": "6100",
+    "name": "Patient Amenities / Discharge Kits",
+    "type": "EXPENSE",
+    "parent_id": 307,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 318,
+    "code": "6110",
+    "name": "IT & Communication",
+    "type": "EXPENSE",
+    "parent_id": 307,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 319,
+    "code": "6500",
+    "name": "Financial & Other Expenses",
+    "type": "EXPENSE",
+    "parent_id": null,
+    "is_active": 1,
+    "is_protected": 1
+  },
+  {
+    "id": 320,
+    "code": "6510",
+    "name": "Depreciation Expense",
+    "type": "EXPENSE",
+    "parent_id": 319,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 321,
+    "code": "6520",
+    "name": "Amortization (Software / Intangibles)",
+    "type": "EXPENSE",
+    "parent_id": 319,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 322,
+    "code": "6530",
+    "name": "Discount Allowed",
+    "type": "EXPENSE",
+    "parent_id": 319,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 323,
+    "code": "6540",
+    "name": "Bad Debts Written Off",
+    "type": "EXPENSE",
+    "parent_id": 319,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 324,
+    "code": "6550",
+    "name": "Foreign Exchange Loss",
+    "type": "EXPENSE",
+    "parent_id": 319,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 325,
+    "code": "6560",
+    "name": "Interest / Finance Charges",
+    "type": "EXPENSE",
+    "parent_id": 319,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 326,
+    "code": "6570",
+    "name": "Penalties & Fines",
+    "type": "EXPENSE",
+    "parent_id": 319,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 327,
+    "code": "6580",
+    "name": "Charity / Free Treatment / Write-offs",
+    "type": "EXPENSE",
+    "parent_id": 319,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 328,
+    "code": "6590",
+    "name": "Taxes & Licenses (Corporate / Property)",
+    "type": "EXPENSE",
+    "parent_id": 319,
+    "is_active": 1,
+    "is_protected": 0
+  },
+  {
+    "id": 329,
+    "code": "6900",
+    "name": "Miscellaneous Expense",
+    "type": "EXPENSE",
+    "parent_id": 319,
+    "is_active": 1,
+    "is_protected": 0
+  }
+];
+
+        // DOM elements
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const searchInput = document.getElementById('searchInput');
+        const expandAllBtn = document.getElementById('expandAllBtn');
+        const collapseAllBtn = document.getElementById('collapseAllBtn');
+        const statsList = document.getElementById('statsList');
+        const contentArea = document.getElementById('contentArea');
+
+        // State variables
+        let expandedNodes = new Set();
+        let searchFilter = '';
+
+        // Theme loader
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            updateThemeIcon(true);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                updateThemeIcon(false);
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                updateThemeIcon(true);
+            }
+        });
+
+        function updateThemeIcon(isDark) {
+            themeIcon.innerHTML = isDark 
+                ? '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>'
+                : '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>';
+        }
+
+        // Build hierarchy tree
+        function buildTree(accounts) {
+            const nodeMap = new Map();
+            accounts.forEach(acc => {
+                nodeMap.set(acc.id, { ...acc, children: [] });
+            });
+
+            const roots = [];
+            nodeMap.forEach(node => {
+                if (node.parent_id && nodeMap.has(node.parent_id)) {
+                    nodeMap.get(node.parent_id).children.push(node);
+                } else {
+                    roots.push(node);
+                }
+            });
+
+            // Sort by code
+            const sortNodes = (nodes) => {
+                nodes.sort((a, b) => a.code.localeCompare(b.code));
+                nodes.forEach(n => sortNodes(n.children));
+            };
+            sortNodes(roots);
+
+            return roots;
+        }
+
+        const treeRoots = buildTree(rawAccounts);
+
+        // Update stats summary count
+        function updateStats(accounts) {
+            const counts = { ASSET: 0, LIABILITY: 0, EQUITY: 0, INCOME: 0, EXPENSE: 0 };
+            accounts.forEach(acc => {
+                if (counts[acc.type]) counts[acc.type]++;
+            });
+
+            statsList.innerHTML = Object.entries(counts).map(([type, count]) => {
+                const lower = type.toLowerCase();
+                return `
+                    <div class="stat-item ${lower}">
+                        <span>${type} Accounts</span>
+                        <span class="stat-val">${count}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        updateStats(rawAccounts);
+
+        // Generate tree markup
+        function renderTree(roots) {
+            const types = ["ASSET", "LIABILITY", "EQUITY", "INCOME", "EXPENSE"];
+            contentArea.innerHTML = '';
+
+            types.forEach(type => {
+                const categoryRoots = roots.filter(r => r.type === type);
+                if (categoryRoots.length === 0) return;
+
+                const categoryContainer = document.createElement('div');
+                categoryContainer.className = 'category-group';
+                
+                const header = document.createElement('div');
+                header.className = `category-header ${type.toLowerCase()}`;
+                header.innerHTML = `
+                    <div class="category-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4c0-.5.2-1 .6-1.4C5 2.2 5.5 2 6 2h12c.5 0 1 .2 1.4.6.4.4.6.9.6 1.4v18l-4-2-4 2-4-2-4 2z"/></svg>
+                        ${type}
+                    </div>
+                    <div class="category-badge">${countAllChildren(categoryRoots)} Accounts</div>
+                `;
+                categoryContainer.appendChild(header);
+
+                const content = document.createElement('div');
+                content.className = 'category-content';
+                
+                const ul = document.createElement('ul');
+                ul.style.paddingLeft = '0';
+                categoryRoots.forEach(node => {
+                    ul.appendChild(createNodeEl(node, 0));
+                });
+                content.appendChild(ul);
+                categoryContainer.appendChild(content);
+
+                contentArea.appendChild(categoryContainer);
+            });
+        }
+
+        function countAllChildren(nodes) {
+            let count = nodes.length;
+            nodes.forEach(n => {
+                count += countAllChildren(n.children);
+            });
+            return count;
+        }
+
+        function highlightMatch(text, query) {
+            if (!query) return text;
+            const index = text.toLowerCase().indexOf(query.toLowerCase());
+            if (index === -1) return text;
+            return text.substring(0, index) + 
+                `<span class="highlight">${text.substring(index, index + query.length)}</span>` + 
+                text.substring(index + query.length);
+        }
+
+        function matchesSearch(node, query) {
+            if (!query) return false;
+            const q = query.toLowerCase();
+            return node.name.toLowerCase().includes(q) || node.code.toLowerCase().includes(q);
+        }
+
+        function hasMatchingDescendant(node, query) {
+            if (!query) return false;
+            return node.children.some(c => matchesSearch(c, query) || hasMatchingDescendant(c, query));
+        }
+
+        function createNodeEl(node, level) {
+            const li = document.createElement('li');
+            li.className = 'tree-node';
+            li.id = `node-${node.id}`;
+
+            const hasChildren = node.children.length > 0;
+            const isExpanded = expandedNodes.has(node.id);
+
+            const row = document.createElement('div');
+            row.className = 'node-row';
+            row.style.paddingLeft = `${level * 24 + 20}px`;
+            
+            // Expand toggle button
+            let toggleHtml = '<span class="expand-toggle" style="visibility: hidden"></span>';
+            if (hasChildren) {
+                toggleHtml = `
+                    <span class="expand-toggle">
+                        ${isExpanded ? 
+                            '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>' : 
+                            '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>'
+                        }
+                    </span>
+                `;
+            }
+
+            const iconHtml = hasChildren 
+                ? (isExpanded 
+                    ? '<svg class="node-icon folder" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-open"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg>'
+                    : '<svg class="node-icon folder" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>')
+                : '<svg class="node-icon file" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>';
+
+            let badgesHtml = '';
+            if (node.is_protected) {
+                badgesHtml += '<span class="badge protected">🔒 Protected</span>';
+            }
+            if (node.is_active === 0) {
+                badgesHtml += '<span class="badge inactive">Inactive</span>';
+            }
+
+            const codeMatch = searchFilter ? highlightMatch(node.code, searchFilter) : node.code;
+            const nameMatch = searchFilter ? highlightMatch(node.name, searchFilter) : node.name;
+
+            row.innerHTML = `
+                ${toggleHtml}
+                ${iconHtml}
+                <span class="node-code">${codeMatch}</span>
+                <span class="node-name">${nameMatch}</span>
+                <div class="node-badges">${badgesHtml}</div>
+            `;
+
+            // Row click event
+            row.addEventListener('click', (e) => {
+                if (hasChildren && (e.target.closest('.expand-toggle') || !e.target.closest('.expand-toggle'))) {
+                    if (expandedNodes.has(node.id)) {
+                        expandedNodes.delete(node.id);
+                    } else {
+                        expandedNodes.add(node.id);
+                    }
+                    refreshTree();
+                }
+            });
+
+            li.appendChild(row);
+
+            // Render child nodes if expanded or if matching descendants exist during search
+            const shouldShowChildren = hasChildren && (isExpanded || (searchFilter && hasMatchingDescendant(node, searchFilter)));
+            if (shouldShowChildren) {
+                const subUl = document.createElement('ul');
+                subUl.className = 'node-children';
+                node.children.forEach(child => {
+                    subUl.appendChild(createNodeEl(child, level + 1));
+                });
+                li.appendChild(subUl);
+            }
+
+            // Hide node if it doesn't match search filter and has no matching descendants
+            if (searchFilter && !matchesSearch(node, searchFilter) && !hasMatchingDescendant(node, searchFilter)) {
+                li.style.display = 'none';
+            }
+
+            return li;
+        }
+
+        function refreshTree() {
+            renderTree(treeRoots);
+        }
+
+        // Initial render
+        refreshTree();
+
+        // Search trigger
+        searchInput.addEventListener('input', (e) => {
+            searchFilter = e.target.value;
+            refreshTree();
+        });
+
+        // Expand/Collapse events
+        expandAllBtn.addEventListener('click', () => {
+            const collectParentIds = (nodes) => {
+                nodes.forEach(n => {
+                    if (n.children.length > 0) {
+                        expandedNodes.add(n.id);
+                        collectParentIds(n.children);
+                    }
+                });
+            };
+            collectParentIds(treeRoots);
+            refreshTree();
+        });
+
+        collapseAllBtn.addEventListener('click', () => {
+            expandedNodes.clear();
+            refreshTree();
+        });
+    </script>
+</body>
+</html>

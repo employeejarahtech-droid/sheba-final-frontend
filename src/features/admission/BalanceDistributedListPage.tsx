@@ -8,6 +8,7 @@ import { Main } from '@/components/layout/main'
 import { DataTable } from '@/components/DataTable'
 import { PageHeader } from '@/components/layout/page-header'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { getCookie } from '@/lib/cookies'
 import { useCurrency } from '@/hooks/use-currency'
@@ -115,6 +116,27 @@ export function BalanceDistributedListPage() {
         },
     ], [])
 
+    const statsCards = useMemo(() => [
+        {
+            label: 'Completed Cycles',
+            value: meta.total,
+            icon: Trophy,
+            grad: 'from-green-500 to-emerald-500',
+        },
+        {
+            label: 'Total Revenue',
+            value: format(totalRevenue),
+            icon: DollarSign,
+            grad: 'from-emerald-500 to-teal-500',
+        },
+        {
+            label: 'Success Rate',
+            value: '100%',
+            icon: CheckCircle,
+            grad: 'from-teal-500 to-cyan-500',
+        },
+    ], [meta.total, totalRevenue, format])
+
     return (
         <>
             <AppHeader />
@@ -127,34 +149,25 @@ export function BalanceDistributedListPage() {
                     backLabel="Back to Patients"
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-gradient-to-r from-green-600 to-green-400 rounded-2xl p-6 text-white shadow-lg">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-green-100 text-sm font-medium">Completed Cycles</p>
-                                <p className="text-3xl font-bold">{meta.total}</p>
-                            </div>
-                            <Trophy className="w-12 h-12 text-white opacity-90" />
-                        </div>
-                    </div>
-                    <div className="bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-2xl p-6 text-white shadow-lg">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-emerald-100 text-sm font-medium">Total Revenue</p>
-                                <p className="text-3xl font-bold">{format(totalRevenue)}</p>
-                            </div>
-                            <DollarSign className="w-12 h-12 text-white opacity-90" />
-                        </div>
-                    </div>
-                    <div className="bg-gradient-to-r from-teal-600 to-teal-400 rounded-2xl p-6 text-white shadow-lg">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-teal-100 text-sm font-medium">Success Rate</p>
-                                <p className="text-3xl font-bold">100%</p>
-                            </div>
-                            <CheckCircle className="w-12 h-12 text-white opacity-90" />
-                        </div>
-                    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    {statsCards.map((card) => {
+                        const Icon = card.icon;
+                        return (
+                            <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
+                                            <Icon className="w-4 h-4 text-white" />
+                                        </div>
+                                        <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="p-4">
+                                    <h3 className="text-2xl font-bold">{card.value}</h3>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
                 </div>
 
                 <DataTable

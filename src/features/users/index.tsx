@@ -219,7 +219,7 @@ function UsersContent() {
     <>
       <AppHeader fixed />
 
-      <main className='flex flex-1 flex-col gap-4 sm:gap-6 p-4'>
+      <main className='flex flex-1 flex-col gap-4 sm:gap-4'>
         <PageHeader
           title="User List"
           description="Manage your users and their roles here."
@@ -262,30 +262,30 @@ function UsersContent() {
         </div>
 
         {/* Users Table */}
-          
-          <div className="pt-2">
-            {isLoading ? (
-              <div className='flex items-center justify-center h-64'>
-                <Loader2 className='h-8 w-8 animate-spin text-primary' />
-              </div>
-            ) : (
-              <DataTable
-                columns={columns}
-                data={users}
-                meta={data?.data?.meta}
-                onPageChange={(newPage) => setPage(newPage)}
-                onLimitChange={(newLimit) => {
-                  setLimit(newLimit);
-                  setPage(1); // reset page when changing limit
-                }}
-                search={search}
-                onSearchChange={(value) => {
-                  setSearch(value);
-                  setPage(1); // reset page when searching
-                }}
-              />
-            )}
-          </div>
+
+        <div className="pt-2">
+          {isLoading ? (
+            <div className='flex items-center justify-center h-64'>
+              <Loader2 className='h-8 w-8 animate-spin text-primary' />
+            </div>
+          ) : (
+            <DataTable
+              columns={columns}
+              data={users}
+              meta={data?.data?.meta}
+              onPageChange={(newPage) => setPage(newPage)}
+              onLimitChange={(newLimit) => {
+                setLimit(newLimit);
+                setPage(1); // reset page when changing limit
+              }}
+              search={search}
+              onSearchChange={(value) => {
+                setSearch(value);
+                setPage(1); // reset page when searching
+              }}
+            />
+          )}
+        </div>
       </main>
 
       <UsersDialogs />

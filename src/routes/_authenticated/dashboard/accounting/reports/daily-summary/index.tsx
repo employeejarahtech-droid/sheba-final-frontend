@@ -71,7 +71,7 @@ function DailySummary() {
   return (
     <>
       <AppHeader fixed />
-      <main className="p-4 space-y-4">
+      <main className=" space-y-4">
         <PageHeader
           title="Daily Summary"
           description="Opening balance, today's transactions, and closing balance."
@@ -97,73 +97,37 @@ function DailySummary() {
         />
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Opening Balance */}
-          <Card className={cn(
-            "border-t-4 shadow-md transition-all duration-300 hover:shadow-lg",
-            "border-t-blue-500"
-          )}>
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center gap-2">
-                <Scale className="h-4 w-4" /> Opening Balance
-              </CardDescription>
-              <CardTitle className="text-2xl">
-                {isLoading ? <Skeleton className="h-8 w-32" /> : "${currencySymbol} ${openingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">Balance before {format(new Date(selectedDate), "dd MMM yyyy")}</p>
-            </CardContent>
-          </Card>
-
-          {/* Today Debit */}
-          <Card className="border-t-4 border-t-emerald-500 shadow-md transition-all duration-300 hover:shadow-lg">
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center gap-2">
-                <ArrowUpRight className="h-4 w-4 text-emerald-600" /> Today's Debit
-              </CardDescription>
-              <CardTitle className="text-2xl text-emerald-600">
-                {isLoading ? <Skeleton className="h-8 w-32" /> : "${currencySymbol} ${todayDebit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">{transactions.length} transaction{transactions.length !== 1 ? "s" : ""} today</p>
-            </CardContent>
-          </Card>
-
-          {/* Today Credit */}
-          <Card className="border-t-4 border-t-red-500 shadow-md transition-all duration-300 hover:shadow-lg">
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center gap-2">
-                <ArrowDownLeft className="h-4 w-4 text-red-600" /> Today's Credit
-              </CardDescription>
-              <CardTitle className="text-2xl text-red-600">
-                {isLoading ? <Skeleton className="h-8 w-32" /> : "${currencySymbol} ${todayCredit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">Total credits for the day</p>
-            </CardContent>
-          </Card>
-
-          {/* Closing Balance */}
-          <Card className={cn(
-            "border-t-4 shadow-md transition-all duration-300 hover:shadow-lg",
-            closingBalance >= 0 ? "border-t-violet-500" : "border-t-red-500"
-          )}>
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center gap-2">
-                {closingBalance >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-                Closing Balance
-              </CardDescription>
-              <CardTitle className={cn("text-2xl", closingBalance >= 0 ? "text-violet-600" : "text-red-600")}>
-                {isLoading ? <Skeleton className="h-8 w-32" /> : "${currencySymbol} ${closingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">Opening + Debit - Credit</p>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { label: "Opening Balance", icon: Scale, grad: "from-blue-500 to-indigo-500", valueClass: "", sub: `Balance before ${format(new Date(selectedDate), "dd MMM yyyy")}`, value: openingBalance },
+            { label: "Today's Debit", icon: ArrowUpRight, grad: "from-emerald-500 to-teal-500", valueClass: "text-emerald-600", sub: `${transactions.length} transaction${transactions.length !== 1 ? "s" : ""} today`, value: todayDebit },
+            { label: "Today's Credit", icon: ArrowDownLeft, grad: "from-rose-500 to-red-500", valueClass: "text-rose-600", sub: "Total credits for the day", value: todayCredit },
+            { label: "Closing Balance", icon: closingBalance >= 0 ? TrendingUp : TrendingDown, grad: closingBalance >= 0 ? "from-violet-500 to-purple-500" : "from-rose-500 to-red-500", valueClass: closingBalance >= 0 ? "text-violet-600" : "text-rose-600", sub: "Opening + Debit − Credit", value: closingBalance },
+          ].map((card) => {
+            const Icon = card.icon;
+            return (
+              <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                  <div className="flex items-center gap-2.5">
+                    <div className={cn("p-2 bg-gradient-to-br rounded-lg shadow-lg", card.grad)}>
+                      <Icon className="w-4 h-4 text-white" />
+                    </div>
+                    <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4">
+                  {isLoading ? (
+                    <Skeleton className="h-8 w-32" />
+                  ) : (
+                    <h3 className={cn("text-2xl font-bold", card.valueClass)}>
+                      {currencySymbol} {card.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </h3>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Calculation */}

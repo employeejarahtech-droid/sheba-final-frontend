@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useState, Fragment } from "react";
-import { Loader2, Plus, Trash2, ChevronDown, ChevronRight, Search, Eye, EyeOff } from "lucide-react";
+import { useState, Fragment, useMemo } from "react";
+import { Loader2, Plus, Trash2, ChevronDown, ChevronRight, Search, Eye, EyeOff, BookOpen, ArrowUpRight, ArrowDownLeft, Scale } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createFileRoute } from '@tanstack/react-router';
 
@@ -36,6 +36,8 @@ import { toast } from "sonner";
 import { AppHeader } from "@/components/layout/app-header";
 import { Main } from "@/components/layout/main";
 import { PageHeader } from "@/components/layout/page-header";
+import { useCurrency } from "@/hooks/use-currency";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute('/_authenticated/dashboard/accounting/reports/journal/')({
   component: JournalReport,
@@ -78,6 +80,54 @@ function JournalReport() {
 
   const totalPages = journalData?.pagination?.totalPage || 1;
   const totalItems = journalData?.pagination?.total || 0;
+
+  const { currencySymbol } = useCurrency();
+
+  const stats = useMemo(() => {
+    const list = journalData?.data || [];
+    let totalDebitSum = 0;
+    let totalCreditSum = 0;
+
+    list.forEach((entry: any) => {
+      (entry.entries || []).forEach((line: any) => {
+        totalDebitSum += parseFloat(line.debit) || 0;
+        totalCreditSum += parseFloat(line.credit) || 0;
+      });
+    });
+
+    const isBalanced = Math.abs(totalDebitSum - totalCreditSum) < 0.01;
+
+    return [
+      {
+        label: "Total Journal Entries",
+        value: totalItems.toLocaleString(),
+        icon: BookOpen,
+        grad: "from-blue-500 to-indigo-500",
+        sub: "Total entries in this period",
+      },
+      {
+        label: "Total Debits",
+        value: `${currencySymbol} ${totalDebitSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        icon: ArrowUpRight,
+        grad: "from-emerald-500 to-teal-500",
+        sub: "Sum of debits in loaded page",
+      },
+      {
+        label: "Total Credits",
+        value: `${currencySymbol} ${totalCreditSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        icon: ArrowDownLeft,
+        grad: "from-rose-500 to-red-500",
+        sub: "Sum of credits in loaded page",
+      },
+      {
+        label: "Ledger Status",
+        value: isBalanced ? "Balanced" : "Unbalanced",
+        icon: Scale,
+        grad: isBalanced ? "from-violet-500 to-purple-500" : "from-amber-500 to-red-500",
+        sub: "Debits vs Credits check",
+      },
+    ];
+  }, [journalData, totalItems, currencySymbol]);
 
   const toggleRow = (id: number) => {
     setExpandedRows(prev => {
@@ -306,6 +356,33 @@ function JournalReport() {
               </Dialog>
             }
           />
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {stats.map((card) => {
+              const Icon = card.icon;
+              return (
+                <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                  <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
+                        <Icon className="w-4 h-4 text-white" />
+                      </div>
+                      <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    {isLoading ? (
+                      <Skeleton className="h-8 w-28" />
+                    ) : (
+                      <h3 className="text-2xl font-bold">{card.value}</h3>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
 
           {/* Filters + Recent Entries */}
           <Card>

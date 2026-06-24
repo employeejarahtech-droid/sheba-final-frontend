@@ -11,6 +11,7 @@ import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { Stethoscope, Award, Globe, MapPin, Plus } from 'lucide-react'
 import { formatId } from '@/lib/prefix-format'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 
 type DoctorItem = {
@@ -152,30 +153,26 @@ export default function Doctors({ page, limit, search, setPage, setLimit, setSea
             {
                 label: "Total Doctors",
                 value: totalDoctors,
-                gradient: "from-blue-600 to-blue-400",
-                shadow: "shadow-blue-500/30",
-                icon: <Stethoscope className="w-6 h-6 text-white" />,
+                icon: Stethoscope,
+                grad: "from-blue-500 to-indigo-500",
             },
             {
                 label: "Specialties",
                 value: totalSpecialties,
-                gradient: "from-purple-600 to-purple-400",
-                shadow: "shadow-purple-500/30",
-                icon: <Award className="w-6 h-6 text-white" />,
+                icon: Award,
+                grad: "from-purple-500 to-indigo-500",
             },
             {
                 label: "Countries",
                 value: totalCountries,
-                gradient: "from-emerald-600 to-emerald-400",
-                shadow: "shadow-emerald-500/30",
-                icon: <Globe className="w-6 h-6 text-white" />,
+                icon: Globe,
+                grad: "from-emerald-500 to-teal-500",
             },
             {
                 label: "Cities",
                 value: totalCities,
-                gradient: "from-amber-600 to-amber-400",
-                shadow: "shadow-amber-500/30",
-                icon: <MapPin className="w-6 h-6 text-white" />,
+                icon: MapPin,
+                grad: "from-amber-500 to-orange-500",
             },
         ];
     }, [data]);
@@ -525,34 +522,25 @@ export default function Doctors({ page, limit, search, setPage, setLimit, setSea
         <Main>
             <div className="space-y-4">
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {stats.map((item, idx) => (
-                    <div
-                        key={idx}
-                        className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${item.gradient} p-4 md:p-6 shadow-lg ${item.shadow} transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]`}
-                    >
-                        {/* Background Pattern */}
-                        <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-                        <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-
-                        <div className="relative flex items-start justify-between">
-                            <div>
-                                <p className="text-xs md:text-sm font-medium text-white/90">{item.label}</p>
-                                <h3 className="mt-1 md:mt-2 text-2xl md:text-3xl font-bold text-white">
-                                    {item.value || 0}
-                                </h3>
-                            </div>
-                            <div className="rounded-xl bg-white/20 p-2 md:p-2.5 backdrop-blur-sm">
-                                {item.icon}
-                            </div>
-                        </div>
-
-                        {/* Progress/Indicator line */}
-                        <div className="mt-4 h-1 w-full rounded-full bg-black/10">
-                            <div className="h-full w-2/3 rounded-full bg-white/40" />
-                        </div>
-                    </div>
-                ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {stats.map((card) => {
+                    const Icon = card.icon;
+                    return (
+                        <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                <div className="flex items-center gap-2.5">
+                                    <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
+                                        <Icon className="w-4 h-4 text-white" />
+                                    </div>
+                                    <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-4">
+                                <h3 className="text-2xl font-bold">{card.value || 0}</h3>
+                            </CardContent>
+                        </Card>
+                    );
+                })}
             </div>
 
               {/* Header & Table */}

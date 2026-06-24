@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { useCurrency } from '@/hooks/use-currency'
 import { BedDouble, DollarSign, LogOut, Stethoscope, TestTube2, UserPlus } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface ActivityItem {
   id: number
@@ -109,43 +110,108 @@ const typeConfig: Record<
 export function RecentActivity() {
   const { currencySymbol } = useCurrency()
 
+  const outdoorActivities = recentActivity.filter(
+    (item) => item.type === 'outdoor' || item.type === 'lab'
+  )
+  const indoorActivities = recentActivity.filter(
+    (item) =>
+      item.type === 'admission' ||
+      item.type === 'discharge' ||
+      item.type === 'payment'
+  )
+
   return (
-    <div className='space-y-4'>
-      {recentActivity.map((item) => {
-        const config = typeConfig[item.type]
-        const Icon = config.icon
-        return (
-          <div key={item.id} className='flex items-start gap-3'>
-            <div
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${config.iconClass}`}
-            >
-              <Icon className='h-4 w-4' />
-            </div>
-            <div className='min-w-0 flex-1'>
-              <div className='flex items-center justify-between gap-2'>
-                <p className='truncate text-sm font-medium'>{item.patient}</p>
-                <span className='text-muted-foreground shrink-0 text-xs'>
-                  {item.time}
-                </span>
+    <Tabs defaultValue='outdoor' className='w-full'>
+      <TabsList className='grid w-full grid-cols-2 mb-4'>
+        <TabsTrigger value='outdoor'>Outdoor</TabsTrigger>
+        <TabsTrigger value='indoor'>Indoor</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value='outdoor' className='space-y-4'>
+        {outdoorActivities.map((item) => {
+          const config = typeConfig[item.type]
+          const Icon = config.icon
+          return (
+            <div key={item.id} className='flex items-start gap-3'>
+              <div
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${config.iconClass}`}
+              >
+                <Icon className='h-4 w-4' />
               </div>
-              <div className='flex items-center gap-2 mt-0.5'>
-                <Badge variant='outline' className='text-[10px] px-1.5 py-0'>
-                  {config.label}
-                </Badge>
-                <p className='text-muted-foreground truncate text-xs'>
-                  {item.detail}
-                </p>
+              <div className='min-w-0 flex-1'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='truncate text-sm font-medium'>{item.patient}</p>
+                  <span className='text-muted-foreground shrink-0 text-xs'>
+                    {item.time}
+                  </span>
+                </div>
+                <div className='flex items-center gap-2 mt-0.5'>
+                  <Badge variant='outline' className='text-[10px] px-1.5 py-0'>
+                    {config.label}
+                  </Badge>
+                  <p className='text-muted-foreground truncate text-xs'>
+                    {item.detail}
+                  </p>
+                </div>
+                {item.amount !== undefined && (
+                  <p className='mt-0.5 text-sm font-semibold text-emerald-600'>
+                    {currencySymbol}
+                    {item.amount.toLocaleString()}
+                  </p>
+                )}
               </div>
-              {item.amount !== undefined && (
-                <p className='mt-0.5 text-sm font-semibold text-emerald-600'>
-                  {currencySymbol}
-                  {item.amount.toLocaleString()}
-                </p>
-              )}
             </div>
-          </div>
-        )
-      })}
-    </div>
+          )
+        })}
+        {outdoorActivities.length === 0 && (
+          <p className='text-sm text-muted-foreground text-center py-4'>
+            No recent outdoor activities.
+          </p>
+        )}
+      </TabsContent>
+
+      <TabsContent value='indoor' className='space-y-4'>
+        {indoorActivities.map((item) => {
+          const config = typeConfig[item.type]
+          const Icon = config.icon
+          return (
+            <div key={item.id} className='flex items-start gap-3'>
+              <div
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${config.iconClass}`}
+              >
+                <Icon className='h-4 w-4' />
+              </div>
+              <div className='min-w-0 flex-1'>
+                <div className='flex items-center justify-between gap-2'>
+                  <p className='truncate text-sm font-medium'>{item.patient}</p>
+                  <span className='text-muted-foreground shrink-0 text-xs'>
+                    {item.time}
+                  </span>
+                </div>
+                <div className='flex items-center gap-2 mt-0.5'>
+                  <Badge variant='outline' className='text-[10px] px-1.5 py-0'>
+                    {config.label}
+                  </Badge>
+                  <p className='text-muted-foreground truncate text-xs'>
+                    {item.detail}
+                  </p>
+                </div>
+                {item.amount !== undefined && (
+                  <p className='mt-0.5 text-sm font-semibold text-emerald-600'>
+                    {currencySymbol}
+                    {item.amount.toLocaleString()}
+                  </p>
+                )}
+              </div>
+            </div>
+          )
+        })}
+        {indoorActivities.length === 0 && (
+          <p className='text-sm text-muted-foreground text-center py-4'>
+            No recent indoor activities.
+          </p>
+        )}
+      </TabsContent>
+    </Tabs>
   )
 }

@@ -340,6 +340,19 @@ export const sidebarData: SidebarData = {
           icon: Wallet,
           items: [
             { title: 'Overview', url: '/dashboard/payroll/overview', icon: Wallet },
+            { title: 'Employees', url: '/dashboard/payroll/employees', icon: Users },
+            { title: 'Attendance', url: '/dashboard/payroll/attendance-list', icon: Calendar },
+            { title: 'Salary Structure', url: '/dashboard/payroll/salary-structure', icon: DollarSign },
+            { title: 'All Payrolls', url: '/dashboard/payroll/all-payrolls', icon: FileText },
+          ],
+        },
+        {
+          title: 'Payments',
+          icon: CreditCard,
+          items: [
+            { title: 'Process Payments', url: '/dashboard/finance/payments', icon: CreditCard },
+            { title: 'Payment History', url: '/dashboard/finance/payment-history', icon: Receipt },
+            { title: 'Reconciliation', url: '/dashboard/finance/reconciliation', icon: CheckCircle2 },
           ],
         },
       ],

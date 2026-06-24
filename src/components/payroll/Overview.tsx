@@ -12,12 +12,15 @@ import {
     PlusCircle,
     Users,
     XCircle,
+    Plus,
 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { DataTable } from "../DataTable";
 import { useNavigate } from "@tanstack/react-router";
 import { AppHeader } from "../layout/app-header";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getCookie } from "@/lib/cookies";
 
 // Dummy types
 type Department = {
@@ -31,17 +34,22 @@ type Role = {
 };
 
 type Staff = {
-    id: string;
-    first_name: string;
-    last_name: string;
+    id: string | number;
+    first_name?: string;
+    last_name?: string;
+    name?: string;
     email: string;
     thumb_url?: string;
+    avatar?: string;
+    image?: string;
+    is_active?: boolean;
+    role_id?: number;
     basic_salary?: number;
     salary?: number;
-    department?: Department;
+    department?: Department | string;
     position?: string;
     role?: Role;
-    status: string;
+    status?: string;
     created_at: string;
     allowances?: { name: string; amount: number }[];
     deductions?: { name: string; amount: number }[];
@@ -219,9 +227,29 @@ export default function HrPayrollOverview() {
     const [search, setSearch] = useState("");
     const [limit] = useState(10);
 
-    // Use dummy data instead of API
-    const [staffsList, setStaffsList] = useState<Staff[]>(DUMMY_STAFF_DATA);
-    const isLoading = false;
+    const token = getCookie('accessToken');
+    const queryClient = useQueryClient();
+
+    const { data: usersResponse, isLoading } = useQuery({
+        queryKey: ["users-list", page, limit, search],
+        queryFn: async () => {
+            const url = `${import.meta.env.VITE_API_URL}/api/users/list?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`;
+            const res = await fetch(url, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error("Failed to fetch user list");
+            return res.json();
+        },
+        enabled: !!token,
+    });
+
+    const staffsList = useMemo<Staff[]>(() => {
+        return usersResponse?.data?.items || [];
+    }, [usersResponse]);
+
+    const totalCount = useMemo(() => {
+        return usersResponse?.data?.meta?.total || staffsList.length || 0;
+    }, [usersResponse, staffsList]);
 
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
@@ -229,48 +257,53 @@ export default function HrPayrollOverview() {
     // -----------------------------------------
     //  DYNAMIC STATS BASED ON API RESPONSE
     // -----------------------------------------
-    const totalStaff = staffsList?.length;
+    const totalStaff = staffsList?.length || 0;
 
     const activeStaff = staffsList?.filter(
-        (s: Staff) => s.status.toLowerCase() === "active"
-    ).length;
+        (s: Staff) => {
+            const statusStr = s.status || (s.is_active ? "active" : "inactive");
+            return statusStr.toLowerCase() === "active";
+        }
+    ).length || 0;
 
     const inactiveStaff = staffsList?.filter(
-        (s: Staff) => s.status.toLowerCase() === "inactive"
-    ).length;
+        (s: Staff) => {
+            const statusStr = s.status || (s.is_active ? "active" : "inactive");
+            return statusStr.toLowerCase() === "inactive";
+        }
+    ).length || 0;
 
     const onLeaveStaff = staffsList?.filter(
-        (s) => s.status.toLowerCase() === "on leave"
-    ).length;
+        (s: Staff) => {
+            const statusStr = s.status || (s.is_active ? "active" : "inactive");
+            return statusStr.toLowerCase() === "on leave";
+        }
+    ).length || 0;
 
     const stats = [
         {
             label: "Total Staffs",
             value: totalStaff,
-            gradient: "from-blue-600 to-blue-400",
-            shadow: "shadow-blue-500/30",
-            icon: <Users className="w-6 h-6 text-white" />,
+            gradientClass: "from-blue-500 to-indigo-500 shadow-blue-500/20",
+            icon: Users,
         },
         {
             label: "Active Staffs",
             value: activeStaff,
-            gradient: "from-emerald-600 to-emerald-400",
-            shadow: "shadow-emerald-500/30",
-            icon: <Clock className="w-6 h-6 text-white" />,
+            gradientClass: "from-emerald-500 to-teal-500 shadow-emerald-500/20",
+            icon: Clock,
         },
         {
             label: "On Leave",
             value: onLeaveStaff,
-            gradient: "from-amber-600 to-amber-400",
-            shadow: "shadow-amber-500/30",
-            icon: <CalendarX2 className="w-6 h-6 text-white" />,
+            gradientClass: "from-amber-500 to-orange-500 shadow-amber-500/20",
+            icon: CalendarX2,
         },
         {
             label: "Inactive Staffs",
             value: inactiveStaff,
-            gradient: "from-rose-600 to-rose-400",
-            shadow: "shadow-rose-500/30",
-            icon: <XCircle className="w-6 h-6 text-white" />,
+            gradientClass: "from-rose-500 to-red-500 shadow-rose-500/20",
+            icon: XCircle,
         },
     ];
 
@@ -282,13 +315,25 @@ export default function HrPayrollOverview() {
         setModalOpen(true);
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (!selectedStaff) return;
-        // Remove from local state
-        setStaffsList(prev => prev.filter(s => s.id !== selectedStaff.id));
-        toast.success("Staff deleted successfully!");
-        setModalOpen(false);
-        setSelectedStaff(null);
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/delete/${selectedStaff.id}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData?.message || "Failed to delete user");
+            }
+            toast.success("User deleted successfully!");
+            queryClient.invalidateQueries({ queryKey: ["users-list"] });
+        } catch (err: any) {
+            toast.error(err.message || "Failed to delete user");
+        } finally {
+            setModalOpen(false);
+            setSelectedStaff(null);
+        }
     };
 
     // -----------------------
@@ -317,17 +362,33 @@ export default function HrPayrollOverview() {
         const allowanceBreakdown: Record<string, number> = {};
         const deductionBreakdown: Record<string, number> = {};
 
+        const parseJSONArray = (val: any) => {
+            if (Array.isArray(val)) return val;
+            if (typeof val === 'string') {
+                try {
+                    const parsed = JSON.parse(val);
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch (_) {
+                    return [];
+                }
+            }
+            return [];
+        };
+
         staffsList.forEach((staff) => {
             const salary = Number(staff.basic_salary) || Number(staff.salary) || 0;
             basic += salary;
 
-            staff.allowances?.forEach((a) => {
+            const allowances = parseJSONArray(staff.allowances);
+            const deductions = parseJSONArray(staff.deductions);
+
+            allowances.forEach((a: any) => {
                 const amt = Number(a.amount) || 0;
                 totalAllowances += amt;
                 allowanceBreakdown[a.name] = (allowanceBreakdown[a.name] || 0) + amt;
             });
 
-            staff.deductions?.forEach((d) => {
+            deductions.forEach((d: any) => {
                 const amt = Number(d.amount) || 0;
                 totalDeductions += amt;
                 deductionBreakdown[d.name] = (deductionBreakdown[d.name] || 0) + amt;
@@ -355,14 +416,18 @@ export default function HrPayrollOverview() {
             title: "Name",
             className: "font-semibold",
             render: (_data: any, _type: string, row: Staff) => {
-                return `${row.first_name} ${row.last_name}`;
+                if (row.name) return row.name;
+                const fname = row.first_name || '';
+                const lname = row.last_name || '';
+                return `${fname} ${lname}`.trim() || 'Unnamed';
             },
         },
         {
             data: "thumb_url",
             title: "Image",
-            render: (data: string) => {
-                return `<div class="flex items-center gap-2"><img src="${data}" class="w-8 h-8 rounded-full" /></div>`;
+            render: (data: string, _type: string, row: any) => {
+                const avatarUrl = data || row.avatar || row.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(row.name || row.email || 'avatar')}`;
+                return `<div class="flex items-center gap-2"><img src="${avatarUrl}" class="w-8 h-8 rounded-full object-cover" /></div>`;
             },
         },
         {
@@ -380,27 +445,37 @@ export default function HrPayrollOverview() {
         {
             data: "department",
             title: "Department",
-            render: (data: Department) => {
-                return data?.name || '-';
+            render: (data: any, _type: string, row: any) => {
+                if (typeof data === 'object' && data?.name) return data.name;
+                if (typeof data === 'string') return data;
+                if (typeof row.department === 'string') return row.department;
+                return '-';
             },
         },
         {
             data: "position",
             title: "Position",
+            render: (data: string) => data || '-',
         },
         {
             data: "role",
             title: "Role",
-            render: (data: Role) => {
-                return data?.display_name || '-';
+            render: (data: any, _type: string, row: any) => {
+                if (data?.display_name) return data.display_name;
+                if (typeof data === 'string') return data;
+                if (row.role_id === 1) return 'Admin';
+                if (row.role_id === 2) return 'Doctor';
+                if (row.role_id === 3) return 'Staff';
+                return '-';
             },
         },
         {
             data: "status",
             title: "Status",
-            render: (data: string) => {
-                const color = data?.toLowerCase() === "active" ? "bg-green-600" : data?.toLowerCase() === "inactive" ? "bg-red-500" : "bg-gray-500";
-                return `<span class="${color} text-white capitalize px-2 py-1 rounded text-xs">${data}</span>`;
+            render: (data: string, _type: string, row: any) => {
+                const statusStr = data || (row.is_active ? 'active' : 'inactive');
+                const color = statusStr.toLowerCase() === "active" ? "bg-green-600" : statusStr.toLowerCase() === "inactive" ? "bg-red-500" : "bg-gray-500";
+                return `<span class="${color} text-white capitalize px-2 py-1 rounded text-xs">${statusStr}</span>`;
             },
         },
         {
@@ -436,15 +511,15 @@ export default function HrPayrollOverview() {
     // Expose handlers to window for onclick
     useEffect(() => {
         (window as any).handleSalaryClick = (id: string) => {
-            const staff = staffsList.find(s => s.id === id);
+            const staff = staffsList.find(s => String(s.id) === String(id));
             if (staff) handleSalaryClick(staff);
         };
         (window as any).handleAttendanceClick = (id: string) => {
-            const staff = staffsList.find(s => s.id === id);
+            const staff = staffsList.find(s => String(s.id) === String(id));
             if (staff) handleAttendanceClick(staff);
         };
         (window as any).handleDeleteClick = (id: string) => {
-            const staff = staffsList.find(s => s.id === id);
+            const staff = staffsList.find(s => String(s.id) === String(id));
             if (staff) handleDeleteClick(staff);
         };
     }, [staffsList]);
@@ -452,53 +527,54 @@ export default function HrPayrollOverview() {
     return (
         <>
             <AppHeader fixed />
-            <main className="p-6 lg:p-10">
+            <main className="">
                 <div className="w-full">
-                    <div className="flex flex-wrap items-center justify-between gap-5 mb-6">
+                    <div className="flex flex-wrap items-center justify-between gap-5 mb-3">
                         <h1 className="text-2xl font-bold tracking-tight">Employee & Payroll Overview</h1>
 
-                        <button onClick={() => toast.info('Add Employee functionality')} className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-2.5 font-medium text-white shadow-lg shadow-blue-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-blue-500/40 active:translate-y-0 active:shadow-none">
-                            <PlusCircle size={18} />
+                        <button onClick={() => toast.info('Add Employee functionality')} className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 px-4 py-2 has-[>svg]:px-3 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs">
+                            <Plus size={16} />
                             Add Employee
                         </button>
                     </div>
 
                     {/* Stats */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                        {stats.map((item, idx) => (
-                            <div
-                                key={idx}
-                                className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${item.gradient} p-6 shadow-lg ${item.shadow} transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]`}
-                            >
-                                {/* Background Pattern */}
-                                <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-                                <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-
-                                <div className="relative flex items-start justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-white/90">{item.label}</p>
-                                        <h3 className="mt-2 text-3xl font-bold text-white">
-                                            {item.value || 0}
-                                        </h3>
-                                    </div>
-                                    <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                                        {item.icon}
-                                    </div>
-                                </div>
-
-                                {/* Progress/Indicator line */}
-                                <div className="mt-4 h-1 w-full rounded-full bg-black/10">
-                                    <div className="h-full w-2/3 rounded-full bg-white/40" />
-                                </div>
-                            </div>
-                        ))}
+                        {stats.map((item, idx) => {
+                            const Icon = item.icon;
+                            return (
+                                <Card key={idx} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className={`p-2 bg-gradient-to-br ${item.gradientClass} rounded-lg shadow-lg`}>
+                                                <Icon className="w-4 h-4 text-white" />
+                                            </div>
+                                            <div>
+                                                <CardTitle className="text-sm font-semibold">{item.label}</CardTitle>
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="p-4">
+                                        <div className="text-2xl font-bold">{item.value || 0}</div>
+                                    </CardContent>
+                                </Card>
+                            );
+                        })}
                     </div>
 
-                    <Card className="pt-6 pb-2">
-                        <CardHeader>
-                            <CardTitle>All Employees</CardTitle>
+                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2.5 px-4 gap-0">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                    <Users className="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-lg font-bold">All Employees</CardTitle>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">List of all registered hospital staff and details</p>
+                                </div>
+                            </div>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="p-4">
                             {isLoading ? (
                                 <p>Loading...</p>
                             ) : (
@@ -508,7 +584,7 @@ export default function HrPayrollOverview() {
                                     meta={{
                                         page: page,
                                         limit: limit,
-                                        total: staffsList.length
+                                        total: totalCount
                                     }}
                                     onPageChange={(newPage) => setPage(newPage)}
                                     search={search}
@@ -531,60 +607,76 @@ export default function HrPayrollOverview() {
 
                             {/* 4 Key Metrics */}
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
-                                    <CardContent className="p-6">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <p className="text-sm font-medium text-gray-500">Total Basic Salary</p>
-                                            <div className="p-2 bg-blue-100 rounded-full">
-                                                <Building2 className="w-4 h-4 text-blue-600" />
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                                <Building2 className="w-4 h-4 text-white" />
+                                            </div>
+                                            <div>
+                                                <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">Total Basic Salary</CardTitle>
                                             </div>
                                         </div>
-                                        <h3 className="text-2xl font-bold text-gray-800">
+                                    </CardHeader>
+                                    <CardContent className="p-4">
+                                        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
                                             {payrollAggregates?.basic.toLocaleString()}
                                         </h3>
                                         <p className="text-xs text-blue-500 mt-1 font-medium">Fixed Component</p>
                                     </CardContent>
                                 </Card>
 
-                                <Card className="border-l-4 border-l-emerald-500 shadow-sm hover:shadow-md transition-shadow">
-                                    <CardContent className="p-6">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <p className="text-sm font-medium text-gray-500">Total Allowances</p>
-                                            <div className="p-2 bg-emerald-100 rounded-full">
-                                                <ArrowUpCircle className="w-4 h-4 text-emerald-600" />
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg shadow-lg">
+                                                <ArrowUpCircle className="w-4 h-4 text-white" />
+                                            </div>
+                                            <div>
+                                                <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">Total Allowances</CardTitle>
                                             </div>
                                         </div>
-                                        <h3 className="text-2xl font-bold text-gray-800">
+                                    </CardHeader>
+                                    <CardContent className="p-4">
+                                        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
                                             {payrollAggregates?.totalAllowances.toLocaleString()}
                                         </h3>
                                         <p className="text-xs text-emerald-500 mt-1 font-medium">+ Additions</p>
                                     </CardContent>
                                 </Card>
 
-                                <Card className="border-l-4 border-l-rose-500 shadow-sm hover:shadow-md transition-shadow">
-                                    <CardContent className="p-6">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <p className="text-sm font-medium text-gray-500">Total Deductions</p>
-                                            <div className="p-2 bg-rose-100 rounded-full">
-                                                <ArrowDownCircle className="w-4 h-4 text-rose-600" />
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="p-2 bg-gradient-to-br from-rose-500 to-red-500 rounded-lg shadow-lg">
+                                                <ArrowDownCircle className="w-4 h-4 text-white" />
+                                            </div>
+                                            <div>
+                                                <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">Total Deductions</CardTitle>
                                             </div>
                                         </div>
-                                        <h3 className="text-2xl font-bold text-gray-800">
+                                    </CardHeader>
+                                    <CardContent className="p-4">
+                                        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
                                             {payrollAggregates?.totalDeductions.toLocaleString()}
                                         </h3>
                                         <p className="text-xs text-rose-500 mt-1 font-medium">- Subtractions</p>
                                     </CardContent>
                                 </Card>
 
-                                <Card className="border-l-4 border-l-purple-600 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-white to-purple-50">
-                                    <CardContent className="p-6">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <p className="text-sm font-medium text-gray-500">Est. Net Payable</p>
-                                            <div className="p-2 bg-purple-100 rounded-full">
-                                                <Banknote className="w-4 h-4 text-purple-600" />
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border bg-gradient-to-br from-white to-purple-50/50 dark:from-gray-900 dark:to-purple-950/10">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg shadow-lg">
+                                                <Banknote className="w-4 h-4 text-white" />
+                                            </div>
+                                            <div>
+                                                <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">Est. Net Payable</CardTitle>
                                             </div>
                                         </div>
-                                        <h3 className="text-2xl font-bold text-purple-700">
+                                    </CardHeader>
+                                    <CardContent className="p-4">
+                                        <h3 className="text-2xl font-bold text-purple-700 dark:text-purple-400">
                                             {payrollAggregates?.net.toLocaleString()}
                                         </h3>
                                         <p className="text-xs text-purple-500 mt-1 font-medium">= Final Payout</p>
@@ -595,13 +687,19 @@ export default function HrPayrollOverview() {
                             {/* Breakdown Charts/Lists */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Allowances Breakdown */}
-                                <Card>
-                                    <CardHeader className="pb-2 border-b">
-                                        <CardTitle className="text-lg flex items-center gap-2 text-emerald-800">
-                                            <PieChart className="w-5 h-5" /> Allowance Breakdown
-                                        </CardTitle>
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2.5 px-4 gap-0">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg shadow-lg">
+                                                <PieChart className="w-4 h-4 text-white" />
+                                            </div>
+                                            <div>
+                                                <CardTitle className="text-lg font-bold text-emerald-800 dark:text-emerald-300">Allowance Breakdown</CardTitle>
+                                                <p className="text-xs text-gray-600 dark:text-gray-400">Detailed list of employee allowances</p>
+                                            </div>
+                                        </div>
                                     </CardHeader>
-                                    <CardContent className="pt-4">
+                                    <CardContent className="p-4">
                                         <div className="space-y-3">
                                             {Object.entries(payrollAggregates?.allowanceBreakdown || {}).map(([name, amount], idx) => (
                                                 <div key={idx} className="flex items-center justify-between text-sm">
@@ -617,13 +715,19 @@ export default function HrPayrollOverview() {
                                 </Card>
 
                                 {/* Deductions Breakdown */}
-                                <Card>
-                                    <CardHeader className="pb-2 border-b">
-                                        <CardTitle className="text-lg flex items-center gap-2 text-rose-800">
-                                            <PieChart className="w-5 h-5" /> Deduction Breakdown
-                                        </CardTitle>
+                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2.5 px-4 gap-0">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="p-2 bg-gradient-to-br from-rose-500 to-red-500 rounded-lg shadow-lg">
+                                                <PieChart className="w-4 h-4 text-white" />
+                                            </div>
+                                            <div>
+                                                <CardTitle className="text-lg font-bold text-rose-800 dark:text-rose-300">Deduction Breakdown</CardTitle>
+                                                <p className="text-xs text-gray-600 dark:text-gray-400">Detailed list of employee deductions</p>
+                                            </div>
+                                        </div>
                                     </CardHeader>
-                                    <CardContent className="pt-4">
+                                    <CardContent className="p-4">
                                         <div className="space-y-3">
                                             {Object.entries(payrollAggregates?.deductionBreakdown || {}).map(([name, amount], idx) => (
                                                 <div key={idx} className="flex items-center justify-between text-sm">
@@ -646,7 +750,7 @@ export default function HrPayrollOverview() {
                         open={modalOpen}
                         onClose={() => setModalOpen(false)}
                         onConfirm={confirmDelete}
-                        message={`Are you sure you want to delete ${selectedStaff?.first_name} ${selectedStaff?.last_name}?`}
+                        message={`Are you sure you want to delete ${selectedStaff?.name || `${selectedStaff?.first_name} ${selectedStaff?.last_name}`.trim() || 'this staff member'}?`}
                     />
                 </div>
             </main>

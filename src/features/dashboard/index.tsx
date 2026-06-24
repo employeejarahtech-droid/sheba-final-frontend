@@ -103,7 +103,7 @@ export function Dashboard() {
             value={format(s.todayRevenue)}
             change={s.revenueChange}
             icon={DollarSign}
-            iconClass='text-emerald-600 bg-emerald-100'
+            gradientClass='from-emerald-500 to-teal-500 shadow-emerald-500/20'
           />
           <SummaryCard
             title='Outdoor Patients'
@@ -111,7 +111,7 @@ export function Dashboard() {
             subtitle='today'
             change={s.outdoorChange}
             icon={Stethoscope}
-            iconClass='text-blue-600 bg-blue-100'
+            gradientClass='from-blue-500 to-indigo-500 shadow-blue-500/20'
           />
           <SummaryCard
             title='Admitted'
@@ -119,14 +119,14 @@ export function Dashboard() {
             subtitle='currently'
             change={s.admittedChange}
             icon={BedDouble}
-            iconClass='text-violet-600 bg-violet-100'
+            gradientClass='from-violet-500 to-purple-500 shadow-violet-500/20'
           />
           <SummaryCard
             title='Available Beds'
             value={`${s.availableBeds}/${s.totalBeds}`}
             subtitle={`${Math.round((s.availableBeds / (s.totalBeds || 1)) * 100)}% free`}
             icon={Users}
-            iconClass='text-orange-600 bg-orange-100'
+            gradientClass='from-orange-500 to-amber-500 shadow-orange-500/20'
           />
           <SummaryCard
             title='Lab Tests'
@@ -134,14 +134,14 @@ export function Dashboard() {
             subtitle='today'
             change={s.labChange}
             icon={TestTube2}
-            iconClass='text-pink-600 bg-pink-100'
+            gradientClass='from-pink-500 to-rose-500 shadow-pink-500/20'
           />
           <SummaryCard
             title='Pending Bills'
             value={String(s.pendingBills)}
             subtitle={format(s.pendingAmount)}
             icon={Receipt}
-            iconClass='text-red-600 bg-red-100'
+            gradientClass='from-red-500 to-orange-500 shadow-red-500/20'
           />
         </div>
 
@@ -211,21 +211,35 @@ export function Dashboard() {
 
         {/* ===== Charts Row ===== */}
         <div className='mt-6 grid grid-cols-1 gap-4 lg:grid-cols-7'>
-          <Card className='col-span-1 lg:col-span-4'>
-            <CardHeader>
-              <CardTitle>Revenue Trend</CardTitle>
-              <CardDescription>Daily revenue — last 30 days</CardDescription>
+          <Card className='col-span-1 lg:col-span-4 overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border'>
+            <CardHeader className='bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0'>
+              <div className='flex items-center gap-2.5'>
+                <div className='p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg'>
+                  <TrendingUp className='h-4 w-4 text-white' />
+                </div>
+                <div>
+                  <CardTitle className='text-lg font-bold'>Revenue Trend</CardTitle>
+                  <CardDescription className='text-xs text-gray-600 dark:text-gray-400'>Daily revenue — last 30 days</CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className='ps-2'>
+            <CardContent className='p-4 ps-2'>
               <Overview />
             </CardContent>
           </Card>
-          <Card className='col-span-1 lg:col-span-3'>
-            <CardHeader>
-              <CardTitle>Department Revenue</CardTitle>
-              <CardDescription>Revenue breakdown — current month</CardDescription>
+          <Card className='col-span-1 lg:col-span-3 overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border'>
+            <CardHeader className='bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0'>
+              <div className='flex items-center gap-2.5'>
+                <div className='p-2 bg-gradient-to-br from-violet-500 to-purple-500 rounded-lg shadow-lg'>
+                  <DollarSign className='h-4 w-4 text-white' />
+                </div>
+                <div>
+                  <CardTitle className='text-lg font-bold'>Department Revenue</CardTitle>
+                  <CardDescription className='text-xs text-gray-600 dark:text-gray-400'>Revenue breakdown — current month</CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className='p-4'>
               <DepartmentRevenue />
             </CardContent>
           </Card>
@@ -233,21 +247,35 @@ export function Dashboard() {
 
         {/* ===== Bottom Row ===== */}
         <div className='mt-6 grid grid-cols-1 gap-4 lg:grid-cols-7'>
-          <Card className='col-span-1 lg:col-span-3'>
-            <CardHeader>
-              <CardTitle>Bed Occupancy</CardTitle>
-              <CardDescription>Current bed & cabin status</CardDescription>
+          <Card className='col-span-1 lg:col-span-3 overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border'>
+            <CardHeader className='bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0'>
+              <div className='flex items-center gap-2.5'>
+                <div className='p-2 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg shadow-lg'>
+                  <BedDouble className='h-4 w-4 text-white' />
+                </div>
+                <div>
+                  <CardTitle className='text-lg font-bold'>Bed Occupancy</CardTitle>
+                  <CardDescription className='text-xs text-gray-600 dark:text-gray-400'>Current bed & cabin status</CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className='p-4'>
               <BedOccupancy />
             </CardContent>
           </Card>
-          <Card className='col-span-1 lg:col-span-4'>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest admissions, discharges & payments</CardDescription>
+          <Card className='col-span-1 lg:col-span-4 overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border'>
+            <CardHeader className='bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0'>
+              <div className='flex items-center gap-2.5'>
+                <div className='p-2 bg-gradient-to-br from-pink-500 to-rose-500 rounded-lg shadow-lg'>
+                  <Activity className='h-4 w-4 text-white' />
+                </div>
+                <div>
+                  <CardTitle className='text-lg font-bold'>Recent Activity</CardTitle>
+                  <CardDescription className='text-xs text-gray-600 dark:text-gray-400'>Latest admissions, discharges & payments</CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className='p-4'>
               <RecentActivity />
             </CardContent>
           </Card>
@@ -264,29 +292,33 @@ function SummaryCard({
   subtitle,
   change,
   icon: Icon,
-  iconClass,
+  gradientClass,
 }: {
   title: string
   value: string
   subtitle?: string
   change?: number
   icon: React.ElementType
-  iconClass: string
+  gradientClass: string
 }) {
   const isPositive = change !== undefined && change >= 0
   return (
-    <Card>
-      <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-        <CardTitle className='text-sm font-medium'>{title}</CardTitle>
-        <div
-          className={`flex h-8 w-8 items-center justify-center rounded-md ${iconClass}`}
-        >
-          <Icon className='h-4 w-4' />
+    <Card className='overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border'>
+      <CardHeader className='bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0'>
+        <div className='flex items-center gap-2.5'>
+          <div
+            className={`p-2 bg-gradient-to-br ${gradientClass} rounded-lg shadow-lg`}
+          >
+            <Icon className='h-4 w-4 text-white' />
+          </div>
+          <div>
+            <CardTitle className='text-sm font-semibold'>{title}</CardTitle>
+          </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className='p-4'>
         <div className='text-2xl font-bold'>{value}</div>
-        <div className='flex items-center gap-1'>
+        <div className='flex items-center gap-1 mt-1'>
           {change !== undefined ? (
             <>
               {isPositive ? (
