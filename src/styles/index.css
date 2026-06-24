@@ -511,3 +511,9 @@ table.dataTable > tbody > tr.child {
     font-size: 0.875rem; /* Maintain body font size */
   }
 }
+
+/* Summernote editor - remove default frame border */
+.note-editor.note-airframe,
+.note-editor.note-frame {
+  border: 0px !important;
+}

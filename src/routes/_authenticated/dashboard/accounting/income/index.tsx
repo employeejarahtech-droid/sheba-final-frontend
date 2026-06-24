@@ -1,5 +1,6 @@
 "use client";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useMemo } from "react";
 import { createFileRoute } from '@tanstack/react-router';
 import { Plus, DollarSign, TrendingUp, CreditCard } from "lucide-react";
@@ -56,27 +57,9 @@ function IncomesPage() {
   const avgTransaction = currentPageTransactions > 0 ? totalIncome / currentPageTransactions : 0;
 
   const stats = [
-    {
-      label: "Page Income",
-      value: `${currencySymbol} ${totalIncome.toLocaleString()}`,
-      gradient: "from-emerald-600 to-emerald-400",
-      shadow: "shadow-emerald-500/30",
-      icon: <DollarSign className="w-6 h-6 text-white" />,
-    },
-    {
-      label: "Total Records",
-      value: total,
-      gradient: "from-blue-600 to-blue-400",
-      shadow: "shadow-blue-500/30",
-      icon: <TrendingUp className="w-6 h-6 text-white" />,
-    },
-    {
-      label: "Avg. Transaction",
-      value: `${currencySymbol} ${avgTransaction.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
-      gradient: "from-violet-600 to-violet-400",
-      shadow: "shadow-violet-500/30",
-      icon: <CreditCard className="w-6 h-6 text-white" />,
-    },
+    { label: "Total Income", value: `${currencySymbol} ${totalIncome.toLocaleString()}`, icon: DollarSign, grad: "from-emerald-500 to-emerald-600" },
+    { label: "Total Records", value: total, icon: TrendingUp, grad: "from-blue-500 to-blue-600" },
+    { label: "Avg. Transaction", value: `${currencySymbol} ${avgTransaction.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, icon: CreditCard, grad: "from-violet-500 to-violet-600" },
   ];
 
   // Delete income handler
@@ -284,38 +267,31 @@ function IncomesPage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          {stats.map((item, idx) => (
-            <div
-              key={idx}
-              className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${item.gradient} p-6 shadow-lg ${item.shadow} transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]`}
-            >
-              {/* Background Pattern */}
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+        <div className="p-4 space-y-3">
 
-              <div className="relative flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white/90">{item.label}</p>
-                  <h3 className="mt-2 text-3xl font-bold text-white">
-                    {item.value}
-                  </h3>
-                </div>
-                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                  {item.icon}
-                </div>
-              </div>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {stats.map((card) => {
+              const Icon = card.icon;
+              return (
+                <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                  <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
+                        <Icon className="w-4 h-4 text-white" />
+                      </div>
+                      <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <h3 className="text-2xl font-bold">{card.value || 0}</h3>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
 
-              {/* Progress/Indicator line */}
-              <div className="mt-4 h-1 w-full rounded-full bg-black/10">
-                <div className="h-full w-2/3 rounded-full bg-white/40" />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <DataTable
+          <DataTable
           columns={columns}
           data={incomes}
           meta={{
@@ -335,6 +311,7 @@ function IncomesPage() {
           }}
           isLoading={isFetching}
         />
+        </div>
       </main>
     </>
   );

@@ -324,10 +324,10 @@ function AllECGReports() {
   const uniquePatients = new Set(items.map((i: any) => i.PatientName).filter(Boolean)).size;
 
   const stats = [
-    { label: "Total Reports", value: ecgAllReports?.data?.meta?.total || 0, icon: FileText, grad: "from-rose-500 to-pink-500" },
-    { label: "ECG", value: items.length, icon: HeartPulse, grad: "from-pink-500 to-rose-500" },
-    { label: "Recent", value: todayCount, icon: Clock, grad: "from-red-500 to-rose-500" },
-    { label: "Patients", value: uniquePatients, icon: Users, grad: "from-indigo-500 to-purple-500" },
+    { label: "Total Reports", value: ecgAllReports?.data?.meta?.total || 0, icon: FileText, grad: "from-rose-500 to-pink-500", bd: "border-rose-200", header: "from-rose-50 to-pink-50" },
+    { label: "ECG", value: items.length, icon: HeartPulse, grad: "from-pink-500 to-rose-500", bd: "border-pink-200", header: "from-pink-50 to-rose-50" },
+    { label: "Recent", value: todayCount, icon: Clock, grad: "from-red-500 to-rose-500", bd: "border-red-200", header: "from-red-50 to-rose-50" },
+    { label: "Patients", value: uniquePatients, icon: Users, grad: "from-indigo-500 to-purple-500", bd: "border-indigo-200", header: "from-indigo-50 to-purple-50" },
   ];
 
   return (
@@ -341,8 +341,8 @@ function AllECGReports() {
             {stats.map((card) => {
               const Icon = card.icon;
               return (
-                <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                  <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                <Card key={card.label} className={`overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border-2 ${card.bd}`}>
+                  <CardHeader className={`bg-gradient-to-r ${card.header} dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0`}>
                     <div className="flex items-center gap-2.5">
                       <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
                         <Icon className="w-4 h-4 text-white" />

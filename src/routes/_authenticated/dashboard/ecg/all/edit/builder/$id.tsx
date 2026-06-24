@@ -1,18 +1,12 @@
-import { createFileRoute, useRouter, Link } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { Button } from "@/components/ui/button";
 import { Main } from '@/components/layout/main';
-import { Header } from '@/components/layout/header';
-import { TopNav } from '@/components/layout/top-nav';
-import { Search } from '@/components/search';
-import { ThemeSwitch } from '@/components/theme-switch';
-import { ConfigDrawer } from '@/components/config-drawer';
-import { ProfileDropdown } from '@/components/profile-dropdown';
-import { Card, CardContent } from '@/components/ui/card';
+import { AppHeader } from '@/components/layout/app-header';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCookie } from '@/lib/cookies';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { topNav } from '@/data/data';
 import { useState, useEffect, useRef } from 'react';
-import { Printer } from 'lucide-react';
+import { ArrowLeft, Printer, User, FileText, PenLine } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const Route = createFileRoute(
@@ -77,8 +71,10 @@ function ECGBuilder() {
   const { data: ecgData, isLoading } = useQuery({
     queryKey: ["ecg-record", id],
     queryFn: async () => {
+      const numericId = parseInt(id, 10);
+
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/ecg-all/builder/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/ecg-all/builder/${numericId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -100,7 +96,6 @@ function ECGBuilder() {
       const $ = (window as any).$;
       if ($) {
         console.log('Initializing Summernote...');
-        console.log('ECG data:', ecgData);
         try {
           $(editorRef.current).summernote({
             height: 500,
@@ -123,12 +118,8 @@ function ECGBuilder() {
 
                 // Set initial content after a small delay to ensure editor is ready
                 setTimeout(() => {
-                  console.log('Setting initial content:', ecgData.test_result);
                   if (ecgData.test_result) {
                     $(editorRef.current).summernote('code', ecgData.test_result);
-                    console.log('Content set successfully');
-                  } else {
-                    console.log('No test_result to set');
                   }
                 }, 200);
               },
@@ -148,11 +139,10 @@ function ECGBuilder() {
 
   const updateMutation = useMutation({
     mutationFn: async (newContent: string) => {
-      console.log('Saving content for ID:', id);
-      console.log('Content length:', newContent?.length || 0);
+      const numericId = parseInt(id, 10);
 
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/ecg-all/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/ecg-all/${numericId}`,
         {
           method: 'PUT',
           headers: {
@@ -165,18 +155,12 @@ function ECGBuilder() {
         }
       );
 
-      console.log('Response status:', res.status);
-      console.log('Response ok:', res.ok);
-
       if (!res.ok) {
         const errorText = await res.text();
-        console.error('Error response:', errorText);
         throw new Error(`Failed to update ECG record (${res.status}): ${errorText}`);
       }
 
-      const result = await res.json();
-      console.log('Update successful:', result);
-      return result;
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ecg-record", id] });
@@ -192,9 +176,20 @@ function ECGBuilder() {
 
   const handleSave = () => {
     const $ = (window as any).$;
-    if ($ && editorRef.current) {
-      const content = $(editorRef.current).summernote('code');
-      updateMutation.mutate(content);
+    if ($) {
+      if (editorRef.current) {
+        try {
+          const content = $(editorRef.current).summernote('code');
+          updateMutation.mutate(content);
+        } catch (error) {
+          console.error('Error getting content from Summernote:', error);
+          toast.error('Error getting content from editor. Please try again.');
+        }
+      } else {
+        toast.error('Editor not ready. Please wait a moment and try again.');
+      }
+    } else {
+      toast.error('Editor not loaded properly. Please refresh the page.');
     }
   };
 
@@ -205,15 +200,7 @@ function ECGBuilder() {
   if (isLoading) {
     return (
       <>
-        <Header>
-          <TopNav links={topNav} />
-          <div className="ms-auto flex items-center space-x-4">
-            <Search />
-            <ThemeSwitch />
-            <ConfigDrawer />
-            <ProfileDropdown />
-          </div>
-        </Header>
+        <AppHeader fixed />
         <Main>
           <div className="flex justify-center items-center h-64">
             <p className="text-gray-500">Loading...</p>
@@ -226,15 +213,7 @@ function ECGBuilder() {
   if (!summernoteInitialized) {
     return (
       <>
-        <Header>
-          <TopNav links={topNav} />
-          <div className="ms-auto flex items-center space-x-4">
-            <Search />
-            <ThemeSwitch />
-            <ConfigDrawer />
-            <ProfileDropdown />
-          </div>
-        </Header>
+        <AppHeader fixed />
         <Main>
           <div className="flex justify-center items-center h-64">
             <p className="text-gray-500">Loading editor...</p>
@@ -246,113 +225,144 @@ function ECGBuilder() {
 
   return (
     <>
-      <Header>
-        <TopNav links={topNav} />
-        <div className="ms-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ConfigDrawer />
-          <ProfileDropdown />
-        </div>
-      </Header>
+      <AppHeader fixed />
 
-      <Main>
-        <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tight">ECG Content Builder</h1>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleBack}>
-              Back
-            </Button>
-            <Link to="/dashboard/all/print/$id" params={{ id }}>
-              <Button variant="outline" onClick={(e) => {
-                e.preventDefault();
-                router.navigate({ to: '/dashboard/ecg/all/print/$id', params: { id } });
-              }}>
+      <Main className="flex flex-1 flex-col gap-6">
+        <div className="space-y-5 w-full min-w-[650px] max-w-[950px] mx-auto px-4">
+          {/* Header */}
+          <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" onClick={handleBack}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  ECG Content Builder
+                </h1>
+                <p className="text-muted-foreground text-sm">Edit and format the ECG report content</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => router.navigate({ to: '/dashboard/ecg/all/print/$id', params: { id } })}>
                 <Printer className="h-4 w-4 mr-2" />
                 Print
               </Button>
-            </Link>
-            <Button variant="default" onClick={handleSave} disabled={updateMutation.isPending}>
-              {updateMutation.isPending ? 'Saving...' : 'Save Content'}
-            </Button>
+              <Button variant="default" onClick={handleSave} disabled={updateMutation.isPending}>
+                {updateMutation.isPending ? 'Saving...' : 'Save Content'}
+              </Button>
+            </div>
           </div>
-        </div>
 
-        {/* Receipt Information Card */}
-        {ecgData?.invoice_information && (
-          <Card className="mb-4">
-            <CardContent className="pt-6">
-              <div className="w-full rounded-xl mx-auto">
-                <div className="flex gap-4 mb-4">
-                  <div className="flex-1">
-                    <div className="text-sm text-gray-600 mb-1">Invoice No</div>
-                    <div className="bg-gray-50 p-2 rounded-md border border-gray-200 text-sm">
+          {/* Receipt Information Card */}
+          {ecgData?.invoice_information && (
+            <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-bold">Patient Information</CardTitle>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Receipt and patient details</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Invoice No</div>
+                    <div className="bg-muted/40 p-2 rounded-md border text-sm font-medium">
                       RPT-{ecgData.invoice_information.id}
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <div className="text-sm text-gray-600 mb-1">Patient Name</div>
-                    <div className="bg-gray-50 p-2 rounded-md border border-gray-200 text-sm">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Patient Name</div>
+                    <div className="bg-muted/40 p-2 rounded-md border text-sm font-medium">
                       {ecgData.invoice_information.patient_name}
                     </div>
                   </div>
-                </div>
-                <div className="flex gap-4 mb-4">
-                  <div className="flex-1">
-                    <div className="text-sm text-gray-600 mb-1">Age</div>
-                    <div className="bg-gray-50 p-2 rounded-md border border-gray-200 text-sm">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Age</div>
+                    <div className="bg-muted/40 p-2 rounded-md border text-sm font-medium">
                       {ecgData.invoice_information.age || '-'}
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <div className="text-sm text-gray-600 mb-1">Gender</div>
-                    <div className="bg-gray-50 p-2 rounded-md border border-gray-200 text-sm">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Gender</div>
+                    <div className="bg-muted/40 p-2 rounded-md border text-sm font-medium">
                       {ecgData.invoice_information.sex || '-'}
                     </div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Test Record Info Card */}
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+            <CardHeader className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg shadow-lg">
+                  <FileText className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold">Test Record</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">ECG record details</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Record ID: </span>
+                  <span className="font-medium">{id}</span>
+                </div>
+                {ecgData?.test_name && (
+                  <div>
+                    <span className="text-muted-foreground">Test Name: </span>
+                    <span className="font-medium">{ecgData.test_name}</span>
+                  </div>
+                )}
+                {ecgData?.test_id && (
+                  <div>
+                    <span className="text-muted-foreground">Test ID: </span>
+                    <span className="font-medium">{ecgData.test_id}</span>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
-        )}
 
-        {/* Test Record Info Card */}
-        <Card className="mb-4">
-          <CardContent className="pt-6">
-            <p className="text-sm text-gray-600">
-              <strong>ECG Record ID:</strong> {id}
-            </p>
-            {ecgData?.test_name && (
-              <p className="text-sm text-gray-600 mt-2">
-                <strong>Test Name:</strong> {ecgData.test_name}
-              </p>
-            )}
-            {ecgData?.test_id && (
-              <p className="text-sm text-gray-600 mt-2">
-                <strong>Test ID:</strong> {ecgData.test_id}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+          {/* HTML Editor Card */}
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+            <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-emerald-500 to-green-500 rounded-lg shadow-lg">
+                  <PenLine className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold">Content Editor</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Use the toolbar to format your report</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              {/* Summernote Editor */}
+              <div className="border border-gray-300 rounded-lg overflow-hidden">
+                <div
+                  ref={editorRef}
+                  id="summernote-editor"
+                ></div>
+              </div>
 
-        {/* HTML Editor Card */}
-        <Card>
-          <CardContent className="pt-6">
-            {/* Summernote Editor */}
-            <div className="border border-gray-300 rounded-lg overflow-hidden">
-              <div
-                ref={editorRef}
-                id="summernote-editor"
-              ></div>
-            </div>
-
-            {/* Footer Info */}
-            <div className="flex justify-between text-sm text-gray-500 mt-4">
-              <span>Use the toolbar above to format your content</span>
-              <span>Powered by Summernote</span>
-            </div>
-          </CardContent>
-        </Card>
+              {/* Footer Info */}
+              <div className="flex justify-between text-sm text-gray-500 mt-4">
+                <span>Use the toolbar above to format your content</span>
+                <span>Powered by Summernote</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </Main>
     </>
   );

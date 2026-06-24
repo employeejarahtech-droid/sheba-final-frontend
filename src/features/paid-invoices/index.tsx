@@ -676,7 +676,7 @@ export default function PaidInvoices({ page, limit, search, from, to, setPage, s
     <>
       <AppHeader fixed />
 
-      <main className='p-4'>
+      <main className=''>
        
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
