@@ -29,36 +29,42 @@ type BillingData = {
 }
 
 type Operation = {
+    id: number
     operation_type: string
     operation_date: string
     charges: number
 }
 
 type Consultant = {
+    id: number
     consultant_name: string
     visit_date: string
     fees: number
 }
 
 type Surgeon = {
+    id: number
     surgeon_name: string
     operation_date: string
     fees: number
 }
 
 type Assistant = {
+    id: number
     assistant_name: string
     operation_date: string
     fees: number
 }
 
 type Service = {
+    id: number
     service_name: string
     note: string
     amount: number
 }
 
 type BedBill = {
+    id: number
     bed_code: string
     bed_type: string
     from_date: string
@@ -233,6 +239,7 @@ export function BillingPrintPage() {
     })
 
     const admission = admissionData?.data as BillingData
+    const finalBillItems = admissionData?.data?.finalBill?.items || []
     const companyLogo = companySettings?.company_logo
         ? (companySettings.company_logo.startsWith('http') || companySettings.company_logo.startsWith('data:'))
             ? companySettings.company_logo
@@ -247,16 +254,42 @@ export function BillingPrintPage() {
     const bedBills = bedBillingData?.data || []
     const bedCharges = bedChargesData?.data || { total: 0, breakdown: [] }
 
-    const totalBedCharges = bedBills.length > 0
-        ? bedBills.reduce((sum: number, b: BedBill) => sum + Number(b.total_amount), 0)
-        : bedCharges.total
+    // Calculate totals - prefer final bill totals if available, otherwise calculate from individual items
+    const finalBillTotals = finalBillItems.length > 0 ? {
+        total: finalBillItems.reduce((sum: number, item: any) => sum + Number(item.final_amount || 0), 0),
+        paid: Number(admissionData?.data?.finalBill?.paid_amount || 0),
+        due: Number(admissionData?.data?.finalBill?.due_amount || 0)
+    } : null
 
-    const totalOperations = operations.reduce((sum: number, op: Operation) => sum + Number(op.charges), 0)
-    const totalConsultants = consultants.reduce((sum: number, c: Consultant) => sum + Number(c.fees), 0)
-    const totalSurgeons = surgeons.reduce((sum: number, s: Surgeon) => sum + Number(s.fees), 0)
-    const totalAssistants = assistants.reduce((sum: number, a: Assistant) => sum + Number(a.fees), 0)
-    const totalServices = services.reduce((sum: number, s: Service) => sum + Number(s.amount), 0)
-    const grandTotal = totalBedCharges + totalOperations + totalConsultants + totalSurgeons + totalAssistants + totalServices
+    const totalBedCharges = finalBillTotals
+        ? finalBillItems.filter((i: any) => i.service_type === 'bed_charges').reduce((sum: number, i: any) => sum + Number(i.final_amount || 0), 0)
+        : bedBills.length > 0
+            ? bedBills.reduce((sum: number, b: BedBill) => sum + Number(b.total_amount), 0)
+            : bedCharges.total
+
+    const totalOperations = finalBillTotals
+        ? finalBillItems.filter((i: any) => i.service_type === 'operation').reduce((sum: number, i: any) => sum + Number(i.final_amount || 0), 0)
+        : operations.reduce((sum: number, op: Operation) => sum + Number(op.charges), 0)
+
+    const totalConsultants = finalBillTotals
+        ? finalBillItems.filter((i: any) => i.service_type === 'consultant').reduce((sum: number, i: any) => sum + Number(i.final_amount || 0), 0)
+        : consultants.reduce((sum: number, c: Consultant) => sum + Number(c.fees), 0)
+
+    const totalSurgeons = finalBillTotals
+        ? finalBillItems.filter((i: any) => i.service_type === 'surgeon').reduce((sum: number, i: any) => sum + Number(i.final_amount || 0), 0)
+        : surgeons.reduce((sum: number, s: Surgeon) => sum + Number(s.fees), 0)
+
+    const totalAssistants = finalBillTotals
+        ? finalBillItems.filter((i: any) => i.service_type === 'assistant').reduce((sum: number, i: any) => sum + Number(i.final_amount || 0), 0)
+        : assistants.reduce((sum: number, a: Assistant) => sum + Number(a.fees), 0)
+
+    const totalServices = finalBillTotals
+        ? finalBillItems.filter((i: any) => i.service_type === 'service').reduce((sum: number, i: any) => sum + Number(i.final_amount || 0), 0)
+        : services.reduce((sum: number, s: Service) => sum + Number(s.amount), 0)
+
+    const grandTotal = finalBillTotals
+        ? finalBillTotals.total
+        : totalBedCharges + totalOperations + totalConsultants + totalSurgeons + totalAssistants + totalServices
 
     const consolidatedItems = useMemo(() => {
         const list: {
@@ -267,12 +300,70 @@ export function BillingPrintPage() {
             qty: number
             rate: number
             amount: number
+            serial_no?: number
         }[] = []
 
+        // If final bill items exist, use them (they're already serialized and ordered)
+        if (finalBillItems.length > 0) {
+            finalBillItems.forEach((item: any) => {
+                const serviceType = item.service_type || 'service'
+                let category = 'Service'
+                let description = item.service_name || 'Service'
+                let date = undefined
+
+                // Map service_type to category and extract relevant details
+                switch (serviceType) {
+                    case 'bed_charges':
+                        category = 'Bed Charges'
+                        // For bed charges, we need to fetch the details from the reference table
+                        description = item.service_note || 'Bed Charges'
+                        break
+                    case 'operation':
+                        category = 'Operation'
+                        description = item.service_name || 'Operation'
+                        break
+                    case 'consultant':
+                        category = 'Consultant'
+                        description = item.service_name || 'Consultant'
+                        break
+                    case 'surgeon':
+                        category = 'Surgeon'
+                        description = item.service_name || 'Surgeon'
+                        break
+                    case 'assistant':
+                        category = 'Assistant'
+                        description = item.service_name || 'Assistant'
+                        break
+                    case 'service':
+                        category = 'Clinical Service'
+                        description = item.service_name || 'Service'
+                        break
+                    default:
+                        category = 'Service'
+                        description = item.service_name || 'Service'
+                }
+
+                list.push({
+                    serial_no: item.serial_no || item.item_order || 0,
+                    category,
+                    description,
+                    note: item.service_note || undefined,
+                    qty: Number(item.quantity) || 1,
+                    rate: Number(item.unit_price) || 0,
+                    amount: Number(item.final_amount) || 0
+                })
+            })
+
+            // Sort by serial_no/item_order (already ordered from API, but ensure it)
+            return list.sort((a, b) => (a.serial_no || 0) - (b.serial_no || 0))
+        }
+
+        // Fallback: If no final bill items, use individual billing queries
         // 1. Bed charges
         if (bedBills.length > 0) {
             bedBills.forEach((b: BedBill) => {
                 list.push({
+                    serial_no: b.id || 0,
                     category: 'Bed Charges',
                     description: `${b.bed_code} (${b.bed_type})`,
                     date: `${safeFormatDate(b.from_date)} to ${safeFormatDate(b.to_date)}`,
@@ -284,6 +375,7 @@ export function BillingPrintPage() {
         } else if (bedCharges?.breakdown?.length > 0) {
             bedCharges.breakdown.forEach((b: any) => {
                 list.push({
+                    serial_no: b.id || 0,
                     category: 'Bed Charges',
                     description: `${b.bed_code} (${b.bed_type})`,
                     date: `${b.from ? safeFormatDate(b.from.split('T')[0]) : ''} to ${b.to ? safeFormatDate(b.to.split('T')[0]) : ''}`,
@@ -297,6 +389,7 @@ export function BillingPrintPage() {
         // 2. Operations
         operations.forEach((op: Operation) => {
             list.push({
+                serial_no: op.id || 0,
                 category: 'Operation',
                 description: op.operation_type,
                 date: safeFormatDate(op.operation_date),
@@ -309,6 +402,7 @@ export function BillingPrintPage() {
         // 3. Consultants
         consultants.forEach((c: Consultant) => {
             list.push({
+                serial_no: c.id || 0,
                 category: 'Consultant',
                 description: c.consultant_name,
                 date: safeFormatDate(c.visit_date),
@@ -321,6 +415,7 @@ export function BillingPrintPage() {
         // 4. Surgeons
         surgeons.forEach((s: Surgeon) => {
             list.push({
+                serial_no: s.id || 0,
                 category: 'Surgeon',
                 description: s.surgeon_name,
                 date: safeFormatDate(s.operation_date),
@@ -333,6 +428,7 @@ export function BillingPrintPage() {
         // 5. Assistants
         assistants.forEach((a: Assistant) => {
             list.push({
+                serial_no: a.id || 0,
                 category: 'Assistant',
                 description: a.assistant_name,
                 date: safeFormatDate(a.operation_date),
@@ -345,6 +441,7 @@ export function BillingPrintPage() {
         // 6. Clinical Services
         services.forEach((s: Service) => {
             list.push({
+                serial_no: s.id || 0,
                 category: 'Clinical Service',
                 description: s.service_name,
                 note: s.note,
@@ -354,8 +451,9 @@ export function BillingPrintPage() {
             })
         })
 
-        return list
-    }, [bedBills, bedCharges, operations, consultants, surgeons, assistants, services])
+        // Sort by ID (as fallback when no serial_no exists)
+        return list.sort((a, b) => (a.serial_no || 0) - (b.serial_no || 0))
+    }, [admissionData, finalBillItems, bedBills, bedCharges, operations, consultants, surgeons, assistants, services, safeFormatDate])
 
     if (admissionLoading) {
         return (
@@ -507,7 +605,7 @@ export function BillingPrintPage() {
                 <tbody>
                     {consolidatedItems.map((item, idx) => (
                         <tr key={idx} className="border-b border-dashed">
-                            <td className="px-2 py-1 text-xs text-gray-500">{idx + 1}</td>
+                            <td className="px-2 py-1 text-xs text-gray-500">{item.serial_no || idx + 1}</td>
                             <td className="px-2 py-1 text-xs font-semibold text-gray-700 uppercase">
                                 {item.category}
                             </td>

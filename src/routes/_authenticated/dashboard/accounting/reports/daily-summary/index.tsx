@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, TrendingUp, TrendingDown, Scale, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { Calendar as CalendarIcon, TrendingUp, TrendingDown, Scale, ArrowUpRight, ArrowDownLeft, Receipt } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from "zod";
@@ -153,12 +153,19 @@ function DailySummary() {
         <Separator />
 
         {/* Today's Transactions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Today's Transactions — {format(new Date(selectedDate), "dd MMM yyyy")}</CardTitle>
-            <CardDescription>All journal entries recorded on this date</CardDescription>
+        <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                <Receipt className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-lg font-bold">Today's Transactions — {format(new Date(selectedDate), "dd MMM yyyy")}</CardTitle>
+                <p className="text-xs text-gray-600 dark:text-gray-400">All journal entries recorded on this date</p>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4">
             {isLoading ? (
               <div className="space-y-3">
                 <Skeleton className="h-10 w-full" />

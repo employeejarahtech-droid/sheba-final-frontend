@@ -327,6 +327,8 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             const params = new URLSearchParams({
                 page: page.toString(),
                 limit: limit.toString(),
+                sort: 'id',
+                order: 'DESC',
                 ...(search && { search }),
                 ...(statusFilter !== "all" && { status: statusFilter }),
                 ...(pathPaymentFilter && { payment_filter: pathPaymentFilter }),

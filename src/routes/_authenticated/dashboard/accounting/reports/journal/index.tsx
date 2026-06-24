@@ -2,9 +2,10 @@
 "use client";
 
 import { useState, Fragment, useMemo } from "react";
-import { Loader2, Plus, Trash2, ChevronDown, ChevronRight, Search, Eye, EyeOff, BookOpen, ArrowUpRight, ArrowDownLeft, Scale } from "lucide-react";
+import { Loader2, Plus, Trash2, ChevronDown, ChevronRight, Search, Eye, EyeOff, BookOpen, ArrowUpRight, ArrowDownLeft, Scale, ChevronLeft, ChevronRight as ChevronRightIcon, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,9 +38,28 @@ import { AppHeader } from "@/components/layout/app-header";
 import { Main } from "@/components/layout/main";
 import { PageHeader } from "@/components/layout/page-header";
 import { useCurrency } from "@/hooks/use-currency";
+import { useDebounce } from "@/hooks/useDebounce";
+import { getPageNumbers } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useEffect } from "react";
+
+const journalSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(20),
+  search: z.string().catch(''),
+  from: z.string().optional(),
+  to: z.string().optional(),
+});
 
 export const Route = createFileRoute('/_authenticated/dashboard/accounting/reports/journal/')({
+  validateSearch: (search) => journalSearchSchema.parse(search),
   component: JournalReport,
 })
 
@@ -55,13 +75,54 @@ function JournalReport() {
   // Modal
   const [isOpen, setIsOpen] = useState(false);
 
-  // Filters
-  const [page, setPage] = useState(1);
-  const limit = 20;
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
-  const [search, setSearch] = useState("");
-  const [searchInput, setSearchInput] = useState("");
+  // URL search params
+  const searchParams: any = Route.useSearch();
+  const navigate = Route.useNavigate();
+
+  const page = Number(searchParams?.page) || 1;
+  const limit = Number(searchParams?.limit) || 20;
+  const search = searchParams?.search || "";
+  const fromDate = searchParams?.from || "";
+  const toDate = searchParams?.to || "";
+  const [searchInput, setSearchInput] = useState(search);
+
+  // Helper functions to update URL params
+  const setPage = (newPage: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
+  };
+  const setLimit = (newLimit: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) });
+  };
+  const setSearch = (newSearch: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
+  };
+  const setFromDate = (newDate: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, from: newDate, page: 1 }) });
+  };
+  const setToDate = (newDate: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, to: newDate, page: 1 }) });
+  };
+  const clearFilters = () => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, from: '', to: '', search: '', page: 1 }) });
+    setSearchInput("");
+  };
+
+  // Debounced search
+  const debouncedSearch = useDebounce(searchInput, 500);
+
+  // Sync search input with URL param when it changes from outside
+  useEffect(() => {
+    if (search !== undefined && search !== searchInput) {
+      setSearchInput(search);
+    }
+  }, [search]);
+
+  // Handle debounced search change - push to URL
+  useEffect(() => {
+    if (debouncedSearch !== search) {
+      setSearch(debouncedSearch);
+    }
+  }, [debouncedSearch]);
 
   // Expanded rows
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
@@ -385,67 +446,95 @@ function JournalReport() {
           </div>
 
           {/* Filters + Recent Entries */}
-          <Card>
-            <CardHeader>
+          <Card className="overflow-hidden shadow-lg border-none bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 dark:from-gray-900 dark:via-blue-950/20 dark:to-indigo-950/10 hover:shadow-xl transition-all duration-300">
+            <CardHeader className="bg-gradient-to-r from-blue-600/10 to-indigo-600/10 dark:from-blue-900/20 dark:to-indigo-900/20 border-b border-blue-100 dark:border-blue-800/30 py-5 px-6 gap-0">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <CardTitle>Recent Journal Entries</CardTitle>
-                  <CardDescription>View and manage your journal entries</CardDescription>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg shadow-md">
+                      <BookOpen className="w-4 h-4 text-white" />
+                    </div>
+                    <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-100">Recent Journal Entries</CardTitle>
+                  </div>
+                  <CardDescription className="text-xs ml-8 pl-0.5 text-gray-500 dark:text-gray-400">View and manage your journal entries</CardDescription>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Input type="date" value={fromDate} onChange={(e) => { setFromDate(e.target.value); setPage(1); }} className="w-36 h-8 text-xs" />
-                  <Input type="date" value={toDate} onChange={(e) => { setToDate(e.target.value); setPage(1); }} className="w-36 h-8 text-xs" />
-                  <div className="flex gap-1">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-0">From:</Label>
+                    <Input type="date" value={fromDate} onChange={(e) => { setFromDate(e.target.value); }} className="w-32 h-8 text-xs border-0 p-0 focus-visible:ring-0" />
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-0">To:</Label>
+                    <Input type="date" value={toDate} onChange={(e) => { setToDate(e.target.value); }} className="w-32 h-8 text-xs border-0 p-0 focus-visible:ring-0" />
+                  </div>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
                     <Input
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') { setSearch(searchInput); setPage(1); } }}
-                      placeholder="Search..."
-                      className="w-40 h-8 text-xs"
+                      placeholder="Search entries..."
+                      className="w-36 h-8 text-xs border-0 p-0 focus-visible:ring-0 placeholder:text-gray-400"
                     />
-                    <Button variant="outline" size="sm" className="h-8 px-2" onClick={() => { setSearch(searchInput); setPage(1); }}>
-                      <Search className="h-3.5 w-3.5" />
-                    </Button>
+                    <Search className="h-3.5 w-3.5 text-gray-400" />
                   </div>
                   {(fromDate || toDate || search) && (
-                    <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setFromDate(""); setToDate(""); setSearch(""); setSearchInput(""); setPage(1); }}>
+                    <Button variant="ghost" size="sm" className="h-8 text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" onClick={clearFilters}>
                       Clear
                     </Button>
                   )}
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               {/* Expand/Collapse All */}
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-muted-foreground">{totalItems} entries</span>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={expandAll}>
+              <div className="flex items-center justify-between mb-4 px-1">
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                  {totalItems} entries found
+                </span>
+                <div className="flex gap-1.5">
+                  <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30" onClick={expandAll}>
                     <Eye className="h-3 w-3" /> Expand All
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={collapseAll}>
+                  <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30" onClick={collapseAll}>
                     <EyeOff className="h-3 w-3" /> Collapse All
                   </Button>
                 </div>
               </div>
 
-              <div className="border rounded-lg overflow-hidden">
+              <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm bg-white dark:bg-gray-900/50 backdrop-blur-sm">
                 <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-8"></TableHead>
-                      <TableHead className="w-28">Date</TableHead>
-                      <TableHead>Narration</TableHead>
-                      <TableHead className="w-32">Type</TableHead>
-                      <TableHead className="w-[130px] text-right">Debit</TableHead>
-                      <TableHead className="w-[130px] text-right">Credit</TableHead>
+                  <TableHeader className="bg-gradient-to-r from-gray-50 to-blue-50/50 dark:from-gray-800/50 dark:to-blue-950/30">
+                    <TableRow className="hover:bg-transparent border-b border-gray-200 dark:border-gray-700">
+                      <TableHead className="w-8 font-semibold text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider"></TableHead>
+                      <TableHead className="w-28 font-semibold text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">Date</TableHead>
+                      <TableHead className="font-semibold text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">Narration</TableHead>
+                      <TableHead className="w-32 font-semibold text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">Type</TableHead>
+                      <TableHead className="w-[130px] text-right font-semibold text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">Debit</TableHead>
+                      <TableHead className="w-[130px] text-right font-semibold text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">Credit</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
-                      <TableRow><TableCell colSpan={6} className="h-24 text-center"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
+                      <TableRow>
+                        <TableCell colSpan={6} className="h-40">
+                          <div className="flex flex-col items-center justify-center gap-3 text-gray-500 dark:text-gray-400">
+                            <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
+                            <p className="text-sm font-medium">Loading journal entries...</p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
                     ) : (journalData?.data || []).length === 0 ? (
-                      <TableRow><TableCell colSpan={6} className="h-24 text-center text-muted-foreground">No journal entries found.</TableCell></TableRow>
+                      <TableRow>
+                        <TableCell colSpan={6} className="h-40">
+                          <div className="flex flex-col items-center justify-center gap-3 text-gray-500 dark:text-gray-400">
+                            <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-full">
+                              <BookOpen className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+                            </div>
+                            <p className="text-sm font-medium">No journal entries found</p>
+                            <p className="text-xs text-muted-foreground">Try adjusting your filters or add a new entry</p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
                     ) : (
                       (journalData?.data || []).map((entry: any) => {
                         const isExpanded = expandedRows.has(entry.id);
@@ -454,70 +543,72 @@ function JournalReport() {
                         const badge = refTypeBadge[entry.reference_type] || { label: entry.reference_type || '-', color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' };
 
                         return (
-                          <Fragment key={entry.id}>
+                           <Fragment key={entry.id}>
                             <TableRow
                               key={entry.id}
-                              className="cursor-pointer hover:bg-muted/50"
+                              className="cursor-pointer hover:bg-blue-50/50 dark:hover:bg-blue-950/20 transition-colors duration-200"
                               onClick={() => toggleRow(entry.id)}
                             >
-                              <TableCell className="px-2">
+                              <TableCell className="px-3">
                                 {isExpanded
-                                  ? <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                                  : <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                  ? <ChevronDown className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+                                  : <ChevronRight className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                 }
                               </TableCell>
-                              <TableCell className="text-sm">
+                              <TableCell className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {entry.date ? new Date(entry.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
                               </TableCell>
-                              <TableCell className="text-sm font-medium">
+                              <TableCell className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                 {entry.narration}
                               </TableCell>
                               <TableCell>
-                                <span className={cn("inline-flex px-2 py-0.5 rounded text-[10px] font-medium", badge.color)}>
+                                <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide shadow-sm", badge.color)}>
                                   {badge.label}
                                 </span>
                               </TableCell>
-                              <TableCell className="text-right font-mono text-sm">
+                              <TableCell className="text-right font-mono text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                                 {entryTotalDebit.toFixed(2)}
                               </TableCell>
-                              <TableCell className="text-right font-mono text-sm">
+                              <TableCell className="text-right font-mono text-sm font-semibold text-rose-600 dark:text-rose-400">
                                 {entryTotalCredit.toFixed(2)}
                               </TableCell>
                             </TableRow>
 
                             {/* Expanded detail lines */}
                             {isExpanded && (
-                              <TableRow key={`${entry.id}-detail`} className="bg-muted/20 hover:bg-muted/20">
+                              <TableRow key={`${entry.id}-detail`} className="bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-950/20 dark:to-indigo-950/20 hover:from-blue-50/70 hover:to-indigo-50/70 dark:hover:from-blue-950/30 dark:hover:to-indigo-950/30">
                                 <TableCell></TableCell>
                                 <TableCell colSpan={5} className="p-0">
-                                  <div className="px-4 py-3">
+                                  <div className="px-4 py-4">
                                     <Table>
                                       <TableHeader>
-                                        <TableRow className="hover:bg-transparent">
-                                          <TableHead className="w-[300px] text-xs h-8">Account</TableHead>
-                                          <TableHead className="w-[130px] text-right text-xs h-8">Debit</TableHead>
-                                          <TableHead className="w-[130px] text-right text-xs h-8">Credit</TableHead>
+                                        <TableRow className="hover:bg-transparent border-b border-blue-200/50 dark:border-blue-800/50">
+                                          <TableHead className="w-[300px] text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider h-8">Account</TableHead>
+                                          <TableHead className="w-[130px] text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider h-8">Debit</TableHead>
+                                          <TableHead className="w-[130px] text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider h-8">Credit</TableHead>
                                         </TableRow>
                                       </TableHeader>
                                       <TableBody>
                                         {(entry.entries || []).map((line: any, i: number) => (
                                           <TableRow key={i} className="hover:bg-transparent border-0">
-                                            <TableCell className="py-1 text-sm">
-                                              <span className="font-mono text-xs text-muted-foreground mr-2">{line.account?.code}</span>
-                                              {line.account?.name}
+                                            <TableCell className="py-2 text-sm">
+                                              <span className="inline-flex items-center px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-[10px] font-mono font-medium mr-2">
+                                                {line.account?.code}
+                                              </span>
+                                              <span className="font-medium text-gray-700 dark:text-gray-300">{line.account?.name}</span>
                                             </TableCell>
-                                            <TableCell className="py-1 text-right font-mono text-sm">
+                                            <TableCell className="py-2 text-right font-mono text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                                               {parseFloat(line.debit) > 0 ? parseFloat(line.debit).toFixed(2) : '-'}
                                             </TableCell>
-                                            <TableCell className="py-1 text-right font-mono text-sm">
+                                            <TableCell className="py-2 text-right font-mono text-sm font-semibold text-rose-600 dark:text-rose-400">
                                               {parseFloat(line.credit) > 0 ? parseFloat(line.credit).toFixed(2) : '-'}
                                             </TableCell>
                                           </TableRow>
                                         ))}
-                                        <TableRow className="hover:bg-transparent border-t">
-                                          <TableCell className="py-1 text-xs font-bold">Total</TableCell>
-                                          <TableCell className="py-1 text-right font-mono text-xs font-bold">{entryTotalDebit.toFixed(2)}</TableCell>
-                                          <TableCell className="py-1 text-right font-mono text-xs font-bold">{entryTotalCredit.toFixed(2)}</TableCell>
+                                        <TableRow className="hover:bg-transparent border-t-2 border-blue-200 dark:border-blue-800 bg-blue-100/30 dark:bg-blue-900/20">
+                                          <TableCell className="py-2 text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Total</TableCell>
+                                          <TableCell className="py-2 text-right font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">{entryTotalDebit.toFixed(2)}</TableCell>
+                                          <TableCell className="py-2 text-right font-mono text-xs font-bold text-rose-700 dark:text-rose-400">{entryTotalCredit.toFixed(2)}</TableCell>
                                         </TableRow>
                                       </TableBody>
                                     </Table>
@@ -535,17 +626,99 @@ function JournalReport() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4">
-                  <p className="text-xs text-muted-foreground">
-                    Page {page} of {totalPages}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
-                      Previous
-                    </Button>
-                    <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>
-                      Next
-                    </Button>
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600 mt-6 px-1 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Showing {(page - 1) * limit + 1}–{Math.min(page * limit, totalItems)} of {totalItems} results
+                  </div>
+
+                  <div className="flex items-center space-x-6">
+                    {/* Limit Selector */}
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs whitespace-nowrap text-muted-foreground font-medium">Rows per page</span>
+                      <Select
+                        value={String(limit)}
+                        onValueChange={(val) => setLimit(Number(val))}
+                      >
+                        <SelectTrigger size="sm" className="h-8 w-[70px]">
+                          <SelectValue placeholder={limit} />
+                        </SelectTrigger>
+                        <SelectContent side="top">
+                          {[10, 20, 25, 50, 100].map((val) => (
+                            <SelectItem key={val} value={String(val)}>
+                              {val}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      {/* First Page */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="hidden lg:flex h-8 w-8 p-0 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                        onClick={() => setPage(1)}
+                        disabled={page <= 1}
+                      >
+                        <ChevronsLeft className="h-4 w-4" />
+                        <span className="sr-only">First Page</span>
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage(page - 1)}
+                        disabled={page <= 1}
+                        className="border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                      >
+                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        Previous
+                      </Button>
+
+                      {/* Page Buttons */}
+                      <div className="hidden md:flex items-center space-x-1">
+                        {getPageNumbers(page, totalPages).map((p, idx) => (
+                          <div key={idx}>
+                            {p === '...' ? (
+                              <span className="px-2">...</span>
+                            ) : (
+                              <Button
+                                variant={page === p ? "default" : "outline"}
+                                size="sm"
+                                className={`h-8 w-8 p-0 ${page === p ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600' : 'border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30'}`}
+                                onClick={() => setPage(Number(p))}
+                              >
+                                {p}
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage(page + 1)}
+                        disabled={page >= totalPages}
+                        className="border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                      >
+                        Next
+                        <ChevronRightIcon className="h-4 w-4 ml-1" />
+                      </Button>
+
+                      {/* Last Page */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="hidden lg:flex h-8 w-8 p-0 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                        onClick={() => setPage(totalPages)}
+                        disabled={page >= totalPages}
+                      >
+                        <ChevronsRight className="h-4 w-4" />
+                        <span className="sr-only">Last Page</span>
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}
