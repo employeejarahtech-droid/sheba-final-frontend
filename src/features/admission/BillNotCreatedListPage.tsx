@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState } from 'react'
+﻿import { useMemo, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { Users, FileText } from 'lucide-react'
@@ -87,7 +87,7 @@ export function BillNotCreatedListPage() {
 
                 return `
                     <div class="flex items-center gap-2">
-                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
                                 type="button"
                                 data-id="${row.id}"
                                 data-patient-name="${(row.patient_name || '-').replace(/"/g, '&quot;')}"

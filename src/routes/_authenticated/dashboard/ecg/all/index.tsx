@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+﻿import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,7 +86,7 @@ function AllECGReports() {
         const status = row.Status || 'Pending';
         return `
           <div class="flex items-center gap-2">
-            <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+            <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
                     type="button"
                     data-recipt-id="${data}"
                     data-patient-id="${row.PatientId || "-"}"
@@ -166,7 +166,7 @@ function AllECGReports() {
         nextRow.remove();
         row.classList.remove('expanded');
         btn.textContent = '+';
-        btn.style.backgroundColor = 'black';
+        btn.style.backgroundColor = '#10B981';
         return;
       }
 
@@ -324,10 +324,10 @@ function AllECGReports() {
   const uniquePatients = new Set(items.map((i: any) => i.PatientName).filter(Boolean)).size;
 
   const stats = [
-    { label: "Total Reports", value: ecgAllReports?.data?.meta?.total || 0, icon: FileText, grad: "from-rose-500 to-pink-500", bd: "border-rose-200", header: "from-rose-50 to-pink-50" },
-    { label: "ECG", value: items.length, icon: HeartPulse, grad: "from-pink-500 to-rose-500", bd: "border-pink-200", header: "from-pink-50 to-rose-50" },
-    { label: "Recent", value: todayCount, icon: Clock, grad: "from-red-500 to-rose-500", bd: "border-red-200", header: "from-red-50 to-rose-50" },
-    { label: "Patients", value: uniquePatients, icon: Users, grad: "from-indigo-500 to-purple-500", bd: "border-indigo-200", header: "from-indigo-50 to-purple-50" },
+    { label: "Total Reports", value: ecgAllReports?.data?.meta?.total || 0, icon: FileText },
+    { label: "ECG",           value: items.length,                          icon: HeartPulse },
+    { label: "Recent",        value: todayCount,                            icon: Clock },
+    { label: "Patients",      value: uniquePatients,                        icon: Users },
   ];
 
   return (
@@ -338,16 +338,17 @@ function AllECGReports() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-            {stats.map((card) => {
+            {stats.map((card, index) => {
               const Icon = card.icon;
+              const color = ['#10B981','#F97316','#EC4899','#14B8A6'][index];
               return (
-                <Card key={card.label} className={`overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border-2 ${card.bd}`}>
-                  <CardHeader className={`bg-gradient-to-r ${card.header} dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0`}>
+                <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                  <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: color }}>
                     <div className="flex items-center gap-2.5">
-                      <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
-                        <Icon className="w-4 h-4 text-white" />
+                      <div className="p-2 bg-white rounded-lg shadow-lg">
+                        <Icon className="w-4 h-4" style={{ color }} />
                       </div>
-                      <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                      <CardTitle className="text-sm font-semibold text-white/90">{card.label}</CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent className="p-4">

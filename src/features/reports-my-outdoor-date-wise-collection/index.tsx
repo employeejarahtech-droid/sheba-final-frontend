@@ -1,9 +1,10 @@
-import { AppHeader } from '@/components/layout/app-header'
+﻿import { AppHeader } from '@/components/layout/app-header'
 import { DataTable } from '@/components/DataTable'
 import { useState, useMemo, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
-import { FileText, DollarSign, TrendingUp, Calendar, CreditCard } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { FileText, DollarSign, TrendingUp, Calendar, CreditCard, Printer } from 'lucide-react'
 
 type PaymentItem = {
   id: number;
@@ -153,7 +154,7 @@ export default function ReportsMyOutdoorDateWiseCollection() {
         nextRow.remove();
         row.classList.remove('expanded');
         btn.textContent = '+';
-        btn.style.backgroundColor = 'black';
+        btn.style.backgroundColor = '#10B981';
         return;
       }
 
@@ -516,7 +517,7 @@ export default function ReportsMyOutdoorDateWiseCollection() {
       render: (data: any) => {
         return `
           <div class="flex items-center gap-2">
-            <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+            <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
                     type="button"
                     data-id="${data}">+</button>
             <span class="font-semibold text-purple-600">${data}</span>
@@ -705,6 +706,12 @@ export default function ReportsMyOutdoorDateWiseCollection() {
               Payments collected by you within a date range
             </p>
           </div>
+          <Link to="/dashboard/reports/my/outdoor/date-wise-collection/print">
+            <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium shadow-sm hover:bg-gray-50 transition-colors">
+              <Printer className="w-4 h-4" />
+              Print Report
+            </button>
+          </Link>
         </div>
 
         {/* Date Range Filter */}

@@ -1,12 +1,11 @@
-
 "use client";
 
 import { useState } from "react";
 import { format, startOfMonth } from "date-fns";
 import { cn } from "@/lib/utils";
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { z } from "zod";
-import { Calendar as CalendarIcon, TrendingUp, TrendingDown } from "lucide-react";
+import { Calendar as CalendarIcon, TrendingUp, TrendingDown, Printer } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/DataTable";
@@ -19,8 +18,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 
 import { useGetProfitLossQuery } from "@/features/accounting/accountingQueries";
-import { AppHeader } from "@/components/layout/app-header";
-import { PageHeader } from '@/components/layout/page-header'
+import { AppHeader } from '@/components/layout/app-header';
+import { PageHeader } from '@/components/layout/page-header';
 
 const profitLossSearchSchema = z.object({
     from: z.string().optional(),
@@ -86,6 +85,12 @@ function ProfitAndLoss() {
                     description="Financial performance for the selected period."
                     actions={
                         <div className="flex flex-wrap items-center gap-2">
+                            <Link to="/dashboard/accounting/reports/profit-and-loss/print" search={{ from: fromDateStr, to: toDateStr }}>
+                                <Button variant="outline" size="sm">
+                                    <Printer className="mr-2 h-4 w-4" />
+                                    Print
+                                </Button>
+                            </Link>
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Button variant="outline" className="w-[160px] justify-start text-left font-normal">

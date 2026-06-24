@@ -517,3 +517,170 @@ table.dataTable > tbody > tr.child {
 .note-editor.note-frame {
   border: 0px !important;
 }
+
+/* ── Professional Print Styles ───────────────────────────── */
+@media print {
+  /* Hide everything except the report content */
+  [data-sidebar],
+  aside,
+  nav,
+  header,
+  footer,
+  .print\:hidden,
+  [class*="AppHeader"],
+  [class*="sidebar"],
+  [class*="nav-"] {
+    display: none !important;
+  }
+
+  /* Reset page */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* ── Critical: Reset all layout containers so content flows freely ── */
+  html,
+  body {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+
+  /* Reset SidebarProvider and SidebarInset wrappers */
+  [data-slot="sidebar-wrapper"],
+  [data-slot="sidebar-inset"],
+  [class*="SidebarProvider"],
+  [class*="SidebarInset"],
+  .group\/sidebar-wrapper {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    display: block !important;
+    flex-direction: unset !important;
+  }
+
+  /* Reset the main flex container */
+  body > div,
+  body > div > div,
+  #root,
+  #root > div {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  /* Page setup */
+  @page {
+    size: A4;
+    margin: 15mm 12mm 15mm 12mm;
+  }
+
+  @page :first {
+    margin-top: 10mm;
+  }
+
+  /* Main content takes full width */
+  main,
+  #print-report,
+  [id="print-report"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Show print-only elements */
+  .print-report-header {
+    display: block !important;
+  }
+
+  /* Stat cards: compact horizontal row */
+  .grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .grid > * {
+    flex: 1 1 22% !important;
+    min-width: 120px !important;
+    max-width: 25% !important;
+  }
+
+  /* Card header colors preserved */
+  [class*="CardHeader"] {
+    padding: 6px 10px !important;
+  }
+
+  /* Tables */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 9pt !important;
+  }
+
+  th {
+    background-color: #1e293b !important;
+    color: white !important;
+    padding: 6px 8px !important;
+    text-align: left !important;
+    font-weight: 600 !important;
+    font-size: 8.5pt !important;
+  }
+
+  td {
+    padding: 5px 8px !important;
+    border-bottom: 0.5px solid #e2e8f0 !important;
+    font-size: 9pt !important;
+    word-break: break-word !important;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #f8fafc !important;
+  }
+
+  /* Page breaks */
+  .page-break-before {
+    page-break-before: always !important;
+  }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+  }
+
+  /* Hide action buttons and search in table */
+  [class*="dataTables_filter"],
+  [class*="dataTables_length"],
+  [class*="dataTables_paginate"],
+  [class*="dataTables_info"],
+  .expand-btn,
+  button:not(.print-keep) {
+    display: none !important;
+  }
+
+  /* Print footer */
+  #print-report::after {
+    content: "Sheba Hospital Management System — Confidential";
+    display: block;
+    text-align: center;
+    font-size: 8pt;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 6px;
+    margin-top: 16px;
+  }
+}

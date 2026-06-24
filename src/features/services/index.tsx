@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+﻿import { useEffect } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
 import { PageHeader } from '@/components/layout/page-header'
@@ -110,7 +110,7 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
             render: (data: any, _type: string, row: ServiceItem) => {
                 return `
                     <div class="flex items-center gap-2">
-                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
                                 type="button"
                                 data-id="${data}"
                                 data-name="${(row.name || '-').replace(/"/g, '&quot;')}"
@@ -199,7 +199,7 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
                 nextRow.remove();
                 row.classList.remove('expanded');
                 btn.textContent = '+';
-                btn.style.backgroundColor = 'black';
+                btn.style.backgroundColor = '#10B981';
                 return;
             }
 
@@ -347,16 +347,16 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
             <div className="space-y-4">
                 {/* Statistics Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {statCards.map((card) => {
+                    {statCards.map((card, index) => {
                         const Icon = card.icon;
                         return (
                             <Card key={card.title} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }}>
                                     <div className="flex items-center gap-2.5">
-                                        <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
-                                            <Icon className="w-4 h-4 text-white" />
+                                        <div className="p-2 bg-white rounded-lg shadow-lg">
+                                            <Icon className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
                                         </div>
-                                        <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.title}</CardTitle>
+                                        <CardTitle className="text-sm font-semibold text-white/90">{card.title}</CardTitle>
                                     </div>
                                 </CardHeader>
                                 <CardContent className="p-4">

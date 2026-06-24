@@ -1,4 +1,4 @@
-import { AppHeader } from '@/components/layout/app-header'
+﻿import { AppHeader } from '@/components/layout/app-header'
 import { DataTable } from '@/components/DataTable'
 import { useMemo, useEffect, useState } from 'react'
 import { getCookie } from '@/lib/cookies'
@@ -146,7 +146,7 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
         nextRow.remove();
         row.classList.remove('expanded');
         btn.textContent = '+';
-        btn.style.backgroundColor = 'black';
+        btn.style.backgroundColor = '#10B981';
         return;
       }
 
@@ -553,7 +553,7 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
           : `<span class="font-semibold text-muted-foreground">${value}</span>`;
         return `
           <div class="flex items-center gap-2">
-            <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+            <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
                     type="button"
                     data-id="${row.id}">+</button>
             ${display}
@@ -690,16 +690,16 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
       <main className=''>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {stats.map((card) => {
+          {stats.map((card, index) => {
             const Icon = card.icon;
             return (
               <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }}>
                   <div className="flex items-center gap-2.5">
-                    <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
-                      <Icon className="w-4 h-4 text-white" />
+                    <div className="p-2 bg-white rounded-lg shadow-lg">
+                      <Icon className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
                     </div>
-                    <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                    <CardTitle className="text-sm font-semibold text-white/90">{card.label}</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">

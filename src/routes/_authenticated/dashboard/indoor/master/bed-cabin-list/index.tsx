@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from 'zod'
 import { AppHeader } from '@/components/layout/app-header';
@@ -91,7 +91,7 @@ function BedCabinList() {
             render: (data: any, _type: string, row: BedCabinItem) => {
                 return `
                     <div class="flex items-center gap-2">
-                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
                                 type="button"
                                 data-id="${data}"
                                 data-code="${(row.code || "-").replace(/"/g, "&quot;")}"
@@ -190,7 +190,7 @@ function BedCabinList() {
                 nextRow.remove();
                 row.classList.remove('expanded');
                 btn.textContent = '+';
-                btn.style.backgroundColor = 'black';
+                btn.style.backgroundColor = '#10B981';
                 return;
             }
 

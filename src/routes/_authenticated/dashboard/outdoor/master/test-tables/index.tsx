@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+﻿import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 
 import { AppHeader } from '@/components/layout/app-header'
@@ -115,7 +115,7 @@ function TestTables() {
         nextRow.remove();
         row.classList.remove('expanded');
         btn.textContent = '+';
-        btn.style.backgroundColor = 'black';
+        btn.style.backgroundColor = '#10B981';
         return;
       }
 
@@ -217,7 +217,7 @@ function TestTables() {
 
         return `
           <div class="flex items-center gap-2">
-            <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+            <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
                     type="button"
                     data-display-name="${displayName.replace(/"/g, '&quot;')}"
                     data-table-name="${tableName.replace(/"/g, '&quot;')}"

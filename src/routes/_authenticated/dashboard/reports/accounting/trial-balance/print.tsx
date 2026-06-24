@@ -1,0 +1,380 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { z } from 'zod'
+import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
+import { getCookie } from '@/lib/cookies'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft, Printer, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
+import { useDateFormat } from '@/hooks/use-date-format'
+
+const searchSchema = z.object({
+  search: z.string().optional().default(''),
+  start_date: z.string().optional().default(''),
+  end_date: z.string().optional().default(''),
+})
+
+export const Route = createFileRoute('/_authenticated/dashboard/reports/accounting/trial-balance/print')({
+  validateSearch: searchSchema,
+  component: TrialBalancePrint,
+})
+
+const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
+
+interface TrialBalanceItem {
+  id: number
+  code: string
+  account: string
+  type: string
+  debit: number
+  credit: number
+}
+
+function TrialBalancePrint() {
+  const { search, start_date, end_date } = Route.useSearch()
+  const token = getCookie('accessToken')
+  const { formatDate } = useDateFormat()
+  const API_URL = import.meta.env.VITE_API_URL || ''
+
+  const safeFormatDate = (dateVal: any) => {
+    if (!dateVal) return '-'
+    if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+      const [y, m, day] = dateVal.split('-').map(Number)
+      return formatDate(new Date(y, m - 1, day))
+    }
+    const d = new Date(dateVal)
+    if (isNaN(d.getTime())) return '-'
+    return formatDate(d)
+  }
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['print-trial-balance', search, start_date, end_date],
+    queryFn: async () => {
+      const params = new URLSearchParams({ page: '1', limit: '9999', search: search ?? '' })
+      if (start_date) params.set('from', start_date)
+      if (end_date) params.set('to', end_date)
+      const res = await fetch(`${API_URL}/api/accounting/reports/trial-balance?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) throw new Error('Failed to fetch trial balance data')
+      return res.json()
+    },
+    enabled: !!token,
+  })
+
+  // Fetch company settings for company name, address and logo
+  const { data: companySettings } = useQuery({
+    queryKey: ["company-settings"],
+    queryFn: async () => {
+      const res = await fetch(`${API_URL}/api/company-settings`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch company settings");
+      const result = await res.json();
+      return result.data;
+    },
+    enabled: !!token,
+  })
+
+  const items = useMemo(() => data?.data?.items ?? [], [data?.data?.items])
+  const flatItems = items.length > 0 && Array.isArray(items[0]) ? items[0] : items
+  const totalDebit = data?.total_debit || 0
+  const totalCredit = data?.total_credit || 0
+  const status = data?.status || 'UNBALANCED'
+  const isBalanced = status === 'BALANCED'
+
+  const stats = useMemo(() => {
+    const debitCount = flatItems.filter((r: any) => r.debit > 0).length
+    const creditCount = flatItems.filter((r: any) => r.credit > 0).length
+    const difference = Math.abs(totalDebit - totalCredit)
+    const totalFromMeta = data?.data?.meta?.total ?? flatItems.length
+
+    return [
+      { label: 'Total Accounts', value: totalFromMeta, color: COLORS[0] },
+      { label: 'Debit Entries', value: debitCount, color: COLORS[5] },
+      { label: 'Credit Entries', value: creditCount, color: COLORS[1] },
+      { label: 'Total Debit', value: totalDebit, color: COLORS[2], isCurrency: true },
+      { label: 'Total Credit', value: totalCredit, color: COLORS[4], isCurrency: true },
+      { label: 'Difference', value: difference, color: isBalanced ? COLORS[0] : COLORS[1], isCurrency: true },
+    ]
+  }, [flatItems, data, totalDebit, totalCredit, isBalanced])
+
+  const companyLogo = companySettings?.company_logo
+    ? (companySettings.company_logo.startsWith('http') || companySettings.company_logo.startsWith('data:'))
+      ? companySettings.company_logo
+      : `${API_URL}${companySettings.company_logo}`
+    : null;
+  const companyName = companySettings?.company_name || 'Sheba Hospital';
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen gap-3">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="text-gray-600">Loading trial balance data...</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto w-full p-8 bg-white">
+      <style>{`
+        .bg-row-blue { background-color: #cfd2d8ff !important; }
+        @media print {
+          @page {
+            size: A4 landscape;
+            margin: 10mm;
+          }
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #fff !important;
+            color: #000 !important;
+          }
+          .print\\:hidden {
+            display: none !important;
+          }
+          /* Reduce container spacing */
+          .max-w-6xl {
+            max-width: 100% !important;
+            padding: 1rem !important;
+          }
+          /* Compact header */
+          .mb-2 {
+            margin-bottom: 0.5rem !important;
+          }
+          .mb-4 {
+            margin-bottom: 0.75rem !important;
+          }
+          .mb-6 {
+            margin-bottom: 1rem !important;
+          }
+          .mt-10 {
+            margin-top: 1rem !important;
+          }
+          .mt-16 {
+            margin-top: 2rem !important;
+          }
+          /* Compact stats section */
+          .bg-gray-50 {
+            padding: 0.25rem 0.5rem !important;
+          }
+          /* Table styling */
+          table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            color: #000 !important;
+            margin-top: 0.5rem !important;
+          }
+          th, td {
+            padding: 4px 6px !important;
+            border: 1px solid #ddd !important;
+            color: #000 !important;
+            font-size: 10px !important;
+          }
+          th {
+            background-color: #f0f9ff !important;
+            color: #000 !important;
+            font-weight: 600 !important;
+          }
+          .bg-row-blue {
+            background-color: #cfd2d8ff !important;
+          }
+          h1, h2, h3, h4, h5, h6, p, span, div {
+            color: #000 !important;
+          }
+          .text-2xl {
+            font-size: 16px !important;
+          }
+          .text-xl {
+            font-size: 14px !important;
+          }
+          .text-sm {
+            font-size: 10px !important;
+          }
+          .text-xs {
+            font-size: 9px !important;
+          }
+          .w-24 {
+            width: 60px !important;
+            height: 60px !important;
+          }
+        }
+      `}</style>
+
+      {/* Back & Print Buttons */}
+      <div className="flex justify-between items-center mb-6 print:hidden">
+        <Button variant="outline" size="sm" onClick={() => window.history.back()}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+        <Button size="sm" onClick={() => window.print()}>
+          <Printer className="w-4 h-4 mr-2" />
+          Print
+        </Button>
+      </div>
+
+      {/* Header */}
+      <div className="mb-2">
+        <div className='flex justify-center items-center gap-6'>
+          {companyLogo ? (
+            <img
+              src={companyLogo}
+              alt="Company Logo"
+              className="w-24 h-24 object-contain"
+            />
+          ) : null}
+
+          <div className="text-center">
+            <h1 className="text-xl font-bold">{companyName}</h1>
+            <p className="text-xs mt-1 leading-4">
+              {[companySettings?.address1, companySettings?.address2].filter(Boolean).join(', ')}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Title ──────────────────────────────────────────────────────── */}
+      <h1 className="text-lg font-bold text-center underline mb-1 tracking-wide uppercase">
+        TRIAL BALANCE REPORT
+      </h1>
+      <p className="text-center text-xs text-gray-600 mb-2">Summary of all ledger account balances</p>
+
+      {/* ── Balance Status ───────────────────────────────────────────────── */}
+      <div className="mb-2 flex items-center justify-center gap-2">
+        <span className="text-xs font-medium">Balance Status:</span>
+        {isBalanced ? (
+          <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold">
+            <CheckCircle2 className="w-3 h-3" />
+            BALANCED
+          </div>
+        ) : (
+          <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
+            <AlertCircle className="w-3 h-3" />
+            UNBALANCED
+          </div>
+        )}
+      </div>
+
+      {/* ── Filter Period ───────────────────────────────────────────────── */}
+      {(start_date || end_date || search) && (
+        <div className="mb-2 p-2 bg-gray-50 rounded border text-xs">
+          <div className="grid grid-cols-3 gap-2">
+            {start_date && (
+              <div><strong>From:</strong> {safeFormatDate(start_date)}</div>
+            )}
+            {end_date && (
+              <div><strong>To:</strong> {safeFormatDate(end_date)}</div>
+            )}
+            {search && (
+              <div><strong>Search:</strong> {search}</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Stats Summary ──────────────────────────────────────────────────── */}
+      <div className="mb-3 p-2 bg-gray-50 rounded border text-[10px]">
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
+          {stats.map((stat, index) => (
+            <span key={index}>
+              <span className="text-gray-600">{stat.label}:</span>{' '}
+              <span className="font-bold">
+                {stat.isCurrency
+                  ? stat.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                  : stat.value.toLocaleString()
+                }
+              </span>
+              {index < stats.length - 1 && <span className="mx-2 text-gray-400">|</span>}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Data Table ───────────────────────────────────────────────────── */}
+      <table className="w-full text-xs mt-2">
+        <thead>
+          <tr className="border-t border-b" style={{ backgroundColor: '#f0f9ff' }}>
+            <th className="px-1.5 py-1 text-left text-[10px] w-[10%]">Account Code</th>
+            <th className="px-1.5 py-1 text-left text-[10px] w-[25%]">Account Name</th>
+            <th className="px-1.5 py-1 text-left text-[10px] w-[15%]">Account Type</th>
+            <th className="px-1.5 py-1 text-right text-[10px] w-[25%]">Debit Balance</th>
+            <th className="px-1.5 py-1 text-right text-[10px] w-[25%]">Credit Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {flatItems.map((item: TrialBalanceItem, idx: number) => (
+            <tr key={item.id || idx} className="border-b border-dashed">
+              <td className="px-1.5 py-1 text-[10px] font-mono">{item.code || '-'}</td>
+              <td className="px-1.5 py-1 text-[10px] font-medium">{item.account || '-'}</td>
+              <td className="px-1.5 py-1 text-[10px] capitalize">{item.type || '-'}</td>
+              <td className="px-1.5 py-1 text-[10px] text-right font-mono">
+                {item.debit > 0
+                  ? item.debit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                  : '-'
+                }
+              </td>
+              <td className="px-1.5 py-1 text-[10px] text-right font-mono">
+                {item.credit > 0
+                  ? item.credit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                  : '-'
+                }
+              </td>
+            </tr>
+          ))}
+          {/* Total Row */}
+          <tr className="bg-row-blue font-bold border-t-2">
+            <td className="px-1.5 py-1 text-[10px]" colSpan={3}>TOTALS</td>
+            <td className="px-1.5 py-1 text-[10px] text-right font-mono text-emerald-600">
+              {totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <td className="px-1.5 py-1 text-[10px] text-right font-mono text-emerald-600">
+              {totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+          </tr>
+          {flatItems.length === 0 && (
+            <tr>
+              <td colSpan={5} className="px-2 py-4 text-center text-gray-500" style={{ color: '#6b7280 !important' }}>
+                <div className="font-semibold text-xs">No trial balance data found for the selected criteria</div>
+                <div className="text-[10px] mt-1">Try adjusting your date range or search filters</div>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      {/* ── Summary Footer ───────────────────────────────────────────────── */}
+      <div className="mt-3 pt-2 border-t text-xs">
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <strong>Total Records:</strong> {flatItems.length}
+          </div>
+          <div className="text-right">
+            <strong>Generated:</strong> {safeFormatDate(new Date())}
+          </div>
+        </div>
+        {!isBalanced && (
+          <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded">
+            <div className="flex items-center gap-1 text-red-700 font-medium text-[10px]">
+              <AlertCircle className="w-3 h-3" />
+              <span>Difference: {Math.abs(totalDebit - totalCredit).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Signature Row ───────────────────────────────────────────────── */}
+      <div className="flex justify-between items-end mt-6 text-xs">
+        <div className="text-left">
+          <p className="border-t border-dashed w-40 pt-1">Prepared By:</p>
+        </div>
+        <div className="text-right">
+          <p className="border-t border-dashed w-48 pt-1">Authority Signature:</p>
+        </div>
+      </div>
+    </div>
+  )
+}

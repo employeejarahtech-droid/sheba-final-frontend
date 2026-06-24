@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Wallet, TrendingUp, TrendingDown, ArrowRightLeft } from "lucide-react";
+import { Calendar as CalendarIcon, Wallet, TrendingUp, TrendingDown, ArrowRightLeft, Printer } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ import { DataTable } from "@/components/DataTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { useGetCashFlowQuery } from "@/features/accounting/accountingQueries";
-import { AppHeader } from "@/components/layout/app-header";
+import { AppHeader } from '@/components/layout/app-header';
 import { PageHeader } from '@/components/layout/page-header';
 
 const cashFlowSearchSchema = z.object({
@@ -104,6 +104,12 @@ function CashFlow() {
                     description="Cash inflows and outflows by Operating, Investing, and Financing activities."
                     actions={
                         <div className="flex items-center gap-2">
+                            <Link to="/dashboard/accounting/reports/cash-flow/print" search={{ from: fromStr, to: toStr }}>
+                                <Button variant="outline" size="sm">
+                                    <Printer className="mr-2 h-4 w-4" />
+                                    Print
+                                </Button>
+                            </Link>
                             <span className="text-sm font-medium">From:</span>
                             <Popover>
                                 <PopoverTrigger asChild>

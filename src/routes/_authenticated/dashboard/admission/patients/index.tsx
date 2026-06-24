@@ -7,6 +7,8 @@ const patientsSearchSchema = z.object({
     limit: z.coerce.number().catch(10),
     search: z.string().catch(''),
     status: z.string().optional(),
+    sort: z.string().catch('admission_prefix'),
+    order: z.string().catch('DESC'),
 })
 
 export const Route = createFileRoute('/_authenticated/dashboard/admission/patients/')({
@@ -21,6 +23,8 @@ function PatientsPage() {
     const page = Number(searchParams?.page) || 1;
     const limit = Number(searchParams?.limit) || 10;
     const search = searchParams?.search || "";
+    const sort = searchParams?.sort || "admission_prefix";
+    const order = searchParams?.order || "DESC";
 
     const setPage = (newPage: number) => {
         navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
@@ -31,15 +35,21 @@ function PatientsPage() {
     const setSearch = (newSearch: string) => {
         navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
     };
+    const setSort = (newSort: string, newOrder: string) => {
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, sort: newSort, order: newOrder, page: 1 }) });
+    };
 
     return (
         <AdmittedPatientsList
             page={page}
             limit={limit}
             search={search}
+            sort={sort}
+            order={order}
             setPage={setPage}
             setLimit={setLimit}
             setSearch={setSearch}
+            setSort={setSort}
         />
     )
 }

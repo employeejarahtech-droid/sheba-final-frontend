@@ -88,30 +88,10 @@ export default function Departments({ page, limit, search, setPage, setLimit, se
     const stats = statsData || { totalDepartments: 0, totalCategories: 0, totalTests: 0, totalReports: 0, totalRevenue: 0 };
 
     const statCards = [
-        {
-            label: 'Total Departments',
-            value: stats.totalDepartments || 0,
-            icon: Building2,
-            grad: 'from-blue-500 to-indigo-500',
-        },
-        {
-            label: 'Total Categories',
-            value: stats.totalCategories || 0,
-            icon: Layers,
-            grad: 'from-purple-500 to-indigo-500',
-        },
-        {
-            label: 'Total Tests',
-            value: stats.totalTests || 0,
-            icon: Database,
-            grad: 'from-emerald-500 to-teal-500',
-        },
-        {
-            label: 'Total Reports',
-            value: stats.totalReports || 0,
-            icon: TrendingUp,
-            grad: 'from-amber-500 to-orange-500',
-        }
+        { label: 'Total Departments', value: stats.totalDepartments || 0, icon: Building2,  headerBg: '#10B981', iconColor: '#10B981' },
+        { label: 'Total Categories',  value: stats.totalCategories  || 0, icon: Layers,     headerBg: '#F97316', iconColor: '#F97316' },
+        { label: 'Total Tests',       value: stats.totalTests       || 0, icon: Database,   headerBg: '#EC4899', iconColor: '#EC4899' },
+        { label: 'Total Reports',     value: stats.totalReports     || 0, icon: TrendingUp, headerBg: '#14B8A6', iconColor: '#14B8A6' },
     ];
 
     // Delete mutation
@@ -147,7 +127,7 @@ export default function Departments({ page, limit, search, setPage, setLimit, se
                 nextRow.remove();
                 row.classList.remove('expanded');
                 btn.textContent = '+';
-                btn.style.backgroundColor = 'black';
+                btn.style.backgroundColor = '#3B82F6';
                 return;
             }
 
@@ -241,7 +221,7 @@ export default function Departments({ page, limit, search, setPage, setLimit, se
             render: (data: any, _type: string, row: DepartmentItem) => {
                 return `
                     <div class="flex items-center gap-2">
-                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#3B82F6;"
                                 type="button"
                                 data-id="${data}"
                                 data-name="${(row.name || '-').replace(/"/g, '&quot;')}"
@@ -302,12 +282,12 @@ export default function Departments({ page, limit, search, setPage, setLimit, se
                         const Icon = card.icon;
                         return (
                             <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: card.headerBg }}>
                                     <div className="flex items-center gap-2.5">
-                                        <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
-                                            <Icon className="w-4 h-4 text-white" />
+                                        <div className="p-2 bg-white rounded-lg shadow-lg">
+                                            <Icon className="w-4 h-4" style={{ color: card.iconColor }} />
                                         </div>
-                                        <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                                        <CardTitle className="text-sm font-semibold text-white/90">{card.label}</CardTitle>
                                     </div>
                                 </CardHeader>
                                 <CardContent className="p-4">

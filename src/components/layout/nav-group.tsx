@@ -151,9 +151,9 @@ function SidebarMenuRecursiveCollapsible({
   href: string;
   depth?: number;
 }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(() => checkIsActive(href, item, true));
 
-  // Auto-expand when navigating to a child item
+  // Auto-expand when navigating into a child item
   useEffect(() => {
     if (checkIsActive(href, item, true) && !open) {
       setOpen(true);

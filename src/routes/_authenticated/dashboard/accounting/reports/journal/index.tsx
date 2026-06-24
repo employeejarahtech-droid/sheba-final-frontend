@@ -1,92 +1,61 @@
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { useMemo, useEffect, useState } from 'react'
+import { getCookie } from '@/lib/cookies'
+import { AppHeader } from '@/components/layout/app-header'
+import { DataTable } from '@/components/DataTable'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { BookOpen, ArrowUpRight, ArrowDownLeft, Scale, Printer, FileText, Hash } from 'lucide-react'
+import { DateField } from '@/components/date-field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
 
-"use client";
+const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
 
-import { useState, Fragment, useMemo } from "react";
-import { Loader2, Plus, Trash2, ChevronDown, ChevronRight, Search, Eye, EyeOff, BookOpen, ArrowUpRight, ArrowDownLeft, Scale, ChevronLeft, ChevronRight as ChevronRightIcon, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { createFileRoute } from '@tanstack/react-router';
-import { z } from 'zod';
+interface JournalEntry {
+  id: number
+  date: string | null
+  narration: string | null
+  reference_type: string | null
+  entries: JournalLine[]
+  total_debit: number
+  total_credit: number
+}
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { NestedAccountSelect } from "@/components/accounting/NestedAccountSelect";
+interface JournalLine {
+  account: {
+    code: string
+    name: string
+  }
+  debit: string
+  credit: string
+}
 
-import { useAddJournalEntryMutation, useGetJournalReportQuery } from "@/features/accounting/accountingQueries";
-import { toast } from "sonner";
-import { AppHeader } from "@/components/layout/app-header";
-import { Main } from "@/components/layout/main";
-import { PageHeader } from "@/components/layout/page-header";
-import { useCurrency } from "@/hooks/use-currency";
-import { useDebounce } from "@/hooks/useDebounce";
-import { getPageNumbers } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useEffect } from "react";
-
-const journalSearchSchema = z.object({
-  page: z.coerce.number().catch(1),
-  limit: z.coerce.number().catch(20),
-  search: z.string().catch(''),
-  from: z.string().optional(),
-  to: z.string().optional(),
-});
+interface Meta {
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
 
 export const Route = createFileRoute('/_authenticated/dashboard/accounting/reports/journal/')({
-  validateSearch: (search) => journalSearchSchema.parse(search),
-  component: JournalReport,
+  component: JournalReportPage,
 })
 
-type FormRow = {
-  id: string;
-  account_id: number | null;
-  account_name: string;
-  debit: string;
-  credit: string;
-};
-
-function JournalReport() {
-  // Modal
-  const [isOpen, setIsOpen] = useState(false);
-
-  // URL search params
+function JournalReportPage() {
   const searchParams: any = Route.useSearch();
   const navigate = Route.useNavigate();
+  const { formatDate } = useDateFormat();
+  const { currencySymbol } = useCurrency();
 
   const page = Number(searchParams?.page) || 1;
-  const limit = Number(searchParams?.limit) || 20;
+  const limit = Number(searchParams?.limit) || 10;
   const search = searchParams?.search || "";
-  const fromDate = searchParams?.from || "";
-  const toDate = searchParams?.to || "";
-  const [searchInput, setSearchInput] = useState(search);
+  const from = searchParams?.from || "";
+  const to = searchParams?.to || "";
 
-  // Helper functions to update URL params
   const setPage = (newPage: number) => {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
   };
@@ -96,60 +65,44 @@ function JournalReport() {
   const setSearch = (newSearch: string) => {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
   };
-  const setFromDate = (newDate: string) => {
-    navigate({ to: '.', search: (prev: any) => ({ ...prev, from: newDate, page: 1 }) });
+  const setFrom = (newFrom: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, from: newFrom, page: 1 }) });
   };
-  const setToDate = (newDate: string) => {
-    navigate({ to: '.', search: (prev: any) => ({ ...prev, to: newDate, page: 1 }) });
-  };
-  const clearFilters = () => {
-    navigate({ to: '.', search: (prev: any) => ({ ...prev, from: '', to: '', search: '', page: 1 }) });
-    setSearchInput("");
+  const setTo = (newTo: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, to: newTo, page: 1 }) });
   };
 
-  // Debounced search
-  const debouncedSearch = useDebounce(searchInput, 500);
+  const token = getCookie('accessToken')
 
-  // Sync search input with URL param when it changes from outside
-  useEffect(() => {
-    if (search !== undefined && search !== searchInput) {
-      setSearchInput(search);
-    }
-  }, [search]);
+  const { data, isLoading } = useQuery({
+    queryKey: ['journal-report', page, limit, search, from, to],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+        search,
+        ...(from ? { from } : {}),
+        ...(to ? { to } : {}),
+      })
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/accounting/journal?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) throw new Error('Failed to fetch journal data')
+      return res.json()
+    },
+    enabled: !!token,
+    placeholderData: (prev) => prev ? prev : { data: { items: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } } },
+  })
 
-  // Handle debounced search change - push to URL
-  useEffect(() => {
-    if (debouncedSearch !== search) {
-      setSearch(debouncedSearch);
-    }
-  }, [debouncedSearch]);
+  const items: JournalEntry[] = data?.data?.items || []
+  const meta: Meta = data?.data?.meta || { total: 0, page: 1, limit: 10, totalPages: 1 }
 
-  // Expanded rows
-  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
-
-  // Form state
-  const [formDate, setFormDate] = useState(new Date().toISOString().split('T')[0]);
-  const [narration, setNarration] = useState("");
-  const [rows, setRows] = useState<FormRow[]>([
-    { id: '1', account_id: null, account_name: '', debit: '', credit: '' },
-    { id: '2', account_id: null, account_name: '', debit: '', credit: '' },
-  ]);
-
-  // Queries
-  const { data: journalData, isLoading } = useGetJournalReportQuery({ page, limit, search, from: fromDate, to: toDate });
-  const { mutateAsync: addJournalEntry, isPending: isAdding } = useAddJournalEntryMutation();
-
-  const totalPages = journalData?.pagination?.totalPage || 1;
-  const totalItems = journalData?.pagination?.total || 0;
-
-  const { currencySymbol } = useCurrency();
-
+  // Calculate statistics
   const stats = useMemo(() => {
-    const list = journalData?.data || [];
     let totalDebitSum = 0;
     let totalCreditSum = 0;
 
-    list.forEach((entry: any) => {
+    items.forEach((entry) => {
       (entry.entries || []).forEach((line: any) => {
         totalDebitSum += parseFloat(line.debit) || 0;
         totalCreditSum += parseFloat(line.credit) || 0;
@@ -159,573 +112,385 @@ function JournalReport() {
     const isBalanced = Math.abs(totalDebitSum - totalCreditSum) < 0.01;
 
     return [
-      {
-        label: "Total Journal Entries",
-        value: totalItems.toLocaleString(),
-        icon: BookOpen,
-        grad: "from-blue-500 to-indigo-500",
-        sub: "Total entries in this period",
-      },
-      {
-        label: "Total Debits",
-        value: `${currencySymbol} ${totalDebitSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-        icon: ArrowUpRight,
-        grad: "from-emerald-500 to-teal-500",
-        sub: "Sum of debits in loaded page",
-      },
-      {
-        label: "Total Credits",
-        value: `${currencySymbol} ${totalCreditSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-        icon: ArrowDownLeft,
-        grad: "from-rose-500 to-red-500",
-        sub: "Sum of credits in loaded page",
-      },
-      {
-        label: "Ledger Status",
-        value: isBalanced ? "Balanced" : "Unbalanced",
-        icon: Scale,
-        grad: isBalanced ? "from-violet-500 to-purple-500" : "from-amber-500 to-red-500",
-        sub: "Debits vs Credits check",
-      },
-    ];
-  }, [journalData, totalItems, currencySymbol]);
+      { label: 'Total Entries', value: meta.total, icon: BookOpen, grad: 'from-green-500 to-green-600' },
+      { label: 'Total Debits', value: `${currencySymbol} ${totalDebitSum.toFixed(2)}`, icon: ArrowUpRight, grad: 'from-blue-500 to-blue-600' },
+      { label: 'Total Credits', value: `${currencySymbol} ${totalCreditSum.toFixed(2)}`, icon: ArrowDownLeft, grad: 'from-orange-500 to-orange-600' },
+      { label: 'This Page', value: items.length, icon: Hash, grad: 'from-teal-500 to-teal-600' },
+      { label: 'Balanced', value: isBalanced ? 'Yes' : 'No', icon: Scale, grad: isBalanced ? 'from-violet-500 to-violet-600' : 'from-red-500 to-red-600' },
+      { label: 'Difference', value: `${currencySymbol} ${Math.abs(totalDebitSum - totalCreditSum).toFixed(2)}`, icon: Hash, grad: 'from-yellow-500 to-yellow-600' },
+    ]
+  }, [items, meta, currencySymbol])
 
-  const toggleRow = (id: number) => {
-    setExpandedRows(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
+  // ---- Date filter presets ----
+  const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+  const toYMD = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+  const datePresets = useMemo(() => ({
+    today: { label: 'Today', from: toYMD(today()), to: toYMD(today()) },
+    yesterday: (() => { const d = today(); d.setDate(d.getDate() - 1); return { label: 'Yesterday', from: toYMD(d), to: toYMD(d) }; })(),
+    last7: { label: 'Last 7 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 6); return d; })()), to: toYMD(today()) },
+    last15: { label: 'Last 15 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 14); return d; })()), to: toYMD(today()) },
+    last30: { label: 'Last 30 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 29); return d; })()), to: toYMD(today()) },
+    last45: { label: 'Last 45 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 44); return d; })()), to: toYMD(today()) },
+    last60: { label: 'Last 60 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 59); return d; })()), to: toYMD(today()) },
+    last90: { label: 'Last 90 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 89); return d; })()), to: toYMD(today()) },
+    last180: { label: 'Last 180 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 179); return d; })()), to: toYMD(today()) },
+    last365: { label: 'Last 365 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 364); return d; })()), to: toYMD(today()) },
+  }), []);
+
+  const activePreset = useMemo(() => {
+    if (!from || !to) return 'custom';
+    const match = Object.entries(datePresets).find(([, v]) => v.from === from && v.to === to);
+    return match ? match[0] : 'custom';
+  }, [from, to, datePresets]);
+
+  const [presetOpen, setPresetOpen] = useState(false);
+  const applyPreset = (key: string) => {
+    const p = (datePresets as any)[key];
+    if (p) { setFrom(p.from); setTo(p.to); }
+    setPresetOpen(false);
   };
 
-  // Form helpers
-  const addRow = () => {
-    setRows([...rows, { id: Date.now().toString(), account_id: null, account_name: '', debit: '', credit: '' }]);
-  };
+  // Handle expand button clicks
+  useEffect(() => {
+    const handleExpandClick = async (e: Event) => {
+      const button = (e.target as HTMLElement).closest('.expand-btn');
+      if (!button) return;
 
-  const removeRow = (id: string) => {
-    if (rows.length > 2) {
-      setRows(rows.filter(r => r.id !== id));
-    }
-  };
+      const btn = button as HTMLButtonElement;
+      const row = btn.closest('tr');
+      if (!row) return;
 
-  const updateRow = (id: string, field: keyof FormRow, value: any) => {
-    setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
-  };
+      const isExpanded = row.classList.contains('expanded');
+      const nextRow = row.nextElementSibling;
 
-  const calcTotals = () => {
-    const td = rows.reduce((s, r) => s + (parseFloat(r.debit) || 0), 0);
-    const tc = rows.reduce((s, r) => s + (parseFloat(r.credit) || 0), 0);
-    return { totalDebit: td, totalCredit: tc };
-  };
+      if (nextRow && nextRow.classList.contains('child-row-detail')) {
+        nextRow.remove();
+        row.classList.remove('expanded');
+        btn.textContent = '+';
+        btn.style.backgroundColor = '#10B981';
+        return;
+      }
 
-  const { totalDebit, totalCredit } = calcTotals();
-  const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01 && totalDebit > 0;
+      if (isExpanded) return;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isBalanced) {
-      toast.error("Debit and Credit must be equal!");
-      return;
-    }
+      const id = btn.dataset.id || '';
 
-    const validEntries = rows.filter(r => r.account_id !== null);
-    if (validEntries.length < 2) {
-      toast.error("At least 2 account entries are required");
-      return;
-    }
+      const details = document.createElement('div');
+      details.className = 'max-w-4xl mx-auto bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden';
 
-    try {
-      await addJournalEntry({
-        date: formDate,
-        narration,
-        entries: validEntries.map(r => ({
-          account_id: Number(r.account_id),
-          debit: Number(r.debit) || 0,
-          credit: Number(r.credit) || 0,
-        })),
-      });
-      toast.success("Journal Entry added successfully");
-      setIsOpen(false);
-      setNarration("");
-      setRows([
-        { id: '1', account_id: null, account_name: '', debit: '', credit: '' },
-        { id: '2', account_id: null, account_name: '', debit: '', credit: '' },
-      ]);
-    } catch (error) {
-      toast.error("Failed to add journal entry");
-      console.error(error);
-    }
-  };
+      details.innerHTML = `
+        <div class="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-4">
+          <h2 class="text-xl font-semibold">Journal Entry Details</h2>
+          <p class="text-sm opacity-90">Entry #${id}</p>
+        </div>
+        <div class="p-6">
+          <div id="journal-details-${id}" class="text-gray-500 text-sm">
+            Loading journal details...
+          </div>
+        </div>
+      `;
+
+      const newRow = document.createElement('tr');
+      newRow.className = 'child-row-detail';
+      const cell = document.createElement('td');
+      cell.className = 'p-4 bg-gray-50';
+      cell.colSpan = row.cells.length;
+      cell.appendChild(details);
+      newRow.appendChild(cell);
+
+      row.parentNode?.insertBefore(newRow, row.nextSibling);
+      row.classList.add('expanded');
+      btn.textContent = '−';
+      btn.style.backgroundColor = '#dc2626';
+
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/accounting/journal/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch journal details");
+
+        const result = await res.json();
+        const entry = result.data;
+
+        const formatDateTime = (date: string | null) => {
+          if (!date) return '-';
+          return formatDate(new Date(date));
+        };
+
+        const journalDetailsHTML = `
+          <div class="space-y-6">
+            <div class="grid grid-cols-2 gap-x-8 gap-y-4 text-sm border-b pb-6">
+              <div>
+                <p class="text-gray-500">Entry ID</p>
+                <p class="font-semibold text-gray-800">#${entry.id || '-'}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Reference Type</p>
+                <p class="font-semibold capitalize">${entry.reference_type || '-'}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Date</p>
+                <p class="font-semibold text-gray-800">${formatDateTime(entry.date)}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Narration</p>
+                <p class="font-semibold text-gray-800">${entry.narration || '-'}</p>
+              </div>
+            </div>
+
+            <div class="border-t pt-4">
+              <h3 class="font-semibold text-gray-800 mb-3">Entry Lines</h3>
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="bg-gray-50">
+                    <th class="px-3 py-2 text-left border">Account</th>
+                    <th class="px-3 py-2 text-right border w-28">Debit</th>
+                    <th class="px-3 py-2 text-right border w-28">Credit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${(entry.entries || []).map((line: any) => `
+                    <tr>
+                      <td class="px-3 py-2 border">
+                        <span class="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded mr-2">${line.account?.code || '-'}</span>
+                        ${line.account?.name || '-'}
+                      </td>
+                      <td class="px-3 py-2 text-right border font-mono">${parseFloat(line.debit) > 0 ? parseFloat(line.debit).toFixed(2) : '-'}</td>
+                      <td class="px-3 py-2 text-right border font-mono">${parseFloat(line.credit) > 0 ? parseFloat(line.credit).toFixed(2) : '-'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t">
+              <a href="/dashboard/accounting/reports/journal/print?id=${id}"
+                 class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
+                Print Entry
+              </a>
+            </div>
+          </div>
+        `;
+
+        const container = document.getElementById(`journal-details-${id}`);
+        if (container) {
+          container.innerHTML = journalDetailsHTML;
+        }
+      } catch (error) {
+        console.error('Error fetching journal details:', error);
+        const container = document.getElementById(`journal-details-${id}`);
+        if (container) {
+          container.innerHTML = `
+            <div class="text-red-500 text-sm">
+              Failed to load journal details. Please try again.
+            </div>
+          `;
+        }
+      }
+    };
+
+    document.addEventListener('click', handleExpandClick);
+
+    return () => {
+      document.removeEventListener('click', handleExpandClick);
+    };
+  }, [token, formatDate]);
 
   const refTypeBadge: Record<string, { label: string; color: string }> = {
-    TRANSACTION: { label: "Transaction", color: "bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300" },
-    MANUAL: { label: "Manual", color: "bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-300" },
-    PROVIDER_PAYMENT: { label: "Provider Pay", color: "bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-300" },
-    ADMISSION_PAYMENT: { label: "Admission Pay", color: "bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-300" },
-    OUTDOOR_PAYMENT: { label: "Outdoor Pay", color: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950/30 dark:text-cyan-300" },
+    TRANSACTION: { label: "Transaction", color: "bg-blue-100 text-blue-700" },
+    MANUAL: { label: "Manual", color: "bg-purple-100 text-purple-700" },
+    PROVIDER_PAYMENT: { label: "Provider Pay", color: "bg-orange-100 text-orange-700" },
+    ADMISSION_PAYMENT: { label: "Admission Pay", color: "bg-green-100 text-green-700" },
+    OUTDOOR_PAYMENT: { label: "Outdoor Pay", color: "bg-cyan-100 text-cyan-700" },
   };
 
-  const expandAll = () => {
-    const allIds = new Set((journalData?.data || []).map((e: any) => e.id));
-    setExpandedRows(allIds);
-  };
-
-  const collapseAll = () => setExpandedRows(new Set());
+  const columns = [
+    {
+      data: "id",
+      title: "Entry #",
+      orderable: true,
+      render: (data: any) => {
+        const value = `JE-${String(data).padStart(4, '0')}`;
+        return `
+          <div class="flex items-center gap-2">
+            <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
+                    type="button"
+                    data-id="${data}">+</button>
+            <span class="font-mono text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded">${value}</span>
+          </div>
+        `;
+      },
+    },
+    {
+      data: "date",
+      title: "Date",
+      render: (data: string | null) => {
+        if (!data) return '-'
+        const date = new Date(data)
+        return `<div class="text-sm">${formatDate(date)}</div>`
+      },
+    },
+    {
+      data: "narration",
+      title: "Narration",
+      render: (data: string | null) => data || '-',
+    },
+    {
+      data: "reference_type",
+      title: "Type",
+      render: (data: string | null) => {
+        const badge = refTypeBadge[data || ''] || { label: data || '-', color: 'bg-gray-100 text-gray-700' };
+        return `<span class="px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${badge.color}">${badge.label}</span>`;
+      },
+    },
+    {
+      data: "total_debit",
+      title: "Debit",
+      render: (data: number, type: string, row: JournalEntry) => {
+        const total = (row.entries || []).reduce((s: number, e: any) => s + (parseFloat(e.debit) || 0), 0);
+        return `<span class="font-mono text-sm font-semibold text-emerald-600">${total.toFixed(2)}</span>`;
+      },
+    },
+    {
+      data: "total_credit",
+      title: "Credit",
+      render: (data: number, type: string, row: JournalEntry) => {
+        const total = (row.entries || []).reduce((s: number, e: any) => s + (parseFloat(e.credit) || 0), 0);
+        return `<span class="font-mono text-sm font-semibold text-rose-600">${total.toFixed(2)}</span>`;
+      },
+    },
+    {
+      data: null,
+      title: "Actions",
+      orderable: false,
+      render: (_data: any, _type: string, row: JournalEntry) => {
+        const id = row.id;
+        return `<div class="flex gap-2">
+          <a href="/dashboard/accounting/reports/journal/print?id=${id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+            Print
+          </a>
+          <a href="/dashboard/accounting/journal/${id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-semibold shadow transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h10"/><path d="M9 4v16"/><path d="M3 9l3 3-3 3"/><path d="M14 8V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v12"/><path d="M20 18v4c0 1.1-.9 2-2 2h-4c-1.1 0-2-.9-2-2v-4"/><path d="M22 8h-6"/></svg>
+            View
+          </a>
+        </div>`;
+      },
+    },
+  ]
 
   return (
     <>
-      <AppHeader fixed />
-      <main className="p-4">
-        <div className="space-y-3">
-          <PageHeader
-            title="Journal Entries"
-            description="Record and review double-entry bookkeeping records."
-            showBackButton={false}
-            actions={
-              <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                    <Plus className="h-4 w-4 mr-1" /> New Journal Entry
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[750px] max-h-[90vh]">
-                  <DialogHeader>
-                    <DialogTitle>New Journal Entry</DialogTitle>
-                    <DialogDescription>Enter debit and credit entries for your transaction</DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleSubmit}>
-                    <div className="grid gap-4 py-4 max-h-[65vh] overflow-y-auto px-1">
-                      {/* Date & Narration */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Date</Label>
-                          <Input type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} required />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Narration</Label>
-                          <Textarea placeholder="Brief description..." value={narration} onChange={(e) => setNarration(e.target.value)} required />
-                        </div>
-                      </div>
+      <AppHeader
+        title="Journal Entries Report"
+        description="Complete record of journal entries with filtering, search, and expandable details"
+        fixed
+      />
 
-                      <Separator />
-
-                      {/* Entry Rows */}
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm font-semibold">Transaction Details</Label>
-                          <Button type="button" onClick={addRow} size="sm" variant="outline">
-                            <Plus className="h-4 w-4 mr-1" /> Add Row
-                          </Button>
-                        </div>
-
-                        <div className="border rounded-lg overflow-hidden">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead className="w-[280px]">Account</TableHead>
-                                <TableHead className="w-[120px] text-right">Debit</TableHead>
-                                <TableHead className="w-[120px] text-right">Credit</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {rows.map((row) => (
-                                <TableRow key={row.id}>
-                                  <TableCell>
-                                    <NestedAccountSelect
-                                      value={row.account_id}
-                                      onChange={(id: number | null, account: any) => {
-                                        updateRow(row.id, 'account_id', id);
-                                        updateRow(row.id, 'account_name', account?.name || '');
-                                      }}
-                                      placeholder="Select account"
-                                    />
-                                  </TableCell>
-                                  <TableCell>
-                                    <Input
-                                      type="number"
-                                      placeholder="0.00"
-                                      className="text-right h-9"
-                                      value={row.debit}
-                                      onChange={(e) => updateRow(row.id, 'debit', e.target.value)}
-                                      step="0.01"
-                                      min="0"
-                                    />
-                                  </TableCell>
-                                  <TableCell>
-                                    <Input
-                                      type="number"
-                                      placeholder="0.00"
-                                      className="text-right h-9"
-                                      value={row.credit}
-                                      onChange={(e) => updateRow(row.id, 'credit', e.target.value)}
-                                      step="0.01"
-                                      min="0"
-                                    />
-                                  </TableCell>
-                                  <TableCell>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => removeRow(row.id)}
-                                      disabled={rows.length <= 2}
-                                    >
-                                      <Trash2 className="h-4 w-4 text-destructive" />
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                              <TableRow className="font-semibold bg-muted/50">
-                                <TableCell className="text-right">Total</TableCell>
-                                <TableCell className="text-right font-mono">{totalDebit.toFixed(2)}</TableCell>
-                                <TableCell className="text-right font-mono">{totalCredit.toFixed(2)}</TableCell>
-                                <TableCell></TableCell>
-                              </TableRow>
-                            </TableBody>
-                          </Table>
-                        </div>
-
-                        {/* Balance Indicator */}
-                        {totalDebit !== totalCredit && (totalDebit > 0 || totalCredit > 0) && (
-                          <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-                            <p className="text-sm text-destructive font-medium">
-                              Entry is not balanced. Difference: {Math.abs(totalDebit - totalCredit).toFixed(2)}
-                            </p>
-                          </div>
-                        )}
-                        {isBalanced && (
-                          <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-md">
-                            <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                              Entry is balanced
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <DialogFooter>
-                      <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-                      <Button type="submit" disabled={isAdding || !isBalanced}>
-                        {isAdding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        Save Entry
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            }
-          />
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((card) => {
-              const Icon = card.icon;
-              return (
-                <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                  <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
-                    <div className="flex items-center gap-2.5">
-                      <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
-                        <Icon className="w-4 h-4 text-white" />
-                      </div>
-                      <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-4">
-                    {isLoading ? (
-                      <Skeleton className="h-8 w-28" />
-                    ) : (
-                      <h3 className="text-2xl font-bold">{card.value}</h3>
-                    )}
-                    <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          {/* Filters + Recent Entries */}
-          <Card className="overflow-hidden shadow-lg border-none bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 dark:from-gray-900 dark:via-blue-950/20 dark:to-indigo-950/10 hover:shadow-xl transition-all duration-300">
-            <CardHeader className="bg-gradient-to-r from-blue-600/10 to-indigo-600/10 dark:from-blue-900/20 dark:to-indigo-900/20 border-b border-blue-100 dark:border-blue-800/30 py-5 px-6 gap-0">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
+      <main className="">
+        {/* Enhanced Stats Cards - 6 cards in 2 rows */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+          {stats.map((stat, index) => {
+            const Icon = stat.icon
+            const colors = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
+            return (
+              <Card key={index} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: colors[index % 6] }}>
                   <div className="flex items-center gap-2.5">
-                    <div className="p-1.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg shadow-md">
-                      <BookOpen className="w-4 h-4 text-white" />
+                    <div className="p-2 bg-white rounded-lg shadow-lg">
+                      <Icon className="w-4 h-4" style={{ color: colors[index % 6] }} />
                     </div>
-                    <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-100">Recent Journal Entries</CardTitle>
+                    <CardTitle className="text-sm font-semibold text-white/90">{stat.label}</CardTitle>
                   </div>
-                  <CardDescription className="text-xs ml-8 pl-0.5 text-gray-500 dark:text-gray-400">View and manage your journal entries</CardDescription>
-                </div>
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                    <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-0">From:</Label>
-                    <Input type="date" value={fromDate} onChange={(e) => { setFromDate(e.target.value); }} className="w-32 h-8 text-xs border-0 p-0 focus-visible:ring-0" />
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                    <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-0">To:</Label>
-                    <Input type="date" value={toDate} onChange={(e) => { setToDate(e.target.value); }} className="w-32 h-8 text-xs border-0 p-0 focus-visible:ring-0" />
-                  </div>
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
-                    <Input
-                      value={searchInput}
-                      onChange={(e) => setSearchInput(e.target.value)}
-                      placeholder="Search entries..."
-                      className="w-36 h-8 text-xs border-0 p-0 focus-visible:ring-0 placeholder:text-gray-400"
-                    />
-                    <Search className="h-3.5 w-3.5 text-gray-400" />
-                  </div>
-                  {(fromDate || toDate || search) && (
-                    <Button variant="ghost" size="sm" className="h-8 text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" onClick={clearFilters}>
-                      Clear
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6">
-              {/* Expand/Collapse All */}
-              <div className="flex items-center justify-between mb-4 px-1">
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                  {totalItems} entries found
-                </span>
-                <div className="flex gap-1.5">
-                  <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30" onClick={expandAll}>
-                    <Eye className="h-3 w-3" /> Expand All
-                  </Button>
-                  <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30" onClick={collapseAll}>
-                    <EyeOff className="h-3 w-3" /> Collapse All
-                  </Button>
-                </div>
-              </div>
-
-              <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm bg-white dark:bg-gray-900/50 backdrop-blur-sm">
-                <Table>
-                  <TableHeader className="bg-gradient-to-r from-gray-50 to-blue-50/50 dark:from-gray-800/50 dark:to-blue-950/30">
-                    <TableRow className="hover:bg-transparent border-b border-gray-200 dark:border-gray-700">
-                      <TableHead className="w-8 font-semibold text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider"></TableHead>
-                      <TableHead className="w-28 font-semibold text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">Date</TableHead>
-                      <TableHead className="font-semibold text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">Narration</TableHead>
-                      <TableHead className="w-32 font-semibold text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">Type</TableHead>
-                      <TableHead className="w-[130px] text-right font-semibold text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">Debit</TableHead>
-                      <TableHead className="w-[130px] text-right font-semibold text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">Credit</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {isLoading ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="h-40">
-                          <div className="flex flex-col items-center justify-center gap-3 text-gray-500 dark:text-gray-400">
-                            <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
-                            <p className="text-sm font-medium">Loading journal entries...</p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ) : (journalData?.data || []).length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="h-40">
-                          <div className="flex flex-col items-center justify-center gap-3 text-gray-500 dark:text-gray-400">
-                            <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-full">
-                              <BookOpen className="h-6 w-6 text-gray-400 dark:text-gray-500" />
-                            </div>
-                            <p className="text-sm font-medium">No journal entries found</p>
-                            <p className="text-xs text-muted-foreground">Try adjusting your filters or add a new entry</p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      (journalData?.data || []).map((entry: any) => {
-                        const isExpanded = expandedRows.has(entry.id);
-                        const entryTotalDebit = (entry.entries || []).reduce((s: number, e: any) => s + (parseFloat(e.debit) || 0), 0);
-                        const entryTotalCredit = (entry.entries || []).reduce((s: number, e: any) => s + (parseFloat(e.credit) || 0), 0);
-                        const badge = refTypeBadge[entry.reference_type] || { label: entry.reference_type || '-', color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' };
-
-                        return (
-                           <Fragment key={entry.id}>
-                            <TableRow
-                              key={entry.id}
-                              className="cursor-pointer hover:bg-blue-50/50 dark:hover:bg-blue-950/20 transition-colors duration-200"
-                              onClick={() => toggleRow(entry.id)}
-                            >
-                              <TableCell className="px-3">
-                                {isExpanded
-                                  ? <ChevronDown className="h-4 w-4 text-blue-500 dark:text-blue-400" />
-                                  : <ChevronRight className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                }
-                              </TableCell>
-                              <TableCell className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {entry.date ? new Date(entry.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
-                              </TableCell>
-                              <TableCell className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                {entry.narration}
-                              </TableCell>
-                              <TableCell>
-                                <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide shadow-sm", badge.color)}>
-                                  {badge.label}
-                                </span>
-                              </TableCell>
-                              <TableCell className="text-right font-mono text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-                                {entryTotalDebit.toFixed(2)}
-                              </TableCell>
-                              <TableCell className="text-right font-mono text-sm font-semibold text-rose-600 dark:text-rose-400">
-                                {entryTotalCredit.toFixed(2)}
-                              </TableCell>
-                            </TableRow>
-
-                            {/* Expanded detail lines */}
-                            {isExpanded && (
-                              <TableRow key={`${entry.id}-detail`} className="bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-950/20 dark:to-indigo-950/20 hover:from-blue-50/70 hover:to-indigo-50/70 dark:hover:from-blue-950/30 dark:hover:to-indigo-950/30">
-                                <TableCell></TableCell>
-                                <TableCell colSpan={5} className="p-0">
-                                  <div className="px-4 py-4">
-                                    <Table>
-                                      <TableHeader>
-                                        <TableRow className="hover:bg-transparent border-b border-blue-200/50 dark:border-blue-800/50">
-                                          <TableHead className="w-[300px] text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider h-8">Account</TableHead>
-                                          <TableHead className="w-[130px] text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider h-8">Debit</TableHead>
-                                          <TableHead className="w-[130px] text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider h-8">Credit</TableHead>
-                                        </TableRow>
-                                      </TableHeader>
-                                      <TableBody>
-                                        {(entry.entries || []).map((line: any, i: number) => (
-                                          <TableRow key={i} className="hover:bg-transparent border-0">
-                                            <TableCell className="py-2 text-sm">
-                                              <span className="inline-flex items-center px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-[10px] font-mono font-medium mr-2">
-                                                {line.account?.code}
-                                              </span>
-                                              <span className="font-medium text-gray-700 dark:text-gray-300">{line.account?.name}</span>
-                                            </TableCell>
-                                            <TableCell className="py-2 text-right font-mono text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-                                              {parseFloat(line.debit) > 0 ? parseFloat(line.debit).toFixed(2) : '-'}
-                                            </TableCell>
-                                            <TableCell className="py-2 text-right font-mono text-sm font-semibold text-rose-600 dark:text-rose-400">
-                                              {parseFloat(line.credit) > 0 ? parseFloat(line.credit).toFixed(2) : '-'}
-                                            </TableCell>
-                                          </TableRow>
-                                        ))}
-                                        <TableRow className="hover:bg-transparent border-t-2 border-blue-200 dark:border-blue-800 bg-blue-100/30 dark:bg-blue-900/20">
-                                          <TableCell className="py-2 text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Total</TableCell>
-                                          <TableCell className="py-2 text-right font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">{entryTotalDebit.toFixed(2)}</TableCell>
-                                          <TableCell className="py-2 text-right font-mono text-xs font-bold text-rose-700 dark:text-rose-400">{entryTotalCredit.toFixed(2)}</TableCell>
-                                        </TableRow>
-                                      </TableBody>
-                                    </Table>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            )}
-                          </Fragment>
-                        );
-                      })
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600 mt-6 px-1 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    Showing {(page - 1) * limit + 1}–{Math.min(page * limit, totalItems)} of {totalItems} results
-                  </div>
-
-                  <div className="flex items-center space-x-6">
-                    {/* Limit Selector */}
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs whitespace-nowrap text-muted-foreground font-medium">Rows per page</span>
-                      <Select
-                        value={String(limit)}
-                        onValueChange={(val) => setLimit(Number(val))}
-                      >
-                        <SelectTrigger size="sm" className="h-8 w-[70px]">
-                          <SelectValue placeholder={limit} />
-                        </SelectTrigger>
-                        <SelectContent side="top">
-                          {[10, 20, 25, 50, 100].map((val) => (
-                            <SelectItem key={val} value={String(val)}>
-                              {val}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      {/* First Page */}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="hidden lg:flex h-8 w-8 p-0 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                        onClick={() => setPage(1)}
-                        disabled={page <= 1}
-                      >
-                        <ChevronsLeft className="h-4 w-4" />
-                        <span className="sr-only">First Page</span>
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(page - 1)}
-                        disabled={page <= 1}
-                        className="border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                      >
-                        <ChevronLeft className="h-4 w-4 mr-1" />
-                        Previous
-                      </Button>
-
-                      {/* Page Buttons */}
-                      <div className="hidden md:flex items-center space-x-1">
-                        {getPageNumbers(page, totalPages).map((p, idx) => (
-                          <div key={idx}>
-                            {p === '...' ? (
-                              <span className="px-2">...</span>
-                            ) : (
-                              <Button
-                                variant={page === p ? "default" : "outline"}
-                                size="sm"
-                                className={`h-8 w-8 p-0 ${page === p ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600' : 'border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30'}`}
-                                onClick={() => setPage(Number(p))}
-                              >
-                                {p}
-                              </Button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(page + 1)}
-                        disabled={page >= totalPages}
-                        className="border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                      >
-                        Next
-                        <ChevronRightIcon className="h-4 w-4 ml-1" />
-                      </Button>
-
-                      {/* Last Page */}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="hidden lg:flex h-8 w-8 p-0 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                        onClick={() => setPage(totalPages)}
-                        disabled={page >= totalPages}
-                      >
-                        <ChevronsRight className="h-4 w-4" />
-                        <span className="sr-only">Last Page</span>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <p className="text-2xl font-bold">{stat.value}</p>
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
+
+        <DataTable
+          tableTitle="Journal Entries List"
+          columns={columns}
+          data={items}
+          meta={meta}
+          onPageChange={setPage}
+          onLimitChange={setLimit}
+          search={search}
+          onSearchChange={setSearch}
+          isLoading={isLoading}
+          filterSlot={
+            <div className="flex items-center gap-1.5">
+              <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>
+                <SelectTrigger className="w-[140px] h-9 rounded-md border-gray-200 dark:border-gray-700 bg-transparent text-sm">
+                  <SelectValue placeholder="Filter by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="yesterday">Yesterday</SelectItem>
+                  <SelectItem value="last7">Last 7 days</SelectItem>
+                  <SelectItem value="last15">Last 15 days</SelectItem>
+                  <SelectItem value="last30">Last 30 days</SelectItem>
+                  <SelectItem value="last45">Last 45 days</SelectItem>
+                  <SelectItem value="last60">Last 60 days</SelectItem>
+                  <SelectItem value="last90">Last 90 days</SelectItem>
+                  <SelectItem value="last180">Last 180 days</SelectItem>
+                  <SelectItem value="last365">Last 365 days</SelectItem>
+                  <SelectItem value="custom">Custom range</SelectItem>
+                </SelectContent>
+              </Select>
+              <DateField
+                value={from}
+                onChange={(v: string) => { setFrom(v); setPresetOpen(false); }}
+                placeholder="From"
+              />
+              <span className="text-xs text-muted-foreground">to</span>
+              <DateField
+                value={to}
+                onChange={(v: string) => { setTo(v); setPresetOpen(false); }}
+                placeholder="To"
+              />
+              {(from || to) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setFrom(""); setTo(""); }}
+                >
+                  Clear
+                </Button>
+              )}
+              <Link
+                to="/dashboard/accounting/reports/journal/print"
+                search={{
+                  search: search || undefined,
+                  from: from || undefined,
+                  to: to || undefined
+                }}
+              >
+                <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
+                  <Printer className="w-4 h-4 mr-2" />
+                  Print Report
+                </Button>
+              </Link>
+            </div>
+          }
+          emptyState={
+            <div className="text-center py-12">
+              <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500 font-medium">No journal entries found</p>
+              <p className="text-sm text-gray-400">Try adjusting your filters or search terms</p>
+            </div>
+          }
+        />
       </main>
     </>
-  );
+  )
 }

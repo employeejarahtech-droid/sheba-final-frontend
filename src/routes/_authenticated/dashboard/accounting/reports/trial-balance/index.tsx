@@ -1,11 +1,10 @@
-
 "use client";
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, CheckCircle2, AlertCircle } from "lucide-react";
+import { Calendar as CalendarIcon, CheckCircle2, AlertCircle, Printer } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -20,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 import { useGetTrialBalanceQuery } from "@/features/accounting/accountingQueries";
-import { AppHeader } from "@/components/layout/app-header";
+import { AppHeader } from '@/components/layout/app-header';
 import { PageHeader } from '@/components/layout/page-header'
 
 const trialBalanceSearchSchema = z.object({
@@ -74,6 +73,12 @@ function TrialBalance() {
                     description="Summary of all ledger account balances."
                     actions={
                         <div className="flex items-center gap-2">
+                            <Link to="/dashboard/accounting/reports/trial-balance/print" search={{ date: dateStr }}>
+                                <Button variant="outline" size="sm">
+                                    <Printer className="mr-2 h-4 w-4" />
+                                    Print
+                                </Button>
+                            </Link>
                             <span className="text-sm font-medium">As of:</span>
                             <Popover>
                                 <PopoverTrigger asChild>

@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+﻿import { useMemo, useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
@@ -365,7 +365,7 @@ export function AnesthesiaBillPage({
         return `
           <div class="flex items-center gap-2">
             <button
-              class="anesthesia-expand-btn inline-flex items-center justify-center w-7 h-7 rounded bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs"
+              class="anesthesia-expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
               type="button"
               data-patient-name="${(adm?.patient_name || '—').replace(/"/g, '&quot;')}"
               data-admission-prefix="${(adm?.admission_prefix || '').replace(/"/g, '&quot;')}"
@@ -660,16 +660,16 @@ export function AnesthesiaBillPage({
 
         {/* Gradient Stat Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          {stats.map((item) => {
+          {stats.map((item, index) => {
             const Icon = item.icon;
             return (
               <Card key={item.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }}>
                   <div className="flex items-center gap-2.5">
                     <div className={`p-2 bg-gradient-to-br ${item.grad} rounded-lg shadow-lg`}>
-                      <Icon className="w-4 h-4 text-white" />
+                      <Icon className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
                     </div>
-                    <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{item.label}</CardTitle>
+                    <CardTitle className="text-sm font-semibold text-white/90">{item.label}</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">

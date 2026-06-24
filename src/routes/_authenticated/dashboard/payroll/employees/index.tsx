@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Button } from "@/components/ui/button";
@@ -221,10 +221,10 @@ function EmployeesPage() {
                             const Icon = item.icon;
                             return (
                                 <Card key={idx} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }}>
                                         <div className="flex items-center gap-2.5">
                                             <div className={`p-2 bg-gradient-to-br ${item.gradientClass} rounded-lg shadow-lg`}>
-                                                <Icon className="w-4 h-4 text-white" />
+                                                <Icon className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
                                             </div>
                                             <CardTitle className="text-sm font-semibold">{item.label}</CardTitle>
                                         </div>
@@ -241,7 +241,7 @@ function EmployeesPage() {
                         <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2.5 px-4 gap-0">
                             <div className="flex items-center gap-2.5">
                                 <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
-                                    <Users className="w-4 h-4 text-white" />
+                                    <Users className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
                                 </div>
                                 <div>
                                     <CardTitle className="text-lg font-bold">All Employees</CardTitle>

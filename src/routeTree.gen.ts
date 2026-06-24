@@ -121,6 +121,44 @@ import { Route as AuthenticatedDashboardAccountingAccountsIndexRouteImport } fro
 import { Route as AuthenticatedDashboardRolesEditIdRouteImport } from './routes/_authenticated/dashboard/roles/edit/$id'
 import { Route as platformAdminPlansEditPlanIdRouteImport } from './routes/(platform)/admin/plans/edit.$planId'
 import { Route as AuthenticatedDashboardAdmissionNewAdmissionIndexBakRouteImport } from './routes/_authenticated/dashboard/admission/new-admission/index.bak'
+import { Route as AuthenticatedDashboardReportsPayrollSalarySheetIndexRouteImport } from './routes/_authenticated/dashboard/reports/payroll/salary-sheet/index'
+import { Route as AuthenticatedDashboardReportsPayrollPayrollSummaryIndexRouteImport } from './routes/_authenticated/dashboard/reports/payroll/payroll-summary/index'
+import { Route as AuthenticatedDashboardReportsPayrollLeaveReportIndexRouteImport } from './routes/_authenticated/dashboard/reports/payroll/leave-report/index'
+import { Route as AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRouteImport } from './routes/_authenticated/dashboard/reports/payroll/department-wise-staff/index'
+import { Route as AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRouteImport } from './routes/_authenticated/dashboard/reports/payroll/attendance-summary/index'
+import { Route as AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRouteImport } from './routes/_authenticated/dashboard/reports/patient/patient-type-stats/index'
+import { Route as AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRouteImport } from './routes/_authenticated/dashboard/reports/patient/doctor-wise-patients/index'
+import { Route as AuthenticatedDashboardReportsPatientDischargeSummaryIndexRouteImport } from './routes/_authenticated/dashboard/reports/patient/discharge-summary/index'
+import { Route as AuthenticatedDashboardReportsPatientBedOccupancyIndexRouteImport } from './routes/_authenticated/dashboard/reports/patient/bed-occupancy/index'
+import { Route as AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRouteImport } from './routes/_authenticated/dashboard/reports/patient/admission-register/index'
+import { Route as AuthenticatedDashboardReportsPathologyTestWiseCountIndexRouteImport } from './routes/_authenticated/dashboard/reports/pathology/test-wise-count/index'
+import { Route as AuthenticatedDashboardReportsPathologySampleStatusIndexRouteImport } from './routes/_authenticated/dashboard/reports/pathology/sample-status/index'
+import { Route as AuthenticatedDashboardReportsPathologyPendingResultsIndexRouteImport } from './routes/_authenticated/dashboard/reports/pathology/pending-results/index'
+import { Route as AuthenticatedDashboardReportsPathologyMachineUtilizationIndexRouteImport } from './routes/_authenticated/dashboard/reports/pathology/machine-utilization/index'
+import { Route as AuthenticatedDashboardReportsPathologyDepartmentWiseVolumeIndexRouteImport } from './routes/_authenticated/dashboard/reports/pathology/department-wise-volume/index'
+import { Route as AuthenticatedDashboardReportsOutdoorTestWiseRevenueIndexRouteImport } from './routes/_authenticated/dashboard/reports/outdoor/test-wise-revenue/index'
+import { Route as AuthenticatedDashboardReportsOutdoorPatientListIndexRouteImport } from './routes/_authenticated/dashboard/reports/outdoor/patient-list/index'
+import { Route as AuthenticatedDashboardReportsOutdoorDueCollectionIndexRouteImport } from './routes/_authenticated/dashboard/reports/outdoor/due-collection/index'
+import { Route as AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionIndexRouteImport } from './routes/_authenticated/dashboard/reports/outdoor/doctor-wise-collection/index'
+import { Route as AuthenticatedDashboardReportsOutdoorCategoryWiseRevenueIndexRouteImport } from './routes/_authenticated/dashboard/reports/outdoor/category-wise-revenue/index'
+import { Route as AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRouteImport } from './routes/_authenticated/dashboard/reports/inventory/supplier-purchases/index'
+import { Route as AuthenticatedDashboardReportsInventoryStockReportIndexRouteImport } from './routes/_authenticated/dashboard/reports/inventory/stock-report/index'
+import { Route as AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRouteImport } from './routes/_authenticated/dashboard/reports/inventory/customer-ledger/index'
+import { Route as AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/service-wise-revenue/index'
+import { Route as AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/revenue-summary/index'
+import { Route as AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/outstanding-balance/index'
+import { Route as AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/final-bill-register/index'
+import { Route as AuthenticatedDashboardReportsIndoorBillDistributionIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/bill-distribution/index'
+import { Route as AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/advance-payments/index'
+import { Route as AuthenticatedDashboardReportsAccountingTrialBalanceIndexRouteImport } from './routes/_authenticated/dashboard/reports/accounting/trial-balance/index'
+import { Route as AuthenticatedDashboardReportsAccountingProfitAndLossIndexRouteImport } from './routes/_authenticated/dashboard/reports/accounting/profit-and-loss/index'
+import { Route as AuthenticatedDashboardReportsAccountingLedgerIndexRouteImport } from './routes/_authenticated/dashboard/reports/accounting/ledger/index'
+import { Route as AuthenticatedDashboardReportsAccountingJournalIndexRouteImport } from './routes/_authenticated/dashboard/reports/accounting/journal/index'
+import { Route as AuthenticatedDashboardReportsAccountingIncomeVsExpenseIndexRouteImport } from './routes/_authenticated/dashboard/reports/accounting/income-vs-expense/index'
+import { Route as AuthenticatedDashboardReportsAccountingDailyTransactionsIndexRouteImport } from './routes/_authenticated/dashboard/reports/accounting/daily-transactions/index'
+import { Route as AuthenticatedDashboardReportsAccountingCashFlowIndexRouteImport } from './routes/_authenticated/dashboard/reports/accounting/cash-flow/index'
+import { Route as AuthenticatedDashboardReportsAccountingBankBookIndexRouteImport } from './routes/_authenticated/dashboard/reports/accounting/bank-book/index'
+import { Route as AuthenticatedDashboardReportsAccountingBalanceSheetIndexRouteImport } from './routes/_authenticated/dashboard/reports/accounting/balance-sheet/index'
 import { Route as AuthenticatedDashboardPayrollSalaryStaffIdIndexRouteImport } from './routes/_authenticated/dashboard/payroll/salary/$staffId/index'
 import { Route as AuthenticatedDashboardPayrollAttendanceStaffIdIndexRouteImport } from './routes/_authenticated/dashboard/payroll/attendance/$staffId/index'
 import { Route as AuthenticatedDashboardPathologyUrineUrineForSugarIndexRouteImport } from './routes/_authenticated/dashboard/pathology/urine/urine-for-sugar/index'
@@ -215,6 +253,43 @@ import { Route as AuthenticatedDashboardXRayAllEditIdRouteImport } from './route
 import { Route as AuthenticatedDashboardUltrasonogramAllPrintIdRouteImport } from './routes/_authenticated/dashboard/ultrasonogram/all/print/$id'
 import { Route as AuthenticatedDashboardUltrasonogramAllEditIdRouteImport } from './routes/_authenticated/dashboard/ultrasonogram/all/edit/$id'
 import { Route as AuthenticatedDashboardRolesPermissionsRoleIdEditRouteImport } from './routes/_authenticated/dashboard/roles/permissions/$roleId/edit'
+import { Route as AuthenticatedDashboardReportsPayrollSalarySheetPrintRouteImport } from './routes/_authenticated/dashboard/reports/payroll/salary-sheet/print'
+import { Route as AuthenticatedDashboardReportsPayrollPayrollSummaryPrintRouteImport } from './routes/_authenticated/dashboard/reports/payroll/payroll-summary/print'
+import { Route as AuthenticatedDashboardReportsPayrollLeaveReportPrintRouteImport } from './routes/_authenticated/dashboard/reports/payroll/leave-report/print'
+import { Route as AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRouteImport } from './routes/_authenticated/dashboard/reports/payroll/department-wise-staff/print'
+import { Route as AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRouteImport } from './routes/_authenticated/dashboard/reports/payroll/attendance-summary/print'
+import { Route as AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRouteImport } from './routes/_authenticated/dashboard/reports/patient/patient-type-stats/print'
+import { Route as AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRouteImport } from './routes/_authenticated/dashboard/reports/patient/doctor-wise-patients/print'
+import { Route as AuthenticatedDashboardReportsPatientDischargeSummaryPrintRouteImport } from './routes/_authenticated/dashboard/reports/patient/discharge-summary/print'
+import { Route as AuthenticatedDashboardReportsPatientBedOccupancyPrintRouteImport } from './routes/_authenticated/dashboard/reports/patient/bed-occupancy/print'
+import { Route as AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRouteImport } from './routes/_authenticated/dashboard/reports/patient/admission-register/print'
+import { Route as AuthenticatedDashboardReportsPathologyTestWiseCountPrintRouteImport } from './routes/_authenticated/dashboard/reports/pathology/test-wise-count/print'
+import { Route as AuthenticatedDashboardReportsPathologySampleStatusPrintRouteImport } from './routes/_authenticated/dashboard/reports/pathology/sample-status/print'
+import { Route as AuthenticatedDashboardReportsPathologyPendingResultsPrintRouteImport } from './routes/_authenticated/dashboard/reports/pathology/pending-results/print'
+import { Route as AuthenticatedDashboardReportsPathologyMachineUtilizationPrintRouteImport } from './routes/_authenticated/dashboard/reports/pathology/machine-utilization/print'
+import { Route as AuthenticatedDashboardReportsPathologyDepartmentWiseVolumePrintRouteImport } from './routes/_authenticated/dashboard/reports/pathology/department-wise-volume/print'
+import { Route as AuthenticatedDashboardReportsOutdoorTestWiseRevenuePrintRouteImport } from './routes/_authenticated/dashboard/reports/outdoor/test-wise-revenue/print'
+import { Route as AuthenticatedDashboardReportsOutdoorPatientListPrintRouteImport } from './routes/_authenticated/dashboard/reports/outdoor/patient-list/print'
+import { Route as AuthenticatedDashboardReportsOutdoorDueCollectionPrintRouteImport } from './routes/_authenticated/dashboard/reports/outdoor/due-collection/print'
+import { Route as AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionPrintRouteImport } from './routes/_authenticated/dashboard/reports/outdoor/doctor-wise-collection/print'
+import { Route as AuthenticatedDashboardReportsOutdoorCategoryWiseRevenuePrintRouteImport } from './routes/_authenticated/dashboard/reports/outdoor/category-wise-revenue/print'
+import { Route as AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRouteImport } from './routes/_authenticated/dashboard/reports/inventory/supplier-purchases/print'
+import { Route as AuthenticatedDashboardReportsInventoryStockReportPrintRouteImport } from './routes/_authenticated/dashboard/reports/inventory/stock-report/print'
+import { Route as AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRouteImport } from './routes/_authenticated/dashboard/reports/inventory/customer-ledger/print'
+import { Route as AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/service-wise-revenue/print'
+import { Route as AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/revenue-summary/print'
+import { Route as AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/outstanding-balance/print'
+import { Route as AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/final-bill-register/print'
+import { Route as AuthenticatedDashboardReportsIndoorBillDistributionPrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/bill-distribution/print'
+import { Route as AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/advance-payments/print'
+import { Route as AuthenticatedDashboardReportsAccountingTrialBalancePrintRouteImport } from './routes/_authenticated/dashboard/reports/accounting/trial-balance/print'
+import { Route as AuthenticatedDashboardReportsAccountingProfitAndLossPrintRouteImport } from './routes/_authenticated/dashboard/reports/accounting/profit-and-loss/print'
+import { Route as AuthenticatedDashboardReportsAccountingLedgerPrintRouteImport } from './routes/_authenticated/dashboard/reports/accounting/ledger/print'
+import { Route as AuthenticatedDashboardReportsAccountingJournalPrintRouteImport } from './routes/_authenticated/dashboard/reports/accounting/journal/print'
+import { Route as AuthenticatedDashboardReportsAccountingIncomeVsExpensePrintRouteImport } from './routes/_authenticated/dashboard/reports/accounting/income-vs-expense/print'
+import { Route as AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRouteImport } from './routes/_authenticated/dashboard/reports/accounting/daily-transactions/print'
+import { Route as AuthenticatedDashboardReportsAccountingCashFlowPrintRouteImport } from './routes/_authenticated/dashboard/reports/accounting/cash-flow/print'
+import { Route as AuthenticatedDashboardReportsAccountingBankBookPrintRouteImport } from './routes/_authenticated/dashboard/reports/accounting/bank-book/print'
 import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId'
 import { Route as AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId'
 import { Route as AuthenticatedDashboardOutdoorMasterTestsIdRouteImport } from './routes/_authenticated/dashboard/outdoor/master/tests/$id'
@@ -226,8 +301,15 @@ import { Route as AuthenticatedDashboardIndoorMasterServicesIdRouteImport } from
 import { Route as AuthenticatedDashboardIndoorMasterBedCabinListIdRouteImport } from './routes/_authenticated/dashboard/indoor/master/bed-cabin-list/$id'
 import { Route as AuthenticatedDashboardEcgAllPrintIdRouteImport } from './routes/_authenticated/dashboard/ecg/all/print/$id'
 import { Route as AuthenticatedDashboardEcgAllEditIdRouteImport } from './routes/_authenticated/dashboard/ecg/all/edit/$id'
+import { Route as AuthenticatedDashboardAccountingReportsTrialBalancePrintRouteImport } from './routes/_authenticated/dashboard/accounting/reports/trial-balance/print'
+import { Route as AuthenticatedDashboardAccountingReportsProfitLossPrintRouteImport } from './routes/_authenticated/dashboard/accounting/reports/profit-loss/print'
+import { Route as AuthenticatedDashboardAccountingReportsProfitAndLossPrintRouteImport } from './routes/_authenticated/dashboard/accounting/reports/profit-and-loss/print'
 import { Route as AuthenticatedDashboardAccountingReportsMultiLedgerPrintRouteImport } from './routes/_authenticated/dashboard/accounting/reports/multi-ledger/print'
 import { Route as AuthenticatedDashboardAccountingReportsLedgerPrintRouteImport } from './routes/_authenticated/dashboard/accounting/reports/ledger/print'
+import { Route as AuthenticatedDashboardAccountingReportsJournalPrintRouteImport } from './routes/_authenticated/dashboard/accounting/reports/journal/print'
+import { Route as AuthenticatedDashboardAccountingReportsDailySummaryPrintRouteImport } from './routes/_authenticated/dashboard/accounting/reports/daily-summary/print'
+import { Route as AuthenticatedDashboardAccountingReportsCashFlowPrintRouteImport } from './routes/_authenticated/dashboard/accounting/reports/cash-flow/print'
+import { Route as AuthenticatedDashboardAccountingReportsBalanceSheetPrintRouteImport } from './routes/_authenticated/dashboard/accounting/reports/balance-sheet/print'
 import { Route as AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRouteImport } from './routes/_authenticated/dashboard/reports/my/outdoor/today-collection/index'
 import { Route as AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRouteImport } from './routes/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/index'
 import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/list/index'
@@ -246,6 +328,8 @@ import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrint
 import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/bill-created/index'
 import { Route as AuthenticatedDashboardXRayAllEditBuilderIdRouteImport } from './routes/_authenticated/dashboard/x-ray/all/edit/builder/$id'
 import { Route as AuthenticatedDashboardUltrasonogramAllEditBuilderIdRouteImport } from './routes/_authenticated/dashboard/ultrasonogram/all/edit/builder/$id'
+import { Route as AuthenticatedDashboardReportsMyOutdoorTodayCollectionPrintRouteImport } from './routes/_authenticated/dashboard/reports/my/outdoor/today-collection/print'
+import { Route as AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionPrintRouteImport } from './routes/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/print'
 import { Route as AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/urine/urine-for-sugar/report/$reportId'
 import { Route as AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/urine/urine-for-re-full/report/$reportId'
 import { Route as AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRouteImport } from './routes/_authenticated/dashboard/pathology/urine/urine-for-re-full/edit/$id'
@@ -924,6 +1008,252 @@ const AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute =
     path: '/dashboard/admission/new-admission/index/bak',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardReportsPayrollSalarySheetIndexRoute =
+  AuthenticatedDashboardReportsPayrollSalarySheetIndexRouteImport.update({
+    id: '/dashboard/reports/payroll/salary-sheet/',
+    path: '/dashboard/reports/payroll/salary-sheet/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPayrollPayrollSummaryIndexRoute =
+  AuthenticatedDashboardReportsPayrollPayrollSummaryIndexRouteImport.update({
+    id: '/dashboard/reports/payroll/payroll-summary/',
+    path: '/dashboard/reports/payroll/payroll-summary/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPayrollLeaveReportIndexRoute =
+  AuthenticatedDashboardReportsPayrollLeaveReportIndexRouteImport.update({
+    id: '/dashboard/reports/payroll/leave-report/',
+    path: '/dashboard/reports/payroll/leave-report/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRoute =
+  AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRouteImport.update(
+    {
+      id: '/dashboard/reports/payroll/department-wise-staff/',
+      path: '/dashboard/reports/payroll/department-wise-staff/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute =
+  AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRouteImport.update({
+    id: '/dashboard/reports/payroll/attendance-summary/',
+    path: '/dashboard/reports/payroll/attendance-summary/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute =
+  AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRouteImport.update({
+    id: '/dashboard/reports/patient/patient-type-stats/',
+    path: '/dashboard/reports/patient/patient-type-stats/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute =
+  AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRouteImport.update(
+    {
+      id: '/dashboard/reports/patient/doctor-wise-patients/',
+      path: '/dashboard/reports/patient/doctor-wise-patients/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute =
+  AuthenticatedDashboardReportsPatientDischargeSummaryIndexRouteImport.update({
+    id: '/dashboard/reports/patient/discharge-summary/',
+    path: '/dashboard/reports/patient/discharge-summary/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute =
+  AuthenticatedDashboardReportsPatientBedOccupancyIndexRouteImport.update({
+    id: '/dashboard/reports/patient/bed-occupancy/',
+    path: '/dashboard/reports/patient/bed-occupancy/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRoute =
+  AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRouteImport.update({
+    id: '/dashboard/reports/patient/admission-register/',
+    path: '/dashboard/reports/patient/admission-register/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPathologyTestWiseCountIndexRoute =
+  AuthenticatedDashboardReportsPathologyTestWiseCountIndexRouteImport.update({
+    id: '/dashboard/reports/pathology/test-wise-count/',
+    path: '/dashboard/reports/pathology/test-wise-count/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPathologySampleStatusIndexRoute =
+  AuthenticatedDashboardReportsPathologySampleStatusIndexRouteImport.update({
+    id: '/dashboard/reports/pathology/sample-status/',
+    path: '/dashboard/reports/pathology/sample-status/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPathologyPendingResultsIndexRoute =
+  AuthenticatedDashboardReportsPathologyPendingResultsIndexRouteImport.update({
+    id: '/dashboard/reports/pathology/pending-results/',
+    path: '/dashboard/reports/pathology/pending-results/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPathologyMachineUtilizationIndexRoute =
+  AuthenticatedDashboardReportsPathologyMachineUtilizationIndexRouteImport.update(
+    {
+      id: '/dashboard/reports/pathology/machine-utilization/',
+      path: '/dashboard/reports/pathology/machine-utilization/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsPathologyDepartmentWiseVolumeIndexRoute =
+  AuthenticatedDashboardReportsPathologyDepartmentWiseVolumeIndexRouteImport.update(
+    {
+      id: '/dashboard/reports/pathology/department-wise-volume/',
+      path: '/dashboard/reports/pathology/department-wise-volume/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsOutdoorTestWiseRevenueIndexRoute =
+  AuthenticatedDashboardReportsOutdoorTestWiseRevenueIndexRouteImport.update({
+    id: '/dashboard/reports/outdoor/test-wise-revenue/',
+    path: '/dashboard/reports/outdoor/test-wise-revenue/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsOutdoorPatientListIndexRoute =
+  AuthenticatedDashboardReportsOutdoorPatientListIndexRouteImport.update({
+    id: '/dashboard/reports/outdoor/patient-list/',
+    path: '/dashboard/reports/outdoor/patient-list/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsOutdoorDueCollectionIndexRoute =
+  AuthenticatedDashboardReportsOutdoorDueCollectionIndexRouteImport.update({
+    id: '/dashboard/reports/outdoor/due-collection/',
+    path: '/dashboard/reports/outdoor/due-collection/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionIndexRoute =
+  AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionIndexRouteImport.update(
+    {
+      id: '/dashboard/reports/outdoor/doctor-wise-collection/',
+      path: '/dashboard/reports/outdoor/doctor-wise-collection/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsOutdoorCategoryWiseRevenueIndexRoute =
+  AuthenticatedDashboardReportsOutdoorCategoryWiseRevenueIndexRouteImport.update(
+    {
+      id: '/dashboard/reports/outdoor/category-wise-revenue/',
+      path: '/dashboard/reports/outdoor/category-wise-revenue/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRoute =
+  AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRouteImport.update(
+    {
+      id: '/dashboard/reports/inventory/supplier-purchases/',
+      path: '/dashboard/reports/inventory/supplier-purchases/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsInventoryStockReportIndexRoute =
+  AuthenticatedDashboardReportsInventoryStockReportIndexRouteImport.update({
+    id: '/dashboard/reports/inventory/stock-report/',
+    path: '/dashboard/reports/inventory/stock-report/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute =
+  AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRouteImport.update({
+    id: '/dashboard/reports/inventory/customer-ledger/',
+    path: '/dashboard/reports/inventory/customer-ledger/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute =
+  AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRouteImport.update({
+    id: '/dashboard/reports/indoor/service-wise-revenue/',
+    path: '/dashboard/reports/indoor/service-wise-revenue/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRoute =
+  AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRouteImport.update({
+    id: '/dashboard/reports/indoor/revenue-summary/',
+    path: '/dashboard/reports/indoor/revenue-summary/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRoute =
+  AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRouteImport.update({
+    id: '/dashboard/reports/indoor/outstanding-balance/',
+    path: '/dashboard/reports/indoor/outstanding-balance/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute =
+  AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRouteImport.update({
+    id: '/dashboard/reports/indoor/final-bill-register/',
+    path: '/dashboard/reports/indoor/final-bill-register/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute =
+  AuthenticatedDashboardReportsIndoorBillDistributionIndexRouteImport.update({
+    id: '/dashboard/reports/indoor/bill-distribution/',
+    path: '/dashboard/reports/indoor/bill-distribution/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute =
+  AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRouteImport.update({
+    id: '/dashboard/reports/indoor/advance-payments/',
+    path: '/dashboard/reports/indoor/advance-payments/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsAccountingTrialBalanceIndexRoute =
+  AuthenticatedDashboardReportsAccountingTrialBalanceIndexRouteImport.update({
+    id: '/dashboard/reports/accounting/trial-balance/',
+    path: '/dashboard/reports/accounting/trial-balance/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsAccountingProfitAndLossIndexRoute =
+  AuthenticatedDashboardReportsAccountingProfitAndLossIndexRouteImport.update({
+    id: '/dashboard/reports/accounting/profit-and-loss/',
+    path: '/dashboard/reports/accounting/profit-and-loss/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsAccountingLedgerIndexRoute =
+  AuthenticatedDashboardReportsAccountingLedgerIndexRouteImport.update({
+    id: '/dashboard/reports/accounting/ledger/',
+    path: '/dashboard/reports/accounting/ledger/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsAccountingJournalIndexRoute =
+  AuthenticatedDashboardReportsAccountingJournalIndexRouteImport.update({
+    id: '/dashboard/reports/accounting/journal/',
+    path: '/dashboard/reports/accounting/journal/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsAccountingIncomeVsExpenseIndexRoute =
+  AuthenticatedDashboardReportsAccountingIncomeVsExpenseIndexRouteImport.update(
+    {
+      id: '/dashboard/reports/accounting/income-vs-expense/',
+      path: '/dashboard/reports/accounting/income-vs-expense/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsAccountingDailyTransactionsIndexRoute =
+  AuthenticatedDashboardReportsAccountingDailyTransactionsIndexRouteImport.update(
+    {
+      id: '/dashboard/reports/accounting/daily-transactions/',
+      path: '/dashboard/reports/accounting/daily-transactions/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsAccountingCashFlowIndexRoute =
+  AuthenticatedDashboardReportsAccountingCashFlowIndexRouteImport.update({
+    id: '/dashboard/reports/accounting/cash-flow/',
+    path: '/dashboard/reports/accounting/cash-flow/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsAccountingBankBookIndexRoute =
+  AuthenticatedDashboardReportsAccountingBankBookIndexRouteImport.update({
+    id: '/dashboard/reports/accounting/bank-book/',
+    path: '/dashboard/reports/accounting/bank-book/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute =
+  AuthenticatedDashboardReportsAccountingBalanceSheetIndexRouteImport.update({
+    id: '/dashboard/reports/accounting/balance-sheet/',
+    path: '/dashboard/reports/accounting/balance-sheet/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute =
   AuthenticatedDashboardPayrollSalaryStaffIdIndexRouteImport.update({
     id: '/dashboard/payroll/salary/$staffId/',
@@ -1522,6 +1852,246 @@ const AuthenticatedDashboardRolesPermissionsRoleIdEditRoute =
     path: '/dashboard/roles/permissions/$roleId/edit',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardReportsPayrollSalarySheetPrintRoute =
+  AuthenticatedDashboardReportsPayrollSalarySheetPrintRouteImport.update({
+    id: '/dashboard/reports/payroll/salary-sheet/print',
+    path: '/dashboard/reports/payroll/salary-sheet/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPayrollPayrollSummaryPrintRoute =
+  AuthenticatedDashboardReportsPayrollPayrollSummaryPrintRouteImport.update({
+    id: '/dashboard/reports/payroll/payroll-summary/print',
+    path: '/dashboard/reports/payroll/payroll-summary/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPayrollLeaveReportPrintRoute =
+  AuthenticatedDashboardReportsPayrollLeaveReportPrintRouteImport.update({
+    id: '/dashboard/reports/payroll/leave-report/print',
+    path: '/dashboard/reports/payroll/leave-report/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRoute =
+  AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRouteImport.update(
+    {
+      id: '/dashboard/reports/payroll/department-wise-staff/print',
+      path: '/dashboard/reports/payroll/department-wise-staff/print',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute =
+  AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRouteImport.update({
+    id: '/dashboard/reports/payroll/attendance-summary/print',
+    path: '/dashboard/reports/payroll/attendance-summary/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute =
+  AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRouteImport.update({
+    id: '/dashboard/reports/patient/patient-type-stats/print',
+    path: '/dashboard/reports/patient/patient-type-stats/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute =
+  AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRouteImport.update(
+    {
+      id: '/dashboard/reports/patient/doctor-wise-patients/print',
+      path: '/dashboard/reports/patient/doctor-wise-patients/print',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute =
+  AuthenticatedDashboardReportsPatientDischargeSummaryPrintRouteImport.update({
+    id: '/dashboard/reports/patient/discharge-summary/print',
+    path: '/dashboard/reports/patient/discharge-summary/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute =
+  AuthenticatedDashboardReportsPatientBedOccupancyPrintRouteImport.update({
+    id: '/dashboard/reports/patient/bed-occupancy/print',
+    path: '/dashboard/reports/patient/bed-occupancy/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRoute =
+  AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRouteImport.update({
+    id: '/dashboard/reports/patient/admission-register/print',
+    path: '/dashboard/reports/patient/admission-register/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPathologyTestWiseCountPrintRoute =
+  AuthenticatedDashboardReportsPathologyTestWiseCountPrintRouteImport.update({
+    id: '/dashboard/reports/pathology/test-wise-count/print',
+    path: '/dashboard/reports/pathology/test-wise-count/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPathologySampleStatusPrintRoute =
+  AuthenticatedDashboardReportsPathologySampleStatusPrintRouteImport.update({
+    id: '/dashboard/reports/pathology/sample-status/print',
+    path: '/dashboard/reports/pathology/sample-status/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPathologyPendingResultsPrintRoute =
+  AuthenticatedDashboardReportsPathologyPendingResultsPrintRouteImport.update({
+    id: '/dashboard/reports/pathology/pending-results/print',
+    path: '/dashboard/reports/pathology/pending-results/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsPathologyMachineUtilizationPrintRoute =
+  AuthenticatedDashboardReportsPathologyMachineUtilizationPrintRouteImport.update(
+    {
+      id: '/dashboard/reports/pathology/machine-utilization/print',
+      path: '/dashboard/reports/pathology/machine-utilization/print',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsPathologyDepartmentWiseVolumePrintRoute =
+  AuthenticatedDashboardReportsPathologyDepartmentWiseVolumePrintRouteImport.update(
+    {
+      id: '/dashboard/reports/pathology/department-wise-volume/print',
+      path: '/dashboard/reports/pathology/department-wise-volume/print',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsOutdoorTestWiseRevenuePrintRoute =
+  AuthenticatedDashboardReportsOutdoorTestWiseRevenuePrintRouteImport.update({
+    id: '/dashboard/reports/outdoor/test-wise-revenue/print',
+    path: '/dashboard/reports/outdoor/test-wise-revenue/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsOutdoorPatientListPrintRoute =
+  AuthenticatedDashboardReportsOutdoorPatientListPrintRouteImport.update({
+    id: '/dashboard/reports/outdoor/patient-list/print',
+    path: '/dashboard/reports/outdoor/patient-list/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsOutdoorDueCollectionPrintRoute =
+  AuthenticatedDashboardReportsOutdoorDueCollectionPrintRouteImport.update({
+    id: '/dashboard/reports/outdoor/due-collection/print',
+    path: '/dashboard/reports/outdoor/due-collection/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionPrintRoute =
+  AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionPrintRouteImport.update(
+    {
+      id: '/dashboard/reports/outdoor/doctor-wise-collection/print',
+      path: '/dashboard/reports/outdoor/doctor-wise-collection/print',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsOutdoorCategoryWiseRevenuePrintRoute =
+  AuthenticatedDashboardReportsOutdoorCategoryWiseRevenuePrintRouteImport.update(
+    {
+      id: '/dashboard/reports/outdoor/category-wise-revenue/print',
+      path: '/dashboard/reports/outdoor/category-wise-revenue/print',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRoute =
+  AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRouteImport.update(
+    {
+      id: '/dashboard/reports/inventory/supplier-purchases/print',
+      path: '/dashboard/reports/inventory/supplier-purchases/print',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsInventoryStockReportPrintRoute =
+  AuthenticatedDashboardReportsInventoryStockReportPrintRouteImport.update({
+    id: '/dashboard/reports/inventory/stock-report/print',
+    path: '/dashboard/reports/inventory/stock-report/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute =
+  AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRouteImport.update({
+    id: '/dashboard/reports/inventory/customer-ledger/print',
+    path: '/dashboard/reports/inventory/customer-ledger/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute =
+  AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRouteImport.update({
+    id: '/dashboard/reports/indoor/service-wise-revenue/print',
+    path: '/dashboard/reports/indoor/service-wise-revenue/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRoute =
+  AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRouteImport.update({
+    id: '/dashboard/reports/indoor/revenue-summary/print',
+    path: '/dashboard/reports/indoor/revenue-summary/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRoute =
+  AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRouteImport.update({
+    id: '/dashboard/reports/indoor/outstanding-balance/print',
+    path: '/dashboard/reports/indoor/outstanding-balance/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute =
+  AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRouteImport.update({
+    id: '/dashboard/reports/indoor/final-bill-register/print',
+    path: '/dashboard/reports/indoor/final-bill-register/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute =
+  AuthenticatedDashboardReportsIndoorBillDistributionPrintRouteImport.update({
+    id: '/dashboard/reports/indoor/bill-distribution/print',
+    path: '/dashboard/reports/indoor/bill-distribution/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute =
+  AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRouteImport.update({
+    id: '/dashboard/reports/indoor/advance-payments/print',
+    path: '/dashboard/reports/indoor/advance-payments/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsAccountingTrialBalancePrintRoute =
+  AuthenticatedDashboardReportsAccountingTrialBalancePrintRouteImport.update({
+    id: '/dashboard/reports/accounting/trial-balance/print',
+    path: '/dashboard/reports/accounting/trial-balance/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsAccountingProfitAndLossPrintRoute =
+  AuthenticatedDashboardReportsAccountingProfitAndLossPrintRouteImport.update({
+    id: '/dashboard/reports/accounting/profit-and-loss/print',
+    path: '/dashboard/reports/accounting/profit-and-loss/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsAccountingLedgerPrintRoute =
+  AuthenticatedDashboardReportsAccountingLedgerPrintRouteImport.update({
+    id: '/dashboard/reports/accounting/ledger/print',
+    path: '/dashboard/reports/accounting/ledger/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsAccountingJournalPrintRoute =
+  AuthenticatedDashboardReportsAccountingJournalPrintRouteImport.update({
+    id: '/dashboard/reports/accounting/journal/print',
+    path: '/dashboard/reports/accounting/journal/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsAccountingIncomeVsExpensePrintRoute =
+  AuthenticatedDashboardReportsAccountingIncomeVsExpensePrintRouteImport.update(
+    {
+      id: '/dashboard/reports/accounting/income-vs-expense/print',
+      path: '/dashboard/reports/accounting/income-vs-expense/print',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRoute =
+  AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRouteImport.update(
+    {
+      id: '/dashboard/reports/accounting/daily-transactions/print',
+      path: '/dashboard/reports/accounting/daily-transactions/print',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardReportsAccountingCashFlowPrintRoute =
+  AuthenticatedDashboardReportsAccountingCashFlowPrintRouteImport.update({
+    id: '/dashboard/reports/accounting/cash-flow/print',
+    path: '/dashboard/reports/accounting/cash-flow/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsAccountingBankBookPrintRoute =
+  AuthenticatedDashboardReportsAccountingBankBookPrintRouteImport.update({
+    id: '/dashboard/reports/accounting/bank-book/print',
+    path: '/dashboard/reports/accounting/bank-book/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute =
   AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteImport.update({
     id: '/dashboard/outdoor/reception/invoices/$invoiceId',
@@ -1590,6 +2160,24 @@ const AuthenticatedDashboardEcgAllEditIdRoute =
     path: '/dashboard/ecg/all/edit/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardAccountingReportsTrialBalancePrintRoute =
+  AuthenticatedDashboardAccountingReportsTrialBalancePrintRouteImport.update({
+    id: '/dashboard/accounting/reports/trial-balance/print',
+    path: '/dashboard/accounting/reports/trial-balance/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAccountingReportsProfitLossPrintRoute =
+  AuthenticatedDashboardAccountingReportsProfitLossPrintRouteImport.update({
+    id: '/dashboard/accounting/reports/profit-loss/print',
+    path: '/dashboard/accounting/reports/profit-loss/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAccountingReportsProfitAndLossPrintRoute =
+  AuthenticatedDashboardAccountingReportsProfitAndLossPrintRouteImport.update({
+    id: '/dashboard/accounting/reports/profit-and-loss/print',
+    path: '/dashboard/accounting/reports/profit-and-loss/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute =
   AuthenticatedDashboardAccountingReportsMultiLedgerPrintRouteImport.update({
     id: '/dashboard/accounting/reports/multi-ledger/print',
@@ -1600,6 +2188,30 @@ const AuthenticatedDashboardAccountingReportsLedgerPrintRoute =
   AuthenticatedDashboardAccountingReportsLedgerPrintRouteImport.update({
     id: '/dashboard/accounting/reports/ledger/print',
     path: '/dashboard/accounting/reports/ledger/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAccountingReportsJournalPrintRoute =
+  AuthenticatedDashboardAccountingReportsJournalPrintRouteImport.update({
+    id: '/dashboard/accounting/reports/journal/print',
+    path: '/dashboard/accounting/reports/journal/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAccountingReportsDailySummaryPrintRoute =
+  AuthenticatedDashboardAccountingReportsDailySummaryPrintRouteImport.update({
+    id: '/dashboard/accounting/reports/daily-summary/print',
+    path: '/dashboard/accounting/reports/daily-summary/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAccountingReportsCashFlowPrintRoute =
+  AuthenticatedDashboardAccountingReportsCashFlowPrintRouteImport.update({
+    id: '/dashboard/accounting/reports/cash-flow/print',
+    path: '/dashboard/accounting/reports/cash-flow/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute =
+  AuthenticatedDashboardAccountingReportsBalanceSheetPrintRouteImport.update({
+    id: '/dashboard/accounting/reports/balance-sheet/print',
+    path: '/dashboard/accounting/reports/balance-sheet/print',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute =
@@ -1728,6 +2340,20 @@ const AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute =
     path: '/dashboard/ultrasonogram/all/edit/builder/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardReportsMyOutdoorTodayCollectionPrintRoute =
+  AuthenticatedDashboardReportsMyOutdoorTodayCollectionPrintRouteImport.update({
+    id: '/dashboard/reports/my/outdoor/today-collection/print',
+    path: '/dashboard/reports/my/outdoor/today-collection/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionPrintRoute =
+  AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionPrintRouteImport.update(
+    {
+      id: '/dashboard/reports/my/outdoor/date-wise-collection/print',
+      path: '/dashboard/reports/my/outdoor/date-wise-collection/print',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute =
   AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRouteImport.update(
     {
@@ -2133,8 +2759,15 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/report-settings': typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
   '/dashboard/ultrasonogram/all': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   '/dashboard/x-ray/all': typeof AuthenticatedDashboardXRayAllIndexRoute
+  '/dashboard/accounting/reports/balance-sheet/print': typeof AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute
+  '/dashboard/accounting/reports/cash-flow/print': typeof AuthenticatedDashboardAccountingReportsCashFlowPrintRoute
+  '/dashboard/accounting/reports/daily-summary/print': typeof AuthenticatedDashboardAccountingReportsDailySummaryPrintRoute
+  '/dashboard/accounting/reports/journal/print': typeof AuthenticatedDashboardAccountingReportsJournalPrintRoute
   '/dashboard/accounting/reports/ledger/print': typeof AuthenticatedDashboardAccountingReportsLedgerPrintRoute
   '/dashboard/accounting/reports/multi-ledger/print': typeof AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute
+  '/dashboard/accounting/reports/profit-and-loss/print': typeof AuthenticatedDashboardAccountingReportsProfitAndLossPrintRoute
+  '/dashboard/accounting/reports/profit-loss/print': typeof AuthenticatedDashboardAccountingReportsProfitLossPrintRoute
+  '/dashboard/accounting/reports/trial-balance/print': typeof AuthenticatedDashboardAccountingReportsTrialBalancePrintRoute
   '/dashboard/ecg/all/edit/$id': typeof AuthenticatedDashboardEcgAllEditIdRoute
   '/dashboard/ecg/all/print/$id': typeof AuthenticatedDashboardEcgAllPrintIdRoute
   '/dashboard/indoor/master/bed-cabin-list/$id': typeof AuthenticatedDashboardIndoorMasterBedCabinListIdRoute
@@ -2146,6 +2779,43 @@ export interface FileRoutesByFullPath {
   '/dashboard/outdoor/master/tests/$id': typeof AuthenticatedDashboardOutdoorMasterTestsIdRoute
   '/dashboard/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
   '/dashboard/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute
+  '/dashboard/reports/accounting/bank-book/print': typeof AuthenticatedDashboardReportsAccountingBankBookPrintRoute
+  '/dashboard/reports/accounting/cash-flow/print': typeof AuthenticatedDashboardReportsAccountingCashFlowPrintRoute
+  '/dashboard/reports/accounting/daily-transactions/print': typeof AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRoute
+  '/dashboard/reports/accounting/income-vs-expense/print': typeof AuthenticatedDashboardReportsAccountingIncomeVsExpensePrintRoute
+  '/dashboard/reports/accounting/journal/print': typeof AuthenticatedDashboardReportsAccountingJournalPrintRoute
+  '/dashboard/reports/accounting/ledger/print': typeof AuthenticatedDashboardReportsAccountingLedgerPrintRoute
+  '/dashboard/reports/accounting/profit-and-loss/print': typeof AuthenticatedDashboardReportsAccountingProfitAndLossPrintRoute
+  '/dashboard/reports/accounting/trial-balance/print': typeof AuthenticatedDashboardReportsAccountingTrialBalancePrintRoute
+  '/dashboard/reports/indoor/advance-payments/print': typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute
+  '/dashboard/reports/indoor/bill-distribution/print': typeof AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute
+  '/dashboard/reports/indoor/final-bill-register/print': typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute
+  '/dashboard/reports/indoor/outstanding-balance/print': typeof AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRoute
+  '/dashboard/reports/indoor/revenue-summary/print': typeof AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRoute
+  '/dashboard/reports/indoor/service-wise-revenue/print': typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute
+  '/dashboard/reports/inventory/customer-ledger/print': typeof AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute
+  '/dashboard/reports/inventory/stock-report/print': typeof AuthenticatedDashboardReportsInventoryStockReportPrintRoute
+  '/dashboard/reports/inventory/supplier-purchases/print': typeof AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRoute
+  '/dashboard/reports/outdoor/category-wise-revenue/print': typeof AuthenticatedDashboardReportsOutdoorCategoryWiseRevenuePrintRoute
+  '/dashboard/reports/outdoor/doctor-wise-collection/print': typeof AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionPrintRoute
+  '/dashboard/reports/outdoor/due-collection/print': typeof AuthenticatedDashboardReportsOutdoorDueCollectionPrintRoute
+  '/dashboard/reports/outdoor/patient-list/print': typeof AuthenticatedDashboardReportsOutdoorPatientListPrintRoute
+  '/dashboard/reports/outdoor/test-wise-revenue/print': typeof AuthenticatedDashboardReportsOutdoorTestWiseRevenuePrintRoute
+  '/dashboard/reports/pathology/department-wise-volume/print': typeof AuthenticatedDashboardReportsPathologyDepartmentWiseVolumePrintRoute
+  '/dashboard/reports/pathology/machine-utilization/print': typeof AuthenticatedDashboardReportsPathologyMachineUtilizationPrintRoute
+  '/dashboard/reports/pathology/pending-results/print': typeof AuthenticatedDashboardReportsPathologyPendingResultsPrintRoute
+  '/dashboard/reports/pathology/sample-status/print': typeof AuthenticatedDashboardReportsPathologySampleStatusPrintRoute
+  '/dashboard/reports/pathology/test-wise-count/print': typeof AuthenticatedDashboardReportsPathologyTestWiseCountPrintRoute
+  '/dashboard/reports/patient/admission-register/print': typeof AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRoute
+  '/dashboard/reports/patient/bed-occupancy/print': typeof AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute
+  '/dashboard/reports/patient/discharge-summary/print': typeof AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute
+  '/dashboard/reports/patient/doctor-wise-patients/print': typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute
+  '/dashboard/reports/patient/patient-type-stats/print': typeof AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute
+  '/dashboard/reports/payroll/attendance-summary/print': typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute
+  '/dashboard/reports/payroll/department-wise-staff/print': typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRoute
+  '/dashboard/reports/payroll/leave-report/print': typeof AuthenticatedDashboardReportsPayrollLeaveReportPrintRoute
+  '/dashboard/reports/payroll/payroll-summary/print': typeof AuthenticatedDashboardReportsPayrollPayrollSummaryPrintRoute
+  '/dashboard/reports/payroll/salary-sheet/print': typeof AuthenticatedDashboardReportsPayrollSalarySheetPrintRoute
   '/dashboard/roles/permissions/$roleId/edit': typeof AuthenticatedDashboardRolesPermissionsRoleIdEditRoute
   '/dashboard/ultrasonogram/all/edit/$id': typeof AuthenticatedDashboardUltrasonogramAllEditIdRoute
   '/dashboard/ultrasonogram/all/print/$id': typeof AuthenticatedDashboardUltrasonogramAllPrintIdRoute
@@ -2240,6 +2910,44 @@ export interface FileRoutesByFullPath {
   '/dashboard/pathology/urine/urine-for-sugar': typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
   '/dashboard/payroll/attendance/$staffId': typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   '/dashboard/payroll/salary/$staffId': typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  '/dashboard/reports/accounting/balance-sheet': typeof AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute
+  '/dashboard/reports/accounting/bank-book': typeof AuthenticatedDashboardReportsAccountingBankBookIndexRoute
+  '/dashboard/reports/accounting/cash-flow': typeof AuthenticatedDashboardReportsAccountingCashFlowIndexRoute
+  '/dashboard/reports/accounting/daily-transactions': typeof AuthenticatedDashboardReportsAccountingDailyTransactionsIndexRoute
+  '/dashboard/reports/accounting/income-vs-expense': typeof AuthenticatedDashboardReportsAccountingIncomeVsExpenseIndexRoute
+  '/dashboard/reports/accounting/journal': typeof AuthenticatedDashboardReportsAccountingJournalIndexRoute
+  '/dashboard/reports/accounting/ledger': typeof AuthenticatedDashboardReportsAccountingLedgerIndexRoute
+  '/dashboard/reports/accounting/profit-and-loss': typeof AuthenticatedDashboardReportsAccountingProfitAndLossIndexRoute
+  '/dashboard/reports/accounting/trial-balance': typeof AuthenticatedDashboardReportsAccountingTrialBalanceIndexRoute
+  '/dashboard/reports/indoor/advance-payments': typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute
+  '/dashboard/reports/indoor/bill-distribution': typeof AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute
+  '/dashboard/reports/indoor/final-bill-register': typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute
+  '/dashboard/reports/indoor/outstanding-balance': typeof AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRoute
+  '/dashboard/reports/indoor/revenue-summary': typeof AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRoute
+  '/dashboard/reports/indoor/service-wise-revenue': typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute
+  '/dashboard/reports/inventory/customer-ledger': typeof AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute
+  '/dashboard/reports/inventory/stock-report': typeof AuthenticatedDashboardReportsInventoryStockReportIndexRoute
+  '/dashboard/reports/inventory/supplier-purchases': typeof AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRoute
+  '/dashboard/reports/outdoor/category-wise-revenue': typeof AuthenticatedDashboardReportsOutdoorCategoryWiseRevenueIndexRoute
+  '/dashboard/reports/outdoor/doctor-wise-collection': typeof AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionIndexRoute
+  '/dashboard/reports/outdoor/due-collection': typeof AuthenticatedDashboardReportsOutdoorDueCollectionIndexRoute
+  '/dashboard/reports/outdoor/patient-list': typeof AuthenticatedDashboardReportsOutdoorPatientListIndexRoute
+  '/dashboard/reports/outdoor/test-wise-revenue': typeof AuthenticatedDashboardReportsOutdoorTestWiseRevenueIndexRoute
+  '/dashboard/reports/pathology/department-wise-volume': typeof AuthenticatedDashboardReportsPathologyDepartmentWiseVolumeIndexRoute
+  '/dashboard/reports/pathology/machine-utilization': typeof AuthenticatedDashboardReportsPathologyMachineUtilizationIndexRoute
+  '/dashboard/reports/pathology/pending-results': typeof AuthenticatedDashboardReportsPathologyPendingResultsIndexRoute
+  '/dashboard/reports/pathology/sample-status': typeof AuthenticatedDashboardReportsPathologySampleStatusIndexRoute
+  '/dashboard/reports/pathology/test-wise-count': typeof AuthenticatedDashboardReportsPathologyTestWiseCountIndexRoute
+  '/dashboard/reports/patient/admission-register': typeof AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRoute
+  '/dashboard/reports/patient/bed-occupancy': typeof AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute
+  '/dashboard/reports/patient/discharge-summary': typeof AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute
+  '/dashboard/reports/patient/doctor-wise-patients': typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute
+  '/dashboard/reports/patient/patient-type-stats': typeof AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute
+  '/dashboard/reports/payroll/attendance-summary': typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute
+  '/dashboard/reports/payroll/department-wise-staff': typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRoute
+  '/dashboard/reports/payroll/leave-report': typeof AuthenticatedDashboardReportsPayrollLeaveReportIndexRoute
+  '/dashboard/reports/payroll/payroll-summary': typeof AuthenticatedDashboardReportsPayrollPayrollSummaryIndexRoute
+  '/dashboard/reports/payroll/salary-sheet': typeof AuthenticatedDashboardReportsPayrollSalarySheetIndexRoute
   '/dashboard/admission/new-admission/index/bak': typeof AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute
   '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute
   '/dashboard/admission/patients/$admissionId/print/$step': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
@@ -2278,6 +2986,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/pathology/urine/urine-for-re-full/edit/$id': typeof AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRoute
   '/dashboard/pathology/urine/urine-for-re-full/report/$reportId': typeof AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRoute
   '/dashboard/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute
+  '/dashboard/reports/my/outdoor/date-wise-collection/print': typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionPrintRoute
+  '/dashboard/reports/my/outdoor/today-collection/print': typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionPrintRoute
   '/dashboard/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute
   '/dashboard/x-ray/all/edit/builder/$id': typeof AuthenticatedDashboardXRayAllEditBuilderIdRoute
   '/dashboard/admission/patients/$admissionId/bill-created': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRoute
@@ -2408,8 +3118,15 @@ export interface FileRoutesByTo {
   '/dashboard/settings/report-settings': typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
   '/dashboard/ultrasonogram/all': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   '/dashboard/x-ray/all': typeof AuthenticatedDashboardXRayAllIndexRoute
+  '/dashboard/accounting/reports/balance-sheet/print': typeof AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute
+  '/dashboard/accounting/reports/cash-flow/print': typeof AuthenticatedDashboardAccountingReportsCashFlowPrintRoute
+  '/dashboard/accounting/reports/daily-summary/print': typeof AuthenticatedDashboardAccountingReportsDailySummaryPrintRoute
+  '/dashboard/accounting/reports/journal/print': typeof AuthenticatedDashboardAccountingReportsJournalPrintRoute
   '/dashboard/accounting/reports/ledger/print': typeof AuthenticatedDashboardAccountingReportsLedgerPrintRoute
   '/dashboard/accounting/reports/multi-ledger/print': typeof AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute
+  '/dashboard/accounting/reports/profit-and-loss/print': typeof AuthenticatedDashboardAccountingReportsProfitAndLossPrintRoute
+  '/dashboard/accounting/reports/profit-loss/print': typeof AuthenticatedDashboardAccountingReportsProfitLossPrintRoute
+  '/dashboard/accounting/reports/trial-balance/print': typeof AuthenticatedDashboardAccountingReportsTrialBalancePrintRoute
   '/dashboard/ecg/all/edit/$id': typeof AuthenticatedDashboardEcgAllEditIdRoute
   '/dashboard/ecg/all/print/$id': typeof AuthenticatedDashboardEcgAllPrintIdRoute
   '/dashboard/indoor/master/bed-cabin-list/$id': typeof AuthenticatedDashboardIndoorMasterBedCabinListIdRoute
@@ -2421,6 +3138,43 @@ export interface FileRoutesByTo {
   '/dashboard/outdoor/master/tests/$id': typeof AuthenticatedDashboardOutdoorMasterTestsIdRoute
   '/dashboard/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
   '/dashboard/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute
+  '/dashboard/reports/accounting/bank-book/print': typeof AuthenticatedDashboardReportsAccountingBankBookPrintRoute
+  '/dashboard/reports/accounting/cash-flow/print': typeof AuthenticatedDashboardReportsAccountingCashFlowPrintRoute
+  '/dashboard/reports/accounting/daily-transactions/print': typeof AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRoute
+  '/dashboard/reports/accounting/income-vs-expense/print': typeof AuthenticatedDashboardReportsAccountingIncomeVsExpensePrintRoute
+  '/dashboard/reports/accounting/journal/print': typeof AuthenticatedDashboardReportsAccountingJournalPrintRoute
+  '/dashboard/reports/accounting/ledger/print': typeof AuthenticatedDashboardReportsAccountingLedgerPrintRoute
+  '/dashboard/reports/accounting/profit-and-loss/print': typeof AuthenticatedDashboardReportsAccountingProfitAndLossPrintRoute
+  '/dashboard/reports/accounting/trial-balance/print': typeof AuthenticatedDashboardReportsAccountingTrialBalancePrintRoute
+  '/dashboard/reports/indoor/advance-payments/print': typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute
+  '/dashboard/reports/indoor/bill-distribution/print': typeof AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute
+  '/dashboard/reports/indoor/final-bill-register/print': typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute
+  '/dashboard/reports/indoor/outstanding-balance/print': typeof AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRoute
+  '/dashboard/reports/indoor/revenue-summary/print': typeof AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRoute
+  '/dashboard/reports/indoor/service-wise-revenue/print': typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute
+  '/dashboard/reports/inventory/customer-ledger/print': typeof AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute
+  '/dashboard/reports/inventory/stock-report/print': typeof AuthenticatedDashboardReportsInventoryStockReportPrintRoute
+  '/dashboard/reports/inventory/supplier-purchases/print': typeof AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRoute
+  '/dashboard/reports/outdoor/category-wise-revenue/print': typeof AuthenticatedDashboardReportsOutdoorCategoryWiseRevenuePrintRoute
+  '/dashboard/reports/outdoor/doctor-wise-collection/print': typeof AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionPrintRoute
+  '/dashboard/reports/outdoor/due-collection/print': typeof AuthenticatedDashboardReportsOutdoorDueCollectionPrintRoute
+  '/dashboard/reports/outdoor/patient-list/print': typeof AuthenticatedDashboardReportsOutdoorPatientListPrintRoute
+  '/dashboard/reports/outdoor/test-wise-revenue/print': typeof AuthenticatedDashboardReportsOutdoorTestWiseRevenuePrintRoute
+  '/dashboard/reports/pathology/department-wise-volume/print': typeof AuthenticatedDashboardReportsPathologyDepartmentWiseVolumePrintRoute
+  '/dashboard/reports/pathology/machine-utilization/print': typeof AuthenticatedDashboardReportsPathologyMachineUtilizationPrintRoute
+  '/dashboard/reports/pathology/pending-results/print': typeof AuthenticatedDashboardReportsPathologyPendingResultsPrintRoute
+  '/dashboard/reports/pathology/sample-status/print': typeof AuthenticatedDashboardReportsPathologySampleStatusPrintRoute
+  '/dashboard/reports/pathology/test-wise-count/print': typeof AuthenticatedDashboardReportsPathologyTestWiseCountPrintRoute
+  '/dashboard/reports/patient/admission-register/print': typeof AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRoute
+  '/dashboard/reports/patient/bed-occupancy/print': typeof AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute
+  '/dashboard/reports/patient/discharge-summary/print': typeof AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute
+  '/dashboard/reports/patient/doctor-wise-patients/print': typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute
+  '/dashboard/reports/patient/patient-type-stats/print': typeof AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute
+  '/dashboard/reports/payroll/attendance-summary/print': typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute
+  '/dashboard/reports/payroll/department-wise-staff/print': typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRoute
+  '/dashboard/reports/payroll/leave-report/print': typeof AuthenticatedDashboardReportsPayrollLeaveReportPrintRoute
+  '/dashboard/reports/payroll/payroll-summary/print': typeof AuthenticatedDashboardReportsPayrollPayrollSummaryPrintRoute
+  '/dashboard/reports/payroll/salary-sheet/print': typeof AuthenticatedDashboardReportsPayrollSalarySheetPrintRoute
   '/dashboard/roles/permissions/$roleId/edit': typeof AuthenticatedDashboardRolesPermissionsRoleIdEditRoute
   '/dashboard/ultrasonogram/all/edit/$id': typeof AuthenticatedDashboardUltrasonogramAllEditIdRoute
   '/dashboard/ultrasonogram/all/print/$id': typeof AuthenticatedDashboardUltrasonogramAllPrintIdRoute
@@ -2515,6 +3269,44 @@ export interface FileRoutesByTo {
   '/dashboard/pathology/urine/urine-for-sugar': typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
   '/dashboard/payroll/attendance/$staffId': typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   '/dashboard/payroll/salary/$staffId': typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  '/dashboard/reports/accounting/balance-sheet': typeof AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute
+  '/dashboard/reports/accounting/bank-book': typeof AuthenticatedDashboardReportsAccountingBankBookIndexRoute
+  '/dashboard/reports/accounting/cash-flow': typeof AuthenticatedDashboardReportsAccountingCashFlowIndexRoute
+  '/dashboard/reports/accounting/daily-transactions': typeof AuthenticatedDashboardReportsAccountingDailyTransactionsIndexRoute
+  '/dashboard/reports/accounting/income-vs-expense': typeof AuthenticatedDashboardReportsAccountingIncomeVsExpenseIndexRoute
+  '/dashboard/reports/accounting/journal': typeof AuthenticatedDashboardReportsAccountingJournalIndexRoute
+  '/dashboard/reports/accounting/ledger': typeof AuthenticatedDashboardReportsAccountingLedgerIndexRoute
+  '/dashboard/reports/accounting/profit-and-loss': typeof AuthenticatedDashboardReportsAccountingProfitAndLossIndexRoute
+  '/dashboard/reports/accounting/trial-balance': typeof AuthenticatedDashboardReportsAccountingTrialBalanceIndexRoute
+  '/dashboard/reports/indoor/advance-payments': typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute
+  '/dashboard/reports/indoor/bill-distribution': typeof AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute
+  '/dashboard/reports/indoor/final-bill-register': typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute
+  '/dashboard/reports/indoor/outstanding-balance': typeof AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRoute
+  '/dashboard/reports/indoor/revenue-summary': typeof AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRoute
+  '/dashboard/reports/indoor/service-wise-revenue': typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute
+  '/dashboard/reports/inventory/customer-ledger': typeof AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute
+  '/dashboard/reports/inventory/stock-report': typeof AuthenticatedDashboardReportsInventoryStockReportIndexRoute
+  '/dashboard/reports/inventory/supplier-purchases': typeof AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRoute
+  '/dashboard/reports/outdoor/category-wise-revenue': typeof AuthenticatedDashboardReportsOutdoorCategoryWiseRevenueIndexRoute
+  '/dashboard/reports/outdoor/doctor-wise-collection': typeof AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionIndexRoute
+  '/dashboard/reports/outdoor/due-collection': typeof AuthenticatedDashboardReportsOutdoorDueCollectionIndexRoute
+  '/dashboard/reports/outdoor/patient-list': typeof AuthenticatedDashboardReportsOutdoorPatientListIndexRoute
+  '/dashboard/reports/outdoor/test-wise-revenue': typeof AuthenticatedDashboardReportsOutdoorTestWiseRevenueIndexRoute
+  '/dashboard/reports/pathology/department-wise-volume': typeof AuthenticatedDashboardReportsPathologyDepartmentWiseVolumeIndexRoute
+  '/dashboard/reports/pathology/machine-utilization': typeof AuthenticatedDashboardReportsPathologyMachineUtilizationIndexRoute
+  '/dashboard/reports/pathology/pending-results': typeof AuthenticatedDashboardReportsPathologyPendingResultsIndexRoute
+  '/dashboard/reports/pathology/sample-status': typeof AuthenticatedDashboardReportsPathologySampleStatusIndexRoute
+  '/dashboard/reports/pathology/test-wise-count': typeof AuthenticatedDashboardReportsPathologyTestWiseCountIndexRoute
+  '/dashboard/reports/patient/admission-register': typeof AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRoute
+  '/dashboard/reports/patient/bed-occupancy': typeof AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute
+  '/dashboard/reports/patient/discharge-summary': typeof AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute
+  '/dashboard/reports/patient/doctor-wise-patients': typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute
+  '/dashboard/reports/patient/patient-type-stats': typeof AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute
+  '/dashboard/reports/payroll/attendance-summary': typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute
+  '/dashboard/reports/payroll/department-wise-staff': typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRoute
+  '/dashboard/reports/payroll/leave-report': typeof AuthenticatedDashboardReportsPayrollLeaveReportIndexRoute
+  '/dashboard/reports/payroll/payroll-summary': typeof AuthenticatedDashboardReportsPayrollPayrollSummaryIndexRoute
+  '/dashboard/reports/payroll/salary-sheet': typeof AuthenticatedDashboardReportsPayrollSalarySheetIndexRoute
   '/dashboard/admission/new-admission/index/bak': typeof AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute
   '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute
   '/dashboard/admission/patients/$admissionId/print/$step': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
@@ -2553,6 +3345,8 @@ export interface FileRoutesByTo {
   '/dashboard/pathology/urine/urine-for-re-full/edit/$id': typeof AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRoute
   '/dashboard/pathology/urine/urine-for-re-full/report/$reportId': typeof AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRoute
   '/dashboard/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute
+  '/dashboard/reports/my/outdoor/date-wise-collection/print': typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionPrintRoute
+  '/dashboard/reports/my/outdoor/today-collection/print': typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionPrintRoute
   '/dashboard/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute
   '/dashboard/x-ray/all/edit/builder/$id': typeof AuthenticatedDashboardXRayAllEditBuilderIdRoute
   '/dashboard/admission/patients/$admissionId/bill-created': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRoute
@@ -2690,8 +3484,15 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/settings/report-settings/': typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
   '/_authenticated/dashboard/ultrasonogram/all/': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   '/_authenticated/dashboard/x-ray/all/': typeof AuthenticatedDashboardXRayAllIndexRoute
+  '/_authenticated/dashboard/accounting/reports/balance-sheet/print': typeof AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute
+  '/_authenticated/dashboard/accounting/reports/cash-flow/print': typeof AuthenticatedDashboardAccountingReportsCashFlowPrintRoute
+  '/_authenticated/dashboard/accounting/reports/daily-summary/print': typeof AuthenticatedDashboardAccountingReportsDailySummaryPrintRoute
+  '/_authenticated/dashboard/accounting/reports/journal/print': typeof AuthenticatedDashboardAccountingReportsJournalPrintRoute
   '/_authenticated/dashboard/accounting/reports/ledger/print': typeof AuthenticatedDashboardAccountingReportsLedgerPrintRoute
   '/_authenticated/dashboard/accounting/reports/multi-ledger/print': typeof AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute
+  '/_authenticated/dashboard/accounting/reports/profit-and-loss/print': typeof AuthenticatedDashboardAccountingReportsProfitAndLossPrintRoute
+  '/_authenticated/dashboard/accounting/reports/profit-loss/print': typeof AuthenticatedDashboardAccountingReportsProfitLossPrintRoute
+  '/_authenticated/dashboard/accounting/reports/trial-balance/print': typeof AuthenticatedDashboardAccountingReportsTrialBalancePrintRoute
   '/_authenticated/dashboard/ecg/all/edit/$id': typeof AuthenticatedDashboardEcgAllEditIdRoute
   '/_authenticated/dashboard/ecg/all/print/$id': typeof AuthenticatedDashboardEcgAllPrintIdRoute
   '/_authenticated/dashboard/indoor/master/bed-cabin-list/$id': typeof AuthenticatedDashboardIndoorMasterBedCabinListIdRoute
@@ -2703,6 +3504,43 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/outdoor/master/tests/$id': typeof AuthenticatedDashboardOutdoorMasterTestsIdRoute
   '/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
   '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute
+  '/_authenticated/dashboard/reports/accounting/bank-book/print': typeof AuthenticatedDashboardReportsAccountingBankBookPrintRoute
+  '/_authenticated/dashboard/reports/accounting/cash-flow/print': typeof AuthenticatedDashboardReportsAccountingCashFlowPrintRoute
+  '/_authenticated/dashboard/reports/accounting/daily-transactions/print': typeof AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRoute
+  '/_authenticated/dashboard/reports/accounting/income-vs-expense/print': typeof AuthenticatedDashboardReportsAccountingIncomeVsExpensePrintRoute
+  '/_authenticated/dashboard/reports/accounting/journal/print': typeof AuthenticatedDashboardReportsAccountingJournalPrintRoute
+  '/_authenticated/dashboard/reports/accounting/ledger/print': typeof AuthenticatedDashboardReportsAccountingLedgerPrintRoute
+  '/_authenticated/dashboard/reports/accounting/profit-and-loss/print': typeof AuthenticatedDashboardReportsAccountingProfitAndLossPrintRoute
+  '/_authenticated/dashboard/reports/accounting/trial-balance/print': typeof AuthenticatedDashboardReportsAccountingTrialBalancePrintRoute
+  '/_authenticated/dashboard/reports/indoor/advance-payments/print': typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute
+  '/_authenticated/dashboard/reports/indoor/bill-distribution/print': typeof AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute
+  '/_authenticated/dashboard/reports/indoor/final-bill-register/print': typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute
+  '/_authenticated/dashboard/reports/indoor/outstanding-balance/print': typeof AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRoute
+  '/_authenticated/dashboard/reports/indoor/revenue-summary/print': typeof AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRoute
+  '/_authenticated/dashboard/reports/indoor/service-wise-revenue/print': typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute
+  '/_authenticated/dashboard/reports/inventory/customer-ledger/print': typeof AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute
+  '/_authenticated/dashboard/reports/inventory/stock-report/print': typeof AuthenticatedDashboardReportsInventoryStockReportPrintRoute
+  '/_authenticated/dashboard/reports/inventory/supplier-purchases/print': typeof AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRoute
+  '/_authenticated/dashboard/reports/outdoor/category-wise-revenue/print': typeof AuthenticatedDashboardReportsOutdoorCategoryWiseRevenuePrintRoute
+  '/_authenticated/dashboard/reports/outdoor/doctor-wise-collection/print': typeof AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionPrintRoute
+  '/_authenticated/dashboard/reports/outdoor/due-collection/print': typeof AuthenticatedDashboardReportsOutdoorDueCollectionPrintRoute
+  '/_authenticated/dashboard/reports/outdoor/patient-list/print': typeof AuthenticatedDashboardReportsOutdoorPatientListPrintRoute
+  '/_authenticated/dashboard/reports/outdoor/test-wise-revenue/print': typeof AuthenticatedDashboardReportsOutdoorTestWiseRevenuePrintRoute
+  '/_authenticated/dashboard/reports/pathology/department-wise-volume/print': typeof AuthenticatedDashboardReportsPathologyDepartmentWiseVolumePrintRoute
+  '/_authenticated/dashboard/reports/pathology/machine-utilization/print': typeof AuthenticatedDashboardReportsPathologyMachineUtilizationPrintRoute
+  '/_authenticated/dashboard/reports/pathology/pending-results/print': typeof AuthenticatedDashboardReportsPathologyPendingResultsPrintRoute
+  '/_authenticated/dashboard/reports/pathology/sample-status/print': typeof AuthenticatedDashboardReportsPathologySampleStatusPrintRoute
+  '/_authenticated/dashboard/reports/pathology/test-wise-count/print': typeof AuthenticatedDashboardReportsPathologyTestWiseCountPrintRoute
+  '/_authenticated/dashboard/reports/patient/admission-register/print': typeof AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRoute
+  '/_authenticated/dashboard/reports/patient/bed-occupancy/print': typeof AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute
+  '/_authenticated/dashboard/reports/patient/discharge-summary/print': typeof AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute
+  '/_authenticated/dashboard/reports/patient/doctor-wise-patients/print': typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute
+  '/_authenticated/dashboard/reports/patient/patient-type-stats/print': typeof AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute
+  '/_authenticated/dashboard/reports/payroll/attendance-summary/print': typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute
+  '/_authenticated/dashboard/reports/payroll/department-wise-staff/print': typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRoute
+  '/_authenticated/dashboard/reports/payroll/leave-report/print': typeof AuthenticatedDashboardReportsPayrollLeaveReportPrintRoute
+  '/_authenticated/dashboard/reports/payroll/payroll-summary/print': typeof AuthenticatedDashboardReportsPayrollPayrollSummaryPrintRoute
+  '/_authenticated/dashboard/reports/payroll/salary-sheet/print': typeof AuthenticatedDashboardReportsPayrollSalarySheetPrintRoute
   '/_authenticated/dashboard/roles/permissions/$roleId/edit': typeof AuthenticatedDashboardRolesPermissionsRoleIdEditRoute
   '/_authenticated/dashboard/ultrasonogram/all/edit/$id': typeof AuthenticatedDashboardUltrasonogramAllEditIdRoute
   '/_authenticated/dashboard/ultrasonogram/all/print/$id': typeof AuthenticatedDashboardUltrasonogramAllPrintIdRoute
@@ -2797,6 +3635,44 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/pathology/urine/urine-for-sugar/': typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
   '/_authenticated/dashboard/payroll/attendance/$staffId/': typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   '/_authenticated/dashboard/payroll/salary/$staffId/': typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  '/_authenticated/dashboard/reports/accounting/balance-sheet/': typeof AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute
+  '/_authenticated/dashboard/reports/accounting/bank-book/': typeof AuthenticatedDashboardReportsAccountingBankBookIndexRoute
+  '/_authenticated/dashboard/reports/accounting/cash-flow/': typeof AuthenticatedDashboardReportsAccountingCashFlowIndexRoute
+  '/_authenticated/dashboard/reports/accounting/daily-transactions/': typeof AuthenticatedDashboardReportsAccountingDailyTransactionsIndexRoute
+  '/_authenticated/dashboard/reports/accounting/income-vs-expense/': typeof AuthenticatedDashboardReportsAccountingIncomeVsExpenseIndexRoute
+  '/_authenticated/dashboard/reports/accounting/journal/': typeof AuthenticatedDashboardReportsAccountingJournalIndexRoute
+  '/_authenticated/dashboard/reports/accounting/ledger/': typeof AuthenticatedDashboardReportsAccountingLedgerIndexRoute
+  '/_authenticated/dashboard/reports/accounting/profit-and-loss/': typeof AuthenticatedDashboardReportsAccountingProfitAndLossIndexRoute
+  '/_authenticated/dashboard/reports/accounting/trial-balance/': typeof AuthenticatedDashboardReportsAccountingTrialBalanceIndexRoute
+  '/_authenticated/dashboard/reports/indoor/advance-payments/': typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute
+  '/_authenticated/dashboard/reports/indoor/bill-distribution/': typeof AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute
+  '/_authenticated/dashboard/reports/indoor/final-bill-register/': typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute
+  '/_authenticated/dashboard/reports/indoor/outstanding-balance/': typeof AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRoute
+  '/_authenticated/dashboard/reports/indoor/revenue-summary/': typeof AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRoute
+  '/_authenticated/dashboard/reports/indoor/service-wise-revenue/': typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute
+  '/_authenticated/dashboard/reports/inventory/customer-ledger/': typeof AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute
+  '/_authenticated/dashboard/reports/inventory/stock-report/': typeof AuthenticatedDashboardReportsInventoryStockReportIndexRoute
+  '/_authenticated/dashboard/reports/inventory/supplier-purchases/': typeof AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRoute
+  '/_authenticated/dashboard/reports/outdoor/category-wise-revenue/': typeof AuthenticatedDashboardReportsOutdoorCategoryWiseRevenueIndexRoute
+  '/_authenticated/dashboard/reports/outdoor/doctor-wise-collection/': typeof AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionIndexRoute
+  '/_authenticated/dashboard/reports/outdoor/due-collection/': typeof AuthenticatedDashboardReportsOutdoorDueCollectionIndexRoute
+  '/_authenticated/dashboard/reports/outdoor/patient-list/': typeof AuthenticatedDashboardReportsOutdoorPatientListIndexRoute
+  '/_authenticated/dashboard/reports/outdoor/test-wise-revenue/': typeof AuthenticatedDashboardReportsOutdoorTestWiseRevenueIndexRoute
+  '/_authenticated/dashboard/reports/pathology/department-wise-volume/': typeof AuthenticatedDashboardReportsPathologyDepartmentWiseVolumeIndexRoute
+  '/_authenticated/dashboard/reports/pathology/machine-utilization/': typeof AuthenticatedDashboardReportsPathologyMachineUtilizationIndexRoute
+  '/_authenticated/dashboard/reports/pathology/pending-results/': typeof AuthenticatedDashboardReportsPathologyPendingResultsIndexRoute
+  '/_authenticated/dashboard/reports/pathology/sample-status/': typeof AuthenticatedDashboardReportsPathologySampleStatusIndexRoute
+  '/_authenticated/dashboard/reports/pathology/test-wise-count/': typeof AuthenticatedDashboardReportsPathologyTestWiseCountIndexRoute
+  '/_authenticated/dashboard/reports/patient/admission-register/': typeof AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRoute
+  '/_authenticated/dashboard/reports/patient/bed-occupancy/': typeof AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute
+  '/_authenticated/dashboard/reports/patient/discharge-summary/': typeof AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute
+  '/_authenticated/dashboard/reports/patient/doctor-wise-patients/': typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute
+  '/_authenticated/dashboard/reports/patient/patient-type-stats/': typeof AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute
+  '/_authenticated/dashboard/reports/payroll/attendance-summary/': typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute
+  '/_authenticated/dashboard/reports/payroll/department-wise-staff/': typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRoute
+  '/_authenticated/dashboard/reports/payroll/leave-report/': typeof AuthenticatedDashboardReportsPayrollLeaveReportIndexRoute
+  '/_authenticated/dashboard/reports/payroll/payroll-summary/': typeof AuthenticatedDashboardReportsPayrollPayrollSummaryIndexRoute
+  '/_authenticated/dashboard/reports/payroll/salary-sheet/': typeof AuthenticatedDashboardReportsPayrollSalarySheetIndexRoute
   '/_authenticated/dashboard/admission/new-admission/index/bak': typeof AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute
   '/_authenticated/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute
   '/_authenticated/dashboard/admission/patients/$admissionId/print/$step': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
@@ -2835,6 +3711,8 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/pathology/urine/urine-for-re-full/edit/$id': typeof AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRoute
   '/_authenticated/dashboard/pathology/urine/urine-for-re-full/report/$reportId': typeof AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRoute
   '/_authenticated/dashboard/pathology/urine/urine-for-sugar/report/$reportId': typeof AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute
+  '/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/print': typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionPrintRoute
+  '/_authenticated/dashboard/reports/my/outdoor/today-collection/print': typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionPrintRoute
   '/_authenticated/dashboard/ultrasonogram/all/edit/builder/$id': typeof AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute
   '/_authenticated/dashboard/x-ray/all/edit/builder/$id': typeof AuthenticatedDashboardXRayAllEditBuilderIdRoute
   '/_authenticated/dashboard/admission/patients/$admissionId/bill-created/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRoute
@@ -2969,8 +3847,15 @@ export interface FileRouteTypes {
     | '/dashboard/settings/report-settings'
     | '/dashboard/ultrasonogram/all'
     | '/dashboard/x-ray/all'
+    | '/dashboard/accounting/reports/balance-sheet/print'
+    | '/dashboard/accounting/reports/cash-flow/print'
+    | '/dashboard/accounting/reports/daily-summary/print'
+    | '/dashboard/accounting/reports/journal/print'
     | '/dashboard/accounting/reports/ledger/print'
     | '/dashboard/accounting/reports/multi-ledger/print'
+    | '/dashboard/accounting/reports/profit-and-loss/print'
+    | '/dashboard/accounting/reports/profit-loss/print'
+    | '/dashboard/accounting/reports/trial-balance/print'
     | '/dashboard/ecg/all/edit/$id'
     | '/dashboard/ecg/all/print/$id'
     | '/dashboard/indoor/master/bed-cabin-list/$id'
@@ -2982,6 +3867,43 @@ export interface FileRouteTypes {
     | '/dashboard/outdoor/master/tests/$id'
     | '/dashboard/outdoor/reception/due-collection/$invoiceId'
     | '/dashboard/outdoor/reception/invoices/$invoiceId'
+    | '/dashboard/reports/accounting/bank-book/print'
+    | '/dashboard/reports/accounting/cash-flow/print'
+    | '/dashboard/reports/accounting/daily-transactions/print'
+    | '/dashboard/reports/accounting/income-vs-expense/print'
+    | '/dashboard/reports/accounting/journal/print'
+    | '/dashboard/reports/accounting/ledger/print'
+    | '/dashboard/reports/accounting/profit-and-loss/print'
+    | '/dashboard/reports/accounting/trial-balance/print'
+    | '/dashboard/reports/indoor/advance-payments/print'
+    | '/dashboard/reports/indoor/bill-distribution/print'
+    | '/dashboard/reports/indoor/final-bill-register/print'
+    | '/dashboard/reports/indoor/outstanding-balance/print'
+    | '/dashboard/reports/indoor/revenue-summary/print'
+    | '/dashboard/reports/indoor/service-wise-revenue/print'
+    | '/dashboard/reports/inventory/customer-ledger/print'
+    | '/dashboard/reports/inventory/stock-report/print'
+    | '/dashboard/reports/inventory/supplier-purchases/print'
+    | '/dashboard/reports/outdoor/category-wise-revenue/print'
+    | '/dashboard/reports/outdoor/doctor-wise-collection/print'
+    | '/dashboard/reports/outdoor/due-collection/print'
+    | '/dashboard/reports/outdoor/patient-list/print'
+    | '/dashboard/reports/outdoor/test-wise-revenue/print'
+    | '/dashboard/reports/pathology/department-wise-volume/print'
+    | '/dashboard/reports/pathology/machine-utilization/print'
+    | '/dashboard/reports/pathology/pending-results/print'
+    | '/dashboard/reports/pathology/sample-status/print'
+    | '/dashboard/reports/pathology/test-wise-count/print'
+    | '/dashboard/reports/patient/admission-register/print'
+    | '/dashboard/reports/patient/bed-occupancy/print'
+    | '/dashboard/reports/patient/discharge-summary/print'
+    | '/dashboard/reports/patient/doctor-wise-patients/print'
+    | '/dashboard/reports/patient/patient-type-stats/print'
+    | '/dashboard/reports/payroll/attendance-summary/print'
+    | '/dashboard/reports/payroll/department-wise-staff/print'
+    | '/dashboard/reports/payroll/leave-report/print'
+    | '/dashboard/reports/payroll/payroll-summary/print'
+    | '/dashboard/reports/payroll/salary-sheet/print'
     | '/dashboard/roles/permissions/$roleId/edit'
     | '/dashboard/ultrasonogram/all/edit/$id'
     | '/dashboard/ultrasonogram/all/print/$id'
@@ -3076,6 +3998,44 @@ export interface FileRouteTypes {
     | '/dashboard/pathology/urine/urine-for-sugar'
     | '/dashboard/payroll/attendance/$staffId'
     | '/dashboard/payroll/salary/$staffId'
+    | '/dashboard/reports/accounting/balance-sheet'
+    | '/dashboard/reports/accounting/bank-book'
+    | '/dashboard/reports/accounting/cash-flow'
+    | '/dashboard/reports/accounting/daily-transactions'
+    | '/dashboard/reports/accounting/income-vs-expense'
+    | '/dashboard/reports/accounting/journal'
+    | '/dashboard/reports/accounting/ledger'
+    | '/dashboard/reports/accounting/profit-and-loss'
+    | '/dashboard/reports/accounting/trial-balance'
+    | '/dashboard/reports/indoor/advance-payments'
+    | '/dashboard/reports/indoor/bill-distribution'
+    | '/dashboard/reports/indoor/final-bill-register'
+    | '/dashboard/reports/indoor/outstanding-balance'
+    | '/dashboard/reports/indoor/revenue-summary'
+    | '/dashboard/reports/indoor/service-wise-revenue'
+    | '/dashboard/reports/inventory/customer-ledger'
+    | '/dashboard/reports/inventory/stock-report'
+    | '/dashboard/reports/inventory/supplier-purchases'
+    | '/dashboard/reports/outdoor/category-wise-revenue'
+    | '/dashboard/reports/outdoor/doctor-wise-collection'
+    | '/dashboard/reports/outdoor/due-collection'
+    | '/dashboard/reports/outdoor/patient-list'
+    | '/dashboard/reports/outdoor/test-wise-revenue'
+    | '/dashboard/reports/pathology/department-wise-volume'
+    | '/dashboard/reports/pathology/machine-utilization'
+    | '/dashboard/reports/pathology/pending-results'
+    | '/dashboard/reports/pathology/sample-status'
+    | '/dashboard/reports/pathology/test-wise-count'
+    | '/dashboard/reports/patient/admission-register'
+    | '/dashboard/reports/patient/bed-occupancy'
+    | '/dashboard/reports/patient/discharge-summary'
+    | '/dashboard/reports/patient/doctor-wise-patients'
+    | '/dashboard/reports/patient/patient-type-stats'
+    | '/dashboard/reports/payroll/attendance-summary'
+    | '/dashboard/reports/payroll/department-wise-staff'
+    | '/dashboard/reports/payroll/leave-report'
+    | '/dashboard/reports/payroll/payroll-summary'
+    | '/dashboard/reports/payroll/salary-sheet'
     | '/dashboard/admission/new-admission/index/bak'
     | '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId'
     | '/dashboard/admission/patients/$admissionId/print/$step'
@@ -3114,6 +4074,8 @@ export interface FileRouteTypes {
     | '/dashboard/pathology/urine/urine-for-re-full/edit/$id'
     | '/dashboard/pathology/urine/urine-for-re-full/report/$reportId'
     | '/dashboard/pathology/urine/urine-for-sugar/report/$reportId'
+    | '/dashboard/reports/my/outdoor/date-wise-collection/print'
+    | '/dashboard/reports/my/outdoor/today-collection/print'
     | '/dashboard/ultrasonogram/all/edit/builder/$id'
     | '/dashboard/x-ray/all/edit/builder/$id'
     | '/dashboard/admission/patients/$admissionId/bill-created'
@@ -3244,8 +4206,15 @@ export interface FileRouteTypes {
     | '/dashboard/settings/report-settings'
     | '/dashboard/ultrasonogram/all'
     | '/dashboard/x-ray/all'
+    | '/dashboard/accounting/reports/balance-sheet/print'
+    | '/dashboard/accounting/reports/cash-flow/print'
+    | '/dashboard/accounting/reports/daily-summary/print'
+    | '/dashboard/accounting/reports/journal/print'
     | '/dashboard/accounting/reports/ledger/print'
     | '/dashboard/accounting/reports/multi-ledger/print'
+    | '/dashboard/accounting/reports/profit-and-loss/print'
+    | '/dashboard/accounting/reports/profit-loss/print'
+    | '/dashboard/accounting/reports/trial-balance/print'
     | '/dashboard/ecg/all/edit/$id'
     | '/dashboard/ecg/all/print/$id'
     | '/dashboard/indoor/master/bed-cabin-list/$id'
@@ -3257,6 +4226,43 @@ export interface FileRouteTypes {
     | '/dashboard/outdoor/master/tests/$id'
     | '/dashboard/outdoor/reception/due-collection/$invoiceId'
     | '/dashboard/outdoor/reception/invoices/$invoiceId'
+    | '/dashboard/reports/accounting/bank-book/print'
+    | '/dashboard/reports/accounting/cash-flow/print'
+    | '/dashboard/reports/accounting/daily-transactions/print'
+    | '/dashboard/reports/accounting/income-vs-expense/print'
+    | '/dashboard/reports/accounting/journal/print'
+    | '/dashboard/reports/accounting/ledger/print'
+    | '/dashboard/reports/accounting/profit-and-loss/print'
+    | '/dashboard/reports/accounting/trial-balance/print'
+    | '/dashboard/reports/indoor/advance-payments/print'
+    | '/dashboard/reports/indoor/bill-distribution/print'
+    | '/dashboard/reports/indoor/final-bill-register/print'
+    | '/dashboard/reports/indoor/outstanding-balance/print'
+    | '/dashboard/reports/indoor/revenue-summary/print'
+    | '/dashboard/reports/indoor/service-wise-revenue/print'
+    | '/dashboard/reports/inventory/customer-ledger/print'
+    | '/dashboard/reports/inventory/stock-report/print'
+    | '/dashboard/reports/inventory/supplier-purchases/print'
+    | '/dashboard/reports/outdoor/category-wise-revenue/print'
+    | '/dashboard/reports/outdoor/doctor-wise-collection/print'
+    | '/dashboard/reports/outdoor/due-collection/print'
+    | '/dashboard/reports/outdoor/patient-list/print'
+    | '/dashboard/reports/outdoor/test-wise-revenue/print'
+    | '/dashboard/reports/pathology/department-wise-volume/print'
+    | '/dashboard/reports/pathology/machine-utilization/print'
+    | '/dashboard/reports/pathology/pending-results/print'
+    | '/dashboard/reports/pathology/sample-status/print'
+    | '/dashboard/reports/pathology/test-wise-count/print'
+    | '/dashboard/reports/patient/admission-register/print'
+    | '/dashboard/reports/patient/bed-occupancy/print'
+    | '/dashboard/reports/patient/discharge-summary/print'
+    | '/dashboard/reports/patient/doctor-wise-patients/print'
+    | '/dashboard/reports/patient/patient-type-stats/print'
+    | '/dashboard/reports/payroll/attendance-summary/print'
+    | '/dashboard/reports/payroll/department-wise-staff/print'
+    | '/dashboard/reports/payroll/leave-report/print'
+    | '/dashboard/reports/payroll/payroll-summary/print'
+    | '/dashboard/reports/payroll/salary-sheet/print'
     | '/dashboard/roles/permissions/$roleId/edit'
     | '/dashboard/ultrasonogram/all/edit/$id'
     | '/dashboard/ultrasonogram/all/print/$id'
@@ -3351,6 +4357,44 @@ export interface FileRouteTypes {
     | '/dashboard/pathology/urine/urine-for-sugar'
     | '/dashboard/payroll/attendance/$staffId'
     | '/dashboard/payroll/salary/$staffId'
+    | '/dashboard/reports/accounting/balance-sheet'
+    | '/dashboard/reports/accounting/bank-book'
+    | '/dashboard/reports/accounting/cash-flow'
+    | '/dashboard/reports/accounting/daily-transactions'
+    | '/dashboard/reports/accounting/income-vs-expense'
+    | '/dashboard/reports/accounting/journal'
+    | '/dashboard/reports/accounting/ledger'
+    | '/dashboard/reports/accounting/profit-and-loss'
+    | '/dashboard/reports/accounting/trial-balance'
+    | '/dashboard/reports/indoor/advance-payments'
+    | '/dashboard/reports/indoor/bill-distribution'
+    | '/dashboard/reports/indoor/final-bill-register'
+    | '/dashboard/reports/indoor/outstanding-balance'
+    | '/dashboard/reports/indoor/revenue-summary'
+    | '/dashboard/reports/indoor/service-wise-revenue'
+    | '/dashboard/reports/inventory/customer-ledger'
+    | '/dashboard/reports/inventory/stock-report'
+    | '/dashboard/reports/inventory/supplier-purchases'
+    | '/dashboard/reports/outdoor/category-wise-revenue'
+    | '/dashboard/reports/outdoor/doctor-wise-collection'
+    | '/dashboard/reports/outdoor/due-collection'
+    | '/dashboard/reports/outdoor/patient-list'
+    | '/dashboard/reports/outdoor/test-wise-revenue'
+    | '/dashboard/reports/pathology/department-wise-volume'
+    | '/dashboard/reports/pathology/machine-utilization'
+    | '/dashboard/reports/pathology/pending-results'
+    | '/dashboard/reports/pathology/sample-status'
+    | '/dashboard/reports/pathology/test-wise-count'
+    | '/dashboard/reports/patient/admission-register'
+    | '/dashboard/reports/patient/bed-occupancy'
+    | '/dashboard/reports/patient/discharge-summary'
+    | '/dashboard/reports/patient/doctor-wise-patients'
+    | '/dashboard/reports/patient/patient-type-stats'
+    | '/dashboard/reports/payroll/attendance-summary'
+    | '/dashboard/reports/payroll/department-wise-staff'
+    | '/dashboard/reports/payroll/leave-report'
+    | '/dashboard/reports/payroll/payroll-summary'
+    | '/dashboard/reports/payroll/salary-sheet'
     | '/dashboard/admission/new-admission/index/bak'
     | '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId'
     | '/dashboard/admission/patients/$admissionId/print/$step'
@@ -3389,6 +4433,8 @@ export interface FileRouteTypes {
     | '/dashboard/pathology/urine/urine-for-re-full/edit/$id'
     | '/dashboard/pathology/urine/urine-for-re-full/report/$reportId'
     | '/dashboard/pathology/urine/urine-for-sugar/report/$reportId'
+    | '/dashboard/reports/my/outdoor/date-wise-collection/print'
+    | '/dashboard/reports/my/outdoor/today-collection/print'
     | '/dashboard/ultrasonogram/all/edit/builder/$id'
     | '/dashboard/x-ray/all/edit/builder/$id'
     | '/dashboard/admission/patients/$admissionId/bill-created'
@@ -3525,8 +4571,15 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/settings/report-settings/'
     | '/_authenticated/dashboard/ultrasonogram/all/'
     | '/_authenticated/dashboard/x-ray/all/'
+    | '/_authenticated/dashboard/accounting/reports/balance-sheet/print'
+    | '/_authenticated/dashboard/accounting/reports/cash-flow/print'
+    | '/_authenticated/dashboard/accounting/reports/daily-summary/print'
+    | '/_authenticated/dashboard/accounting/reports/journal/print'
     | '/_authenticated/dashboard/accounting/reports/ledger/print'
     | '/_authenticated/dashboard/accounting/reports/multi-ledger/print'
+    | '/_authenticated/dashboard/accounting/reports/profit-and-loss/print'
+    | '/_authenticated/dashboard/accounting/reports/profit-loss/print'
+    | '/_authenticated/dashboard/accounting/reports/trial-balance/print'
     | '/_authenticated/dashboard/ecg/all/edit/$id'
     | '/_authenticated/dashboard/ecg/all/print/$id'
     | '/_authenticated/dashboard/indoor/master/bed-cabin-list/$id'
@@ -3538,6 +4591,43 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/outdoor/master/tests/$id'
     | '/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId'
     | '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId'
+    | '/_authenticated/dashboard/reports/accounting/bank-book/print'
+    | '/_authenticated/dashboard/reports/accounting/cash-flow/print'
+    | '/_authenticated/dashboard/reports/accounting/daily-transactions/print'
+    | '/_authenticated/dashboard/reports/accounting/income-vs-expense/print'
+    | '/_authenticated/dashboard/reports/accounting/journal/print'
+    | '/_authenticated/dashboard/reports/accounting/ledger/print'
+    | '/_authenticated/dashboard/reports/accounting/profit-and-loss/print'
+    | '/_authenticated/dashboard/reports/accounting/trial-balance/print'
+    | '/_authenticated/dashboard/reports/indoor/advance-payments/print'
+    | '/_authenticated/dashboard/reports/indoor/bill-distribution/print'
+    | '/_authenticated/dashboard/reports/indoor/final-bill-register/print'
+    | '/_authenticated/dashboard/reports/indoor/outstanding-balance/print'
+    | '/_authenticated/dashboard/reports/indoor/revenue-summary/print'
+    | '/_authenticated/dashboard/reports/indoor/service-wise-revenue/print'
+    | '/_authenticated/dashboard/reports/inventory/customer-ledger/print'
+    | '/_authenticated/dashboard/reports/inventory/stock-report/print'
+    | '/_authenticated/dashboard/reports/inventory/supplier-purchases/print'
+    | '/_authenticated/dashboard/reports/outdoor/category-wise-revenue/print'
+    | '/_authenticated/dashboard/reports/outdoor/doctor-wise-collection/print'
+    | '/_authenticated/dashboard/reports/outdoor/due-collection/print'
+    | '/_authenticated/dashboard/reports/outdoor/patient-list/print'
+    | '/_authenticated/dashboard/reports/outdoor/test-wise-revenue/print'
+    | '/_authenticated/dashboard/reports/pathology/department-wise-volume/print'
+    | '/_authenticated/dashboard/reports/pathology/machine-utilization/print'
+    | '/_authenticated/dashboard/reports/pathology/pending-results/print'
+    | '/_authenticated/dashboard/reports/pathology/sample-status/print'
+    | '/_authenticated/dashboard/reports/pathology/test-wise-count/print'
+    | '/_authenticated/dashboard/reports/patient/admission-register/print'
+    | '/_authenticated/dashboard/reports/patient/bed-occupancy/print'
+    | '/_authenticated/dashboard/reports/patient/discharge-summary/print'
+    | '/_authenticated/dashboard/reports/patient/doctor-wise-patients/print'
+    | '/_authenticated/dashboard/reports/patient/patient-type-stats/print'
+    | '/_authenticated/dashboard/reports/payroll/attendance-summary/print'
+    | '/_authenticated/dashboard/reports/payroll/department-wise-staff/print'
+    | '/_authenticated/dashboard/reports/payroll/leave-report/print'
+    | '/_authenticated/dashboard/reports/payroll/payroll-summary/print'
+    | '/_authenticated/dashboard/reports/payroll/salary-sheet/print'
     | '/_authenticated/dashboard/roles/permissions/$roleId/edit'
     | '/_authenticated/dashboard/ultrasonogram/all/edit/$id'
     | '/_authenticated/dashboard/ultrasonogram/all/print/$id'
@@ -3632,6 +4722,44 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/pathology/urine/urine-for-sugar/'
     | '/_authenticated/dashboard/payroll/attendance/$staffId/'
     | '/_authenticated/dashboard/payroll/salary/$staffId/'
+    | '/_authenticated/dashboard/reports/accounting/balance-sheet/'
+    | '/_authenticated/dashboard/reports/accounting/bank-book/'
+    | '/_authenticated/dashboard/reports/accounting/cash-flow/'
+    | '/_authenticated/dashboard/reports/accounting/daily-transactions/'
+    | '/_authenticated/dashboard/reports/accounting/income-vs-expense/'
+    | '/_authenticated/dashboard/reports/accounting/journal/'
+    | '/_authenticated/dashboard/reports/accounting/ledger/'
+    | '/_authenticated/dashboard/reports/accounting/profit-and-loss/'
+    | '/_authenticated/dashboard/reports/accounting/trial-balance/'
+    | '/_authenticated/dashboard/reports/indoor/advance-payments/'
+    | '/_authenticated/dashboard/reports/indoor/bill-distribution/'
+    | '/_authenticated/dashboard/reports/indoor/final-bill-register/'
+    | '/_authenticated/dashboard/reports/indoor/outstanding-balance/'
+    | '/_authenticated/dashboard/reports/indoor/revenue-summary/'
+    | '/_authenticated/dashboard/reports/indoor/service-wise-revenue/'
+    | '/_authenticated/dashboard/reports/inventory/customer-ledger/'
+    | '/_authenticated/dashboard/reports/inventory/stock-report/'
+    | '/_authenticated/dashboard/reports/inventory/supplier-purchases/'
+    | '/_authenticated/dashboard/reports/outdoor/category-wise-revenue/'
+    | '/_authenticated/dashboard/reports/outdoor/doctor-wise-collection/'
+    | '/_authenticated/dashboard/reports/outdoor/due-collection/'
+    | '/_authenticated/dashboard/reports/outdoor/patient-list/'
+    | '/_authenticated/dashboard/reports/outdoor/test-wise-revenue/'
+    | '/_authenticated/dashboard/reports/pathology/department-wise-volume/'
+    | '/_authenticated/dashboard/reports/pathology/machine-utilization/'
+    | '/_authenticated/dashboard/reports/pathology/pending-results/'
+    | '/_authenticated/dashboard/reports/pathology/sample-status/'
+    | '/_authenticated/dashboard/reports/pathology/test-wise-count/'
+    | '/_authenticated/dashboard/reports/patient/admission-register/'
+    | '/_authenticated/dashboard/reports/patient/bed-occupancy/'
+    | '/_authenticated/dashboard/reports/patient/discharge-summary/'
+    | '/_authenticated/dashboard/reports/patient/doctor-wise-patients/'
+    | '/_authenticated/dashboard/reports/patient/patient-type-stats/'
+    | '/_authenticated/dashboard/reports/payroll/attendance-summary/'
+    | '/_authenticated/dashboard/reports/payroll/department-wise-staff/'
+    | '/_authenticated/dashboard/reports/payroll/leave-report/'
+    | '/_authenticated/dashboard/reports/payroll/payroll-summary/'
+    | '/_authenticated/dashboard/reports/payroll/salary-sheet/'
     | '/_authenticated/dashboard/admission/new-admission/index/bak'
     | '/_authenticated/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId'
     | '/_authenticated/dashboard/admission/patients/$admissionId/print/$step'
@@ -3670,6 +4798,8 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/pathology/urine/urine-for-re-full/edit/$id'
     | '/_authenticated/dashboard/pathology/urine/urine-for-re-full/report/$reportId'
     | '/_authenticated/dashboard/pathology/urine/urine-for-sugar/report/$reportId'
+    | '/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/print'
+    | '/_authenticated/dashboard/reports/my/outdoor/today-collection/print'
     | '/_authenticated/dashboard/ultrasonogram/all/edit/builder/$id'
     | '/_authenticated/dashboard/x-ray/all/edit/builder/$id'
     | '/_authenticated/dashboard/admission/patients/$admissionId/bill-created/'
@@ -4504,6 +5634,272 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardAdmissionNewAdmissionIndexBakRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/reports/payroll/salary-sheet/': {
+      id: '/_authenticated/dashboard/reports/payroll/salary-sheet/'
+      path: '/dashboard/reports/payroll/salary-sheet'
+      fullPath: '/dashboard/reports/payroll/salary-sheet'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPayrollSalarySheetIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/payroll/payroll-summary/': {
+      id: '/_authenticated/dashboard/reports/payroll/payroll-summary/'
+      path: '/dashboard/reports/payroll/payroll-summary'
+      fullPath: '/dashboard/reports/payroll/payroll-summary'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPayrollPayrollSummaryIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/payroll/leave-report/': {
+      id: '/_authenticated/dashboard/reports/payroll/leave-report/'
+      path: '/dashboard/reports/payroll/leave-report'
+      fullPath: '/dashboard/reports/payroll/leave-report'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPayrollLeaveReportIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/payroll/department-wise-staff/': {
+      id: '/_authenticated/dashboard/reports/payroll/department-wise-staff/'
+      path: '/dashboard/reports/payroll/department-wise-staff'
+      fullPath: '/dashboard/reports/payroll/department-wise-staff'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/payroll/attendance-summary/': {
+      id: '/_authenticated/dashboard/reports/payroll/attendance-summary/'
+      path: '/dashboard/reports/payroll/attendance-summary'
+      fullPath: '/dashboard/reports/payroll/attendance-summary'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/patient/patient-type-stats/': {
+      id: '/_authenticated/dashboard/reports/patient/patient-type-stats/'
+      path: '/dashboard/reports/patient/patient-type-stats'
+      fullPath: '/dashboard/reports/patient/patient-type-stats'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/patient/doctor-wise-patients/': {
+      id: '/_authenticated/dashboard/reports/patient/doctor-wise-patients/'
+      path: '/dashboard/reports/patient/doctor-wise-patients'
+      fullPath: '/dashboard/reports/patient/doctor-wise-patients'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/patient/discharge-summary/': {
+      id: '/_authenticated/dashboard/reports/patient/discharge-summary/'
+      path: '/dashboard/reports/patient/discharge-summary'
+      fullPath: '/dashboard/reports/patient/discharge-summary'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientDischargeSummaryIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/patient/bed-occupancy/': {
+      id: '/_authenticated/dashboard/reports/patient/bed-occupancy/'
+      path: '/dashboard/reports/patient/bed-occupancy'
+      fullPath: '/dashboard/reports/patient/bed-occupancy'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientBedOccupancyIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/patient/admission-register/': {
+      id: '/_authenticated/dashboard/reports/patient/admission-register/'
+      path: '/dashboard/reports/patient/admission-register'
+      fullPath: '/dashboard/reports/patient/admission-register'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/pathology/test-wise-count/': {
+      id: '/_authenticated/dashboard/reports/pathology/test-wise-count/'
+      path: '/dashboard/reports/pathology/test-wise-count'
+      fullPath: '/dashboard/reports/pathology/test-wise-count'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPathologyTestWiseCountIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/pathology/sample-status/': {
+      id: '/_authenticated/dashboard/reports/pathology/sample-status/'
+      path: '/dashboard/reports/pathology/sample-status'
+      fullPath: '/dashboard/reports/pathology/sample-status'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPathologySampleStatusIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/pathology/pending-results/': {
+      id: '/_authenticated/dashboard/reports/pathology/pending-results/'
+      path: '/dashboard/reports/pathology/pending-results'
+      fullPath: '/dashboard/reports/pathology/pending-results'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPathologyPendingResultsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/pathology/machine-utilization/': {
+      id: '/_authenticated/dashboard/reports/pathology/machine-utilization/'
+      path: '/dashboard/reports/pathology/machine-utilization'
+      fullPath: '/dashboard/reports/pathology/machine-utilization'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPathologyMachineUtilizationIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/pathology/department-wise-volume/': {
+      id: '/_authenticated/dashboard/reports/pathology/department-wise-volume/'
+      path: '/dashboard/reports/pathology/department-wise-volume'
+      fullPath: '/dashboard/reports/pathology/department-wise-volume'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPathologyDepartmentWiseVolumeIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/outdoor/test-wise-revenue/': {
+      id: '/_authenticated/dashboard/reports/outdoor/test-wise-revenue/'
+      path: '/dashboard/reports/outdoor/test-wise-revenue'
+      fullPath: '/dashboard/reports/outdoor/test-wise-revenue'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsOutdoorTestWiseRevenueIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/outdoor/patient-list/': {
+      id: '/_authenticated/dashboard/reports/outdoor/patient-list/'
+      path: '/dashboard/reports/outdoor/patient-list'
+      fullPath: '/dashboard/reports/outdoor/patient-list'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsOutdoorPatientListIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/outdoor/due-collection/': {
+      id: '/_authenticated/dashboard/reports/outdoor/due-collection/'
+      path: '/dashboard/reports/outdoor/due-collection'
+      fullPath: '/dashboard/reports/outdoor/due-collection'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsOutdoorDueCollectionIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/outdoor/doctor-wise-collection/': {
+      id: '/_authenticated/dashboard/reports/outdoor/doctor-wise-collection/'
+      path: '/dashboard/reports/outdoor/doctor-wise-collection'
+      fullPath: '/dashboard/reports/outdoor/doctor-wise-collection'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/outdoor/category-wise-revenue/': {
+      id: '/_authenticated/dashboard/reports/outdoor/category-wise-revenue/'
+      path: '/dashboard/reports/outdoor/category-wise-revenue'
+      fullPath: '/dashboard/reports/outdoor/category-wise-revenue'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsOutdoorCategoryWiseRevenueIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/inventory/supplier-purchases/': {
+      id: '/_authenticated/dashboard/reports/inventory/supplier-purchases/'
+      path: '/dashboard/reports/inventory/supplier-purchases'
+      fullPath: '/dashboard/reports/inventory/supplier-purchases'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/inventory/stock-report/': {
+      id: '/_authenticated/dashboard/reports/inventory/stock-report/'
+      path: '/dashboard/reports/inventory/stock-report'
+      fullPath: '/dashboard/reports/inventory/stock-report'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsInventoryStockReportIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/inventory/customer-ledger/': {
+      id: '/_authenticated/dashboard/reports/inventory/customer-ledger/'
+      path: '/dashboard/reports/inventory/customer-ledger'
+      fullPath: '/dashboard/reports/inventory/customer-ledger'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/service-wise-revenue/': {
+      id: '/_authenticated/dashboard/reports/indoor/service-wise-revenue/'
+      path: '/dashboard/reports/indoor/service-wise-revenue'
+      fullPath: '/dashboard/reports/indoor/service-wise-revenue'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/revenue-summary/': {
+      id: '/_authenticated/dashboard/reports/indoor/revenue-summary/'
+      path: '/dashboard/reports/indoor/revenue-summary'
+      fullPath: '/dashboard/reports/indoor/revenue-summary'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/outstanding-balance/': {
+      id: '/_authenticated/dashboard/reports/indoor/outstanding-balance/'
+      path: '/dashboard/reports/indoor/outstanding-balance'
+      fullPath: '/dashboard/reports/indoor/outstanding-balance'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/final-bill-register/': {
+      id: '/_authenticated/dashboard/reports/indoor/final-bill-register/'
+      path: '/dashboard/reports/indoor/final-bill-register'
+      fullPath: '/dashboard/reports/indoor/final-bill-register'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/bill-distribution/': {
+      id: '/_authenticated/dashboard/reports/indoor/bill-distribution/'
+      path: '/dashboard/reports/indoor/bill-distribution'
+      fullPath: '/dashboard/reports/indoor/bill-distribution'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorBillDistributionIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/advance-payments/': {
+      id: '/_authenticated/dashboard/reports/indoor/advance-payments/'
+      path: '/dashboard/reports/indoor/advance-payments'
+      fullPath: '/dashboard/reports/indoor/advance-payments'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/trial-balance/': {
+      id: '/_authenticated/dashboard/reports/accounting/trial-balance/'
+      path: '/dashboard/reports/accounting/trial-balance'
+      fullPath: '/dashboard/reports/accounting/trial-balance'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingTrialBalanceIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/profit-and-loss/': {
+      id: '/_authenticated/dashboard/reports/accounting/profit-and-loss/'
+      path: '/dashboard/reports/accounting/profit-and-loss'
+      fullPath: '/dashboard/reports/accounting/profit-and-loss'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingProfitAndLossIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/ledger/': {
+      id: '/_authenticated/dashboard/reports/accounting/ledger/'
+      path: '/dashboard/reports/accounting/ledger'
+      fullPath: '/dashboard/reports/accounting/ledger'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingLedgerIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/journal/': {
+      id: '/_authenticated/dashboard/reports/accounting/journal/'
+      path: '/dashboard/reports/accounting/journal'
+      fullPath: '/dashboard/reports/accounting/journal'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingJournalIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/income-vs-expense/': {
+      id: '/_authenticated/dashboard/reports/accounting/income-vs-expense/'
+      path: '/dashboard/reports/accounting/income-vs-expense'
+      fullPath: '/dashboard/reports/accounting/income-vs-expense'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingIncomeVsExpenseIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/daily-transactions/': {
+      id: '/_authenticated/dashboard/reports/accounting/daily-transactions/'
+      path: '/dashboard/reports/accounting/daily-transactions'
+      fullPath: '/dashboard/reports/accounting/daily-transactions'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingDailyTransactionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/cash-flow/': {
+      id: '/_authenticated/dashboard/reports/accounting/cash-flow/'
+      path: '/dashboard/reports/accounting/cash-flow'
+      fullPath: '/dashboard/reports/accounting/cash-flow'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingCashFlowIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/bank-book/': {
+      id: '/_authenticated/dashboard/reports/accounting/bank-book/'
+      path: '/dashboard/reports/accounting/bank-book'
+      fullPath: '/dashboard/reports/accounting/bank-book'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingBankBookIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/balance-sheet/': {
+      id: '/_authenticated/dashboard/reports/accounting/balance-sheet/'
+      path: '/dashboard/reports/accounting/balance-sheet'
+      fullPath: '/dashboard/reports/accounting/balance-sheet'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingBalanceSheetIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/payroll/salary/$staffId/': {
       id: '/_authenticated/dashboard/payroll/salary/$staffId/'
       path: '/dashboard/payroll/salary/$staffId'
@@ -5162,6 +6558,265 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRolesPermissionsRoleIdEditRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/reports/payroll/salary-sheet/print': {
+      id: '/_authenticated/dashboard/reports/payroll/salary-sheet/print'
+      path: '/dashboard/reports/payroll/salary-sheet/print'
+      fullPath: '/dashboard/reports/payroll/salary-sheet/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPayrollSalarySheetPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/payroll/payroll-summary/print': {
+      id: '/_authenticated/dashboard/reports/payroll/payroll-summary/print'
+      path: '/dashboard/reports/payroll/payroll-summary/print'
+      fullPath: '/dashboard/reports/payroll/payroll-summary/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPayrollPayrollSummaryPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/payroll/leave-report/print': {
+      id: '/_authenticated/dashboard/reports/payroll/leave-report/print'
+      path: '/dashboard/reports/payroll/leave-report/print'
+      fullPath: '/dashboard/reports/payroll/leave-report/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPayrollLeaveReportPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/payroll/department-wise-staff/print': {
+      id: '/_authenticated/dashboard/reports/payroll/department-wise-staff/print'
+      path: '/dashboard/reports/payroll/department-wise-staff/print'
+      fullPath: '/dashboard/reports/payroll/department-wise-staff/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/payroll/attendance-summary/print': {
+      id: '/_authenticated/dashboard/reports/payroll/attendance-summary/print'
+      path: '/dashboard/reports/payroll/attendance-summary/print'
+      fullPath: '/dashboard/reports/payroll/attendance-summary/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/patient/patient-type-stats/print': {
+      id: '/_authenticated/dashboard/reports/patient/patient-type-stats/print'
+      path: '/dashboard/reports/patient/patient-type-stats/print'
+      fullPath: '/dashboard/reports/patient/patient-type-stats/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/patient/doctor-wise-patients/print': {
+      id: '/_authenticated/dashboard/reports/patient/doctor-wise-patients/print'
+      path: '/dashboard/reports/patient/doctor-wise-patients/print'
+      fullPath: '/dashboard/reports/patient/doctor-wise-patients/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/patient/discharge-summary/print': {
+      id: '/_authenticated/dashboard/reports/patient/discharge-summary/print'
+      path: '/dashboard/reports/patient/discharge-summary/print'
+      fullPath: '/dashboard/reports/patient/discharge-summary/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientDischargeSummaryPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/patient/bed-occupancy/print': {
+      id: '/_authenticated/dashboard/reports/patient/bed-occupancy/print'
+      path: '/dashboard/reports/patient/bed-occupancy/print'
+      fullPath: '/dashboard/reports/patient/bed-occupancy/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientBedOccupancyPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/patient/admission-register/print': {
+      id: '/_authenticated/dashboard/reports/patient/admission-register/print'
+      path: '/dashboard/reports/patient/admission-register/print'
+      fullPath: '/dashboard/reports/patient/admission-register/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/pathology/test-wise-count/print': {
+      id: '/_authenticated/dashboard/reports/pathology/test-wise-count/print'
+      path: '/dashboard/reports/pathology/test-wise-count/print'
+      fullPath: '/dashboard/reports/pathology/test-wise-count/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPathologyTestWiseCountPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/pathology/sample-status/print': {
+      id: '/_authenticated/dashboard/reports/pathology/sample-status/print'
+      path: '/dashboard/reports/pathology/sample-status/print'
+      fullPath: '/dashboard/reports/pathology/sample-status/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPathologySampleStatusPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/pathology/pending-results/print': {
+      id: '/_authenticated/dashboard/reports/pathology/pending-results/print'
+      path: '/dashboard/reports/pathology/pending-results/print'
+      fullPath: '/dashboard/reports/pathology/pending-results/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPathologyPendingResultsPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/pathology/machine-utilization/print': {
+      id: '/_authenticated/dashboard/reports/pathology/machine-utilization/print'
+      path: '/dashboard/reports/pathology/machine-utilization/print'
+      fullPath: '/dashboard/reports/pathology/machine-utilization/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPathologyMachineUtilizationPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/pathology/department-wise-volume/print': {
+      id: '/_authenticated/dashboard/reports/pathology/department-wise-volume/print'
+      path: '/dashboard/reports/pathology/department-wise-volume/print'
+      fullPath: '/dashboard/reports/pathology/department-wise-volume/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPathologyDepartmentWiseVolumePrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/outdoor/test-wise-revenue/print': {
+      id: '/_authenticated/dashboard/reports/outdoor/test-wise-revenue/print'
+      path: '/dashboard/reports/outdoor/test-wise-revenue/print'
+      fullPath: '/dashboard/reports/outdoor/test-wise-revenue/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsOutdoorTestWiseRevenuePrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/outdoor/patient-list/print': {
+      id: '/_authenticated/dashboard/reports/outdoor/patient-list/print'
+      path: '/dashboard/reports/outdoor/patient-list/print'
+      fullPath: '/dashboard/reports/outdoor/patient-list/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsOutdoorPatientListPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/outdoor/due-collection/print': {
+      id: '/_authenticated/dashboard/reports/outdoor/due-collection/print'
+      path: '/dashboard/reports/outdoor/due-collection/print'
+      fullPath: '/dashboard/reports/outdoor/due-collection/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsOutdoorDueCollectionPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/outdoor/doctor-wise-collection/print': {
+      id: '/_authenticated/dashboard/reports/outdoor/doctor-wise-collection/print'
+      path: '/dashboard/reports/outdoor/doctor-wise-collection/print'
+      fullPath: '/dashboard/reports/outdoor/doctor-wise-collection/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/outdoor/category-wise-revenue/print': {
+      id: '/_authenticated/dashboard/reports/outdoor/category-wise-revenue/print'
+      path: '/dashboard/reports/outdoor/category-wise-revenue/print'
+      fullPath: '/dashboard/reports/outdoor/category-wise-revenue/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsOutdoorCategoryWiseRevenuePrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/inventory/supplier-purchases/print': {
+      id: '/_authenticated/dashboard/reports/inventory/supplier-purchases/print'
+      path: '/dashboard/reports/inventory/supplier-purchases/print'
+      fullPath: '/dashboard/reports/inventory/supplier-purchases/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/inventory/stock-report/print': {
+      id: '/_authenticated/dashboard/reports/inventory/stock-report/print'
+      path: '/dashboard/reports/inventory/stock-report/print'
+      fullPath: '/dashboard/reports/inventory/stock-report/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsInventoryStockReportPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/inventory/customer-ledger/print': {
+      id: '/_authenticated/dashboard/reports/inventory/customer-ledger/print'
+      path: '/dashboard/reports/inventory/customer-ledger/print'
+      fullPath: '/dashboard/reports/inventory/customer-ledger/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/service-wise-revenue/print': {
+      id: '/_authenticated/dashboard/reports/indoor/service-wise-revenue/print'
+      path: '/dashboard/reports/indoor/service-wise-revenue/print'
+      fullPath: '/dashboard/reports/indoor/service-wise-revenue/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/revenue-summary/print': {
+      id: '/_authenticated/dashboard/reports/indoor/revenue-summary/print'
+      path: '/dashboard/reports/indoor/revenue-summary/print'
+      fullPath: '/dashboard/reports/indoor/revenue-summary/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/outstanding-balance/print': {
+      id: '/_authenticated/dashboard/reports/indoor/outstanding-balance/print'
+      path: '/dashboard/reports/indoor/outstanding-balance/print'
+      fullPath: '/dashboard/reports/indoor/outstanding-balance/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/final-bill-register/print': {
+      id: '/_authenticated/dashboard/reports/indoor/final-bill-register/print'
+      path: '/dashboard/reports/indoor/final-bill-register/print'
+      fullPath: '/dashboard/reports/indoor/final-bill-register/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/bill-distribution/print': {
+      id: '/_authenticated/dashboard/reports/indoor/bill-distribution/print'
+      path: '/dashboard/reports/indoor/bill-distribution/print'
+      fullPath: '/dashboard/reports/indoor/bill-distribution/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorBillDistributionPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/advance-payments/print': {
+      id: '/_authenticated/dashboard/reports/indoor/advance-payments/print'
+      path: '/dashboard/reports/indoor/advance-payments/print'
+      fullPath: '/dashboard/reports/indoor/advance-payments/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/trial-balance/print': {
+      id: '/_authenticated/dashboard/reports/accounting/trial-balance/print'
+      path: '/dashboard/reports/accounting/trial-balance/print'
+      fullPath: '/dashboard/reports/accounting/trial-balance/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingTrialBalancePrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/profit-and-loss/print': {
+      id: '/_authenticated/dashboard/reports/accounting/profit-and-loss/print'
+      path: '/dashboard/reports/accounting/profit-and-loss/print'
+      fullPath: '/dashboard/reports/accounting/profit-and-loss/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingProfitAndLossPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/ledger/print': {
+      id: '/_authenticated/dashboard/reports/accounting/ledger/print'
+      path: '/dashboard/reports/accounting/ledger/print'
+      fullPath: '/dashboard/reports/accounting/ledger/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingLedgerPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/journal/print': {
+      id: '/_authenticated/dashboard/reports/accounting/journal/print'
+      path: '/dashboard/reports/accounting/journal/print'
+      fullPath: '/dashboard/reports/accounting/journal/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingJournalPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/income-vs-expense/print': {
+      id: '/_authenticated/dashboard/reports/accounting/income-vs-expense/print'
+      path: '/dashboard/reports/accounting/income-vs-expense/print'
+      fullPath: '/dashboard/reports/accounting/income-vs-expense/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingIncomeVsExpensePrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/daily-transactions/print': {
+      id: '/_authenticated/dashboard/reports/accounting/daily-transactions/print'
+      path: '/dashboard/reports/accounting/daily-transactions/print'
+      fullPath: '/dashboard/reports/accounting/daily-transactions/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/cash-flow/print': {
+      id: '/_authenticated/dashboard/reports/accounting/cash-flow/print'
+      path: '/dashboard/reports/accounting/cash-flow/print'
+      fullPath: '/dashboard/reports/accounting/cash-flow/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingCashFlowPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/accounting/bank-book/print': {
+      id: '/_authenticated/dashboard/reports/accounting/bank-book/print'
+      path: '/dashboard/reports/accounting/bank-book/print'
+      fullPath: '/dashboard/reports/accounting/bank-book/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingBankBookPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId': {
       id: '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId'
       path: '/dashboard/outdoor/reception/invoices/$invoiceId'
@@ -5239,6 +6894,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardEcgAllEditIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/accounting/reports/trial-balance/print': {
+      id: '/_authenticated/dashboard/accounting/reports/trial-balance/print'
+      path: '/dashboard/accounting/reports/trial-balance/print'
+      fullPath: '/dashboard/accounting/reports/trial-balance/print'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsTrialBalancePrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/accounting/reports/profit-loss/print': {
+      id: '/_authenticated/dashboard/accounting/reports/profit-loss/print'
+      path: '/dashboard/accounting/reports/profit-loss/print'
+      fullPath: '/dashboard/accounting/reports/profit-loss/print'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsProfitLossPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/accounting/reports/profit-and-loss/print': {
+      id: '/_authenticated/dashboard/accounting/reports/profit-and-loss/print'
+      path: '/dashboard/accounting/reports/profit-and-loss/print'
+      fullPath: '/dashboard/accounting/reports/profit-and-loss/print'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsProfitAndLossPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/accounting/reports/multi-ledger/print': {
       id: '/_authenticated/dashboard/accounting/reports/multi-ledger/print'
       path: '/dashboard/accounting/reports/multi-ledger/print'
@@ -5251,6 +6927,34 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/accounting/reports/ledger/print'
       fullPath: '/dashboard/accounting/reports/ledger/print'
       preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsLedgerPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/accounting/reports/journal/print': {
+      id: '/_authenticated/dashboard/accounting/reports/journal/print'
+      path: '/dashboard/accounting/reports/journal/print'
+      fullPath: '/dashboard/accounting/reports/journal/print'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsJournalPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/accounting/reports/daily-summary/print': {
+      id: '/_authenticated/dashboard/accounting/reports/daily-summary/print'
+      path: '/dashboard/accounting/reports/daily-summary/print'
+      fullPath: '/dashboard/accounting/reports/daily-summary/print'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsDailySummaryPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/accounting/reports/cash-flow/print': {
+      id: '/_authenticated/dashboard/accounting/reports/cash-flow/print'
+      path: '/dashboard/accounting/reports/cash-flow/print'
+      fullPath: '/dashboard/accounting/reports/cash-flow/print'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsCashFlowPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/accounting/reports/balance-sheet/print': {
+      id: '/_authenticated/dashboard/accounting/reports/balance-sheet/print'
+      path: '/dashboard/accounting/reports/balance-sheet/print'
+      fullPath: '/dashboard/accounting/reports/balance-sheet/print'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsBalanceSheetPrintRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/reports/my/outdoor/today-collection/': {
@@ -5377,6 +7081,20 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/ultrasonogram/all/edit/builder/$id'
       fullPath: '/dashboard/ultrasonogram/all/edit/builder/$id'
       preLoaderRoute: typeof AuthenticatedDashboardUltrasonogramAllEditBuilderIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/my/outdoor/today-collection/print': {
+      id: '/_authenticated/dashboard/reports/my/outdoor/today-collection/print'
+      path: '/dashboard/reports/my/outdoor/today-collection/print'
+      fullPath: '/dashboard/reports/my/outdoor/today-collection/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/print': {
+      id: '/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/print'
+      path: '/dashboard/reports/my/outdoor/date-wise-collection/print'
+      fullPath: '/dashboard/reports/my/outdoor/date-wise-collection/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionPrintRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/pathology/urine/urine-for-sugar/report/$reportId': {
@@ -5777,8 +7495,15 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRolesCreateIndexRoute: typeof AuthenticatedDashboardRolesCreateIndexRoute
   AuthenticatedDashboardUltrasonogramAllIndexRoute: typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   AuthenticatedDashboardXRayAllIndexRoute: typeof AuthenticatedDashboardXRayAllIndexRoute
+  AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute: typeof AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute
+  AuthenticatedDashboardAccountingReportsCashFlowPrintRoute: typeof AuthenticatedDashboardAccountingReportsCashFlowPrintRoute
+  AuthenticatedDashboardAccountingReportsDailySummaryPrintRoute: typeof AuthenticatedDashboardAccountingReportsDailySummaryPrintRoute
+  AuthenticatedDashboardAccountingReportsJournalPrintRoute: typeof AuthenticatedDashboardAccountingReportsJournalPrintRoute
   AuthenticatedDashboardAccountingReportsLedgerPrintRoute: typeof AuthenticatedDashboardAccountingReportsLedgerPrintRoute
   AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute: typeof AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute
+  AuthenticatedDashboardAccountingReportsProfitAndLossPrintRoute: typeof AuthenticatedDashboardAccountingReportsProfitAndLossPrintRoute
+  AuthenticatedDashboardAccountingReportsProfitLossPrintRoute: typeof AuthenticatedDashboardAccountingReportsProfitLossPrintRoute
+  AuthenticatedDashboardAccountingReportsTrialBalancePrintRoute: typeof AuthenticatedDashboardAccountingReportsTrialBalancePrintRoute
   AuthenticatedDashboardEcgAllEditIdRoute: typeof AuthenticatedDashboardEcgAllEditIdRoute
   AuthenticatedDashboardEcgAllPrintIdRoute: typeof AuthenticatedDashboardEcgAllPrintIdRoute
   AuthenticatedDashboardIndoorMasterBedCabinListIdRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListIdRoute
@@ -5790,6 +7515,43 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardOutdoorMasterTestsIdRoute: typeof AuthenticatedDashboardOutdoorMasterTestsIdRoute
   AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute: typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
   AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute
+  AuthenticatedDashboardReportsAccountingBankBookPrintRoute: typeof AuthenticatedDashboardReportsAccountingBankBookPrintRoute
+  AuthenticatedDashboardReportsAccountingCashFlowPrintRoute: typeof AuthenticatedDashboardReportsAccountingCashFlowPrintRoute
+  AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRoute: typeof AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRoute
+  AuthenticatedDashboardReportsAccountingIncomeVsExpensePrintRoute: typeof AuthenticatedDashboardReportsAccountingIncomeVsExpensePrintRoute
+  AuthenticatedDashboardReportsAccountingJournalPrintRoute: typeof AuthenticatedDashboardReportsAccountingJournalPrintRoute
+  AuthenticatedDashboardReportsAccountingLedgerPrintRoute: typeof AuthenticatedDashboardReportsAccountingLedgerPrintRoute
+  AuthenticatedDashboardReportsAccountingProfitAndLossPrintRoute: typeof AuthenticatedDashboardReportsAccountingProfitAndLossPrintRoute
+  AuthenticatedDashboardReportsAccountingTrialBalancePrintRoute: typeof AuthenticatedDashboardReportsAccountingTrialBalancePrintRoute
+  AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute: typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute
+  AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute: typeof AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute
+  AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute: typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute
+  AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRoute: typeof AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRoute
+  AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRoute: typeof AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRoute
+  AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute: typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute
+  AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute: typeof AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute
+  AuthenticatedDashboardReportsInventoryStockReportPrintRoute: typeof AuthenticatedDashboardReportsInventoryStockReportPrintRoute
+  AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRoute: typeof AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRoute
+  AuthenticatedDashboardReportsOutdoorCategoryWiseRevenuePrintRoute: typeof AuthenticatedDashboardReportsOutdoorCategoryWiseRevenuePrintRoute
+  AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionPrintRoute: typeof AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionPrintRoute
+  AuthenticatedDashboardReportsOutdoorDueCollectionPrintRoute: typeof AuthenticatedDashboardReportsOutdoorDueCollectionPrintRoute
+  AuthenticatedDashboardReportsOutdoorPatientListPrintRoute: typeof AuthenticatedDashboardReportsOutdoorPatientListPrintRoute
+  AuthenticatedDashboardReportsOutdoorTestWiseRevenuePrintRoute: typeof AuthenticatedDashboardReportsOutdoorTestWiseRevenuePrintRoute
+  AuthenticatedDashboardReportsPathologyDepartmentWiseVolumePrintRoute: typeof AuthenticatedDashboardReportsPathologyDepartmentWiseVolumePrintRoute
+  AuthenticatedDashboardReportsPathologyMachineUtilizationPrintRoute: typeof AuthenticatedDashboardReportsPathologyMachineUtilizationPrintRoute
+  AuthenticatedDashboardReportsPathologyPendingResultsPrintRoute: typeof AuthenticatedDashboardReportsPathologyPendingResultsPrintRoute
+  AuthenticatedDashboardReportsPathologySampleStatusPrintRoute: typeof AuthenticatedDashboardReportsPathologySampleStatusPrintRoute
+  AuthenticatedDashboardReportsPathologyTestWiseCountPrintRoute: typeof AuthenticatedDashboardReportsPathologyTestWiseCountPrintRoute
+  AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRoute: typeof AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRoute
+  AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute: typeof AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute
+  AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute: typeof AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute
+  AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute: typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute
+  AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute: typeof AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute
+  AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute: typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute
+  AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRoute: typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRoute
+  AuthenticatedDashboardReportsPayrollLeaveReportPrintRoute: typeof AuthenticatedDashboardReportsPayrollLeaveReportPrintRoute
+  AuthenticatedDashboardReportsPayrollPayrollSummaryPrintRoute: typeof AuthenticatedDashboardReportsPayrollPayrollSummaryPrintRoute
+  AuthenticatedDashboardReportsPayrollSalarySheetPrintRoute: typeof AuthenticatedDashboardReportsPayrollSalarySheetPrintRoute
   AuthenticatedDashboardRolesPermissionsRoleIdEditRoute: typeof AuthenticatedDashboardRolesPermissionsRoleIdEditRoute
   AuthenticatedDashboardUltrasonogramAllEditIdRoute: typeof AuthenticatedDashboardUltrasonogramAllEditIdRoute
   AuthenticatedDashboardUltrasonogramAllPrintIdRoute: typeof AuthenticatedDashboardUltrasonogramAllPrintIdRoute
@@ -5884,6 +7646,44 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute: typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
   AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute: typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute: typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute: typeof AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute
+  AuthenticatedDashboardReportsAccountingBankBookIndexRoute: typeof AuthenticatedDashboardReportsAccountingBankBookIndexRoute
+  AuthenticatedDashboardReportsAccountingCashFlowIndexRoute: typeof AuthenticatedDashboardReportsAccountingCashFlowIndexRoute
+  AuthenticatedDashboardReportsAccountingDailyTransactionsIndexRoute: typeof AuthenticatedDashboardReportsAccountingDailyTransactionsIndexRoute
+  AuthenticatedDashboardReportsAccountingIncomeVsExpenseIndexRoute: typeof AuthenticatedDashboardReportsAccountingIncomeVsExpenseIndexRoute
+  AuthenticatedDashboardReportsAccountingJournalIndexRoute: typeof AuthenticatedDashboardReportsAccountingJournalIndexRoute
+  AuthenticatedDashboardReportsAccountingLedgerIndexRoute: typeof AuthenticatedDashboardReportsAccountingLedgerIndexRoute
+  AuthenticatedDashboardReportsAccountingProfitAndLossIndexRoute: typeof AuthenticatedDashboardReportsAccountingProfitAndLossIndexRoute
+  AuthenticatedDashboardReportsAccountingTrialBalanceIndexRoute: typeof AuthenticatedDashboardReportsAccountingTrialBalanceIndexRoute
+  AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute: typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute
+  AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute: typeof AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute
+  AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute: typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute
+  AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRoute: typeof AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRoute
+  AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRoute: typeof AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRoute
+  AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute: typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute
+  AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute: typeof AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute
+  AuthenticatedDashboardReportsInventoryStockReportIndexRoute: typeof AuthenticatedDashboardReportsInventoryStockReportIndexRoute
+  AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRoute: typeof AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRoute
+  AuthenticatedDashboardReportsOutdoorCategoryWiseRevenueIndexRoute: typeof AuthenticatedDashboardReportsOutdoorCategoryWiseRevenueIndexRoute
+  AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionIndexRoute: typeof AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionIndexRoute
+  AuthenticatedDashboardReportsOutdoorDueCollectionIndexRoute: typeof AuthenticatedDashboardReportsOutdoorDueCollectionIndexRoute
+  AuthenticatedDashboardReportsOutdoorPatientListIndexRoute: typeof AuthenticatedDashboardReportsOutdoorPatientListIndexRoute
+  AuthenticatedDashboardReportsOutdoorTestWiseRevenueIndexRoute: typeof AuthenticatedDashboardReportsOutdoorTestWiseRevenueIndexRoute
+  AuthenticatedDashboardReportsPathologyDepartmentWiseVolumeIndexRoute: typeof AuthenticatedDashboardReportsPathologyDepartmentWiseVolumeIndexRoute
+  AuthenticatedDashboardReportsPathologyMachineUtilizationIndexRoute: typeof AuthenticatedDashboardReportsPathologyMachineUtilizationIndexRoute
+  AuthenticatedDashboardReportsPathologyPendingResultsIndexRoute: typeof AuthenticatedDashboardReportsPathologyPendingResultsIndexRoute
+  AuthenticatedDashboardReportsPathologySampleStatusIndexRoute: typeof AuthenticatedDashboardReportsPathologySampleStatusIndexRoute
+  AuthenticatedDashboardReportsPathologyTestWiseCountIndexRoute: typeof AuthenticatedDashboardReportsPathologyTestWiseCountIndexRoute
+  AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRoute: typeof AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRoute
+  AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute: typeof AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute
+  AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute: typeof AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute
+  AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute: typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute
+  AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute: typeof AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute
+  AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute: typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute
+  AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRoute: typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRoute
+  AuthenticatedDashboardReportsPayrollLeaveReportIndexRoute: typeof AuthenticatedDashboardReportsPayrollLeaveReportIndexRoute
+  AuthenticatedDashboardReportsPayrollPayrollSummaryIndexRoute: typeof AuthenticatedDashboardReportsPayrollPayrollSummaryIndexRoute
+  AuthenticatedDashboardReportsPayrollSalarySheetIndexRoute: typeof AuthenticatedDashboardReportsPayrollSalarySheetIndexRoute
   AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute: typeof AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute
   AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute
   AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
@@ -5922,6 +7722,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRoute: typeof AuthenticatedDashboardPathologyUrineUrineForReFullEditIdRoute
   AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRoute: typeof AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRoute
   AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute: typeof AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute
+  AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionPrintRoute: typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionPrintRoute
+  AuthenticatedDashboardReportsMyOutdoorTodayCollectionPrintRoute: typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionPrintRoute
   AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute: typeof AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute
   AuthenticatedDashboardXRayAllEditBuilderIdRoute: typeof AuthenticatedDashboardXRayAllEditBuilderIdRoute
   AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillCreatedIndexRoute
@@ -6063,10 +7865,24 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardUltrasonogramAllIndexRoute,
   AuthenticatedDashboardXRayAllIndexRoute:
     AuthenticatedDashboardXRayAllIndexRoute,
+  AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute:
+    AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute,
+  AuthenticatedDashboardAccountingReportsCashFlowPrintRoute:
+    AuthenticatedDashboardAccountingReportsCashFlowPrintRoute,
+  AuthenticatedDashboardAccountingReportsDailySummaryPrintRoute:
+    AuthenticatedDashboardAccountingReportsDailySummaryPrintRoute,
+  AuthenticatedDashboardAccountingReportsJournalPrintRoute:
+    AuthenticatedDashboardAccountingReportsJournalPrintRoute,
   AuthenticatedDashboardAccountingReportsLedgerPrintRoute:
     AuthenticatedDashboardAccountingReportsLedgerPrintRoute,
   AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute:
     AuthenticatedDashboardAccountingReportsMultiLedgerPrintRoute,
+  AuthenticatedDashboardAccountingReportsProfitAndLossPrintRoute:
+    AuthenticatedDashboardAccountingReportsProfitAndLossPrintRoute,
+  AuthenticatedDashboardAccountingReportsProfitLossPrintRoute:
+    AuthenticatedDashboardAccountingReportsProfitLossPrintRoute,
+  AuthenticatedDashboardAccountingReportsTrialBalancePrintRoute:
+    AuthenticatedDashboardAccountingReportsTrialBalancePrintRoute,
   AuthenticatedDashboardEcgAllEditIdRoute:
     AuthenticatedDashboardEcgAllEditIdRoute,
   AuthenticatedDashboardEcgAllPrintIdRoute:
@@ -6089,6 +7905,80 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute,
   AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute:
     AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute,
+  AuthenticatedDashboardReportsAccountingBankBookPrintRoute:
+    AuthenticatedDashboardReportsAccountingBankBookPrintRoute,
+  AuthenticatedDashboardReportsAccountingCashFlowPrintRoute:
+    AuthenticatedDashboardReportsAccountingCashFlowPrintRoute,
+  AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRoute:
+    AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRoute,
+  AuthenticatedDashboardReportsAccountingIncomeVsExpensePrintRoute:
+    AuthenticatedDashboardReportsAccountingIncomeVsExpensePrintRoute,
+  AuthenticatedDashboardReportsAccountingJournalPrintRoute:
+    AuthenticatedDashboardReportsAccountingJournalPrintRoute,
+  AuthenticatedDashboardReportsAccountingLedgerPrintRoute:
+    AuthenticatedDashboardReportsAccountingLedgerPrintRoute,
+  AuthenticatedDashboardReportsAccountingProfitAndLossPrintRoute:
+    AuthenticatedDashboardReportsAccountingProfitAndLossPrintRoute,
+  AuthenticatedDashboardReportsAccountingTrialBalancePrintRoute:
+    AuthenticatedDashboardReportsAccountingTrialBalancePrintRoute,
+  AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute:
+    AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute,
+  AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute:
+    AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute,
+  AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute:
+    AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute,
+  AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRoute:
+    AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRoute,
+  AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRoute:
+    AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRoute,
+  AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute:
+    AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute,
+  AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute:
+    AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute,
+  AuthenticatedDashboardReportsInventoryStockReportPrintRoute:
+    AuthenticatedDashboardReportsInventoryStockReportPrintRoute,
+  AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRoute:
+    AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRoute,
+  AuthenticatedDashboardReportsOutdoorCategoryWiseRevenuePrintRoute:
+    AuthenticatedDashboardReportsOutdoorCategoryWiseRevenuePrintRoute,
+  AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionPrintRoute:
+    AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionPrintRoute,
+  AuthenticatedDashboardReportsOutdoorDueCollectionPrintRoute:
+    AuthenticatedDashboardReportsOutdoorDueCollectionPrintRoute,
+  AuthenticatedDashboardReportsOutdoorPatientListPrintRoute:
+    AuthenticatedDashboardReportsOutdoorPatientListPrintRoute,
+  AuthenticatedDashboardReportsOutdoorTestWiseRevenuePrintRoute:
+    AuthenticatedDashboardReportsOutdoorTestWiseRevenuePrintRoute,
+  AuthenticatedDashboardReportsPathologyDepartmentWiseVolumePrintRoute:
+    AuthenticatedDashboardReportsPathologyDepartmentWiseVolumePrintRoute,
+  AuthenticatedDashboardReportsPathologyMachineUtilizationPrintRoute:
+    AuthenticatedDashboardReportsPathologyMachineUtilizationPrintRoute,
+  AuthenticatedDashboardReportsPathologyPendingResultsPrintRoute:
+    AuthenticatedDashboardReportsPathologyPendingResultsPrintRoute,
+  AuthenticatedDashboardReportsPathologySampleStatusPrintRoute:
+    AuthenticatedDashboardReportsPathologySampleStatusPrintRoute,
+  AuthenticatedDashboardReportsPathologyTestWiseCountPrintRoute:
+    AuthenticatedDashboardReportsPathologyTestWiseCountPrintRoute,
+  AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRoute:
+    AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRoute,
+  AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute:
+    AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute,
+  AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute:
+    AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute,
+  AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute:
+    AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute,
+  AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute:
+    AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute,
+  AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute:
+    AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute,
+  AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRoute:
+    AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRoute,
+  AuthenticatedDashboardReportsPayrollLeaveReportPrintRoute:
+    AuthenticatedDashboardReportsPayrollLeaveReportPrintRoute,
+  AuthenticatedDashboardReportsPayrollPayrollSummaryPrintRoute:
+    AuthenticatedDashboardReportsPayrollPayrollSummaryPrintRoute,
+  AuthenticatedDashboardReportsPayrollSalarySheetPrintRoute:
+    AuthenticatedDashboardReportsPayrollSalarySheetPrintRoute,
   AuthenticatedDashboardRolesPermissionsRoleIdEditRoute:
     AuthenticatedDashboardRolesPermissionsRoleIdEditRoute,
   AuthenticatedDashboardUltrasonogramAllEditIdRoute:
@@ -6277,6 +8167,82 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute,
   AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute:
     AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute,
+  AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute:
+    AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute,
+  AuthenticatedDashboardReportsAccountingBankBookIndexRoute:
+    AuthenticatedDashboardReportsAccountingBankBookIndexRoute,
+  AuthenticatedDashboardReportsAccountingCashFlowIndexRoute:
+    AuthenticatedDashboardReportsAccountingCashFlowIndexRoute,
+  AuthenticatedDashboardReportsAccountingDailyTransactionsIndexRoute:
+    AuthenticatedDashboardReportsAccountingDailyTransactionsIndexRoute,
+  AuthenticatedDashboardReportsAccountingIncomeVsExpenseIndexRoute:
+    AuthenticatedDashboardReportsAccountingIncomeVsExpenseIndexRoute,
+  AuthenticatedDashboardReportsAccountingJournalIndexRoute:
+    AuthenticatedDashboardReportsAccountingJournalIndexRoute,
+  AuthenticatedDashboardReportsAccountingLedgerIndexRoute:
+    AuthenticatedDashboardReportsAccountingLedgerIndexRoute,
+  AuthenticatedDashboardReportsAccountingProfitAndLossIndexRoute:
+    AuthenticatedDashboardReportsAccountingProfitAndLossIndexRoute,
+  AuthenticatedDashboardReportsAccountingTrialBalanceIndexRoute:
+    AuthenticatedDashboardReportsAccountingTrialBalanceIndexRoute,
+  AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute:
+    AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute,
+  AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute:
+    AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute,
+  AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute:
+    AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute,
+  AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRoute:
+    AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRoute,
+  AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRoute:
+    AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRoute,
+  AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute:
+    AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute,
+  AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute:
+    AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute,
+  AuthenticatedDashboardReportsInventoryStockReportIndexRoute:
+    AuthenticatedDashboardReportsInventoryStockReportIndexRoute,
+  AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRoute:
+    AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRoute,
+  AuthenticatedDashboardReportsOutdoorCategoryWiseRevenueIndexRoute:
+    AuthenticatedDashboardReportsOutdoorCategoryWiseRevenueIndexRoute,
+  AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionIndexRoute:
+    AuthenticatedDashboardReportsOutdoorDoctorWiseCollectionIndexRoute,
+  AuthenticatedDashboardReportsOutdoorDueCollectionIndexRoute:
+    AuthenticatedDashboardReportsOutdoorDueCollectionIndexRoute,
+  AuthenticatedDashboardReportsOutdoorPatientListIndexRoute:
+    AuthenticatedDashboardReportsOutdoorPatientListIndexRoute,
+  AuthenticatedDashboardReportsOutdoorTestWiseRevenueIndexRoute:
+    AuthenticatedDashboardReportsOutdoorTestWiseRevenueIndexRoute,
+  AuthenticatedDashboardReportsPathologyDepartmentWiseVolumeIndexRoute:
+    AuthenticatedDashboardReportsPathologyDepartmentWiseVolumeIndexRoute,
+  AuthenticatedDashboardReportsPathologyMachineUtilizationIndexRoute:
+    AuthenticatedDashboardReportsPathologyMachineUtilizationIndexRoute,
+  AuthenticatedDashboardReportsPathologyPendingResultsIndexRoute:
+    AuthenticatedDashboardReportsPathologyPendingResultsIndexRoute,
+  AuthenticatedDashboardReportsPathologySampleStatusIndexRoute:
+    AuthenticatedDashboardReportsPathologySampleStatusIndexRoute,
+  AuthenticatedDashboardReportsPathologyTestWiseCountIndexRoute:
+    AuthenticatedDashboardReportsPathologyTestWiseCountIndexRoute,
+  AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRoute:
+    AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRoute,
+  AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute:
+    AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute,
+  AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute:
+    AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute,
+  AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute:
+    AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute,
+  AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute:
+    AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute,
+  AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute:
+    AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute,
+  AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRoute:
+    AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRoute,
+  AuthenticatedDashboardReportsPayrollLeaveReportIndexRoute:
+    AuthenticatedDashboardReportsPayrollLeaveReportIndexRoute,
+  AuthenticatedDashboardReportsPayrollPayrollSummaryIndexRoute:
+    AuthenticatedDashboardReportsPayrollPayrollSummaryIndexRoute,
+  AuthenticatedDashboardReportsPayrollSalarySheetIndexRoute:
+    AuthenticatedDashboardReportsPayrollSalarySheetIndexRoute,
   AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute:
     AuthenticatedDashboardAdmissionNewAdmissionIndexBakRoute,
   AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute:
@@ -6353,6 +8319,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardPathologyUrineUrineForReFullReportReportIdRoute,
   AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute:
     AuthenticatedDashboardPathologyUrineUrineForSugarReportReportIdRoute,
+  AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionPrintRoute:
+    AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionPrintRoute,
+  AuthenticatedDashboardReportsMyOutdoorTodayCollectionPrintRoute:
+    AuthenticatedDashboardReportsMyOutdoorTodayCollectionPrintRoute,
   AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute:
     AuthenticatedDashboardUltrasonogramAllEditBuilderIdRoute,
   AuthenticatedDashboardXRayAllEditBuilderIdRoute:

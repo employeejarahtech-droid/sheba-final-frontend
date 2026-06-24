@@ -37,6 +37,7 @@ interface DataTableProps<TData> {
   onLimitChange?: (limit: number) => void;
   search?: string;
   onSearchChange?: (value: string) => void;
+  onSort?: (columnData: string | null, direction: 'ASC' | 'DESC') => void;
   isLoading?: boolean;
   filterSlot?: React.ReactNode;
   tableTitle?: string;
@@ -53,6 +54,7 @@ export function DataTable<TData extends Record<string, any>>({
   onLimitChange,
   search,
   onSearchChange,
+  onSort,
   isLoading,
   filterSlot,
   tableTitle,

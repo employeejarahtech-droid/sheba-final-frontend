@@ -3,7 +3,8 @@ import { DataTable } from '@/components/DataTable'
 import { useState, useMemo } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
-import { FileText, DollarSign, TrendingUp, Calendar, CreditCard } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { FileText, DollarSign, TrendingUp, Calendar, CreditCard, Printer } from 'lucide-react'
 
 type PaymentItem = {
   id: number;
@@ -300,6 +301,12 @@ export default function ReportsMyOutdoorTodayCollection() {
               })}
             </p>
           </div>
+          <Link to="/dashboard/reports/my/outdoor/today-collection/print">
+            <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium shadow-sm hover:bg-gray-50 transition-colors">
+              <Printer className="w-4 h-4" />
+              Print Report
+            </button>
+          </Link>
         </div>
 
         {/* Stats Cards */}
