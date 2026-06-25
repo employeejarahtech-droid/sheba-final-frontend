@@ -396,6 +396,10 @@ export const sidebarData: SidebarData = {
             { title: 'Bill Distribution', url: '/dashboard/reports/indoor/bill-distribution', icon: TrendingUp },
             { title: 'Final Bill Register', url: '/dashboard/reports/indoor/final-bill-register', icon: Receipt },
             { title: 'Outstanding Balance', url: '/dashboard/reports/indoor/outstanding-balance', icon: TrendingDown },
+            { title: 'Anesthesia Bill', url: '/dashboard/reports/indoor/anesthesia-bill', icon: DollarSign },
+            { title: 'Assistant Bill', url: '/dashboard/reports/indoor/assistant-bill', icon: DollarSign },
+            { title: 'Surgeon Bill', url: '/dashboard/reports/indoor/surgeon-bill', icon: DollarSign },
+            { title: 'Clinical Bills', url: '/dashboard/reports/indoor/clinical-bills', icon: DollarSign },
           ],
         },
         {

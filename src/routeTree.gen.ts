@@ -144,11 +144,15 @@ import { Route as AuthenticatedDashboardReportsOutdoorCategoryWiseRevenueIndexRo
 import { Route as AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRouteImport } from './routes/_authenticated/dashboard/reports/inventory/supplier-purchases/index'
 import { Route as AuthenticatedDashboardReportsInventoryStockReportIndexRouteImport } from './routes/_authenticated/dashboard/reports/inventory/stock-report/index'
 import { Route as AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRouteImport } from './routes/_authenticated/dashboard/reports/inventory/customer-ledger/index'
+import { Route as AuthenticatedDashboardReportsIndoorSurgeonBillIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/surgeon-bill/index'
 import { Route as AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/service-wise-revenue/index'
 import { Route as AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/revenue-summary/index'
 import { Route as AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/outstanding-balance/index'
 import { Route as AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/final-bill-register/index'
+import { Route as AuthenticatedDashboardReportsIndoorClinicalBillsIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/clinical-bills/index'
 import { Route as AuthenticatedDashboardReportsIndoorBillDistributionIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/bill-distribution/index'
+import { Route as AuthenticatedDashboardReportsIndoorAssistantBillIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/assistant-bill/index'
+import { Route as AuthenticatedDashboardReportsIndoorAnesthesiaBillIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/anesthesia-bill/index'
 import { Route as AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRouteImport } from './routes/_authenticated/dashboard/reports/indoor/advance-payments/index'
 import { Route as AuthenticatedDashboardReportsAccountingTrialBalanceIndexRouteImport } from './routes/_authenticated/dashboard/reports/accounting/trial-balance/index'
 import { Route as AuthenticatedDashboardReportsAccountingProfitAndLossIndexRouteImport } from './routes/_authenticated/dashboard/reports/accounting/profit-and-loss/index'
@@ -276,11 +280,15 @@ import { Route as AuthenticatedDashboardReportsOutdoorCategoryWiseRevenuePrintRo
 import { Route as AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRouteImport } from './routes/_authenticated/dashboard/reports/inventory/supplier-purchases/print'
 import { Route as AuthenticatedDashboardReportsInventoryStockReportPrintRouteImport } from './routes/_authenticated/dashboard/reports/inventory/stock-report/print'
 import { Route as AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRouteImport } from './routes/_authenticated/dashboard/reports/inventory/customer-ledger/print'
+import { Route as AuthenticatedDashboardReportsIndoorSurgeonBillPrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/surgeon-bill/print'
 import { Route as AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/service-wise-revenue/print'
 import { Route as AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/revenue-summary/print'
 import { Route as AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/outstanding-balance/print'
 import { Route as AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/final-bill-register/print'
+import { Route as AuthenticatedDashboardReportsIndoorClinicalBillsPrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/clinical-bills/print'
 import { Route as AuthenticatedDashboardReportsIndoorBillDistributionPrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/bill-distribution/print'
+import { Route as AuthenticatedDashboardReportsIndoorAssistantBillPrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/assistant-bill/print'
+import { Route as AuthenticatedDashboardReportsIndoorAnesthesiaBillPrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/anesthesia-bill/print'
 import { Route as AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRouteImport } from './routes/_authenticated/dashboard/reports/indoor/advance-payments/print'
 import { Route as AuthenticatedDashboardReportsAccountingTrialBalancePrintRouteImport } from './routes/_authenticated/dashboard/reports/accounting/trial-balance/print'
 import { Route as AuthenticatedDashboardReportsAccountingProfitAndLossPrintRouteImport } from './routes/_authenticated/dashboard/reports/accounting/profit-and-loss/print'
@@ -1160,6 +1168,12 @@ const AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute =
     path: '/dashboard/reports/inventory/customer-ledger/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardReportsIndoorSurgeonBillIndexRoute =
+  AuthenticatedDashboardReportsIndoorSurgeonBillIndexRouteImport.update({
+    id: '/dashboard/reports/indoor/surgeon-bill/',
+    path: '/dashboard/reports/indoor/surgeon-bill/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute =
   AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRouteImport.update({
     id: '/dashboard/reports/indoor/service-wise-revenue/',
@@ -1184,10 +1198,28 @@ const AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute =
     path: '/dashboard/reports/indoor/final-bill-register/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardReportsIndoorClinicalBillsIndexRoute =
+  AuthenticatedDashboardReportsIndoorClinicalBillsIndexRouteImport.update({
+    id: '/dashboard/reports/indoor/clinical-bills/',
+    path: '/dashboard/reports/indoor/clinical-bills/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute =
   AuthenticatedDashboardReportsIndoorBillDistributionIndexRouteImport.update({
     id: '/dashboard/reports/indoor/bill-distribution/',
     path: '/dashboard/reports/indoor/bill-distribution/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorAssistantBillIndexRoute =
+  AuthenticatedDashboardReportsIndoorAssistantBillIndexRouteImport.update({
+    id: '/dashboard/reports/indoor/assistant-bill/',
+    path: '/dashboard/reports/indoor/assistant-bill/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorAnesthesiaBillIndexRoute =
+  AuthenticatedDashboardReportsIndoorAnesthesiaBillIndexRouteImport.update({
+    id: '/dashboard/reports/indoor/anesthesia-bill/',
+    path: '/dashboard/reports/indoor/anesthesia-bill/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute =
@@ -2004,6 +2036,12 @@ const AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute =
     path: '/dashboard/reports/inventory/customer-ledger/print',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardReportsIndoorSurgeonBillPrintRoute =
+  AuthenticatedDashboardReportsIndoorSurgeonBillPrintRouteImport.update({
+    id: '/dashboard/reports/indoor/surgeon-bill/print',
+    path: '/dashboard/reports/indoor/surgeon-bill/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute =
   AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRouteImport.update({
     id: '/dashboard/reports/indoor/service-wise-revenue/print',
@@ -2028,10 +2066,28 @@ const AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute =
     path: '/dashboard/reports/indoor/final-bill-register/print',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardReportsIndoorClinicalBillsPrintRoute =
+  AuthenticatedDashboardReportsIndoorClinicalBillsPrintRouteImport.update({
+    id: '/dashboard/reports/indoor/clinical-bills/print',
+    path: '/dashboard/reports/indoor/clinical-bills/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute =
   AuthenticatedDashboardReportsIndoorBillDistributionPrintRouteImport.update({
     id: '/dashboard/reports/indoor/bill-distribution/print',
     path: '/dashboard/reports/indoor/bill-distribution/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorAssistantBillPrintRoute =
+  AuthenticatedDashboardReportsIndoorAssistantBillPrintRouteImport.update({
+    id: '/dashboard/reports/indoor/assistant-bill/print',
+    path: '/dashboard/reports/indoor/assistant-bill/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardReportsIndoorAnesthesiaBillPrintRoute =
+  AuthenticatedDashboardReportsIndoorAnesthesiaBillPrintRouteImport.update({
+    id: '/dashboard/reports/indoor/anesthesia-bill/print',
+    path: '/dashboard/reports/indoor/anesthesia-bill/print',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute =
@@ -2788,11 +2844,15 @@ export interface FileRoutesByFullPath {
   '/dashboard/reports/accounting/profit-and-loss/print': typeof AuthenticatedDashboardReportsAccountingProfitAndLossPrintRoute
   '/dashboard/reports/accounting/trial-balance/print': typeof AuthenticatedDashboardReportsAccountingTrialBalancePrintRoute
   '/dashboard/reports/indoor/advance-payments/print': typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute
+  '/dashboard/reports/indoor/anesthesia-bill/print': typeof AuthenticatedDashboardReportsIndoorAnesthesiaBillPrintRoute
+  '/dashboard/reports/indoor/assistant-bill/print': typeof AuthenticatedDashboardReportsIndoorAssistantBillPrintRoute
   '/dashboard/reports/indoor/bill-distribution/print': typeof AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute
+  '/dashboard/reports/indoor/clinical-bills/print': typeof AuthenticatedDashboardReportsIndoorClinicalBillsPrintRoute
   '/dashboard/reports/indoor/final-bill-register/print': typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute
   '/dashboard/reports/indoor/outstanding-balance/print': typeof AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRoute
   '/dashboard/reports/indoor/revenue-summary/print': typeof AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRoute
   '/dashboard/reports/indoor/service-wise-revenue/print': typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute
+  '/dashboard/reports/indoor/surgeon-bill/print': typeof AuthenticatedDashboardReportsIndoorSurgeonBillPrintRoute
   '/dashboard/reports/inventory/customer-ledger/print': typeof AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute
   '/dashboard/reports/inventory/stock-report/print': typeof AuthenticatedDashboardReportsInventoryStockReportPrintRoute
   '/dashboard/reports/inventory/supplier-purchases/print': typeof AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRoute
@@ -2920,11 +2980,15 @@ export interface FileRoutesByFullPath {
   '/dashboard/reports/accounting/profit-and-loss': typeof AuthenticatedDashboardReportsAccountingProfitAndLossIndexRoute
   '/dashboard/reports/accounting/trial-balance': typeof AuthenticatedDashboardReportsAccountingTrialBalanceIndexRoute
   '/dashboard/reports/indoor/advance-payments': typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute
+  '/dashboard/reports/indoor/anesthesia-bill': typeof AuthenticatedDashboardReportsIndoorAnesthesiaBillIndexRoute
+  '/dashboard/reports/indoor/assistant-bill': typeof AuthenticatedDashboardReportsIndoorAssistantBillIndexRoute
   '/dashboard/reports/indoor/bill-distribution': typeof AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute
+  '/dashboard/reports/indoor/clinical-bills': typeof AuthenticatedDashboardReportsIndoorClinicalBillsIndexRoute
   '/dashboard/reports/indoor/final-bill-register': typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute
   '/dashboard/reports/indoor/outstanding-balance': typeof AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRoute
   '/dashboard/reports/indoor/revenue-summary': typeof AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRoute
   '/dashboard/reports/indoor/service-wise-revenue': typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute
+  '/dashboard/reports/indoor/surgeon-bill': typeof AuthenticatedDashboardReportsIndoorSurgeonBillIndexRoute
   '/dashboard/reports/inventory/customer-ledger': typeof AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute
   '/dashboard/reports/inventory/stock-report': typeof AuthenticatedDashboardReportsInventoryStockReportIndexRoute
   '/dashboard/reports/inventory/supplier-purchases': typeof AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRoute
@@ -3147,11 +3211,15 @@ export interface FileRoutesByTo {
   '/dashboard/reports/accounting/profit-and-loss/print': typeof AuthenticatedDashboardReportsAccountingProfitAndLossPrintRoute
   '/dashboard/reports/accounting/trial-balance/print': typeof AuthenticatedDashboardReportsAccountingTrialBalancePrintRoute
   '/dashboard/reports/indoor/advance-payments/print': typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute
+  '/dashboard/reports/indoor/anesthesia-bill/print': typeof AuthenticatedDashboardReportsIndoorAnesthesiaBillPrintRoute
+  '/dashboard/reports/indoor/assistant-bill/print': typeof AuthenticatedDashboardReportsIndoorAssistantBillPrintRoute
   '/dashboard/reports/indoor/bill-distribution/print': typeof AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute
+  '/dashboard/reports/indoor/clinical-bills/print': typeof AuthenticatedDashboardReportsIndoorClinicalBillsPrintRoute
   '/dashboard/reports/indoor/final-bill-register/print': typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute
   '/dashboard/reports/indoor/outstanding-balance/print': typeof AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRoute
   '/dashboard/reports/indoor/revenue-summary/print': typeof AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRoute
   '/dashboard/reports/indoor/service-wise-revenue/print': typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute
+  '/dashboard/reports/indoor/surgeon-bill/print': typeof AuthenticatedDashboardReportsIndoorSurgeonBillPrintRoute
   '/dashboard/reports/inventory/customer-ledger/print': typeof AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute
   '/dashboard/reports/inventory/stock-report/print': typeof AuthenticatedDashboardReportsInventoryStockReportPrintRoute
   '/dashboard/reports/inventory/supplier-purchases/print': typeof AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRoute
@@ -3279,11 +3347,15 @@ export interface FileRoutesByTo {
   '/dashboard/reports/accounting/profit-and-loss': typeof AuthenticatedDashboardReportsAccountingProfitAndLossIndexRoute
   '/dashboard/reports/accounting/trial-balance': typeof AuthenticatedDashboardReportsAccountingTrialBalanceIndexRoute
   '/dashboard/reports/indoor/advance-payments': typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute
+  '/dashboard/reports/indoor/anesthesia-bill': typeof AuthenticatedDashboardReportsIndoorAnesthesiaBillIndexRoute
+  '/dashboard/reports/indoor/assistant-bill': typeof AuthenticatedDashboardReportsIndoorAssistantBillIndexRoute
   '/dashboard/reports/indoor/bill-distribution': typeof AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute
+  '/dashboard/reports/indoor/clinical-bills': typeof AuthenticatedDashboardReportsIndoorClinicalBillsIndexRoute
   '/dashboard/reports/indoor/final-bill-register': typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute
   '/dashboard/reports/indoor/outstanding-balance': typeof AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRoute
   '/dashboard/reports/indoor/revenue-summary': typeof AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRoute
   '/dashboard/reports/indoor/service-wise-revenue': typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute
+  '/dashboard/reports/indoor/surgeon-bill': typeof AuthenticatedDashboardReportsIndoorSurgeonBillIndexRoute
   '/dashboard/reports/inventory/customer-ledger': typeof AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute
   '/dashboard/reports/inventory/stock-report': typeof AuthenticatedDashboardReportsInventoryStockReportIndexRoute
   '/dashboard/reports/inventory/supplier-purchases': typeof AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRoute
@@ -3513,11 +3585,15 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/reports/accounting/profit-and-loss/print': typeof AuthenticatedDashboardReportsAccountingProfitAndLossPrintRoute
   '/_authenticated/dashboard/reports/accounting/trial-balance/print': typeof AuthenticatedDashboardReportsAccountingTrialBalancePrintRoute
   '/_authenticated/dashboard/reports/indoor/advance-payments/print': typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute
+  '/_authenticated/dashboard/reports/indoor/anesthesia-bill/print': typeof AuthenticatedDashboardReportsIndoorAnesthesiaBillPrintRoute
+  '/_authenticated/dashboard/reports/indoor/assistant-bill/print': typeof AuthenticatedDashboardReportsIndoorAssistantBillPrintRoute
   '/_authenticated/dashboard/reports/indoor/bill-distribution/print': typeof AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute
+  '/_authenticated/dashboard/reports/indoor/clinical-bills/print': typeof AuthenticatedDashboardReportsIndoorClinicalBillsPrintRoute
   '/_authenticated/dashboard/reports/indoor/final-bill-register/print': typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute
   '/_authenticated/dashboard/reports/indoor/outstanding-balance/print': typeof AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRoute
   '/_authenticated/dashboard/reports/indoor/revenue-summary/print': typeof AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRoute
   '/_authenticated/dashboard/reports/indoor/service-wise-revenue/print': typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute
+  '/_authenticated/dashboard/reports/indoor/surgeon-bill/print': typeof AuthenticatedDashboardReportsIndoorSurgeonBillPrintRoute
   '/_authenticated/dashboard/reports/inventory/customer-ledger/print': typeof AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute
   '/_authenticated/dashboard/reports/inventory/stock-report/print': typeof AuthenticatedDashboardReportsInventoryStockReportPrintRoute
   '/_authenticated/dashboard/reports/inventory/supplier-purchases/print': typeof AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRoute
@@ -3645,11 +3721,15 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/reports/accounting/profit-and-loss/': typeof AuthenticatedDashboardReportsAccountingProfitAndLossIndexRoute
   '/_authenticated/dashboard/reports/accounting/trial-balance/': typeof AuthenticatedDashboardReportsAccountingTrialBalanceIndexRoute
   '/_authenticated/dashboard/reports/indoor/advance-payments/': typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute
+  '/_authenticated/dashboard/reports/indoor/anesthesia-bill/': typeof AuthenticatedDashboardReportsIndoorAnesthesiaBillIndexRoute
+  '/_authenticated/dashboard/reports/indoor/assistant-bill/': typeof AuthenticatedDashboardReportsIndoorAssistantBillIndexRoute
   '/_authenticated/dashboard/reports/indoor/bill-distribution/': typeof AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute
+  '/_authenticated/dashboard/reports/indoor/clinical-bills/': typeof AuthenticatedDashboardReportsIndoorClinicalBillsIndexRoute
   '/_authenticated/dashboard/reports/indoor/final-bill-register/': typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute
   '/_authenticated/dashboard/reports/indoor/outstanding-balance/': typeof AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRoute
   '/_authenticated/dashboard/reports/indoor/revenue-summary/': typeof AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRoute
   '/_authenticated/dashboard/reports/indoor/service-wise-revenue/': typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute
+  '/_authenticated/dashboard/reports/indoor/surgeon-bill/': typeof AuthenticatedDashboardReportsIndoorSurgeonBillIndexRoute
   '/_authenticated/dashboard/reports/inventory/customer-ledger/': typeof AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute
   '/_authenticated/dashboard/reports/inventory/stock-report/': typeof AuthenticatedDashboardReportsInventoryStockReportIndexRoute
   '/_authenticated/dashboard/reports/inventory/supplier-purchases/': typeof AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRoute
@@ -3876,11 +3956,15 @@ export interface FileRouteTypes {
     | '/dashboard/reports/accounting/profit-and-loss/print'
     | '/dashboard/reports/accounting/trial-balance/print'
     | '/dashboard/reports/indoor/advance-payments/print'
+    | '/dashboard/reports/indoor/anesthesia-bill/print'
+    | '/dashboard/reports/indoor/assistant-bill/print'
     | '/dashboard/reports/indoor/bill-distribution/print'
+    | '/dashboard/reports/indoor/clinical-bills/print'
     | '/dashboard/reports/indoor/final-bill-register/print'
     | '/dashboard/reports/indoor/outstanding-balance/print'
     | '/dashboard/reports/indoor/revenue-summary/print'
     | '/dashboard/reports/indoor/service-wise-revenue/print'
+    | '/dashboard/reports/indoor/surgeon-bill/print'
     | '/dashboard/reports/inventory/customer-ledger/print'
     | '/dashboard/reports/inventory/stock-report/print'
     | '/dashboard/reports/inventory/supplier-purchases/print'
@@ -4008,11 +4092,15 @@ export interface FileRouteTypes {
     | '/dashboard/reports/accounting/profit-and-loss'
     | '/dashboard/reports/accounting/trial-balance'
     | '/dashboard/reports/indoor/advance-payments'
+    | '/dashboard/reports/indoor/anesthesia-bill'
+    | '/dashboard/reports/indoor/assistant-bill'
     | '/dashboard/reports/indoor/bill-distribution'
+    | '/dashboard/reports/indoor/clinical-bills'
     | '/dashboard/reports/indoor/final-bill-register'
     | '/dashboard/reports/indoor/outstanding-balance'
     | '/dashboard/reports/indoor/revenue-summary'
     | '/dashboard/reports/indoor/service-wise-revenue'
+    | '/dashboard/reports/indoor/surgeon-bill'
     | '/dashboard/reports/inventory/customer-ledger'
     | '/dashboard/reports/inventory/stock-report'
     | '/dashboard/reports/inventory/supplier-purchases'
@@ -4235,11 +4323,15 @@ export interface FileRouteTypes {
     | '/dashboard/reports/accounting/profit-and-loss/print'
     | '/dashboard/reports/accounting/trial-balance/print'
     | '/dashboard/reports/indoor/advance-payments/print'
+    | '/dashboard/reports/indoor/anesthesia-bill/print'
+    | '/dashboard/reports/indoor/assistant-bill/print'
     | '/dashboard/reports/indoor/bill-distribution/print'
+    | '/dashboard/reports/indoor/clinical-bills/print'
     | '/dashboard/reports/indoor/final-bill-register/print'
     | '/dashboard/reports/indoor/outstanding-balance/print'
     | '/dashboard/reports/indoor/revenue-summary/print'
     | '/dashboard/reports/indoor/service-wise-revenue/print'
+    | '/dashboard/reports/indoor/surgeon-bill/print'
     | '/dashboard/reports/inventory/customer-ledger/print'
     | '/dashboard/reports/inventory/stock-report/print'
     | '/dashboard/reports/inventory/supplier-purchases/print'
@@ -4367,11 +4459,15 @@ export interface FileRouteTypes {
     | '/dashboard/reports/accounting/profit-and-loss'
     | '/dashboard/reports/accounting/trial-balance'
     | '/dashboard/reports/indoor/advance-payments'
+    | '/dashboard/reports/indoor/anesthesia-bill'
+    | '/dashboard/reports/indoor/assistant-bill'
     | '/dashboard/reports/indoor/bill-distribution'
+    | '/dashboard/reports/indoor/clinical-bills'
     | '/dashboard/reports/indoor/final-bill-register'
     | '/dashboard/reports/indoor/outstanding-balance'
     | '/dashboard/reports/indoor/revenue-summary'
     | '/dashboard/reports/indoor/service-wise-revenue'
+    | '/dashboard/reports/indoor/surgeon-bill'
     | '/dashboard/reports/inventory/customer-ledger'
     | '/dashboard/reports/inventory/stock-report'
     | '/dashboard/reports/inventory/supplier-purchases'
@@ -4600,11 +4696,15 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/reports/accounting/profit-and-loss/print'
     | '/_authenticated/dashboard/reports/accounting/trial-balance/print'
     | '/_authenticated/dashboard/reports/indoor/advance-payments/print'
+    | '/_authenticated/dashboard/reports/indoor/anesthesia-bill/print'
+    | '/_authenticated/dashboard/reports/indoor/assistant-bill/print'
     | '/_authenticated/dashboard/reports/indoor/bill-distribution/print'
+    | '/_authenticated/dashboard/reports/indoor/clinical-bills/print'
     | '/_authenticated/dashboard/reports/indoor/final-bill-register/print'
     | '/_authenticated/dashboard/reports/indoor/outstanding-balance/print'
     | '/_authenticated/dashboard/reports/indoor/revenue-summary/print'
     | '/_authenticated/dashboard/reports/indoor/service-wise-revenue/print'
+    | '/_authenticated/dashboard/reports/indoor/surgeon-bill/print'
     | '/_authenticated/dashboard/reports/inventory/customer-ledger/print'
     | '/_authenticated/dashboard/reports/inventory/stock-report/print'
     | '/_authenticated/dashboard/reports/inventory/supplier-purchases/print'
@@ -4732,11 +4832,15 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/reports/accounting/profit-and-loss/'
     | '/_authenticated/dashboard/reports/accounting/trial-balance/'
     | '/_authenticated/dashboard/reports/indoor/advance-payments/'
+    | '/_authenticated/dashboard/reports/indoor/anesthesia-bill/'
+    | '/_authenticated/dashboard/reports/indoor/assistant-bill/'
     | '/_authenticated/dashboard/reports/indoor/bill-distribution/'
+    | '/_authenticated/dashboard/reports/indoor/clinical-bills/'
     | '/_authenticated/dashboard/reports/indoor/final-bill-register/'
     | '/_authenticated/dashboard/reports/indoor/outstanding-balance/'
     | '/_authenticated/dashboard/reports/indoor/revenue-summary/'
     | '/_authenticated/dashboard/reports/indoor/service-wise-revenue/'
+    | '/_authenticated/dashboard/reports/indoor/surgeon-bill/'
     | '/_authenticated/dashboard/reports/inventory/customer-ledger/'
     | '/_authenticated/dashboard/reports/inventory/stock-report/'
     | '/_authenticated/dashboard/reports/inventory/supplier-purchases/'
@@ -5795,6 +5899,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/reports/indoor/surgeon-bill/': {
+      id: '/_authenticated/dashboard/reports/indoor/surgeon-bill/'
+      path: '/dashboard/reports/indoor/surgeon-bill'
+      fullPath: '/dashboard/reports/indoor/surgeon-bill'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorSurgeonBillIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/reports/indoor/service-wise-revenue/': {
       id: '/_authenticated/dashboard/reports/indoor/service-wise-revenue/'
       path: '/dashboard/reports/indoor/service-wise-revenue'
@@ -5823,11 +5934,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/reports/indoor/clinical-bills/': {
+      id: '/_authenticated/dashboard/reports/indoor/clinical-bills/'
+      path: '/dashboard/reports/indoor/clinical-bills'
+      fullPath: '/dashboard/reports/indoor/clinical-bills'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorClinicalBillsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/reports/indoor/bill-distribution/': {
       id: '/_authenticated/dashboard/reports/indoor/bill-distribution/'
       path: '/dashboard/reports/indoor/bill-distribution'
       fullPath: '/dashboard/reports/indoor/bill-distribution'
       preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorBillDistributionIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/assistant-bill/': {
+      id: '/_authenticated/dashboard/reports/indoor/assistant-bill/'
+      path: '/dashboard/reports/indoor/assistant-bill'
+      fullPath: '/dashboard/reports/indoor/assistant-bill'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorAssistantBillIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/anesthesia-bill/': {
+      id: '/_authenticated/dashboard/reports/indoor/anesthesia-bill/'
+      path: '/dashboard/reports/indoor/anesthesia-bill'
+      fullPath: '/dashboard/reports/indoor/anesthesia-bill'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorAnesthesiaBillIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/reports/indoor/advance-payments/': {
@@ -6719,6 +6851,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/reports/indoor/surgeon-bill/print': {
+      id: '/_authenticated/dashboard/reports/indoor/surgeon-bill/print'
+      path: '/dashboard/reports/indoor/surgeon-bill/print'
+      fullPath: '/dashboard/reports/indoor/surgeon-bill/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorSurgeonBillPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/reports/indoor/service-wise-revenue/print': {
       id: '/_authenticated/dashboard/reports/indoor/service-wise-revenue/print'
       path: '/dashboard/reports/indoor/service-wise-revenue/print'
@@ -6747,11 +6886,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/reports/indoor/clinical-bills/print': {
+      id: '/_authenticated/dashboard/reports/indoor/clinical-bills/print'
+      path: '/dashboard/reports/indoor/clinical-bills/print'
+      fullPath: '/dashboard/reports/indoor/clinical-bills/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorClinicalBillsPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/reports/indoor/bill-distribution/print': {
       id: '/_authenticated/dashboard/reports/indoor/bill-distribution/print'
       path: '/dashboard/reports/indoor/bill-distribution/print'
       fullPath: '/dashboard/reports/indoor/bill-distribution/print'
       preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorBillDistributionPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/assistant-bill/print': {
+      id: '/_authenticated/dashboard/reports/indoor/assistant-bill/print'
+      path: '/dashboard/reports/indoor/assistant-bill/print'
+      fullPath: '/dashboard/reports/indoor/assistant-bill/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorAssistantBillPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/indoor/anesthesia-bill/print': {
+      id: '/_authenticated/dashboard/reports/indoor/anesthesia-bill/print'
+      path: '/dashboard/reports/indoor/anesthesia-bill/print'
+      fullPath: '/dashboard/reports/indoor/anesthesia-bill/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsIndoorAnesthesiaBillPrintRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/reports/indoor/advance-payments/print': {
@@ -7524,11 +7684,15 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardReportsAccountingProfitAndLossPrintRoute: typeof AuthenticatedDashboardReportsAccountingProfitAndLossPrintRoute
   AuthenticatedDashboardReportsAccountingTrialBalancePrintRoute: typeof AuthenticatedDashboardReportsAccountingTrialBalancePrintRoute
   AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute: typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute
+  AuthenticatedDashboardReportsIndoorAnesthesiaBillPrintRoute: typeof AuthenticatedDashboardReportsIndoorAnesthesiaBillPrintRoute
+  AuthenticatedDashboardReportsIndoorAssistantBillPrintRoute: typeof AuthenticatedDashboardReportsIndoorAssistantBillPrintRoute
   AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute: typeof AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute
+  AuthenticatedDashboardReportsIndoorClinicalBillsPrintRoute: typeof AuthenticatedDashboardReportsIndoorClinicalBillsPrintRoute
   AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute: typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute
   AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRoute: typeof AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRoute
   AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRoute: typeof AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRoute
   AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute: typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute
+  AuthenticatedDashboardReportsIndoorSurgeonBillPrintRoute: typeof AuthenticatedDashboardReportsIndoorSurgeonBillPrintRoute
   AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute: typeof AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute
   AuthenticatedDashboardReportsInventoryStockReportPrintRoute: typeof AuthenticatedDashboardReportsInventoryStockReportPrintRoute
   AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRoute: typeof AuthenticatedDashboardReportsInventorySupplierPurchasesPrintRoute
@@ -7656,11 +7820,15 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardReportsAccountingProfitAndLossIndexRoute: typeof AuthenticatedDashboardReportsAccountingProfitAndLossIndexRoute
   AuthenticatedDashboardReportsAccountingTrialBalanceIndexRoute: typeof AuthenticatedDashboardReportsAccountingTrialBalanceIndexRoute
   AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute: typeof AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute
+  AuthenticatedDashboardReportsIndoorAnesthesiaBillIndexRoute: typeof AuthenticatedDashboardReportsIndoorAnesthesiaBillIndexRoute
+  AuthenticatedDashboardReportsIndoorAssistantBillIndexRoute: typeof AuthenticatedDashboardReportsIndoorAssistantBillIndexRoute
   AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute: typeof AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute
+  AuthenticatedDashboardReportsIndoorClinicalBillsIndexRoute: typeof AuthenticatedDashboardReportsIndoorClinicalBillsIndexRoute
   AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute: typeof AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute
   AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRoute: typeof AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRoute
   AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRoute: typeof AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRoute
   AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute: typeof AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute
+  AuthenticatedDashboardReportsIndoorSurgeonBillIndexRoute: typeof AuthenticatedDashboardReportsIndoorSurgeonBillIndexRoute
   AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute: typeof AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute
   AuthenticatedDashboardReportsInventoryStockReportIndexRoute: typeof AuthenticatedDashboardReportsInventoryStockReportIndexRoute
   AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRoute: typeof AuthenticatedDashboardReportsInventorySupplierPurchasesIndexRoute
@@ -7923,8 +8091,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardReportsAccountingTrialBalancePrintRoute,
   AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute:
     AuthenticatedDashboardReportsIndoorAdvancePaymentsPrintRoute,
+  AuthenticatedDashboardReportsIndoorAnesthesiaBillPrintRoute:
+    AuthenticatedDashboardReportsIndoorAnesthesiaBillPrintRoute,
+  AuthenticatedDashboardReportsIndoorAssistantBillPrintRoute:
+    AuthenticatedDashboardReportsIndoorAssistantBillPrintRoute,
   AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute:
     AuthenticatedDashboardReportsIndoorBillDistributionPrintRoute,
+  AuthenticatedDashboardReportsIndoorClinicalBillsPrintRoute:
+    AuthenticatedDashboardReportsIndoorClinicalBillsPrintRoute,
   AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute:
     AuthenticatedDashboardReportsIndoorFinalBillRegisterPrintRoute,
   AuthenticatedDashboardReportsIndoorOutstandingBalancePrintRoute:
@@ -7933,6 +8107,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardReportsIndoorRevenueSummaryPrintRoute,
   AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute:
     AuthenticatedDashboardReportsIndoorServiceWiseRevenuePrintRoute,
+  AuthenticatedDashboardReportsIndoorSurgeonBillPrintRoute:
+    AuthenticatedDashboardReportsIndoorSurgeonBillPrintRoute,
   AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute:
     AuthenticatedDashboardReportsInventoryCustomerLedgerPrintRoute,
   AuthenticatedDashboardReportsInventoryStockReportPrintRoute:
@@ -8187,8 +8363,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardReportsAccountingTrialBalanceIndexRoute,
   AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute:
     AuthenticatedDashboardReportsIndoorAdvancePaymentsIndexRoute,
+  AuthenticatedDashboardReportsIndoorAnesthesiaBillIndexRoute:
+    AuthenticatedDashboardReportsIndoorAnesthesiaBillIndexRoute,
+  AuthenticatedDashboardReportsIndoorAssistantBillIndexRoute:
+    AuthenticatedDashboardReportsIndoorAssistantBillIndexRoute,
   AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute:
     AuthenticatedDashboardReportsIndoorBillDistributionIndexRoute,
+  AuthenticatedDashboardReportsIndoorClinicalBillsIndexRoute:
+    AuthenticatedDashboardReportsIndoorClinicalBillsIndexRoute,
   AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute:
     AuthenticatedDashboardReportsIndoorFinalBillRegisterIndexRoute,
   AuthenticatedDashboardReportsIndoorOutstandingBalanceIndexRoute:
@@ -8197,6 +8379,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardReportsIndoorRevenueSummaryIndexRoute,
   AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute:
     AuthenticatedDashboardReportsIndoorServiceWiseRevenueIndexRoute,
+  AuthenticatedDashboardReportsIndoorSurgeonBillIndexRoute:
+    AuthenticatedDashboardReportsIndoorSurgeonBillIndexRoute,
   AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute:
     AuthenticatedDashboardReportsInventoryCustomerLedgerIndexRoute,
   AuthenticatedDashboardReportsInventoryStockReportIndexRoute:

@@ -4,8 +4,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { z } from 'zod';
 import { ArrowLeft, Printer } from 'lucide-react';
 
-import { Header } from "@/components/layout/header";
-import { TopNav } from "@/data/data";
+import { AppHeader } from '@/components/layout/app-header';
 import { Button } from "@/components/ui/button";
 import { useProfitAndLoss } from "@/features/accounting/api/queries";
 import { useCurrency } from '@/hooks/use-currency';
@@ -41,9 +40,7 @@ function ProfitLossPrintPage() {
 
     return (
         <>
-            <Header fixed>
-                <TopNav links={TopNav} />
-            </Header>
+            <AppHeader fixed />
             <div className="print:hidden flex items-center justify-between gap-4 mb-4 p-6">
                 <Link to="/dashboard/accounting/reports/profit-loss">
                     <Button variant="outline" size="sm">
@@ -94,9 +91,9 @@ function ProfitLossPrintPage() {
                                 .border { border-color: #333 !important; }
                                 .border-dashed { border-color: #999 !important; }
                                 .bg-row-blue { background-color: #cfd2d8ff !important; }
+                            }
                             `}
                         </style>
-                    }
 
                     {/* Title */}
                     <h1 className="text-2xl font-bold text-center underline mb-2 tracking-wide">
