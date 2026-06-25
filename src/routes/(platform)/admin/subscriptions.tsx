@@ -12,6 +12,7 @@ import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -74,6 +75,7 @@ interface SubscriptionRow {
   stripe_customer_id?: string | null
   stripe_subscription_id?: string | null
   is_active?: number
+  hide_subscription_info?: number
   created_at?: string
 }
 
@@ -236,6 +238,13 @@ function SubscriptionsPage() {
         subscription_expires_at: row.subscription_expires_at,
         plan_id: row.plan_id,
       },
+    })
+  }
+
+  const handleToggleHideInfo = (row: SubscriptionRow, hide: boolean) => {
+    updateSubscription.mutate({
+      companyId: row.id,
+      data: { hide_subscription_info: hide ? 1 : 0 },
     })
   }
 
@@ -434,6 +443,7 @@ function SubscriptionsPage() {
                 <th className="px-4 py-3 text-left font-medium">Status</th>
                 <th className="px-4 py-3 text-left font-medium">Expires</th>
                 <th className="px-4 py-3 text-left font-medium">Active</th>
+                <th className="px-4 py-3 text-center font-medium">Hide Sub. Info</th>
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
@@ -509,6 +519,18 @@ function SubscriptionsPage() {
                           {sub.is_active ? 'Active' : 'Inactive'}
                         </span>
                       </span>
+                    </td>
+
+                    {/* Hide Subscription Info */}
+                    <td className="px-4 py-3 text-center">
+                      <Checkbox
+                        checked={!!sub.hide_subscription_info}
+                        onCheckedChange={(checked) =>
+                          handleToggleHideInfo(sub, checked === true)
+                        }
+                        disabled={updateSubscription.isPending}
+                        aria-label="Hide subscription info"
+                      />
                     </td>
 
                     {/* Actions */}

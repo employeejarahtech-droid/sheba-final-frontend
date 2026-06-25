@@ -41,6 +41,7 @@ export interface PlatformCompany {
   subscription_status: string
   subscription_expires_at: string | null
   is_active: number
+  hide_subscription_info?: number
   billing?: Record<string, unknown> | null
   stripe_customer_id?: string | null
   stripe_subscription_id?: string | null

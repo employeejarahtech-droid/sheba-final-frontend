@@ -28,12 +28,21 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { adminSidebarData } from './admin-sidebar-data'
 import { NavGroup } from '@/components/layout/nav-group'
-import { usePlatformAuthStore } from '@/stores/platform-auth-store'
+import { usePlatformAuthStore, getAdminRoleFromToken } from '@/stores/platform-auth-store'
 import { useAdminProfile } from '@/hooks/usePlatformAdmin'
 
 export function AdminSidebar() {
   const { data: profile } = useAdminProfile()
   const logout = usePlatformAuthStore((s) => s.logout)
+
+  // Companies management is super-admin only — hide the nav item for others.
+  const isSuperAdmin = (profile?.role || getAdminRoleFromToken()) === 'super_admin'
+  const navGroups = adminSidebarData.navGroups.map((group) => ({
+    ...group,
+    items: group.items.filter(
+      (item) => isSuperAdmin || item.url !== '/admin/companies'
+    ),
+  }))
 
   const name = profile?.name || 'Admin'
   const email = profile?.email || ''
@@ -69,7 +78,7 @@ export function AdminSidebar() {
 
       {/* Navigation */}
       <SidebarContent>
-        {adminSidebarData.navGroups.map((props) => (
+        {navGroups.map((props) => (
           <NavGroup key={props.title} {...props} />
         ))}
       </SidebarContent>

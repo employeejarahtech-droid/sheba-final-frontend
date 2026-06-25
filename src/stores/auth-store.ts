@@ -32,6 +32,7 @@ interface AuthUser {
   companyId?: number;
   subdomain?: string;
   planId?: number;
+  hide_subscription_info?: number;
   permissions?: string[];
   menu?: string[];
 }

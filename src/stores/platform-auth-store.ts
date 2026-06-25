@@ -11,6 +11,29 @@ import type { PlatformAdminUser } from '@/types/platform.types'
 
 const ADMIN_TOKEN_KEY = 'adminAccessToken'
 
+/**
+ * Decode the platform admin role from the JWT stored in the adminAccessToken
+ * cookie, without verifying the signature (the backend is authoritative).
+ * Returns null when no token is present or it can't be parsed.
+ */
+export function getAdminRoleFromToken(): string | null {
+  const token = getCookie(ADMIN_TOKEN_KEY)
+  if (!token) return null
+  try {
+    const payload = token.split('.')[1]
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    )
+    return JSON.parse(json).role ?? null
+  } catch {
+    return null
+  }
+}
+
 interface PlatformAuthState {
   user: PlatformAdminUser | null
   accessToken: string

@@ -7,7 +7,7 @@
  * (both return unwrapped entities) from @/hooks/usePlatformAdmin.
  */
 
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import {
   Building2,
@@ -30,8 +30,15 @@ import {
   useToggleCompanyActive,
 } from '@/hooks/usePlatformAdmin'
 import type { PlatformCompany, PlatformSubscription } from '@/types/platform.types'
+import { getAdminRoleFromToken } from '@/stores/platform-auth-store'
 
 export const Route = createFileRoute('/(platform)/admin/companies/$companyId')({
+  beforeLoad: () => {
+    // Companies management is restricted to super admins (backend enforces too)
+    if (getAdminRoleFromToken() !== 'super_admin') {
+      throw redirect({ to: '/admin' })
+    }
+  },
   component: CompanyDetailPage,
 })
 

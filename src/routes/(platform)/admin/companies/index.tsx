@@ -7,13 +7,14 @@
  * the detail page. Mirrors the purple-gradient visual pattern of contacts.tsx.
  */
 
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -54,11 +55,19 @@ import {
   useToggleCompanyActive,
   useDeleteCompany,
   useCreateCompany,
+  useUpdateCompany,
   useAdminPlans,
 } from '@/hooks/usePlatformAdmin'
 import type { PlatformCompany } from '@/types/platform.types'
+import { getAdminRoleFromToken } from '@/stores/platform-auth-store'
 
 export const Route = createFileRoute('/(platform)/admin/companies/')({
+  beforeLoad: () => {
+    // Companies management is restricted to super admins (backend enforces too)
+    if (getAdminRoleFromToken() !== 'super_admin') {
+      throw redirect({ to: '/admin' })
+    }
+  },
   component: CompaniesListPage,
 })
 
@@ -122,6 +131,7 @@ function CompaniesListPage() {
   const { data: response, isLoading } = useCompanies({ page, limit, search })
   const toggleActive = useToggleCompanyActive()
   const deleteCompany = useDeleteCompany()
+  const updateCompany = useUpdateCompany()
 
   // Normalize raw response: rows via .data, pagination via .pagination
   const normalized: CompaniesListResponse = (response ?? {}) as CompaniesListResponse
@@ -173,6 +183,13 @@ function CompaniesListPage() {
 
   const handleToggleActive = (company: PlatformCompany) => {
     toggleActive.mutate(company.id)
+  }
+
+  const handleToggleHideInfo = (company: PlatformCompany, hide: boolean) => {
+    updateCompany.mutate({
+      id: company.id,
+      data: { hide_subscription_info: hide ? 1 : 0 },
+    })
   }
 
   const handleDelete = (id: number) => {
@@ -304,6 +321,7 @@ function CompaniesListPage() {
                 <th className="px-4 py-3 text-left font-medium">Status</th>
                 <th className="px-4 py-3 text-left font-medium">DB Type</th>
                 <th className="px-4 py-3 text-left font-medium">Active</th>
+                <th className="px-4 py-3 text-center font-medium">Hide Sub. Info</th>
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
@@ -378,6 +396,18 @@ function CompaniesListPage() {
                           {active ? 'Active' : 'Inactive'}
                         </span>
                       </span>
+                    </td>
+
+                    {/* Hide Subscription Info */}
+                    <td className="px-4 py-3 text-center">
+                      <Checkbox
+                        checked={!!company.hide_subscription_info}
+                        onCheckedChange={(checked) =>
+                          handleToggleHideInfo(company, checked === true)
+                        }
+                        disabled={updateCompany.isPending}
+                        aria-label="Hide subscription info"
+                      />
                     </td>
 
                     {/* Actions */}
