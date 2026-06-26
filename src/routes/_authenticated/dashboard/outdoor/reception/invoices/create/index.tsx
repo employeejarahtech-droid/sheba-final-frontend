@@ -22,17 +22,18 @@ function CreateInvoice() {
       <Main className="flex flex-1 flex-col gap-6">
         <div className="space-y-5 w-full min-w-[650px] max-w-[950px] mx-auto px-4">
           {/* Header Section */}
-          <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-wrap justify-between items-center gap-4 mb-4 pb-4 border-b">
+            <div className="flex items-center gap-3">
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
+                className="h-9 w-9"
                 onClick={() => navigate({ to: '/dashboard/outdoor/reception/invoices/list' })}
               >
-                <ArrowLeft className="h-5 w-5" />
+                <ArrowLeft className="h-4 w-4" />
               </Button>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                <h1 className="text-xl font-semibold tracking-tight text-foreground">
                   Create Outdoor Invoice
                 </h1>
                 <p className="text-muted-foreground text-sm">Generate a new medical invoice for outpatient services</p>
@@ -42,7 +43,7 @@ function CreateInvoice() {
               type="submit"
               form="hospital-invoice-form"
               disabled={submitting}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white min-w-[200px]"
+              className="min-w-[180px]"
             >
               <CircleCheck className="size-4" />
               {submitting ? "Creating..." : "Create Invoice"}

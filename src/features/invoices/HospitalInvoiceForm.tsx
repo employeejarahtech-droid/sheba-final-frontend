@@ -925,15 +925,15 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
       <Form {...form}>
         <form id="hospital-invoice-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Patient Info Card */}
-          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
-                  <User className="w-4 h-4 text-white" />
+          <Card className="overflow-hidden gap-0 shadow-sm p-0">
+            <CardHeader className="bg-muted/40 border-b py-3 px-4 gap-0">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground">
+                  <User className="w-4 h-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-bold">Patient Information</CardTitle>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Basic details and registration information</p>
+                  <CardTitle className="text-base font-semibold">Patient Information</CardTitle>
+                  <p className="text-xs text-muted-foreground">Basic details and registration information</p>
                 </div>
               </div>
             </CardHeader>
@@ -973,7 +973,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       <FormControl>
                         <Input
                           placeholder="Enter full name"
-                          className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all shadow-sm"
+                          className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm"
                           {...field}
                         />
                       </FormControl>
@@ -993,7 +993,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       </FormLabel>
                       <FormControl>
                         <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all shadow-sm" style={{height: "40px"}}>
+                          <SelectTrigger className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm" style={{height: "40px"}}>
                             <SelectValue placeholder="Select sex..." />
                           </SelectTrigger>
                           <SelectContent>
@@ -1024,7 +1024,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                               type="number"
                               min="0"
                               placeholder="0"
-                              className="h-10 w-20 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all shadow-sm"
+                              className="h-10 w-20 rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm"
                               {...field}
                             />
                           </FormControl>
@@ -1043,7 +1043,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                               min="0"
                               max="11"
                               placeholder="0"
-                              className="h-10 w-20 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all shadow-sm"
+                              className="h-10 w-20 rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm"
                               {...field}
                             />
                           </FormControl>
@@ -1072,7 +1072,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                         <Input
                           type="text"
                           placeholder="01xxxxxxxxx"
-                          className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500/50 transition-all shadow-sm"
+                          className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm"
                           {...field}
                         />
                       </FormControl>
@@ -1207,7 +1207,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                                 !field.value && "text-muted-foreground"
                               )}
                             >
-                              <CalendarIcon className="mr-2 h-4 w-4 text-blue-500" />
+                              <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
                               {field.value || formatDate(new Date())}
                             </Button>
                           </FormControl>
@@ -1233,15 +1233,15 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
           </Card>
 
           {/* Indoor Patient Card */}
-          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
-            <CardHeader className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 border-b py-1.5 px-4 gap-0">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-gradient-to-br from-purple-500 to-violet-500 rounded-lg shadow-lg">
-                  <User className="w-4 h-4 text-white" />
+          <Card className="overflow-hidden gap-0 shadow-sm p-0">
+            <CardHeader className="bg-muted/40 border-b py-3 px-4 gap-0">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground">
+                  <User className="w-4 h-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-bold">Indoor Patient</CardTitle>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Link with admitted patient records</p>
+                  <CardTitle className="text-base font-semibold">Indoor Patient</CardTitle>
+                  <p className="text-xs text-muted-foreground">Link with admitted patient records</p>
                 </div>
               </div>
             </CardHeader>
@@ -1249,7 +1249,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
                 {/* Is Indoor Patient Checkbox */}
                 <FormItem className="flex flex-col gap-2 md:col-span-2">
-                  <div className="flex items-center space-x-3 p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                  <div className="flex items-center space-x-3 p-4 bg-muted/40 rounded-lg border">
                     <Checkbox
                       id="isIndoorPatient"
                       checked={watch('isIndoorPatient')}
@@ -1298,7 +1298,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                           role="combobox"
                           aria-expanded={admissionOpen}
                           className={cn(
-                            "w-full justify-between h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-purple-500/20 focus:border-purple-500/50 transition-all shadow-sm disabled:opacity-50",
+                            "w-full justify-between h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm disabled:opacity-50",
                             !selectedAdmission && "text-muted-foreground"
                           )}
                         >
@@ -1419,15 +1419,15 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
 
        
           {/* Test Info Card */}
-          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
-                  <Activity className="w-4 h-4 text-white" />
+          <Card className="overflow-hidden gap-0 shadow-sm p-0">
+            <CardHeader className="bg-muted/40 border-b py-3 px-4 gap-0">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground">
+                  <Activity className="w-4 h-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-bold">Test Selection</CardTitle>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Select diagnostic tests and view summary</p>
+                  <CardTitle className="text-base font-semibold">Test Selection</CardTitle>
+                  <p className="text-xs text-muted-foreground">Select diagnostic tests and view summary</p>
                 </div>
               </div>
             </CardHeader>
@@ -1445,10 +1445,10 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       type="button"
                       variant="outline"
                       onClick={() => setTestDrawerOpen(true)}
-                      className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm justify-start font-normal"
+                      className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm justify-start font-normal"
                       style={{ height: '40px' }}
                     >
-                      <Activity className="h-4 w-4 text-blue-500 mr-2 shrink-0" />
+                      <Activity className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
                       <span className={cn("truncate", !selectedTests.length && "text-muted-foreground")}>
                         {selectedTests.length
                           ? `${selectedTests.length} test${selectedTests.length !== 1 ? 's' : ''} selected`
@@ -1467,7 +1467,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       value={categoryFilter}
                       onValueChange={(v) => { setCategoryFilter(v); setPage(1); }}
                     >
-                      <SelectTrigger className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" style={{ height: '40px' }}>
+                      <SelectTrigger className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm" style={{ height: '40px' }}>
                         <SelectValue placeholder="All Categories" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1484,14 +1484,14 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
 
                 <Sheet open={testDrawerOpen} onOpenChange={setTestDrawerOpen}>
                   <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
-                    <SheetHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b px-4 py-3 gap-0">
-                      <SheetTitle className="flex items-center gap-2.5 pr-8">
-                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md">
-                          <FlaskConical className="w-4 h-4 text-white" />
+                    <SheetHeader className="bg-muted/40 border-b px-4 py-3 gap-0">
+                      <SheetTitle className="flex items-center gap-3 pr-8">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground">
+                          <FlaskConical className="w-4 h-4" />
                         </div>
                         <div>
-                          <div className="text-lg font-bold text-left">Select Tests</div>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 font-normal text-left">Search and choose tests to add</p>
+                          <div className="text-base font-semibold text-left">Select Tests</div>
+                          <p className="text-xs text-muted-foreground font-normal text-left">Search and choose tests to add</p>
                         </div>
                       </SheetTitle>
                     </SheetHeader>
@@ -1543,14 +1543,13 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                             <div
                               key={test.id}
                               className={cn(
-                                "flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors border-b border-gray-50 dark:border-gray-800/60",
-                                isChecked && "bg-blue-50/60 dark:bg-blue-900/20"
+                                "flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-accent transition-colors border-b border-border/60",
+                                isChecked && "bg-accent"
                               )}
                               onClick={() => toggleTest(test)}
                             >
                               <Checkbox
                                 checked={isChecked}
-                                className="border-gray-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                               />
                               <div className="flex flex-col flex-1 min-w-0">
                                 <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{test.name}</span>
@@ -1560,7 +1559,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                                   <span className="truncate">{department}</span>
                                 </div>
                               </div>
-                              {isChecked && <Check className="ml-auto h-4 w-4 text-blue-600 shrink-0" />}
+                              {isChecked && <Check className="ml-auto h-4 w-4 text-primary shrink-0" />}
                             </div>
                           );
                         })
@@ -1613,16 +1612,16 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
               </div>
 
               {/* TABLE */}
-              <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
+              <div className="rounded-lg border overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-800">
-                      <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 w-16">#</th>
-                      <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Test Name</th>
-                      <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Room No</th>
-                      <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Department</th>
-                      <th className="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300 w-32">Price</th>
-                      <th className="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 w-16">Action</th>
+                    <tr className="bg-muted/50 border-b">
+                      <th className="px-4 py-2.5 text-left font-medium text-muted-foreground w-16">#</th>
+                      <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Test Name</th>
+                      <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Room No</th>
+                      <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Department</th>
+                      <th className="px-4 py-2.5 text-right font-medium text-muted-foreground w-32">Price</th>
+                      <th className="px-4 py-2.5 text-center font-medium text-muted-foreground w-16">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -1635,19 +1634,19 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       const roomName = nestedRoomName || matchedRoom?.name || '-';
 
                       return (
-                        <tr key={test.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
-                          <td className="px-4 py-3 text-gray-500 font-mono">{index + 1}</td>
-                          <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{test.name}</td>
-                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{roomName}</td>
-                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{department}</td>
-                          <td className="px-4 py-3 text-right font-mono text-blue-600 dark:text-blue-400 font-semibold">
+                        <tr key={test.id} className="hover:bg-muted/40 transition-colors">
+                          <td className="px-4 py-3 text-muted-foreground font-mono">{index + 1}</td>
+                          <td className="px-4 py-3 font-medium text-foreground">{test.name}</td>
+                          <td className="px-4 py-3 text-sm text-muted-foreground">{roomName}</td>
+                          <td className="px-4 py-3 text-sm text-muted-foreground">{department}</td>
+                          <td className="px-4 py-3 text-right font-mono font-semibold text-foreground">
                             {Number(test.price).toLocaleString()}
                           </td>
                           <td className="px-4 py-3 text-center">
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                               onClick={() => toggleTest(test)}
                             >
                               <Trash2Icon className="w-4 h-4" />
@@ -1673,11 +1672,11 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                   </tbody>
                   {selectedTests.length > 0 && (
                     <tfoot>
-                      <tr className="bg-blue-50/30 dark:bg-blue-950/20 border-t border-blue-100 dark:border-blue-900">
-                        <td colSpan={4} className="px-4 py-3 font-bold text-gray-800 dark:text-gray-200 text-right">
+                      <tr className="bg-muted/50 border-t">
+                        <td colSpan={4} className="px-4 py-3 font-semibold text-foreground text-right">
                           Subtotal:
                         </td>
-                        <td className="px-4 py-3 text-right font-mono font-bold text-blue-700 dark:text-blue-300 text-lg">
+                        <td className="px-4 py-3 text-right font-mono font-bold text-foreground text-base">
                           {totalCharge.toLocaleString()}
                         </td>
                         <td></td>
@@ -1689,23 +1688,23 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
             </CardContent>
           </Card>
 
-   {/* Sample Collection Rooms Card */}
-          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
-            <CardHeader className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 border-b py-1.5 px-4 gap-0">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg shadow-lg">
-                  <FlaskConical className="w-4 h-4 text-white" />
+          {/* Sample Collection Rooms Card */}
+          <Card className="overflow-hidden gap-0 shadow-sm p-0">
+            <CardHeader className="bg-muted/40 border-b py-3 px-4 gap-0">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground">
+                  <FlaskConical className="w-4 h-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-bold">Sample Collection Rooms</CardTitle>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Select rooms for sample collection</p>
+                  <CardTitle className="text-base font-semibold">Sample Collection Rooms</CardTitle>
+                  <p className="text-xs text-muted-foreground">Select rooms for sample collection</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-4 md:p-6">
               {isLoadingRooms ? (
                 <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                  <Loader2 className="h-8 w-8 animate-spin text-teal-500 mb-2" />
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-2" />
                   <p className="text-sm">Loading sample collection rooms...</p>
                 </div>
               ) : roomsError ? (
@@ -1734,10 +1733,10 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                           <div
                             key={room.id}
                             className={cn(
-                              "relative flex items-start gap-3 p-4 rounded-lg border-2 transition-all hover:shadow-md",
+                              "relative flex items-start gap-3 p-4 rounded-lg border transition-colors",
                               isSelected
-                                ? "bg-blue-50 dark:bg-blue-950/30 border-blue-500 dark:border-blue-600"
-                                : "bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-700"
+                                ? "bg-accent border-primary"
+                                : "bg-background hover:border-muted-foreground/40"
                             )}
                           >
                             <Checkbox
@@ -1751,7 +1750,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                                     setValue("sample_collection_rooms", updatedRooms, { shouldValidate: true });
                                   }
                               }}
-                              className="mt-0.5 border-gray-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                              className="mt-0.5"
                             />
                             <label
                               htmlFor={`room-${room.id}`}
@@ -1762,7 +1761,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                                   {room.name}
                                 </h4>
                                 {isSelected && (
-                                  <Check className="h-4 w-4 text-blue-600" />
+                                  <Check className="h-4 w-4 text-primary" />
                                 )}
                               </div>
                               <p className="text-xs text-muted-foreground mt-1">{room.location}</p>
@@ -1775,15 +1774,15 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       })}
                   </div>
                   {selectedRooms.length > 0 && (
-                    <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                      <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                    <div className="mt-4 p-3 bg-muted/40 rounded-lg border">
+                      <p className="text-sm font-medium text-foreground">
                         {selectedRooms.length} room{selectedRooms.length > 1 ? 's' : ''} selected for sample collection
                       </p>
                     </div>
                   )}
                   {form.formState.errors.sample_collection_rooms && (
-                    <p className="text-sm font-semibold text-red-500 mt-3 flex items-center gap-1.5">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500" />
+                    <p className="text-sm font-medium text-destructive mt-3 flex items-center gap-1.5">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-destructive" />
                       {form.formState.errors.sample_collection_rooms.message as string}
                     </p>
                   )}
@@ -1807,33 +1806,33 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
           </Card>
 
           {/* Department Discount Card */}
-          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
-            <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-b py-1.5 px-4 gap-0">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg shadow-lg">
-                  <PenLine className="w-4 h-4 text-white" />
+          <Card className="overflow-hidden gap-0 shadow-sm p-0">
+            <CardHeader className="bg-muted/40 border-b py-3 px-4 gap-0">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground">
+                  <PenLine className="w-4 h-4" />
                 </div>
                 <div className="flex-1">
-                  <CardTitle className="text-lg font-bold">Dept. Discounts & Payments</CardTitle>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Breakdown of charges and payments per department</p>
+                  <CardTitle className="text-base font-semibold">Dept. Discounts & Payments</CardTitle>
+                  <p className="text-xs text-muted-foreground">Breakdown of charges and payments per department</p>
                 </div>
-                <div className="flex items-center gap-2 bg-blue-100/50 dark:bg-blue-900/30 px-3 py-1 rounded-lg border border-blue-200/50">
-                  <span className="text-[10px] font-semibold text-blue-700 dark:text-blue-300">Total Dept. Discount:</span>
-                  <span className="text-xs font-bold text-blue-800 dark:text-blue-100 font-mono">{totalDeptDiscount.toLocaleString()}</span>
+                <div className="flex items-center gap-2 bg-background px-3 py-1 rounded-md border">
+                  <span className="text-[10px] font-medium text-muted-foreground">Total Dept. Discount:</span>
+                  <span className="text-xs font-semibold text-foreground font-mono">{totalDeptDiscount.toLocaleString()}</span>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-4 md:p-6">
-              <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
+              <div className="rounded-lg border overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-800">
-                      <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Department</th>
-                      <th className="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300">Gross</th>
-                      <th className="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 w-32">Discount</th>
-                      <th className="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300">Net</th>
-                      <th className="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 w-32">Paid</th>
-                      <th className="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300">Due</th>
+                    <tr className="bg-muted/50 border-b">
+                      <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Department</th>
+                      <th className="px-4 py-2.5 text-right font-medium text-muted-foreground">Gross</th>
+                      <th className="px-4 py-2.5 text-center font-medium text-muted-foreground w-32">Discount</th>
+                      <th className="px-4 py-2.5 text-right font-medium text-muted-foreground">Net</th>
+                      <th className="px-4 py-2.5 text-center font-medium text-muted-foreground w-32">Paid</th>
+                      <th className="px-4 py-2.5 text-right font-medium text-muted-foreground">Due</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -1845,13 +1844,13 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                         const due = netAmount - paid;
 
                         return (
-                          <tr key={deptName} className="hover:bg-gray-50/20 transition-colors">
-                            <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{deptName}</td>
-                            <td className="px-4 py-3 text-right font-mono text-gray-500">{group.total.toLocaleString()}</td>
+                          <tr key={deptName} className="hover:bg-muted/40 transition-colors">
+                            <td className="px-4 py-3 font-medium text-foreground">{deptName}</td>
+                            <td className="px-4 py-3 text-right font-mono text-muted-foreground">{group.total.toLocaleString()}</td>
                             <td className="px-4 py-3">
                               <Input
                                 type="number"
-                                className="h-8 text-right font-mono bg-white dark:bg-gray-950 border-gray-200"
+                                className="h-8 text-right font-mono"
                                 value={discount}
                                 onChange={(e) => {
                                   let val = Number(e.target.value);
@@ -1863,13 +1862,13 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                                 max={group.total}
                               />
                             </td>
-                            <td className="px-4 py-3 text-right font-mono font-semibold text-blue-600 dark:text-blue-400">
+                            <td className="px-4 py-3 text-right font-mono font-semibold text-foreground">
                               {netAmount.toLocaleString()}
                             </td>
                             <td className="px-4 py-3">
                               <Input
                                 type="number"
-                                className="h-8 text-right font-mono bg-white dark:bg-gray-950 border-gray-200"
+                                className="h-8 text-right font-mono"
                                 value={paid || ''}
                                 onChange={(e) => {
                                   const valStr = e.target.value;
@@ -1886,7 +1885,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                                 max={netAmount}
                               />
                             </td>
-                            <td className={`px-4 py-3 text-right font-mono font-bold ${due > 0 ? 'text-red-500' : 'text-green-600'}`}>
+                            <td className={`px-4 py-3 text-right font-mono font-bold ${due > 0 ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400'}`}>
                               {due.toLocaleString()}
                             </td>
                           </tr>
@@ -1906,15 +1905,15 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
           </Card>
 
           {/* Billing Summary Card */}
-          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
-            <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 border-b py-1.5 px-4 gap-0">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-gradient-to-br from-emerald-500 to-green-500 rounded-lg shadow-lg">
-                  <Clock className="w-4 h-4 text-white" />
+          <Card className="overflow-hidden gap-0 shadow-sm p-0">
+            <CardHeader className="bg-muted/40 border-b py-3 px-4 gap-0">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground">
+                  <Clock className="w-4 h-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-bold">Billing & Delivery</CardTitle>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Final summary, delivery schedule and payment</p>
+                  <CardTitle className="text-base font-semibold">Billing & Delivery</CardTitle>
+                  <p className="text-xs text-muted-foreground">Final summary, delivery schedule and payment</p>
                 </div>
               </div>
             </CardHeader>
@@ -1942,7 +1941,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                                     !field.value && "text-muted-foreground"
                                   )}
                                 >
-                                  <CalendarIcon className="mr-2 h-4 w-4 text-blue-500" />
+                                  <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
                                   {field.value || <span>Pick a date</span>}
                                 </Button>
                               </FormControl>
@@ -1979,7 +1978,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                           </FormLabel>
                           <FormControl>
                             <div className="relative group">
-                              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
+                              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors" />
                               <Input
                                 type="time"
                                 className="h-10 pl-10 border-gray-200 bg-transparent shadow-sm"
@@ -2066,13 +2065,13 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                     />
                   </div>
 
-                  <div className="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/50">
-                    <h4 className="text-sm font-bold text-blue-900 dark:text-blue-300 mb-2 flex items-center gap-2">
-                      <Activity className="h-4 w-4" />
+                  <div className="p-4 rounded-lg bg-muted/40 border">
+                    <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-muted-foreground" />
                       Invoice Status Summary
                     </h4>
-                    <p className="text-xs text-blue-800/70 dark:text-blue-400/70 leading-relaxed">
-                      This invoice will be registered as {dueAmount > 0 ? <span className="text-red-600 font-bold uppercase">Partial / Due</span> : <span className="text-green-600 font-bold uppercase">Fully Paid</span>}.
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      This invoice will be registered as {dueAmount > 0 ? <span className="text-destructive font-semibold uppercase">Partial / Due</span> : <span className="text-emerald-600 dark:text-emerald-400 font-semibold uppercase">Fully Paid</span>}.
                       The department-wise payment breakdown ensures accurate revenue tracking across clinical units.
                     </p>
                   </div>
