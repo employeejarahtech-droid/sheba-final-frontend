@@ -467,6 +467,28 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
     }
   }, [appSettings, setValue]);
 
+  // Date controls from settings (date-controls page). When the toggle is off,
+  // the invoice date is locked to today and the picker is disabled.
+  const dateControls = useMemo(() => {
+    const raw = appSettings?.data?.date_controls;
+    if (!raw) return {} as Record<string, boolean>;
+    try {
+      return (typeof raw === "string" ? JSON.parse(raw) : raw) as Record<string, boolean>;
+    } catch {
+      return {} as Record<string, boolean>;
+    }
+  }, [appSettings]);
+
+  const invoiceDateChangeable = dateControls.outdoor_invoice_date_changeable === true;
+
+  // When invoice date is not changeable, force it to today.
+  useEffect(() => {
+    if (!invoiceDateChangeable) {
+      setValue("date", formatDate(new Date()), { shouldValidate: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [invoiceDateChangeable, dateFormat]);
+
   // Re-format the auto-seeded date fields once the tenant date format is known,
   // unless the user has already picked a date manually.
   useEffect(() => {
@@ -926,14 +948,14 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
         <form id="hospital-invoice-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Patient Info Card */}
           <Card className="overflow-hidden gap-0 shadow-sm p-0">
-            <CardHeader className="bg-muted/40 border-b py-3 px-4 gap-0">
+            <CardHeader className="border-b py-3 px-4 gap-0" style={{ backgroundColor: '#3B82F6' }}>
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground">
-                  <User className="w-4 h-4" />
+                <div className="p-2 bg-white rounded-lg shadow-lg">
+                  <User className="w-4 h-4" style={{ color: '#3B82F6' }} />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-semibold">Patient Information</CardTitle>
-                  <p className="text-xs text-muted-foreground">Basic details and registration information</p>
+                  <CardTitle className="text-base font-semibold text-white">Patient Information</CardTitle>
+                  <p className="text-xs text-white/80">Basic details and registration information</p>
                 </div>
               </div>
             </CardHeader>
@@ -973,7 +995,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       <FormControl>
                         <Input
                           placeholder="Enter full name"
-                          className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm"
+                          className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all"
                           {...field}
                         />
                       </FormControl>
@@ -993,7 +1015,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       </FormLabel>
                       <FormControl>
                         <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm" style={{height: "40px"}}>
+                          <SelectTrigger className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all" style={{height: "40px"}}>
                             <SelectValue placeholder="Select sex..." />
                           </SelectTrigger>
                           <SelectContent>
@@ -1024,7 +1046,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                               type="number"
                               min="0"
                               placeholder="0"
-                              className="h-10 w-20 rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm"
+                              className="h-10 w-20 rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all"
                               {...field}
                             />
                           </FormControl>
@@ -1043,7 +1065,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                               min="0"
                               max="11"
                               placeholder="0"
-                              className="h-10 w-20 rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm"
+                              className="h-10 w-20 rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all"
                               {...field}
                             />
                           </FormControl>
@@ -1072,7 +1094,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                         <Input
                           type="text"
                           placeholder="01xxxxxxxxx"
-                          className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm"
+                          className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all"
                           {...field}
                         />
                       </FormControl>
@@ -1103,7 +1125,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                                 variant="outline"
                                 role="combobox"
                                 className={cn(
-                                  "w-full justify-between h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-all shadow-sm text-sm",
+                                  "w-full justify-between h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-all text-sm",
                                   !field.value && "text-muted-foreground"
                                 )}
                               >
@@ -1197,14 +1219,16 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                         Invoice Date <span className="text-xs font-normal text-muted-foreground">({formatHint})</span>
                       </FormLabel>
                       <Popover>
-                        <PopoverTrigger asChild>
+                        <PopoverTrigger asChild disabled={!invoiceDateChangeable}>
                           <FormControl>
                             <Button
                               type="button"
                               variant="outline"
+                              disabled={!invoiceDateChangeable}
                               className={cn(
-                                "h-10 justify-start text-left font-normal border-gray-200 bg-transparent shadow-sm",
-                                !field.value && "text-muted-foreground"
+                                "h-10 justify-start text-left font-normal border-gray-200 bg-transparent",
+                                !field.value && "text-muted-foreground",
+                                !invoiceDateChangeable && "disabled:opacity-100 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                               )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
@@ -1224,6 +1248,9 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                           />
                         </PopoverContent>
                       </Popover>
+                      {!invoiceDateChangeable && (
+                        <p className="text-xs text-muted-foreground">Locked to today by settings.</p>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -1234,14 +1261,14 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
 
           {/* Indoor Patient Card */}
           <Card className="overflow-hidden gap-0 shadow-sm p-0">
-            <CardHeader className="bg-muted/40 border-b py-3 px-4 gap-0">
+            <CardHeader className="border-b py-3 px-4 gap-0" style={{ backgroundColor: '#8B5CF6' }}>
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground">
-                  <User className="w-4 h-4" />
+                <div className="p-2 bg-white rounded-lg shadow-lg">
+                  <User className="w-4 h-4" style={{ color: '#8B5CF6' }} />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-semibold">Indoor Patient</CardTitle>
-                  <p className="text-xs text-muted-foreground">Link with admitted patient records</p>
+                  <CardTitle className="text-base font-semibold text-white">Indoor Patient</CardTitle>
+                  <p className="text-xs text-white/80">Link with admitted patient records</p>
                 </div>
               </div>
             </CardHeader>
@@ -1298,7 +1325,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                           role="combobox"
                           aria-expanded={admissionOpen}
                           className={cn(
-                            "w-full justify-between h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm disabled:opacity-50",
+                            "w-full justify-between h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all disabled:opacity-50",
                             !selectedAdmission && "text-muted-foreground"
                           )}
                         >
@@ -1420,14 +1447,14 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
        
           {/* Test Info Card */}
           <Card className="overflow-hidden gap-0 shadow-sm p-0">
-            <CardHeader className="bg-muted/40 border-b py-3 px-4 gap-0">
+            <CardHeader className="border-b py-3 px-4 gap-0" style={{ backgroundColor: '#6366F1' }}>
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground">
-                  <Activity className="w-4 h-4" />
+                <div className="p-2 bg-white rounded-lg shadow-lg">
+                  <Activity className="w-4 h-4" style={{ color: '#6366F1' }} />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-semibold">Test Selection</CardTitle>
-                  <p className="text-xs text-muted-foreground">Select diagnostic tests and view summary</p>
+                  <CardTitle className="text-base font-semibold text-white">Test Selection</CardTitle>
+                  <p className="text-xs text-white/80">Select diagnostic tests and view summary</p>
                 </div>
               </div>
             </CardHeader>
@@ -1445,7 +1472,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       type="button"
                       variant="outline"
                       onClick={() => setTestDrawerOpen(true)}
-                      className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm justify-start font-normal"
+                      className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all justify-start font-normal"
                       style={{ height: '40px' }}
                     >
                       <Activity className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
@@ -1467,7 +1494,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       value={categoryFilter}
                       onValueChange={(v) => { setCategoryFilter(v); setPage(1); }}
                     >
-                      <SelectTrigger className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all shadow-sm" style={{ height: '40px' }}>
+                      <SelectTrigger className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all" style={{ height: '40px' }}>
                         <SelectValue placeholder="All Categories" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1484,14 +1511,14 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
 
                 <Sheet open={testDrawerOpen} onOpenChange={setTestDrawerOpen}>
                   <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
-                    <SheetHeader className="bg-muted/40 border-b px-4 py-3 gap-0">
+                    <SheetHeader className="border-b px-4 py-3 gap-0" style={{ backgroundColor: '#6366F1' }}>
                       <SheetTitle className="flex items-center gap-3 pr-8">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground">
-                          <FlaskConical className="w-4 h-4" />
+                        <div className="p-2 bg-white rounded-lg shadow-lg">
+                          <FlaskConical className="w-4 h-4" style={{ color: '#6366F1' }} />
                         </div>
                         <div>
-                          <div className="text-base font-semibold text-left">Select Tests</div>
-                          <p className="text-xs text-muted-foreground font-normal text-left">Search and choose tests to add</p>
+                          <div className="text-base font-semibold text-left text-white">Select Tests</div>
+                          <p className="text-xs text-white/80 font-normal text-left">Search and choose tests to add</p>
                         </div>
                       </SheetTitle>
                     </SheetHeader>
@@ -1690,14 +1717,14 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
 
           {/* Sample Collection Rooms Card */}
           <Card className="overflow-hidden gap-0 shadow-sm p-0">
-            <CardHeader className="bg-muted/40 border-b py-3 px-4 gap-0">
+            <CardHeader className="border-b py-3 px-4 gap-0" style={{ backgroundColor: '#14B8A6' }}>
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground">
-                  <FlaskConical className="w-4 h-4" />
+                <div className="p-2 bg-white rounded-lg shadow-lg">
+                  <FlaskConical className="w-4 h-4" style={{ color: '#14B8A6' }} />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-semibold">Sample Collection Rooms</CardTitle>
-                  <p className="text-xs text-muted-foreground">Select rooms for sample collection</p>
+                  <CardTitle className="text-base font-semibold text-white">Sample Collection Rooms</CardTitle>
+                  <p className="text-xs text-white/80">Select rooms for sample collection</p>
                 </div>
               </div>
             </CardHeader>
@@ -1807,16 +1834,16 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
 
           {/* Department Discount Card */}
           <Card className="overflow-hidden gap-0 shadow-sm p-0">
-            <CardHeader className="bg-muted/40 border-b py-3 px-4 gap-0">
+            <CardHeader className="border-b py-3 px-4 gap-0" style={{ backgroundColor: '#F59E0B' }}>
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground">
-                  <PenLine className="w-4 h-4" />
+                <div className="p-2 bg-white rounded-lg shadow-lg">
+                  <PenLine className="w-4 h-4" style={{ color: '#F59E0B' }} />
                 </div>
                 <div className="flex-1">
-                  <CardTitle className="text-base font-semibold">Dept. Discounts & Payments</CardTitle>
-                  <p className="text-xs text-muted-foreground">Breakdown of charges and payments per department</p>
+                  <CardTitle className="text-base font-semibold text-white">Dept. Discounts & Payments</CardTitle>
+                  <p className="text-xs text-white/80">Breakdown of charges and payments per department</p>
                 </div>
-                <div className="flex items-center gap-2 bg-background px-3 py-1 rounded-md border">
+                <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-md shadow-sm">
                   <span className="text-[10px] font-medium text-muted-foreground">Total Dept. Discount:</span>
                   <span className="text-xs font-semibold text-foreground font-mono">{totalDeptDiscount.toLocaleString()}</span>
                 </div>
@@ -1906,19 +1933,19 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
 
           {/* Billing Summary Card */}
           <Card className="overflow-hidden gap-0 shadow-sm p-0">
-            <CardHeader className="bg-muted/40 border-b py-3 px-4 gap-0">
+            <CardHeader className="border-b py-3 px-4 gap-0" style={{ backgroundColor: '#10B981' }}>
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground">
-                  <Clock className="w-4 h-4" />
+                <div className="p-2 bg-white rounded-lg shadow-lg">
+                  <Clock className="w-4 h-4" style={{ color: '#10B981' }} />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-semibold">Billing & Delivery</CardTitle>
-                  <p className="text-xs text-muted-foreground">Final summary, delivery schedule and payment</p>
+                  <CardTitle className="text-base font-semibold text-white">Billing & Delivery</CardTitle>
+                  <p className="text-xs text-white/80">Final summary, delivery schedule and payment</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-4 md:p-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Delivery details */}
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -1937,7 +1964,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                                   type="button"
                                   variant="outline"
                                   className={cn(
-                                    "h-10 justify-start text-left font-normal border-gray-200 bg-transparent shadow-sm",
+                                    "h-10 justify-start text-left font-normal border-gray-200 bg-transparent",
                                     !field.value && "text-muted-foreground"
                                   )}
                                 >
@@ -1981,7 +2008,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                               <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors" />
                               <Input
                                 type="time"
-                                className="h-10 pl-10 border-gray-200 bg-transparent shadow-sm"
+                                className="h-10 pl-10 border-gray-200 bg-transparent"
                                 {...field}
                               />
                             </div>
@@ -2009,7 +2036,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={openPaymentMethod}
-                                className="w-full justify-between h-10 border-gray-200 dark:border-gray-800 bg-transparent shadow-sm"
+                                className="w-full justify-between h-10 border-gray-200 dark:border-gray-800 bg-transparent"
                               >
                                 {field.value
                                   ? paymentMethodOptions.find((m) => m === field.value) || field.value
@@ -2061,7 +2088,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       value={discountReason}
                       onChange={(e) => setDiscountReason(e.target.value)}
                       placeholder="Reason for discount (optional)"
-                      className="h-10 border-gray-200 dark:border-gray-800 bg-transparent shadow-sm"
+                      className="h-10 border-gray-200 dark:border-gray-800 bg-transparent"
                     />
                   </div>
 
@@ -2078,47 +2105,47 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                 </div>
 
                 {/* Billing details */}
-                <div className="bg-gray-50/50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-inner pb-0">
-                  <div className="flex justify-between items-center pb-2">
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">Gross Total</span>
-                    <span className="text-lg font-mono font-semibold text-gray-900 dark:text-gray-100">
+                <div className="bg-muted/40 p-5 rounded-lg border h-fit">
+                  <div className="flex justify-between items-center pb-3">
+                    <span className="text-muted-foreground font-medium">Gross Total</span>
+                    <span className="text-base font-mono font-semibold text-foreground">
                       {totalCharge.toLocaleString()}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-2 border-t border-dashed border-gray-200">
+                  <div className="flex justify-between items-center py-3 border-t">
                     <div className="flex flex-col">
-                      <span className="text-gray-600 dark:text-gray-400 font-medium">Total Discount
+                      <span className="text-muted-foreground font-medium">Total Discount
                         {totalCharge > 0 && (
-                          <span className="text-xs text-green-500 ml-1">
+                          <span className="text-xs text-muted-foreground ml-1">
                             ({((totalDeptDiscount / totalCharge) * 100).toFixed(1)}%)
                           </span>
                         )}
                       </span>
                       <span className="text-[10px] text-muted-foreground">(Department-wise)</span>
                     </div>
-                    <span className="text-lg font-mono font-semibold text-green-600">
+                    <span className="text-base font-mono font-semibold text-foreground">
                       - {totalDeptDiscount.toLocaleString()}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-2 border-t-1 border-gray-200 dark:border-gray-700">
-                    <span className="text-gray-900 dark:text-gray-100 font-bold">Net Payable</span>
-                    <span className="text-2xl font-mono font-bold text-blue-600 dark:text-blue-400">
+                  <div className="flex justify-between items-center py-3 border-t">
+                    <span className="text-foreground font-semibold">Net Payable</span>
+                    <span className="text-xl font-mono font-bold text-foreground">
                       {discountedAmount.toLocaleString()}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-2 border-t border-dashed border-gray-200">
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">Paid Amount</span>
-                    <span className="text-lg font-mono font-semibold text-indigo-600">
+                  <div className="flex justify-between items-center py-3 border-t">
+                    <span className="text-muted-foreground font-medium">Paid Amount</span>
+                    <span className="text-base font-mono font-semibold text-foreground">
                       {totalDeptPaid.toLocaleString()}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-4 border-t-1 border-gray-300 dark:border-gray-600 bg-blue-600/5 -mx-4 px-4">
-                    <span className="text-gray-900 dark:text-gray-100 font-black text-lg">BALANCE DUE</span>
-                    <span className={`text-3xl font-mono font-black ${dueAmount > 0 ? 'text-red-500' : 'text-green-600'}`}>
+                  <div className="flex justify-between items-center pt-4 mt-1 border-t-2 border-foreground/10">
+                    <span className="text-foreground font-bold text-base">BALANCE DUE</span>
+                    <span className={`text-2xl font-mono font-bold ${dueAmount > 0 ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400'}`}>
                       {dueAmount.toLocaleString()}
                     </span>
                   </div>

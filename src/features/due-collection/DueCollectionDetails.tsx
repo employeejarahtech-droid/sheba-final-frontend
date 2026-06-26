@@ -21,6 +21,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { cn } from "@/lib/utils"
 import { useCurrency } from '@/hooks/use-currency'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useDateControls } from '@/hooks/use-date-controls'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -73,6 +74,8 @@ export default function DueCollectionDetails() {
     const navigate = useNavigate();
     const { currencySymbol, format } = useCurrency();
     const { formatDate: fmtDate } = useDateFormat();
+    const { isChangeable } = useDateControls();
+    const dueDateChangeable = isChangeable('outdoor_due_collection_date_changeable');
     // Settings date format + 12h time, for entry/payment timestamps
     const fmtDateTime = (d: Date) => `${fmtDate(d)} ${d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
 
@@ -946,11 +949,11 @@ export default function DueCollectionDetails() {
                                         </Popover>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Date (Fixed to Invoice Date)</Label>
+                                        <Label>{dueDateChangeable ? 'Payment Date' : 'Date (Fixed to Invoice Date)'}</Label>
                                         <DateField
                                             value={paymentDate}
-                                            onChange={() => {}}
-                                            disabled={true}
+                                            onChange={(iso) => setPaymentDate(iso)}
+                                            disabled={!dueDateChangeable}
                                         />
                                     </div>
                                     <div className="col-span-2 space-y-2">

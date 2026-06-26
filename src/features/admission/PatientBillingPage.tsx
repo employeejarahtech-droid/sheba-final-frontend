@@ -26,6 +26,7 @@ import { Main } from '@/components/layout/main'
 import { PageHeader } from '@/components/layout/page-header'
 import { useCurrency } from '@/hooks/use-currency'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useDateControls } from '@/hooks/use-date-controls'
 import { DateField } from '@/components/date-field'
 import { cn } from '@/lib/utils'
 
@@ -223,7 +224,8 @@ export function PatientBillingPage() {
         const n = typeof amount === 'string' ? parseFloat(amount) : amount
         return n.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     }
-    const { formatDate, formatDateTime } = useDateFormat()
+    const { formatDate, formatDateTime, toISODate } = useDateFormat()
+    const { isChangeable } = useDateControls()
     const safeFormatDate = (dateVal: any) => {
         if (!dateVal) return '-'
         if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
@@ -1381,6 +1383,13 @@ export function PatientBillingPage() {
     const [txnAmount, setTxnAmount] = useState<number>(0)
     const [txnMethod, setTxnMethod] = useState<string>('cash')
     const [txnNotes, setTxnNotes] = useState<string>('')
+    // Payment date for the advance/payment dialog (ISO YYYY-MM-DD).
+    const [txnDate, setTxnDate] = useState<string>('')
+    // Whether the date for the current dialog mode may be edited (Settings → Date Controls).
+    const txnDateChangeable =
+        txnDialogMode === 'advance' ? isChangeable('indoor_advance_payment_date_changeable')
+            : txnDialogMode === 'payment' ? isChangeable('indoor_payment_date_changeable')
+                : false
 
     // Create Final Bill from the editable grid (apply per-line discounts)
     const finalizeWithDiscountMutation = useMutation({
@@ -1533,10 +1542,13 @@ export function PatientBillingPage() {
             const mode = txnDialogMode
             const endpoint = mode === 'advance' ? 'advance-payment' : mode === 'refund' ? 'final-bill/refund' : 'final-bill/payment'
             const methodKey = mode === 'refund' ? 'refund_method' : 'payment_method'
+            // Only send a chosen payment date for advance/payment, and only when
+            // the admin allows editing it — otherwise the backend stamps "now".
+            const includeDate = (mode === 'advance' || mode === 'payment') && txnDateChangeable && txnDate
             const res = await fetch(`${API_URL}/api/admission/${admissionId}/${endpoint}`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amount: Number(txnAmount), notes: txnNotes || undefined, [methodKey]: txnMethod }),
+                body: JSON.stringify({ amount: Number(txnAmount), notes: txnNotes || undefined, [methodKey]: txnMethod, ...(includeDate ? { payment_date: txnDate } : {}) }),
             })
             if (!res.ok) {
                 const err = await res.json().catch(() => null)
@@ -1547,7 +1559,7 @@ export function PatientBillingPage() {
         onSuccess: () => {
             const label = txnDialogMode === 'advance' ? 'Advance' : txnDialogMode === 'refund' ? 'Refund' : 'Payment'
             toast.success(`${label} recorded successfully`)
-            setTxnDialogMode(null); setTxnAmount(0); setTxnNotes('')
+            setTxnDialogMode(null); setTxnAmount(0); setTxnNotes(''); setTxnDate('')
             queryClient.invalidateQueries({ queryKey: ['admission', admissionId] })
             queryClient.invalidateQueries({ queryKey: ['final-bill', admissionId] })
             queryClient.invalidateQueries({ queryKey: ['payments', admissionId] })
@@ -3443,14 +3455,14 @@ export function PatientBillingPage() {
                                                 {/* Actions: Advance (any) · Payment (≤ due) · Refund (≤ refundable) */}
                                                 <div className="grid grid-cols-3 gap-2">
                                                     <Button
-                                                        onClick={() => { setTxnAmount(0); setTxnNotes(''); setTxnDialogMode('advance') }}
+                                                        onClick={() => { setTxnAmount(0); setTxnNotes(''); setTxnDate(toISODate(new Date())); setTxnDialogMode('advance') }}
                                                         disabled={!!admissionData?.data?.final_bill_created_date}
                                                         className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs"
                                                     >
                                                         <Plus className="h-3 w-3 mr-1" /> Advance
                                                     </Button>
                                                     <Button
-                                                        onClick={() => { setTxnAmount(maxPayment); setTxnNotes(''); setTxnDialogMode('payment') }}
+                                                        onClick={() => { setTxnAmount(maxPayment); setTxnNotes(''); setTxnDate(toISODate(new Date())); setTxnDialogMode('payment') }}
                                                         disabled={maxPayment <= 0}
                                                         className="h-8 bg-green-600 hover:bg-green-700 text-white text-xs"
                                                     >
@@ -4729,6 +4741,20 @@ export function PatientBillingPage() {
                                         </SelectContent>
                                     </Select>
                                 </div>
+                                {(txnDialogMode === 'advance' || txnDialogMode === 'payment') && (
+                                    <div className="space-y-1">
+                                        <Label>{txnDialogMode === 'advance' ? 'Advance Date' : 'Payment Date'}</Label>
+                                        <DateField
+                                            value={txnDate}
+                                            onChange={setTxnDate}
+                                            disabled={!txnDateChangeable || recordTxnMutation.isPending}
+                                            className="w-full h-10"
+                                        />
+                                        {!txnDateChangeable && (
+                                            <p className="text-[10px] text-muted-foreground">Locked to today by settings.</p>
+                                        )}
+                                    </div>
+                                )}
                                 <div className="space-y-1">
                                     <Label>Notes</Label>
                                     <Input value={txnNotes} onChange={(e) => setTxnNotes(e.target.value)} placeholder="Optional" disabled={recordTxnMutation.isPending} />

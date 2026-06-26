@@ -63,6 +63,12 @@ export function SettingsDateControls() {
             return json.data || {}
         },
         enabled: !!token,
+        // The ['app-settings'] cache is shared app-wide and the global default is
+        // refetchOnMount: false, so opening this page would otherwise show stale
+        // cached values without a request. Always refetch so the toggles reflect
+        // whatever is currently persisted in the DB.
+        staleTime: 0,
+        refetchOnMount: 'always',
     })
 
     useEffect(() => {
@@ -78,23 +84,37 @@ export function SettingsDateControls() {
 
     const saveMutation = useMutation({
         mutationFn: async () => {
+            console.log('=== Save Changes Clicked ===');
+            console.log('Current values:', values);
+            const payload = { [KEY]: JSON.stringify(values) };
+            console.log('API Payload:', payload);
+
             const res = await fetch(`${API_URL}/api/app-settings`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ [KEY]: JSON.stringify(values) }),
+                body: JSON.stringify(payload),
             })
+            console.log('API Response Status:', res.status, res.statusText);
             const json: { message?: string; error?: string } = await res.json().catch(() => ({}))
+            console.log('API Response JSON:', json);
+
             if (!res.ok) {
                 const msg = json?.message || json?.error || `Save failed (HTTP ${res.status})`
+                console.error('Save failed:', msg);
                 throw new Error(msg)
             }
+            console.log('Save successful!');
             return json
         },
-        onSuccess: () => {
+        onSuccess: (data) => {
+            console.log('=== Save Success ===', data);
             toast.success('Date controls saved successfully')
             queryClient.invalidateQueries({ queryKey: ['app-settings'] })
         },
-        onError: (err: unknown) => toast.error(err instanceof Error ? err.message : 'Failed to save date controls'),
+        onError: (err) => {
+            console.error('=== Save Error ===', err);
+            toast.error(err instanceof Error ? err.message : 'Failed to save date controls')
+        },
     })
 
     const toggle = (k: Key, v: boolean) => setValues((prev) => ({ ...prev, [k]: v }))
@@ -149,7 +169,16 @@ export function SettingsDateControls() {
             })}
 
             <div className="flex justify-end">
-                <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+                <Button
+                    onClick={() => {
+                        console.log('=== Save Changes Button Clicked ===');
+                        console.log('Current state:', values);
+                        console.log('Token exists:', !!token);
+                        console.log('Mutation pending:', saveMutation.isPending);
+                        saveMutation.mutate();
+                    }}
+                    disabled={saveMutation.isPending}
+                >
                     {saveMutation.isPending ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (

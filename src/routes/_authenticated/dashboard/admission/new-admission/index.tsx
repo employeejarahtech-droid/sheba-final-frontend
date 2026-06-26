@@ -36,6 +36,7 @@ import {
 
 import { Calendar } from "@/components/ui/calendar";
 import { useDateFormat } from "@/hooks/use-date-format";
+import { useDateControls } from "@/hooks/use-date-controls";
 import { useCurrency } from "@/hooks/use-currency";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Input } from "@/components/ui/input";
@@ -87,6 +88,13 @@ const admissionSchema = z.object({
 });
 
 // Patient Type Select Component with Search
+// Shared form-control styling — one height (h-10) and one look across every
+// input, select, combobox and date field so the form reads clean and professional.
+const FIELD_BASE =
+    "h-10 rounded-md border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-all focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500/20";
+const FIELD_TEXTAREA =
+    "rounded-md border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-all focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500/20 resize-none";
+
 interface PatientTypeSelectProps {
     patientTypes: any[];
     value: string;
@@ -118,7 +126,7 @@ function PatientTypeSelect({
                         variant="outline"
                         role="combobox"
                         className={cn(
-                            "w-full justify-between h-10 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm",
+                            "w-full justify-between", FIELD_BASE,
                             !value && "text-muted-foreground"
                         )}
                         disabled={disabled || loading}
@@ -276,7 +284,7 @@ function DoctorSelect({
                         variant="outline"
                         role="combobox"
                         className={cn(
-                            "w-full justify-between h-11 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm",
+                            "w-full justify-between", FIELD_BASE,
                             !value && "text-muted-foreground"
                         )}
                         disabled={disabled || loading}
@@ -427,7 +435,7 @@ function BedSelect({
                         variant="outline"
                         role="combobox"
                         className={cn(
-                            "w-full justify-between h-11 rounded-lg border-gray-200 dark:border-gray-700 bg-transparent focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm",
+                            "w-full justify-between", FIELD_BASE,
                             !value && "text-muted-foreground"
                         )}
                         disabled={disabled || loading}
@@ -502,6 +510,10 @@ function IndoorNewAdmission() {
     // Tenant date format from settings
     const { dateFormat, formatHint, formatDate, parseDate, toISODate } = useDateFormat();
     const dateTouchedRef = useRef(false);
+
+    // Admission date/time editability from Settings → Date Controls.
+    const { isChangeable } = useDateControls();
+    const admissionDateChangeable = isChangeable('indoor_admission_date_changeable');
 
     const [isBoardOpen, setIsBoardOpen] = useState(false);
     const [boardFilter, setBoardFilter] = useState<'all' | 'free' | 'booked' | 'maintenance'>('all');
@@ -629,6 +641,16 @@ function IndoorNewAdmission() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dateFormat]);
 
+    // When admission date/time is not changeable, lock both to now.
+    useEffect(() => {
+        if (!admissionDateChangeable) {
+            const now = new Date();
+            form.setValue("admissionDate", formatDate(now), { shouldValidate: true });
+            form.setValue("admissionTime", now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }), { shouldValidate: true });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [admissionDateChangeable, dateFormat]);
+
     // Create admission mutation
     const createMutation = useMutation({
         mutationFn: async (values: z.infer<typeof admissionSchema>) => {
@@ -722,14 +744,14 @@ function IndoorNewAdmission() {
 
                             {/* Card 1: Patient Identity */}
                             <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
-                                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                                <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 border-b py-1.5 px-4 gap-0">
                                     <div className="flex items-center gap-2.5">
-                                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                        <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
                                             <User className="w-4 h-4 text-white" />
                                         </div>
                                         <div>
-                                            <CardTitle className="text-lg font-bold">Patient Identity</CardTitle>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400">Personal details and identification</p>
+                                            <CardTitle className="text-lg font-bold text-white">Patient Identity</CardTitle>
+                                            <p className="text-xs text-blue-100">Personal details and identification</p>
                                         </div>
                                     </div>
                                 </CardHeader>
@@ -753,7 +775,7 @@ function IndoorNewAdmission() {
                                                 <FormItem className="flex flex-col gap-2">
                                                     <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Patient Name <span className="text-destructive">*</span></FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="Full name" className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all" {...field} />
+                                                        <Input placeholder="Full name" className={FIELD_BASE} {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -766,7 +788,7 @@ function IndoorNewAdmission() {
                                                 <FormItem className="flex flex-col gap-2">
                                                     <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Father / Husband Name <span className="text-destructive">*</span></FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="Guardian name" className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all" {...field} />
+                                                        <Input placeholder="Guardian name" className={FIELD_BASE} {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -784,7 +806,7 @@ function IndoorNewAdmission() {
                                                                 type="number"
                                                                 min="0"
                                                                 placeholder="0"
-                                                                className="h-10 w-24 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all shadow-sm"
+                                                                className={cn(FIELD_BASE, "w-24")}
                                                                 {...field}
                                                             />
                                                         </FormControl>
@@ -799,7 +821,7 @@ function IndoorNewAdmission() {
                                                                         min="0"
                                                                         max="11"
                                                                         placeholder="0"
-                                                                        className="h-10 w-24 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all shadow-sm"
+                                                                        className={cn(FIELD_BASE, "w-24")}
                                                                         {...field}
                                                                     />
                                                                 </FormControl>
@@ -823,7 +845,7 @@ function IndoorNewAdmission() {
                                                     <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Gender <span className="text-destructive">*</span></FormLabel>
                                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                         <FormControl>
-                                                            <SelectTrigger className="w-full h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all">
+                                                            <SelectTrigger className={cn("w-full", FIELD_BASE)}>
                                                                 <SelectValue placeholder="Select" />
                                                             </SelectTrigger>
                                                         </FormControl>
@@ -865,7 +887,7 @@ function IndoorNewAdmission() {
                                                     <FormControl>
                                                         <div className="relative">
                                                             <Activity className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                            <Input placeholder="017XXX..." className="h-10 pl-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all" {...field} />
+                                                            <Input placeholder="017XXX..." className={cn(FIELD_BASE, "pl-10")} {...field} />
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage />
@@ -879,7 +901,7 @@ function IndoorNewAdmission() {
                                                 <FormItem className="flex flex-col gap-2">
                                                     <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">ID Card Number (Optional)</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="NID, Passport or Birth Cert" className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all" {...field} />
+                                                        <Input placeholder="NID, Passport or Birth Cert" className={FIELD_BASE} {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -898,7 +920,7 @@ function IndoorNewAdmission() {
                                                     <FormControl>
                                                         <Textarea
                                                             placeholder="Enter complete residential address"
-                                                            className="min-h-[80px] rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all resize-none"
+                                                            className={cn(FIELD_TEXTAREA, "min-h-[80px]")}
                                                             {...field}
                                                         />
                                                     </FormControl>
@@ -912,14 +934,14 @@ function IndoorNewAdmission() {
 
                             {/* Card 2: Clinical Assignment */}
                             <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
-                                <CardHeader className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 border-b py-1.5 px-4 gap-0">
+                                <CardHeader className="bg-gradient-to-r from-purple-600 to-violet-600 border-b py-1.5 px-4 gap-0">
                                     <div className="flex items-center gap-2.5">
-                                        <div className="p-2 bg-gradient-to-br from-purple-500 to-violet-500 rounded-lg shadow-lg">
+                                        <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
                                             <Stethoscope className="w-4 h-4 text-white" />
                                         </div>
                                         <div>
-                                            <CardTitle className="text-lg font-bold">Clinical Assignment</CardTitle>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400">Medical supervisors and referrals</p>
+                                            <CardTitle className="text-lg font-bold text-white">Clinical Assignment</CardTitle>
+                                            <p className="text-xs text-purple-100">Medical supervisors and referrals</p>
                                         </div>
                                     </div>
                                 </CardHeader>
@@ -953,14 +975,14 @@ function IndoorNewAdmission() {
 
                             {/* Card 3: Admission Logistics */}
                             <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
-                                <CardHeader className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 border-b py-1.5 px-4 gap-0">
+                                <CardHeader className="bg-gradient-to-r from-teal-600 to-cyan-600 border-b py-1.5 px-4 gap-0">
                                     <div className="flex items-center gap-2.5">
-                                        <div className="p-2 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg shadow-lg">
+                                        <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
                                             <Bed className="w-4 h-4 text-white" />
                                         </div>
                                         <div>
-                                            <CardTitle className="text-lg font-bold">Admission Logistics</CardTitle>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400">Stay details and room allocation</p>
+                                            <CardTitle className="text-lg font-bold text-white">Admission Logistics</CardTitle>
+                                            <p className="text-xs text-teal-100">Stay details and room allocation</p>
                                         </div>
                                     </div>
                                 </CardHeader>
@@ -975,14 +997,16 @@ function IndoorNewAdmission() {
                                                         Admission Date <span className="text-destructive">*</span> <span className="text-xs font-normal text-muted-foreground">({formatHint})</span>
                                                     </FormLabel>
                                                     <Popover>
-                                                        <PopoverTrigger asChild>
+                                                        <PopoverTrigger asChild disabled={!admissionDateChangeable}>
                                                             <FormControl>
                                                                 <Button
                                                                     type="button"
                                                                     variant="outline"
+                                                                    disabled={!admissionDateChangeable}
                                                                     className={cn(
-                                                                        "h-10 justify-start text-left font-normal border-gray-200 bg-transparent shadow-sm",
-                                                                        !field.value && "text-muted-foreground"
+                                                                        FIELD_BASE, "justify-start text-left font-normal",
+                                                                        !field.value && "text-muted-foreground",
+                                                                        !admissionDateChangeable && "disabled:opacity-100 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                                                                     )}
                                                                 >
                                                                     <CalendarIcon className="mr-2 h-4 w-4 text-blue-500" />
@@ -1020,7 +1044,11 @@ function IndoorNewAdmission() {
                                                     <FormControl>
                                                         <Input
                                                             type="time"
-                                                            className="h-10 rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all"
+                                                            disabled={!admissionDateChangeable}
+                                                            className={cn(
+                                                                FIELD_BASE,
+                                                                !admissionDateChangeable && "disabled:opacity-100 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                                                            )}
                                                             {...field}
                                                         />
                                                     </FormControl>
@@ -1051,11 +1079,10 @@ function IndoorNewAdmission() {
                                                                 <Button
                                                                     type="button"
                                                                     variant="outline"
-                                                                    className="h-11 px-3 rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5 shrink-0"
+                                                                    className="h-11 w-11 p-0 rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-center shrink-0"
                                                                     title="Quick view of beds & cabins"
                                                                 >
                                                                     <LayoutGrid className="h-4 w-4 text-blue-500" />
-                                                                    <span>Quick View</span>
                                                                 </Button>
                                                             </DialogTrigger>
                                                             <DialogContent className="sm:max-w-[850px] max-w-[850px] w-[95vw] sm:w-full max-h-[85vh] overflow-y-auto p-6 rounded-2xl">
@@ -1227,14 +1254,14 @@ function IndoorNewAdmission() {
 
                             {/* Card 4: Admission Reason */}
                             <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
-                                <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-b py-1.5 px-4 gap-0">
+                                <CardHeader className="bg-gradient-to-r from-amber-600 to-orange-600 border-b py-1.5 px-4 gap-0">
                                     <div className="flex items-center gap-2.5">
-                                        <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg shadow-lg">
+                                        <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
                                             <ClipboardList className="w-4 h-4 text-white" />
                                         </div>
                                         <div>
-                                            <CardTitle className="text-lg font-bold">Admission Reason</CardTitle>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400">Clinical notes and reason for admission</p>
+                                            <CardTitle className="text-lg font-bold text-white">Admission Reason</CardTitle>
+                                            <p className="text-xs text-amber-100">Clinical notes and reason for admission</p>
                                         </div>
                                     </div>
                                 </CardHeader>
@@ -1248,7 +1275,7 @@ function IndoorNewAdmission() {
                                                 <FormControl>
                                                     <Textarea
                                                         placeholder="Describe the clinical reason for patient admission..."
-                                                        className="min-h-[110px] rounded-md border-gray-200 dark:border-gray-800 bg-transparent focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all resize-none"
+                                                        className={cn(FIELD_TEXTAREA, "min-h-[110px]")}
                                                         {...field}
                                                     />
                                                 </FormControl>
