@@ -1,22 +1,37 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { z } from 'zod'
 import { ReportPrintLayout } from '@/components/reports/ReportPrintLayout'
 import { useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
 import { useMemo } from 'react'
 
+const printSearchSchema = z.object({
+  search: z.string().optional().default(''),
+  start_date: z.string().optional().default(''),
+  end_date: z.string().optional().default(''),
+})
+
 export const Route = createFileRoute('/_authenticated/dashboard/reports/my/outdoor/today-collection/print')({
+  validateSearch: (search) => printSearchSchema.parse(search),
   component: TodayCollectionPrint,
 })
 
 function TodayCollectionPrint() {
+  const { search, start_date, end_date } = Route.useSearch()
   const token = getCookie('accessToken')
   const API_URL = import.meta.env.VITE_API_URL || ''
 
   // Fetch today's collection data
   const { data, isLoading } = useQuery({
-    queryKey: ["my-outdoor-today-collection-print"],
+    queryKey: ["my-outdoor-today-collection-print", search, start_date, end_date],
     queryFn: async () => {
-      const res = await fetch(`${API_URL}/api/outdoor-invoice/today-collection?limit=999`, {
+      const params = new URLSearchParams({
+        limit: '999',
+        search: search || '',
+        ...(start_date ? { start_date } : {}),
+        ...(end_date ? { end_date } : {}),
+      })
+      const res = await fetch(`${API_URL}/api/outdoor-invoice/today-collection?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (!res.ok) throw new Error("Failed to fetch today's collection")

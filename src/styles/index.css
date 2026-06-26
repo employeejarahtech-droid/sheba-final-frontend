@@ -709,4 +709,43 @@ table.dataTable > tbody > tr.child {
     padding-top: 6px;
     margin-top: 16px;
   }
+
+  /* Hide DataTables responsive indicators in print */
+  .dtr-title,
+  .dtr-data,
+  .dtr-control,
+  td.control,
+  th.control,
+  .child-row-detail {
+    display: none !important;
+  }
+
+  /* Hide any pseudo-element content from DataTables responsive */
+  table::before,
+  table::after,
+  td::before,
+  td::after,
+  th::before,
+  th::after {
+    content: none !important;
+  }
+
+  /* Specifically target and hide text content matching [col-X] patterns */
+  td:empty::after,
+  th:empty::after {
+    display: none !important;
+  }
+
+  /* Hide any child nodes that might contain responsive markers */
+  table td span:last-child:empty,
+  table th span:last-child:empty {
+    display: none !important;
+  }
+
+  /* Reset any font-size or other styling that might reveal hidden content */
+  table td,
+  table th {
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+  }
 }

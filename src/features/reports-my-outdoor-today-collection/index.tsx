@@ -5,6 +5,8 @@ import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { FileText, DollarSign, TrendingUp, Calendar, CreditCard, Printer } from 'lucide-react'
+import { DateField } from '@/components/date-field'
+import { Button } from '@/components/ui/button'
 
 type PaymentItem = {
   id: number;
@@ -40,20 +42,48 @@ type PaymentItem = {
   created_at: string;
 };
 
-export default function ReportsMyOutdoorTodayCollection() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const limit = 10;
+interface ReportsMyOutdoorTodayCollectionProps {
+  page: number
+  limit: number
+  search: string
+  from: string
+  to: string
+  setPage: (page: number) => void
+  setLimit: (limit: number) => void
+  setSearch: (search: string) => void
+  setFrom: (from: string) => void
+  setTo: (to: string) => void
+}
+
+export default function ReportsMyOutdoorTodayCollection({
+  page,
+  limit,
+  search,
+  from,
+  to,
+  setPage,
+  setLimit,
+  setSearch,
+  setFrom,
+  setTo,
+}: ReportsMyOutdoorTodayCollectionProps) {
 
   const token = getCookie('accessToken');
 
   // Fetch today's collection (payments made today by current user)
   const { data, isLoading } = useQuery({
-    queryKey: ["my-outdoor-today-collection", page, search],
+    queryKey: ["my-outdoor-today-collection", page, limit, search, from, to],
 
     queryFn: async () => {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+        search,
+        ...(from ? { start_date: from } : {}),
+        ...(to ? { end_date: to } : {}),
+      })
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/outdoor-invoice/today-collection?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
+        `${import.meta.env.VITE_API_URL}/api/outdoor-invoice/today-collection?${params}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -301,7 +331,14 @@ export default function ReportsMyOutdoorTodayCollection() {
               })}
             </p>
           </div>
-          <Link to="/dashboard/reports/my/outdoor/today-collection/print">
+          <Link
+            to="/dashboard/reports/my/outdoor/today-collection/print"
+            search={{
+              search: search || undefined,
+              start_date: from || undefined,
+              end_date: to || undefined
+            }}
+          >
             <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium shadow-sm hover:bg-gray-50 transition-colors">
               <Printer className="w-4 h-4" />
               Print Report
@@ -402,8 +439,33 @@ export default function ReportsMyOutdoorTodayCollection() {
             data={data?.data?.items || []}
             meta={data?.data?.meta}
             onPageChange={setPage}
+            onLimitChange={setLimit}
             search={search}
             onSearchChange={setSearch}
+            filterSlot={
+              <div className="flex items-center gap-1.5">
+                <DateField
+                  value={from}
+                  onChange={(v: string) => setFrom(v)}
+                  placeholder="From"
+                />
+                <span className="text-xs text-muted-foreground">to</span>
+                <DateField
+                  value={to}
+                  onChange={(v: string) => setTo(v)}
+                  placeholder="To"
+                />
+                {(from || to) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setFrom(""); setTo(""); }}
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
+            }
           />
         )}
       </main>

@@ -60,6 +60,9 @@ export default function Categories({ page, limit, search, departmentId, setPage,
             });
             if (departmentId && departmentId !== 'all') params.set('department_id', departmentId);
 
+            console.log('=== Fetching categories ===');
+            console.log('Params:', params.toString());
+
             const res = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/test-category?${params.toString()}`,
                 {
@@ -68,7 +71,10 @@ export default function Categories({ page, limit, search, departmentId, setPage,
             );
 
             if (!res.ok) throw new Error("Failed to fetch categories");
-            return res.json();
+            const json = await res.json();
+            console.log('Categories API response:', json);
+            console.log('First few categories:', json.data?.items?.slice(0, 3));
+            return json;
         },
 
         enabled: !!token,
@@ -190,7 +196,7 @@ export default function Categories({ page, limit, search, departmentId, setPage,
             // Get data from attributes
             const id = btn.dataset.id || '';
             const name = btn.dataset.name || '-';
-            const department = btn.dataset.department || '-';
+            const department = btn.dataset.department || 'No Department';
             const createdBy = btn.dataset.createdBy || '-';
 
             // Create card HTML
@@ -220,9 +226,10 @@ export default function Categories({ page, limit, search, departmentId, setPage,
 
                             <li class="flex flex-col">
                                 <span class="text-gray-500">Department</span>
-                                <span class="px-3 py-1 w-fit text-xs font-semibold rounded-full bg-green-100 text-green-700">
-                                    ${department}
-                                </span>
+                                ${department === 'No Department'
+                                    ? '<span class="px-3 py-1 w-fit text-xs font-semibold rounded-full bg-red-100 text-red-700">No Department Assigned</span>'
+                                    : `<span class="px-3 py-1 w-fit text-xs font-semibold rounded-full bg-green-100 text-green-700">${department}</span>`
+                                }
                             </li>
 
                             <li class="flex flex-col">
@@ -312,7 +319,13 @@ export default function Categories({ page, limit, search, departmentId, setPage,
             title: "Department Name",
             orderable: true,
             responsivePriority: 2,
-            defaultContent: "",
+            render: (data: any) => {
+                if (!data) {
+                    return '<span class="text-red-500 font-semibold text-xs bg-red-50 px-2 py-1 rounded">No Department</span>';
+                }
+                return `<span class="text-sm font-medium text-green-700 dark:text-green-400">${data}</span>`;
+            },
+            defaultContent: '<span class="text-red-500 font-semibold text-xs bg-red-50 px-2 py-1 rounded">No Department</span>',
         },
         {
             data: "created_by",

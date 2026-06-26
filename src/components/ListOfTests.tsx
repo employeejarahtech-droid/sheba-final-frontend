@@ -254,7 +254,7 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
             newRow.className = 'child-row-detail';
             const cell = document.createElement('td');
             cell.className = 'p-4 bg-muted/50';
-            cell.colSpan = 8;
+            cell.colSpan = 9;
             cell.appendChild(cardContainer);
             newRow.appendChild(cell);
 
@@ -357,15 +357,27 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
             responsivePriority: 2,
             render: (_data: any, _type: string, row: TestItem) => {
                 const category = row.category;
+                return `<span class="font-medium">${category?.name || '<span class="text-red-500 font-semibold">N/A</span>'}</span>`;
+            },
+            defaultContent: "",
+        },
+        {
+            data: null,
+            title: "Department",
+            orderable: true,
+            responsivePriority: 3,
+            render: (_data: any, _type: string, row: TestItem) => {
+                const category = row.category;
                 const department = category?.department;
 
+                if (!department) {
+                    return '<span class="text-red-500 font-semibold">N/A</span>';
+                }
+
                 return `
-                    <div class="flex flex-col">
-                        <span>${category?.name || '<span class="text-red-500 font-semibold">N/A</span>'}</span>
-                        <span class="text-xs text-muted-foreground">
-                            ${department?.name || ''}
-                        </span>
-                    </div>
+                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                        ${department.name || 'N/A'}
+                    </span>
                 `;
             },
             defaultContent: "",

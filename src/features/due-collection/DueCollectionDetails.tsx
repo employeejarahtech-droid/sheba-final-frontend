@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { DateField } from '@/components/date-field'
 import { useState, useEffect, useRef } from 'react'
 import { toast } from "sonner"
 import { Loader2, ArrowLeft, Check, ChevronsUpDown, Printer, User, FlaskConical, Tag, Wallet, PenLine } from 'lucide-react'
@@ -79,7 +80,7 @@ export default function DueCollectionDetails() {
     const [paymentMethod, setPaymentMethod] = useState<string>("");
     const [openPaymentMethod, setOpenPaymentMethod] = useState(false);
     const [discountReason, setDiscountReason] = useState<string>("");
-    const [paymentDate, setPaymentDate] = useState<string>(new Date().toISOString().split('T')[0]);
+    const [paymentDate, setPaymentDate] = useState<string>("");
 
     // Department-wise inputs
     const [deptInputs, setDeptInputs] = useState<Record<string, { discount: string; payment: string }>>({});
@@ -117,10 +118,26 @@ export default function DueCollectionDetails() {
             });
             if (!res.ok) throw new Error("Failed to fetch invoice details");
             const json = await res.json();
+            console.log('=== Invoice data received ===');
+            console.log('Full invoice data:', json.data);
+            console.log('Selected tests:', json.data.selected_tests);
+            if (json.data.selected_tests && json.data.selected_tests.length > 0) {
+                console.log('First test structure:', json.data.selected_tests[0]);
+                console.log('First test.category:', json.data.selected_tests[0].test?.category);
+                console.log('First test.category.department:', json.data.selected_tests[0].test?.category?.department);
+            }
             return json.data;
         },
         enabled: !!invoiceId && !!token
     });
+
+    // Set payment date to invoice date when invoice loads
+    useEffect(() => {
+        if (invoice?.invoice_date) {
+            const invoiceDate = new Date(invoice.invoice_date);
+            setPaymentDate(invoiceDate.toISOString().split('T')[0]);
+        }
+    }, [invoice]);
 
     // ── Drag-to-scroll on hover for the department collection table ──────────
     useEffect(() => {
@@ -178,6 +195,8 @@ export default function DueCollectionDetails() {
             department_discounts?: { department_id: number; discount: number }[];
             payment_date?: string;
         }) => {
+            console.log('=== collectMutation.mutationFn called ===');
+            console.log('Payload:', payload);
             const res = await fetch(`${import.meta.env.VITE_API_URL}/api/outdoor-invoice/due-collection`, {
                 method: 'POST',
                 headers: {
@@ -186,13 +205,18 @@ export default function DueCollectionDetails() {
                 },
                 body: JSON.stringify(payload),
             });
+            console.log('API response status:', res.status);
             if (!res.ok) {
                 const errorData = await res.json();
+                console.error('API error:', errorData);
                 throw new Error(errorData.message || "Failed to collect payment");
             }
-            return res.json();
+            const result = await res.json();
+            console.log('API success response:', result);
+            return result;
         },
         onSuccess: () => {
+            console.log('=== collectMutation.onSuccess called ===');
             toast.success("Payment collected successfully");
             queryClient.invalidateQueries({ queryKey: ["invoice", invoiceId] });
             // Reset department inputs
@@ -200,12 +224,16 @@ export default function DueCollectionDetails() {
             setDiscountReason("");
         },
         onError: (err) => {
+            console.error('=== collectMutation.onError called ===');
+            console.error('Error:', err);
             toast.error(err.message);
         }
     });
 
     // Helper to update department inputs with validation
     const handleDeptInputChange = (dept: string, field: 'discount' | 'payment', value: string) => {
+        console.log(`=== handleDeptInputChange called: dept=${dept}, field=${field}, value=${value} ===`);
+
         // Get department data for validation
         const tests = testsByDept[dept];
         const deptId = tests?.[0]?.test?.category?.department?.id;
@@ -213,9 +241,12 @@ export default function DueCollectionDetails() {
         const histDisc = getDeptDiscountAmount(deptId);
         const histPaid = getDeptPaidAmount(deptId, billTotal);
 
+        console.log(`deptId: ${deptId}, billTotal: ${billTotal}, histDisc: ${histDisc}, histPaid: ${histPaid}`);
+
         // Calculate current due amount
         const discountedTotal = Math.max(0, billTotal - histDisc);
         const currentDue = Math.max(0, discountedTotal - histPaid);
+        console.log(`currentDue: ${currentDue}`);
 
         // Get current input values
         const currentDiscount = field === 'discount' ? value : (deptInputs[dept]?.discount || '0');
@@ -223,15 +254,18 @@ export default function DueCollectionDetails() {
 
         // Validate numeric input (allow empty string, positive numbers and decimals)
         if (value !== '' && !/^\d*\.?\d*$/.test(value)) {
+            console.log('Invalid numeric input, returning early');
             return; // Invalid input, don't update state
         }
 
         // Parse numeric values
         const discountAmt = parseFloat(currentDiscount) || 0;
         const paymentAmt = parseFloat(currentPayment) || 0;
+        console.log(`discountAmt: ${discountAmt}, paymentAmt: ${paymentAmt}`);
 
         // Validate discount doesn't exceed current due
         if (field === 'discount' && discountAmt > currentDue) {
+            console.log(`Discount validation failed: ${discountAmt} > ${currentDue}`);
             toast.error(`Discount cannot exceed current due (${format(currentDue)}) for ${dept}`);
             return;
         }
@@ -239,19 +273,25 @@ export default function DueCollectionDetails() {
         // Validate payment doesn't exceed current due minus discount
         const maxPayment = Math.max(0, currentDue - discountAmt);
         if (field === 'payment' && paymentAmt > maxPayment) {
+            console.log(`Payment validation failed: ${paymentAmt} > ${maxPayment}`);
             toast.error(`Payment cannot exceed due amount (${format(maxPayment)}) for ${dept}`);
             return;
         }
 
+        console.log('All validations passed, updating state');
         // All validations passed, update state
-        setDeptInputs(prev => ({
-            ...prev,
-            [dept]: {
-                ...prev[dept],
-                discount: field === 'discount' ? value : (prev[dept]?.discount || ''),
-                payment: field === 'payment' ? value : (prev[dept]?.payment || '')
-            }
-        }));
+        setDeptInputs(prev => {
+            const updated = {
+                ...prev,
+                [dept]: {
+                    ...prev[dept],
+                    discount: field === 'discount' ? value : (prev[dept]?.discount || ''),
+                    payment: field === 'payment' ? value : (prev[dept]?.payment || '')
+                }
+            };
+            console.log('Updated deptInputs:', updated);
+            return updated;
+        });
     };
 
     // Helper to calculate total input
@@ -264,6 +304,9 @@ export default function DueCollectionDetails() {
     };
 
     const handleConfirmCollection = () => {
+        console.log('=== handleConfirmCollection called ===');
+        console.log('deptInputs:', deptInputs);
+
         if (!invoice) return;
 
         // Build department-wise arrays
@@ -271,12 +314,15 @@ export default function DueCollectionDetails() {
         const department_discounts: { department_id: number; discount: number }[] = [];
 
         Object.entries(deptInputs).forEach(([deptName, inputs]) => {
+            console.log(`Processing department: ${deptName}, inputs:`, inputs);
             const tests = testsByDept[deptName];
             const deptId = tests?.[0]?.test?.category?.department?.id;
+            console.log(`deptId for ${deptName}:`, deptId);
 
             if (deptId) {
                 const paymentAmt = parseFloat(inputs.payment || '0');
                 const discountAmt = parseFloat(inputs.discount || '0');
+                console.log(`paymentAmt: ${paymentAmt}, discountAmt: ${discountAmt}`);
 
                 if (paymentAmt > 0) {
                     department_payments.push({
@@ -284,6 +330,7 @@ export default function DueCollectionDetails() {
                         amount: paymentAmt,
                         method: paymentMethod
                     });
+                    console.log(`Added payment for ${deptName}:`, paymentAmt);
                 }
 
                 if (discountAmt > 0) {
@@ -291,11 +338,16 @@ export default function DueCollectionDetails() {
                         department_id: deptId,
                         discount: discountAmt
                     });
+                    console.log(`Added discount for ${deptName}:`, discountAmt);
                 }
             }
         });
 
+        console.log('Final department_payments:', department_payments);
+        console.log('Final department_discounts:', department_discounts);
+
         if (department_payments.length === 0 && department_discounts.length === 0) {
+            console.error('No payments or discounts to submit');
             toast.error("Please enter at least one payment or discount");
             return;
         }
@@ -316,18 +368,31 @@ export default function DueCollectionDetails() {
             const totalReduction = discountAmt + paymentAmt;
 
             if (totalReduction > currentDue) {
+                console.error(`Validation failed for ${deptName}: totalReduction(${totalReduction}) > currentDue(${currentDue})`);
                 toast.error(`${deptName}: Total (${format(totalReduction)}) exceeds due amount (${format(currentDue)})`);
                 hasInvalidAmount = true;
             }
         });
 
         if (hasInvalidAmount) {
+            console.log('Has invalid amounts, returning early');
             return;
         }
 
         // Calculate totals
         const totalPayment = department_payments.reduce((sum, p) => sum + p.amount, 0);
         const totalDiscount = department_discounts.reduce((sum, d) => sum + d.discount, 0);
+
+        console.log('About to call collectMutation.mutate with:', {
+            invoice_id: invoice.id,
+            amount: totalPayment,
+            method: paymentMethod,
+            discount: totalDiscount,
+            discount_reason: discountReason,
+            department_payments,
+            department_discounts,
+            payment_date: paymentDate
+        });
 
         collectMutation.mutate({
             invoice_id: invoice.id,
@@ -339,6 +404,7 @@ export default function DueCollectionDetails() {
             department_discounts,
             payment_date: paymentDate
         });
+        console.log('collectMutation.mutate called successfully');
     };
 
     if (isLoading) return <div className="flex justify-center p-10"><Loader2 className="animate-spin" /></div>;
@@ -353,8 +419,11 @@ export default function DueCollectionDetails() {
     const testsByDept: Record<string, TestItem[]> = {};
     const deptTotals: Record<string, number> = {};
 
+    console.log('=== Grouping tests by department ===');
     invoice.selected_tests?.forEach(item => {
+        console.log('Processing test item:', item);
         const deptName = item.test?.category?.department?.name || "Uncategorized";
+        console.log(`Test: ${item.test?.name}, Department: ${deptName}`);
         if (!testsByDept[deptName]) {
             testsByDept[deptName] = [];
             deptTotals[deptName] = 0;
@@ -362,6 +431,8 @@ export default function DueCollectionDetails() {
         testsByDept[deptName].push(item);
         deptTotals[deptName] += parseFloat(item.price) || 0;
     });
+    console.log('Final testsByDept:', testsByDept);
+    console.log('Final deptTotals:', deptTotals);
 
     // Calculate total bill across all departments
     const totalBill = Object.values(deptTotals).reduce((sum, val) => sum + val, 0);
@@ -734,7 +805,10 @@ export default function DueCollectionDetails() {
                                                                 min="0"
                                                                 step="0.01"
                                                                 value={deptInputs[dept]?.discount || ''}
-                                                                onChange={(e) => handleDeptInputChange(dept, 'discount', e.target.value)}
+                                                                onChange={(e) => {
+                                                                    console.log(`Discount input changed for dept="${dept}" value=${e.target.value}`);
+                                                                    handleDeptInputChange(dept, 'discount', e.target.value);
+                                                                }}
                                                                 placeholder="0"
                                                                 disabled={isPaidOff}
                                                                 onKeyPress={(e) => {
@@ -752,7 +826,10 @@ export default function DueCollectionDetails() {
                                                                 min="0"
                                                                 step="0.01"
                                                                 value={deptInputs[dept]?.payment || ''}
-                                                                onChange={(e) => handleDeptInputChange(dept, 'payment', e.target.value)}
+                                                                onChange={(e) => {
+                                                                    console.log(`Payment input changed for dept="${dept}" value=${e.target.value}`);
+                                                                    handleDeptInputChange(dept, 'payment', e.target.value);
+                                                                }}
                                                                 placeholder="0"
                                                                 disabled={isPaidOff}
                                                                 onKeyPress={(e) => {
@@ -869,11 +946,11 @@ export default function DueCollectionDetails() {
                                         </Popover>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Date</Label>
-                                        <Input
-                                            type="date"
+                                        <Label>Date (Fixed to Invoice Date)</Label>
+                                        <DateField
                                             value={paymentDate}
-                                            onChange={(e) => setPaymentDate(e.target.value)}
+                                            onChange={() => {}}
+                                            disabled={true}
                                         />
                                     </div>
                                     <div className="col-span-2 space-y-2">

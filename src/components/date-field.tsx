@@ -11,6 +11,7 @@ type DateFieldProps = {
   onChange: (iso: string) => void
   placeholder?: string
   className?: string
+  disabled?: boolean
 }
 
 /** Parse an ISO YYYY-MM-DD string into a local Date (avoids UTC off-by-one). */
@@ -27,17 +28,18 @@ function isoToDate(iso: string): Date | undefined {
  * as an ISO YYYY-MM-DD string (for the URL / backend) but DISPLAYED in the
  * tenant's configured date format from company settings (via useDateFormat).
  */
-export function DateField({ value, onChange, placeholder = 'Pick a date', className }: DateFieldProps) {
+export function DateField({ value, onChange, placeholder = 'Pick a date', className, disabled = false }: DateFieldProps) {
   const { formatDate, toISODate } = useDateFormat()
   const date = isoToDate(value)
 
   return (
-    <Popover>
+    <Popover disabled={disabled}>
       <PopoverTrigger asChild>
         <Button
           type="button"
           variant="outline"
           size="sm"
+          disabled={disabled}
           className={cn('h-9 justify-start text-left font-normal', !value && 'text-muted-foreground', className)}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
@@ -50,6 +52,7 @@ export function DateField({ value, onChange, placeholder = 'Pick a date', classN
           selected={date}
           onSelect={(d) => onChange(d ? toISODate(d) : '')}
           initialFocus
+          disabled={disabled}
         />
       </PopoverContent>
     </Popover>

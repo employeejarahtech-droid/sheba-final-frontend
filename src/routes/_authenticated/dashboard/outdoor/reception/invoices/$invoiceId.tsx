@@ -97,6 +97,26 @@ function InvoiceDetails() {
 
     const dueAmount = Number(invoice?.net_amount) - Number(totalPayments);
 
+    // Function to clean DataTables responsive markers
+    const cleanPrintView = () => {
+        // Remove any [col-X] text nodes
+        const walker = document.createTreeWalker(
+            document.body,
+            NodeFilter.SHOW_TEXT,
+            null
+        );
+        const textNodes = [];
+        let node;
+        while (node = walker.nextNode()) {
+            if (node.nodeValue && node.nodeValue.includes('[col-')) {
+                textNodes.push(node);
+            }
+        }
+        textNodes.forEach(node => {
+            node.nodeValue = node.nodeValue.replace(/\[col-\d+\]*/g, '').trim();
+        });
+    };
+
     // Auto-print only on initial load, not on refresh
     useEffect(() => {
         if (invoice && !hasPrinted.current) {
@@ -106,8 +126,30 @@ function InvoiceDetails() {
             if (!alreadyPrinted) {
                 hasPrinted.current = true
                 sessionStorage.setItem(printKey, 'true')
+
+                // Remove DataTables responsive markers before printing
                 setTimeout(() => {
-                    window.print()
+                    // Remove any [col-X] text nodes
+                    const cleanTextNodes = () => {
+                        const walker = document.createTreeWalker(
+                            document.body,
+                            NodeFilter.SHOW_TEXT,
+                            null
+                        );
+                        const textNodes = [];
+                        let node;
+                        while (node = walker.nextNode()) {
+                            if (node.nodeValue && node.nodeValue.includes('[col-')) {
+                                textNodes.push(node);
+                            }
+                        }
+                        textNodes.forEach(node => {
+                            node.nodeValue = node.nodeValue.replace(/\[col-\d+\]*/g, '').trim();
+                        });
+                    };
+
+                    cleanTextNodes();
+                    window.print();
                 }, 500)
             }
         }
@@ -145,6 +187,23 @@ function InvoiceDetails() {
                     /* Avoid breaking rows across pages */
                     tr, td, th {
                         page-break-inside: avoid;
+                    }
+                    /* Hide DataTables responsive column indicators */
+                    .dtr-title, .dtr-data, .dtr-control, td.control, th.control {
+                        display: none !important;
+                    }
+                    /* Hide any DataTables responsive markers */
+                    table::before, table::after, td::before, td::after, th::before, th::after {
+                        content: none !important;
+                    }
+                    /* Specifically hide any content that shows [col-X] patterns */
+                    * {
+                        &::before {
+                            content: none !important;
+                        }
+                        &::after {
+                            content: none !important;
+                        }
                     }
                 }
             `}</style>
@@ -193,7 +252,7 @@ function InvoiceDetails() {
 
 
                     {/* Patient Info Table */}
-                    <table className="w-full text-sm border mt-4">
+                    <table className="w-full text-sm border mt-4" data-table-ignore="true">
                         <tbody>
                             <tr className="border">
                                 <td className="border px-2 py-1 w-1/3">
@@ -218,11 +277,11 @@ function InvoiceDetails() {
                                 </td>
                             </tr>
                             <tr className="border">
-                                <td className="border px-2 py-1">
-                                    Ref. Doctor: {invoice?.doctor?.doctor_name || '-'}
+                                <td className="border px-2 py-1 w-1/3" colSpan={2}>
+                                    Ref. Doctor: <strong>{invoice?.doctor?.doctor_name || '-'}</strong>
                                 </td>
-                                <td className="border px-2 py-1" colSpan={2}>
-                                    Contact No: {invoice?.phone || '-'}
+                                <td className="border px-2 py-1 w-1/3" >
+                                    Contact No: <strong>{invoice?.phone || '-'}</strong>
                                 </td>
                             </tr>
                         </tbody>
@@ -230,7 +289,7 @@ function InvoiceDetails() {
 
                     {/* Test Table */}
                     <div className="mt-6">
-                        <table className="w-full text-sm border">
+                        <table className="w-full text-sm border" data-table-ignore="true">
                             <thead>
                                 <tr className="border">
                                     <th className="py-1.5 px-2 border text-left font-bold w-12">SL</th>
@@ -313,7 +372,10 @@ function InvoiceDetails() {
                     {/* Print & Download Buttons */}
                     <div className="flex justify-end gap-3 mt-8 print:hidden">
                         <button
-                            onClick={() => window.print()}
+                            onClick={() => {
+                                cleanPrintView();
+                                setTimeout(() => window.print(), 100);
+                            }}
                             className="border px-4 py-2 rounded bg-slate-800 text-white font-medium hover:bg-slate-700 transition shadow"
                         >
                             Print
