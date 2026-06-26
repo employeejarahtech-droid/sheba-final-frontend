@@ -17,11 +17,13 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
- 
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
- 
+
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Activity } from "lucide-react";
  
 // --- Schema ---
 const widalSchema = z.object({
@@ -29,6 +31,7 @@ const widalSchema = z.object({
     typhiH: z.string().min(1, { message: "Required" }),
     paratyphiAH: z.string().min(1, { message: "Required" }),
     paratyphiBH: z.string().min(1, { message: "Required" }),
+    status: z.union([z.literal('complete'), z.literal('incomplete')]),
 });
  
 type WidalFormValues = z.infer<typeof widalSchema>;
@@ -46,6 +49,7 @@ export function WidalTestForm({ open, setOpen }: WidalTestFormProps) {
             typhiH: "",
             paratyphiAH: "",
             paratyphiBH: "",
+            status: "incomplete",
         },
     });
  
@@ -139,6 +143,42 @@ export function WidalTestForm({ open, setOpen }: WidalTestFormProps) {
                             )}
                         />
  
+                        {/* Report Status */}
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border rounded-lg p-4">
+                            <div className="flex items-center gap-2.5 mb-3">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md">
+                                    <Activity className="h-4 w-4 text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-semibold text-gray-800">Report Status</h3>
+                                    <p className="text-xs text-gray-600">Mark report as complete or incomplete</p>
+                                </div>
+                            </div>
+                            <FormField
+                                control={form.control}
+                                name="status"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                value={field.value === 'complete' ? 'complete' : 'incomplete'}
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select status" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="incomplete">Incomplete</SelectItem>
+                                                    <SelectItem value="complete">Complete</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
                         {/* Buttons */}
                         <div className="flex justify-center gap-2 pt-4">
                             <Button

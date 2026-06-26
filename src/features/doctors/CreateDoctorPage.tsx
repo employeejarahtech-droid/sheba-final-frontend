@@ -72,7 +72,8 @@ export default function CreateDoctorPage() {
       )
       if (!res.ok) throw new Error('Failed to fetch doctor types')
       const result = await res.json()
-      return result.data?.items || result.data || []
+      const items = result.data?.items || result.data || []
+      return Array.isArray(items) ? items : []
     },
     enabled: !!token,
   })

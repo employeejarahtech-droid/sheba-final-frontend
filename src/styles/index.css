@@ -518,6 +518,32 @@ table.dataTable > tbody > tr.child {
   border: 0px !important;
 }
 
+/* Select component text truncation fix */
+[data-slot="select-value"] {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  max-width: 100% !important;
+  display: block !important;
+}
+
+/* Ensure SelectTrigger respects container width */
+[data-radix-select-trigger] {
+  overflow: hidden !important;
+}
+
+/* Fix SelectContent (dropdown) width to stay within modal bounds */
+[data-radix-select-content] {
+  max-width: calc(450px - 4rem) !important;
+  overflow: hidden !important;
+}
+
+[data-radix-select-item] {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
 /* ── Professional Print Styles ───────────────────────────── */
 @media print {
   /* Hide everything except the report content */
@@ -630,8 +656,8 @@ table.dataTable > tbody > tr.child {
   }
 
   th {
-    background-color: #1e293b !important;
-    color: white !important;
+    background-color: transparent !important;
+    color: black !important;
     padding: 6px 8px !important;
     text-align: left !important;
     font-weight: 600 !important;
@@ -646,7 +672,7 @@ table.dataTable > tbody > tr.child {
   }
 
   tr:nth-child(even) td {
-    background-color: #f8fafc !important;
+    background-color: transparent !important;
   }
 
   /* Page breaks */

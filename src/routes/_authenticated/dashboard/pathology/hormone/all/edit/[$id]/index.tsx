@@ -25,6 +25,7 @@ type LabTest = {
   test_result: string | null
   machine_id: number | null
   test_carried_out_by: string | null
+  status: 'complete' | 'incomplete' | null
   created_at: string | null
   updated_at: string | null
 }
@@ -53,6 +54,7 @@ function EditReportHormone() {
   const [testResults, setTestResults] = useState<Record<number, string>>({});
   const [testCarriedOutBy, setTestCarriedOutBy] = useState('');
   const [machineId, setMachineId] = useState('');
+  const [status, setStatus] = useState<'complete' | 'incomplete'>('incomplete');
 
   // Fetch Hormon data for this invoice (includes invoice info + Hormon records)
   const { data: invoiceData, isLoading } = useQuery({
@@ -102,6 +104,7 @@ function EditReportHormone() {
       const first = invoiceData.hormon_all_info[0];
       setTestCarriedOutBy(first?.test_carried_out_by || '');
       setMachineId(first?.machine_id ? String(first.machine_id) : '');
+      setStatus(first?.status || 'incomplete');
     }
   }, [invoiceData]);
 
@@ -119,6 +122,7 @@ function EditReportHormone() {
             test_result: testResults[hormonId],
             machine_id: machineId ? parseInt(machineId) : null,
             test_carried_out_by: testCarriedOutBy || null,
+            status: status,
           }),
         }
       );
@@ -249,6 +253,35 @@ function EditReportHormone() {
                       {machine.name}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+
+          {/* Status */}
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                  <Activity className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold">Report Status</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Mark report as complete or incomplete</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <Select
+                value={status}
+                onValueChange={(value: 'complete' | 'incomplete') => setStatus(value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="incomplete">Incomplete</SelectItem>
+                  <SelectItem value="complete">Complete</SelectItem>
                 </SelectContent>
               </Select>
             </CardContent>

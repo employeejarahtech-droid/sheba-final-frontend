@@ -27,6 +27,7 @@ type TestItem = {
     match_table_name: number
     price: number
     sample_collection_room_id?: number;
+    sample_normal_range?: string;
     sampleCollectionRoom?: {
         id: number;
         name: string;
@@ -253,7 +254,7 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
             newRow.className = 'child-row-detail';
             const cell = document.createElement('td');
             cell.className = 'p-4 bg-muted/50';
-            cell.colSpan = 7;
+            cell.colSpan = 8;
             cell.appendChild(cardContainer);
             newRow.appendChild(cell);
 
@@ -305,7 +306,7 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
                                 data-price="${Number(row.price || 0).toFixed(2)}"
                                 data-currency="${currencySymbol}"
                                 data-id="${row.id}">+</button>
-                        <span>${row.id}</span>
+                        <span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${row.id.toString().startsWith('T-') ? row.id : 'T-' + row.id}</span>
                     </div>
                 `;
             },
@@ -326,16 +327,28 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
             render: (_data: any, _type: string, row: TestItem) => {
                 const value = row.match_table_name;
                 if (!value) return '<span class="text-red-500 font-semibold">N/A</span>';
-                
+
                 const matchedTable = testTables.find(
                     (t: any) => t.table_name === String(value) || t.display_name === String(value)
                 );
-                
+
                 return matchedTable
                     ? `<span class="font-medium text-blue-600 dark:text-blue-400">${matchedTable.display_name}</span>`
                     : `<span>${String(value)}</span>`;
             },
             defaultContent: "",
+        },
+        {
+            data: "sample_normal_range",
+            title: "Normal Range",
+            orderable: true,
+            responsivePriority: 4,
+            render: (data: any) => {
+                const range = data;
+                if (!range) return '<span class="text-muted-foreground">-</span>';
+                return `<span class="text-sm font-medium text-gray-700 dark:text-gray-300">${range}</span>`;
+            },
+            defaultContent: "-",
         },
         {
             data: null,
@@ -392,11 +405,15 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
             responsivePriority: 1,
             render: (_data: any, _type: string, row: TestItem) => {
                 return `
-                    <div class="flex gap-2">
-                        <a href="/dashboard/outdoor/master/tests/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-4 py-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <a href="/dashboard/outdoor/master/tests/${row.id}"
+                           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                             View
                         </a>
-                        <a href="/dashboard/outdoor/master/tests/edit/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2">
+                        <a href="/dashboard/outdoor/master/tests/edit/${row.id}"
+                           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                             Edit
                         </a>
                     </div>

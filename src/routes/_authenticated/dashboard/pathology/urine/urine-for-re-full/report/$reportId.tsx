@@ -1,11 +1,12 @@
 import { AppHeader } from '@/components/layout/app-header';
 import { Main } from '@/components/layout/main';
 import { Button } from '@/components/ui/button';
-import { outdoorInvoices } from '@/data/data';
 import UrineForReFullReportDetails from '@/features/pathology/urine/UrineForReFullReportDetails'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeft, Printer } from 'lucide-react';
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getCookie } from '@/lib/cookies';
 
 export const Route = createFileRoute(
   '/_authenticated/dashboard/pathology/urine/urine-for-re-full/report/$reportId',
@@ -15,8 +16,23 @@ export const Route = createFileRoute(
 
 function UrineForReFullReport() {
   const { reportId } = Route.useParams();
-  const invoice = outdoorInvoices.find((item) => item.id === Number(reportId));
+  const token = getCookie('accessToken');
   const [paddingTop, setPaddingTop] = useState(100);
+
+  // Fetch the actual urine R/E record (incl. patient/doctor) for this report.
+  const { data: reportData, isLoading } = useQuery({
+    queryKey: ["urine-re", reportId],
+    queryFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/urine-re/${reportId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error("Failed to fetch urine RE report");
+      const json = await res.json();
+      return json.data;
+    },
+    enabled: !!token && !!reportId,
+  });
 
   // Generate padding options from 10 to 200 in increments of 5
   const paddingOptions = Array.from({ length: 39 }, (_, i) => (i + 2) * 5); // [10, 15, 20, ..., 200]
@@ -54,7 +70,11 @@ function UrineForReFullReport() {
             </Button>
           </div>
         </div>
-        <UrineForReFullReportDetails invoice={invoice} paddingTop={paddingTop} />
+        {isLoading ? (
+          <div className="p-10 text-center text-muted-foreground">Loading report…</div>
+        ) : (
+          <UrineForReFullReportDetails report={reportData} paddingTop={paddingTop} />
+        )}
       </Main>
 
     </>

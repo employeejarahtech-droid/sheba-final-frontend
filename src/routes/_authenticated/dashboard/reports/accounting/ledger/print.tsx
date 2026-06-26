@@ -122,8 +122,8 @@ function LedgerPrint() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <p className="text-red-500 font-medium">No account selected</p>
-          <Button variant="outline" className="mt-4" onClick={() => window.close()}>
-            Close
+          <Button variant="outline" className="mt-4" onClick={() => window.history.back()}>
+            Back
           </Button>
         </div>
       </div>
@@ -173,9 +173,9 @@ function LedgerPrint() {
 
       {/* Back & Print Buttons */}
       <div className="flex justify-between items-center mb-6 print:hidden">
-        <Button variant="outline" size="sm" onClick={() => window.close()}>
+        <Button variant="outline" size="sm" onClick={() => window.history.back()}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Close
+          Back
         </Button>
         <Button size="sm" onClick={() => window.print()}>
           <Printer className="w-4 h-4 mr-2" />

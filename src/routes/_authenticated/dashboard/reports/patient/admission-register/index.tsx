@@ -20,6 +20,7 @@ const admissionSearchSchema = z.object({
   search: z.string().catch(''),
   from: z.string().catch(''),
   to: z.string().catch(''),
+  status: z.string().catch(''),
 })
 
 interface AdmissionItem {
@@ -74,6 +75,7 @@ function AdmissionRegisterPage() {
   const search = searchParams?.search || "";
   const from = searchParams?.from || "";
   const to = searchParams?.to || "";
+  const status = searchParams?.status || "";
 
   const setPage = (newPage: number) => {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
@@ -90,11 +92,14 @@ function AdmissionRegisterPage() {
   const setTo = (newTo: string) => {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, to: newTo, page: 1 }) });
   };
+  const setStatus = (newStatus: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, status: newStatus, page: 1 }) });
+  };
 
   const token = getCookie('accessToken')
 
   const { data, isLoading } = useQuery({
-    queryKey: ['admission-register', page, limit, search, from, to],
+    queryKey: ['admission-register', page, limit, search, from, to, status],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: String(page),
@@ -102,6 +107,7 @@ function AdmissionRegisterPage() {
         search,
         ...(from ? { start_date: from } : {}),
         ...(to ? { end_date: to } : {}),
+        ...(status ? { status } : {}),
       })
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admission?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -509,6 +515,17 @@ function AdmissionRegisterPage() {
           isLoading={isLoading}
           filterSlot={
             <div className="flex items-center gap-1.5">
+              <Select value={status || "all"} onValueChange={(v) => setStatus(v === "all" ? "" : v)}>
+                <SelectTrigger className="w-[140px] h-9 rounded-md border-gray-200 dark:border-gray-700 bg-transparent text-sm">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="discharged">Discharged</SelectItem>
+                  <SelectItem value="critical">Critical</SelectItem>
+                </SelectContent>
+              </Select>
               <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>
                 <SelectTrigger className="w-[140px] h-9 rounded-md border-gray-200 dark:border-gray-700 bg-transparent text-sm">
                   <SelectValue placeholder="Filter by" />
@@ -552,7 +569,8 @@ function AdmissionRegisterPage() {
                 search={{
                   search: search || undefined,
                   start_date: from || undefined,
-                  end_date: to || undefined
+                  end_date: to || undefined,
+                  status: status || undefined,
                 }}
               >
                 <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>

@@ -21,11 +21,22 @@ export const Route = createFileRoute('/_authenticated/dashboard/reports/patient/
 interface BedItem {
   id: number
   name: string
+  code: string | null
   type: string | null
   ward_name: string | null
+  ward: string | null
   status: 'occupied' | 'available' | 'maintenance' | string
   patient_name: string | null
   notes: string | null
+  current_admission?: {
+    patient_name: string | null
+  } | null
+  admission?: {
+    patient_name: string | null
+  } | null
+  patient?: {
+    name: string | null
+  } | null
 }
 
 function BedOccupancyPrint() {
@@ -218,9 +229,9 @@ function BedOccupancyPrint() {
 
       {/* Back & Print Buttons */}
       <div className="flex justify-between items-center mb-6 print:hidden">
-        <Button variant="outline" size="sm" onClick={() => window.close()}>
+        <Button variant="outline" size="sm" onClick={() => window.history.back()}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Close
+          Back
         </Button>
         <Button size="sm" onClick={() => window.print()}>
           <Printer className="w-4 h-4 mr-2" />
@@ -316,7 +327,9 @@ function BedOccupancyPrint() {
                   </span>
                 ) : '-'}
               </td>
-              <td className="px-1.5 py-1 text-[10px]">{item.patient_name || <span className="text-gray-400 italic text-[9px]">None</span>}</td>
+              <td className="px-1.5 py-1 text-[10px]">
+                {item.current_admission?.patient_name || item.admission?.patient_name || item.patient?.name || item.patient_name || <span className="text-gray-400 italic text-[9px]">None</span>}
+              </td>
               <td className="px-1.5 py-1 text-[10px]">{item.notes || <span className="text-gray-400 italic text-[9px]">No notes</span>}</td>
             </tr>
           ))}

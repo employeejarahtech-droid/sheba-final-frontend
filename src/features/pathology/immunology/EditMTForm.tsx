@@ -8,7 +8,7 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
-import { Syringe } from "lucide-react";
+import { Syringe, Activity } from "lucide-react";
 
 import {
     Form,
@@ -38,6 +38,7 @@ const tuberculinSchema = z.object({
     comments: z.string().optional(),
     testCarriedOutBy: z.string().optional(),
     machineId: z.string().optional(),
+    status: z.union([z.literal('complete'), z.literal('incomplete')]),
 });
 
 type TuberculinFormValues = z.infer<typeof tuberculinSchema>;
@@ -64,6 +65,7 @@ export function EditMTForm({ open, setOpen, reportId, invoiceId }: TuberculinTes
             comments: "",
             testCarriedOutBy: "",
             machineId: "",
+            status: "incomplete",
         },
     });
 
@@ -93,6 +95,7 @@ export function EditMTForm({ open, setOpen, reportId, invoiceId }: TuberculinTes
                 comments: mtData.remarks || '',
                 testCarriedOutBy: mtData.test_carried_out_by || '',
                 machineId: mtData.machine_id ? String(mtData.machine_id) : '',
+                status: String(mtData.status).trim().toLowerCase() === 'complete' ? 'complete' : 'incomplete',
             })
         }
     }, [mtData, form]);
@@ -114,6 +117,7 @@ export function EditMTForm({ open, setOpen, reportId, invoiceId }: TuberculinTes
                     remarks: payload.comments,
                     test_carried_out_by: payload.testCarriedOutBy,
                     machine_id: payload.machineId ? parseInt(payload.machineId) : null,
+                    status: payload.status,
                 }),
             });
 
@@ -184,14 +188,12 @@ export function EditMTForm({ open, setOpen, reportId, invoiceId }: TuberculinTes
                 </SheetHeader>
 
                 <div className="px-4">
-                    <PatientInvoiceInfo
-                        invoiceInfo={{
-                            invoiceNo: "RPT-1009",
-                            patientName: "Rafiq Ahmed",
-                            age: "29 Years",
-                            gender: "Male",
-                        }}
-                    />
+                    <PatientInvoiceInfo invoiceInfo={{
+                        invoiceNo: mtData?.invoice_id ? `RPT-${mtData.invoice_id}` : "—",
+                        patientName: mtData?.outdoor_invoice?.patient_name || "—",
+                        age: mtData?.outdoor_invoice?.age_text || mtData?.outdoor_invoice?.age || "—",
+                        gender: mtData?.outdoor_invoice?.sex || "—",
+                    }} />
                 </div>
 
                 <Form {...form}>
@@ -280,6 +282,42 @@ export function EditMTForm({ open, setOpen, reportId, invoiceId }: TuberculinTes
                                 </FormItem>
                             )}
                         />
+
+                        {/* Report Status */}
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border rounded-lg p-4">
+                            <div className="flex items-center gap-2.5 mb-3">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md">
+                                    <Activity className="h-4 w-4 text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-semibold text-gray-800">Report Status</h3>
+                                    <p className="text-xs text-gray-600">Mark report as complete or incomplete</p>
+                                </div>
+                            </div>
+                            <FormField
+                                control={form.control}
+                                name="status"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                value={field.value === 'complete' ? 'complete' : 'incomplete'}
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select status" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="incomplete">Incomplete</SelectItem>
+                                                    <SelectItem value="complete">Complete</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
 
                         {/* Buttons */}
                         <div className="flex justify-center gap-2 pt-4">

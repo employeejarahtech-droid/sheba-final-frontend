@@ -31,8 +31,10 @@ import {
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 import { Main } from '@/components/layout/main';
 import { AppHeader } from '@/components/layout/app-header';
@@ -46,6 +48,7 @@ import {
   MessageSquare,
   Stethoscope,
   User,
+  Activity,
 } from 'lucide-react';
 
 export const Route = createFileRoute(
@@ -79,9 +82,20 @@ const semenAnalysisSchema = z.object({
   comment: z.string().optional(),
   testCarriedOutBy: z.string().optional(),
   machineId: z.string().optional(),
+  status: z.union([z.literal('complete'), z.literal('incomplete')]),
 });
 
 type SemenFormValues = z.infer<typeof semenAnalysisSchema>;
+
+// ------------- Expected result option lists -------------
+const SAMPLE_COLLECTION_OPTIONS = ["Masturbation", "Coitus Interruptus", "Condom Method"];
+const COLOR_OPTIONS = ["Greyish White", "White", "Yellowish", "Yellow", "Brownish", "Reddish"];
+const ODOUR_OPTIONS = ["Characteristic (Sui generis)", "Normal", "Foul", "Pungent"];
+const CONSISTENCY_OPTIONS = ["Viscous", "Highly Viscous", "Watery", "Liquefied"];
+const FRUCTOSE_OPTIONS = ["Present", "Absent"];
+const EPITHELIAL_OPTIONS = ["Nil", "Few (0-2/HPF)", "Moderate (3-5/HPF)", "Plenty (>5/HPF)"];
+const PUS_CELLS_OPTIONS = ["Nil", "0-2", "2-4", "4-6", "6-8", "8-10", "10-15", "Plenty"];
+const RBC_OPTIONS = ["Nil", "0-2", "2-4", "4-6", "6-8", "8-10", "10-15", "Plenty"];
 
 // Shared card header styling (matches outdoor/master/tests/create)
 const cardHeaderClass =
@@ -92,6 +106,24 @@ function EditSemenReport() {
   const { reportId } = Route.useParams();
   const token = getCookie('accessToken');
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // Fetch existing semen report
+  const { data: semenData } = useQuery({
+    queryKey: ["semen", reportId],
+    queryFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/semen/${reportId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch semen analysis report");
+      const result = await res.json();
+      return result.data;
+    },
+    enabled: !!token && !!reportId,
+  });
 
   // Fetch machines from API
   const { data: machinesData } = useQuery({
@@ -132,12 +164,87 @@ function EditSemenReport() {
       comment: "",
       testCarriedOutBy: "",
       machineId: "",
+      status: "incomplete",
+    },
+  });
+
+  // Populate the form once the existing report is loaded
+  useEffect(() => {
+    if (semenData) {
+      form.reset({
+        sampleCollection: semenData.sample_collection || "",
+        timeOfEjaculation: semenData.time_of_ejaculation || "",
+        timeOfExamination: semenData.time_of_examination || "",
+        volume: semenData.volume || "",
+        color: semenData.color || "",
+        odour: semenData.odour || "",
+        consistency: semenData.consistency || "",
+        ph: semenData.ph || "",
+        fructose: semenData.fructose || "",
+        pusCells: semenData.pus_cells || "",
+        epithelial: semenData.epithelial || "",
+        rbc: semenData.rbc || "",
+        spermCount: semenData.count || "",
+        motility: semenData.motility || "",
+        morphology: semenData.morphology || "",
+        comment: semenData.remarks || "",
+        testCarriedOutBy: semenData.test_carried_out_by || "",
+        machineId: semenData.machine_id?.toString() || "",
+        status: String(semenData.status).trim().toLowerCase() === 'complete' ? 'complete' : 'incomplete',
+      });
+    }
+  }, [semenData, form]);
+
+  const updateSemenMutation = useMutation({
+    mutationFn: async (values: SemenFormValues) => {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/semen/${reportId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          invoice_id: semenData?.invoice_id,
+          sample_collection: values.sampleCollection,
+          time_of_ejaculation: values.timeOfEjaculation,
+          time_of_examination: values.timeOfExamination,
+          volume: values.volume,
+          color: values.color,
+          odour: values.odour,
+          consistency: values.consistency,
+          ph: values.ph,
+          fructose: values.fructose,
+          pus_cells: values.pusCells,
+          epithelial: values.epithelial,
+          rbc: values.rbc,
+          count: values.spermCount,
+          motility: values.motility,
+          morphology: values.morphology,
+          remarks: values.comment,
+          test_carried_out_by: values.testCarriedOutBy,
+          machine_id: values.machineId ? parseInt(values.machineId) : null,
+          status: values.status,
+        }),
+      });
+
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || "Failed to update semen analysis report");
+      }
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || "Semen analysis report updated successfully!");
+      queryClient.invalidateQueries({ queryKey: ["semen", reportId] });
+      navigate({ to: '/dashboard/pathology/hormone/semen' });
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Something went wrong");
     },
   });
 
   const onSubmit = (values: SemenFormValues) => {
-    // Replace with actual save API call
-    console.log("Semen Analysis Report saved:", values);
+    updateSemenMutation.mutate(values);
   };
 
   const handleClose = () => {
@@ -196,11 +303,52 @@ function EditSemenReport() {
               <CardContent className="p-4">
                 <PatientInvoiceInfo
                   invoiceInfo={{
-                    invoiceNo: "SEM-1207",
-                    patientName: "Patient Name",
-                    age: "—",
-                    gender: "Male",
+                    invoiceNo: semenData?.invoice_id ? `SEM-${semenData.invoice_id}` : "—",
+                    patientName: semenData?.outdoor_invoice?.patient_name || "—",
+                    age: semenData?.outdoor_invoice?.age_text || semenData?.outdoor_invoice?.age || "—",
+                    gender: semenData?.outdoor_invoice?.sex || "—",
                   }}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Status */}
+            <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+              <CardHeader className={cardHeaderClass}>
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                    <Activity className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-bold">Report Status</CardTitle>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Mark report as complete or incomplete</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-4">
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Report Status</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="incomplete">Incomplete</SelectItem>
+                            <SelectItem value="complete">Complete</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </CardContent>
             </Card>
@@ -227,7 +375,16 @@ function EditSemenReport() {
                       <FormItem>
                         <FormLabel>Sample Collection</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., Masturbation / Coitus Interruptus" {...field} />
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select collection method" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {SAMPLE_COLLECTION_OPTIONS.map((option) => (
+                                <SelectItem key={option} value={option}>{option}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -299,7 +456,18 @@ function EditSemenReport() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Color</FormLabel>
-                          <FormControl><Input placeholder="Enter colour" {...field} /></FormControl>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select colour" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {COLOR_OPTIONS.map((option) => (
+                                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -312,7 +480,18 @@ function EditSemenReport() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Odour</FormLabel>
-                          <FormControl><Input placeholder="e.g., Foul / Normal" {...field} /></FormControl>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select odour" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {ODOUR_OPTIONS.map((option) => (
+                                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -324,7 +503,18 @@ function EditSemenReport() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Consistency</FormLabel>
-                          <FormControl><Input placeholder="e.g., Viscous / Watery" {...field} /></FormControl>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select consistency" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {CONSISTENCY_OPTIONS.map((option) => (
+                                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -367,7 +557,18 @@ function EditSemenReport() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Fructose</FormLabel>
-                        <FormControl><Input placeholder="Enter fructose result" {...field} /></FormControl>
+                        <FormControl>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select fructose result" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {FRUCTOSE_OPTIONS.map((option) => (
+                                <SelectItem key={option} value={option}>{option}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -397,7 +598,18 @@ function EditSemenReport() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Pus Cells (per HPF)</FormLabel>
-                        <FormControl><Input placeholder="e.g., 0-2" {...field} /></FormControl>
+                        <FormControl>
+                          <Select onValueChange={field.onChange} value={field.value || undefined}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select pus cells" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {PUS_CELLS_OPTIONS.map((option) => (
+                                <SelectItem key={option} value={option}>{option}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -409,7 +621,18 @@ function EditSemenReport() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Epithelial</FormLabel>
-                        <FormControl><Input placeholder="Enter epithelial cells" {...field} /></FormControl>
+                        <FormControl>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select epithelial cells" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {EPITHELIAL_OPTIONS.map((option) => (
+                                <SelectItem key={option} value={option}>{option}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -421,7 +644,18 @@ function EditSemenReport() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>RBC (per HPF)</FormLabel>
-                        <FormControl><Input placeholder="Enter RBC" {...field} /></FormControl>
+                        <FormControl>
+                          <Select onValueChange={field.onChange} value={field.value || undefined}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select RBC" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {RBC_OPTIONS.map((option) => (
+                                <SelectItem key={option} value={option}>{option}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -593,10 +827,10 @@ function EditSemenReport() {
               <Button
                 type="submit"
                 size="lg"
-                disabled={form.formState.isSubmitting}
+                disabled={updateSemenMutation.isPending || !semenData}
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white min-w-[200px]"
               >
-                {form.formState.isSubmitting ? "Saving..." : "Save Report"}
+                {updateSemenMutation.isPending ? "Saving..." : "Save Report"}
               </Button>
             </div>
           </form>

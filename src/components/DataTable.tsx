@@ -351,10 +351,6 @@ export function DataTable<TData extends Record<string, any>>({
             background: linear-gradient(to bottom right, #2563eb, #60a5fa) !important;
             color: white !important;
           }
-          .dt-sticky-left .font-mono,
-          .dt-sticky-left span {
-            color: white !important;
-          }
           .dt-sticky-left a,
           .dt-sticky-left button.expand-btn {
             color: white !important;

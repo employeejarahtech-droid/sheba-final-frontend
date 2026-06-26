@@ -8,7 +8,7 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
-import { FlaskConical } from "lucide-react";
+import { FlaskConical, Activity } from "lucide-react";
 
 import {
     Form,
@@ -21,10 +21,10 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MachineSelect } from "./MachineSelect";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,6 +39,7 @@ const ptSchema = z.object({
     remarks: z.string().optional(),
     machineId: z.string().optional(),
     testCarriedOutBy: z.string().optional(),
+    status: z.union([z.literal('complete'), z.literal('incomplete')]),
 });
 
 type ProthrombinFormValues = z.infer<typeof ptSchema>;
@@ -64,6 +65,7 @@ export function EditProthrombinTimeForm({ open, setOpen, reportId, invoiceId }: 
             remarks: "",
             machineId: "",
             testCarriedOutBy: "",
+            status: "incomplete",
         },
     });
 
@@ -108,6 +110,7 @@ export function EditProthrombinTimeForm({ open, setOpen, reportId, invoiceId }: 
                 remarks: prothombinTime.remarks || "",
                 machineId: prothombinTime.machine_id?.toString() || "",
                 testCarriedOutBy: prothombinTime.test_carried_out_by || "",
+                status: String(prothombinTime.status).trim().toLowerCase() === 'complete' ? 'complete' : 'incomplete',
             })
         }
     }, [prothombinTime]);
@@ -117,6 +120,22 @@ export function EditProthrombinTimeForm({ open, setOpen, reportId, invoiceId }: 
 
     const updateProthombinTimeMutation = useMutation({
         mutationFn: async (data: ProthrombinFormValues) => {
+            // Build the API payload
+            const apiPayload: any = {
+                invoice_id: invoiceId,
+                pt_test: data.pt_test?.toString() || null,
+                control_pt: data.control_pt?.toString() || null,
+                inr: data.inr?.toString() || null,
+                remarks: data.remarks,
+                test_carried_out_by: data.testCarriedOutBy,
+                status: data.status,
+            };
+
+            // Only include machine_id if it exists
+            if (data.machineId && data.machineId !== '') {
+                apiPayload.machine_id = parseInt(data.machineId);
+            }
+
             const res = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/prothombin-time/${reportId}`,
                 {
@@ -125,24 +144,17 @@ export function EditProthrombinTimeForm({ open, setOpen, reportId, invoiceId }: 
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
                     },
-                    body: JSON.stringify({
-                        invoice_id: invoiceId,
-                        pt_test: data.pt_test?.toString() || null,
-                        control_pt: data.control_pt?.toString() || null,
-                        inr: data.inr?.toString() || null,
-                        remarks: data.remarks,
-                        machine_id: data.machineId ? parseInt(data.machineId) : null,
-                        test_carried_out_by: data.testCarriedOutBy,
-                    }),
+                    body: JSON.stringify(apiPayload),
                 }
             );
             if (!res.ok) throw new Error("Failed to update prothombin time report");
             return res.json();
         },
         onSuccess: (data) => {
-            console.log("Peripheral Blood Film Updated API Response:", data);
+            console.log("Prothombin Time Updated API Response:", data);
             queryClient.invalidateQueries({ queryKey: ["prothombin-time", reportId] });
-            toast.success("Peripheral Blood Film updated successfully");
+            queryClient.invalidateQueries({ queryKey: ["prothombin-time"] });
+            toast.success("Prothombin Time updated successfully");
             navigate({ to: "/dashboard/pathology/hematology/prothom-bin-time-full" });
         },
         onError: (error: Error) => {
@@ -174,14 +186,12 @@ export function EditProthrombinTimeForm({ open, setOpen, reportId, invoiceId }: 
                 </SheetHeader>
 
                 <div className="px-4">
-                    <PatientInvoiceInfo
-                        invoiceInfo={{
-                            invoiceNo: "RPT-1005",
-                            patientName: "Hasina Khatun",
-                            age: "45 Years",
-                            gender: "Female",
-                        }}
-                    />
+                    <PatientInvoiceInfo invoiceInfo={{
+                        invoiceNo: prothombinTime?.invoice_id ? `RPT-${prothombinTime.invoice_id}` : "—",
+                        patientName: prothombinTime?.outdoor_invoice?.patient_name || "—",
+                        age: prothombinTime?.outdoor_invoice?.age_text || prothombinTime?.outdoor_invoice?.age || "—",
+                        gender: prothombinTime?.outdoor_invoice?.sex || "—",
+                    }} />
                 </div>
 
                 <Form {...form}>
@@ -252,37 +262,64 @@ export function EditProthrombinTimeForm({ open, setOpen, reportId, invoiceId }: 
                         {/* Test Carried Out By */}
                         <FormField
                             control={form.control}
-                            name="testCarriedOutBy"
+                            name="machineId"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="w-full">
                                     <FormLabel>Test Carried Out By (Machine)</FormLabel>
                                     <FormControl>
-                                        <Select
-                                            onValueChange={(value) => {
-                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                        <MachineSelect
+                                            value={field.value}
+                                            onChange={(value) => {
+                                                field.onChange(value);
+                                                // Find the machine and update testCarriedOutBy with the name
+                                                const selectedMachine = machineList.find((m: any) => m.id === parseInt(value));
                                                 if (selectedMachine) {
-                                                    field.onChange(value);
-                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                    form.setValue('testCarriedOutBy', selectedMachine.name);
                                                 }
                                             }}
-                                            value={field.value}
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select machine" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {machineList.map((machine: any) => (
-                                                    <SelectItem key={machine.id} value={machine.name}>
-                                                        {machine.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                            placeholder="Select machine"
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
+
+                        {/* Report Status */}
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border rounded-lg p-4">
+                            <div className="flex items-center gap-2.5 mb-3">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md">
+                                    <Activity className="h-4 w-4 text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-semibold text-gray-800">Report Status</h3>
+                                    <p className="text-xs text-gray-600">Mark report as complete or incomplete</p>
+                                </div>
+                            </div>
+                            <FormField
+                                control={form.control}
+                                name="status"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                value={field.value === 'complete' ? 'complete' : 'incomplete'}
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select status" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="incomplete">Incomplete</SelectItem>
+                                                    <SelectItem value="complete">Complete</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
 
                         {/* Buttons */}
                         <div className="flex justify-center gap-2 pt-4">

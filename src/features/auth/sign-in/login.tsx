@@ -1,37 +1,106 @@
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import dashboardDark from './assets/Sheba-Background.jpg'
-import dashboardLight from './assets/Sheba-Background.jpg'
 import { UserAuthForm } from './components/user-auth-form'
+import { getSubdomainInfo } from '@/lib/subdomain'
+import { Building2 } from 'lucide-react'
+
+interface LoginSettings {
+  logo?: string
+  bgImage?: string
+  informationText?: string
+  company_name?: string
+}
 
 export function Login() {
   const [companyName, setCompanyName] = useState<string>('HMS')
   const [profileImage, setProfileImage] = useState<string | null>(null)
+  const [bgImage, setBgImage] = useState<string | null>(null)
+  const [informationText, setInformationText] = useState<string>('')
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Fetch company settings (public endpoint - no auth required)
+  // Fetch tenant login settings (public endpoint - no auth required)
   useEffect(() => {
     const fetchSettings = async () => {
+      setIsLoading(true)
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/company-settings/public`)
+        const { isCompanyPortal, subdomain } = getSubdomainInfo()
 
-        if (res.ok) {
-          const response = await res.json()
-          if (response.data?.company_name) {
-            setCompanyName(response.data.company_name)
-          }
-          let logoUrl = response.data?.company_logo || null
-          if (logoUrl && !logoUrl.startsWith('http') && !logoUrl.startsWith('data:')) {
-            logoUrl = `${import.meta.env.VITE_API_URL || ''}${logoUrl}`
-          }
-          setProfileImage(logoUrl)
+        // Only fetch settings for tenant subdomains
+        if (!isCompanyPortal || !subdomain) {
+          console.log('Platform domain detected - should use PlatformLogin component')
+          setIsLoading(false)
+          return
+        }
 
-          // Update favicon dynamically
-          if (logoUrl) {
-            updateFavicon(logoUrl)
+        // Try to fetch tenant-specific login settings
+        let settingsFetched = false
+
+        try {
+          const url = `${import.meta.env.VITE_API_URL || ''}/api/public/app-settings/login-settings/${subdomain}`
+          const res = await fetch(url)
+
+          if (res.ok) {
+            const response = await res.json()
+            const settings: LoginSettings = response.data || {}
+
+            // Logo
+            let logoUrl = settings.logo || null
+            if (logoUrl && !logoUrl.startsWith('http') && !logoUrl.startsWith('data:')) {
+              logoUrl = `${import.meta.env.VITE_API_URL || ''}${logoUrl}`
+            }
+            setProfileImage(logoUrl)
+
+            // Background image
+            let bgImageUrl = settings.bgImage || null
+            if (bgImageUrl && !bgImageUrl.startsWith('http') && !bgImageUrl.startsWith('data:')) {
+              bgImageUrl = `${import.meta.env.VITE_API_URL || ''}${bgImageUrl}`
+            }
+            setBgImage(bgImageUrl)
+
+            // Information text
+            setInformationText(settings.informationText || '')
+
+            // Update favicon dynamically
+            if (logoUrl) {
+              updateFavicon(logoUrl)
+            }
+
+            settingsFetched = true
+          }
+        } catch (err) {
+          console.log('Login settings endpoint not available, using defaults')
+        }
+
+        // If login settings failed, try tenant settings as fallback for company name/logo
+        if (!settingsFetched) {
+          try {
+            const fallbackUrl = `${import.meta.env.VITE_API_URL || ''}/api/platform/public/tenant-settings/${subdomain}`
+            const fallbackRes = await fetch(fallbackUrl)
+
+            if (fallbackRes.ok) {
+              const response = await fallbackRes.json()
+              if (response.data?.company_name) {
+                setCompanyName(response.data.company_name)
+              }
+              let logoUrl = response.data?.company_logo || null
+              if (logoUrl && !logoUrl.startsWith('http') && !logoUrl.startsWith('data:')) {
+                logoUrl = `${import.meta.env.VITE_API_URL || ''}${logoUrl}`
+              }
+              setProfileImage(logoUrl)
+
+              if (logoUrl) {
+                updateFavicon(logoUrl)
+              }
+            }
+          } catch (err) {
+            console.log('Tenant settings endpoint not available, using defaults')
           }
         }
+
       } catch (error) {
         console.error('Failed to fetch settings:', error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -67,6 +136,20 @@ export function Login() {
   // Get first letter for fallback
   const firstLetter = companyName.charAt(0).toUpperCase()
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50'>
+        <div className='text-center space-y-4'>
+          <div className='h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center mx-auto shadow-lg animate-pulse'>
+            <Building2 className='h-6 w-6 text-white' />
+          </div>
+          <p className='text-sm text-gray-600'>Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className='relative container grid h-svh flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0'>
       <div className='lg:p-8'>
@@ -75,12 +158,12 @@ export function Login() {
             {profileImage ? (
               <img
                 src={profileImage}
-                alt='Company Logo'
-                className='h-16 w-16 object-cover rounded-full border-2 border-gray-200 shadow-lg'
+                alt={`${companyName} Logo`}
+                className='h-20 w-20 object-contain rounded-2xl border-2 border-gray-200 shadow-lg bg-white'
               />
             ) : (
-              <div className='h-16 w-16 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg'>
-                <span className='text-white font-bold text-2xl'>{firstLetter}</span>
+              <div className='h-20 w-20 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg'>
+                <span className='text-white font-bold text-3xl'>{firstLetter}</span>
               </div>
             )}
             <div className='text-center'>
@@ -89,6 +172,16 @@ export function Login() {
             </div>
           </div>
         </div>
+
+        {/* Information Text Section */}
+        {informationText && (
+          <div className='mx-auto w-full max-w-sm mb-6'>
+            <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
+              <p className='text-sm text-blue-800'>{informationText}</p>
+            </div>
+          </div>
+        )}
+
         <div className='mx-auto flex w-full max-w-sm flex-col justify-center space-y-6'>
           <div className='flex flex-col space-y-2 text-start'>
             <h2 className='text-2xl font-bold tracking-tight'>Sign in to your account</h2>
@@ -103,23 +196,44 @@ export function Login() {
       <div
         className={cn(
           'bg-muted relative h-full overflow-hidden max-lg:hidden',
-          '[&>img]:absolute [&>img]:h-full [&>img]:w-full [&>img]:object-cover [&>img]:object-top-left [&>img]:select-none'
+          '[&>img]:absolute [&>img]:h-full [&>img]:w-full [&>img]:object-cover [&>img]:object-top [&>img]:select-none'
         )}
       >
-        <img
-          src={dashboardLight}
-          className='dark:hidden'
-          width={1024}
-          height={1151}
-          alt='Shadcn-Admin'
-        />
-        <img
-          src={dashboardDark}
-          className='hidden dark:block'
-          width={1024}
-          height={1138}
-          alt='Shadcn-Admin'
-        />
+        {bgImage ? (
+          <img
+            src={bgImage}
+            className='dark:hidden'
+            width={1920}
+            height={1080}
+            alt={`${companyName} Facility`}
+          />
+        ) : (
+          <img
+            src='https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1920&auto=format&fit=crop'
+            className='dark:hidden'
+            width={1920}
+            height={1080}
+            alt='Medical Facility'
+          />
+        )}
+        {bgImage && (
+          <img
+            src={bgImage}
+            className='hidden dark:block'
+            width={1920}
+            height={1080}
+            alt={`${companyName} Facility`}
+          />
+        )}
+        {!bgImage && (
+          <img
+            src='https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1920&auto=format&fit=crop'
+            className='hidden dark:block'
+            width={1920}
+            height={1080}
+            alt='Medical Facility'
+          />
+        )}
       </div>
     </div>
   )

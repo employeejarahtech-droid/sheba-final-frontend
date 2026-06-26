@@ -1,14 +1,29 @@
-import { Button } from "@/components/ui/button";
 import { ReportFooter } from '@/components/pathology/ReportFooter'
 
 interface SemenReportDetailsProps {
     semenData: {
         id: number;
         invoice_id: number;
-        volume: string;
-        count: string;
-        motility: string;
-        morphology: string;
+        // Collection & timing
+        sample_collection?: string;
+        time_of_ejaculation?: string;
+        time_of_examination?: string;
+        // Physical
+        volume?: string;
+        color?: string;
+        odour?: string;
+        consistency?: string;
+        // Chemical
+        ph?: string;
+        fructose?: string;
+        // Microscopic
+        pus_cells?: string;
+        epithelial?: string;
+        rbc?: string;
+        // Sperm analysis
+        count?: string;
+        motility?: string;
+        morphology?: string;
         remarks?: string;
         test_carried_out_by?: string;
         created_at: string;
@@ -30,7 +45,22 @@ export default function SemenReportDetails({ semenData, invoiceData, paddingTop 
         return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
     };
 
-    const borderWidth = 2;
+    // A single label / value / normal-range row.
+    const Row = ({ label, value, range }: { label: string; value?: string; range?: string }) => (
+        <tr className="border-b">
+            <td className="px-3 py-1">{label}</td>
+            <td className="px-3 py-1">{value || '-'}</td>
+            {range !== undefined && <td className="px-3 py-1">{range}</td>}
+        </tr>
+    );
+
+    // Section header for a sub-table.
+    const SectionHead = ({ title, withRange = false }: { title: string; withRange?: boolean }) => (
+        <tr className="border-b">
+            <td className="px-3 py-1 font-semibold bg-gray-100" colSpan={withRange ? 3 : 2}>{title}</td>
+        </tr>
+    );
+
     return (
         <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
             <style>
@@ -80,7 +110,6 @@ export default function SemenReportDetails({ semenData, invoiceData, paddingTop 
                         <td className="border px-3 py-2 w-1/4">Receipt ID : {invoiceData?.id}</td>
                         <td className="border px-3 py-2 w-1/4">Date: {invoiceData?.invoice_date ? formatDate(invoiceData.invoice_date) : 'N/A'}</td>
                         <td className="border px-3 py-2 w-1/4">Age: {invoiceData?.age} years</td>
-
                     </tr>
                     <tr className="border">
                         <td className="border px-3 py-2" colSpan={2}>Patient name: {invoiceData?.patient_name}</td>
@@ -90,50 +119,79 @@ export default function SemenReportDetails({ semenData, invoiceData, paddingTop 
                         <td className="border px-3 py-2" colSpan={3}>
                             Refd. By: {invoiceData?.reference_doctor ? `Prof./Dr. ${invoiceData.reference_doctor}` : 'N/A'}
                         </td>
-
                     </tr>
                 </tbody>
             </table>
 
-            {/* Test Table */}
+            {/* Collection & Timing */}
+            <table className="w-full text-sm mt-6">
+                <tbody>
+                    <SectionHead title="REPORT OF EXAMINATION OF SEMINAL FLUID" />
+                    <Row label="Sample Collection" value={semenData?.sample_collection} />
+                    <Row label="Time of Ejaculation" value={semenData?.time_of_ejaculation} />
+                    <Row label="Time of Examination" value={semenData?.time_of_examination} />
+                </tbody>
+            </table>
+
+            {/* Physical | Chemical & Microscopic - 2 column layout */}
+            <table className="w-full text-sm mt-4">
+                <tbody>
+                    <tr className="align-top">
+                        <td className="py-1" colSpan={2}>
+                            <table className="w-full">
+                                <tbody>
+                                    <SectionHead title="PHYSICAL EXAMINATION" />
+                                    <Row label="Volume" value={semenData?.volume ? `${semenData.volume} mL` : undefined} />
+                                    <Row label="Color" value={semenData?.color} />
+                                    <Row label="Odour" value={semenData?.odour} />
+                                    <Row label="Consistency" value={semenData?.consistency} />
+                                </tbody>
+                            </table>
+                        </td>
+                        <td className="pl-4 py-1" colSpan={2}>
+                            <table className="w-full">
+                                <tbody>
+                                    <SectionHead title="CHEMICAL EXAMINATION" />
+                                    <Row label="pH" value={semenData?.ph} />
+                                    <Row label="Fructose" value={semenData?.fructose} />
+                                </tbody>
+                            </table>
+                            <table className="w-full mt-2">
+                                <tbody>
+                                    <SectionHead title="MICROSCOPIC EXAMINATION (per HPF)" />
+                                    <Row label="Pus Cells" value={semenData?.pus_cells} />
+                                    <Row label="Epithelial" value={semenData?.epithelial} />
+                                    <Row label="RBC" value={semenData?.rbc} />
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            {/* Sperm Analysis with normal ranges */}
             <table className="w-full text-sm mt-6">
                 <thead>
                     <tr className="border-t border-b bg-row-blue">
-                        <th className="px-3 py-2 text-left w-[40%]">Test name</th>
-                        <th className="px-3 py-2 text-left w-[30%]">Test Result</th>
+                        <th className="px-3 py-2 text-left w-[40%]">Sperm Analysis</th>
+                        <th className="px-3 py-2 text-left w-[30%]">Result</th>
                         <th className="px-3 py-2 text-left w-[30%]">Normal Range</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">Volume</td>
-                        <td className="px-3 py-2">{semenData?.volume || 'Pending'} mL</td>
-                        <td className="px-3 py-2">1.5-5.0 mL</td>
-                    </tr>
-                    <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">Sperm Count</td>
-                        <td className="px-3 py-2">{semenData?.count || 'Pending'} million/mL</td>
-                        <td className="px-3 py-2">≥15 million/mL</td>
-                    </tr>
-                    <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">Motility</td>
-                        <td className="px-3 py-2">{semenData?.motility || 'Pending'}%</td>
-                        <td className="px-3 py-2">≥40% (progressive)</td>
-                    </tr>
-                    <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                        <td className="px-3 py-2">Morphology</td>
-                        <td className="px-3 py-2">{semenData?.morphology || 'Pending'}%</td>
-                        <td className="px-3 py-2">≥4% normal forms</td>
-                    </tr>
-                    {semenData?.remarks && (
-                        <tr className={`border-b-${borderWidth} border-dashed border-b`}>
-                            <td className="px-3 py-2">Remarks</td>
-                            <td className="px-3 py-2" colSpan={2}>{semenData.remarks}</td>
-                        </tr>
-                    )}
+                    <Row label="Volume" value={semenData?.volume ? `${semenData.volume} mL` : undefined} range="1.5 - 5.0 mL" />
+                    <Row label="Sperm Count" value={semenData?.count ? `${semenData.count} million/mL` : undefined} range="≥ 15 million/mL" />
+                    <Row label="Motility" value={semenData?.motility ? `${semenData.motility}%` : undefined} range="≥ 40% (progressive)" />
+                    <Row label="Morphology" value={semenData?.morphology ? `${semenData.morphology}%` : undefined} range="≥ 4% normal forms" />
                 </tbody>
             </table>
+
+            {/* Remarks */}
+            {semenData?.remarks && (
+                <div className="mt-6 text-sm border p-4">
+                    <p><span className="font-semibold">Remarks:</span> {semenData.remarks}</p>
+                </div>
+            )}
 
             {/* Tested By */}
             <p className="text-sm mt-4">
@@ -142,8 +200,6 @@ export default function SemenReportDetails({ semenData, invoiceData, paddingTop 
             </p>
 
             <ReportFooter />
-
-           
         </div>
     );
 }

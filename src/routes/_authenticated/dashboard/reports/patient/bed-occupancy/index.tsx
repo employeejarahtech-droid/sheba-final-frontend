@@ -16,11 +16,22 @@ const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6'
 interface BedItem {
   id: number
   name: string
+  code: string | null
   type: string | null
   ward_name: string | null
+  ward: string | null
   status: 'occupied' | 'available' | 'maintenance' | string
   patient_name: string | null
   notes: string | null
+  current_admission?: {
+    patient_name: string | null
+  } | null
+  admission?: {
+    patient_name: string | null
+  } | null
+  patient?: {
+    name: string | null
+  } | null
 }
 
 interface Meta {
@@ -137,13 +148,17 @@ function BedOccupancyPage() {
     setPresetOpen(false);
   };
 
-  const columns = [
+  const columns = useMemo(() => [
     {
-      data: "id",
+      data: null,
       title: "#",
       orderable: false,
-      render: (_data: any, _type: string, _row: BedItem, index: number) => {
-        return `<span class="text-sm text-gray-500 font-mono">${(meta.page - 1) * meta.limit + index + 1}</span>`;
+      render: function(_data: any, _type: string, _row: BedItem, dtMeta: any) {
+        // DataTables row index (0-based, for current page only)
+        const rowIndex = dtMeta?.row?.index ?? 0;
+        // Calculate global index across all pages
+        const displayIndex = (meta.page - 1) * meta.limit + rowIndex + 1;
+        return `<span class="text-sm text-gray-500 font-mono">${displayIndex}</span>`;
       },
     },
     {
@@ -199,15 +214,22 @@ function BedOccupancyPage() {
     {
       data: "patient_name",
       title: "Current Patient",
-      render: (data: string | null) => {
-        if (!data) return `<span class="text-gray-400 italic">None</span>`;
+      render: (_data: any, _type: string, row: BedItem) => {
+        // Check multiple possible fields for patient name
+        const patientName = row.current_admission?.patient_name
+          ?? row.admission?.patient_name
+          ?? row.patient?.name
+          ?? row.patient_name
+          ?? null;
+
+        if (!patientName) return `<span class="text-gray-400 italic">None</span>`;
         return `<div class="flex items-center gap-2">
           <div class="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center">
             <svg class="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
             </svg>
           </div>
-          <span class="font-medium">${data}</span>
+          <span class="font-medium">${patientName}</span>
         </div>`;
       },
     },
@@ -237,7 +259,7 @@ function BedOccupancyPage() {
         </div>`;
       },
     },
-  ];
+  ], [meta]);
 
   return (
     <>

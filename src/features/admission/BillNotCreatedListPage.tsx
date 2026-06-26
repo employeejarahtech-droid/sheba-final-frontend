@@ -100,7 +100,7 @@ export function BillNotCreatedListPage() {
                                 data-doctor="${doctorName.replace(/"/g, '&quot;')}"
                                 data-diagnosis="${(row.diagnosis || '-').replace(/"/g, '&quot;')}"
                                 data-created-by="${(row.created_by_user?.name || '-').replace(/"/g, '&quot;')}">+</button>
-                        <span class="font-semibold text-blue-600">${displayId}</span>
+                        <span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${displayId}</span>
                     </div>
                 `;
             },

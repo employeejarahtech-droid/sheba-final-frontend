@@ -10,8 +10,18 @@ import { UserX, CheckCircle, AlertCircle, Hash, Printer, FileText, Calendar } fr
 import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
+import { z } from 'zod'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
+
+const dischargeSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+  from: z.string().catch(''),
+  to: z.string().catch(''),
+})
 
 interface DischargeItem {
   id: number
@@ -19,14 +29,20 @@ interface DischargeItem {
   patient_name: string
   age: number | null
   sex: string | null
+  patient_gender?: string | null
   admission_date: string | null
+  admission_time: string | null
   discharge_date: string | null
+  discharge_time: string | null
   phone: string | null
   status: string | null
   diagnosis: string | null
   total_bill_amount: number | null
   paid_amount: number | null
   due_amount: number | null
+  discount_amount?: number | null
+  final_bill_amount?: number | null
+  advance_payment?: number | null
   doctor?: {
     doctor_name: string | null
   } | null
@@ -35,12 +51,17 @@ interface DischargeItem {
     total_bill_amount: number | null
     paid_amount: number | null
     due_amount: number | null
+    discount_amount?: number | null
+    final_bill_amount?: number | null
   } | null
   bedCabin?: {
     code: string | null
     type: string | null
     ward: string | null
   } | null
+  bed_name: string | null
+  ward_name: string | null
+  department_name: string | null
 }
 
 interface Meta {
@@ -51,6 +72,7 @@ interface Meta {
 }
 
 export const Route = createFileRoute('/_authenticated/dashboard/reports/patient/discharge-summary/')({
+  validateSearch: (search) => dischargeSearchSchema.parse(search),
   component: DischargeSummaryPage,
 })
 
@@ -58,6 +80,7 @@ function DischargeSummaryPage() {
   const searchParams: any = Route.useSearch();
   const navigate = Route.useNavigate();
   const { formatDate } = useDateFormat();
+  const { currencySymbol } = useCurrency();
 
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 10;
@@ -90,7 +113,6 @@ function DischargeSummaryPage() {
         page: String(page),
         limit: String(limit),
         search,
-        status: 'discharged',
         ...(from ? { start_date: from } : {}),
         ...(to ? { end_date: to } : {}),
       })
@@ -127,9 +149,9 @@ function DischargeSummaryPage() {
       { label: 'Fully Paid', value: paidCount, icon: CheckCircle, grad: 'from-blue-500 to-blue-600' },
       { label: 'With Due', value: dueCount, icon: AlertCircle, grad: 'from-orange-500 to-orange-600' },
       { label: 'This Page', value: items.length, icon: Hash, grad: 'from-teal-500 to-teal-600' },
-      { label: 'Total Revenue', value: '৳' + totalRevenue.toLocaleString(), icon: Calendar, grad: 'from-pink-500 to-pink-600' },
+      { label: `Total Revenue (${currencySymbol})`, value: totalRevenue.toLocaleString(), icon: Calendar, grad: 'from-pink-500 to-pink-600' },
     ]
-  }, [items, meta])
+  }, [items, meta, currencySymbol])
 
   // ---- Date filter presets ----
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
@@ -271,15 +293,15 @@ function DischargeSummaryPage() {
               </div>
               <div>
                 <p class="text-gray-500">Total Bill</p>
-                <p class="font-semibold text-gray-800">৳${Number(admission.total_bill || 0).toLocaleString()}</p>
+                <p class="font-semibold text-gray-800">${Number(admission.total_bill || 0).toLocaleString()}</p>
               </div>
               <div>
                 <p class="text-gray-500">Amount Paid</p>
-                <p class="font-semibold text-gray-800">৳${Number(admission.advance_payment || 0).toLocaleString()}</p>
+                <p class="font-semibold text-gray-800">${Number(admission.advance_payment || 0).toLocaleString()}</p>
               </div>
               <div>
                 <p class="text-gray-500">Due Amount</p>
-                <p class="font-semibold ${admission.due_amount > 0 ? 'text-red-600' : 'text-green-600'}">৳${Number(admission.due_amount || 0).toLocaleString()}</p>
+                <p class="font-semibold ${admission.due_amount > 0 ? 'text-red-600' : 'text-green-600'}">${Number(admission.due_amount || 0).toLocaleString()}</p>
               </div>
               <div class="col-span-2">
                 <p class="text-gray-500">Bed/Cabin</p>
@@ -328,9 +350,9 @@ function DischargeSummaryPage() {
     return () => {
       document.removeEventListener('click', handleExpandClick);
     };
-  }, [token, formatDate]);
+  }, [token, formatDate, currencySymbol]);
 
-  const columns = [
+  const columns = useMemo(() => [
     {
       data: null,
       title: "Admission No",
@@ -405,27 +427,85 @@ function DischargeSummaryPage() {
     },
     {
       data: null,
-      title: "Total Bill",
+      title: `Total Bill (${currencySymbol})`,
       render: (_data: any, _type: string, row: DischargeItem) => {
+        // Try multiple possible fields for total bill amount
+        const finalBillTotal = row.finalBill?.total_bill_amount;
+        const admissionTotal = row.total_bill_amount;
+        const totalBill = finalBillTotal ?? admissionTotal ?? 0;
+
+        return `<span class="font-semibold text-blue-600">${Number(totalBill).toLocaleString()}</span>`
+      },
+    },
+    {
+      data: null,
+      title: `Discount (${currencySymbol})`,
+      render: (_data: any, _type: string, row: DischargeItem) => {
+        // Try multiple possible fields for discount amount
+        const finalBillDiscount = row.finalBill?.discount_amount;
+        const admissionDiscount = row.discount_amount;
+        const discount = finalBillDiscount ?? admissionDiscount ?? 0;
+
+        return `<span class="font-semibold text-orange-600">${Number(discount).toLocaleString()}</span>`
+      },
+    },
+    {
+      data: null,
+      title: `Final Bill (${currencySymbol})`,
+      render: (_data: any, _type: string, row: DischargeItem) => {
+        // Try multiple possible fields for final bill amount
+        const finalBillFinal = row.finalBill?.final_bill_amount;
+        const admissionFinal = row.final_bill_amount;
+        const finalBill = finalBillFinal ?? admissionFinal ?? 0;
+
+        // Calculate from total and discount if final bill is missing
         const totalBill = row.finalBill?.total_bill_amount || row.total_bill_amount || 0;
-        return `<span class="font-semibold text-blue-600">৳${Number(totalBill).toLocaleString()}</span>`
+        const discount = row.finalBill?.discount_amount || row.discount_amount || 0;
+        const calculatedFinal = totalBill - discount;
+
+        // Use calculated final if stored final is 0 but calculated final > 0
+        const finalAmount = (finalBill === 0 && calculatedFinal > 0) ? calculatedFinal : finalBill;
+
+        return `<span class="font-semibold text-purple-600">${Number(finalAmount).toLocaleString()}</span>`
       },
     },
     {
       data: null,
-      title: "Amount Paid",
+      title: `Paid (${currencySymbol})`,
       render: (_data: any, _type: string, row: DischargeItem) => {
+        // Try multiple possible fields for paid amount
+        const finalBillPaid = row.finalBill?.paid_amount;
+        const admissionPaid = row.paid_amount;
+        const advancePayment = row.advance_payment;
+        const paid = finalBillPaid ?? admissionPaid ?? advancePayment ?? 0;
+
+        return `<span class="font-semibold text-green-600">${Number(paid).toLocaleString()}</span>`
+      },
+    },
+    {
+      data: null,
+      title: `Due (${currencySymbol})`,
+      render: (_data: any, _type: string, row: DischargeItem) => {
+        // Try multiple possible fields for due amount
+        const finalBillDue = row.finalBill?.due_amount;
+        const admissionDue = row.due_amount;
+        const due = finalBillDue ?? admissionDue ?? 0;
+
+        // Calculate from final bill and paid if due is missing or zero
+        const finalBill = row.finalBill?.final_bill_amount || row.final_bill_amount || 0;
+        const totalBill = row.finalBill?.total_bill_amount || row.total_bill_amount || 0;
+        const discount = row.finalBill?.discount_amount || row.discount_amount || 0;
         const paid = row.finalBill?.paid_amount || row.paid_amount || 0;
-        return `<span class="font-semibold text-green-600">৳${Number(paid).toLocaleString()}</span>`
-      },
-    },
-    {
-      data: null,
-      title: "Due Amount",
-      render: (_data: any, _type: string, row: DischargeItem) => {
-        const due = row.finalBill?.due_amount || row.due_amount || 0;
-        const colorClass = due > 0 ? 'text-red-600' : 'text-gray-600'
-        return `<span class="font-semibold ${colorClass}">৳${Number(due).toLocaleString()}</span>`
+
+        // Use final bill for calculation if available, otherwise use total - discount
+        const baseAmount = finalBill > 0 ? finalBill : (totalBill - discount);
+        const calculatedDue = baseAmount - paid;
+
+        // Use calculated due if stored due is 0 but calculated due > 0
+        const finalDue = (due === 0 && calculatedDue > 0) ? calculatedDue : due;
+
+        const colorClass = finalDue > 0 ? 'text-red-600' : 'text-green-600'
+        return `<span class="font-semibold ${colorClass}">${Number(finalDue).toLocaleString()}</span>`
       },
     },
     {
@@ -459,7 +539,7 @@ function DischargeSummaryPage() {
         </div>`;
       },
     },
-  ]
+  ], [formatDate, currencySymbol])
 
   return (
     <>
@@ -548,7 +628,7 @@ function DischargeSummaryPage() {
                 search={{
                   search: search || undefined,
                   start_date: from || undefined,
-                  end_date: to || undefined
+                  end_date: to || undefined,
                 }}
               >
                 <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>

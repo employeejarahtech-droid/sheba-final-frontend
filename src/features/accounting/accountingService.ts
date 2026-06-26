@@ -56,7 +56,7 @@ export const accountingService = {
     },
 
     // GET ALL INCOMES
-    getIncomes: async (params?: { page?: number; limit?: number; search?: string; date?: string }) => {
+    getIncomes: async (params?: { page?: number; limit?: number; search?: string; date?: string; start_date?: string; end_date?: string }) => {
         const response = await api.get<IncomeResponse>('/accounting/incomes', { params });
         return response.data;
     },
@@ -68,7 +68,7 @@ export const accountingService = {
     },
 
     // GET ALL EXPENSES
-    getExpenses: async (params?: { page?: number; limit?: number; search?: string; date?: string }) => {
+    getExpenses: async (params?: { page?: number; limit?: number; search?: string; date?: string; start_date?: string; end_date?: string }) => {
         const response = await api.get<ExpenseResponse>('/accounting/expenses', { params });
         return response.data;
     },

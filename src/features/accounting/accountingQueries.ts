@@ -55,7 +55,7 @@ export const useGetAccountingChartDataQuery = () => {
     });
 };
 
-export const useGetIncomesQuery = (params?: { page?: number; limit?: number; search?: string; date?: string }) => {
+export const useGetIncomesQuery = (params?: { page?: number; limit?: number; search?: string; date?: string; start_date?: string; end_date?: string }) => {
     return useQuery({
         queryKey: [...ACCOUNTING_KEYS.incomes(), params],
         queryFn: () => accountingService.getIncomes(params),
@@ -74,7 +74,7 @@ export const useAddIncomeMutation = () => {
     });
 };
 
-export const useGetExpensesQuery = (params?: { page?: number; limit?: number; search?: string; date?: string }) => {
+export const useGetExpensesQuery = (params?: { page?: number; limit?: number; search?: string; date?: string; start_date?: string; end_date?: string }) => {
     return useQuery({
         queryKey: [...ACCOUNTING_KEYS.expenses(), params],
         queryFn: () => accountingService.getExpenses(params),

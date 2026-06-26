@@ -25,11 +25,13 @@ import { Button } from "@/components/ui/button";
 import PatientInvoiceInfo from "@/components/pathology/PatientInvoiceInfo";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { MachineSelect } from "./MachineSelect";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
 import { Textarea } from "@/components/ui/textarea";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { Activity } from "lucide-react";
 
 // --- Schema ---
 const pbfSchema = z.object({
@@ -39,6 +41,7 @@ const pbfSchema = z.object({
     comments: z.string().optional(),
     machineId: z.string().optional(),
     testCarriedOutBy: z.string().optional(),
+    status: z.union([z.literal('complete'), z.literal('incomplete')]),
 });
 
 type PBFFormValues = z.infer<typeof pbfSchema>;
@@ -64,6 +67,7 @@ export function EditPeripheralBloodFilmForm({ open, setOpen, reportId, invoiceId
             comments: "",
             machineId: "",
             testCarriedOutBy: "",
+            status: "incomplete",
         },
     });
 
@@ -108,6 +112,7 @@ export function EditPeripheralBloodFilmForm({ open, setOpen, reportId, invoiceId
                 comments: peripheralBloodFilm.remarks,
                 machineId: peripheralBloodFilm.machine_id?.toString() || "",
                 testCarriedOutBy: peripheralBloodFilm.test_carried_out_by || "",
+                status: String(peripheralBloodFilm.status).trim().toLowerCase() === 'complete' ? 'complete' : 'incomplete',
             })
         }
     }, [peripheralBloodFilm]);
@@ -118,6 +123,26 @@ export function EditPeripheralBloodFilmForm({ open, setOpen, reportId, invoiceId
 
     const updatePeripheralBloodFilmMutation = useMutation({
         mutationFn: async (data: PBFFormValues) => {
+            // Build the API payload
+            const apiPayload: any = {
+                invoice_id: invoiceId,
+                rbc: data.rbcMorphology,
+                wbc: data.wbcMorphology,
+                platelets: data.platelet,
+                remarks: data.comments,
+                test_carried_out_by: data.testCarriedOutBy,
+            };
+
+            // Only include machine_id if it exists
+            if (data.machineId && data.machineId !== '') {
+                apiPayload.machine_id = parseInt(data.machineId);
+            }
+
+            // Only include status if it exists (for backwards compatibility)
+            if (data.status) {
+                apiPayload.status = data.status;
+            }
+
             const res = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/peripheral-blood/${reportId}`,
                 {
@@ -126,15 +151,7 @@ export function EditPeripheralBloodFilmForm({ open, setOpen, reportId, invoiceId
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
                     },
-                    body: JSON.stringify({
-                        invoice_id: invoiceId,
-                        rbc: data.rbcMorphology,
-                        wbc: data.wbcMorphology,
-                        platelets: data.platelet,
-                        remarks: data.comments,
-                        machine_id: data.machineId ? parseInt(data.machineId) : null,
-                        test_carried_out_by: data.testCarriedOutBy,
-                    }),
+                    body: JSON.stringify(apiPayload),
                 }
             );
             if (!res.ok) throw new Error("Failed to update Peripheral Blood Film");
@@ -143,6 +160,7 @@ export function EditPeripheralBloodFilmForm({ open, setOpen, reportId, invoiceId
         onSuccess: (data) => {
             console.log("Peripheral Blood Film Updated API Response:", data);
             queryClient.invalidateQueries({ queryKey: ["peripheral-blood", reportId] });
+            queryClient.invalidateQueries({ queryKey: ["peripheral-blood"] });
             toast.success("Peripheral Blood Film updated successfully");
             navigate({ to: "/dashboard/pathology/hematology/peripheral-blood-film" });
         },
@@ -153,7 +171,18 @@ export function EditPeripheralBloodFilmForm({ open, setOpen, reportId, invoiceId
 
     function onSubmit(values: PBFFormValues) {
         console.log("Peripheral Blood Film Report:", values);
-        updatePeripheralBloodFilmMutation.mutate(values);
+
+        // Get current status value from form to ensure dynamic status is captured
+        const currentStatus = form.watch('status');
+
+        // Create payload with current status
+        const submitPayload = {
+            ...values,
+            status: currentStatus
+        };
+
+        console.log("Submit Payload with Status:", submitPayload);
+        updatePeripheralBloodFilmMutation.mutate(submitPayload);
         setOpen(false);
     }
 
@@ -177,10 +206,10 @@ export function EditPeripheralBloodFilmForm({ open, setOpen, reportId, invoiceId
                 <div className="px-4">
                     <PatientInvoiceInfo
                         invoiceInfo={{
-                            invoiceNo: "RPT-1006",
-                            patientName: "Sabbir Hossain",
-                            age: "27 Years",
-                            gender: "Male",
+                            invoiceNo: peripheralBloodFilm?.invoice_id ? `RPT-${peripheralBloodFilm.invoice_id}` : "—",
+                            patientName: peripheralBloodFilm?.outdoor_invoice?.patient_name || "—",
+                            age: peripheralBloodFilm?.outdoor_invoice?.age_text || peripheralBloodFilm?.outdoor_invoice?.age || "—",
+                            gender: peripheralBloodFilm?.outdoor_invoice?.sex || "—",
                         }}
                     />
                 </div>
@@ -254,37 +283,74 @@ export function EditPeripheralBloodFilmForm({ open, setOpen, reportId, invoiceId
                         {/* Test Carried Out By (Machine) */}
                         <FormField
                             control={form.control}
-                            name="testCarriedOutBy"
+                            name="machineId"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="w-full">
                                     <FormLabel>Test Carried Out By (Machine)</FormLabel>
                                     <FormControl>
-                                        <Select
-                                            onValueChange={(value) => {
-                                                const selectedMachine = machineList.find((m: any) => m.name === value);
+                                        <MachineSelect
+                                            value={field.value}
+                                            onChange={(value) => {
+                                                field.onChange(value);
+                                                // Find the machine and update testCarriedOutBy with the name
+                                                const selectedMachine = machineList.find((m: any) => m.id === parseInt(value));
                                                 if (selectedMachine) {
-                                                    field.onChange(value);
-                                                    form.setValue('machineId', String(selectedMachine.id));
+                                                    form.setValue('testCarriedOutBy', selectedMachine.name);
                                                 }
                                             }}
-                                            value={field.value}
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select machine" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {machineList.map((machine: any) => (
-                                                    <SelectItem key={machine.id} value={machine.name}>
-                                                        {machine.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                            placeholder="Select machine"
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
+
+                        {/* Report Status */}
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border rounded-lg p-4">
+                            <div className="flex items-center gap-2.5 mb-3">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md">
+                                    <Activity className="h-4 w-4 text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-semibold text-gray-800">Report Status</h3>
+                                    <p className="text-xs text-gray-600">Mark report as complete or incomplete</p>
+                                </div>
+                            </div>
+                            <FormField
+                                control={form.control}
+                                name="status"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                value={field.value === 'complete' ? 'complete' : 'incomplete'}
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select status" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="incomplete">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                                            <span>Incomplete</span>
+                                                        </div>
+                                                    </SelectItem>
+                                                    <SelectItem value="complete">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                                            <span>Complete</span>
+                                                        </div>
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
 
                         {/* Buttons */}
                         <div className="flex justify-center gap-2 pt-4">

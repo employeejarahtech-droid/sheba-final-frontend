@@ -81,7 +81,13 @@ export function BillsDistributedListPage() {
     const meta = { page, limit, total: admissions.length }
 
     const columns = useMemo(() => [
-        { data: "id", title: "ID", orderable: true },
+        {
+            data: "id",
+            title: "ID",
+            orderable: true,
+            render: (_data: any, _type: string, row: AdmissionItem) =>
+                `<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${row.id}</span>`
+        },
         { data: "patient_name", title: "Patient Name", orderable: true },
         { data: "phone", title: "Phone" },
         {

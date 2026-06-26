@@ -197,11 +197,13 @@ export function DischargedPatientListPage({ page, limit, search, setPage, setSea
 
     const columns = useMemo(() => [
         {
-            data: "id",
-            title: "ID",
+            data: "admission_prefix",
+            title: "Admission No",
             orderable: true,
             responsivePriority: 1,
             render: (data: any, _type: string, row: AdmissionItem) => {
+                // Ensure admission number always has ADM- prefix
+                const displayId = data && data.toString().startsWith('ADM-') ? data : (data ? `ADM-${data}` : `ADM-${row.id}`);
                 const admissionDate = row.admission_date ? new Date(row.admission_date).toLocaleDateString() : '-';
                 const dischargeDate = row.discharge_date ? new Date(row.discharge_date).toLocaleDateString() : '-';
                 const bedCabinInfo = row.bedCabin ? `${row.bedCabin.code} (${row.bedCabin.type})` : '-';
@@ -232,7 +234,7 @@ export function DischargedPatientListPage({ page, limit, search, setPage, setSea
                     <div class="flex items-center gap-2">
                         <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
                                 type="button"
-                                data-id="${data}"
+                                data-id="${row.id}"
                                 data-patient-name="${(row.patient_name || '-').replace(/"/g, '&quot;')}"
                                 data-age="${row.age || 0}"
                                 data-sex="${row.sex || '-'}"
@@ -246,7 +248,7 @@ export function DischargedPatientListPage({ page, limit, search, setPage, setSea
                                 data-created-by="${String(row.created_by || '-').replace(/"/g, '&quot;')}"
                                 data-final-bill="${row.finalBill ? JSON.stringify(row.finalBill).replace(/"/g, '&quot;') : ''}"
                                 data-status-data="${encodeURIComponent(JSON.stringify(statusData)).replace(/"/g, '&quot;')}">+</button>
-                        <span>${data}</span>
+                        <span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${displayId}</span>
                     </div>
                 `
             },
@@ -640,7 +642,7 @@ export function DischargedPatientListPage({ page, limit, search, setPage, setSea
         <>
             <AppHeader />
             <Main fluid>
-                <div className="flex-1 space-y-8 px-4 py-6 overflow-auto w-full">
+                <div className="flex-1 space-y-4  overflow-auto w-full">
                 <PageHeader
                     title={pageTitle}
                     description={pageDescription}

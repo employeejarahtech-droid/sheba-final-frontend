@@ -28,24 +28,7 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: ['.lvh.me', '.hms.me', 'localhost'],
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5001',
-        changeOrigin: true,
-        secure: false,
-        configure: (proxy, _options) => {
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
-            // Forward original Host so backend can extract subdomain
-            proxyReq.setHeader('X-Forwarded-Host', req.headers.host || '');
-          });
-        },
-      },
-      '/uploads': {
-        target: 'http://localhost:5001',
-        changeOrigin: true,
-        secure: false,
-      },
-    },
+    // Proxy disabled - using direct API URL (api.lvh.me:5001)
     fs: {
       strict: false,
     },

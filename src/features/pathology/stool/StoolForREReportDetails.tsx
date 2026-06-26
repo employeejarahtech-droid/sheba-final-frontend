@@ -80,7 +80,7 @@ export default function StoolForREReportDetails({ report, invoice, paddingTop = 
           </tr>
           <tr className="border">
             <td className="border px-3 py-1.5" colSpan={3}>
-              Refd. By: Prof./Dr. {data?.outdoor_invoice?.reference_doctor || data?.reference_doctor || 'N/A'}
+              Refd. By: Prof./Dr. {data?.outdoor_invoice?.doctor?.doctor_name || 'N/A'}
             </td>
           </tr>
         </tbody>
@@ -132,19 +132,19 @@ export default function StoolForREReportDetails({ report, invoice, paddingTop = 
                   </tr>
                   <tr className={`border-dashed border-b-${borderWidth}`}>
                     <td className="px-3 py-1">Reducing Substance</td>
-                    <td className="px-3 py-1">{data?.reducingSubstance || '-'}</td>
+                    <td className="px-3 py-1">{data?.reducing_substance || '-'}</td>
                   </tr>
                   <tr className={`border-dashed border-b-${borderWidth}`}>
                     <td className="px-3 py-1">Occult Blood</td>
-                    <td className="px-3 py-1">{data?.occultBlood || '-'}</td>
+                    <td className="px-3 py-1">{data?.occult_blood || '-'}</td>
                   </tr>
                   <tr className={`border-dashed border-b-${borderWidth}`}>
                     <td className="px-3 py-1">Bile Pigments</td>
-                    <td className="px-3 py-1">{data?.bilePigments || '-'}</td>
+                    <td className="px-3 py-1">{data?.bile_pigments || '-'}</td>
                   </tr>
                   <tr className={`border-dashed border-b-${borderWidth}`}>
                     <td className="px-3 py-1">Bile Salts</td>
-                    <td className="px-3 py-1">{data?.bileSalts || '-'}</td>
+                    <td className="px-3 py-1">{data?.bile_salts || '-'}</td>
                   </tr>
                 </tbody>
               </table>
@@ -161,37 +161,37 @@ export default function StoolForREReportDetails({ report, invoice, paddingTop = 
                   </tr>
                   <tr className={`border-dashed border-b-${borderWidth}`}>
                     <td className="px-3 py-1 w-1/4">Ova of</td>
-                    <td className="px-3 py-1 w-1/4">{data?.ovaOf || '-'}</td>
+                    <td className="px-3 py-1 w-1/4">{data?.ova_of || '-'}</td>
                     <td className="px-3 py-1 w-1/4">Pus Cells</td>
                     <td className="px-3 py-1 w-1/4">{data?.pusCells || data?.pus_cells || '-'}</td>
                   </tr>
                   <tr className={`border-dashed border-b-${borderWidth}`}>
                     <td className="px-3 py-1 w-1/4">Cysts of</td>
-                    <td className="px-3 py-1 w-1/4">{data?.cystsOf || '-'}</td>
+                    <td className="px-3 py-1 w-1/4">{data?.cysts_of || '-'}</td>
                     <td className="px-3 py-1 w-1/4">Epithelial Cells</td>
                     <td className="px-3 py-1 w-1/4">{data?.epithelialCells || data?.epithelium || '-'}</td>
                   </tr>
                   <tr className={`border-dashed border-b-${borderWidth}`}>
                     <td className="px-3 py-1 w-1/4">Larva of</td>
-                    <td className="px-3 py-1 w-1/4">{data?.larvaOf || '-'}</td>
+                    <td className="px-3 py-1 w-1/4">{data?.larva_of || '-'}</td>
                     <td className="px-3 py-1 w-1/4">RBC</td>
                     <td className="px-3 py-1 w-1/4">{data?.rbc || '-'}</td>
                   </tr>
                   <tr className={`border-dashed border-b-${borderWidth}`}>
                     <td className="px-3 py-1 w-1/4">Trophozoite of</td>
-                    <td className="px-3 py-1 w-1/4">{data?.trophozoiteOf || '-'}</td>
+                    <td className="px-3 py-1 w-1/4">{data?.trophozoite_of || '-'}</td>
                     <td className="px-3 py-1 w-1/4">Macrophage</td>
                     <td className="px-3 py-1 w-1/4">{data?.macrophage || '-'}</td>
                   </tr>
                   <tr className={`border-dashed border-b-${borderWidth}`}>
                     <td className="px-3 py-1 w-1/4">Vegetable Cells</td>
-                    <td className="px-3 py-1 w-1/4">{data?.vegetableCells || '-'}</td>
+                    <td className="px-3 py-1 w-1/4">{data?.vegetable_cells || '-'}</td>
                     <td className="px-3 py-1 w-1/4">Undigested Food</td>
-                    <td className="px-3 py-1 w-1/4">{data?.undigestedFood || '-'}</td>
+                    <td className="px-3 py-1 w-1/4">{data?.undigested_food || '-'}</td>
                   </tr>
                   <tr className={`border-dashed border-b-${borderWidth}`}>
                     <td className="px-3 py-1 w-1/4">Fat Globules</td>
-                    <td className="px-3 py-1 w-1/4">{data?.fatGlobules || '-'}</td>
+                    <td className="px-3 py-1 w-1/4">{data?.fat_globules || '-'}</td>
                     <td className="px-3 py-1 w-1/4">Others</td>
                     <td className="px-3 py-1 w-1/4">{data?.others || '-'}</td>
                   </tr>

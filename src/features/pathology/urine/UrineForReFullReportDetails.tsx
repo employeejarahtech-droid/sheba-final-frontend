@@ -65,20 +65,18 @@ export default function UrineForReFullReportDetails({ report, invoice, paddingTo
       <table className="w-full text-sm">
         <tbody>
           <tr className="border">
-            <td className="border px-3 py-2 w-1/4">Receipt ID : {report?.invoice_id || invoice?.id || 'N/A'}</td>
+            <td className="border px-3 py-2 w-1/4">Receipt ID : {report?.invoice_id || 'N/A'}</td>
             <td className="border px-3 py-2 w-1/4">Date: {formatDate(report?.created_at)}</td>
-            <td className="border px-3 py-2 w-1/4">Age: {invoice?.patient?.age || 'N/A'} years</td>
-
+            <td className="border px-3 py-2 w-1/4">Age: {report?.outdoor_invoice?.age_text || report?.outdoor_invoice?.age || 'N/A'}</td>
           </tr>
           <tr className="border">
-            <td className="border px-3 py-2" colSpan={2}>Patient name: {invoice?.patient?.name || invoice?.patient_name || 'N/A'}</td>
-            <td className="border px-3 py-2">Sex: {invoice?.patient?.sex || invoice?.patient?.gender || 'N/A'}</td>
+            <td className="border px-3 py-2" colSpan={2}>Patient name: {report?.outdoor_invoice?.patient_name || 'N/A'}</td>
+            <td className="border px-3 py-2">Sex: {report?.outdoor_invoice?.sex || 'N/A'}</td>
           </tr>
           <tr className="border">
             <td className="border px-3 py-2" colSpan={3}>
-              Refd. By: {invoice?.doctor?.name || invoice?.reference_doctor || 'Prof./Dr. N/A'}
+              Refd. By: {report?.outdoor_invoice?.doctor?.doctor_name || 'Prof./Dr. N/A'}
             </td>
-
           </tr>
         </tbody>
       </table>
@@ -272,7 +270,7 @@ export default function UrineForReFullReportDetails({ report, invoice, paddingTo
       {/* Tested By */}
       <p className="text-sm mt-4">
         <span className="font-semibold">Test Carried Out By:</span> &nbsp;
-        {report?.test_carried_out_by || invoice?.reference_doctor || 'N/A'}
+        {report?.test_carried_out_by || 'N/A'}
       </p>
 
       <ReportFooter />

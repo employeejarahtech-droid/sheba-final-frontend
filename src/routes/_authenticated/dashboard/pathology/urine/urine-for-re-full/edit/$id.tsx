@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, FlaskConical, User } from "lucide-react";
+import { ArrowLeft, FlaskConical, User, Activity } from "lucide-react";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -77,9 +77,49 @@ const urineSchema = z.object({
   comments: z.string().optional(),
   machineId: z.string().optional(),
   testCarriedOutBy: z.string().optional(),
+  status: z.union([z.literal('complete'), z.literal('incomplete')]),
 });
 
 type UrineFormValues = z.infer<typeof urineSchema>;
+
+// Predefined options for urine R/E test fields.
+//  options: string[] -> dropdown restricted to these values
+//  options: null     -> numeric / free-text input (e.g. Specific Gravity, pH)
+const URINE_FIELD_CONFIG: Record<string, { label: string; options: string[] | null }> = {
+  // Physical
+  color: { label: "Color", options: ["Yellow", "Light Yellow", "Pale Yellow", "Dark Yellow", "Amber", "Orange", "Brown", "Red", "Colorless"] },
+  appearance: { label: "Appearance", options: ["Clear", "Slightly Hazy", "Hazy", "Cloudy", "Turbid", "Flocculent"] },
+  sediment: { label: "Sediment", options: ["Nil", "Few", "Moderate", "Plenty"] },
+  // Microscopic (per HPF)
+  epithelialCells: { label: "Epithelial Cells", options: ["Nil", "Occasional", "1-2", "2-4", "4-6", "6-8", "8-10", "10-15", "Plenty"] },
+  rbcCells: { label: "RBC Cells", options: ["Nil", "0-2", "2-4", "4-6", "6-8", "8-10", "10-15", "15-20", "Plenty"] },
+  pusCells: { label: "Pus Cells", options: ["Nil", "0-2", "2-4", "4-6", "6-8", "8-10", "10-15", "15-20", "20-25", "Plenty"] },
+  yeastCells: { label: "Yeast Cells", options: ["Nil", "Few", "Moderate", "Plenty"] },
+  spermatozoa: { label: "Spermatozoa", options: ["Nil", "Few", "Moderate", "Plenty"] },
+  // Crystals
+  uricAcidCrystals: { label: "Uric Acid Crystals", options: ["Nil", "+", "++", "+++", "Plenty"] },
+  calciumOxalate: { label: "Calcium Oxalate", options: ["Nil", "+", "++", "+++", "Plenty"] },
+  triplePhosphate: { label: "Triple Phosphate", options: ["Nil", "+", "++", "+++", "Plenty"] },
+  amorphousDeposits: { label: "Amorphous Deposits", options: ["Nil", "Few", "Moderate", "Plenty"] },
+  // Casts / LPE
+  hyalineCasts: { label: "Hyaline Casts", options: ["Nil", "0-1", "1-2", "2-4", "4-6", "6-8", "8-10", "Plenty"] },
+  granularCasts: { label: "Granular Casts", options: ["Nil", "0-1", "1-2", "2-4", "4-6", "6-8", "8-10", "Plenty"] },
+  rbcCasts: { label: "RBC Casts", options: ["Nil", "0-1", "1-2", "2-4", "4-6", "6-8", "8-10", "Plenty"] },
+  wbcCasts: { label: "WBC Casts", options: ["Nil", "0-1", "1-2", "2-4", "4-6", "6-8", "8-10", "Plenty"] },
+  epithelialCasts: { label: "Epithelial Casts", options: ["Nil", "0-1", "1-2", "2-4", "4-6", "6-8", "8-10", "Plenty"] },
+  // Chemical (dipstick)
+  urobilinogen: { label: "Urobilinogen", options: ["Normal", "0.2", "1", "2", "4", "8"] },
+  bilirubin: { label: "Bilirubin", options: ["Negative", "+", "++", "+++"] },
+  ketone: { label: "Ketone", options: ["Negative", "Trace", "+", "++", "+++"] },
+  blood: { label: "Blood", options: ["Negative", "Trace", "+", "++", "+++"] },
+  protein: { label: "Protein", options: ["Negative", "Trace", "+", "++", "+++", "++++"] },
+  nitrite: { label: "Nitrite", options: ["Negative", "Positive"] },
+  leukocytes: { label: "Leukocytes", options: ["Negative", "Trace", "+", "++", "+++"] },
+  glucose: { label: "Glucose", options: ["Negative", "Trace", "+", "++", "+++", "++++"] },
+  specificGravity: { label: "Specific Gravity", options: null },
+  reactionPh: { label: "Reaction (pH)", options: null },
+  ascorbicAcid: { label: "Ascorbic Acid", options: ["Negative", "Trace", "+", "++"] },
+};
 
 // --------------------------------------------------
 // COMPONENT
@@ -134,35 +174,36 @@ function EditUrineForReFull() {
       form.reset({
         color: urineReData.color || '',
         appearance: urineReData.appearance || '',
-        sediment: '',
-        epithelialCells: '',
-        rbcCells: '',
-        pusCells: '',
-        yeastCells: '',
-        spermatozoa: '',
-        uricAcidCrystals: '',
-        calciumOxalate: '',
-        triplePhosphate: '',
-        amorphousDeposits: '',
-        hyalineCasts: '',
-        granularCasts: '',
-        rbcCasts: '',
-        wbcCasts: '',
-        epithelialCasts: '',
-        urobilinogen: '',
-        bilirubin: '',
-        ketone: '',
-        blood: '',
-        protein: '',
-        nitrite: '',
-        leukocytes: '',
-        glucose: '',
-        specificGravity: '',
-        reactionPh: '',
-        ascorbicAcid: '',
+        sediment: urineReData.sediment || '',
+        epithelialCells: urineReData.epithelial_cells || '',
+        rbcCells: urineReData.rbc_cells || '',
+        pusCells: urineReData.pus_cells || '',
+        yeastCells: urineReData.yeast_cells || '',
+        spermatozoa: urineReData.spermatozoa || '',
+        uricAcidCrystals: urineReData.uric_acid_crystals || '',
+        calciumOxalate: urineReData.calcium_oxalate || '',
+        triplePhosphate: urineReData.triple_phosphate || '',
+        amorphousDeposits: urineReData.amorphous_deposits || '',
+        hyalineCasts: urineReData.hyaline_casts || '',
+        granularCasts: urineReData.granular_casts || '',
+        rbcCasts: urineReData.rbc_casts || '',
+        wbcCasts: urineReData.wbc_casts || '',
+        epithelialCasts: urineReData.epithelial_casts || '',
+        urobilinogen: urineReData.urobilinogen || '',
+        bilirubin: urineReData.bilirubin || '',
+        ketone: urineReData.ketones || '',
+        blood: urineReData.blood || '',
+        protein: urineReData.protein || '',
+        nitrite: urineReData.nitrite || '',
+        leukocytes: urineReData.leukocytes || '',
+        glucose: urineReData.glucose || '',
+        specificGravity: urineReData.specific_gravity || '',
+        reactionPh: urineReData.ph || '',
+        ascorbicAcid: urineReData.ascorbic_acid || '',
         comments: urineReData.remarks || '',
         machineId: urineReData.machine_id?.toString() || "",
         testCarriedOutBy: urineReData.test_carried_out_by || "",
+        status: urineReData.status || 'incomplete',
       });
     }
   }, [urineReData, form]);
@@ -188,9 +229,29 @@ function EditUrineForReFull() {
           nitrite: payload.nitrite,
           leukocytes: payload.leukocytes,
           ph: payload.reactionPh,
+          sediment: payload.sediment,
+          epithelial_cells: payload.epithelialCells,
+          rbc_cells: payload.rbcCells,
+          pus_cells: payload.pusCells,
+          yeast_cells: payload.yeastCells,
+          spermatozoa: payload.spermatozoa,
+          uric_acid_crystals: payload.uricAcidCrystals,
+          calcium_oxalate: payload.calciumOxalate,
+          triple_phosphate: payload.triplePhosphate,
+          amorphous_deposits: payload.amorphousDeposits,
+          hyaline_casts: payload.hyalineCasts,
+          granular_casts: payload.granularCasts,
+          rbc_casts: payload.rbcCasts,
+          wbc_casts: payload.wbcCasts,
+          epithelial_casts: payload.epithelialCasts,
+          urobilinogen: payload.urobilinogen,
+          bilirubin: payload.bilirubin,
+          specific_gravity: payload.specificGravity,
+          ascorbic_acid: payload.ascorbicAcid,
           remarks: payload.comments,
           machine_id: payload.machineId ? parseInt(payload.machineId) : null,
           test_carried_out_by: payload.testCarriedOutBy,
+          status: payload.status,
         }),
       });
 
@@ -216,6 +277,40 @@ function EditUrineForReFull() {
   const onSubmit = (values: UrineFormValues) => {
     console.log("Urine Examination Report:", values);
     updateUrineReMutation.mutate(values);
+  };
+
+  // Renders a result field as a dropdown (predefined options) or a numeric input.
+  const renderField = (fieldName: string) => {
+    const cfg = URINE_FIELD_CONFIG[fieldName];
+    return (
+      <FormField
+        key={fieldName}
+        control={form.control}
+        name={fieldName as any}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{cfg.label}</FormLabel>
+            <FormControl>
+              {cfg.options ? (
+                <Select onValueChange={field.onChange} value={field.value || undefined}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={`Select ${cfg.label}`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cfg.options.map((opt) => (
+                      <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input type="number" step="any" placeholder={`Enter ${cfg.label}`} {...field} />
+              )}
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    );
   };
 
   return (
@@ -269,11 +364,53 @@ function EditUrineForReFull() {
             <CardContent className="p-4">
               <PatientInvoiceInfo
                 invoiceInfo={{
-                  invoiceNo: "UEX-4021",
-                  patientName: "Hasina Begum",
-                  age: "29 Years",
-                  gender: "Female",
+                  invoiceNo: urineReData?.invoice_id ? `RPT-${urineReData.invoice_id}` : "—",
+                  patientName: urineReData?.outdoor_invoice?.patient_name || "—",
+                  age: urineReData?.outdoor_invoice?.age_text || urineReData?.outdoor_invoice?.age || "—",
+                  gender: urineReData?.outdoor_invoice?.sex || "—",
                 }}
+              />
+            </CardContent>
+          </Card>
+
+          <Form {...form}>
+          {/* Status */}
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                  <Activity className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold">Report Status</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Mark report as complete or incomplete</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Report Status</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="incomplete">Incomplete</SelectItem>
+                          <SelectItem value="complete">Complete</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </CardContent>
           </Card>
@@ -292,7 +429,6 @@ function EditUrineForReFull() {
               </div>
             </CardHeader>
             <CardContent className="p-4">
-              <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
 
                 {/* ------------------------------- */}
@@ -300,25 +436,8 @@ function EditUrineForReFull() {
                 {/* ------------------------------- */}
                 <section>
                   <h3 className="text-lg font-semibold mb-2">Physical Examination</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {["color", "appearance", "sediment"].map((fieldName) => (
-                      <FormField
-                        key={fieldName}
-                        control={form.control}
-                        name={fieldName as any}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="capitalize">
-                              {fieldName.replace(/([A-Z])/g, " $1")}
-                            </FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    ))}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {["color", "appearance", "sediment"].map(renderField)}
                   </div>
                 </section>
 
@@ -327,31 +446,8 @@ function EditUrineForReFull() {
                 {/* ------------------------------- */}
                 <section>
                   <h3 className="text-lg font-semibold mb-2">Microscopic Examination</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      "epithelialCells",
-                      "rbcCells",
-                      "pusCells",
-                      "yeastCells",
-                      "spermatozoa",
-                    ].map((fieldName) => (
-                      <FormField
-                        key={fieldName}
-                        control={form.control}
-                        name={fieldName as any}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="capitalize">
-                              {fieldName.replace(/([A-Z])/g, " $1")}
-                            </FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    ))}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {["epithelialCells", "rbcCells", "pusCells", "yeastCells", "spermatozoa"].map(renderField)}
                   </div>
                 </section>
 
@@ -360,30 +456,8 @@ function EditUrineForReFull() {
                 {/* ------------------------------- */}
                 <section>
                   <h3 className="text-lg font-semibold mb-2">Crystals</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      "uricAcidCrystals",
-                      "calciumOxalate",
-                      "triplePhosphate",
-                      "amorphousDeposits",
-                    ].map((fieldName) => (
-                      <FormField
-                        key={fieldName}
-                        control={form.control}
-                        name={fieldName as any}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="capitalize">
-                              {fieldName.replace(/([A-Z])/g, " $1")}
-                            </FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    ))}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {["uricAcidCrystals", "calciumOxalate", "triplePhosphate", "amorphousDeposits"].map(renderField)}
                   </div>
                 </section>
 
@@ -392,31 +466,8 @@ function EditUrineForReFull() {
                 {/* ------------------------------- */}
                 <section>
                   <h3 className="text-lg font-semibold mb-2">Casts / LPE</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      "hyalineCasts",
-                      "granularCasts",
-                      "rbcCasts",
-                      "wbcCasts",
-                      "epithelialCasts",
-                    ].map((fieldName) => (
-                      <FormField
-                        key={fieldName}
-                        control={form.control}
-                        name={fieldName as any}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="capitalize">
-                              {fieldName.replace(/([A-Z])/g, " $1")}
-                            </FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    ))}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {["hyalineCasts", "granularCasts", "rbcCasts", "wbcCasts", "epithelialCasts"].map(renderField)}
                   </div>
                 </section>
 
@@ -425,37 +476,8 @@ function EditUrineForReFull() {
                 {/* ------------------------------- */}
                 <section>
                   <h3 className="text-lg font-semibold mb-2">Chemical Examination</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      "urobilinogen",
-                      "bilirubin",
-                      "ketone",
-                      "blood",
-                      "protein",
-                      "nitrite",
-                      "leukocytes",
-                      "glucose",
-                      "specificGravity",
-                      "reactionPh",
-                      "ascorbicAcid",
-                    ].map((fieldName) => (
-                      <FormField
-                        key={fieldName}
-                        control={form.control}
-                        name={fieldName as any}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="capitalize">
-                              {fieldName.replace(/([A-Z])/g, " $1")}
-                            </FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    ))}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {["urobilinogen", "bilirubin", "ketone", "blood", "protein", "nitrite", "leukocytes", "glucose", "specificGravity", "reactionPh", "ascorbicAcid"].map(renderField)}
                   </div>
                 </section>
 
@@ -532,9 +554,9 @@ function EditUrineForReFull() {
                   </Button>
                 </div>
               </form>
-              </Form>
             </CardContent>
           </Card>
+          </Form>
         </div>
       </Main>
     </>

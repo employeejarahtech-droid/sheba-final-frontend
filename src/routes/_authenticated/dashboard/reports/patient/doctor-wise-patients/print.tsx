@@ -219,9 +219,9 @@ function DoctorWisePatientsPrint() {
 
       {/* Back & Print Buttons */}
       <div className="flex justify-between items-center mb-6 print:hidden">
-        <Button variant="outline" size="sm" onClick={() => window.close()}>
+        <Button variant="outline" size="sm" onClick={() => window.history.back()}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Close
+          Back
         </Button>
         <Button size="sm" onClick={() => window.print()}>
           <Printer className="w-4 h-4 mr-2" />

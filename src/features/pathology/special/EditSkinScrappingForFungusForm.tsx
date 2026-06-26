@@ -8,7 +8,7 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
-import { FlaskConical } from "lucide-react";
+import { FlaskConical, Activity } from "lucide-react";
 
 import {
     Form,
@@ -44,6 +44,7 @@ const skinScrapingSchema = z.object({
     comments: z.string().optional(),
     testCarriedOutBy: z.string().optional(),
     machineId: z.string().optional(),
+    status: z.union([z.literal('complete'), z.literal('incomplete')]),
 });
 
 type SkinScrapingFormValues = z.infer<typeof skinScrapingSchema>;
@@ -69,6 +70,7 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
             comments: "",
             testCarriedOutBy: "",
             machineId: "",
+            status: "incomplete",
         },
     });
 
@@ -117,6 +119,7 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
                 comments: skinScrappingData.remarks || '',
                 testCarriedOutBy: skinScrappingData.test_carried_out_by || '',
                 machineId: skinScrappingData.machine_id?.toString() || '',
+                status: String(skinScrappingData.status).trim().toLowerCase() === 'complete' ? 'complete' : 'incomplete',
             })
         }
     }, [skinScrappingData, form]);
@@ -138,6 +141,7 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
                     remarks: payload.comments,
                     test_carried_out_by: payload.testCarriedOutBy,
                     machine_id: payload.machineId ? parseInt(payload.machineId) : null,
+                    status: payload.status,
                 }),
             });
 
@@ -195,14 +199,12 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
                 </SheetHeader>
 
                 <div className="px-4">
-                    <PatientInvoiceInfo
-                        invoiceInfo={{
-                            invoiceNo: skinScrappingData?.invoice_id ? `RPT-${skinScrappingData.invoice_id}` : "—",
-                            patientName: skinScrappingData?.outdoor_invoice?.patient_name || "—",
-                            age: skinScrappingData?.outdoor_invoice?.age ? `${skinScrappingData.outdoor_invoice.age} Years` : "—",
-                            gender: skinScrappingData?.outdoor_invoice?.sex || "—",
-                        }}
-                    />
+                    <PatientInvoiceInfo invoiceInfo={{
+                        invoiceNo: skinScrappingData?.invoice_id ? `RPT-${skinScrappingData.invoice_id}` : "—",
+                        patientName: skinScrappingData?.outdoor_invoice?.patient_name || "—",
+                        age: skinScrappingData?.outdoor_invoice?.age_text || skinScrappingData?.outdoor_invoice?.age || "—",
+                        gender: skinScrappingData?.outdoor_invoice?.sex || "—",
+                    }} />
                 </div>
 
                 <Form {...form}>
@@ -292,6 +294,42 @@ export function EditSkinScrapingForFungalForm({ open, setOpen, reportId, invoice
                                 </FormItem>
                             )}
                         />
+
+                        {/* Report Status */}
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border rounded-lg p-4">
+                            <div className="flex items-center gap-2.5 mb-3">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md">
+                                    <Activity className="h-4 w-4 text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-semibold text-gray-800">Report Status</h3>
+                                    <p className="text-xs text-gray-600">Mark report as complete or incomplete</p>
+                                </div>
+                            </div>
+                            <FormField
+                                control={form.control}
+                                name="status"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                value={field.value === 'complete' ? 'complete' : 'incomplete'}
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select status" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="incomplete">Incomplete</SelectItem>
+                                                    <SelectItem value="complete">Complete</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
 
                         {/* Buttons */}
                         <div className="flex justify-between gap-3 pt-4">

@@ -244,10 +244,10 @@ export default function IndoorAllCollections({
         {
             data: null, title: 'Actions', orderable: false, responsivePriority: 1,
             render: (_d: any, _t: string, row: any) =>
-                `<div class="flex items-center gap-2">
-                    <button class="view-details-btn inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent h-8 px-4 py-2" type="button" data-id="${row.id}">View Details</button>
+                `<div class="flex flex-wrap items-center gap-2">
+                    <button class="view-details-btn inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow transition-colors" type="button" data-id="${row.id}"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>View Details</button>
                     <button onclick="window.location.href = '/dashboard/admission/patients/${row.id}/payment-receipt/${row.payment_id}'"
-                            class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white h-8 px-4 py-2" type="button">Print</button>
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded text-xs font-semibold shadow transition-colors" type="button"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>Print</button>
                 </div>`,
             defaultContent: '',
         },
@@ -342,7 +342,7 @@ export default function IndoorAllCollections({
 
                 {/* Stats */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    {stats.map((item) => {
+                    {stats.map((item, index) => {
                         const Icon = item.icon;
                         return (
                             <Card key={item.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">

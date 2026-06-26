@@ -118,7 +118,14 @@ export function PaymentCompletedListPage({ page, limit, search, setPage, setSear
     const meta = { page, limit, total }
 
     const columns = useMemo(() => [
-        { data: "id", title: "ID", orderable: true, responsivePriority: 1 },
+        {
+            data: "id",
+            title: "ID",
+            orderable: true,
+            responsivePriority: 1,
+            render: (_data: any, _type: string, row: AdmissionItem) =>
+                `<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${row.id}</span>`
+        },
         { data: "patient_name", title: "Patient Name", orderable: true, responsivePriority: 2 },
         { data: "phone", title: "Phone", orderable: false, responsivePriority: 3 },
         {

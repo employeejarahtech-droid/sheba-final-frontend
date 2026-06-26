@@ -549,8 +549,8 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
       render: (data: any, _type: string, row: InvoiceItem) => {
         const value = data || `INV-${String(row.id).padStart(4, '0')}`;
         const display = data
-          ? `<span class="font-semibold text-orange-600">${data}</span>`
-          : `<span class="font-semibold text-muted-foreground">${value}</span>`;
+          ? `<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${data}</span>`
+          : `<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${value}</span>`;
         return `
           <div class="flex items-center gap-2">
             <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"

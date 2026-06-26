@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
-import { Camera, Upload, X } from 'lucide-react'
+import { Camera, Upload, X, Image as ImageIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { ImageSelectorModal } from './image-selector-modal'
 
 interface ProfileImageUploaderProps {
   currentImage?: string
@@ -19,6 +20,7 @@ export function ProfileImageUploader({
   const [preview, setPreview] = useState<string | undefined>(currentImage)
   const [isDragging, setIsDragging] = useState(false)
   const [removed, setRemoved] = useState(false)
+  const [showGallery, setShowGallery] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Only sync from prop when it actually changes (new saved image from server)
@@ -78,6 +80,16 @@ export function ProfileImageUploader({
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
+  }
+
+  const handleGalleryImageSelect = (file: File) => {
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setPreview(reader.result as string)
+      setRemoved(false)
+      onImageChange(file)
+    }
+    reader.readAsDataURL(file)
   }
 
   return (
@@ -154,7 +166,19 @@ export function ProfileImageUploader({
       />
 
       {/* Action Buttons */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap justify-center">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={(e) => {
+            e.preventDefault()
+            setShowGallery(true)
+          }}
+        >
+          <ImageIcon className="w-4 h-4 mr-2" />
+          Choose from Gallery
+        </Button>
         <Button
           type="button"
           variant="outline"
@@ -165,7 +189,7 @@ export function ProfileImageUploader({
           }}
         >
           <Upload className="w-4 h-4 mr-2" />
-          Choose File
+          Upload File
         </Button>
         {preview && (
           <Button
@@ -185,8 +209,16 @@ export function ProfileImageUploader({
 
       {/* Instructions */}
       <p className="text-xs text-muted-foreground text-center max-w-[200px]">
-        Drag & drop or click to upload. Max size: 5MB. Formats: JPG, PNG, GIF, WebP
+        Choose from gallery or upload your own image. Max size: 5MB
       </p>
+
+      {/* Gallery Modal */}
+      <ImageSelectorModal
+        isOpen={showGallery}
+        onClose={() => setShowGallery(false)}
+        onSelectImage={handleGalleryImageSelect}
+        currentImage={preview}
+      />
     </div>
   )
 }

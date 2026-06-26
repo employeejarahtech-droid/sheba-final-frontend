@@ -8,7 +8,6 @@ import { Plus, DollarSign, TrendingUp, CreditCard } from "lucide-react";
 import { useGetIncomesQuery } from "@/features/accounting/accountingQueries";
 import { Income } from "@/types/accounting.types";
 import { DataTable } from "@/components/DataTable";
-import { Input } from "@/components/ui/input";
 import { AddIncomeModal } from "@/components/accounting/AddIncomeModal";
 import { Button } from "@/components/ui/button";
 import { getCookie } from "@/lib/cookies";
@@ -16,6 +15,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import api from "@/lib/axios";
 import { useCurrency } from '@/hooks/use-currency'
+import { DateField } from '@/components/date-field'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 
 // Layout
 
@@ -33,9 +40,42 @@ function IncomesPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
-  const [date, setDate] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const token = getCookie('accessToken');
   const queryClient = useQueryClient();
+
+  // Date filter presets
+  const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
+  const toYMD = (d: Date) => {
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${day}`
+  }
+  const datePresets = useMemo(() => ({
+    today: { from: toYMD(today()), to: toYMD(today()) },
+    yesterday: (() => { const d = today(); d.setDate(d.getDate() - 1); return { from: toYMD(d), to: toYMD(d) }; })(),
+    last7: (() => { const d = today(); d.setDate(d.getDate() - 6); return { from: toYMD(d), to: toYMD(today()) }; })(),
+    last15: (() => { const d = today(); d.setDate(d.getDate() - 14); return { from: toYMD(d), to: toYMD(today()) }; })(),
+    last30: (() => { const d = today(); d.setDate(d.getDate() - 29); return { from: toYMD(d), to: toYMD(today()) }; })(),
+    last45: (() => { const d = today(); d.setDate(d.getDate() - 44); return { from: toYMD(d), to: toYMD(today()) }; })(),
+    last60: (() => { const d = today(); d.setDate(d.getDate() - 59); return { from: toYMD(d), to: toYMD(today()) }; })(),
+    last90: (() => { const d = today(); d.setDate(d.getDate() - 89); return { from: toYMD(d), to: toYMD(today()) }; })(),
+    last180: (() => { const d = today(); d.setDate(d.getDate() - 179); return { from: toYMD(d), to: toYMD(today()) }; })(),
+    last365: (() => { const d = today(); d.setDate(d.getDate() - 364); return { from: toYMD(d), to: toYMD(today()) }; })(),
+  }), [])
+  const activePreset = useMemo(() => {
+    if (!from || !to) return 'custom'
+    const match = Object.entries(datePresets).find(([, v]) => v.from === from && v.to === to)
+    return match ? match[0] : 'custom'
+  }, [from, to, datePresets])
+  const [presetOpen, setPresetOpen] = useState(false)
+  const applyPreset = (key: string) => {
+    const p = (datePresets as any)[key]
+    if (p) { setFrom(p.from); setTo(p.to); setPage(1) }
+    setPresetOpen(false)
+  }
 
   const {
     data: fetchedData,
@@ -45,7 +85,8 @@ function IncomesPage() {
     page,
     limit,
     search,
-    date,
+    start_date: from,
+    end_date: to,
   });
 
   const incomes: Income[] = fetchedData?.data || [];
@@ -246,19 +287,10 @@ function IncomesPage() {
   return (
     <>
       <AppHeader fixed />
-      <main className='p-6 lg:p-10'>
+      <main className=''>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h1 className="text-2xl font-bold tracking-tight">All Income</h1>
           <div className="flex gap-2 items-center w-full sm:w-auto">
-            <Input
-              type="date"
-              className="w-auto"
-              value={date}
-              onChange={(e) => {
-                setDate(e.target.value);
-                setPage(1);
-              }}
-            />
             <AddIncomeModal>
               <Button className="flex items-center gap-2">
                 <Plus size={18} /> Add Income
@@ -267,7 +299,7 @@ function IncomesPage() {
           </div>
         </div>
 
-        <div className="p-4 space-y-3">
+        <div className=" space-y-3">
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -310,6 +342,36 @@ function IncomesPage() {
             setPage(1);
           }}
           isLoading={isFetching}
+          filterSlot={
+            <div className="flex items-center gap-1.5">
+              <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>
+                <SelectTrigger className="w-[140px] h-9 rounded-md border-gray-200 dark:border-gray-700 bg-transparent text-sm">
+                  <SelectValue placeholder="Filter by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="yesterday">Yesterday</SelectItem>
+                  <SelectItem value="last7">Last 7 days</SelectItem>
+                  <SelectItem value="last15">Last 15 days</SelectItem>
+                  <SelectItem value="last30">Last 30 days</SelectItem>
+                  <SelectItem value="last45">Last 45 days</SelectItem>
+                  <SelectItem value="last60">Last 60 days</SelectItem>
+                  <SelectItem value="last90">Last 90 days</SelectItem>
+                  <SelectItem value="last180">Last 180 days</SelectItem>
+                  <SelectItem value="last365">Last 365 days</SelectItem>
+                  <SelectItem value="custom">Custom range</SelectItem>
+                </SelectContent>
+              </Select>
+              <DateField value={from} onChange={(v: string) => { setFrom(v); setPresetOpen(false); setPage(1) }} placeholder="From" />
+              <span className="text-xs text-muted-foreground">to</span>
+              <DateField value={to} onChange={(v: string) => { setTo(v); setPresetOpen(false); setPage(1) }} placeholder="To" />
+              {(from || to) && (
+                <Button variant="ghost" size="sm" onClick={() => { setFrom(''); setTo(''); setPage(1) }}>
+                  Clear
+                </Button>
+              )}
+            </div>
+          }
         />
         </div>
       </main>

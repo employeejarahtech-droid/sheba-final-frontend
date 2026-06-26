@@ -8,7 +8,7 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
-import { TestTube } from "lucide-react";
+import { TestTube, Activity } from "lucide-react";
 
 import {
     Form,
@@ -38,6 +38,7 @@ const hcgSchema = z.object({
     comments: z.string().optional(),
     testCarriedOutBy: z.string().optional(),
     machineId: z.string().optional(),
+    status: z.union([z.literal('complete'), z.literal('incomplete')]),
 });
 
 type HCGFormValues = z.infer<typeof hcgSchema>;
@@ -63,6 +64,7 @@ export function EditBetaHCGTestForm({ open, setOpen, reportId, invoiceId }: HCGT
             comments: "",
             testCarriedOutBy: "",
             machineId: "",
+            status: "incomplete",
         },
     });
 
@@ -92,6 +94,7 @@ export function EditBetaHCGTestForm({ open, setOpen, reportId, invoiceId }: HCGT
                 comments: betaHCGData.remarks || '',
                 testCarriedOutBy: betaHCGData.test_carried_out_by || '',
                 machineId: betaHCGData.machine_id ? String(betaHCGData.machine_id) : '',
+                status: String(betaHCGData.status).trim().toLowerCase() === 'complete' ? 'complete' : 'incomplete',
             })
         }
     }, [betaHCGData, form]);
@@ -112,6 +115,7 @@ export function EditBetaHCGTestForm({ open, setOpen, reportId, invoiceId }: HCGT
                     remarks: payload.comments,
                     test_carried_out_by: payload.testCarriedOutBy,
                     machine_id: payload.machineId ? parseInt(payload.machineId) : null,
+                    status: payload.status,
                 }),
             });
 
@@ -179,14 +183,12 @@ export function EditBetaHCGTestForm({ open, setOpen, reportId, invoiceId }: HCGT
                 </SheetHeader>
 
                 <div className="px-4">
-                    <PatientInvoiceInfo
-                        invoiceInfo={{
-                            invoiceNo: "RPT-1010",
-                            patientName: "Afsana Begum",
-                            age: "28 Years",
-                            gender: "Female",
-                        }}
-                    />
+                    <PatientInvoiceInfo invoiceInfo={{
+                        invoiceNo: betaHCGData?.invoice_id ? `RPT-${betaHCGData.invoice_id}` : "—",
+                        patientName: betaHCGData?.outdoor_invoice?.patient_name || "—",
+                        age: betaHCGData?.outdoor_invoice?.age_text || betaHCGData?.outdoor_invoice?.age || "—",
+                        gender: betaHCGData?.outdoor_invoice?.sex || "—",
+                    }} />
                 </div>
 
                 <Form {...form}>
@@ -274,6 +276,42 @@ export function EditBetaHCGTestForm({ open, setOpen, reportId, invoiceId }: HCGT
                                 </FormItem>
                             )}
                         />
+
+                        {/* Report Status */}
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border rounded-lg p-4">
+                            <div className="flex items-center gap-2.5 mb-3">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md">
+                                    <Activity className="h-4 w-4 text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-semibold text-gray-800">Report Status</h3>
+                                    <p className="text-xs text-gray-600">Mark report as complete or incomplete</p>
+                                </div>
+                            </div>
+                            <FormField
+                                control={form.control}
+                                name="status"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                value={field.value === 'complete' ? 'complete' : 'incomplete'}
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select status" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="incomplete">Incomplete</SelectItem>
+                                                    <SelectItem value="complete">Complete</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
 
                         {/* Buttons */}
                         <div className="flex justify-center gap-2 pt-4">

@@ -28,9 +28,12 @@ type BTCTItem = {
   id: number;
   invoice_id: number;
   patient_name: string;
+  age?: string | number | null;
+  sex?: string | null;
   ref_doctor?: string | null;
   bleeding_time: number | null;
   clotting_time: number | null;
+  status?: string | null;
   created_at: string;
 };
 
@@ -130,6 +133,8 @@ function BloodForBTCT() {
       // Get data from attributes
       const invoiceId = btn.dataset.invoiceId || '';
       const patientName = btn.dataset.patientName || '-';
+      const age = btn.dataset.age || '';
+      const sex = btn.dataset.sex || '';
       const date = btn.dataset.date || '-';
       const reportId = btn.dataset.reportId || '';
 
@@ -167,12 +172,14 @@ function BloodForBTCT() {
               <p class="font-semibold text-gray-800">${patientName}</p>
             </div>
             <div>
-              <p class="text-gray-500">Date</p>
-              <p class="font-semibold text-gray-800">${formattedDate}</p>
+              <p class="text-gray-500">Age/Sex</p>
+              <p class="font-semibold text-gray-800">
+                ${age ? age : '-'}${sex ? ` <span class="text-gray-600">(${sex})</span>` : ''}
+              </p>
             </div>
             <div>
-              <p class="text-gray-500">Department</p>
-              <p class="font-semibold text-gray-800">Hematology</p>
+              <p class="text-gray-500">Date</p>
+              <p class="font-semibold text-gray-800">${formattedDate}</p>
             </div>
           </div>
         </div>
@@ -271,7 +278,7 @@ function BloodForBTCT() {
       newRow.className = 'child-row-detail';
       const cell = document.createElement('td');
       cell.className = 'p-4 bg-gray-50';
-      cell.colSpan = 6;
+      cell.colSpan = 7; // Updated to include age column
       cell.appendChild(details);
       newRow.appendChild(cell);
 
@@ -303,6 +310,8 @@ function BloodForBTCT() {
                     type="button"
                     data-invoice-id="${data}"
                     data-patient-name="${(row.patient_name || "-").replace(/"/g, "&quot;")}"
+                    data-age="${row.age || ""}"
+                    data-sex="${row.sex || ""}"
                     data-date="${date}"
                     data-report-id="${row.id}">+</button>
             <span>${data}</span>
@@ -317,6 +326,22 @@ function BloodForBTCT() {
       orderable: true,
       responsivePriority: 1,
       defaultContent: "",
+    },
+    {
+      data: "age",
+      title: "Age",
+      orderable: true,
+      responsivePriority: 4,
+      render: (data: any, _type: string, row: BTCTItem) => {
+        const age = row.age;
+        const sex = row.sex;
+        if (!age && !sex) return '-';
+        return `<div class="text-sm">
+          ${age ? `<span>${age}</span>` : ''}
+          ${sex ? `<span class="text-gray-500 text-xs ml-1">(${sex})</span>` : ''}
+        </div>`;
+      },
+      defaultContent: "-",
     },
     {
       data: "ref_doctor",
@@ -334,13 +359,39 @@ function BloodForBTCT() {
       defaultContent: "",
     },
     {
+      data: 'test_carried_out_by',
+      title: 'Test Carried Out By',
+      render: (data: any) => {
+        const value = data as string;
+        return `<div class="text-sm">${value || `-`}</div>`;
+      },
+    },
+    {
+      data: "status",
+      title: "Status",
+      orderable: true,
+      render: (data: any, _type: string, row: BTCTItem) => {
+        const status = row.status || 'incomplete';
+        const statusClass = status === 'complete'
+          ? 'bg-green-100 text-green-700 border-green-300'
+          : 'bg-yellow-100 text-yellow-700 border-yellow-300';
+        const statusText = status === 'complete' ? 'Complete' : 'Incomplete';
+        return `
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${statusClass}">
+            ${statusText}
+          </span>
+        `;
+      },
+      defaultContent: "",
+    },
+    {
       data: null,
       title: "Actions",
       orderable: false,
       render: (_data: any, _type: string, row: any) => `
-        <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
-          <button type="button" onclick="window.editBloodForBTCT(${row.id}, ${row.invoice_id})" title="Edit" class="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-xs font-medium h-8 px-2.5 transition">Edit</button>
-          <a href="/dashboard/pathology/hematology/blood-for-bt-ct/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print" class="inline-flex items-center gap-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium h-8 px-2.5 transition">Print</a>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" onclick="window.editBloodForBTCT(${row.id}, ${row.invoice_id})" title="Edit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit</button>
+          <a href="/dashboard/pathology/hematology/blood-for-bt-ct/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded text-xs font-semibold shadow transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>Print</a>
         </div>
       `,
     },
@@ -394,7 +445,7 @@ function BloodForBTCT() {
                 <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
                   <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }}>
                     <div className="flex items-center gap-2.5">
-                      <div className={cn("p-2 bg-gradient-to-br rounded-lg shadow-lg", card.grad)}>
+                      <div className="p-2 bg-white rounded-lg shadow-lg">
                         <Icon className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
                       </div>
                       <CardTitle className="text-sm font-semibold text-white/90">{card.label}</CardTitle>

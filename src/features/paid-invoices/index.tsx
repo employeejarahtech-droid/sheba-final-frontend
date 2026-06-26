@@ -544,7 +544,7 @@ export default function PaidInvoices({ page, limit, search, from, to, setPage, s
       orderable: true,
       responsivePriority: 1,
       render: (data: any, _type: string, row: InvoiceItem) => {
-        const display = data ? `<span class="font-semibold text-emerald-600">${data}</span>` : '<span class="text-muted-foreground text-sm">-</span>';
+        const display = data ? `<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${data}</span>` : '<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">-</span>';
         return `
           <div class="flex items-center gap-2">
             <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"

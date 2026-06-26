@@ -22,7 +22,10 @@ export function ReportFooter() {
     }
 
     return (
-        <div className="grid mt-32 text-sm" style={{ gridTemplateColumns: `repeat(${items.length}, 1fr)` }}>
+        <div
+            className="flex mt-32 text-sm w-full"
+            style={{ justifyContent: items.length === 1 ? 'center' : 'space-between' }}
+        >
             {items.map((item: string, i: number) => {
                 const align = items.length === 1 ? 'center' : i === 0 ? 'left' : i === items.length - 1 ? 'right' : 'center'
                 return (

@@ -143,11 +143,9 @@ function LipidProfile() {
       const formattedDate = date !== '-' ? date : '';
 
       // Status badge
-      const statusBadge = status === 'passed'
-        ? `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Passed</span>`
-        : status === 'failed'
-          ? `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Failed</span>`
-          : `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">Pending</span>`;
+      const statusBadge = status === 'Completed'
+        ? `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Completed</span>`
+        : `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">Pending</span>`;
 
       // Build the HTML content
       let htmlContent = `
@@ -369,20 +367,23 @@ function LipidProfile() {
     },
 
     {
+      data: 'test_carried_out_by',
+      title: 'Test Carried Out By',
+      render: (data: any) => {
+        const value = data as string;
+        return `<div class="text-sm">${value || `-`}</div>`;
+      },
+    },
+    {
       data: "status",
       title: "Status",
       orderable: true,
       responsivePriority: 3,
       render: (_data: any, _type: string, row: LipidProfileItem) => {
-        const status = row.status;
-        const color =
-          status === "passed"
-            ? "bg-green-500"
-            : status === "failed"
-              ? "bg-red-500"
-              : "bg-yellow-500";
+        const status = row.status || 'Pending';
+        const color = status === 'Completed' ? 'bg-green-500' : 'bg-yellow-500';
 
-        return `<span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status || `Pending`}</span>`;
+        return `<span class="${color} text-white inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">${status}</span>`;
       },
       defaultContent: "",
     },
@@ -393,15 +394,15 @@ function LipidProfile() {
       searchable: false,
       render: (_data: any, _type: string, row: LipidProfileItem) => {
         return `
-          <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
+          <div class="flex flex-wrap items-center gap-2">
             <button type="button" onclick="window.editLipidProfile(${row.id}, ${row.invoice_id})" title="Edit"
-              class="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-xs font-medium h-8 px-2.5 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
               Edit
             </button>
             <a href="/dashboard/pathology/biochemical/lipid-profile/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print / view report"
-              class="inline-flex items-center gap-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium h-8 px-2.5 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V2h12v7"/><path d="M6 14h12v8H6z"/></svg>
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded text-xs font-semibold shadow transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
               Print
             </a>
           </div>
@@ -431,24 +432,24 @@ function LipidProfile() {
             },
             {
               label: "Completed",
-              value: data?.data?.items?.filter((i: any) => i.status === "passed").length || 0,
+              value: data?.data?.items?.filter((i: any) => i.status === 'Completed').length || 0,
               icon: Activity,
               grad: "from-emerald-500 to-teal-500",
-              sub: "Status: Passed"
+              sub: "Status Done"
             },
             {
               label: "Pending",
-              value: data?.data?.items?.filter((i: any) => !i.status || i.status === "pending").length || 0,
+              value: data?.data?.items?.filter((i: any) => !i.status || i.status === 'Pending').length || 0,
               icon: Clock,
               grad: "from-amber-500 to-orange-500",
-              sub: "Status: Awaiting"
+              sub: "Status Awaiting"
             },
             {
-              label: "Failed",
-              value: data?.data?.items?.filter((i: any) => i.status === "failed").length || 0,
-              icon: AlertCircle,
-              grad: "from-rose-500 to-red-500",
-              sub: "Status: Attention"
+              label: "Patients",
+              value: new Set(data?.data?.items?.map((i: any) => i.patient_name)).size || 0,
+              icon: Activity,
+              grad: "from-purple-500 to-pink-500",
+              sub: "Unique patients"
             }
           ].map((card, index) => {
             const Icon = card.icon;
@@ -456,7 +457,7 @@ function LipidProfile() {
               <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
                 <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }}>
                   <div className="flex items-center gap-2.5">
-                    <div className={cn("p-2 bg-gradient-to-br rounded-lg shadow-lg", card.grad)}>
+                    <div className="p-2 bg-white rounded-lg shadow-lg">
                       <Icon className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
                     </div>
                     <CardTitle className="text-sm font-semibold text-white/90">{card.label}</CardTitle>

@@ -188,15 +188,13 @@ function UrineForAlbumin() {
       data: 'status',
       title: 'Status',
       render: (data: any) => {
-        const status = data as string;
-        const color =
-          status === "passed"
-            ? "bg-green-500"
-            : status === "failed"
-              ? "bg-red-500"
-              : "bg-yellow-500";
+        const isComplete = String(data || '').toLowerCase() === 'complete';
+        const cls = isComplete
+          ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+          : 'bg-amber-100 text-amber-700 border-amber-200';
+        const label = isComplete ? 'Complete' : 'Incomplete';
 
-        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${color} text-white border-transparent">${status || `Pending`}</span>`;
+        return `<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${cls}">${label}</span>`;
       },
     },
     {
@@ -206,9 +204,9 @@ function UrineForAlbumin() {
       render: (_data: any, _type: string, row: ReportItem) => {
         const rowData = JSON.stringify(row).replace(/"/g, '&quot;');
         return `
-          <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
-            <button class="edit-urine-albumin-btn inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-xs font-medium h-8 px-2.5 transition" data-row="${rowData}">Edit</button>
-            <a href="/dashboard/pathology/urine/urine-for-albumin/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print" class="inline-flex items-center gap-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium h-8 px-2.5 transition">Print</a>
+          <div class="flex flex-wrap items-center gap-2">
+            <button class="edit-urine-albumin-btn inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors" data-row="${rowData}"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit</button>
+            <a href="/dashboard/pathology/urine/urine-for-albumin/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded text-xs font-semibold shadow transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>Print</a>
           </div>
         `;
       },
@@ -257,11 +255,10 @@ function UrineForAlbumin() {
       const formattedDate = date !== '-' ? date : '';
 
       // Status badge
-      const statusBadge = status === 'passed'
-? <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Passed</span>
-        : status === 'failed'
-? <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Failed</span>
-          : <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Pending</span>;
+      const isComplete = String(status || '').toLowerCase() === 'complete';
+      const statusBadge = isComplete
+        ? `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">Complete</span>`
+        : `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">Incomplete</span>`;
 
       // Build the HTML content
       let htmlContent = `

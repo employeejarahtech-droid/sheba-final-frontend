@@ -50,6 +50,7 @@ import { Route as AuthenticatedDashboardTasksIndexRouteImport } from './routes/_
 import { Route as AuthenticatedDashboardSubscriptionIndexRouteImport } from './routes/_authenticated/dashboard/subscription/index'
 import { Route as AuthenticatedDashboardSettingsIndexRouteImport } from './routes/_authenticated/dashboard/settings/index'
 import { Route as AuthenticatedDashboardRolesIndexRouteImport } from './routes/_authenticated/dashboard/roles/index'
+import { Route as AuthenticatedDashboardPurchaseIndexRouteImport } from './routes/_authenticated/dashboard/purchase/index'
 import { Route as AuthenticatedDashboardNotificationsIndexRouteImport } from './routes/_authenticated/dashboard/notifications/index'
 import { Route as AuthenticatedDashboardMyAccountIndexRouteImport } from './routes/_authenticated/dashboard/my-account/index'
 import { Route as AuthenticatedDashboardHelpIndexRouteImport } from './routes/_authenticated/dashboard/help/index'
@@ -60,6 +61,7 @@ import { Route as AuthenticatedDashboardCompanyAccountIndexRouteImport } from '.
 import { Route as AuthenticatedDashboardChatsIndexRouteImport } from './routes/_authenticated/dashboard/chats/index'
 import { Route as AuthenticatedDashboardBackupsIndexRouteImport } from './routes/_authenticated/dashboard/backups/index'
 import { Route as AuthenticatedDashboardBackupSettingsIndexRouteImport } from './routes/_authenticated/dashboard/backup-settings/index'
+import { Route as AuthenticatedDashboardAssetsIndexRouteImport } from './routes/_authenticated/dashboard/assets/index'
 import { Route as AuthenticatedDashboardAppsIndexRouteImport } from './routes/_authenticated/dashboard/apps/index'
 import { Route as AuthenticatedDashboardAccountingIndexRouteImport } from './routes/_authenticated/dashboard/accounting/index'
 import { Route as platformAdminPlansIndexRouteImport } from './routes/(platform)/admin/plans/index'
@@ -80,7 +82,14 @@ import { Route as platformAdminBillingStripeRouteImport } from './routes/(platfo
 import { Route as AuthenticatedDashboardXRayAllIndexRouteImport } from './routes/_authenticated/dashboard/x-ray/all/index'
 import { Route as AuthenticatedDashboardUltrasonogramAllIndexRouteImport } from './routes/_authenticated/dashboard/ultrasonogram/all/index'
 import { Route as AuthenticatedDashboardSettingsReportSettingsIndexRouteImport } from './routes/_authenticated/dashboard/settings/report-settings/index'
+import { Route as AuthenticatedDashboardSettingsLoginSettingsIndexRouteImport } from './routes/_authenticated/dashboard/settings/login-settings/index'
+import { Route as AuthenticatedDashboardSettingsHomePageSettingsIndexRouteImport } from './routes/_authenticated/dashboard/settings/home-page-settings/index'
 import { Route as AuthenticatedDashboardRolesCreateIndexRouteImport } from './routes/_authenticated/dashboard/roles/create/index'
+import { Route as AuthenticatedDashboardPurchaseSuppliersIndexRouteImport } from './routes/_authenticated/dashboard/purchase/suppliers/index'
+import { Route as AuthenticatedDashboardPurchaseSupplierPerformanceIndexRouteImport } from './routes/_authenticated/dashboard/purchase/supplier-performance/index'
+import { Route as AuthenticatedDashboardPurchaseStatisticsIndexRouteImport } from './routes/_authenticated/dashboard/purchase/statistics/index'
+import { Route as AuthenticatedDashboardPurchaseRequestsIndexRouteImport } from './routes/_authenticated/dashboard/purchase/requests/index'
+import { Route as AuthenticatedDashboardPurchaseGoodsReceiptIndexRouteImport } from './routes/_authenticated/dashboard/purchase/goods-receipt/index'
 import { Route as AuthenticatedDashboardPayrollSalaryStructureIndexRouteImport } from './routes/_authenticated/dashboard/payroll/salary-structure/index'
 import { Route as AuthenticatedDashboardPayrollOverviewIndexRouteImport } from './routes/_authenticated/dashboard/payroll/overview/index'
 import { Route as AuthenticatedDashboardPayrollEmployeesIndexRouteImport } from './routes/_authenticated/dashboard/payroll/employees/index'
@@ -92,6 +101,12 @@ import { Route as AuthenticatedDashboardBanksBankWithdrawalsIndexRouteImport } f
 import { Route as AuthenticatedDashboardBanksBankTransactionsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-transactions/index'
 import { Route as AuthenticatedDashboardBanksBankDepositsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-deposits/index'
 import { Route as AuthenticatedDashboardBanksBankAccountsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-accounts/index'
+import { Route as AuthenticatedDashboardAssetsStatisticsIndexRouteImport } from './routes/_authenticated/dashboard/assets/statistics/index'
+import { Route as AuthenticatedDashboardAssetsMaintenanceIndexRouteImport } from './routes/_authenticated/dashboard/assets/maintenance/index'
+import { Route as AuthenticatedDashboardAssetsLocationsIndexRouteImport } from './routes/_authenticated/dashboard/assets/locations/index'
+import { Route as AuthenticatedDashboardAssetsListIndexRouteImport } from './routes/_authenticated/dashboard/assets/list/index'
+import { Route as AuthenticatedDashboardAssetsDepreciationIndexRouteImport } from './routes/_authenticated/dashboard/assets/depreciation/index'
+import { Route as AuthenticatedDashboardAssetsCategoriesIndexRouteImport } from './routes/_authenticated/dashboard/assets/categories/index'
 import { Route as AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRouteImport } from './routes/_authenticated/dashboard/admission/user-wise-collections/index'
 import { Route as AuthenticatedDashboardAdmissionSecondTimeBillIndexRouteImport } from './routes/_authenticated/dashboard/admission/second-time-bill/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/index'
@@ -163,6 +178,10 @@ import { Route as AuthenticatedDashboardReportsAccountingDailyTransactionsIndexR
 import { Route as AuthenticatedDashboardReportsAccountingCashFlowIndexRouteImport } from './routes/_authenticated/dashboard/reports/accounting/cash-flow/index'
 import { Route as AuthenticatedDashboardReportsAccountingBankBookIndexRouteImport } from './routes/_authenticated/dashboard/reports/accounting/bank-book/index'
 import { Route as AuthenticatedDashboardReportsAccountingBalanceSheetIndexRouteImport } from './routes/_authenticated/dashboard/reports/accounting/balance-sheet/index'
+import { Route as AuthenticatedDashboardPurchaseSuppliersCreateIndexRouteImport } from './routes/_authenticated/dashboard/purchase/suppliers/create/index'
+import { Route as AuthenticatedDashboardPurchaseRequestsPendingIndexRouteImport } from './routes/_authenticated/dashboard/purchase/requests/pending/index'
+import { Route as AuthenticatedDashboardPurchaseRequestsCreateIndexRouteImport } from './routes/_authenticated/dashboard/purchase/requests/create/index'
+import { Route as AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRouteImport } from './routes/_authenticated/dashboard/purchase/goods-receipt/create/index'
 import { Route as AuthenticatedDashboardPayrollSalaryStaffIdIndexRouteImport } from './routes/_authenticated/dashboard/payroll/salary/$staffId/index'
 import { Route as AuthenticatedDashboardPayrollAttendanceStaffIdIndexRouteImport } from './routes/_authenticated/dashboard/payroll/attendance/$staffId/index'
 import { Route as AuthenticatedDashboardPathologyUrineUrineForSugarIndexRouteImport } from './routes/_authenticated/dashboard/pathology/urine/urine-for-sugar/index'
@@ -224,6 +243,10 @@ import { Route as AuthenticatedDashboardIndoorManagementDistributionsIndexRouteI
 import { Route as AuthenticatedDashboardIndoorManagementClinicalBillsIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/clinical-bills/index'
 import { Route as AuthenticatedDashboardIndoorManagementAssistantBillIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/assistant-bill/index'
 import { Route as AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/anesthesia-bill/index'
+import { Route as AuthenticatedDashboardAssetsMaintenanceCreateIndexRouteImport } from './routes/_authenticated/dashboard/assets/maintenance/create/index'
+import { Route as AuthenticatedDashboardAssetsLocationsCreateIndexRouteImport } from './routes/_authenticated/dashboard/assets/locations/create/index'
+import { Route as AuthenticatedDashboardAssetsListCreateIndexRouteImport } from './routes/_authenticated/dashboard/assets/list/create/index'
+import { Route as AuthenticatedDashboardAssetsCategoriesCreateIndexRouteImport } from './routes/_authenticated/dashboard/assets/categories/create/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/payment-completed-list/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsPaidIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/paid/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/final-bill-created-list/index'
@@ -320,12 +343,19 @@ import { Route as AuthenticatedDashboardAccountingReportsCashFlowPrintRouteImpor
 import { Route as AuthenticatedDashboardAccountingReportsBalanceSheetPrintRouteImport } from './routes/_authenticated/dashboard/accounting/reports/balance-sheet/print'
 import { Route as AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRouteImport } from './routes/_authenticated/dashboard/reports/my/outdoor/today-collection/index'
 import { Route as AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRouteImport } from './routes/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/index'
+import { Route as AuthenticatedDashboardPurchaseSuppliersEditIdIndexRouteImport } from './routes/_authenticated/dashboard/purchase/suppliers/edit/$id/index'
+import { Route as AuthenticatedDashboardPurchaseRequestsEditIdIndexRouteImport } from './routes/_authenticated/dashboard/purchase/requests/edit/$id/index'
+import { Route as AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRouteImport } from './routes/_authenticated/dashboard/purchase/goods-receipt/edit/$id/index'
 import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/list/index'
 import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/create/index'
 import { Route as AuthenticatedDashboardOutdoorMasterTestsCreateIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/tests/create/index'
 import { Route as AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/doctors/$doctorId/index'
 import { Route as AuthenticatedDashboardIndoorMasterServicesCreateIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/services/create/index'
 import { Route as AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/bed-cabin-list/create/index'
+import { Route as AuthenticatedDashboardAssetsMaintenanceEditIdIndexRouteImport } from './routes/_authenticated/dashboard/assets/maintenance/edit/$id/index'
+import { Route as AuthenticatedDashboardAssetsLocationsEditIdIndexRouteImport } from './routes/_authenticated/dashboard/assets/locations/edit/$id/index'
+import { Route as AuthenticatedDashboardAssetsListEditIdIndexRouteImport } from './routes/_authenticated/dashboard/assets/list/edit/$id/index'
+import { Route as AuthenticatedDashboardAssetsCategoriesEditIdIndexRouteImport } from './routes/_authenticated/dashboard/assets/categories/edit/$id/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/print/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/final-bill/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/final-bill-print/index'
@@ -592,6 +622,12 @@ const AuthenticatedDashboardRolesIndexRoute =
     path: '/dashboard/roles/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardPurchaseIndexRoute =
+  AuthenticatedDashboardPurchaseIndexRouteImport.update({
+    id: '/dashboard/purchase/',
+    path: '/dashboard/purchase/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardNotificationsIndexRoute =
   AuthenticatedDashboardNotificationsIndexRouteImport.update({
     id: '/dashboard/notifications/',
@@ -650,6 +686,12 @@ const AuthenticatedDashboardBackupSettingsIndexRoute =
   AuthenticatedDashboardBackupSettingsIndexRouteImport.update({
     id: '/dashboard/backup-settings/',
     path: '/dashboard/backup-settings/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAssetsIndexRoute =
+  AuthenticatedDashboardAssetsIndexRouteImport.update({
+    id: '/dashboard/assets/',
+    path: '/dashboard/assets/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardAppsIndexRoute =
@@ -770,10 +812,52 @@ const AuthenticatedDashboardSettingsReportSettingsIndexRoute =
     path: '/report-settings/',
     getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
   } as any)
+const AuthenticatedDashboardSettingsLoginSettingsIndexRoute =
+  AuthenticatedDashboardSettingsLoginSettingsIndexRouteImport.update({
+    id: '/login-settings/',
+    path: '/login-settings/',
+    getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
+  } as any)
+const AuthenticatedDashboardSettingsHomePageSettingsIndexRoute =
+  AuthenticatedDashboardSettingsHomePageSettingsIndexRouteImport.update({
+    id: '/home-page-settings/',
+    path: '/home-page-settings/',
+    getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
+  } as any)
 const AuthenticatedDashboardRolesCreateIndexRoute =
   AuthenticatedDashboardRolesCreateIndexRouteImport.update({
     id: '/dashboard/roles/create/',
     path: '/dashboard/roles/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPurchaseSuppliersIndexRoute =
+  AuthenticatedDashboardPurchaseSuppliersIndexRouteImport.update({
+    id: '/dashboard/purchase/suppliers/',
+    path: '/dashboard/purchase/suppliers/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPurchaseSupplierPerformanceIndexRoute =
+  AuthenticatedDashboardPurchaseSupplierPerformanceIndexRouteImport.update({
+    id: '/dashboard/purchase/supplier-performance/',
+    path: '/dashboard/purchase/supplier-performance/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPurchaseStatisticsIndexRoute =
+  AuthenticatedDashboardPurchaseStatisticsIndexRouteImport.update({
+    id: '/dashboard/purchase/statistics/',
+    path: '/dashboard/purchase/statistics/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPurchaseRequestsIndexRoute =
+  AuthenticatedDashboardPurchaseRequestsIndexRouteImport.update({
+    id: '/dashboard/purchase/requests/',
+    path: '/dashboard/purchase/requests/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute =
+  AuthenticatedDashboardPurchaseGoodsReceiptIndexRouteImport.update({
+    id: '/dashboard/purchase/goods-receipt/',
+    path: '/dashboard/purchase/goods-receipt/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardPayrollSalaryStructureIndexRoute =
@@ -840,6 +924,42 @@ const AuthenticatedDashboardBanksBankAccountsIndexRoute =
   AuthenticatedDashboardBanksBankAccountsIndexRouteImport.update({
     id: '/dashboard/banks/bank-accounts/',
     path: '/dashboard/banks/bank-accounts/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAssetsStatisticsIndexRoute =
+  AuthenticatedDashboardAssetsStatisticsIndexRouteImport.update({
+    id: '/dashboard/assets/statistics/',
+    path: '/dashboard/assets/statistics/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAssetsMaintenanceIndexRoute =
+  AuthenticatedDashboardAssetsMaintenanceIndexRouteImport.update({
+    id: '/dashboard/assets/maintenance/',
+    path: '/dashboard/assets/maintenance/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAssetsLocationsIndexRoute =
+  AuthenticatedDashboardAssetsLocationsIndexRouteImport.update({
+    id: '/dashboard/assets/locations/',
+    path: '/dashboard/assets/locations/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAssetsListIndexRoute =
+  AuthenticatedDashboardAssetsListIndexRouteImport.update({
+    id: '/dashboard/assets/list/',
+    path: '/dashboard/assets/list/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAssetsDepreciationIndexRoute =
+  AuthenticatedDashboardAssetsDepreciationIndexRouteImport.update({
+    id: '/dashboard/assets/depreciation/',
+    path: '/dashboard/assets/depreciation/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAssetsCategoriesIndexRoute =
+  AuthenticatedDashboardAssetsCategoriesIndexRouteImport.update({
+    id: '/dashboard/assets/categories/',
+    path: '/dashboard/assets/categories/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute =
@@ -1286,6 +1406,30 @@ const AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute =
     path: '/dashboard/reports/accounting/balance-sheet/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardPurchaseSuppliersCreateIndexRoute =
+  AuthenticatedDashboardPurchaseSuppliersCreateIndexRouteImport.update({
+    id: '/dashboard/purchase/suppliers/create/',
+    path: '/dashboard/purchase/suppliers/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPurchaseRequestsPendingIndexRoute =
+  AuthenticatedDashboardPurchaseRequestsPendingIndexRouteImport.update({
+    id: '/dashboard/purchase/requests/pending/',
+    path: '/dashboard/purchase/requests/pending/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPurchaseRequestsCreateIndexRoute =
+  AuthenticatedDashboardPurchaseRequestsCreateIndexRouteImport.update({
+    id: '/dashboard/purchase/requests/create/',
+    path: '/dashboard/purchase/requests/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute =
+  AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRouteImport.update({
+    id: '/dashboard/purchase/goods-receipt/create/',
+    path: '/dashboard/purchase/goods-receipt/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute =
   AuthenticatedDashboardPayrollSalaryStaffIdIndexRouteImport.update({
     id: '/dashboard/payroll/salary/$staffId/',
@@ -1664,6 +1808,30 @@ const AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute =
   AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRouteImport.update({
     id: '/dashboard/indoor/management/anesthesia-bill/',
     path: '/dashboard/indoor/management/anesthesia-bill/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute =
+  AuthenticatedDashboardAssetsMaintenanceCreateIndexRouteImport.update({
+    id: '/dashboard/assets/maintenance/create/',
+    path: '/dashboard/assets/maintenance/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAssetsLocationsCreateIndexRoute =
+  AuthenticatedDashboardAssetsLocationsCreateIndexRouteImport.update({
+    id: '/dashboard/assets/locations/create/',
+    path: '/dashboard/assets/locations/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAssetsListCreateIndexRoute =
+  AuthenticatedDashboardAssetsListCreateIndexRouteImport.update({
+    id: '/dashboard/assets/list/create/',
+    path: '/dashboard/assets/list/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAssetsCategoriesCreateIndexRoute =
+  AuthenticatedDashboardAssetsCategoriesCreateIndexRouteImport.update({
+    id: '/dashboard/assets/categories/create/',
+    path: '/dashboard/assets/categories/create/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute =
@@ -2284,6 +2452,24 @@ const AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute =
       getParentRoute: () => AuthenticatedRouteRoute,
     } as any,
   )
+const AuthenticatedDashboardPurchaseSuppliersEditIdIndexRoute =
+  AuthenticatedDashboardPurchaseSuppliersEditIdIndexRouteImport.update({
+    id: '/dashboard/purchase/suppliers/edit/$id/',
+    path: '/dashboard/purchase/suppliers/edit/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPurchaseRequestsEditIdIndexRoute =
+  AuthenticatedDashboardPurchaseRequestsEditIdIndexRouteImport.update({
+    id: '/dashboard/purchase/requests/edit/$id/',
+    path: '/dashboard/purchase/requests/edit/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute =
+  AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRouteImport.update({
+    id: '/dashboard/purchase/goods-receipt/edit/$id/',
+    path: '/dashboard/purchase/goods-receipt/edit/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute =
   AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRouteImport.update({
     id: '/dashboard/outdoor/reception/invoices/list/',
@@ -2318,6 +2504,30 @@ const AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute =
   AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRouteImport.update({
     id: '/dashboard/indoor/master/bed-cabin-list/create/',
     path: '/dashboard/indoor/master/bed-cabin-list/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute =
+  AuthenticatedDashboardAssetsMaintenanceEditIdIndexRouteImport.update({
+    id: '/dashboard/assets/maintenance/edit/$id/',
+    path: '/dashboard/assets/maintenance/edit/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAssetsLocationsEditIdIndexRoute =
+  AuthenticatedDashboardAssetsLocationsEditIdIndexRouteImport.update({
+    id: '/dashboard/assets/locations/edit/$id/',
+    path: '/dashboard/assets/locations/edit/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAssetsListEditIdIndexRoute =
+  AuthenticatedDashboardAssetsListEditIdIndexRouteImport.update({
+    id: '/dashboard/assets/list/edit/$id/',
+    path: '/dashboard/assets/list/edit/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAssetsCategoriesEditIdIndexRoute =
+  AuthenticatedDashboardAssetsCategoriesEditIdIndexRouteImport.update({
+    id: '/dashboard/assets/categories/edit/$id/',
+    path: '/dashboard/assets/categories/edit/$id/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute =
@@ -2757,6 +2967,7 @@ export interface FileRoutesByFullPath {
   '/admin/plans': typeof platformAdminPlansIndexRoute
   '/dashboard/accounting': typeof AuthenticatedDashboardAccountingIndexRoute
   '/dashboard/apps': typeof AuthenticatedDashboardAppsIndexRoute
+  '/dashboard/assets': typeof AuthenticatedDashboardAssetsIndexRoute
   '/dashboard/backup-settings': typeof AuthenticatedDashboardBackupSettingsIndexRoute
   '/dashboard/backups': typeof AuthenticatedDashboardBackupsIndexRoute
   '/dashboard/chats': typeof AuthenticatedDashboardChatsIndexRoute
@@ -2767,6 +2978,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/help': typeof AuthenticatedDashboardHelpIndexRoute
   '/dashboard/my-account': typeof AuthenticatedDashboardMyAccountIndexRoute
   '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsIndexRoute
+  '/dashboard/purchase': typeof AuthenticatedDashboardPurchaseIndexRoute
   '/dashboard/roles': typeof AuthenticatedDashboardRolesIndexRoute
   '/dashboard/settings/': typeof AuthenticatedDashboardSettingsIndexRoute
   '/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionIndexRoute
@@ -2800,6 +3012,12 @@ export interface FileRoutesByFullPath {
   '/dashboard/admission/patients': typeof AuthenticatedDashboardAdmissionPatientsIndexRoute
   '/dashboard/admission/second-time-bill': typeof AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute
   '/dashboard/admission/user-wise-collections': typeof AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute
+  '/dashboard/assets/categories': typeof AuthenticatedDashboardAssetsCategoriesIndexRoute
+  '/dashboard/assets/depreciation': typeof AuthenticatedDashboardAssetsDepreciationIndexRoute
+  '/dashboard/assets/list': typeof AuthenticatedDashboardAssetsListIndexRoute
+  '/dashboard/assets/locations': typeof AuthenticatedDashboardAssetsLocationsIndexRoute
+  '/dashboard/assets/maintenance': typeof AuthenticatedDashboardAssetsMaintenanceIndexRoute
+  '/dashboard/assets/statistics': typeof AuthenticatedDashboardAssetsStatisticsIndexRoute
   '/dashboard/banks/bank-accounts': typeof AuthenticatedDashboardBanksBankAccountsIndexRoute
   '/dashboard/banks/bank-deposits': typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
   '/dashboard/banks/bank-transactions': typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
@@ -2811,7 +3029,14 @@ export interface FileRoutesByFullPath {
   '/dashboard/payroll/employees': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
   '/dashboard/payroll/overview': typeof AuthenticatedDashboardPayrollOverviewIndexRoute
   '/dashboard/payroll/salary-structure': typeof AuthenticatedDashboardPayrollSalaryStructureIndexRoute
+  '/dashboard/purchase/goods-receipt': typeof AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute
+  '/dashboard/purchase/requests': typeof AuthenticatedDashboardPurchaseRequestsIndexRoute
+  '/dashboard/purchase/statistics': typeof AuthenticatedDashboardPurchaseStatisticsIndexRoute
+  '/dashboard/purchase/supplier-performance': typeof AuthenticatedDashboardPurchaseSupplierPerformanceIndexRoute
+  '/dashboard/purchase/suppliers': typeof AuthenticatedDashboardPurchaseSuppliersIndexRoute
   '/dashboard/roles/create': typeof AuthenticatedDashboardRolesCreateIndexRoute
+  '/dashboard/settings/home-page-settings': typeof AuthenticatedDashboardSettingsHomePageSettingsIndexRoute
+  '/dashboard/settings/login-settings': typeof AuthenticatedDashboardSettingsLoginSettingsIndexRoute
   '/dashboard/settings/report-settings': typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
   '/dashboard/ultrasonogram/all': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   '/dashboard/x-ray/all': typeof AuthenticatedDashboardXRayAllIndexRoute
@@ -2909,6 +3134,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/admission/patients/final-bill-created-list': typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
   '/dashboard/admission/patients/paid': typeof AuthenticatedDashboardAdmissionPatientsPaidIndexRoute
   '/dashboard/admission/patients/payment-completed-list': typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
+  '/dashboard/assets/categories/create': typeof AuthenticatedDashboardAssetsCategoriesCreateIndexRoute
+  '/dashboard/assets/list/create': typeof AuthenticatedDashboardAssetsListCreateIndexRoute
+  '/dashboard/assets/locations/create': typeof AuthenticatedDashboardAssetsLocationsCreateIndexRoute
+  '/dashboard/assets/maintenance/create': typeof AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute
   '/dashboard/indoor/management/anesthesia-bill': typeof AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute
   '/dashboard/indoor/management/assistant-bill': typeof AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute
   '/dashboard/indoor/management/clinical-bills': typeof AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute
@@ -2970,6 +3199,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/pathology/urine/urine-for-sugar': typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
   '/dashboard/payroll/attendance/$staffId': typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   '/dashboard/payroll/salary/$staffId': typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  '/dashboard/purchase/goods-receipt/create': typeof AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute
+  '/dashboard/purchase/requests/create': typeof AuthenticatedDashboardPurchaseRequestsCreateIndexRoute
+  '/dashboard/purchase/requests/pending': typeof AuthenticatedDashboardPurchaseRequestsPendingIndexRoute
+  '/dashboard/purchase/suppliers/create': typeof AuthenticatedDashboardPurchaseSuppliersCreateIndexRoute
   '/dashboard/reports/accounting/balance-sheet': typeof AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute
   '/dashboard/reports/accounting/bank-book': typeof AuthenticatedDashboardReportsAccountingBankBookIndexRoute
   '/dashboard/reports/accounting/cash-flow': typeof AuthenticatedDashboardReportsAccountingCashFlowIndexRoute
@@ -3062,12 +3295,19 @@ export interface FileRoutesByFullPath {
   '/dashboard/admission/patients/$admissionId/final-bill-print': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
   '/dashboard/admission/patients/$admissionId/final-bill': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute
   '/dashboard/admission/patients/$admissionId/print': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute
+  '/dashboard/assets/categories/edit/$id': typeof AuthenticatedDashboardAssetsCategoriesEditIdIndexRoute
+  '/dashboard/assets/list/edit/$id': typeof AuthenticatedDashboardAssetsListEditIdIndexRoute
+  '/dashboard/assets/locations/edit/$id': typeof AuthenticatedDashboardAssetsLocationsEditIdIndexRoute
+  '/dashboard/assets/maintenance/edit/$id': typeof AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute
   '/dashboard/indoor/master/bed-cabin-list/create': typeof AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute
   '/dashboard/indoor/master/services/create': typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
   '/dashboard/outdoor/master/doctors/$doctorId': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
   '/dashboard/outdoor/master/tests/create': typeof AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute
   '/dashboard/outdoor/reception/invoices/create': typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
   '/dashboard/outdoor/reception/invoices/list': typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
+  '/dashboard/purchase/goods-receipt/edit/$id': typeof AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute
+  '/dashboard/purchase/requests/edit/$id': typeof AuthenticatedDashboardPurchaseRequestsEditIdIndexRoute
+  '/dashboard/purchase/suppliers/edit/$id': typeof AuthenticatedDashboardPurchaseSuppliersEditIdIndexRoute
   '/dashboard/reports/my/outdoor/date-wise-collection': typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute
   '/dashboard/reports/my/outdoor/today-collection': typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute
   '/dashboard/outdoor/master/tests/edit/$id': typeof AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute
@@ -3124,6 +3364,7 @@ export interface FileRoutesByTo {
   '/admin/plans': typeof platformAdminPlansIndexRoute
   '/dashboard/accounting': typeof AuthenticatedDashboardAccountingIndexRoute
   '/dashboard/apps': typeof AuthenticatedDashboardAppsIndexRoute
+  '/dashboard/assets': typeof AuthenticatedDashboardAssetsIndexRoute
   '/dashboard/backup-settings': typeof AuthenticatedDashboardBackupSettingsIndexRoute
   '/dashboard/backups': typeof AuthenticatedDashboardBackupsIndexRoute
   '/dashboard/chats': typeof AuthenticatedDashboardChatsIndexRoute
@@ -3134,6 +3375,7 @@ export interface FileRoutesByTo {
   '/dashboard/help': typeof AuthenticatedDashboardHelpIndexRoute
   '/dashboard/my-account': typeof AuthenticatedDashboardMyAccountIndexRoute
   '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsIndexRoute
+  '/dashboard/purchase': typeof AuthenticatedDashboardPurchaseIndexRoute
   '/dashboard/roles': typeof AuthenticatedDashboardRolesIndexRoute
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsIndexRoute
   '/dashboard/subscription': typeof AuthenticatedDashboardSubscriptionIndexRoute
@@ -3167,6 +3409,12 @@ export interface FileRoutesByTo {
   '/dashboard/admission/patients': typeof AuthenticatedDashboardAdmissionPatientsIndexRoute
   '/dashboard/admission/second-time-bill': typeof AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute
   '/dashboard/admission/user-wise-collections': typeof AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute
+  '/dashboard/assets/categories': typeof AuthenticatedDashboardAssetsCategoriesIndexRoute
+  '/dashboard/assets/depreciation': typeof AuthenticatedDashboardAssetsDepreciationIndexRoute
+  '/dashboard/assets/list': typeof AuthenticatedDashboardAssetsListIndexRoute
+  '/dashboard/assets/locations': typeof AuthenticatedDashboardAssetsLocationsIndexRoute
+  '/dashboard/assets/maintenance': typeof AuthenticatedDashboardAssetsMaintenanceIndexRoute
+  '/dashboard/assets/statistics': typeof AuthenticatedDashboardAssetsStatisticsIndexRoute
   '/dashboard/banks/bank-accounts': typeof AuthenticatedDashboardBanksBankAccountsIndexRoute
   '/dashboard/banks/bank-deposits': typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
   '/dashboard/banks/bank-transactions': typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
@@ -3178,7 +3426,14 @@ export interface FileRoutesByTo {
   '/dashboard/payroll/employees': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
   '/dashboard/payroll/overview': typeof AuthenticatedDashboardPayrollOverviewIndexRoute
   '/dashboard/payroll/salary-structure': typeof AuthenticatedDashboardPayrollSalaryStructureIndexRoute
+  '/dashboard/purchase/goods-receipt': typeof AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute
+  '/dashboard/purchase/requests': typeof AuthenticatedDashboardPurchaseRequestsIndexRoute
+  '/dashboard/purchase/statistics': typeof AuthenticatedDashboardPurchaseStatisticsIndexRoute
+  '/dashboard/purchase/supplier-performance': typeof AuthenticatedDashboardPurchaseSupplierPerformanceIndexRoute
+  '/dashboard/purchase/suppliers': typeof AuthenticatedDashboardPurchaseSuppliersIndexRoute
   '/dashboard/roles/create': typeof AuthenticatedDashboardRolesCreateIndexRoute
+  '/dashboard/settings/home-page-settings': typeof AuthenticatedDashboardSettingsHomePageSettingsIndexRoute
+  '/dashboard/settings/login-settings': typeof AuthenticatedDashboardSettingsLoginSettingsIndexRoute
   '/dashboard/settings/report-settings': typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
   '/dashboard/ultrasonogram/all': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   '/dashboard/x-ray/all': typeof AuthenticatedDashboardXRayAllIndexRoute
@@ -3276,6 +3531,10 @@ export interface FileRoutesByTo {
   '/dashboard/admission/patients/final-bill-created-list': typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
   '/dashboard/admission/patients/paid': typeof AuthenticatedDashboardAdmissionPatientsPaidIndexRoute
   '/dashboard/admission/patients/payment-completed-list': typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
+  '/dashboard/assets/categories/create': typeof AuthenticatedDashboardAssetsCategoriesCreateIndexRoute
+  '/dashboard/assets/list/create': typeof AuthenticatedDashboardAssetsListCreateIndexRoute
+  '/dashboard/assets/locations/create': typeof AuthenticatedDashboardAssetsLocationsCreateIndexRoute
+  '/dashboard/assets/maintenance/create': typeof AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute
   '/dashboard/indoor/management/anesthesia-bill': typeof AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute
   '/dashboard/indoor/management/assistant-bill': typeof AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute
   '/dashboard/indoor/management/clinical-bills': typeof AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute
@@ -3337,6 +3596,10 @@ export interface FileRoutesByTo {
   '/dashboard/pathology/urine/urine-for-sugar': typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
   '/dashboard/payroll/attendance/$staffId': typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   '/dashboard/payroll/salary/$staffId': typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  '/dashboard/purchase/goods-receipt/create': typeof AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute
+  '/dashboard/purchase/requests/create': typeof AuthenticatedDashboardPurchaseRequestsCreateIndexRoute
+  '/dashboard/purchase/requests/pending': typeof AuthenticatedDashboardPurchaseRequestsPendingIndexRoute
+  '/dashboard/purchase/suppliers/create': typeof AuthenticatedDashboardPurchaseSuppliersCreateIndexRoute
   '/dashboard/reports/accounting/balance-sheet': typeof AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute
   '/dashboard/reports/accounting/bank-book': typeof AuthenticatedDashboardReportsAccountingBankBookIndexRoute
   '/dashboard/reports/accounting/cash-flow': typeof AuthenticatedDashboardReportsAccountingCashFlowIndexRoute
@@ -3429,12 +3692,19 @@ export interface FileRoutesByTo {
   '/dashboard/admission/patients/$admissionId/final-bill-print': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
   '/dashboard/admission/patients/$admissionId/final-bill': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute
   '/dashboard/admission/patients/$admissionId/print': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute
+  '/dashboard/assets/categories/edit/$id': typeof AuthenticatedDashboardAssetsCategoriesEditIdIndexRoute
+  '/dashboard/assets/list/edit/$id': typeof AuthenticatedDashboardAssetsListEditIdIndexRoute
+  '/dashboard/assets/locations/edit/$id': typeof AuthenticatedDashboardAssetsLocationsEditIdIndexRoute
+  '/dashboard/assets/maintenance/edit/$id': typeof AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute
   '/dashboard/indoor/master/bed-cabin-list/create': typeof AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute
   '/dashboard/indoor/master/services/create': typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
   '/dashboard/outdoor/master/doctors/$doctorId': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
   '/dashboard/outdoor/master/tests/create': typeof AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute
   '/dashboard/outdoor/reception/invoices/create': typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
   '/dashboard/outdoor/reception/invoices/list': typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
+  '/dashboard/purchase/goods-receipt/edit/$id': typeof AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute
+  '/dashboard/purchase/requests/edit/$id': typeof AuthenticatedDashboardPurchaseRequestsEditIdIndexRoute
+  '/dashboard/purchase/suppliers/edit/$id': typeof AuthenticatedDashboardPurchaseSuppliersEditIdIndexRoute
   '/dashboard/reports/my/outdoor/date-wise-collection': typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute
   '/dashboard/reports/my/outdoor/today-collection': typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute
   '/dashboard/outdoor/master/tests/edit/$id': typeof AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute
@@ -3498,6 +3768,7 @@ export interface FileRoutesById {
   '/(platform)/admin/plans/': typeof platformAdminPlansIndexRoute
   '/_authenticated/dashboard/accounting/': typeof AuthenticatedDashboardAccountingIndexRoute
   '/_authenticated/dashboard/apps/': typeof AuthenticatedDashboardAppsIndexRoute
+  '/_authenticated/dashboard/assets/': typeof AuthenticatedDashboardAssetsIndexRoute
   '/_authenticated/dashboard/backup-settings/': typeof AuthenticatedDashboardBackupSettingsIndexRoute
   '/_authenticated/dashboard/backups/': typeof AuthenticatedDashboardBackupsIndexRoute
   '/_authenticated/dashboard/chats/': typeof AuthenticatedDashboardChatsIndexRoute
@@ -3508,6 +3779,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/help/': typeof AuthenticatedDashboardHelpIndexRoute
   '/_authenticated/dashboard/my-account/': typeof AuthenticatedDashboardMyAccountIndexRoute
   '/_authenticated/dashboard/notifications/': typeof AuthenticatedDashboardNotificationsIndexRoute
+  '/_authenticated/dashboard/purchase/': typeof AuthenticatedDashboardPurchaseIndexRoute
   '/_authenticated/dashboard/roles/': typeof AuthenticatedDashboardRolesIndexRoute
   '/_authenticated/dashboard/settings/': typeof AuthenticatedDashboardSettingsIndexRoute
   '/_authenticated/dashboard/subscription/': typeof AuthenticatedDashboardSubscriptionIndexRoute
@@ -3541,6 +3813,12 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/admission/patients/': typeof AuthenticatedDashboardAdmissionPatientsIndexRoute
   '/_authenticated/dashboard/admission/second-time-bill/': typeof AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute
   '/_authenticated/dashboard/admission/user-wise-collections/': typeof AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute
+  '/_authenticated/dashboard/assets/categories/': typeof AuthenticatedDashboardAssetsCategoriesIndexRoute
+  '/_authenticated/dashboard/assets/depreciation/': typeof AuthenticatedDashboardAssetsDepreciationIndexRoute
+  '/_authenticated/dashboard/assets/list/': typeof AuthenticatedDashboardAssetsListIndexRoute
+  '/_authenticated/dashboard/assets/locations/': typeof AuthenticatedDashboardAssetsLocationsIndexRoute
+  '/_authenticated/dashboard/assets/maintenance/': typeof AuthenticatedDashboardAssetsMaintenanceIndexRoute
+  '/_authenticated/dashboard/assets/statistics/': typeof AuthenticatedDashboardAssetsStatisticsIndexRoute
   '/_authenticated/dashboard/banks/bank-accounts/': typeof AuthenticatedDashboardBanksBankAccountsIndexRoute
   '/_authenticated/dashboard/banks/bank-deposits/': typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
   '/_authenticated/dashboard/banks/bank-transactions/': typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
@@ -3552,7 +3830,14 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/payroll/employees/': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
   '/_authenticated/dashboard/payroll/overview/': typeof AuthenticatedDashboardPayrollOverviewIndexRoute
   '/_authenticated/dashboard/payroll/salary-structure/': typeof AuthenticatedDashboardPayrollSalaryStructureIndexRoute
+  '/_authenticated/dashboard/purchase/goods-receipt/': typeof AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute
+  '/_authenticated/dashboard/purchase/requests/': typeof AuthenticatedDashboardPurchaseRequestsIndexRoute
+  '/_authenticated/dashboard/purchase/statistics/': typeof AuthenticatedDashboardPurchaseStatisticsIndexRoute
+  '/_authenticated/dashboard/purchase/supplier-performance/': typeof AuthenticatedDashboardPurchaseSupplierPerformanceIndexRoute
+  '/_authenticated/dashboard/purchase/suppliers/': typeof AuthenticatedDashboardPurchaseSuppliersIndexRoute
   '/_authenticated/dashboard/roles/create/': typeof AuthenticatedDashboardRolesCreateIndexRoute
+  '/_authenticated/dashboard/settings/home-page-settings/': typeof AuthenticatedDashboardSettingsHomePageSettingsIndexRoute
+  '/_authenticated/dashboard/settings/login-settings/': typeof AuthenticatedDashboardSettingsLoginSettingsIndexRoute
   '/_authenticated/dashboard/settings/report-settings/': typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
   '/_authenticated/dashboard/ultrasonogram/all/': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   '/_authenticated/dashboard/x-ray/all/': typeof AuthenticatedDashboardXRayAllIndexRoute
@@ -3650,6 +3935,10 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/admission/patients/final-bill-created-list/': typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
   '/_authenticated/dashboard/admission/patients/paid/': typeof AuthenticatedDashboardAdmissionPatientsPaidIndexRoute
   '/_authenticated/dashboard/admission/patients/payment-completed-list/': typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
+  '/_authenticated/dashboard/assets/categories/create/': typeof AuthenticatedDashboardAssetsCategoriesCreateIndexRoute
+  '/_authenticated/dashboard/assets/list/create/': typeof AuthenticatedDashboardAssetsListCreateIndexRoute
+  '/_authenticated/dashboard/assets/locations/create/': typeof AuthenticatedDashboardAssetsLocationsCreateIndexRoute
+  '/_authenticated/dashboard/assets/maintenance/create/': typeof AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute
   '/_authenticated/dashboard/indoor/management/anesthesia-bill/': typeof AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute
   '/_authenticated/dashboard/indoor/management/assistant-bill/': typeof AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute
   '/_authenticated/dashboard/indoor/management/clinical-bills/': typeof AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute
@@ -3711,6 +4000,10 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/pathology/urine/urine-for-sugar/': typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
   '/_authenticated/dashboard/payroll/attendance/$staffId/': typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   '/_authenticated/dashboard/payroll/salary/$staffId/': typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  '/_authenticated/dashboard/purchase/goods-receipt/create/': typeof AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute
+  '/_authenticated/dashboard/purchase/requests/create/': typeof AuthenticatedDashboardPurchaseRequestsCreateIndexRoute
+  '/_authenticated/dashboard/purchase/requests/pending/': typeof AuthenticatedDashboardPurchaseRequestsPendingIndexRoute
+  '/_authenticated/dashboard/purchase/suppliers/create/': typeof AuthenticatedDashboardPurchaseSuppliersCreateIndexRoute
   '/_authenticated/dashboard/reports/accounting/balance-sheet/': typeof AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute
   '/_authenticated/dashboard/reports/accounting/bank-book/': typeof AuthenticatedDashboardReportsAccountingBankBookIndexRoute
   '/_authenticated/dashboard/reports/accounting/cash-flow/': typeof AuthenticatedDashboardReportsAccountingCashFlowIndexRoute
@@ -3803,12 +4096,19 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/admission/patients/$admissionId/final-bill-print/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
   '/_authenticated/dashboard/admission/patients/$admissionId/final-bill/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute
   '/_authenticated/dashboard/admission/patients/$admissionId/print/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute
+  '/_authenticated/dashboard/assets/categories/edit/$id/': typeof AuthenticatedDashboardAssetsCategoriesEditIdIndexRoute
+  '/_authenticated/dashboard/assets/list/edit/$id/': typeof AuthenticatedDashboardAssetsListEditIdIndexRoute
+  '/_authenticated/dashboard/assets/locations/edit/$id/': typeof AuthenticatedDashboardAssetsLocationsEditIdIndexRoute
+  '/_authenticated/dashboard/assets/maintenance/edit/$id/': typeof AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute
   '/_authenticated/dashboard/indoor/master/bed-cabin-list/create/': typeof AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute
   '/_authenticated/dashboard/indoor/master/services/create/': typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
   '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
   '/_authenticated/dashboard/outdoor/master/tests/create/': typeof AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute
   '/_authenticated/dashboard/outdoor/reception/invoices/create/': typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
   '/_authenticated/dashboard/outdoor/reception/invoices/list/': typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
+  '/_authenticated/dashboard/purchase/goods-receipt/edit/$id/': typeof AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute
+  '/_authenticated/dashboard/purchase/requests/edit/$id/': typeof AuthenticatedDashboardPurchaseRequestsEditIdIndexRoute
+  '/_authenticated/dashboard/purchase/suppliers/edit/$id/': typeof AuthenticatedDashboardPurchaseSuppliersEditIdIndexRoute
   '/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/': typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute
   '/_authenticated/dashboard/reports/my/outdoor/today-collection/': typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute
   '/_authenticated/dashboard/outdoor/master/tests/edit/$id/': typeof AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute
@@ -3869,6 +4169,7 @@ export interface FileRouteTypes {
     | '/admin/plans'
     | '/dashboard/accounting'
     | '/dashboard/apps'
+    | '/dashboard/assets'
     | '/dashboard/backup-settings'
     | '/dashboard/backups'
     | '/dashboard/chats'
@@ -3879,6 +4180,7 @@ export interface FileRouteTypes {
     | '/dashboard/help'
     | '/dashboard/my-account'
     | '/dashboard/notifications'
+    | '/dashboard/purchase'
     | '/dashboard/roles'
     | '/dashboard/settings/'
     | '/dashboard/subscription'
@@ -3912,6 +4214,12 @@ export interface FileRouteTypes {
     | '/dashboard/admission/patients'
     | '/dashboard/admission/second-time-bill'
     | '/dashboard/admission/user-wise-collections'
+    | '/dashboard/assets/categories'
+    | '/dashboard/assets/depreciation'
+    | '/dashboard/assets/list'
+    | '/dashboard/assets/locations'
+    | '/dashboard/assets/maintenance'
+    | '/dashboard/assets/statistics'
     | '/dashboard/banks/bank-accounts'
     | '/dashboard/banks/bank-deposits'
     | '/dashboard/banks/bank-transactions'
@@ -3923,7 +4231,14 @@ export interface FileRouteTypes {
     | '/dashboard/payroll/employees'
     | '/dashboard/payroll/overview'
     | '/dashboard/payroll/salary-structure'
+    | '/dashboard/purchase/goods-receipt'
+    | '/dashboard/purchase/requests'
+    | '/dashboard/purchase/statistics'
+    | '/dashboard/purchase/supplier-performance'
+    | '/dashboard/purchase/suppliers'
     | '/dashboard/roles/create'
+    | '/dashboard/settings/home-page-settings'
+    | '/dashboard/settings/login-settings'
     | '/dashboard/settings/report-settings'
     | '/dashboard/ultrasonogram/all'
     | '/dashboard/x-ray/all'
@@ -4021,6 +4336,10 @@ export interface FileRouteTypes {
     | '/dashboard/admission/patients/final-bill-created-list'
     | '/dashboard/admission/patients/paid'
     | '/dashboard/admission/patients/payment-completed-list'
+    | '/dashboard/assets/categories/create'
+    | '/dashboard/assets/list/create'
+    | '/dashboard/assets/locations/create'
+    | '/dashboard/assets/maintenance/create'
     | '/dashboard/indoor/management/anesthesia-bill'
     | '/dashboard/indoor/management/assistant-bill'
     | '/dashboard/indoor/management/clinical-bills'
@@ -4082,6 +4401,10 @@ export interface FileRouteTypes {
     | '/dashboard/pathology/urine/urine-for-sugar'
     | '/dashboard/payroll/attendance/$staffId'
     | '/dashboard/payroll/salary/$staffId'
+    | '/dashboard/purchase/goods-receipt/create'
+    | '/dashboard/purchase/requests/create'
+    | '/dashboard/purchase/requests/pending'
+    | '/dashboard/purchase/suppliers/create'
     | '/dashboard/reports/accounting/balance-sheet'
     | '/dashboard/reports/accounting/bank-book'
     | '/dashboard/reports/accounting/cash-flow'
@@ -4174,12 +4497,19 @@ export interface FileRouteTypes {
     | '/dashboard/admission/patients/$admissionId/final-bill-print'
     | '/dashboard/admission/patients/$admissionId/final-bill'
     | '/dashboard/admission/patients/$admissionId/print'
+    | '/dashboard/assets/categories/edit/$id'
+    | '/dashboard/assets/list/edit/$id'
+    | '/dashboard/assets/locations/edit/$id'
+    | '/dashboard/assets/maintenance/edit/$id'
     | '/dashboard/indoor/master/bed-cabin-list/create'
     | '/dashboard/indoor/master/services/create'
     | '/dashboard/outdoor/master/doctors/$doctorId'
     | '/dashboard/outdoor/master/tests/create'
     | '/dashboard/outdoor/reception/invoices/create'
     | '/dashboard/outdoor/reception/invoices/list'
+    | '/dashboard/purchase/goods-receipt/edit/$id'
+    | '/dashboard/purchase/requests/edit/$id'
+    | '/dashboard/purchase/suppliers/edit/$id'
     | '/dashboard/reports/my/outdoor/date-wise-collection'
     | '/dashboard/reports/my/outdoor/today-collection'
     | '/dashboard/outdoor/master/tests/edit/$id'
@@ -4236,6 +4566,7 @@ export interface FileRouteTypes {
     | '/admin/plans'
     | '/dashboard/accounting'
     | '/dashboard/apps'
+    | '/dashboard/assets'
     | '/dashboard/backup-settings'
     | '/dashboard/backups'
     | '/dashboard/chats'
@@ -4246,6 +4577,7 @@ export interface FileRouteTypes {
     | '/dashboard/help'
     | '/dashboard/my-account'
     | '/dashboard/notifications'
+    | '/dashboard/purchase'
     | '/dashboard/roles'
     | '/dashboard/settings'
     | '/dashboard/subscription'
@@ -4279,6 +4611,12 @@ export interface FileRouteTypes {
     | '/dashboard/admission/patients'
     | '/dashboard/admission/second-time-bill'
     | '/dashboard/admission/user-wise-collections'
+    | '/dashboard/assets/categories'
+    | '/dashboard/assets/depreciation'
+    | '/dashboard/assets/list'
+    | '/dashboard/assets/locations'
+    | '/dashboard/assets/maintenance'
+    | '/dashboard/assets/statistics'
     | '/dashboard/banks/bank-accounts'
     | '/dashboard/banks/bank-deposits'
     | '/dashboard/banks/bank-transactions'
@@ -4290,7 +4628,14 @@ export interface FileRouteTypes {
     | '/dashboard/payroll/employees'
     | '/dashboard/payroll/overview'
     | '/dashboard/payroll/salary-structure'
+    | '/dashboard/purchase/goods-receipt'
+    | '/dashboard/purchase/requests'
+    | '/dashboard/purchase/statistics'
+    | '/dashboard/purchase/supplier-performance'
+    | '/dashboard/purchase/suppliers'
     | '/dashboard/roles/create'
+    | '/dashboard/settings/home-page-settings'
+    | '/dashboard/settings/login-settings'
     | '/dashboard/settings/report-settings'
     | '/dashboard/ultrasonogram/all'
     | '/dashboard/x-ray/all'
@@ -4388,6 +4733,10 @@ export interface FileRouteTypes {
     | '/dashboard/admission/patients/final-bill-created-list'
     | '/dashboard/admission/patients/paid'
     | '/dashboard/admission/patients/payment-completed-list'
+    | '/dashboard/assets/categories/create'
+    | '/dashboard/assets/list/create'
+    | '/dashboard/assets/locations/create'
+    | '/dashboard/assets/maintenance/create'
     | '/dashboard/indoor/management/anesthesia-bill'
     | '/dashboard/indoor/management/assistant-bill'
     | '/dashboard/indoor/management/clinical-bills'
@@ -4449,6 +4798,10 @@ export interface FileRouteTypes {
     | '/dashboard/pathology/urine/urine-for-sugar'
     | '/dashboard/payroll/attendance/$staffId'
     | '/dashboard/payroll/salary/$staffId'
+    | '/dashboard/purchase/goods-receipt/create'
+    | '/dashboard/purchase/requests/create'
+    | '/dashboard/purchase/requests/pending'
+    | '/dashboard/purchase/suppliers/create'
     | '/dashboard/reports/accounting/balance-sheet'
     | '/dashboard/reports/accounting/bank-book'
     | '/dashboard/reports/accounting/cash-flow'
@@ -4541,12 +4894,19 @@ export interface FileRouteTypes {
     | '/dashboard/admission/patients/$admissionId/final-bill-print'
     | '/dashboard/admission/patients/$admissionId/final-bill'
     | '/dashboard/admission/patients/$admissionId/print'
+    | '/dashboard/assets/categories/edit/$id'
+    | '/dashboard/assets/list/edit/$id'
+    | '/dashboard/assets/locations/edit/$id'
+    | '/dashboard/assets/maintenance/edit/$id'
     | '/dashboard/indoor/master/bed-cabin-list/create'
     | '/dashboard/indoor/master/services/create'
     | '/dashboard/outdoor/master/doctors/$doctorId'
     | '/dashboard/outdoor/master/tests/create'
     | '/dashboard/outdoor/reception/invoices/create'
     | '/dashboard/outdoor/reception/invoices/list'
+    | '/dashboard/purchase/goods-receipt/edit/$id'
+    | '/dashboard/purchase/requests/edit/$id'
+    | '/dashboard/purchase/suppliers/edit/$id'
     | '/dashboard/reports/my/outdoor/date-wise-collection'
     | '/dashboard/reports/my/outdoor/today-collection'
     | '/dashboard/outdoor/master/tests/edit/$id'
@@ -4609,6 +4969,7 @@ export interface FileRouteTypes {
     | '/(platform)/admin/plans/'
     | '/_authenticated/dashboard/accounting/'
     | '/_authenticated/dashboard/apps/'
+    | '/_authenticated/dashboard/assets/'
     | '/_authenticated/dashboard/backup-settings/'
     | '/_authenticated/dashboard/backups/'
     | '/_authenticated/dashboard/chats/'
@@ -4619,6 +4980,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/help/'
     | '/_authenticated/dashboard/my-account/'
     | '/_authenticated/dashboard/notifications/'
+    | '/_authenticated/dashboard/purchase/'
     | '/_authenticated/dashboard/roles/'
     | '/_authenticated/dashboard/settings/'
     | '/_authenticated/dashboard/subscription/'
@@ -4652,6 +5014,12 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/admission/patients/'
     | '/_authenticated/dashboard/admission/second-time-bill/'
     | '/_authenticated/dashboard/admission/user-wise-collections/'
+    | '/_authenticated/dashboard/assets/categories/'
+    | '/_authenticated/dashboard/assets/depreciation/'
+    | '/_authenticated/dashboard/assets/list/'
+    | '/_authenticated/dashboard/assets/locations/'
+    | '/_authenticated/dashboard/assets/maintenance/'
+    | '/_authenticated/dashboard/assets/statistics/'
     | '/_authenticated/dashboard/banks/bank-accounts/'
     | '/_authenticated/dashboard/banks/bank-deposits/'
     | '/_authenticated/dashboard/banks/bank-transactions/'
@@ -4663,7 +5031,14 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/payroll/employees/'
     | '/_authenticated/dashboard/payroll/overview/'
     | '/_authenticated/dashboard/payroll/salary-structure/'
+    | '/_authenticated/dashboard/purchase/goods-receipt/'
+    | '/_authenticated/dashboard/purchase/requests/'
+    | '/_authenticated/dashboard/purchase/statistics/'
+    | '/_authenticated/dashboard/purchase/supplier-performance/'
+    | '/_authenticated/dashboard/purchase/suppliers/'
     | '/_authenticated/dashboard/roles/create/'
+    | '/_authenticated/dashboard/settings/home-page-settings/'
+    | '/_authenticated/dashboard/settings/login-settings/'
     | '/_authenticated/dashboard/settings/report-settings/'
     | '/_authenticated/dashboard/ultrasonogram/all/'
     | '/_authenticated/dashboard/x-ray/all/'
@@ -4761,6 +5136,10 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/admission/patients/final-bill-created-list/'
     | '/_authenticated/dashboard/admission/patients/paid/'
     | '/_authenticated/dashboard/admission/patients/payment-completed-list/'
+    | '/_authenticated/dashboard/assets/categories/create/'
+    | '/_authenticated/dashboard/assets/list/create/'
+    | '/_authenticated/dashboard/assets/locations/create/'
+    | '/_authenticated/dashboard/assets/maintenance/create/'
     | '/_authenticated/dashboard/indoor/management/anesthesia-bill/'
     | '/_authenticated/dashboard/indoor/management/assistant-bill/'
     | '/_authenticated/dashboard/indoor/management/clinical-bills/'
@@ -4822,6 +5201,10 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/pathology/urine/urine-for-sugar/'
     | '/_authenticated/dashboard/payroll/attendance/$staffId/'
     | '/_authenticated/dashboard/payroll/salary/$staffId/'
+    | '/_authenticated/dashboard/purchase/goods-receipt/create/'
+    | '/_authenticated/dashboard/purchase/requests/create/'
+    | '/_authenticated/dashboard/purchase/requests/pending/'
+    | '/_authenticated/dashboard/purchase/suppliers/create/'
     | '/_authenticated/dashboard/reports/accounting/balance-sheet/'
     | '/_authenticated/dashboard/reports/accounting/bank-book/'
     | '/_authenticated/dashboard/reports/accounting/cash-flow/'
@@ -4914,12 +5297,19 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/admission/patients/$admissionId/final-bill-print/'
     | '/_authenticated/dashboard/admission/patients/$admissionId/final-bill/'
     | '/_authenticated/dashboard/admission/patients/$admissionId/print/'
+    | '/_authenticated/dashboard/assets/categories/edit/$id/'
+    | '/_authenticated/dashboard/assets/list/edit/$id/'
+    | '/_authenticated/dashboard/assets/locations/edit/$id/'
+    | '/_authenticated/dashboard/assets/maintenance/edit/$id/'
     | '/_authenticated/dashboard/indoor/master/bed-cabin-list/create/'
     | '/_authenticated/dashboard/indoor/master/services/create/'
     | '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/'
     | '/_authenticated/dashboard/outdoor/master/tests/create/'
     | '/_authenticated/dashboard/outdoor/reception/invoices/create/'
     | '/_authenticated/dashboard/outdoor/reception/invoices/list/'
+    | '/_authenticated/dashboard/purchase/goods-receipt/edit/$id/'
+    | '/_authenticated/dashboard/purchase/requests/edit/$id/'
+    | '/_authenticated/dashboard/purchase/suppliers/edit/$id/'
     | '/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/'
     | '/_authenticated/dashboard/reports/my/outdoor/today-collection/'
     | '/_authenticated/dashboard/outdoor/master/tests/edit/$id/'
@@ -5241,6 +5631,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRolesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/purchase/': {
+      id: '/_authenticated/dashboard/purchase/'
+      path: '/dashboard/purchase'
+      fullPath: '/dashboard/purchase'
+      preLoaderRoute: typeof AuthenticatedDashboardPurchaseIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/notifications/': {
       id: '/_authenticated/dashboard/notifications/'
       path: '/dashboard/notifications'
@@ -5309,6 +5706,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/backup-settings'
       fullPath: '/dashboard/backup-settings'
       preLoaderRoute: typeof AuthenticatedDashboardBackupSettingsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/assets/': {
+      id: '/_authenticated/dashboard/assets/'
+      path: '/dashboard/assets'
+      fullPath: '/dashboard/assets'
+      preLoaderRoute: typeof AuthenticatedDashboardAssetsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/apps/': {
@@ -5451,11 +5855,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardSettingsReportSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
     }
+    '/_authenticated/dashboard/settings/login-settings/': {
+      id: '/_authenticated/dashboard/settings/login-settings/'
+      path: '/login-settings'
+      fullPath: '/dashboard/settings/login-settings'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsLoginSettingsIndexRouteImport
+      parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
+    }
+    '/_authenticated/dashboard/settings/home-page-settings/': {
+      id: '/_authenticated/dashboard/settings/home-page-settings/'
+      path: '/home-page-settings'
+      fullPath: '/dashboard/settings/home-page-settings'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsHomePageSettingsIndexRouteImport
+      parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
+    }
     '/_authenticated/dashboard/roles/create/': {
       id: '/_authenticated/dashboard/roles/create/'
       path: '/dashboard/roles/create'
       fullPath: '/dashboard/roles/create'
       preLoaderRoute: typeof AuthenticatedDashboardRolesCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/purchase/suppliers/': {
+      id: '/_authenticated/dashboard/purchase/suppliers/'
+      path: '/dashboard/purchase/suppliers'
+      fullPath: '/dashboard/purchase/suppliers'
+      preLoaderRoute: typeof AuthenticatedDashboardPurchaseSuppliersIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/purchase/supplier-performance/': {
+      id: '/_authenticated/dashboard/purchase/supplier-performance/'
+      path: '/dashboard/purchase/supplier-performance'
+      fullPath: '/dashboard/purchase/supplier-performance'
+      preLoaderRoute: typeof AuthenticatedDashboardPurchaseSupplierPerformanceIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/purchase/statistics/': {
+      id: '/_authenticated/dashboard/purchase/statistics/'
+      path: '/dashboard/purchase/statistics'
+      fullPath: '/dashboard/purchase/statistics'
+      preLoaderRoute: typeof AuthenticatedDashboardPurchaseStatisticsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/purchase/requests/': {
+      id: '/_authenticated/dashboard/purchase/requests/'
+      path: '/dashboard/purchase/requests'
+      fullPath: '/dashboard/purchase/requests'
+      preLoaderRoute: typeof AuthenticatedDashboardPurchaseRequestsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/purchase/goods-receipt/': {
+      id: '/_authenticated/dashboard/purchase/goods-receipt/'
+      path: '/dashboard/purchase/goods-receipt'
+      fullPath: '/dashboard/purchase/goods-receipt'
+      preLoaderRoute: typeof AuthenticatedDashboardPurchaseGoodsReceiptIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/payroll/salary-structure/': {
@@ -5533,6 +5986,48 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/banks/bank-accounts'
       fullPath: '/dashboard/banks/bank-accounts'
       preLoaderRoute: typeof AuthenticatedDashboardBanksBankAccountsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/assets/statistics/': {
+      id: '/_authenticated/dashboard/assets/statistics/'
+      path: '/dashboard/assets/statistics'
+      fullPath: '/dashboard/assets/statistics'
+      preLoaderRoute: typeof AuthenticatedDashboardAssetsStatisticsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/assets/maintenance/': {
+      id: '/_authenticated/dashboard/assets/maintenance/'
+      path: '/dashboard/assets/maintenance'
+      fullPath: '/dashboard/assets/maintenance'
+      preLoaderRoute: typeof AuthenticatedDashboardAssetsMaintenanceIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/assets/locations/': {
+      id: '/_authenticated/dashboard/assets/locations/'
+      path: '/dashboard/assets/locations'
+      fullPath: '/dashboard/assets/locations'
+      preLoaderRoute: typeof AuthenticatedDashboardAssetsLocationsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/assets/list/': {
+      id: '/_authenticated/dashboard/assets/list/'
+      path: '/dashboard/assets/list'
+      fullPath: '/dashboard/assets/list'
+      preLoaderRoute: typeof AuthenticatedDashboardAssetsListIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/assets/depreciation/': {
+      id: '/_authenticated/dashboard/assets/depreciation/'
+      path: '/dashboard/assets/depreciation'
+      fullPath: '/dashboard/assets/depreciation'
+      preLoaderRoute: typeof AuthenticatedDashboardAssetsDepreciationIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/assets/categories/': {
+      id: '/_authenticated/dashboard/assets/categories/'
+      path: '/dashboard/assets/categories'
+      fullPath: '/dashboard/assets/categories'
+      preLoaderRoute: typeof AuthenticatedDashboardAssetsCategoriesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/admission/user-wise-collections/': {
@@ -6032,6 +6527,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingBalanceSheetIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/purchase/suppliers/create/': {
+      id: '/_authenticated/dashboard/purchase/suppliers/create/'
+      path: '/dashboard/purchase/suppliers/create'
+      fullPath: '/dashboard/purchase/suppliers/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPurchaseSuppliersCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/purchase/requests/pending/': {
+      id: '/_authenticated/dashboard/purchase/requests/pending/'
+      path: '/dashboard/purchase/requests/pending'
+      fullPath: '/dashboard/purchase/requests/pending'
+      preLoaderRoute: typeof AuthenticatedDashboardPurchaseRequestsPendingIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/purchase/requests/create/': {
+      id: '/_authenticated/dashboard/purchase/requests/create/'
+      path: '/dashboard/purchase/requests/create'
+      fullPath: '/dashboard/purchase/requests/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPurchaseRequestsCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/purchase/goods-receipt/create/': {
+      id: '/_authenticated/dashboard/purchase/goods-receipt/create/'
+      path: '/dashboard/purchase/goods-receipt/create'
+      fullPath: '/dashboard/purchase/goods-receipt/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/payroll/salary/$staffId/': {
       id: '/_authenticated/dashboard/payroll/salary/$staffId/'
       path: '/dashboard/payroll/salary/$staffId'
@@ -6457,6 +6980,34 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/indoor/management/anesthesia-bill'
       fullPath: '/dashboard/indoor/management/anesthesia-bill'
       preLoaderRoute: typeof AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/assets/maintenance/create/': {
+      id: '/_authenticated/dashboard/assets/maintenance/create/'
+      path: '/dashboard/assets/maintenance/create'
+      fullPath: '/dashboard/assets/maintenance/create'
+      preLoaderRoute: typeof AuthenticatedDashboardAssetsMaintenanceCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/assets/locations/create/': {
+      id: '/_authenticated/dashboard/assets/locations/create/'
+      path: '/dashboard/assets/locations/create'
+      fullPath: '/dashboard/assets/locations/create'
+      preLoaderRoute: typeof AuthenticatedDashboardAssetsLocationsCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/assets/list/create/': {
+      id: '/_authenticated/dashboard/assets/list/create/'
+      path: '/dashboard/assets/list/create'
+      fullPath: '/dashboard/assets/list/create'
+      preLoaderRoute: typeof AuthenticatedDashboardAssetsListCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/assets/categories/create/': {
+      id: '/_authenticated/dashboard/assets/categories/create/'
+      path: '/dashboard/assets/categories/create'
+      fullPath: '/dashboard/assets/categories/create'
+      preLoaderRoute: typeof AuthenticatedDashboardAssetsCategoriesCreateIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/admission/patients/payment-completed-list/': {
@@ -7131,6 +7682,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/purchase/suppliers/edit/$id/': {
+      id: '/_authenticated/dashboard/purchase/suppliers/edit/$id/'
+      path: '/dashboard/purchase/suppliers/edit/$id'
+      fullPath: '/dashboard/purchase/suppliers/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPurchaseSuppliersEditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/purchase/requests/edit/$id/': {
+      id: '/_authenticated/dashboard/purchase/requests/edit/$id/'
+      path: '/dashboard/purchase/requests/edit/$id'
+      fullPath: '/dashboard/purchase/requests/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPurchaseRequestsEditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/purchase/goods-receipt/edit/$id/': {
+      id: '/_authenticated/dashboard/purchase/goods-receipt/edit/$id/'
+      path: '/dashboard/purchase/goods-receipt/edit/$id'
+      fullPath: '/dashboard/purchase/goods-receipt/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/outdoor/reception/invoices/list/': {
       id: '/_authenticated/dashboard/outdoor/reception/invoices/list/'
       path: '/dashboard/outdoor/reception/invoices/list'
@@ -7171,6 +7743,34 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/indoor/master/bed-cabin-list/create'
       fullPath: '/dashboard/indoor/master/bed-cabin-list/create'
       preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/assets/maintenance/edit/$id/': {
+      id: '/_authenticated/dashboard/assets/maintenance/edit/$id/'
+      path: '/dashboard/assets/maintenance/edit/$id'
+      fullPath: '/dashboard/assets/maintenance/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardAssetsMaintenanceEditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/assets/locations/edit/$id/': {
+      id: '/_authenticated/dashboard/assets/locations/edit/$id/'
+      path: '/dashboard/assets/locations/edit/$id'
+      fullPath: '/dashboard/assets/locations/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardAssetsLocationsEditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/assets/list/edit/$id/': {
+      id: '/_authenticated/dashboard/assets/list/edit/$id/'
+      path: '/dashboard/assets/list/edit/$id'
+      fullPath: '/dashboard/assets/list/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardAssetsListEditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/assets/categories/edit/$id/': {
+      id: '/_authenticated/dashboard/assets/categories/edit/$id/'
+      path: '/dashboard/assets/categories/edit/$id'
+      fullPath: '/dashboard/assets/categories/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardAssetsCategoriesEditIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/admission/patients/$admissionId/print/': {
@@ -7563,6 +8163,8 @@ interface AuthenticatedDashboardSettingsRouteRouteChildren {
   AuthenticatedDashboardSettingsPaymentAccountsRoute: typeof AuthenticatedDashboardSettingsPaymentAccountsRoute
   AuthenticatedDashboardSettingsPrefixRoute: typeof AuthenticatedDashboardSettingsPrefixRoute
   AuthenticatedDashboardSettingsIndexRoute: typeof AuthenticatedDashboardSettingsIndexRoute
+  AuthenticatedDashboardSettingsHomePageSettingsIndexRoute: typeof AuthenticatedDashboardSettingsHomePageSettingsIndexRoute
+  AuthenticatedDashboardSettingsLoginSettingsIndexRoute: typeof AuthenticatedDashboardSettingsLoginSettingsIndexRoute
   AuthenticatedDashboardSettingsReportSettingsIndexRoute: typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
 }
 
@@ -7584,6 +8186,10 @@ const AuthenticatedDashboardSettingsRouteRouteChildren: AuthenticatedDashboardSe
       AuthenticatedDashboardSettingsPrefixRoute,
     AuthenticatedDashboardSettingsIndexRoute:
       AuthenticatedDashboardSettingsIndexRoute,
+    AuthenticatedDashboardSettingsHomePageSettingsIndexRoute:
+      AuthenticatedDashboardSettingsHomePageSettingsIndexRoute,
+    AuthenticatedDashboardSettingsLoginSettingsIndexRoute:
+      AuthenticatedDashboardSettingsLoginSettingsIndexRoute,
     AuthenticatedDashboardSettingsReportSettingsIndexRoute:
       AuthenticatedDashboardSettingsReportSettingsIndexRoute,
   }
@@ -7600,6 +8206,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardNotificationsIdRoute: typeof AuthenticatedDashboardNotificationsIdRoute
   AuthenticatedDashboardAccountingIndexRoute: typeof AuthenticatedDashboardAccountingIndexRoute
   AuthenticatedDashboardAppsIndexRoute: typeof AuthenticatedDashboardAppsIndexRoute
+  AuthenticatedDashboardAssetsIndexRoute: typeof AuthenticatedDashboardAssetsIndexRoute
   AuthenticatedDashboardBackupSettingsIndexRoute: typeof AuthenticatedDashboardBackupSettingsIndexRoute
   AuthenticatedDashboardBackupsIndexRoute: typeof AuthenticatedDashboardBackupsIndexRoute
   AuthenticatedDashboardChatsIndexRoute: typeof AuthenticatedDashboardChatsIndexRoute
@@ -7610,6 +8217,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardHelpIndexRoute: typeof AuthenticatedDashboardHelpIndexRoute
   AuthenticatedDashboardMyAccountIndexRoute: typeof AuthenticatedDashboardMyAccountIndexRoute
   AuthenticatedDashboardNotificationsIndexRoute: typeof AuthenticatedDashboardNotificationsIndexRoute
+  AuthenticatedDashboardPurchaseIndexRoute: typeof AuthenticatedDashboardPurchaseIndexRoute
   AuthenticatedDashboardRolesIndexRoute: typeof AuthenticatedDashboardRolesIndexRoute
   AuthenticatedDashboardSubscriptionIndexRoute: typeof AuthenticatedDashboardSubscriptionIndexRoute
   AuthenticatedDashboardTasksIndexRoute: typeof AuthenticatedDashboardTasksIndexRoute
@@ -7641,6 +8249,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardAdmissionPatientsIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsIndexRoute
   AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute: typeof AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute
   AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute: typeof AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute
+  AuthenticatedDashboardAssetsCategoriesIndexRoute: typeof AuthenticatedDashboardAssetsCategoriesIndexRoute
+  AuthenticatedDashboardAssetsDepreciationIndexRoute: typeof AuthenticatedDashboardAssetsDepreciationIndexRoute
+  AuthenticatedDashboardAssetsListIndexRoute: typeof AuthenticatedDashboardAssetsListIndexRoute
+  AuthenticatedDashboardAssetsLocationsIndexRoute: typeof AuthenticatedDashboardAssetsLocationsIndexRoute
+  AuthenticatedDashboardAssetsMaintenanceIndexRoute: typeof AuthenticatedDashboardAssetsMaintenanceIndexRoute
+  AuthenticatedDashboardAssetsStatisticsIndexRoute: typeof AuthenticatedDashboardAssetsStatisticsIndexRoute
   AuthenticatedDashboardBanksBankAccountsIndexRoute: typeof AuthenticatedDashboardBanksBankAccountsIndexRoute
   AuthenticatedDashboardBanksBankDepositsIndexRoute: typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
   AuthenticatedDashboardBanksBankTransactionsIndexRoute: typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
@@ -7652,6 +8266,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardPayrollEmployeesIndexRoute: typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
   AuthenticatedDashboardPayrollOverviewIndexRoute: typeof AuthenticatedDashboardPayrollOverviewIndexRoute
   AuthenticatedDashboardPayrollSalaryStructureIndexRoute: typeof AuthenticatedDashboardPayrollSalaryStructureIndexRoute
+  AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute: typeof AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute
+  AuthenticatedDashboardPurchaseRequestsIndexRoute: typeof AuthenticatedDashboardPurchaseRequestsIndexRoute
+  AuthenticatedDashboardPurchaseStatisticsIndexRoute: typeof AuthenticatedDashboardPurchaseStatisticsIndexRoute
+  AuthenticatedDashboardPurchaseSupplierPerformanceIndexRoute: typeof AuthenticatedDashboardPurchaseSupplierPerformanceIndexRoute
+  AuthenticatedDashboardPurchaseSuppliersIndexRoute: typeof AuthenticatedDashboardPurchaseSuppliersIndexRoute
   AuthenticatedDashboardRolesCreateIndexRoute: typeof AuthenticatedDashboardRolesCreateIndexRoute
   AuthenticatedDashboardUltrasonogramAllIndexRoute: typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   AuthenticatedDashboardXRayAllIndexRoute: typeof AuthenticatedDashboardXRayAllIndexRoute
@@ -7749,6 +8368,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
   AuthenticatedDashboardAdmissionPatientsPaidIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsPaidIndexRoute
   AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
+  AuthenticatedDashboardAssetsCategoriesCreateIndexRoute: typeof AuthenticatedDashboardAssetsCategoriesCreateIndexRoute
+  AuthenticatedDashboardAssetsListCreateIndexRoute: typeof AuthenticatedDashboardAssetsListCreateIndexRoute
+  AuthenticatedDashboardAssetsLocationsCreateIndexRoute: typeof AuthenticatedDashboardAssetsLocationsCreateIndexRoute
+  AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute: typeof AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute
   AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute: typeof AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute
   AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute: typeof AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute
   AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute: typeof AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute
@@ -7810,6 +8433,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute: typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
   AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute: typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute: typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute: typeof AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute
+  AuthenticatedDashboardPurchaseRequestsCreateIndexRoute: typeof AuthenticatedDashboardPurchaseRequestsCreateIndexRoute
+  AuthenticatedDashboardPurchaseRequestsPendingIndexRoute: typeof AuthenticatedDashboardPurchaseRequestsPendingIndexRoute
+  AuthenticatedDashboardPurchaseSuppliersCreateIndexRoute: typeof AuthenticatedDashboardPurchaseSuppliersCreateIndexRoute
   AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute: typeof AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute
   AuthenticatedDashboardReportsAccountingBankBookIndexRoute: typeof AuthenticatedDashboardReportsAccountingBankBookIndexRoute
   AuthenticatedDashboardReportsAccountingCashFlowIndexRoute: typeof AuthenticatedDashboardReportsAccountingCashFlowIndexRoute
@@ -7902,12 +8529,19 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
   AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute
   AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute
+  AuthenticatedDashboardAssetsCategoriesEditIdIndexRoute: typeof AuthenticatedDashboardAssetsCategoriesEditIdIndexRoute
+  AuthenticatedDashboardAssetsListEditIdIndexRoute: typeof AuthenticatedDashboardAssetsListEditIdIndexRoute
+  AuthenticatedDashboardAssetsLocationsEditIdIndexRoute: typeof AuthenticatedDashboardAssetsLocationsEditIdIndexRoute
+  AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute: typeof AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute
   AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute
   AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute: typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
   AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute: typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
   AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute: typeof AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute
   AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
   AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
+  AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute: typeof AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute
+  AuthenticatedDashboardPurchaseRequestsEditIdIndexRoute: typeof AuthenticatedDashboardPurchaseRequestsEditIdIndexRoute
+  AuthenticatedDashboardPurchaseSuppliersEditIdIndexRoute: typeof AuthenticatedDashboardPurchaseSuppliersEditIdIndexRoute
   AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute: typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute
   AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute: typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute
   AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute: typeof AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute
@@ -7928,6 +8562,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardAccountingIndexRoute:
     AuthenticatedDashboardAccountingIndexRoute,
   AuthenticatedDashboardAppsIndexRoute: AuthenticatedDashboardAppsIndexRoute,
+  AuthenticatedDashboardAssetsIndexRoute:
+    AuthenticatedDashboardAssetsIndexRoute,
   AuthenticatedDashboardBackupSettingsIndexRoute:
     AuthenticatedDashboardBackupSettingsIndexRoute,
   AuthenticatedDashboardBackupsIndexRoute:
@@ -7946,6 +8582,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardMyAccountIndexRoute,
   AuthenticatedDashboardNotificationsIndexRoute:
     AuthenticatedDashboardNotificationsIndexRoute,
+  AuthenticatedDashboardPurchaseIndexRoute:
+    AuthenticatedDashboardPurchaseIndexRoute,
   AuthenticatedDashboardRolesIndexRoute: AuthenticatedDashboardRolesIndexRoute,
   AuthenticatedDashboardSubscriptionIndexRoute:
     AuthenticatedDashboardSubscriptionIndexRoute,
@@ -8005,6 +8643,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardAdmissionSecondTimeBillIndexRoute,
   AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute:
     AuthenticatedDashboardAdmissionUserWiseCollectionsIndexRoute,
+  AuthenticatedDashboardAssetsCategoriesIndexRoute:
+    AuthenticatedDashboardAssetsCategoriesIndexRoute,
+  AuthenticatedDashboardAssetsDepreciationIndexRoute:
+    AuthenticatedDashboardAssetsDepreciationIndexRoute,
+  AuthenticatedDashboardAssetsListIndexRoute:
+    AuthenticatedDashboardAssetsListIndexRoute,
+  AuthenticatedDashboardAssetsLocationsIndexRoute:
+    AuthenticatedDashboardAssetsLocationsIndexRoute,
+  AuthenticatedDashboardAssetsMaintenanceIndexRoute:
+    AuthenticatedDashboardAssetsMaintenanceIndexRoute,
+  AuthenticatedDashboardAssetsStatisticsIndexRoute:
+    AuthenticatedDashboardAssetsStatisticsIndexRoute,
   AuthenticatedDashboardBanksBankAccountsIndexRoute:
     AuthenticatedDashboardBanksBankAccountsIndexRoute,
   AuthenticatedDashboardBanksBankDepositsIndexRoute:
@@ -8027,6 +8677,16 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardPayrollOverviewIndexRoute,
   AuthenticatedDashboardPayrollSalaryStructureIndexRoute:
     AuthenticatedDashboardPayrollSalaryStructureIndexRoute,
+  AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute:
+    AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute,
+  AuthenticatedDashboardPurchaseRequestsIndexRoute:
+    AuthenticatedDashboardPurchaseRequestsIndexRoute,
+  AuthenticatedDashboardPurchaseStatisticsIndexRoute:
+    AuthenticatedDashboardPurchaseStatisticsIndexRoute,
+  AuthenticatedDashboardPurchaseSupplierPerformanceIndexRoute:
+    AuthenticatedDashboardPurchaseSupplierPerformanceIndexRoute,
+  AuthenticatedDashboardPurchaseSuppliersIndexRoute:
+    AuthenticatedDashboardPurchaseSuppliersIndexRoute,
   AuthenticatedDashboardRolesCreateIndexRoute:
     AuthenticatedDashboardRolesCreateIndexRoute,
   AuthenticatedDashboardUltrasonogramAllIndexRoute:
@@ -8221,6 +8881,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardAdmissionPatientsPaidIndexRoute,
   AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute:
     AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute,
+  AuthenticatedDashboardAssetsCategoriesCreateIndexRoute:
+    AuthenticatedDashboardAssetsCategoriesCreateIndexRoute,
+  AuthenticatedDashboardAssetsListCreateIndexRoute:
+    AuthenticatedDashboardAssetsListCreateIndexRoute,
+  AuthenticatedDashboardAssetsLocationsCreateIndexRoute:
+    AuthenticatedDashboardAssetsLocationsCreateIndexRoute,
+  AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute:
+    AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute,
   AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute:
     AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute,
   AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute:
@@ -8343,6 +9011,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute,
   AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute:
     AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute,
+  AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute:
+    AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute,
+  AuthenticatedDashboardPurchaseRequestsCreateIndexRoute:
+    AuthenticatedDashboardPurchaseRequestsCreateIndexRoute,
+  AuthenticatedDashboardPurchaseRequestsPendingIndexRoute:
+    AuthenticatedDashboardPurchaseRequestsPendingIndexRoute,
+  AuthenticatedDashboardPurchaseSuppliersCreateIndexRoute:
+    AuthenticatedDashboardPurchaseSuppliersCreateIndexRoute,
   AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute:
     AuthenticatedDashboardReportsAccountingBalanceSheetIndexRoute,
   AuthenticatedDashboardReportsAccountingBankBookIndexRoute:
@@ -8527,6 +9203,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute,
   AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute:
     AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRoute,
+  AuthenticatedDashboardAssetsCategoriesEditIdIndexRoute:
+    AuthenticatedDashboardAssetsCategoriesEditIdIndexRoute,
+  AuthenticatedDashboardAssetsListEditIdIndexRoute:
+    AuthenticatedDashboardAssetsListEditIdIndexRoute,
+  AuthenticatedDashboardAssetsLocationsEditIdIndexRoute:
+    AuthenticatedDashboardAssetsLocationsEditIdIndexRoute,
+  AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute:
+    AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute,
   AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute:
     AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute,
   AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute:
@@ -8539,6 +9223,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute,
   AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute:
     AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute,
+  AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute:
+    AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute,
+  AuthenticatedDashboardPurchaseRequestsEditIdIndexRoute:
+    AuthenticatedDashboardPurchaseRequestsEditIdIndexRoute,
+  AuthenticatedDashboardPurchaseSuppliersEditIdIndexRoute:
+    AuthenticatedDashboardPurchaseSuppliersEditIdIndexRoute,
   AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute:
     AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute,
   AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute:

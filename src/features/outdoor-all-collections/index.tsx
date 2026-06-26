@@ -188,7 +188,7 @@ export default function OutdoorAllCollections({
 
     const columns = [
         { data: 'payment_id', title: 'Payment ID', orderable: true, responsivePriority: 1, defaultContent: '-' },
-        { data: 'invoice_prefix', title: 'Invoice Number', orderable: true, responsivePriority: 1, render: (d: any) => `<span class="font-semibold text-purple-600">${d || '-'}</span>`, defaultContent: '-' },
+        { data: 'invoice_prefix', title: 'Invoice Number', orderable: true, responsivePriority: 1, render: (d: any) => `<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${d || '-'}</span>`, defaultContent: '-' },
         { data: 'created_at', title: 'Invoice Date & Time', orderable: true, responsivePriority: 4, render: (d: any) => fmtDateTime(d), defaultContent: '-' },
         { data: 'patient_name', title: 'Patient Name', orderable: true, responsivePriority: 1, defaultContent: '-' },
         { data: 'phone', title: 'Phone', orderable: true, className: 'dt-head-left dt-body-left', responsivePriority: 2, defaultContent: '-' },

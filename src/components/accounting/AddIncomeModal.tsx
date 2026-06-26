@@ -132,7 +132,7 @@ export function AddIncomeModal({ children }: { children: React.ReactNode }) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4">
           <div className="grid gap-6 md:grid-cols-2">
             {/* BASIC INFO */}
-            <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-green-200 hover:shadow-lg">
+            <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-green-200 hover:shadow-lg p-0">
               <CardHeader className="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 dark:from-green-950/30 dark:via-emerald-950/30 dark:to-green-950/30 border-b-1 border-green-100 dark:border-green-900 py-3 gap-0">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-gradient-to-br from-green-600 to-green-500 rounded-xl shadow-lg shadow-green-500/30">
@@ -257,7 +257,7 @@ export function AddIncomeModal({ children }: { children: React.ReactNode }) {
             </Card>
 
             {/* PAYMENT INFO */}
-            <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-green-200 hover:shadow-lg">
+            <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-green-200 hover:shadow-lg p-0">
               <CardHeader className="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 dark:from-green-950/30 dark:via-emerald-950/30 dark:to-green-950/30 border-b-1 border-green-100 dark:border-green-900 py-3 gap-0">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-gradient-to-br from-green-600 to-green-500 rounded-xl shadow-lg shadow-green-500/30">

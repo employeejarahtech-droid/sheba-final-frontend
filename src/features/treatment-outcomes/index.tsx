@@ -115,7 +115,7 @@ export default function TreatmentOutcomes({ page, limit, search, setPage, setLim
                                 data-description="${(row.description || '-').replace(/"/g, '&quot;')}"
                                 data-created-date="${createdDate.replace(/"/g, '&quot;')}"
                                 data-created-by="${String(row.created_by_name || row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
-                        <span>${data}</span>
+                        <span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${data.toString().startsWith('TO-') ? data : 'TO-' + data}</span>
                     </div>
                 `;
             },
@@ -152,11 +152,13 @@ export default function TreatmentOutcomes({ page, limit, search, setPage, setLim
             title: "Actions",
             render: (_data: any, _type: string, row: TreatmentOutcomeItem) => {
                 return `
-                    <div class="flex gap-2">
-                        <button data-action="view" data-id="${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button data-action="view" data-id="${row.id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                             View
                         </button>
-                        <button data-action="edit" data-id="${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3">
+                        <button data-action="edit" data-id="${row.id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                             Edit
                         </button>
                     </div>

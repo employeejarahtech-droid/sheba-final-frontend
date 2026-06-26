@@ -183,7 +183,7 @@ ${statsHtml}
 <script>
   window.onload = function() {
     window.print();
-    window.onafterprint = function() { window.close(); };
+    window.onafterprint = function() { window.history.back(); };
   };
 </script>
 </body>

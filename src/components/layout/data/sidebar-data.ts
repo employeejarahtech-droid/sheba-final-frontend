@@ -54,6 +54,9 @@ import {
   Calendar,
   Clock,
   User,
+  Package,
+  ShoppingCart,
+  Truck,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -322,7 +325,7 @@ export const sidebarData: SidebarData = {
             { title: 'Profit & Loss', url: '/dashboard/accounting/reports/profit-and-loss', icon: PieChart },
             { title: 'Balance Sheet', url: '/dashboard/accounting/reports/balance-sheet', icon: FileText },
             { title: 'Income', url: '/dashboard/accounting/income', icon: TrendingUp },
-            { title: 'Expense', url: '/dashboard/accounting/expense', icon: TrendingDown },
+            { title: 'Expense', url: '/dashboard/accounting/expenses', icon: TrendingDown },
           ],
         },
         {
@@ -353,6 +356,39 @@ export const sidebarData: SidebarData = {
             { title: 'Process Payments', url: '/dashboard/finance/payments', icon: CreditCard },
             { title: 'Payment History', url: '/dashboard/finance/payment-history', icon: Receipt },
             { title: 'Reconciliation', url: '/dashboard/finance/reconciliation', icon: CheckCircle2 },
+          ],
+        },
+      ],
+    },
+
+    // ── Inventory ─────────────────────────────────────────────────────
+    {
+      title: 'Inventory',
+      items: [
+        {
+          title: 'Asset Management',
+          icon: Package,
+          items: [
+            { title: 'Assets Dashboard', url: '/dashboard/assets', icon: LayoutDashboard },
+            { title: 'All Assets', url: '/dashboard/assets/list', icon: List },
+            { title: 'Categories', url: '/dashboard/assets/categories', icon: ListFilter },
+            { title: 'Locations', url: '/dashboard/assets/locations', icon: Building2 },
+            { title: 'Maintenance', url: '/dashboard/assets/maintenance', icon: Wrench },
+            { title: 'Depreciation', url: '/dashboard/assets/depreciation', icon: TrendingDown },
+            { title: 'Asset Statistics', url: '/dashboard/assets/statistics', icon: BarChart3 },
+          ],
+        },
+        {
+          title: 'Purchase Management',
+          icon: ShoppingCart,
+          items: [
+            { title: 'Purchase Dashboard', url: '/dashboard/purchase', icon: LayoutDashboard },
+            { title: 'Purchase Requests', url: '/dashboard/purchase/requests', icon: FileText },
+            { title: 'Pending Requests', url: '/dashboard/purchase/requests/pending', icon: Bell },
+            { title: 'Goods Receipt Notes', url: '/dashboard/purchase/goods-receipt', icon: Truck },
+            { title: 'Suppliers', url: '/dashboard/purchase/suppliers', icon: Users },
+            { title: 'Supplier Performance', url: '/dashboard/purchase/supplier-performance', icon: BarChart3 },
+            { title: 'Purchase Statistics', url: '/dashboard/purchase/statistics', icon: PieChart },
           ],
         },
       ],
@@ -468,6 +504,8 @@ export const sidebarData: SidebarData = {
           icon: Settings,
           items: [
             { title: 'App Configuration', url: '/dashboard/settings', icon: Settings },
+            { title: 'Login Settings', url: '/dashboard/settings/login-settings', icon: UserCog },
+            { title: 'Home Page Settings', url: '/dashboard/settings/home-page-settings', icon: Home },
             { title: 'Report Settings', url: '/dashboard/settings/report-settings', icon: FileText },
             { title: 'Date Controls', url: '/dashboard/settings/date-controls', icon: Clock },
             { title: 'Payment Accounts', url: '/dashboard/settings/payment-accounts', icon: Landmark },

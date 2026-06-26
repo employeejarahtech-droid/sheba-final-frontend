@@ -28,6 +28,7 @@ type CBCItem = {
   invoice_id: number;
   patient_name: string;
   ref_doctor?: string | null;
+  status?: string | null;
   created_at: string;
 };
 
@@ -374,13 +375,35 @@ function CBCShort() {
       defaultContent: "",
     },
     {
+      data: 'test_carried_out_by',
+      title: 'Test Carried Out By',
+      render: (data: any) => {
+        const value = data as string;
+        return `<div class="text-sm">${value || `-`}</div>`;
+      },
+    },
+    {
+      data: "status",
+      title: "Status",
+      orderable: true,
+      render: (_data: any, _type: string, row: CBCItem) => {
+        const isComplete = String(row.status || '').toLowerCase() === 'complete';
+        const cls = isComplete
+          ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+          : 'bg-amber-100 text-amber-700 border-amber-200';
+        const label = isComplete ? 'Complete' : 'Incomplete';
+        return `<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${cls}">${label}</span>`;
+      },
+      defaultContent: "-",
+    },
+    {
       data: null,
       title: "Actions",
       orderable: false,
       render: (_data: any, _type: string, row: any) => `
-        <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
-          <a href="/dashboard/pathology/hematology/cbc-short/edit/${row.id}" title="Edit" class="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-xs font-medium h-8 px-2.5 transition">Edit</a>
-          <a href="/dashboard/pathology/hematology/cbc-short/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print" class="inline-flex items-center gap-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium h-8 px-2.5 transition">Print</a>
+        <div class="flex flex-wrap items-center gap-2">
+          <a href="/dashboard/pathology/hematology/cbc-short/edit/${row.id}" title="Edit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit</a>
+          <a href="/dashboard/pathology/hematology/cbc-short/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded text-xs font-semibold shadow transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>Print</a>
         </div>
       `,
     },
@@ -434,7 +457,7 @@ function CBCShort() {
                 <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
                   <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }}>
                     <div className="flex items-center gap-2.5">
-                      <div className={cn("p-2 bg-gradient-to-br rounded-lg shadow-lg", card.grad)}>
+                      <div className="p-2 bg-white rounded-lg shadow-lg">
                         <Icon className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
                       </div>
                       <CardTitle className="text-sm font-semibold text-white/90">{card.label}</CardTitle>

@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { Textarea } from '@/components/ui/textarea';
 import { AppHeader } from '@/components/layout/app-header';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, FlaskConical, User } from "lucide-react";
+import { ArrowLeft, FlaskConical, User, Activity } from "lucide-react";
 
 export const Route = createFileRoute(
     '/_authenticated/dashboard/pathology/hematology/cbc-with-pbf/edit/$id',
@@ -57,6 +57,7 @@ const cbcSchema = z.object({
     pbf_findings: z.string().optional(),
     machineId: z.string().optional(),
     testCarriedOutBy: z.string().optional(),
+    status: z.union([z.literal('complete'), z.literal('incomplete')]),
 });
 
 type CBCFormValues = z.infer<typeof cbcSchema>;
@@ -90,6 +91,7 @@ function EditCBCWithPBF() {
             pbf_findings: "",
             machineId: "",
             testCarriedOutBy: "",
+            status: "incomplete",
         },
     });
 
@@ -147,6 +149,7 @@ function EditCBCWithPBF() {
                 pbf_findings: cbcWithPbfData.pbf_findings || "",
                 machineId: cbcWithPbfData.machine_id?.toString() || "",
                 testCarriedOutBy: cbcWithPbfData.test_carried_out_by || "",
+                status: cbcWithPbfData.status || 'incomplete',
             })
         }
     }, [cbcWithPbfData, form]);
@@ -168,6 +171,7 @@ function EditCBCWithPBF() {
                         ...data,
                         machine_id: data.machineId ? parseInt(data.machineId) : null,
                         test_carried_out_by: data.testCarriedOutBy,
+                        status: data.status,
                     }),
                 }
             );
@@ -235,9 +239,51 @@ function EditCBCWithPBF() {
                                 invoiceInfo={{
                                     invoiceNo: cbcWithPbfData?.invoice_id ? `RPT-${cbcWithPbfData.invoice_id}` : "—",
                                     patientName: cbcWithPbfData?.outdoor_invoice?.patient_name || "—",
-                                    age: cbcWithPbfData?.outdoor_invoice?.age ? `${cbcWithPbfData.outdoor_invoice.age} ${cbcWithPbfData.outdoor_invoice.age_text || 'Years'}` : "—",
+                                    age: cbcWithPbfData?.outdoor_invoice?.age_text || cbcWithPbfData?.outdoor_invoice?.age || "—",
                                     gender: cbcWithPbfData?.outdoor_invoice?.sex || "—",
                                 }}
+                            />
+                        </CardContent>
+                    </Card>
+
+                    <Form {...form}>
+                    {/* Status */}
+                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                    <Activity className="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-lg font-bold">Report Status</CardTitle>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">Mark report as complete or incomplete</p>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-4">
+                            <FormField
+                                control={form.control}
+                                name="status"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Report Status</FormLabel>
+                                        <FormControl>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                value={field.value}
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select status" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="incomplete">Incomplete</SelectItem>
+                                                    <SelectItem value="complete">Complete</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
                         </CardContent>
                     </Card>
@@ -256,7 +302,6 @@ function EditCBCWithPBF() {
                             </div>
                         </CardHeader>
                         <CardContent className="p-4">
-                            <Form {...form}>
                                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                                     {/* Group: Basic CBC */}
                                     <div>
@@ -510,9 +555,9 @@ function EditCBCWithPBF() {
                                         </Button>
                                     </div>
                                 </form>
-                            </Form>
                         </CardContent>
                     </Card>
+                    </Form>
                 </div>
             </Main>
         </>

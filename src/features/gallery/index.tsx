@@ -141,8 +141,8 @@ export function Gallery() {
 
   const filteredImages = images.filter(
     (img) =>
-      img.original_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      img.filename?.toLowerCase().includes(searchQuery.toLowerCase())
+      (img.original_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (img.filename?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   )
 
   // Stats (backend returns images sorted by created_at DESC)
@@ -268,7 +268,7 @@ export function Gallery() {
               <div className="aspect-square bg-muted relative">
                 <img
                   src={resolveUrl(image.url)}
-                  alt={image.original_name}
+                  alt={image.original_name || image.filename || 'Gallery image'}
                   className="w-full h-full object-cover cursor-pointer"
                   loading="lazy"
                   onClick={() => setPreviewImage(image)}
@@ -302,8 +302,8 @@ export function Gallery() {
                 </div>
               </div>
               <div className="p-3">
-                <p className="text-sm font-medium truncate" title={image.original_name}>
-                  {image.original_name}
+                <p className="text-sm font-medium truncate" title={image.original_name || image.filename || 'Untitled'}>
+                  {image.original_name || image.filename || 'Untitled'}
                 </p>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-xs text-muted-foreground">
@@ -349,7 +349,7 @@ export function Gallery() {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 bg-background border-b shrink-0">
-              <h3 className="text-lg font-semibold truncate">{previewImage.original_name}</h3>
+              <h3 className="text-lg font-semibold truncate">{previewImage.original_name || previewImage.filename || 'Untitled'}</h3>
               <button
                 onClick={() => setPreviewImage(null)}
                 className="rounded-md p-1.5 hover:bg-muted transition-colors"
@@ -365,7 +365,7 @@ export function Gallery() {
                 <div className="flex-1 flex items-center justify-center bg-muted rounded-lg p-4">
                   <img
                     src={resolveUrl(previewImage.url)}
-                    alt={previewImage.original_name}
+                    alt={previewImage.original_name || previewImage.filename || 'Gallery image'}
                     className="max-w-full max-h-[calc(100vh-280px)] object-contain rounded-lg"
                   />
                 </div>
@@ -377,7 +377,7 @@ export function Gallery() {
                       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                         File Name
                       </span>
-                      <p className="text-sm mt-0.5 break-all">{previewImage.original_name}</p>
+                      <p className="text-sm mt-0.5 break-all">{previewImage.original_name || previewImage.filename || 'Untitled'}</p>
                     </div>
                     <div>
                       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">

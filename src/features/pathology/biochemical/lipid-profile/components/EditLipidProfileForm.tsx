@@ -24,7 +24,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
 import { toast } from "sonner";
 import { useEffect } from "react";
-import { FlaskConical } from "lucide-react";
+import { FlaskConical, Activity } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 //import { outdoorInvoices } from "@/data/data";
 
 // --- 1. Define the Schema using Zod ---
@@ -39,6 +40,7 @@ const formSchema = z.object({
     cholesterol_ratio: z.string().min(1, { message: "Required" }),
     testCarriedOutBy: z.string().optional(),
     machineId: z.string().optional(),
+    status: z.union([z.literal('complete'), z.literal('incomplete')]),
 });
 
 // Infer the TypeScript type from the Zod schema
@@ -72,6 +74,7 @@ export function EditLipidProfileForm({ open, setOpen, reportId, invoiceId }: Edi
             cholesterol_ratio: '',
             testCarriedOutBy: "",
             machineId: "",
+            status: "incomplete",
         },
         // You could set initial data here if passed via props
         // values: initialData,
@@ -108,6 +111,7 @@ export function EditLipidProfileForm({ open, setOpen, reportId, invoiceId }: Edi
                 cholesterol_ratio: lipidProfileData.cholesterol_ratio || '',
                 testCarriedOutBy: lipidProfileData.test_carried_out_by || '',
                 machineId: lipidProfileData.machine_id ? String(lipidProfileData.machine_id) : '',
+                status: String(lipidProfileData.status).trim().toLowerCase() === 'complete' ? 'complete' : 'incomplete',
             })
         }
     }, [lipidProfileData]);
@@ -133,6 +137,7 @@ export function EditLipidProfileForm({ open, setOpen, reportId, invoiceId }: Edi
                     cholesterol_ratio: payload.cholesterol_ratio,
                     test_carried_out_by: payload.testCarriedOutBy,
                     machine_id: payload.machineId ? parseInt(payload.machineId) : null,
+                    status: payload.status,
                 }),
             });
 
@@ -146,7 +151,9 @@ export function EditLipidProfileForm({ open, setOpen, reportId, invoiceId }: Edi
 
         onSuccess: (data) => {
             console.log("Updated API Response:", data);
-            queryClient.invalidateQueries({ queryKey: ["lipid-profile", reportId] });
+            // Invalidate the shared prefix so BOTH the list/table query
+            // ["lipid-profile", page] and the detail query ["lipid-profile", reportId] refetch.
+            queryClient.invalidateQueries({ queryKey: ["lipid-profile"] });
             toast.success(data.message || "lipid-profile created successfully!");
             navigate({ to: "/dashboard/pathology/biochemical/lipid-profile" });
         },
@@ -204,7 +211,12 @@ export function EditLipidProfileForm({ open, setOpen, reportId, invoiceId }: Edi
                 </SheetHeader>
 
                 <div className="px-4">
-                    <PatientInvoiceInfo invoiceInfo={{ invoiceNo: "RPT-1001", patientName: "Maksudul Haque", age: "40 Years", gender: "Male" }} />
+                    <PatientInvoiceInfo invoiceInfo={{
+                        invoiceNo: lipidProfileData?.invoice_id ? `RPT-${lipidProfileData.invoice_id}` : "—",
+                        patientName: lipidProfileData?.outdoor_invoice?.patient_name || "—",
+                        age: lipidProfileData?.outdoor_invoice?.age_text || lipidProfileData?.outdoor_invoice?.age || "—",
+                        gender: lipidProfileData?.outdoor_invoice?.sex || "—",
+                    }} />
                 </div>
                 {/* --- 4. Wrap the form content with the <Form> component --- */}
                 <Form {...form}>
@@ -340,6 +352,41 @@ export function EditLipidProfileForm({ open, setOpen, reportId, invoiceId }: Edi
                             )}
                         />
 
+                        {/* Report Status */}
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border rounded-lg p-4">
+                            <div className="flex items-center gap-2.5 mb-3">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md">
+                                    <Activity className="h-4 w-4 text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-semibold text-gray-800">Report Status</h3>
+                                    <p className="text-xs text-gray-600">Mark report as complete or incomplete</p>
+                                </div>
+                            </div>
+                            <FormField
+                                control={form.control}
+                                name="status"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                value={field.value === 'complete' ? 'complete' : 'incomplete'}
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select status" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="incomplete">Incomplete</SelectItem>
+                                                    <SelectItem value="complete">Complete</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
 
                         {/* --- Action Buttons --- */}
                         <div className="flex justify-center gap-2 pt-4">

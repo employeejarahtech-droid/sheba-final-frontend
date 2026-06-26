@@ -1,18 +1,24 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { createFileRoute } from '@tanstack/react-router';
-import { ColumnDef } from "@tanstack/react-table";
 import { Plus, DollarSign, TrendingDown, CreditCard } from "lucide-react";
 import { AddExpenseModal } from "@/components/accounting/AddExpenseModal";
 
 import { useGetExpensesQuery } from "@/features/accounting/accountingQueries";
 import { Expense } from "@/types/accounting.types";
-import { DataTable } from "@/components/dashboard/components/DataTable";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { DataTable } from "@/components/DataTable";
 import { useCurrency } from '@/hooks/use-currency'
+import { DateField } from '@/components/date-field'
+import { Button } from '@/components/ui/button'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 
 // Layout
 
@@ -29,8 +35,41 @@ function ExpensesPage() {
     const { currencySymbol } = useCurrency();
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
-    const [date, setDate] = useState("");
+    const [from, setFrom] = useState("");
+    const [to, setTo] = useState("");
     const limit = 10;
+
+    // Date filter presets
+    const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
+    const toYMD = (d: Date) => {
+        const y = d.getFullYear()
+        const m = String(d.getMonth() + 1).padStart(2, '0')
+        const day = String(d.getDate()).padStart(2, '0')
+        return `${y}-${m}-${day}`
+    }
+    const datePresets = useMemo(() => ({
+        today: { from: toYMD(today()), to: toYMD(today()) },
+        yesterday: (() => { const d = today(); d.setDate(d.getDate() - 1); return { from: toYMD(d), to: toYMD(d) }; })(),
+        last7: (() => { const d = today(); d.setDate(d.getDate() - 6); return { from: toYMD(d), to: toYMD(today()) }; })(),
+        last15: (() => { const d = today(); d.setDate(d.getDate() - 14); return { from: toYMD(d), to: toYMD(today()) }; })(),
+        last30: (() => { const d = today(); d.setDate(d.getDate() - 29); return { from: toYMD(d), to: toYMD(today()) }; })(),
+        last45: (() => { const d = today(); d.setDate(d.getDate() - 44); return { from: toYMD(d), to: toYMD(today()) }; })(),
+        last60: (() => { const d = today(); d.setDate(d.getDate() - 59); return { from: toYMD(d), to: toYMD(today()) }; })(),
+        last90: (() => { const d = today(); d.setDate(d.getDate() - 89); return { from: toYMD(d), to: toYMD(today()) }; })(),
+        last180: (() => { const d = today(); d.setDate(d.getDate() - 179); return { from: toYMD(d), to: toYMD(today()) }; })(),
+        last365: (() => { const d = today(); d.setDate(d.getDate() - 364); return { from: toYMD(d), to: toYMD(today()) }; })(),
+    }), [])
+    const activePreset = useMemo(() => {
+        if (!from || !to) return 'custom'
+        const match = Object.entries(datePresets).find(([, v]) => v.from === from && v.to === to)
+        return match ? match[0] : 'custom'
+    }, [from, to, datePresets])
+    const [presetOpen, setPresetOpen] = useState(false)
+    const applyPreset = (key: string) => {
+        const p = (datePresets as any)[key]
+        if (p) { setFrom(p.from); setTo(p.to); setPage(1) }
+        setPresetOpen(false)
+    }
 
     const {
         data: fetchedData,
@@ -40,7 +79,8 @@ function ExpensesPage() {
         page,
         limit,
         search,
-        date,
+        start_date: from,
+        end_date: to,
     });
 
     // @ts-ignore
@@ -79,52 +119,76 @@ function ExpensesPage() {
         },
     ];
 
-    const expenseColumns: ColumnDef<Expense>[] = [
+    const expenseColumns = [
         {
-            accessorKey: "id",
-            header: "ID",
-            meta: { className: "md:sticky md:left-0 z-20 bg-background min-w-[60px]" } as any
+            data: "id",
+            title: "ID",
+            orderable: true,
+            responsivePriority: 1,
         },
         {
-            accessorKey: "title",
-            header: "Title",
-            meta: { className: "md:sticky md:left-[60px] z-20 bg-background md:shadow-[4px_0px_5px_-2px_rgba(0,0,0,0.1)]" } as any
+            data: "title",
+            title: "Title",
+            orderable: true,
+            responsivePriority: 2,
         },
-        { accessorKey: "description", header: "Description" },
         {
-            accessorKey: "debitHead",
-            header: "Category",
-            cell: ({ row }: { row: any }) => {
-                const debitHead = row?.original?.debitHead?.name;
-                return <span className="font-medium">{debitHead}</span>;
+            data: "description",
+            title: "Description",
+            orderable: false,
+            responsivePriority: 5,
+        },
+        {
+            data: null,
+            title: "Category",
+            orderable: true,
+            responsivePriority: 3,
+            render: (_data: any, _type: string, row: Expense) => {
+                const debitHead = row?.debitHead?.name;
+                return debitHead || '<span class="text-red-500 font-semibold">N/A</span>';
             },
         },
         {
-            accessorKey: "amount",
-            header: () => (
-                <div className="text-right">Amount ({currencySymbol})</div>
-            ),
-            cell: ({ row }: { row: any }) => (
-                <div className="text-right">{Number(row.getValue("amount")).toFixed(2)}</div>
-            ),
+            data: "amount",
+            title: `Amount (${currencySymbol})`,
+            orderable: true,
+            responsivePriority: 2,
+            render: (data: any) => Number(data || 0).toFixed(2),
         },
-        { accessorKey: "expense_date", header: "Date" },
-        { accessorKey: "payment_method", header: "Payment Method" },
-        { accessorKey: "reference_number", header: "Reference" },
         {
-            accessorKey: "status",
-            header: "Status",
-            cell: ({ row }: { row: any }) => {
-                const status = (row.getValue("status") as string) || "pending";
-                let className = "capitalize ";
+            data: "expense_date",
+            title: "Date",
+            orderable: true,
+            responsivePriority: 4,
+        },
+        {
+            data: "payment_method",
+            title: "Payment Method",
+            orderable: true,
+            responsivePriority: 4,
+        },
+        {
+            data: "reference_number",
+            title: "Reference",
+            orderable: true,
+            responsivePriority: 5,
+        },
+        {
+            data: "status",
+            title: "Status",
+            orderable: true,
+            responsivePriority: 3,
+            render: (data: any) => {
+                const status = data || "pending";
+                let className = "capitalize inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ";
                 if (status.toLowerCase() === "paid") {
-                    className += "bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200";
+                    className += "bg-emerald-100 text-emerald-700 border-emerald-200";
                 } else if (status.toLowerCase() === "pending") {
-                    className += "bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200";
+                    className += "bg-amber-100 text-amber-700 border-amber-200";
                 } else {
-                    className += "bg-rose-100 text-rose-700 border-rose-200 hover:bg-rose-200";
+                    className += "bg-rose-100 text-rose-700 border-rose-200";
                 }
-                return <Badge variant="outline" className={className}>{status}</Badge>;
+                return `<span class="${className}">${status}</span>`;
             },
         },
     ];
@@ -134,19 +198,10 @@ function ExpensesPage() {
     return (
         <div className="">
             <AppHeader fixed />
-            <main className='p-6 lg:p-10'>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <main className=''>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-3">
                     <h2 className="text-2xl font-bold">All Expenses</h2>
                     <div className="flex gap-2 items-center w-full sm:w-auto">
-                        <Input
-                            type="date"
-                            className="w-auto"
-                            value={date}
-                            onChange={(e) => {
-                                setDate(e.target.value);
-                                setPage(1);
-                            }}
-                        />
                         <AddExpenseModal>
                             <button className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-2.5 font-medium text-white shadow-lg shadow-blue-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-blue-500/40 active:translate-y-0 active:shadow-none whitespace-nowrap">
                                 <Plus size={18} /> Add Expense
@@ -189,16 +244,52 @@ function ExpensesPage() {
                 <DataTable
                     columns={expenseColumns}
                     data={expenses}
-                    pageIndex={page - 1}
-                    pageSize={limit}
-                    // @ts-ignore
-                    totalCount={fetchedData?.pagination?.total || 0}
-                    onPageChange={setPage}
-                    onSearch={(val) => {
-                        setSearch(val);
+                    meta={{
+                        page,
+                        limit,
+                        total: fetchedData?.pagination?.total || 0,
+                    }}
+                    onPageChange={(newPage) => setPage(newPage)}
+                    onLimitChange={() => {
+                        // Keep limit fixed at 10 for now
                         setPage(1);
                     }}
-                    isFetching={isFetching}
+                    search={search}
+                    onSearchChange={(value) => {
+                        setSearch(value);
+                        setPage(1);
+                    }}
+                    isLoading={isFetching}
+                    filterSlot={
+                        <div className="flex items-center gap-1.5">
+                            <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>
+                                <SelectTrigger className="w-[140px] h-9 rounded-md border-gray-200 dark:border-gray-700 bg-transparent text-sm">
+                                    <SelectValue placeholder="Filter by" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="today">Today</SelectItem>
+                                    <SelectItem value="yesterday">Yesterday</SelectItem>
+                                    <SelectItem value="last7">Last 7 days</SelectItem>
+                                    <SelectItem value="last15">Last 15 days</SelectItem>
+                                    <SelectItem value="last30">Last 30 days</SelectItem>
+                                    <SelectItem value="last45">Last 45 days</SelectItem>
+                                    <SelectItem value="last60">Last 60 days</SelectItem>
+                                    <SelectItem value="last90">Last 90 days</SelectItem>
+                                    <SelectItem value="last180">Last 180 days</SelectItem>
+                                    <SelectItem value="last365">Last 365 days</SelectItem>
+                                    <SelectItem value="custom">Custom range</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <DateField value={from} onChange={(v: string) => { setFrom(v); setPresetOpen(false); setPage(1) }} placeholder="From" />
+                            <span className="text-xs text-muted-foreground">to</span>
+                            <DateField value={to} onChange={(v: string) => { setTo(v); setPresetOpen(false); setPage(1) }} placeholder="To" />
+                            {(from || to) && (
+                                <Button variant="ghost" size="sm" onClick={() => { setFrom(''); setTo(''); setPage(1) }}>
+                                    Clear
+                                </Button>
+                            )}
+                        </div>
+                    }
                 />
             </main>
         </div>

@@ -378,7 +378,7 @@ export function AnesthesiaBillPage({
               data-discharge-date="${disDate}"
               data-patient-status="${adm?.status ?? ''}"
             >+</button>
-            <span class="font-mono text-xs text-muted-foreground">${meta.row + 1 + (page - 1) * limit}</span>
+            <span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${meta.row + 1 + (page - 1) * limit}</span>
           </div>
         `
       },

@@ -252,7 +252,7 @@ export function AssistantBillPage({
       orderable: true,
       responsivePriority: 3,
       render: (_: any, __: string, _row: FinalDistribution, meta: any) =>
-        `<span class="font-mono text-xs text-muted-foreground">${meta.row + 1 + (page - 1) * limit}</span>`,
+        `<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${meta.row + 1 + (page - 1) * limit}</span>`,
       defaultContent: '',
     },
     {

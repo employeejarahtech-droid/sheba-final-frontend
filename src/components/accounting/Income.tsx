@@ -124,7 +124,7 @@ export default function IncomePage() {
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
         {stats.map((item, idx) => (
           <div
             key={idx}

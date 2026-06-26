@@ -11,6 +11,7 @@ const searchSchema = z.object({
   search: z.string().optional().default(''),
   start_date: z.string().optional().default(''),
   end_date: z.string().optional().default(''),
+  status: z.string().optional().default(''),
 })
 
 export const Route = createFileRoute('/_authenticated/dashboard/reports/patient/admission-register/print')({
@@ -49,7 +50,7 @@ interface AdmissionItem {
 }
 
 function AdmissionRegisterPrint() {
-  const { search, start_date, end_date } = Route.useSearch()
+  const { search, start_date, end_date, status } = Route.useSearch()
   const token = getCookie('accessToken')
   const { formatDate } = useDateFormat()
   const API_URL = import.meta.env.VITE_API_URL || ''
@@ -66,11 +67,12 @@ function AdmissionRegisterPrint() {
   }
 
   const { data, isLoading } = useQuery({
-    queryKey: ['print-patient-admission-register', search, start_date, end_date],
+    queryKey: ['print-patient-admission-register', search, start_date, end_date, status],
     queryFn: async () => {
       const params = new URLSearchParams({ page: '1', limit: '9999', search: search ?? '' })
       if (start_date) params.set('start_date', start_date)
       if (end_date) params.set('end_date', end_date)
+      if (status) params.set('status', status)
       const res = await fetch(`${API_URL}/api/admission?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -262,9 +264,9 @@ function AdmissionRegisterPrint() {
       <p className="text-center text-xs text-gray-600 mb-2">Complete record of patient admissions</p>
 
       {/* ── Filter Period ───────────────────────────────────────────────── */}
-      {(start_date || end_date || search) && (
+      {(start_date || end_date || search || status) && (
         <div className="mb-2 p-2 bg-gray-50 rounded border text-xs">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
             {start_date && (
               <div><strong>From:</strong> {safeFormatDate(start_date)}</div>
             )}
@@ -273,6 +275,9 @@ function AdmissionRegisterPrint() {
             )}
             {search && (
               <div><strong>Search:</strong> {search}</div>
+            )}
+            {status && (
+              <div><strong>Status:</strong> <span className="capitalize">{status}</span></div>
             )}
           </div>
         </div>
