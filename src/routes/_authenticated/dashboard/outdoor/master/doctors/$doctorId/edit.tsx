@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { TagInput } from '@/components/ui/tag-input'
 import { getCookie } from '@/lib/cookies'
+import { GallerySelector } from '@/components/gallery-selector'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
@@ -48,6 +49,8 @@ const doctorSchema = z.object({
   email: z.string().email({ message: 'Invalid email' }).optional().or(z.literal('')),
   experience: z.number().min(0, { message: 'Experience must be at least 0' }),
   score: z.number().min(0, { message: 'Score must be at least 0' }),
+  show_in_home_page: z.boolean().default(false),
+  is_active: z.boolean().default(true),
 })
 
 type DoctorValues = z.infer<typeof doctorSchema>
@@ -66,6 +69,7 @@ function EditDoctorPage() {
   const token = getCookie('accessToken')
 
   const [typeModalOpen, setTypeModalOpen] = useState(false)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   // Fetch doctor types
   const { data: doctorTypes = [], isLoading: isLoadingDoctorTypes } = useQuery({
@@ -114,6 +118,8 @@ function EditDoctorPage() {
       email: '',
       experience: 0,
       score: 0,
+      show_in_home_page: false,
+      is_active: true,
     },
   })
 
@@ -149,7 +155,17 @@ function EditDoctorPage() {
       email: doctorData.email || "",
       experience: Number(doctorData.experience) || 0,
       score: Number(doctorData.score) || 0,
+      show_in_home_page: Boolean(doctorData.show_in_home_page),
+      is_active: doctorData.is_active !== false,
     })
+
+    if (doctorData.image) {
+      setImagePreview(
+        doctorData.image.startsWith('http')
+          ? doctorData.image
+          : `${import.meta.env.VITE_API_URL}${doctorData.image}`
+      )
+    }
   }, [doctorData, form])
 
   const createTypeMutation = useMutation({
@@ -187,7 +203,9 @@ function EditDoctorPage() {
         ...data,
         qualification: data.qualification.join(', '),
         speciality: data.speciality.join(', '),
+        image: imagePreview || undefined,
       }
+
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/doctor/${doctorId}`,
         {
@@ -353,6 +371,54 @@ function EditDoctorPage() {
                           />
                         </FormControl>
                         <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="show_in_home_page"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm mt-4 md:col-span-2">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">
+                            Show in Home Page
+                          </FormLabel>
+                          <FormDescription>
+                            Display this doctor on the tenant home page
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="is_active"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm mt-4 md:col-span-2 border-l-4 border-l-blue-500">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base font-semibold">
+                            Active Status
+                          </FormLabel>
+                          <FormDescription>
+                            If inactive, the doctor won't appear in admission or invoice selections
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                          />
+                        </FormControl>
                       </FormItem>
                     )}
                   />
@@ -598,6 +664,51 @@ function EditDoctorPage() {
                       </FormItem>
                     )}
                   />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Display Settings */}
+            <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+              <CardHeader className="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 border-b py-1.5 px-4 gap-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-gradient-to-br from-pink-500 to-rose-500 rounded-lg shadow-lg">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-bold">Profile Image</CardTitle>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Upload a professional photo</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-6">
+                    <div className="h-24 w-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50">
+                      {imagePreview ? (
+                        <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+                      ) : (
+                        <User className="h-8 w-8 text-gray-400" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-semibold mb-2">Select from Gallery</div>
+                      <div className="flex">
+                        <GallerySelector
+                          onImageSelect={(url) => setImagePreview(url)}
+                          currentImage={imagePreview || undefined}
+                          triggerLabel="Choose Profile Image"
+                          triggerClassName="gap-2"
+                          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                          maxSize={5 * 1024 * 1024}
+                          aspectRatio="square"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Recommended size: 400x400px.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

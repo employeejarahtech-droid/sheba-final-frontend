@@ -30,7 +30,7 @@ export function CtaSection() {
             asChild
             variant="outline"
             size="lg"
-            className="border-white/30 text-white hover:bg-white/10 hover:text-white font-semibold text-base px-8 h-12"
+            className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white font-semibold text-base px-8 h-12"
           >
             <Link to="/contact">Contact Sales</Link>
           </Button>

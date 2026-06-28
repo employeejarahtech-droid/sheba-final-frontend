@@ -119,7 +119,16 @@ export function PlatformLogin() {
               <UserAuthForm />
 
               {/* Additional Links */}
-              <div className='pt-4 border-t border-slate-100 space-y-3'>
+              <div className='pt-4 border-t border-slate-100 space-y-4'>
+                <p className='text-center text-sm text-slate-600'>
+                  Don't have an account?{' '}
+                  <Link
+                    to='/register'
+                    className='text-blue-600 hover:text-blue-700 font-semibold transition-colors'
+                  >
+                    Sign up
+                  </Link>
+                </p>
                 <Link
                   to='/about'
                   className='block text-center text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors'

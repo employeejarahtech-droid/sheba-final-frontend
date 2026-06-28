@@ -156,7 +156,7 @@ function ContactPage() {
             <Card className="border-slate-200 lg:col-span-2">
               <CardHeader>
                 <CardTitle>Send a Message</CardTitle>
-                <CardDescription>
+                <CardDescription className='mb-5'>
                   Fill out the form below and we'll get back to you shortly.
                 </CardDescription>
               </CardHeader>

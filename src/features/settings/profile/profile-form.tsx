@@ -454,7 +454,7 @@ export function ProfileForm() {
                 <div className="text-sm font-semibold mb-2">Select Logo from Gallery</div>
                 <div className="flex justify-center">
                   <GallerySelector
-                    onImageSelect={(url) => setLogoUrl(url)}
+                    onImageSelect={(url) => { setLogoUrl(url); setCurrentLogo(url); }}
                     currentImage={logoUrl}
                     triggerLabel="Choose Logo from Gallery"
                     triggerClassName="gap-2"

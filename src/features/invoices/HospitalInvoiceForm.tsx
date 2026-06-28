@@ -222,7 +222,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
     queryKey: ["doctors", debouncedDoctorSearch],
     queryFn: async () => {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/doctor?limit=100&search=${encodeURIComponent(debouncedDoctorSearch)}`,
+        `${import.meta.env.VITE_API_URL}/api/doctor?limit=100&is_active=true&search=${encodeURIComponent(debouncedDoctorSearch)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

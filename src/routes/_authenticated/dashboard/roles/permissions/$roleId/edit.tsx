@@ -49,6 +49,21 @@ const roleSchema = z.object({
 
 type RoleFormValues = z.infer<typeof roleSchema>;
 
+// Permissions/dashboard can arrive from the API as an array, a JSON string,
+// or null. Always coerce to a string array so the UI never crashes.
+const toStringArray = (val: unknown): string[] => {
+    if (Array.isArray(val)) return val.filter((v): v is string => typeof v === 'string');
+    if (typeof val === 'string') {
+        try {
+            const parsed = JSON.parse(val);
+            return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === 'string') : [];
+        } catch {
+            return [];
+        }
+    }
+    return [];
+};
+
 export const Route = createFileRoute(
     '/_authenticated/dashboard/roles/permissions/$roleId/edit',
 )({
@@ -84,8 +99,8 @@ function EditRolePermissions() {
                 display_name: roleView.display_name || "",
                 description: roleView.description || "",
                 status: (roleView.status as "active" | "inactive") || "active",
-                permissions: roleView.permissions || [],
-                dashboard: roleView.settings?.dashboard || [],
+                permissions: toStringArray(roleView.permissions),
+                dashboard: toStringArray(roleView.settings?.dashboard),
             });
         }
     }, [roleView, form]);
@@ -99,6 +114,10 @@ function EditRolePermissions() {
         control: form.control,
         name: "dashboard",
     });
+
+    // Defensive: render code calls .includes(), so guarantee arrays.
+    const selectedPermissions = Array.isArray(permissions) ? permissions : [];
+    const selectedDashboard = Array.isArray(dashboardPermissions) ? dashboardPermissions : [];
 
     const togglePermission = (value: string) => {
         const current = form.getValues("permissions");
@@ -154,6 +173,8 @@ function EditRolePermissions() {
                 roleId,
                 body: {
                     display_name: values.display_name,
+                    description: values.description,
+                    status: values.status,
                     permissions: values.permissions,
                     dashboard: values.dashboard,
                 }
@@ -206,7 +227,7 @@ function EditRolePermissions() {
                             </div>
 
                             <Button asChild variant="outline" size="sm" className="gap-2">
-                                <Link to="/dashboard/notifications">
+                                <Link to="/dashboard/roles">
                                     <ArrowLeft className="h-4 w-4" />
                                     Back to Roles
                                 </Link>
@@ -224,8 +245,9 @@ function EditRolePermissions() {
                                                 <FormItem>
                                                     <FormLabel>Role Code</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="ADMIN" {...field} />
+                                                        <Input placeholder="ADMIN" {...field} disabled readOnly className="bg-muted/50 cursor-not-allowed" />
                                                     </FormControl>
+                                                    <p className="text-xs text-muted-foreground">The role code is the identifier and can't be changed.</p>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
@@ -292,10 +314,10 @@ function EditRolePermissions() {
 
                                             <TabsContent value="dashboard" className="space-y-4 pt-4">
                                                 {(() => {
-                                                    const dashboardPerms = PERMISSION_GROUPS.Dashboard;
-                                                    const values = Object.values(dashboardPerms);
-                                                    const allChecked = values.length > 0 && values.every(p =>
-                                                        dashboardPermissions.includes(p)
+                                                    const pages = PERMISSION_GROUPS.Dashboard;
+                                                    const values = pages.flatMap((p) => p.actions.map((a) => a.value));
+                                                    const allChecked = values.length > 0 && values.every(v =>
+                                                        selectedDashboard.includes(v)
                                                     );
 
                                                     return (
@@ -316,18 +338,18 @@ function EditRolePermissions() {
                                                             </CardHeader>
 
                                                             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4">
-                                                                {Object.entries(dashboardPerms).map(([label, permission]) => (
+                                                                {pages.map((page) => (
                                                                     <label
-                                                                        key={permission}
+                                                                        key={page.label}
                                                                         className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
                                                                     >
                                                                         <Checkbox
-                                                                            checked={dashboardPermissions.includes(permission)}
+                                                                            checked={selectedDashboard.includes(page.actions[0].value)}
                                                                             onCheckedChange={() =>
-                                                                                toggleDashboardPermission(permission)
+                                                                                toggleDashboardPermission(page.actions[0].value)
                                                                             }
                                                                         />
-                                                                        {label}
+                                                                        {page.label}
                                                                     </label>
                                                                 ))}
                                                             </CardContent>
@@ -339,10 +361,10 @@ function EditRolePermissions() {
                                             <TabsContent value="role-permissions" className="space-y-4 pt-4">
                                                 {Object.entries(PERMISSION_GROUPS)
                                                     .filter(([groupName]) => groupName !== "Dashboard")
-                                                    .map(([groupName, perms]) => {
-                                                        const values = Object.values(perms);
-                                                        const allChecked = values.length > 0 && values.every(p =>
-                                                            permissions.includes(p)
+                                                    .map(([groupName, pages]) => {
+                                                        const values = pages.flatMap((p) => p.actions.map((a) => a.value));
+                                                        const allChecked = values.length > 0 && values.every(v =>
+                                                            selectedPermissions.includes(v)
                                                         );
 
                                                         return (
@@ -362,20 +384,32 @@ function EditRolePermissions() {
                                                                     </Button>
                                                                 </CardHeader>
 
-                                                                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-                                                                    {Object.entries(perms).map(([label, permission]) => (
-                                                                        <label
-                                                                            key={permission}
-                                                                            className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
+                                                                <CardContent className="divide-y pt-0">
+                                                                    {pages.map((page) => (
+                                                                        <div
+                                                                            key={page.label}
+                                                                            className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between"
                                                                         >
-                                                                            <Checkbox
-                                                                                checked={permissions.includes(permission)}
-                                                                                onCheckedChange={() =>
-                                                                                    togglePermission(permission)
-                                                                                }
-                                                                            />
-                                                                            {label}
-                                                                        </label>
+                                                                            <span className="text-sm font-medium text-foreground">
+                                                                                {page.label}
+                                                                            </span>
+                                                                            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                                                                                {page.actions.map((action) => (
+                                                                                    <label
+                                                                                        key={action.value}
+                                                                                        className="flex items-center gap-1.5 text-xs cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                                                                                    >
+                                                                                        <Checkbox
+                                                                                            checked={selectedPermissions.includes(action.value)}
+                                                                                            onCheckedChange={() =>
+                                                                                                togglePermission(action.value)
+                                                                                            }
+                                                                                        />
+                                                                                        {action.label}
+                                                                                    </label>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
                                                                     ))}
                                                                 </CardContent>
                                                             </Card>

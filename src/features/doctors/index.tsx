@@ -1,4 +1,4 @@
-﻿
+
 import { AppHeader } from '@/components/layout/app-header'
 import { PageHeader } from '@/components/layout/page-header'
 import { Main } from '@/components/layout/main'
@@ -38,6 +38,10 @@ type DoctorItem = {
     created_by?: string;
     created_by_name?: string;
     doctor_type_ids?: string | number[];
+    referred_patients_outdoor?: number;
+    referred_patients_indoor?: number;
+    experience?: number;
+    created_at?: string;
 };
 
 type DoctorsProps = {
@@ -252,6 +256,8 @@ export default function Doctors({ page, limit, search, doctorType, setPage, setL
             const phone = btn.dataset.phone || '-';
             const mobile = btn.dataset.mobile || '-';
             const email = btn.dataset.email || '-';
+            const referredPatientsOutdoor = btn.dataset.referredPatientsOutdoor || '0';
+            const referredPatientsIndoor = btn.dataset.referredPatientsIndoor || '0';
             const createdBy = btn.dataset.createdBy || '-';
 
             // Create card HTML
@@ -321,7 +327,17 @@ export default function Doctors({ page, limit, search, doctorType, setPage, setL
                                 <span class="font-medium text-blue-600">${email}</span>
                             </li>
 
-                            <li class="flex flex-col md:col-span-2">
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Referred Patients (Outdoor)</span>
+                                <span class="font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full text-xs w-fit mt-1">${referredPatientsOutdoor}</span>
+                            </li>
+                            
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Referred Patients (Indoor)</span>
+                                <span class="font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-xs w-fit mt-1">${referredPatientsIndoor}</span>
+                            </li>
+
+                            <li class="flex flex-col">
                                 <span class="text-gray-500">Created By</span>
                                 <span class="font-medium text-gray-700">${createdBy}</span>
                             </li>
@@ -422,6 +438,8 @@ export default function Doctors({ page, limit, search, doctorType, setPage, setL
                                 data-phone="${(row.phone || '-').replace(/"/g, '&quot;')}"
                                 data-mobile="${(row.mobile || '-').replace(/"/g, '&quot;')}"
                                 data-email="${(row.email || '-').replace(/"/g, '&quot;')}"
+                                data-referred-patients-outdoor="${row.referred_patients_outdoor || 0}"
+                                data-referred-patients-indoor="${row.referred_patients_indoor || 0}"
                                 data-created-by="${String(row.created_by_name || row.created_by || '-').replace(/"/g, '&quot;')}">+</button>
                         <span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${formattedId}</span>
                     </div>
@@ -430,10 +448,19 @@ export default function Doctors({ page, limit, search, doctorType, setPage, setL
             defaultContent: "",
         },
         {
-            data: "doctor_name",
-            title: "Doctor's Name",
-            orderable: true,
+            data: "image",
+            title: "Profile Image",
+            orderable: false,
             responsivePriority: 1,
+            render: (_data: any, _type: string, row: DoctorItem) => {
+                if (row.image) {
+                    const imageUrl = row.image.startsWith('http') 
+                        ? row.image 
+                        : `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}${row.image.startsWith('/') ? '' : '/'}${row.image}`;
+                    return `<img src="${imageUrl}" alt="${row.doctor_name}" class="w-10 h-10 rounded-full object-cover border border-gray-200" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(row.doctor_name || 'Dr')}&background=random'" />`;
+                }
+                return `<img src="https://ui-avatars.com/api/?name=${encodeURIComponent(row.doctor_name || 'Dr')}&background=random" alt="${row.doctor_name}" class="w-10 h-10 rounded-full object-cover border border-gray-200" />`;
+            },
             defaultContent: "",
         },
         {
@@ -441,6 +468,13 @@ export default function Doctors({ page, limit, search, doctorType, setPage, setL
             title: "Title",
             orderable: true,
             responsivePriority: 3,
+            defaultContent: "",
+        },
+        {
+            data: "doctor_name",
+            title: "Doctor's Name",
+            orderable: true,
+            responsivePriority: 1,
             defaultContent: "",
         },
         {
@@ -487,6 +521,36 @@ export default function Doctors({ page, limit, search, doctorType, setPage, setL
             defaultContent: "-",
         },
         {
+            data: "experience",
+            title: "Experience (Years)",
+            orderable: true,
+            responsivePriority: 4,
+            render: (data: any, type: string, row: DoctorItem) => {
+                if (row.experience === undefined || row.experience === null) return '-';
+                
+                let calculatedExperience = row.experience;
+                if (row.created_at) {
+                    const createdDate = new Date(row.created_at);
+                    if (!isNaN(createdDate.getTime())) {
+                        const now = new Date();
+                        let yearsElapsed = now.getFullYear() - createdDate.getFullYear();
+                        
+                        const monthDiff = now.getMonth() - createdDate.getMonth();
+                        if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < createdDate.getDate())) {
+                            yearsElapsed--;
+                        }
+                        
+                        if (yearsElapsed > 0) {
+                            calculatedExperience += yearsElapsed;
+                        }
+                    }
+                }
+                
+                return `${calculatedExperience} Yrs`;
+            },
+            defaultContent: "-",
+        },
+        {
             data: "country",
             title: "Country",
             orderable: true,
@@ -520,6 +584,26 @@ export default function Doctors({ page, limit, search, doctorType, setPage, setL
             orderable: true,
             responsivePriority: 6,
             defaultContent: "",
+        },
+        {
+            data: "referred_patients_outdoor",
+            title: "Referred Patients (Outdoor)",
+            orderable: true,
+            responsivePriority: 6,
+            render: (_data: any, _type: string, row: DoctorItem) => {
+                return `<span class="font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full text-xs">${row.referred_patients_outdoor || 0}</span>`;
+            },
+            defaultContent: "0",
+        },
+        {
+            data: "referred_patients_indoor",
+            title: "Referred Patients (Indoor)",
+            orderable: true,
+            responsivePriority: 6,
+            render: (_data: any, _type: string, row: DoctorItem) => {
+                return `<span class="font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-xs">${row.referred_patients_indoor || 0}</span>`;
+            },
+            defaultContent: "0",
         },
         {
             data: "created_by",

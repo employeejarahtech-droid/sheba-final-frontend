@@ -25,6 +25,20 @@ export const useAssetStatisticsQuery = () =>
 export const useAssetDepreciationQuery = () =>
   useQuery({ queryKey: ASSET_KEYS.depreciation(), queryFn: assetService.getDepreciation })
 
+export const useDepreciationRunsQuery = () =>
+  useQuery({ queryKey: [...ASSET_KEYS.all, 'depreciation-runs'], queryFn: assetService.getDepreciationRuns })
+
+export const usePostDepreciationMutation = () => {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (period?: string) => assetService.postDepreciation(period),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [...ASSET_KEYS.all, 'depreciation-runs'] })
+      qc.invalidateQueries({ queryKey: ASSET_KEYS.depreciation() })
+    },
+  })
+}
+
 /* ── Assets ── */
 export const useAssetsQuery = (params?: AssetListParams) =>
   useQuery({ queryKey: ASSET_KEYS.list(params), queryFn: () => assetService.list(params) })

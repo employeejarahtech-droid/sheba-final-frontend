@@ -86,7 +86,7 @@ export function LandingHeader() {
                 <Link to="/login">Sign In</Link>
               </Button>
               <Button asChild className="bg-blue-600 hover:bg-blue-700">
-                <Link to="/register">Get Started</Link>
+                <Link to="/register" search={{ plan: 'business', cycle: 'monthly', status: '', reason: '' }}>Get Started</Link>
               </Button>
             </>
           )}
@@ -137,7 +137,7 @@ export function LandingHeader() {
                     </Link>
                   </Button>
                   <Button asChild className="w-full bg-blue-600 hover:bg-blue-700">
-                    <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                    <Link to="/register" search={{ plan: 'business', cycle: 'monthly', status: '', reason: '' }} onClick={() => setMobileMenuOpen(false)}>
                       Get Started
                     </Link>
                   </Button>

@@ -1,10 +1,14 @@
 import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { DollarSign, TrendingDown, Wallet } from 'lucide-react'
+import { DollarSign, TrendingDown, Wallet, CalendarClock } from 'lucide-react'
+import { toast } from 'sonner'
 import { AppHeader } from '@/components/layout/app-header'
 import { DataTable } from '@/components/DataTable'
 import { useCurrency } from '@/hooks/use-currency'
-import { useAssetDepreciationQuery } from '@/features/assets/assetQueries'
+import {
+  useAssetDepreciationQuery,
+  usePostDepreciationMutation,
+} from '@/features/assets/assetQueries'
 import { StatCards } from '@/features/assets/components/StatCard'
 
 export const Route = createFileRoute('/_authenticated/dashboard/assets/depreciation/')({
@@ -30,6 +34,21 @@ function AssetDepreciationPage() {
   }), [all])
 
   const fmt = (n: number) => `${currencySymbol} ${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+  const postDep = usePostDepreciationMutation()
+  const handlePostDepreciation = () => {
+    postDep.mutate(undefined, {
+      onSuccess: (res: any) => {
+        const d = res?.data
+        toast.success(
+          `Depreciation posted for ${d?.period}: ${fmt(Number(d?.total_amount || 0))} across ${d?.asset_count} asset(s)`
+        )
+      },
+      onError: (err: any) => {
+        toast.error(err?.response?.data?.message || 'Failed to post depreciation')
+      },
+    })
+  }
 
   const cards = [
     { label: 'Total Cost', value: fmt(totals.cost), icon: DollarSign, headerBg: '#3B82F6', iconColor: '#3B82F6' },
@@ -57,6 +76,15 @@ function AssetDepreciationPage() {
       <main className="">
         <div className="flex flex-wrap items-end justify-between gap-2 mb-3">
           <h1 className="text-2xl font-bold tracking-tight">Depreciation Tracking</h1>
+          <button
+            type="button"
+            onClick={handlePostDepreciation}
+            disabled={postDep.isPending}
+            className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+          >
+            <CalendarClock className="size-4" />
+            {postDep.isPending ? 'Posting…' : "Post This Month's Depreciation"}
+          </button>
         </div>
 
         <StatCards cards={cards} />

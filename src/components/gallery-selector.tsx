@@ -337,7 +337,7 @@ export function GallerySelector({
                                 </div>
                             ) : (
                                 <div className="flex justify-center py-4 sm:py-6 px-2">
-                                    <div className="grid grid-cols-1 gap-4 sm:gap-6 pb-4 w-full max-w-[750px]">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 pb-4 w-full max-w-full">
                                         {currentImages.map((image) => {
                                             const isSelected = selectedImage?.id === image.id;
                                             return (
@@ -346,13 +346,13 @@ export function GallerySelector({
                                                     key={image.id}
                                                     onClick={() => handleSelect(image)}
                                                     className={cn(
-                                                        "group relative overflow-hidden rounded-xl sm:rounded-2xl border-2 text-left transition-all duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/20 mx-auto w-full",
+                                                        "group relative aspect-square overflow-hidden rounded-lg border-2 text-left transition-all duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/20 w-full",
                                                         isSelected
-                                                            ? "border-blue-500 shadow-xl shadow-blue-500/20"
+                                                            ? "border-blue-500 shadow-xl shadow-blue-500/20 ring-2 ring-blue-500 ring-offset-2"
                                                             : "border-gray-200 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-lg"
                                                     )}
                                                 >
-                                                    <div className="relative bg-white dark:bg-gray-900 w-full" style={{ height: '200px' }}>
+                                                    <div className="relative bg-white dark:bg-gray-900 w-full h-full">
                                                         <img
                                                             src={image.url}
                                                             alt={image.original_name || image.filename || 'Gallery image'}
@@ -360,14 +360,18 @@ export function GallerySelector({
                                                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                         />
 
-                                                        {/* Overlay gradient */}
-                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-                                                        {/* Selected indicator */}
+                                                        {/* Selected indicator overlay */}
                                                         {isSelected && (
-                                                            <div className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg">
-                                                                <Check className="h-4 w-4" />
+                                                            <div className="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center">
+                                                                <div className="bg-blue-500 text-white rounded-full p-1 shadow-lg">
+                                                                    <Check className="h-5 w-5" />
+                                                                </div>
                                                             </div>
+                                                        )}
+
+                                                        {/* Gradient overlay for text */}
+                                                        {!isSelected && (
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                                                         )}
 
                                                         {/* Delete button */}
@@ -375,18 +379,19 @@ export function GallerySelector({
                                                             role="button"
                                                             tabIndex={-1}
                                                             onClick={(e) => handleDelete(image.id, image.original_name || image.filename || 'image', e)}
-                                                            className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white opacity-0 backdrop-blur-sm transition-all duration-300 hover:bg-red-600 group-hover:opacity-100 shadow-lg"
+                                                            className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-white opacity-0 backdrop-blur-sm transition-all duration-300 hover:bg-red-600 group-hover:opacity-100 shadow-lg z-10"
                                                         >
-                                                            <Trash2 className="h-4 w-4" />
+                                                            <Trash2 className="h-3.5 w-3.5" />
                                                         </span>
 
                                                         {/* Image info (on hover) */}
-                                                        <div className="absolute bottom-0 left-0 right-0 p-4 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                                                            <p className="truncate text-sm font-semibold drop-shadow-lg">
-                                                                {image.original_name || image.filename || 'Untitled'}
-                                                            </p>
-                                                            <p className="text-xs opacity-90 mt-0.5">{formatFileSize(image.size)}</p>
-                                                        </div>
+                                                        {!isSelected && (
+                                                            <div className="absolute bottom-0 left-0 right-0 p-2 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                                                                <p className="truncate text-xs font-semibold drop-shadow-lg">
+                                                                    {image.original_name || image.filename || 'Untitled'}
+                                                                </p>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </button>
                                             );

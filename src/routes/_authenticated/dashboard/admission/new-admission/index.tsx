@@ -219,7 +219,7 @@ function DoctorSelect({
         queryKey: ['doctors-select-list', debouncedSearchVal],
         queryFn: async () => {
             const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/doctor?limit=50&search=${encodeURIComponent(debouncedSearchVal)}`,
+                `${import.meta.env.VITE_API_URL}/api/doctor?limit=50&is_active=true&search=${encodeURIComponent(debouncedSearchVal)}`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }

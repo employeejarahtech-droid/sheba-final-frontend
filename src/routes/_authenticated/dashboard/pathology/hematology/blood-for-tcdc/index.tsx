@@ -2,19 +2,27 @@ import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
 import { EditBloodForTcDcForm } from '@/features/pathology/hematology/blood-for-tcdc/EditBloodForTcDcForm';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getCookie } from '@/lib/cookies';
 import { useDateFormat } from '@/hooks/use-date-format';
 import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
-import { FileText, Droplets, Clock, Users } from 'lucide-react';
+import { FileText, Droplets, Clock, Users, Check, Filter } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DateField } from "@/components/date-field";
 
 const tcdcSearchSchema = z.object({
   page: z.coerce.number().catch(1),
   limit: z.coerce.number().catch(10),
   search: z.string().catch(''),
+  status: z.string().catch('all'),
+  from: z.string().catch(''),
+  to: z.string().catch(''),
 })
 
 export const Route = createFileRoute(
@@ -45,6 +53,9 @@ function BloodForTcdc() {
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 10;
   const search = searchParams?.search || "";
+  const statusFilter = searchParams?.status || "all";
+  const from = searchParams?.from || "";
+  const to = searchParams?.to || "";
 
   const setPage = (newPage: number) => {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
@@ -55,18 +66,30 @@ function BloodForTcdc() {
   const setLimit = (newLimit: number) => {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) });
   };
+  const setStatusFilter = (newStatus: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, status: newStatus, page: 1 }) });
+  };
+  const setFrom = (newFrom: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, from: newFrom, page: 1 }) });
+  };
+  const setTo = (newTo: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, to: newTo, page: 1 }) });
+  };
 
   const token = getCookie('accessToken');
 
-  // Tenant date format (from company settings) + 12h time � matches the rest of the app.
+  // Tenant date format (from company settings) + 12h time � matches the rest of the app.
   const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data, isFetching } = useQuery({
-    queryKey: ["tcdc", page, limit, search],
+    queryKey: ["tcdc", page, limit, search, statusFilter, from, to],
 
     queryFn: async () => {
+      const statusParam = statusFilter !== "all" ? `&status=${encodeURIComponent(statusFilter)}` : "";
+      const fromParam = from ? `&from=${encodeURIComponent(from)}` : "";
+      const toParam = to ? `&to=${encodeURIComponent(to)}` : "";
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/tcdc?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
+        `${import.meta.env.VITE_API_URL}/api/tcdc?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -321,6 +344,43 @@ function BloodForTcdc() {
     };
   }, [token]);
 
+  // ---- Date filter presets (Filter By dropdown) — mirrors the invoices list.
+  // Presets produce from/to (YYYY-MM-DD) which the API applies to
+  // outdoor_invoice.invoice_date (the report date).
+  const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+  // Format as LOCAL YYYY-MM-DD. Do NOT use toISOString() — it converts to UTC and
+  // shifts the date back one day in timezones east of UTC (e.g. UTC+6 → off-by-one).
+  const toYMD = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+  const datePresets = useMemo(() => ({
+    today: { label: 'Today', from: toYMD(today()), to: toYMD(today()) },
+    yesterday: (() => { const d = today(); d.setDate(d.getDate() - 1); return { label: 'Yesterday', from: toYMD(d), to: toYMD(d) }; })(),
+    last7: { label: 'Last 7 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 6); return d; })()), to: toYMD(today()) },
+    last15: { label: 'Last 15 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 14); return d; })()), to: toYMD(today()) },
+    last30: { label: 'Last 30 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 29); return d; })()), to: toYMD(today()) },
+    last45: { label: 'Last 45 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 44); return d; })()), to: toYMD(today()) },
+    last60: { label: 'Last 60 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 59); return d; })()), to: toYMD(today()) },
+    last90: { label: 'Last 90 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 89); return d; })()), to: toYMD(today()) },
+    last180: { label: 'Last 180 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 179); return d; })()), to: toYMD(today()) },
+    last365: { label: 'Last 365 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 364); return d; })()), to: toYMD(today()) },
+  }), []);
+  const activePreset = useMemo(() => {
+    if (!from || !to) return 'custom';
+    const match = Object.entries(datePresets).find(([, v]) => v.from === from && v.to === to);
+    return match ? match[0] : 'custom';
+  }, [from, to, datePresets]);
+  const [presetOpen, setPresetOpen] = useState(false);
+  const [openStatus, setOpenStatus] = useState(false);
+  const applyPreset = (key: string) => {
+    const p = (datePresets as any)[key];
+    if (p) { setFrom(p.from); setTo(p.to); }
+    setPresetOpen(false);
+  };
+
   const columns = [
     {
       data: "invoice_id",
@@ -461,6 +521,7 @@ function BloodForTcdc() {
           </div>
 
           <DataTable
+            hideExport
             tableTitle="Blood For TCDC"
             columns={columns}
             data={data?.data?.items || []}
@@ -470,6 +531,86 @@ function BloodForTcdc() {
             search={search}
             onSearchChange={setSearch}
             isLoading={isFetching}
+            filterSlot={
+              <>
+                <Popover open={openStatus} onOpenChange={setOpenStatus}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Filter className="mr-2 h-4 w-4" />
+                      {statusFilter !== "all" ? `Status: ${statusFilter}` : "Filter Status"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[200px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search status..." />
+                      <CommandList>
+                        <CommandEmpty>No status found.</CommandEmpty>
+                        <CommandGroup>
+                          {["all", "Completed", "Pending"].map((status) => (
+                            <CommandItem
+                              key={status}
+                              value={status}
+                              onSelect={(currentValue) => {
+                                setStatusFilter(currentValue === statusFilter ? "all" : currentValue)
+                                setOpenStatus(false)
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  statusFilter === status ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {status === "all" ? "All Status" : status}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <div className="flex items-center gap-1.5">
+                  <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>
+                    <SelectTrigger className="w-[140px] h-9 rounded-md border-gray-200 dark:border-gray-700 bg-transparent text-sm">
+                      <SelectValue placeholder="Filter by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="today">Today</SelectItem>
+                      <SelectItem value="yesterday">Yesterday</SelectItem>
+                      <SelectItem value="last7">Last 7 days</SelectItem>
+                      <SelectItem value="last15">Last 15 days</SelectItem>
+                      <SelectItem value="last30">Last 30 days</SelectItem>
+                      <SelectItem value="last45">Last 45 days</SelectItem>
+                      <SelectItem value="last60">Last 60 days</SelectItem>
+                      <SelectItem value="last90">Last 90 days</SelectItem>
+                      <SelectItem value="last180">Last 180 days</SelectItem>
+                      <SelectItem value="last365">Last 365 days</SelectItem>
+                      <SelectItem value="custom">Custom range</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <DateField
+                    value={from}
+                    onChange={(v: string) => { setFrom(v); setPresetOpen(false); }}
+                    placeholder="From"
+                  />
+                  <span className="text-xs text-muted-foreground">to</span>
+                  <DateField
+                    value={to}
+                    onChange={(v: string) => { setTo(v); setPresetOpen(false); }}
+                    placeholder="To"
+                  />
+                  {(from || to) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => { setFrom(""); setTo(""); }}
+                    >
+                      Clear
+                    </Button>
+                  )}
+                </div>
+              </>
+            }
           />
         </div>
         <EditBloodForTcDcForm open={open} setOpen={setOpen} reportId={reportId} invoiceId={invoiceId} />

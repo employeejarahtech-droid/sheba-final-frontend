@@ -9,6 +9,7 @@ import { AppTitle } from './app-title'
 import { sidebarData } from './data/sidebar-data'
 import { useAuthStore } from '@/stores/auth-store'
 import { getCookie } from '@/lib/cookies'
+import { filterNavGroups } from '@/lib/permissions'
 
 export function AppSidebar() {
   const user = useAuthStore((s) => s.user)
@@ -37,7 +38,7 @@ export function AppSidebar() {
 
   // When the company has hide_subscription_info enabled, drop the
   // Subscription link from the sidebar entirely.
-  const navGroups = hideSubscription
+  const baseGroups = hideSubscription
     ? sidebarData.navGroups.map((group) => ({
         ...group,
         items: group.items.filter(
@@ -45,6 +46,10 @@ export function AppSidebar() {
         ),
       }))
     : sidebarData.navGroups
+
+  // Role-based gating: hide pages the user's role can't view. Admins and
+  // roles with no permissions configured see everything (see lib/permissions).
+  const navGroups = filterNavGroups(user, baseGroups)
 
   return (
     <Sidebar collapsible="icon" className="print:hidden">

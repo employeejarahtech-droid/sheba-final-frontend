@@ -24,6 +24,9 @@ export const assetService = {
   getDashboard: async () => (await api.get<ApiResponse<AssetDashboard>>('/assets/stats')).data.data,
   getStatistics: async () => (await api.get<ApiResponse<AssetStatistics>>('/assets/statistics')).data.data,
   getDepreciation: async () => (await api.get<ApiResponse<AssetDepreciationRow[]>>('/assets/depreciation')).data.data,
+  getDepreciationRuns: async () => (await api.get<ApiResponse<any[]>>('/assets/depreciation/runs')).data.data,
+  postDepreciation: async (period?: string) =>
+    (await api.post<ApiResponse<any>>('/assets/depreciation/run', period ? { period } : {})).data,
 
   // Assets
   list: async (params?: AssetListParams) =>

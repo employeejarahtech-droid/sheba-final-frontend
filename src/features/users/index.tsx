@@ -33,16 +33,17 @@ function UsersContent() {
     const map: Record<number, { name: string; display_name: string; color: string }> = {}
     roles.forEach((role: any) => {
       const colors: Record<string, string> = {
-        'Admin': 'bg-purple-500 hover:bg-purple-600',
-        'Superadmin': 'bg-red-500 hover:bg-red-600',
-        'Manager': 'bg-green-500 hover:bg-green-600',
-        'User': 'bg-blue-500 hover:bg-blue-600',
-        'Cashier': 'bg-orange-500 hover:bg-orange-600',
+        'admin': 'bg-purple-500 hover:bg-purple-600',
+        'superadmin': 'bg-red-500 hover:bg-red-600',
+        'manager': 'bg-green-500 hover:bg-green-600',
+        'user': 'bg-blue-500 hover:bg-blue-600',
+        'cashier': 'bg-orange-500 hover:bg-orange-600',
       }
+      const roleName = (role.name || '').toLowerCase()
       map[role.id] = {
-        name: role.role,
-        display_name: role.display_name,
-        color: colors[role.role] || 'bg-gray-500 hover:bg-gray-600'
+        name: role.name,
+        display_name: role.display_name || role.name,
+        color: colors[roleName] || 'bg-gray-500 hover:bg-gray-600'
       }
     })
     return map
@@ -115,10 +116,16 @@ function UsersContent() {
       data: 'role_id',
       title: 'Role',
       responsivePriority: 5,
-      render: (data: any) => {
-        const roleId = data as number
-        const role = roleMap[roleId] || { display_name: 'Unknown', color: 'bg-gray-500' }
-        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${role.color} text-white border-transparent">${role.display_name}</span>`
+      render: (data: any, _type: string, row: ApiUser) => {
+        const roleId = (data as number) || row.role?.id || row.role_id
+        const role = roleId ? roleMap[roleId] : null
+        
+        if (role) {
+            return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${role.color} text-white border-transparent">${role.display_name}</span>`
+        }
+        
+        const fallbackName = row.role?.display_name || row.role?.name || 'Unknown'
+        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-500 hover:bg-gray-600 text-white border-transparent">${fallbackName}</span>`
       },
     },
     {

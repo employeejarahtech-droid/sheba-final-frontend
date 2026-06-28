@@ -509,6 +509,7 @@ export const sidebarData: SidebarData = {
             { title: 'Report Settings', url: '/dashboard/settings/report-settings', icon: FileText },
             { title: 'Date Controls', url: '/dashboard/settings/date-controls', icon: Clock },
             { title: 'Payment Accounts', url: '/dashboard/settings/payment-accounts', icon: Landmark },
+            { title: 'Inventory Accounts', url: '/dashboard/settings/inventory-accounts', icon: Package },
             { title: 'Database Browser', url: '/dashboard/database', icon: Database },
             { title: 'Backups', url: '/dashboard/backups', icon: Database },
             { title: 'Backup Settings', url: '/dashboard/backup-settings', icon: Settings },
