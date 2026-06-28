@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { CheckCircle, DollarSign, Trophy, X } from 'lucide-react'
@@ -36,27 +36,67 @@ type AdmissionItem = {
     balance_distributed_date?: string | null
 }
 
-export function BalanceDistributedListPage() {
+interface BalanceDistributedListPageProps {
+    page?: number;
+    limit?: number;
+    search?: string;
+    statusFilter?: string;
+    paymentFilter?: string;
+    setPage?: (page: number) => void;
+    setLimit?: (limit: number) => void;
+    setSearch?: (search: string) => void;
+    setStatusFilter?: (status: string) => void;
+    setPaymentFilter?: (payment: string) => void;
+}
+
+export function BalanceDistributedListPage({
+    page: propPage,
+    limit: propLimit,
+    search: propSearch,
+    statusFilter: propStatusFilter,
+    paymentFilter: propPaymentFilter,
+    setPage: propSetPage,
+    setLimit: propSetLimit,
+    setSearch: propSetSearch,
+    setStatusFilter: propSetStatusFilter,
+    setPaymentFilter: propSetPaymentFilter,
+}: BalanceDistributedListPageProps) {
     const navigate = useNavigate()
     const token = getCookie('accessToken')
     const { format } = useCurrency()
-    const [page, setPage] = useState(1)
-    const [limit] = useState(10)
-    const [search, setSearch] = useState('')
-    const [statusFilter, setStatusFilter] = useState<string>('all')
-    const [paymentFilter, setPaymentFilter] = useState<string>('all')
+
+    // Support local state fallback or driven by props
+    const [localPage, localSetPage] = useState(1);
+    const [localLimit, localSetLimit] = useState(10);
+    const [localSearch, localSetSearch] = useState('');
+    const [localStatusFilter, localSetStatusFilter] = useState('all');
+    const [localPaymentFilter, localSetPaymentFilter] = useState('all');
+
+    const page = propPage !== undefined ? propPage : localPage;
+    const limit = propLimit !== undefined ? propLimit : localLimit;
+    const search = propSearch !== undefined ? propSearch : localSearch;
+    const statusFilter = propStatusFilter !== undefined ? propStatusFilter : localStatusFilter;
+    const paymentFilter = propPaymentFilter !== undefined ? propPaymentFilter : localPaymentFilter;
+
+    const setPage = propSetPage || localSetPage;
+    const setLimit = propSetLimit || localSetLimit;
+    const setSearch = propSetSearch || localSetSearch;
+    const setStatusFilter = propSetStatusFilter || localSetStatusFilter;
+    const setPaymentFilter = propSetPaymentFilter || localSetPaymentFilter;
 
     const { data: allAdmissionsData, isFetching } = useQuery({
-        queryKey: ['admissions', 'balance_distributed', page, limit, search, statusFilter, paymentFilter],
+        queryKey: ['admissions', 'balance_distributed_list', page, limit, search, statusFilter, paymentFilter],
         queryFn: async () => {
             const params = new URLSearchParams({
                 page: page.toString(),
                 limit: limit.toString(),
-                ...(search && { search }),
-                ...(statusFilter && statusFilter !== 'all' && { status: statusFilter }),
-                ...(paymentFilter && paymentFilter !== 'all' && { payment_status: paymentFilter }),
+                search,
+                status: statusFilter,
+                payment_status: paymentFilter,
+                bills_distributed: '1',
+                balance_distributed: '1',
             })
-            const res = await fetch(`${API_URL}/api/admission?${params}`, {
+            const res = await fetch(`${API_URL}/api/admission/discharged?${params}`, {
                 headers: { Authorization: `Bearer ${token}` },
             })
             if (!res.ok) throw new Error('Failed to fetch admissions')
@@ -65,10 +105,8 @@ export function BalanceDistributedListPage() {
         enabled: !!token,
     })
 
-    const allAdmissions = allAdmissionsData?.data?.items || []
-    const admissions = allAdmissions.filter((a: any) => a.balance_distributed === 1)
-
-    const meta = { page, limit, total: admissions.length }
+    const admissions = allAdmissionsData?.data?.items || []
+    const meta = allAdmissionsData?.data?.meta || { page, limit, total: admissions.length }
 
     const totalRevenue = admissions.reduce((sum: number, a: any) => sum + (a.finalBill?.paid_amount || 0), 0)
 
@@ -182,6 +220,7 @@ export function BalanceDistributedListPage() {
                     isLoading={isFetching}
                     meta={meta}
                     onPageChange={setPage}
+                    onLimitChange={setLimit}
                     search={search}
                     onSearchChange={setSearch}
                     filterSlot={

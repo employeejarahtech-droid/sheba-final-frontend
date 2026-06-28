@@ -128,7 +128,7 @@ function TrialBalance() {
                                 {
                                     data: "code",
                                     title: "Code",
-                                    render: (data: any) => <span class="font-mono text-xs text-muted-foreground">${data || ''}</span>
+                                    render: (data: any) => `<span class="font-mono text-xs text-muted-foreground">${data || ''}</span>`
                                 },
                                 {
                                     data: "account",

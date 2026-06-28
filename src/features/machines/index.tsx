@@ -5,7 +5,8 @@ import { PageHeader } from '@/components/layout/page-header'
 import { DataTable } from '@/components/DataTable'
 import { CreateMachineForm } from './components/CreateMachineForm'
 import { EditMachineForm } from './components/EditMachineForm'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 //import { useNavigate } from '@tanstack/react-router'
 import { getCookie } from '@/lib/cookies'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -36,6 +37,25 @@ export default function Machines({ page, limit, search, setPage, setLimit, setSe
 
     const token = getCookie('accessToken');
     //const navigate = useNavigate();
+    const queryClient = useQueryClient();
+
+    const deleteMutation = useMutation({
+        mutationFn: async (id: string) => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/machine/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(json.message || 'Failed to delete machine');
+            return json;
+        },
+        onSuccess: () => {
+            toast.success('Machine deleted');
+            queryClient.invalidateQueries({ queryKey: ['machine'] });
+            queryClient.invalidateQueries({ queryKey: ['machines-overall-stats'] });
+        },
+        onError: (err: Error) => { toast.error(err.message); },
+    });
 
     const { data, isFetching } = useQuery({
         queryKey: ["machine", page, limit, search],
@@ -125,6 +145,15 @@ export default function Machines({ page, limit, search, setPage, setLimit, setSe
             setOpenEditForm(true);
         };
     }, [setSelectedMachineId, setOpenEditForm]);
+
+    // Expose delete function to window for onclick handlers
+    useEffect(() => {
+        (window as any).deleteMachine = (id: string) => {
+            if (confirm('Delete this machine? This action cannot be undone.')) {
+                deleteMutation.mutate(id);
+            }
+        };
+    }, [deleteMutation]);
 
     // Handle expand button clicks using event delegation
     useEffect(() => {
@@ -286,6 +315,10 @@ export default function Machines({ page, limit, search, setPage, setLimit, setSe
                         <button onclick="window.editMachine('${row.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                             Edit
+                        </button>
+                        <button onclick="window.deleteMachine('${row.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            Delete
                         </button>
                     </div>
                 `;

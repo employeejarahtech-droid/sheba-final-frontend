@@ -24,6 +24,7 @@ import { Route as errors401RouteImport } from './routes/(errors)/401'
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as authSignIn2RouteImport } from './routes/(auth)/sign-in-2'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
+import { Route as authRegistrationSuccessRouteImport } from './routes/(auth)/registration-success'
 import { Route as authOtpRouteImport } from './routes/(auth)/otp'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
@@ -360,6 +361,7 @@ import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintIndexRo
 import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/final-bill/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/final-bill-print/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/distribute-bill/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdDiagnosisTreatmentIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/diagnosis-treatment/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/confirm-balance/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/billing/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/billing-print/index'
@@ -482,6 +484,11 @@ const authSignIn2Route = authSignIn2RouteImport.update({
 const authSignInRoute = authSignInRouteImport.update({
   id: '/(auth)/sign-in',
   path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authRegistrationSuccessRoute = authRegistrationSuccessRouteImport.update({
+  id: '/(auth)/registration-success',
+  path: '/registration-success',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authOtpRoute = authOtpRouteImport.update({
@@ -2562,6 +2569,14 @@ const AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute
       getParentRoute: () => AuthenticatedRouteRoute,
     } as any,
   )
+const AuthenticatedDashboardAdmissionPatientsAdmissionIdDiagnosisTreatmentIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdDiagnosisTreatmentIndexRouteImport.update(
+    {
+      id: '/dashboard/admission/patients/$admissionId/diagnosis-treatment/',
+      path: '/dashboard/admission/patients/$admissionId/diagnosis-treatment/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute =
   AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRouteImport.update(
     {
@@ -2925,6 +2940,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/otp': typeof authOtpRoute
+  '/registration-success': typeof authRegistrationSuccessRoute
   '/sign-in': typeof authSignInRoute
   '/sign-in-2': typeof authSignIn2Route
   '/sign-up': typeof authSignUpRoute
@@ -3291,6 +3307,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/admission/patients/$admissionId/billing-print': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRoute
   '/dashboard/admission/patients/$admissionId/billing': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRoute
   '/dashboard/admission/patients/$admissionId/confirm-balance': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
+  '/dashboard/admission/patients/$admissionId/diagnosis-treatment': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdDiagnosisTreatmentIndexRoute
   '/dashboard/admission/patients/$admissionId/distribute-bill': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute
   '/dashboard/admission/patients/$admissionId/final-bill-print': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
   '/dashboard/admission/patients/$admissionId/final-bill': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute
@@ -3323,6 +3340,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/otp': typeof authOtpRoute
+  '/registration-success': typeof authRegistrationSuccessRoute
   '/sign-in': typeof authSignInRoute
   '/sign-in-2': typeof authSignIn2Route
   '/sign-up': typeof authSignUpRoute
@@ -3688,6 +3706,7 @@ export interface FileRoutesByTo {
   '/dashboard/admission/patients/$admissionId/billing-print': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRoute
   '/dashboard/admission/patients/$admissionId/billing': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRoute
   '/dashboard/admission/patients/$admissionId/confirm-balance': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
+  '/dashboard/admission/patients/$admissionId/diagnosis-treatment': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdDiagnosisTreatmentIndexRoute
   '/dashboard/admission/patients/$admissionId/distribute-bill': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute
   '/dashboard/admission/patients/$admissionId/final-bill-print': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
   '/dashboard/admission/patients/$admissionId/final-bill': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute
@@ -3725,6 +3744,7 @@ export interface FileRoutesById {
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/otp': typeof authOtpRoute
+  '/(auth)/registration-success': typeof authRegistrationSuccessRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/(auth)/sign-in-2': typeof authSignIn2Route
   '/(auth)/sign-up': typeof authSignUpRoute
@@ -4092,6 +4112,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/admission/patients/$admissionId/billing-print/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRoute
   '/_authenticated/dashboard/admission/patients/$admissionId/billing/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRoute
   '/_authenticated/dashboard/admission/patients/$admissionId/confirm-balance/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
+  '/_authenticated/dashboard/admission/patients/$admissionId/diagnosis-treatment/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdDiagnosisTreatmentIndexRoute
   '/_authenticated/dashboard/admission/patients/$admissionId/distribute-bill/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute
   '/_authenticated/dashboard/admission/patients/$admissionId/final-bill-print/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
   '/_authenticated/dashboard/admission/patients/$admissionId/final-bill/': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute
@@ -4127,6 +4148,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/otp'
+    | '/registration-success'
     | '/sign-in'
     | '/sign-in-2'
     | '/sign-up'
@@ -4493,6 +4515,7 @@ export interface FileRouteTypes {
     | '/dashboard/admission/patients/$admissionId/billing-print'
     | '/dashboard/admission/patients/$admissionId/billing'
     | '/dashboard/admission/patients/$admissionId/confirm-balance'
+    | '/dashboard/admission/patients/$admissionId/diagnosis-treatment'
     | '/dashboard/admission/patients/$admissionId/distribute-bill'
     | '/dashboard/admission/patients/$admissionId/final-bill-print'
     | '/dashboard/admission/patients/$admissionId/final-bill'
@@ -4525,6 +4548,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/otp'
+    | '/registration-success'
     | '/sign-in'
     | '/sign-in-2'
     | '/sign-up'
@@ -4890,6 +4914,7 @@ export interface FileRouteTypes {
     | '/dashboard/admission/patients/$admissionId/billing-print'
     | '/dashboard/admission/patients/$admissionId/billing'
     | '/dashboard/admission/patients/$admissionId/confirm-balance'
+    | '/dashboard/admission/patients/$admissionId/diagnosis-treatment'
     | '/dashboard/admission/patients/$admissionId/distribute-bill'
     | '/dashboard/admission/patients/$admissionId/final-bill-print'
     | '/dashboard/admission/patients/$admissionId/final-bill'
@@ -4926,6 +4951,7 @@ export interface FileRouteTypes {
     | '/(auth)/forgot-password'
     | '/(auth)/login'
     | '/(auth)/otp'
+    | '/(auth)/registration-success'
     | '/(auth)/sign-in'
     | '/(auth)/sign-in-2'
     | '/(auth)/sign-up'
@@ -5293,6 +5319,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/admission/patients/$admissionId/billing-print/'
     | '/_authenticated/dashboard/admission/patients/$admissionId/billing/'
     | '/_authenticated/dashboard/admission/patients/$admissionId/confirm-balance/'
+    | '/_authenticated/dashboard/admission/patients/$admissionId/diagnosis-treatment/'
     | '/_authenticated/dashboard/admission/patients/$admissionId/distribute-bill/'
     | '/_authenticated/dashboard/admission/patients/$admissionId/final-bill-print/'
     | '/_authenticated/dashboard/admission/patients/$admissionId/final-bill/'
@@ -5328,6 +5355,7 @@ export interface RootRouteChildren {
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authLoginRoute: typeof authLoginRoute
   authOtpRoute: typeof authOtpRoute
+  authRegistrationSuccessRoute: typeof authRegistrationSuccessRoute
   authSignInRoute: typeof authSignInRoute
   authSignIn2Route: typeof authSignIn2Route
   authSignUpRoute: typeof authSignUpRoute
@@ -5447,6 +5475,13 @@ declare module '@tanstack/react-router' {
       path: '/sign-in'
       fullPath: '/sign-in'
       preLoaderRoute: typeof authSignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/registration-success': {
+      id: '/(auth)/registration-success'
+      path: '/registration-success'
+      fullPath: '/registration-success'
+      preLoaderRoute: typeof authRegistrationSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/otp': {
@@ -7801,6 +7836,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/admission/patients/$admissionId/diagnosis-treatment/': {
+      id: '/_authenticated/dashboard/admission/patients/$admissionId/diagnosis-treatment/'
+      path: '/dashboard/admission/patients/$admissionId/diagnosis-treatment'
+      fullPath: '/dashboard/admission/patients/$admissionId/diagnosis-treatment'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdDiagnosisTreatmentIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/admission/patients/$admissionId/confirm-balance/': {
       id: '/_authenticated/dashboard/admission/patients/$admissionId/confirm-balance/'
       path: '/dashboard/admission/patients/$admissionId/confirm-balance'
@@ -8525,6 +8567,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingPrintIndexRoute
   AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRoute
   AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdDiagnosisTreatmentIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdDiagnosisTreatmentIndexRoute
   AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute
   AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute
   AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillIndexRoute
@@ -9195,6 +9238,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardAdmissionPatientsAdmissionIdBillingIndexRoute,
   AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute:
     AuthenticatedDashboardAdmissionPatientsAdmissionIdConfirmBalanceIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsAdmissionIdDiagnosisTreatmentIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsAdmissionIdDiagnosisTreatmentIndexRoute,
   AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute:
     AuthenticatedDashboardAdmissionPatientsAdmissionIdDistributeBillIndexRoute,
   AuthenticatedDashboardAdmissionPatientsAdmissionIdFinalBillPrintIndexRoute:
@@ -9341,6 +9386,7 @@ const rootRouteChildren: RootRouteChildren = {
   authForgotPasswordRoute: authForgotPasswordRoute,
   authLoginRoute: authLoginRoute,
   authOtpRoute: authOtpRoute,
+  authRegistrationSuccessRoute: authRegistrationSuccessRoute,
   authSignInRoute: authSignInRoute,
   authSignIn2Route: authSignIn2Route,
   authSignUpRoute: authSignUpRoute,

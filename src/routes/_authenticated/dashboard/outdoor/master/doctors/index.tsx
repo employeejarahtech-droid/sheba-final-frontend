@@ -6,6 +6,7 @@ const doctorsSearchSchema = z.object({
     page: z.coerce.number().catch(1),
     limit: z.coerce.number().catch(10),
     search: z.string().catch(''),
+    doctor_type: z.string().catch(''),
 })
 
 export const Route = createFileRoute(
@@ -22,6 +23,7 @@ function DoctorsPage() {
     const page = Number(searchParams?.page) || 1;
     const limit = Number(searchParams?.limit) || 10;
     const search = searchParams?.search || "";
+    const doctorType = searchParams?.doctor_type || "";
 
     const setPage = (newPage: number) => {
         navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
@@ -32,15 +34,20 @@ function DoctorsPage() {
     const setSearch = (newSearch: string) => {
         navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
     };
+    const setDoctorType = (newType: string) => {
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, doctor_type: newType, page: 1 }) });
+    };
 
     return (
         <Doctors
             page={page}
             limit={limit}
             search={search}
+            doctorType={doctorType}
             setPage={setPage}
             setLimit={setLimit}
             setSearch={setSearch}
+            setDoctorType={setDoctorType}
         />
     )
 }

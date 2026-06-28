@@ -1,19 +1,6 @@
-// Re-export from store or duplicate slice definition if needed by imports
-// But based on my check, I put it in store.ts. 
-// If imports expect 'src/store/currencySlice', I should create it.
-
-import { createSlice } from '@reduxjs/toolkit';
-
-export const currencySlice = createSlice({
-    name: 'currency',
-    initialState: { value: '' },
-    reducers: {
-        setCurrency: (state, action) => {
-            state.value = action.payload;
-        },
-    },
-});
-
-export const { setCurrency } = currencySlice.actions;
-export const selectCurrency = (state: { currency: { value: string } }) => state.currency.value;
-export default currencySlice.reducer;
+// Single source of truth for the currency slice lives in store.ts (that's the
+// reducer wired into the store). Re-export from there so importers of
+// '@/store/currencySlice' get the same action creators and persistence logic
+// rather than a second, dead slice definition.
+export { setCurrency, selectCurrency, currencySlice } from './store';
+export { default } from './store';

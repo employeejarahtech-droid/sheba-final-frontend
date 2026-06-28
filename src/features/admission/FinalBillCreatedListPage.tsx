@@ -1,4 +1,4 @@
-﻿import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { Users, Activity, CheckCircle, FileText, DollarSign, Eye, CreditCard, X } from 'lucide-react'
@@ -101,6 +101,8 @@ type AdmissionItem = {
     doctor?: {
         id: number
         doctor_name: string
+        title?: string
+        qualification?: string
         speciality: string
     }
     finalBill?: {
@@ -124,7 +126,7 @@ interface FinalBillCreatedListPageProps {
     setSearch: (search: string) => void;
 }
 
-export function FinalBillCreatedListPage({ page, limit, search, setPage, setSearch }: FinalBillCreatedListPageProps) {
+export function FinalBillCreatedListPage({ page, limit, search, setPage, setLimit, setSearch }: FinalBillCreatedListPageProps) {
     const navigate = useNavigate()
     const token = getCookie('accessToken')
     const { format } = useCurrency()
@@ -235,8 +237,13 @@ export function FinalBillCreatedListPage({ page, limit, search, setPage, setSear
             title: "Doctor",
             orderable: false,
             responsivePriority: 4,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
-                return row.doctor?.doctor_name || '-'
+            render: (_data: any, type: string, row: AdmissionItem) => {
+                const d = row.doctor
+                if (!d?.doctor_name) return '-'
+                if (type === 'sort' || type === 'filter' || type === 'type') return d.doctor_name
+                const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                const subtitle = [d.qualification || d.title, d.speciality].filter(Boolean).join(' - ')
+                return `<div class="flex flex-col"><span class="font-medium">Dr. ${esc(d.doctor_name)}</span>${subtitle ? `<span class="text-xs text-muted-foreground">${esc(subtitle)}</span>` : ''}</div>`
             },
         },
         {
@@ -761,6 +768,7 @@ export function FinalBillCreatedListPage({ page, limit, search, setPage, setSear
                     isLoading={isFetching}
                     meta={meta}
                     onPageChange={setPage}
+                    onLimitChange={setLimit}
                     search={search}
                     onSearchChange={setSearch}
                     filterSlot={

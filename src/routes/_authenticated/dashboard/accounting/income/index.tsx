@@ -158,7 +158,7 @@ function IncomesPage() {
       responsivePriority: 2,
       render: (_data: any, _type: string, row: Income) => {
         const creditHead = row?.creditHead?.name;
-        return creditHead || <span class="text-red-500 font-semibold">N/A</span>;
+        return creditHead || `<span class="text-red-500 font-semibold">N/A</span>`;
       },
       defaultContent: "",
     },
@@ -211,7 +211,7 @@ function IncomesPage() {
         } else {
           className += "bg-rose-100 text-rose-700 border-rose-200";
         }
-        return <span class="${className}">${status}</span>;
+        return `<span class="${className}">${status}</span>`;
       },
       defaultContent: "pending",
     },

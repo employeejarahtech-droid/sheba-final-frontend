@@ -74,7 +74,7 @@ export function Login() {
         // If login settings failed, try tenant settings as fallback for company name/logo
         if (!settingsFetched) {
           try {
-            const fallbackUrl = `${import.meta.env.VITE_API_URL || ''}/api/platform/public/tenant-settings/${subdomain}`
+            const fallbackUrl = `${import.meta.env.VITE_API_URL || ''}/api/public/tenant-settings/${subdomain}`
             const fallbackRes = await fetch(fallbackUrl)
 
             if (fallbackRes.ok) {

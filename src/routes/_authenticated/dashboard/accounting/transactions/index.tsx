@@ -1,12 +1,13 @@
 
 "use client";
 
-import { useState, Fragment } from "react";
+import { useState, Fragment, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Search, Calendar as CalendarIcon, X, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Calendar as CalendarIcon, X, Plus, ChevronDown, ChevronUp, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +42,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 
-import { useAddTransactionMutation, useGetJournalReportQuery } from "@/features/accounting/accountingQueries";
+import { useAddTransactionMutation, useGetJournalReportQuery, useAddJournalEntryMutation } from "@/features/accounting/accountingQueries";
+import { NestedAccountSelect } from "@/components/accounting/NestedAccountSelect";
+import { useDateFormat } from "@/hooks/use-date-format";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import type { CreateTransactionInput } from "@/types/accounting.types";
@@ -49,65 +52,199 @@ import type { DateRange } from "react-day-picker";
 import { AppHeader } from "@/components/layout/app-header";
 
 
+const transactionsSearchSchema = z.object({
+    page: z.coerce.number().catch(1),
+    limit: z.coerce.number().catch(10),
+    search: z.string().catch(''),
+    from: z.string().catch(''),
+    to: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/dashboard/accounting/transactions/')({
+    validateSearch: (search) => transactionsSearchSchema.parse(search),
     component: Transactions,
 })
 
 function Transactions() {
+    const { formatDate, toISODate } = useDateFormat();
     const [isOpen, setIsOpen] = useState(false);
     const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
-    // Filter Query States
-    const [dateRange, setDateRange] = useState<DateRange | undefined>();
-    const [searchQuery, setSearchQuery] = useState("");
-    const [filterType, setFilterType] = useState<string>("ALL");
+    const searchParams: any = Route.useSearch();
+    const navigate = Route.useNavigate();
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasPage = urlParams.has('page');
+        const hasLimit = urlParams.has('limit');
+        const hasSearch = urlParams.has('search');
+        const hasFrom = urlParams.has('from');
+        const hasTo = urlParams.has('to');
+
+        if (!hasPage || !hasLimit || !hasSearch || !hasFrom || !hasTo) {
+            navigate({
+                to: '.',
+                replace: true,
+                search: (prev: any) => ({
+                    page: prev?.page ?? 1,
+                    limit: prev?.limit ?? 10,
+                    search: prev?.search ?? '',
+                    from: prev?.from ?? '',
+                    to: prev?.to ?? '',
+                })
+            });
+        }
+    }, [navigate]);
+
+    const page = Number(searchParams?.page) || 1;
+    const limit = Number(searchParams?.limit) || 10;
+    const search = searchParams?.search || "";
+    const from = searchParams?.from || "";
+    const to = searchParams?.to || "";
+
+    const setPage = (newPage: number) => {
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
+    };
+    const setLimit = (newLimit: number) => {
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) });
+    };
+
+    // Filter Query States driven by URL
+    const dateRange = {
+        from: from ? new Date(from) : undefined,
+        to: to ? new Date(to) : undefined,
+    };
+    const setDateRange = (range: DateRange | undefined) => {
+        navigate({
+            to: '.',
+            search: (prev: any) => ({
+                ...prev,
+                from: range?.from ? format(range.from, 'yyyy-MM-dd') : '',
+                to: range?.to ? format(range.to, 'yyyy-MM-dd') : '',
+                page: 1
+            })
+        });
+    };
+
+    const [searchVal, setSearchVal] = useState(search);
+    useEffect(() => {
+        setSearchVal(search);
+    }, [search]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (searchVal !== search) {
+                navigate({ to: '.', search: (prev: any) => ({ ...prev, search: searchVal, page: 1 }) });
+            }
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchVal, search, navigate]);
 
     const { data: journalData, isLoading } = useGetJournalReportQuery({
-        page: 1,
-        limit: 10,
-        search: searchQuery || undefined,
-        from: dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : undefined,
-        to: dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : undefined,
+        page,
+        limit,
+        search: search || undefined,
+        from: from || undefined,
+        to: to || undefined,
     });
 
     const journalEntries = journalData?.data || [];
-    const { mutateAsync: addTransaction, isPending: isAdding } = useAddTransactionMutation();
+    const { mutateAsync: addJournalEntry, isPending: isAddingJournal } = useAddJournalEntryMutation();
 
-    const { control, handleSubmit, reset, formState: { errors } } = useForm<CreateTransactionInput>({
-        defaultValues: {
-            type: undefined,
-            amount: undefined,
-            payment_mode: undefined,
-            date: format(new Date(), "yyyy-MM-dd"),
-            description: "",
-        },
-    });
+    // Double Entry Form States
+    const [narration, setNarration] = useState("");
+    const [entryDate, setEntryDate] = useState<string>(toISODate(new Date()));
+    const [journalLines, setJournalLines] = useState<Array<{ accountId: number | null; debit: number; credit: number }>>([
+        { accountId: null, debit: 0, credit: 0 },
+        { accountId: null, debit: 0, credit: 0 },
+    ]);
 
-    const onSubmit = async (data: CreateTransactionInput) => {
+    const addLine = () => {
+        setJournalLines(prev => [...prev, { accountId: null, debit: 0, credit: 0 }]);
+    };
+
+    const removeLine = (index: number) => {
+        if (journalLines.length <= 2) return;
+        setJournalLines(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const updateLine = (index: number, field: string, value: any) => {
+        setJournalLines(prev => prev.map((line, i) => {
+            if (i === index) {
+                const updated = { ...line, [field]: value };
+                if (field === 'debit' && Number(value) > 0) {
+                    updated.credit = 0;
+                } else if (field === 'credit' && Number(value) > 0) {
+                    updated.debit = 0;
+                }
+                return updated;
+            }
+            return line;
+        }));
+    };
+
+    const totalDebit = journalLines.reduce((sum, line) => sum + (Number(line.debit) || 0), 0);
+    const totalCredit = journalLines.reduce((sum, line) => sum + (Number(line.credit) || 0), 0);
+    const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01 && totalDebit > 0;
+
+    const handleJournalSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!narration.trim()) {
+            toast.error("Narration is required");
+            return;
+        }
+        if (!isBalanced) {
+            toast.error("Debits and credits must balance and be greater than 0");
+            return;
+        }
+
+        const formattedEntries = journalLines
+            .filter(line => line.accountId !== null && (Number(line.debit) > 0 || Number(line.credit) > 0))
+            .map(line => ({
+                account_id: line.accountId!,
+                debit: Number(line.debit) || 0,
+                credit: Number(line.credit) || 0
+            }));
+
+        if (formattedEntries.length < 2) {
+            toast.error("At least two valid journal lines are required");
+            return;
+        }
+
         try {
-            await addTransaction(data);
-            toast.success("Transaction created successfully");
-            setIsOpen(false);
-            reset({
-                type: undefined,
-                amount: undefined,
-                payment_mode: undefined,
-                date: format(new Date(), "yyyy-MM-dd"),
-                description: "",
+            await addJournalEntry({
+                date: entryDate,
+                narration,
+                entries: formattedEntries
             });
-        } catch (error) {
-            toast.error("Failed to create transaction");
-            console.error(error);
+            toast.success("Journal Entry created successfully");
+            setIsOpen(false);
+            // Reset state
+            setNarration("");
+            setEntryDate(toISODate(new Date()));
+            setJournalLines([
+                { accountId: null, debit: 0, credit: 0 },
+                { accountId: null, debit: 0, credit: 0 },
+            ]);
+        } catch (error: any) {
+            toast.error(error?.message || "Failed to create journal entry");
         }
     };
 
     const clearFilters = () => {
-        setDateRange(undefined);
-        setSearchQuery("");
-        setFilterType("ALL");
+        navigate({
+            to: '.',
+            search: (prev: any) => ({
+                ...prev,
+                from: '',
+                to: '',
+                search: '',
+                page: 1
+            })
+        });
     };
 
-    const hasActiveFilters = dateRange || searchQuery || filterType !== "ALL";
+    const hasActiveFilters = !!(from || to || search);
 
     const toggleRow = (id: number) => {
         setExpandedRows(prev => {
@@ -151,147 +288,156 @@ function Transactions() {
                     </div>
                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
                         <DialogTrigger asChild>
-                            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                                <Plus className="h-4 w-4" /> New Transaction
+                            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium">
+                                <Plus className="h-4 w-4 mr-2" /> New Journal Entry
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="sm:max-w-[500px]">
+                        <DialogContent className="sm:max-w-[750px] max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                                <DialogTitle>Create New Transaction</DialogTitle>
+                                <DialogTitle>Create New Journal Entry</DialogTitle>
                                 <DialogDescription>
-                                    Enter the details of the transaction below.
+                                    Record a double-entry transaction. Debits and credits must balance.
                                 </DialogDescription>
                             </DialogHeader>
-                            <form onSubmit={handleSubmit(onSubmit)}>
-                                <div className="grid gap-4 py-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label>Transaction Type <span className="text-red-500">*</span></Label>
-                                            <Controller
-                                                name="type"
-                                                control={control}
-                                                rules={{ required: "Type is required" }}
-                                                render={({ field }) => (
-                                                    <Select onValueChange={field.onChange} value={field.value}>
-                                                        <SelectTrigger
-                                                            className={cn("w-full", errors.type && "border-red-500")}
-                                                        >
-                                                            <SelectValue placeholder="Select type" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="SALES">Sales</SelectItem>
-                                                            <SelectItem value="PURCHASE">Purchase</SelectItem>
-                                                            <SelectItem value="EXPENSE">Expense</SelectItem>
-                                                            <SelectItem value="INCOME">Income</SelectItem>
-                                                            <SelectItem value="JOURNAL">Journal</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                )}
-                                            />
-                                            {errors.type && <p className="text-red-500 text-xs">{errors.type.message}</p>}
-                                            <p className="text-[0.8rem] text-muted-foreground">
-                                                Sales: Dr Cash / Cr Sales
-                                            </p>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label>Date <span className="text-red-500">*</span></Label>
-                                            <Controller
-                                                name="date"
-                                                control={control}
-                                                rules={{ required: "Date is required" }}
-                                                render={({ field }) => (
-                                                    <Popover>
-                                                        <PopoverTrigger asChild>
-                                                            <Button
-                                                                variant={"outline"}
-                                                                className={cn(
-                                                                    "w-full justify-start text-left font-normal",
-                                                                    !field.value && "text-muted-foreground",
-                                                                    errors.date && "border-red-500"
-                                                                )}
-                                                            >
-                                                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                                                {field.value ? format(new Date(field.value), "PPP") : <span>Pick a date</span>}
-                                                            </Button>
-                                                        </PopoverTrigger>
-                                                        <PopoverContent className="w-auto p-0">
-                                                            <CalendarComponent
-                                                                mode="single"
-                                                                selected={field.value ? new Date(field.value) : undefined}
-                                                                onSelect={(d) => field.onChange(d ? format(d, "yyyy-MM-dd") : "")}
-                                                                initialFocus
-                                                            />
-                                                        </PopoverContent>
-                                                    </Popover>
-                                                )}
-                                            />
-                                            {errors.date && <p className="text-red-500 text-xs">{errors.date.message}</p>}
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label>Amount <span className="text-red-500">*</span></Label>
-                                            <Controller
-                                                name="amount"
-                                                control={control}
-                                                rules={{ required: "Amount is required", min: { value: 0.01, message: "Amount must be greater than 0" } }}
-                                                render={({ field }) => (
-                                                    <Input
-                                                        {...field}
-                                                        type="number"
-                                                        placeholder="0.00"
-                                                        className={cn(errors.amount && "border-red-500")}
-                                                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                                                    />
-                                                )}
-                                            />
-                                            {errors.amount && <p className="text-red-500 text-xs">{errors.amount.message}</p>}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label>Payment Mode <span className="text-red-500">*</span></Label>
-                                            <Controller
-                                                name="payment_mode"
-                                                control={control}
-                                                rules={{ required: "Mode is required" }}
-                                                render={({ field }) => (
-                                                    <Select onValueChange={field.onChange} value={field.value}>
-                                                        <SelectTrigger className={cn("w-full", errors.payment_mode && "border-red-500")}>
-                                                            <SelectValue placeholder="Select mode" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="CASH">Cash</SelectItem>
-                                                            <SelectItem value="BANK">Bank</SelectItem>
-                                                            <SelectItem value="DUE">Due</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                )}
-                                            />
-                                            {errors.payment_mode && <p className="text-red-500 text-xs">{errors.payment_mode.message}</p>}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label>Description <span className="text-red-500">*</span></Label>
-                                        <Controller
-                                            name="description"
-                                            control={control}
-                                            rules={{ required: "Description is required" }}
-                                            render={({ field }) => (
-                                                <Textarea
-                                                    {...field}
-                                                    placeholder="Enter transaction details..."
-                                                    className={cn(errors.description && "border-red-500")}
+                            <form onSubmit={handleJournalSubmit} className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="space-y-2 md:col-span-1">
+                                        <Label>Date <span className="text-red-500">*</span></Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className="w-full justify-start text-left font-normal"
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {entryDate ? formatDate(new Date(entryDate)) : <span>Pick a date</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <CalendarComponent
+                                                    mode="single"
+                                                    selected={entryDate ? new Date(entryDate) : undefined}
+                                                    onSelect={(d) => setEntryDate(d ? toISODate(d) : "")}
+                                                    initialFocus
                                                 />
-                                            )}
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                    <div className="space-y-2 md:col-span-2">
+                                        <Label>Narration / Description <span className="text-red-500">*</span></Label>
+                                        <Input
+                                            placeholder="Enter entry description..."
+                                            value={narration}
+                                            onChange={(e) => setNarration(e.target.value)}
+                                            required
                                         />
-                                        {errors.description && <p className="text-red-500 text-xs">{errors.description.message}</p>}
                                     </div>
                                 </div>
+
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <Label className="text-base font-semibold">Journal Lines</Label>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={addLine}
+                                            className="text-xs"
+                                        >
+                                            <Plus className="h-3 h-3 mr-1" /> Add Row
+                                        </Button>
+                                    </div>
+
+                                    <div className="border rounded-md overflow-hidden">
+                                        <Table>
+                                            <TableHeader className="bg-muted/50">
+                                                <TableRow>
+                                                    <TableHead className="w-[50%]">Account Head</TableHead>
+                                                    <TableHead className="text-right w-[20%]">Debit</TableHead>
+                                                    <TableHead className="text-right w-[20%]">Credit</TableHead>
+                                                    <TableHead className="w-[10%]"></TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {journalLines.map((line, index) => (
+                                                    <TableRow key={index} className="hover:bg-transparent">
+                                                        <TableCell className="p-2">
+                                                            <NestedAccountSelect
+                                                                value={line.accountId}
+                                                                onChange={(id) => updateLine(index, 'accountId', id)}
+                                                                placeholder="Select account"
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell className="p-2 text-right">
+                                                            <Input
+                                                                type="number"
+                                                                step="0.01"
+                                                                min="0"
+                                                                placeholder="0.00"
+                                                                className="text-right font-mono"
+                                                                value={line.debit || ""}
+                                                                onChange={(e) => updateLine(index, 'debit', parseFloat(e.target.value) || 0)}
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell className="p-2 text-right">
+                                                            <Input
+                                                                type="number"
+                                                                step="0.01"
+                                                                min="0"
+                                                                placeholder="0.00"
+                                                                className="text-right font-mono"
+                                                                value={line.credit || ""}
+                                                                onChange={(e) => updateLine(index, 'credit', parseFloat(e.target.value) || 0)}
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell className="p-2 text-center">
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="text-red-500 hover:text-red-700 disabled:opacity-30"
+                                                                onClick={() => removeLine(index)}
+                                                                disabled={journalLines.length <= 2}
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+
+                                                {/* Totals Row */}
+                                                <TableRow className="bg-muted/30 font-semibold">
+                                                    <TableCell className="text-right pr-4">Total</TableCell>
+                                                    <TableCell className="text-right font-mono pr-3">
+                                                        {totalDebit.toFixed(2)}
+                                                    </TableCell>
+                                                    <TableCell className="text-right font-mono pr-3">
+                                                        {totalCredit.toFixed(2)}
+                                                    </TableCell>
+                                                    <TableCell></TableCell>
+                                                </TableRow>
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border">
+                                    <span className="text-sm font-medium text-muted-foreground">Status:</span>
+                                    {isBalanced ? (
+                                        <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white border-0 px-3 py-1 font-medium">
+                                            Balanced
+                                        </Badge>
+                                    ) : (
+                                        <Badge variant="destructive" className="px-3 py-1 font-medium">
+                                            Unbalanced (Diff: {Math.abs(totalDebit - totalCredit).toFixed(2)})
+                                        </Badge>
+                                    )}
+                                </div>
+
                                 <DialogFooter>
                                     <Button variant="outline" onClick={() => setIsOpen(false)} type="button">Cancel</Button>
-                                    <Button type="submit" disabled={isAdding}>
-                                        {isAdding ? "Saving..." : "Save Transaction"}
+                                    <Button type="submit" disabled={isAddingJournal || !isBalanced} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                                        {isAddingJournal ? "Posting..." : "Post Journal Entry"}
                                     </Button>
                                 </DialogFooter>
                             </form>
@@ -306,8 +452,8 @@ function Transactions() {
                         <Input
                             placeholder="Search journal entries..."
                             className="pl-8"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            value={searchVal}
+                            onChange={(e) => setSearchVal(e.target.value)}
                         />
                     </div>
 
@@ -376,7 +522,7 @@ function Transactions() {
                                                         <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                                                 </TableCell>
                                                 <TableCell className="font-medium">
-                                                    {entry.date ? format(new Date(entry.date), "dd MMM yyyy") : "-"}
+                                                    {entry.date ? formatDate(new Date(entry.date)) : "-"}
                                                 </TableCell>
                                                 <TableCell className="max-w-[300px] truncate">
                                                     {entry.narration || '-'}
@@ -459,6 +605,55 @@ function Transactions() {
                         </TableBody>
                     </Table>
                 </div>
+
+                {/* Pagination Footer */}
+                {journalData?.pagination && (
+                    <div className="flex items-center justify-between mt-4 bg-card p-4 rounded-lg border shadow-sm">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>Rows per page:</span>
+                            <Select
+                                value={String(limit)}
+                                onValueChange={(val) => setLimit(Number(val))}
+                            >
+                                <SelectTrigger className="w-[70px] h-8">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="10">10</SelectItem>
+                                    <SelectItem value="20">20</SelectItem>
+                                    <SelectItem value="50">50</SelectItem>
+                                    <SelectItem value="100">100</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <span className="ml-4">
+                                Showing {journalData.pagination.total > 0 ? ((page - 1) * limit) + 1 : 0} to {Math.min(page * limit, journalData.pagination.total)} of {journalData.pagination.total} entries
+                            </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setPage(page - 1)}
+                                disabled={page <= 1}
+                            >
+                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                Previous
+                            </Button>
+                            <span className="text-sm text-muted-foreground">
+                                Page {page} of {journalData.pagination.totalPage || 1}
+                            </span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setPage(page + 1)}
+                                disabled={page >= (journalData.pagination.totalPage || 1)}
+                            >
+                                Next
+                                <ChevronRight className="h-4 w-4 ml-1" />
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </main>
         </>
     );

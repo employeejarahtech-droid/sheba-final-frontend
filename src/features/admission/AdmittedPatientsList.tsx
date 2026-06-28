@@ -1,4 +1,4 @@
-﻿import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useLocation } from '@tanstack/react-router'
 import { Users, Activity, CheckCircle, AlertCircle, UserPlus, X, DollarSign, Filter } from 'lucide-react'
@@ -23,6 +23,7 @@ type AdmissionItem = {
     admission_prefix: string | null
     patient_name: string
     age: number
+    age_text?: string | null
     sex: string
     phone: string
     id_card_number?: string | null
@@ -98,6 +99,8 @@ type AdmissionItem = {
     doctor?: {
         id: number
         doctor_name: string
+        title?: string
+        qualification?: string
         speciality: string
     }
     finalBill?: {
@@ -199,6 +202,8 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
         creditAccountId: '',
         narration: '',
     })
+
+
 
     // Fetch accounts for journal entry dropdowns
     const [accountSearch, setAccountSearch] = useState('')
@@ -302,6 +307,8 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             alert(error.message || 'Failed to record advance payment')
         },
     })
+
+
 
     // Fetch statistics
     const { data: statsData } = useQuery({
@@ -464,7 +471,7 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                                 type="button"
                                 data-id="${row.id}"
                                 data-patient-name="${(row.patient_name || '-').replace(/"/g, '&quot;')}"
-                                data-age="${row.age || 0}"
+                                data-age="${row.age_text || row.age || ''}"
                                 data-sex="${row.sex || '-'}"
                                 data-phone="${row.phone || '-'}"
                                 data-id-card-number="${row.id_card_number || '-'}"
@@ -496,8 +503,17 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             title: "Age/Sex",
             orderable: true,
             responsivePriority: 4,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
-                return row.age && row.sex ? `${row.age}/${row.sex.charAt(0).toUpperCase()}` : '-'
+            render: (_data: any, type: string, row: AdmissionItem) => {
+                // Sort by numeric years so "5Y" sorts below "40Y" (not alphabetically).
+                if (type === 'sort' || type === 'type') {
+                    return row.age != null ? Number(row.age) : -1
+                }
+                // Prefer the rich age_text (e.g. "40Y 5M") from the DB; fall back to
+                // the numeric age, then blank. Never blank the whole cell just
+                // because `age` is null — age_text may still be present (e.g. "0Y 2M").
+                const age = row.age_text || (row.age != null ? `${row.age}Y` : '')
+                const sex = row.sex ? row.sex.charAt(0).toUpperCase() : ''
+                return age || sex ? `${age}/${sex}` : '-'
             },
             defaultContent: "",
         },
@@ -564,8 +580,19 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             title: "Doctor",
             orderable: true,
             responsivePriority: 4,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
-                return row.doctor?.doctor_name || '-'
+            render: (_data: any, type: string, row: AdmissionItem) => {
+                const d = row.doctor
+                if (!d?.doctor_name) return '-'
+                // Sort/search on the plain name so the rich markup doesn't break ordering.
+                if (type === 'sort' || type === 'filter' || type === 'type') return d.doctor_name
+                const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                const subtitle = [d.qualification || d.title, d.speciality].filter(Boolean).join(' - ')
+                return `
+                    <div class="flex flex-col">
+                        <span class="font-medium">Dr. ${esc(d.doctor_name)}</span>
+                        ${subtitle ? `<span class="text-xs text-muted-foreground">${esc(subtitle)}</span>` : ''}
+                    </div>
+                `
             },
             defaultContent: "",
         },
@@ -579,153 +606,135 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             },
                         defaultContent: "-",
         },
-        // ── Bill Created columns ─────────────────────────────────────────
+        // ── Bill Information (consolidated) ──────────────────────────────
         {
             data: null,
-            title: "Bill Created Status",
+            title: "Bill Information",
             orderable: false,
             responsivePriority: 6,
             render: (_data: any, _type: string, row: AdmissionItem) => {
                 // eslint-disable-next-line eqeqeq
                 const isCreated = row.bill_created == 1
-                return isCreated
-                    ? '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">Yes</span>'
-                    : '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">No</span>'
-            },
-            defaultContent: '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">No</span>',
-        },
-        {
-            data: null,
-            title: "Bill Created Date",
-            orderable: false,
-            responsivePriority: 7,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
-                if (!row.bill_created_date) return '<span class="text-muted-foreground text-xs">—</span>'
-                const parts = row.bill_created_date.split('T')[0].split('-')
-                const dateStr = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : row.bill_created_date.split('T')[0]
-                return `<span>${dateStr}</span>`
-            },
-            defaultContent: '<span class="text-muted-foreground text-xs">—</span>',
-        },
-        {
-            data: null,
-            title: "Bill Created By",
-            orderable: false,
-            responsivePriority: 7,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
-                return row.bill_created_by_user?.name
-                    ? `<span class="text-xs">${row.bill_created_by_user.name}</span>`
-                    : '<span class="text-muted-foreground text-xs">—</span>'
-            },
-            defaultContent: '<span class="text-muted-foreground text-xs">—</span>',
-        },
-        {
-            data: null,
-            title: `Total Bill Amt. (${currencySymbol})`,
-            orderable: false,
-            responsivePriority: 6,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
-                // Prefer the direct field on the admission row; fall back to finalBill
+                const badge = isCreated
+                    ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">Yes</span>'
+                    : '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">No</span>'
+
+                // "DD/MM/YYYY HH:MM" from an ISO datetime string.
+                const fmtDateTime = (val?: string | null) => {
+                    if (!val) return '—'
+                    const [datePart, timePart] = String(val).split('T')
+                    const p = datePart.split('-')
+                    const dateStr = p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : datePart
+                    const timeStr = timePart ? timePart.slice(0, 5) : ''
+                    return timeStr ? `${dateStr} ${timeStr}` : dateStr
+                }
+                const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+                const headerRow = `<div class="flex items-center gap-1.5"><span class="text-muted-foreground">Bill Created:</span>${badge}</div>`
+                if (!isCreated) {
+                    return `<div class="text-xs">${headerRow}</div>`
+                }
+
+                const createdBy = row.bill_created_by_user?.name || '—'
                 const raw = (row as any).total_bill_amount ?? row.finalBill?.total_bill_amount ?? null
                 const amount = raw !== null && raw !== undefined ? parseFloat(String(raw)) : null
-                // Show dash if no amount or amount is 0 (no bill created yet)
-                if (amount === null || amount === 0) return '<span class="text-muted-foreground text-xs">—</span>'
-                return `<span class="font-medium">${format(amount)}</span>`
+                const amountStr = amount && amount !== 0 ? `<span class="font-medium">${format(amount)}</span>` : '—'
+
+                return `
+                    <div class="flex flex-col gap-0.5 text-xs min-w-[190px]">
+                        ${headerRow}
+                        <div><span class="text-muted-foreground">Date:</span> ${fmtDateTime(row.bill_created_date)}</div>
+                        <div><span class="text-muted-foreground">By:</span> ${esc(createdBy)}</div>
+                        <div><span class="text-muted-foreground">Amount:</span> ${amountStr}</div>
+                    </div>
+                `
             },
-            defaultContent: '<span class="text-muted-foreground text-xs">—</span>',
+            defaultContent: '—',
         },
-        // ── Final Bill columns ───────────────────────────────────────────
+        // ── Final Bill Information (consolidated) ─────────────────────────
         {
             data: null,
-            title: "Final Bill Created Status",
+            title: "Final Bill Information",
             orderable: false,
             responsivePriority: 6,
             render: (_data: any, _type: string, row: AdmissionItem) => {
                 // eslint-disable-next-line eqeqeq
                 const isCreated = row.final_bill_created == 1
-                return isCreated
-                    ? '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">Yes</span>'
-                    : '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">No</span>'
-            },
-            defaultContent: '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">No</span>',
-        },
-        {
-            data: null,
-            title: "Final Bill Date",
-            orderable: false,
-            responsivePriority: 7,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
-                if (!row.final_bill_created_date) return '<span class="text-muted-foreground text-xs">—</span>'
-                const parts = row.final_bill_created_date.split('T')[0].split('-')
-                const dateStr = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : row.final_bill_created_date.split('T')[0]
-                return `<span>${dateStr}</span>`
-            },
-            defaultContent: '<span class="text-muted-foreground text-xs">—</span>',
-        },
-        {
-            data: null,
-            title: "Final Bill By",
-            orderable: false,
-            responsivePriority: 7,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
-                return row.final_bill_created_by_user?.name
-                    ? `<span class="text-xs">${row.final_bill_created_by_user.name}</span>`
-                    : '<span class="text-muted-foreground text-xs">—</span>'
-            },
-            defaultContent: '<span class="text-muted-foreground text-xs">—</span>',
-        },
-        {
-            data: null,
-            title: `Final Bill Amt. (${currencySymbol})`,
-            orderable: false,
-            responsivePriority: 6,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
+                const badge = isCreated
+                    ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">Yes</span>'
+                    : '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">No</span>'
+
+                // "DD/MM/YYYY HH:MM" from an ISO datetime string.
+                const fmtDateTime = (val?: string | null) => {
+                    if (!val) return '—'
+                    const [datePart, timePart] = String(val).split('T')
+                    const p = datePart.split('-')
+                    const dateStr = p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : datePart
+                    const timeStr = timePart ? timePart.slice(0, 5) : ''
+                    return timeStr ? `${dateStr} ${timeStr}` : dateStr
+                }
+                const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+                const headerRow = `<div class="flex items-center gap-1.5"><span class="text-muted-foreground">Created:</span>${badge}</div>`
+                if (!isCreated) {
+                    return `<div class="text-xs">${headerRow}</div>`
+                }
+
+                const createdBy = row.final_bill_created_by_user?.name || '—'
                 const amt = row.finalBill?.total_discounted_amount
                 const parsed = amt !== null && amt !== undefined ? parseFloat(String(amt)) : null
-                if (!parsed) return '<span class="text-muted-foreground text-xs">—</span>'
-                return `<span class="font-medium">${format(parsed)}</span>`
+                const amountStr = parsed ? `<span class="font-medium">${format(parsed)}</span>` : '—'
+
+                return `
+                    <div class="flex flex-col gap-0.5 text-xs min-w-[190px]">
+                        ${headerRow}
+                        <div><span class="text-muted-foreground">Date:</span> ${fmtDateTime(row.final_bill_created_date)}</div>
+                        <div><span class="text-muted-foreground">By:</span> ${esc(createdBy)}</div>
+                        <div><span class="text-muted-foreground">Amount:</span> ${amountStr}</div>
+                    </div>
+                `
             },
-            defaultContent: '<span class="text-muted-foreground text-xs">—</span>',
+            defaultContent: '—',
         },
-        // ── Discharge columns ────────────────────────────────────────────
+        // ── Discharge Information (consolidated) ──────────────────────────
         {
             data: null,
-            title: "Discharge Status",
+            title: "Discharge Information",
             orderable: false,
             responsivePriority: 6,
             render: (_data: any, _type: string, row: AdmissionItem) => {
                 // eslint-disable-next-line eqeqeq
                 const isDischarged = row.discharged == 1
-                return isDischarged
-                    ? '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">Yes</span>'
-                    : '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">No</span>'
+                const badge = isDischarged
+                    ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">Yes</span>'
+                    : '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">No</span>'
+
+                // "DD/MM/YYYY HH:MM" from an ISO datetime string.
+                const fmtDateTime = (val?: string | null) => {
+                    if (!val) return '—'
+                    const [datePart, timePart] = String(val).split('T')
+                    const p = datePart.split('-')
+                    const dateStr = p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : datePart
+                    const timeStr = timePart ? timePart.slice(0, 5) : ''
+                    return timeStr ? `${dateStr} ${timeStr}` : dateStr
+                }
+                const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+                const headerRow = `<div class="flex items-center gap-1.5"><span class="text-muted-foreground">Discharged:</span>${badge}</div>`
+                if (!isDischarged) {
+                    return `<div class="text-xs">${headerRow}</div>`
+                }
+
+                const dischargedBy = row.discharged_by_user?.name || '—'
+                return `
+                    <div class="flex flex-col gap-0.5 text-xs min-w-[190px]">
+                        ${headerRow}
+                        <div><span class="text-muted-foreground">Date:</span> ${fmtDateTime(row.discharged_date)}</div>
+                        <div><span class="text-muted-foreground">By:</span> ${esc(dischargedBy)}</div>
+                    </div>
+                `
             },
-            defaultContent: '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">No</span>',
-        },
-        {
-            data: null,
-            title: "Discharge Date & Time",
-            orderable: false,
-            responsivePriority: 7,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
-                if (!row.discharged_date) return '<span class="text-muted-foreground text-xs">—</span>'
-                const parts = row.discharged_date.split('T')[0].split('-')
-                const dateStr = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : row.discharged_date.split('T')[0]
-                return `<span>${dateStr}</span>`
-            },
-            defaultContent: '<span class="text-muted-foreground text-xs">—</span>',
-        },
-        {
-            data: null,
-            title: "Discharged By",
-            orderable: false,
-            responsivePriority: 7,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
-                return row.discharged_by_user?.name
-                    ? `<span class="text-xs">${row.discharged_by_user.name}</span>`
-                    : '<span class="text-muted-foreground text-xs">—</span>'
-            },
-            defaultContent: '<span class="text-muted-foreground text-xs">—</span>',
+            defaultContent: '—',
         },
         // ── Payment columns ──────────────────────────────────────────────
         {
@@ -791,11 +800,18 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                 const dueAmount = row.finalBill?.due_amount ? parseFloat(String(row.finalBill.due_amount)) : 0;
                 const hasOverpayment = dueAmount < 0;
 
+                const escQuote = (str: string | null | undefined) => (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
                 let buttons = `
                     <button onclick="window.location.href='/dashboard/admission/patients/${row.id}'"
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         View
+                    </button>
+                    <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/diagnosis-treatment'"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                        Diagnosis / Treatment
                     </button>
                     <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/billing'"
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
@@ -1222,7 +1238,7 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                                     <div><span class='font-medium text-gray-500 dark:text-gray-400'>Phone:</span> ${phone}</div>
                                     <div><span class='font-medium text-gray-500 dark:text-gray-400'>ID Card Number:</span> ${idCardNumber}</div>
                                     <div><span class='font-medium text-gray-500 dark:text-gray-400'>Doctor:</span> ${doctor}</div>
-                                    <div><span class='font-medium text-gray-500 dark:text-gray-400'>Diagnosis:</span> ${diagnosis}</div>
+                                    <div><span class='font-medium text-gray-500 dark:text-gray-400'>Diagnosis / Treatment:</span> ${diagnosis}</div>
                                     <div><span class='font-medium text-gray-500 dark:text-gray-400'>Admission Date:</span> ${safeFormatDate(admissionDate)}</div>
                                     <div><span class='font-medium text-gray-500 dark:text-gray-400'>Discharge Date:</span> ${safeFormatDate(dischargeDate)}</div>
                                 </div>
@@ -1520,7 +1536,7 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                             <div class="info-item"><span class="info-label">Bed/Cabin:</span> <span class="info-value">${data.bedCabin}</span></div>
                             <div class="info-item"><span class="info-label">Doctor:</span> <span class="info-value">${data.doctor}</span></div>
                         </div>
-                        <div class="info-item" style="margin-top: 10px;"><span class="info-label">Diagnosis:</span> <span class="info-value">${data.diagnosis}</span></div>
+                        <div class="info-item" style="margin-top: 10px;"><span class="info-label">Diagnosis / Treatment:</span> <span class="info-value">${data.diagnosis}</span></div>
                     </div>
 
                     <div class="section">
@@ -1603,7 +1619,6 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
 
     return (
         <>
-            {/* Advance Payment Modal */}
             {advancePaymentModal.open && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-lg p-6 m-4 max-h-[90vh] overflow-y-auto">

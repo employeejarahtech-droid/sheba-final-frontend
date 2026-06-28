@@ -91,9 +91,9 @@ const admissionSchema = z.object({
 // Shared form-control styling — one height (h-10) and one look across every
 // input, select, combobox and date field so the form reads clean and professional.
 const FIELD_BASE =
-    "h-10 rounded-md border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-all focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500/20";
+    "h-10 rounded-md border border-input bg-transparent text-sm shadow-none transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring";
 const FIELD_TEXTAREA =
-    "rounded-md border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 shadow-sm transition-all focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500/20 resize-none";
+    "rounded-md border border-input bg-transparent text-sm shadow-none transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring resize-none";
 
 interface PatientTypeSelectProps {
     patientTypes: any[];
@@ -756,17 +756,6 @@ function IndoorNewAdmission() {
                                     </div>
                                 </CardHeader>
                                 <CardContent className="px-4 md:px-6 py-6">
-                                    {/* Debug current date settings */}
-                                    <div className="mb-5 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-3">
-                                        <h4 className="text-sm font-bold text-amber-800 dark:text-amber-300">System Date Debug:</h4>
-                                        <div className="grid grid-cols-2 gap-2 text-xs text-amber-700 dark:text-amber-400 mt-1">
-                                            <div><strong>Configured Format (from DB):</strong> {dateFormat}</div>
-                                            <div><strong>Formatted Today Date:</strong> {formatDate(new Date())}</div>
-                                            <div><strong>Form Field Value:</strong> {form.watch("admissionDate")}</div>
-                                            <div><strong>Format Hint:</strong> {formatHint}</div>
-                                        </div>
-                                    </div>
-
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
                                         <FormField
                                             control={form.control}
@@ -1009,7 +998,7 @@ function IndoorNewAdmission() {
                                                                         !admissionDateChangeable && "disabled:opacity-100 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                                                                     )}
                                                                 >
-                                                                    <CalendarIcon className="mr-2 h-4 w-4 text-blue-500" />
+                                                                    <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
                                                                     {field.value || formatDate(new Date())}
                                                                 </Button>
                                                             </FormControl>

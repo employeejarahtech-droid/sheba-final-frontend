@@ -37,7 +37,7 @@ const columns = [
     {
         data: "code",
         title: "Code",
-        render: (data: any) => <span class="font-mono text-xs text-muted-foreground">${data || ``}</span>
+        render: (data: any) => `<span class="font-mono text-xs text-muted-foreground">${data || ''}</span>`
     },
     {
         data: "name",
@@ -51,7 +51,7 @@ const columns = [
         render: (data: any) => {
             const val = Number(data);
             const color = val >= 0 ? 'text-emerald-600' : 'text-red-600';
-            return <span class="${color}">${val.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>;
+            return `<span class="${color}">${val.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>`;
         }
     },
 ];
@@ -182,11 +182,17 @@ function CashFlow() {
                 {/* Report Sections */}
                 <div className="grid gap-6 lg:grid-cols-2">
                     {/* Operating Activities */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-emerald-700 flex items-center gap-2">
-                                <TrendingUp className="w-5 h-5" /> Operating Activities
-                            </CardTitle>
+                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                        <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border-b py-1.5 px-4 gap-0">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg shadow-lg">
+                                    <TrendingUp className="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-lg font-bold">Operating Activities</CardTitle>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">Cash from core business operations</p>
+                                </div>
+                            </div>
                         </CardHeader>
                         <CardContent className="p-0">
                             <DataTable columns={columns} data={operating.items} isLoading={isLoading} />
@@ -198,11 +204,17 @@ function CashFlow() {
                     </Card>
 
                     {/* Investing Activities */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-blue-700 flex items-center gap-2">
-                                <Wallet className="w-5 h-5" /> Investing Activities
-                            </CardTitle>
+                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                        <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border-b py-1.5 px-4 gap-0">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg shadow-lg">
+                                    <Wallet className="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-lg font-bold">Investing Activities</CardTitle>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">Cash from buying or selling assets</p>
+                                </div>
+                            </div>
                         </CardHeader>
                         <CardContent className="p-0">
                             <DataTable columns={columns} data={investing.items} isLoading={isLoading} />
@@ -214,11 +226,17 @@ function CashFlow() {
                     </Card>
 
                     {/* Financing Activities */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-purple-700 flex items-center gap-2">
-                                <ArrowRightLeft className="w-5 h-5" /> Financing Activities
-                            </CardTitle>
+                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                        <CardHeader className="bg-gradient-to-r from-purple-50 to-fuchsia-50 dark:from-purple-950/30 dark:to-fuchsia-950/30 border-b py-1.5 px-4 gap-0">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-gradient-to-br from-purple-500 to-fuchsia-500 rounded-lg shadow-lg">
+                                    <ArrowRightLeft className="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-lg font-bold">Financing Activities</CardTitle>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">Cash from loans, capital, and owners</p>
+                                </div>
+                            </div>
                         </CardHeader>
                         <CardContent className="p-0">
                             <DataTable columns={columns} data={financing.items} isLoading={isLoading} />

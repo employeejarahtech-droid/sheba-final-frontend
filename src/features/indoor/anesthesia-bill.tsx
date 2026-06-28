@@ -693,6 +693,7 @@ export function AnesthesiaBillPage({
             onSearchChange={setSearch}
             tableTitle="Anesthesia Bills"
             filterSlot={filterSlot}
+            hideExport
           />
         </div>
       </main>

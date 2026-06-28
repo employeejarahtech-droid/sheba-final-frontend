@@ -1,27 +1,56 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Truck, DollarSign, Star } from 'lucide-react'
+import { z } from 'zod'
 import { AppHeader } from '@/components/layout/app-header'
 import { DataTable } from '@/components/DataTable'
 import { useCurrency } from '@/hooks/use-currency'
 import { useSupplierPerformanceQuery } from '@/features/purchase/purchaseQueries'
 import { StatCards } from '@/features/assets/components/StatCard'
 
+const searchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/dashboard/purchase/supplier-performance/')({
+  validateSearch: (search) => searchSchema.parse(search),
   component: SupplierPerformancePage,
 })
 
 function SupplierPerformancePage() {
   const { currencySymbol } = useCurrency()
+
+  const searchParams = Route.useSearch()
+  const navigate = Route.useNavigate()
+
+  const page = searchParams.page
+  const limit = searchParams.limit
+  const search = searchParams.search
+
+  const setPage = (newPage: number) =>
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) })
+  const setLimit = (newLimit: number) =>
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) })
+  const setSearch = (newSearch: string) =>
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) })
+
   const { data, isFetching } = useSupplierPerformanceQuery()
-  const [search, setSearch] = useState('')
 
   const all = data || []
+
+  // Client-side search filter
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     if (!q) return all
     return all.filter((r) => r.name.toLowerCase().includes(q) || (r.category || '').toLowerCase().includes(q))
   }, [all, search])
+
+  // Client-side pagination
+  const total = filtered.length
+  const start = (page - 1) * limit
+  const pageItems = filtered.slice(start, start + limit)
 
   const totalValue = all.reduce((s, r) => s + Number(r.total_value || 0), 0)
   const avgRating = all.length ? (all.reduce((s, r) => s + Number(r.rating || 0), 0) / all.length).toFixed(1) : '0.0'
@@ -32,6 +61,13 @@ function SupplierPerformancePage() {
   ]), [all, totalValue, avgRating, currencySymbol])
 
   const columns = useMemo(() => [
+    {
+      data: 'id',
+      title: 'ID',
+      orderable: true,
+      render: (_d: any, _t: string, row: any) =>
+        `<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">SP-${row.id}</span>`,
+    },
     { data: 'name', title: 'Supplier', orderable: true },
     { data: 'category', title: 'Category', orderable: true, render: (d: any) => d || '<span class="text-muted-foreground">—</span>' },
     { data: 'orders', title: 'GRNs', orderable: true },
@@ -60,11 +96,14 @@ function SupplierPerformancePage() {
 
         <DataTable
           columns={columns}
-          data={filtered}
-          meta={{ page: 1, limit: Math.max(filtered.length, 1), total: filtered.length }}
+          data={pageItems}
+          meta={{ page, limit, total }}
           search={search}
           onSearchChange={setSearch}
+          onPageChange={setPage}
+          onLimitChange={setLimit}
           isLoading={isFetching}
+          hideExport
         />
       </main>
     </>

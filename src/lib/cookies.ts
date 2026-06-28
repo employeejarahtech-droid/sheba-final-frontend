@@ -41,12 +41,20 @@ function getCookieDomain(): string | undefined {
 export function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
 
-  const value = `; ${document.cookie}`
-  const parts = value.split(`; ${name}=`)
-  if (parts.length === 2) {
-    const cookieValue = parts.pop()?.split(';').shift()
-    // URL decode the value
-    return cookieValue ? decodeURIComponent(cookieValue) : undefined
+  // Return the FIRST cookie matching `name`. Note: multiple cookies can share a
+  // name across domain scopes (e.g. a host-only cookie on `kumir.lvh.me` plus a
+  // `.lvh.me`-scoped one left over from a platform/other-tenant login). The old
+  // split('; name=') approach returned undefined whenever >1 match existed,
+  // which made the auth guard think the user was logged out and bounce them
+  // straight back to /login after a successful sign-in.
+  const cookies = document.cookie ? document.cookie.split('; ') : []
+  for (const cookie of cookies) {
+    const eq = cookie.indexOf('=')
+    const key = eq === -1 ? cookie : cookie.slice(0, eq)
+    if (key === name) {
+      const raw = eq === -1 ? '' : cookie.slice(eq + 1)
+      return raw ? decodeURIComponent(raw) : undefined
+    }
   }
   return undefined
 }

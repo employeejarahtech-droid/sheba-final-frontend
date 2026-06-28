@@ -1,4 +1,4 @@
-﻿import { AppHeader } from '@/components/layout/app-header'
+import { AppHeader } from '@/components/layout/app-header'
 import { DataTable } from '@/components/DataTable'
 import { useState, useMemo, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
@@ -558,7 +558,7 @@ export default function ReportsMyOutdoorDateWiseCollection() {
       responsivePriority: 3,
       render: (_data: any, _type: string, row: PaymentItem) => {
         const doctorName = row.doctor?.doctor_name;
-        return doctorName || "-";
+        return doctorName ? `<span class="font-semibold text-blue-600 dark:text-blue-400">Dr. ${doctorName}</span>` : "-";
       },
       defaultContent: "-",
     },

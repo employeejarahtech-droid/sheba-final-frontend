@@ -85,7 +85,8 @@ function JournalPrint() {
     enabled: !!token,
   })
 
-  const items = useMemo(() => data?.data?.items ?? [], [data?.data?.items])
+  // Endpoint returns { data: [...rows], pagination } — read the array directly.
+  const items = useMemo(() => data?.data ?? [], [data?.data])
   const flatItems = items.length > 0 && Array.isArray(items[0]) ? items[0] : items
 
   const stats = useMemo(() => {
@@ -100,7 +101,7 @@ function JournalPrint() {
     });
 
     const isBalanced = Math.abs(totalDebitSum - totalCreditSum) < 0.01;
-    const totalFromMeta = data?.data?.meta?.total ?? flatItems.length
+    const totalFromMeta = data?.pagination?.total ?? flatItems.length
 
     return [
       { label: 'Total Entries', value: totalFromMeta },

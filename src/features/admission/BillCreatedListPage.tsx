@@ -1,4 +1,4 @@
-﻿import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { Users, Activity, CheckCircle, FileText, DollarSign, Eye, CreditCard, X, Loader2, ArrowLeft } from 'lucide-react'
@@ -94,6 +94,8 @@ type AdmissionItem = {
     doctor?: {
         id: number
         doctor_name: string
+        title?: string
+        qualification?: string
         speciality: string
     }
     finalBill?: {
@@ -147,7 +149,7 @@ interface BillCreatedListPageProps {
     setSearch: (search: string) => void;
 }
 
-export function BillCreatedListPage({ page, limit, search, setPage, setSearch }: BillCreatedListPageProps) {
+export function BillCreatedListPage({ page, limit, search, setPage, setLimit, setSearch }: BillCreatedListPageProps) {
     const navigate = useNavigate()
     const token = getCookie('accessToken')
     const { format } = useCurrency()
@@ -367,11 +369,12 @@ export function BillCreatedListPage({ page, limit, search, setPage, setSearch }:
 
     const columns = useMemo(() => [
         {
-            data: "id",
-            title: "ID",
+            data: "admission_prefix",
+            title: "Admission No",
             orderable: true,
             responsivePriority: 1,
             render: (data: any, _type: string, row: AdmissionItem) => {
+                const displayId = data && data.toString().startsWith('ADM-') ? data : (data ? `ADM-${data}` : `ADM-${row.id}`);
                 const admissionDate = row.admission_date ? new Date(row.admission_date).toLocaleDateString() : '-';
                 const dischargeDate = row.discharge_date ? new Date(row.discharge_date).toLocaleDateString() : '-';
                 const bedCabinInfo = row.bedCabin ? `${row.bedCabin.code} (${row.bedCabin.type})` : '-';
@@ -403,7 +406,7 @@ export function BillCreatedListPage({ page, limit, search, setPage, setSearch }:
                     <div class="flex items-center gap-2">
                         <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
                                 type="button"
-                                data-id="${data}"
+                                data-id="${row.id}"
                                 data-patient-name="${(row.patient_name || '-').replace(/"/g, '&quot;')}"
                                 data-age="${row.age || 0}"
                                 data-sex="${row.sex || '-'}"
@@ -417,7 +420,7 @@ export function BillCreatedListPage({ page, limit, search, setPage, setSearch }:
                                 data-created-by="${String(row.created_by || '-').replace(/"/g, '&quot;')}"
                                 data-final-bill="${row.finalBill ? JSON.stringify(row.finalBill).replace(/"/g, '&quot;') : ''}"
                                 data-status-data="${encodeURIComponent(JSON.stringify(statusData)).replace(/"/g, '&quot;')}">+</button>
-                        <span>${data}</span>
+                        <span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${displayId}</span>
                     </div>
                 `
             },
@@ -439,8 +442,13 @@ export function BillCreatedListPage({ page, limit, search, setPage, setSearch }:
             title: "Doctor",
             orderable: false,
             responsivePriority: 4,
-            render: (_data: any, _type: string, row: AdmissionItem) => {
-                return row.doctor?.doctor_name || '-'
+            render: (_data: any, type: string, row: AdmissionItem) => {
+                const d = row.doctor
+                if (!d?.doctor_name) return '-'
+                if (type === 'sort' || type === 'filter' || type === 'type') return d.doctor_name
+                const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                const subtitle = [d.qualification || d.title, d.speciality].filter(Boolean).join(' - ')
+                return `<div class="flex flex-col"><span class="font-medium">Dr. ${esc(d.doctor_name)}</span>${subtitle ? `<span class="text-xs text-muted-foreground">${esc(subtitle)}</span>` : ''}</div>`
             },
         },
         {
@@ -981,6 +989,7 @@ export function BillCreatedListPage({ page, limit, search, setPage, setSearch }:
                     isLoading={isFetching}
                     meta={meta}
                     onPageChange={setPage}
+                    onLimitChange={setLimit}
                     search={search}
                     onSearchChange={setSearch}
                     filterSlot={

@@ -91,11 +91,20 @@ function JournalReportPage() {
       return res.json()
     },
     enabled: !!token,
-    placeholderData: (prev) => prev ? prev : { data: { items: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } } },
+    placeholderData: (prev) => prev ? prev : { data: [], pagination: { total: 0, page: 1, limit: 10, totalPage: 0 } },
   })
 
-  const items: JournalEntry[] = data?.data?.items || []
-  const meta: Meta = data?.data?.meta || { total: 0, page: 1, limit: 10, totalPages: 1 }
+  // The /api/accounting/journal endpoint returns { data: [...rows], pagination }
+  // (not { data: { items, meta } }). Read that shape.
+  const items: JournalEntry[] = data?.data || []
+  const meta: Meta = data?.pagination
+    ? {
+        total: data.pagination.total ?? 0,
+        page: data.pagination.page ?? 1,
+        limit: data.pagination.limit ?? 10,
+        totalPages: data.pagination.totalPage ?? data.pagination.totalPages ?? 1,
+      }
+    : { total: 0, page: 1, limit: 10, totalPages: 1 }
 
   // Calculate statistics
   const stats = useMemo(() => {

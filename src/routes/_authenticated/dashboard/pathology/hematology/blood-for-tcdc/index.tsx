@@ -1,4 +1,4 @@
-﻿import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod'
 import { DataTable } from "@/components/DataTable";
 import { EditBloodForTcDcForm } from '@/features/pathology/hematology/blood-for-tcdc/EditBloodForTcDcForm';
@@ -58,7 +58,7 @@ function BloodForTcdc() {
 
   const token = getCookie('accessToken');
 
-  // Tenant date format (from company settings) + 12h time — matches the rest of the app.
+  // Tenant date format (from company settings) + 12h time � matches the rest of the app.
   const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data, isFetching } = useQuery({
@@ -309,7 +309,7 @@ function BloodForTcdc() {
 
       row.parentNode?.insertBefore(newRow, row.nextSibling);
       row.classList.add('expanded');
-      btn.textContent = '−';
+      btn.textContent = '-';
       btn.style.backgroundColor = '#dc2626';
     };
 
@@ -392,7 +392,7 @@ function BloodForTcdc() {
       title: "Actions",
       orderable: false,
       render: (_data: any, _type: string, row: any) => `
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-nowrap items-center gap-2">
           <button type="button" onclick="window.editBloodForTcdc(${row.id}, ${row.invoice_id})" title="Edit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit</button>
           <a href="/dashboard/pathology/hematology/blood-for-tcdc/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded text-xs font-semibold shadow transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>Print</a>
         </div>

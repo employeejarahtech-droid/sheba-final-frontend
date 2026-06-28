@@ -1,4 +1,4 @@
-﻿import { AppHeader } from '@/components/layout/app-header'
+import { AppHeader } from '@/components/layout/app-header'
 import { DataTable } from '@/components/DataTable'
 import { Button } from '@/components/ui/button'
 import { useMemo, useEffect, useState } from 'react'
@@ -32,7 +32,7 @@ type InvoiceItem = {
   age: number | null;
   age_text: string | null;
   sex: string | null;
-  doctor?: { name: string; } | null;
+  doctor?: { name?: string; doctor_name?: string; title?: string | null; qualification?: string | null; speciality?: string | null; } | null;
   reference_doctor: string | null;
   creator?: {
     id: number;
@@ -576,10 +576,18 @@ export default function PaidInvoices({ page, limit, search, from, to, setPage, s
       title: "Reference Doctor",
       orderable: true,
       responsivePriority: 3,
-      render: (_data: any, _type: string, row: InvoiceItem) => {
-        const doctorName = row.doctor?.name;
+      render: (_data: any, type: string, row: InvoiceItem) => {
+        const d: any = row.doctor;
         const refDoctor = row.reference_doctor;
-        return doctorName || refDoctor || "-";
+        const name = d?.doctor_name || d?.name;
+        const plain = name || refDoctor || "-";
+        if (type === 'sort' || type === 'filter' || type === 'type') return plain;
+        const esc = (s: any) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        if (name) {
+          const subtitle = [d.qualification || d.title, d.speciality].filter(Boolean).join(' - ');
+          return `<div class="flex flex-col"><span class="font-semibold text-blue-600 dark:text-blue-400">Dr. ${esc(name)}</span>${subtitle ? `<span class="text-xs text-muted-foreground">${esc(subtitle)}</span>` : ''}</div>`;
+        }
+        return refDoctor ? `<span class="font-medium text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-0.5 rounded w-fit">${esc(refDoctor)}</span>` : "-";
       },
       defaultContent: "-",
     },

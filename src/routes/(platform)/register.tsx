@@ -12,6 +12,7 @@
 import { useState, useEffect } from 'react'
 import { createFileRoute, Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { toast } from 'sonner'
 import {
   CheckCircle2,
@@ -47,19 +48,32 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { COUNTRIES, CURRENCIES, getCurrencyByCode } from '@/lib/currencies'
 
-type FormValues = {
-  company_name: string
-  subdomain: string
-  name: string
-  email: string
-  phone: string
-  address: string
-  country: string
-  currency: string
-  admin_password: string
-  confirm_password: string
-  plan_id: string
-}
+// Registration form contract (mirrors the ronju-erp reference register.tsx schema,
+// extended with Sheba's country/currency fields). Used as the form type source;
+// field-level validation stays on the inline react-hook-form rules below.
+const registerSchema = z
+  .object({
+    company_name: z.string().min(2, 'Company name is required'),
+    subdomain: z
+      .string()
+      .min(3, 'Subdomain must be at least 3 characters')
+      .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens'),
+    name: z.string().min(2, 'Name is required'),
+    email: z.string().email('Please enter a valid email'),
+    phone: z.string().optional(),
+    address: z.string().min(5, 'Business address is required'),
+    country: z.string().optional(),
+    currency: z.string().optional(),
+    admin_password: z.string().min(6, 'Password must be at least 6 characters'),
+    confirm_password: z.string(),
+    plan_id: z.string().optional(),
+  })
+  .refine((data) => data.admin_password === data.confirm_password, {
+    message: 'Passwords do not match',
+    path: ['confirm_password'],
+  })
+
+type FormValues = z.infer<typeof registerSchema>
 
 export const Route = createFileRoute('/(platform)/register')({
   beforeLoad: () => {
@@ -69,7 +83,7 @@ export const Route = createFileRoute('/(platform)/register')({
     if (host !== BASE_DOMAIN && host !== `www.${BASE_DOMAIN}` && host !== 'localhost' && host !== '127.0.0.1' && host.endsWith(`.${BASE_DOMAIN}`)) {
       const port = window.location.port ? `:${window.location.port}` : ''
       const search = window.location.search || ''
-      window.location.replace(`http://${BASE_DOMAIN}${port}/register${search}`)
+      window.location.replace(`${window.location.protocol}//${BASE_DOMAIN}${port}/register${search}`)
       return
     }
   },
@@ -77,6 +91,8 @@ export const Route = createFileRoute('/(platform)/register')({
   validateSearch: (search: Record<string, string>) => ({
     plan: search.plan || '',
     cycle: search.cycle || 'monthly',
+    status: search.status || '',
+    reason: search.reason || '',
   }),
 })
 
@@ -136,6 +152,16 @@ function RegisterPage() {
   useEffect(() => {
     fetchPlans()
   }, [])
+
+  // Surface payment cancel/fail redirects coming back from a gateway callback
+  useEffect(() => {
+    if (search.status === 'cancel') {
+      toast.error('Payment cancelled.')
+    } else if (search.status === 'payment_failed') {
+      toast.error(search.reason ? `Payment failed: ${search.reason}` : 'Payment failed.')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.status])
 
   const fetchPlans = async () => {
     try {
@@ -227,15 +253,17 @@ function RegisterPage() {
         }
         setAuth(result.user, result.token, company)
 
-        // Cross-subdomain redirect
-        const PORT = window.location.port || '5173'
+        // Cross-subdomain redirect — keep current scheme/port (no hardcoded
+        // http:// or :5173, which break on https://*.hmsap.com in production).
+        const protocol = window.location.protocol
+        const portSuffix = window.location.port ? `:${window.location.port}` : ''
         const currentHost = window.location.hostname
         const targetHost = `${data.subdomain}.${baseDomain}`
 
-        if (currentHost === targetHost || currentHost === `${targetHost}:${PORT}`) {
+        if (currentHost === targetHost) {
           navigate({ to: '/dashboard' })
         } else {
-          window.location.href = `http://${targetHost}:${PORT}/auth-callback?token=${encodeURIComponent(result.token)}&user=${encodeURIComponent(JSON.stringify(result.user))}&company=${encodeURIComponent(JSON.stringify(company))}`
+          window.location.href = `${protocol}//${targetHost}${portSuffix}/auth-callback?token=${encodeURIComponent(result.token)}&user=${encodeURIComponent(JSON.stringify(result.user))}&company=${encodeURIComponent(JSON.stringify(company))}`
         }
       } else {
         toast.error('Registration could not be completed. Please try again.')

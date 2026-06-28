@@ -1,4 +1,4 @@
-ï»¿import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 import { DataTable } from "@/components/DataTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -170,7 +170,7 @@ function T3T4TSH() {
       orderable: false,
       render: (_data: any, _type: string, row: ReportsItem) => {
         return `
-          <div class="flex flex-wrap items-center gap-2">
+          <div class="flex flex-nowrap items-center gap-2">
             <button onclick="window.editT3T4TSH(${row.id}, ${row.invoice_id})" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
               Edit
@@ -231,7 +231,7 @@ function T3T4TSH() {
           <div class="flex justify-between items-center">
             <div>
               <h2 class="text-xl font-semibold">Thyroid Function Test Report</h2>
-              <p class="text-sm opacity-90">Invoice #${invoiceId} â€¢ ${formattedDate}</p>
+              <p class="text-sm opacity-90">Invoice #${invoiceId} • ${formattedDate}</p>
             </div>
           </div>
         </div>
@@ -323,13 +323,13 @@ function T3T4TSH() {
                     </tr>
                     <tr class="border-b">
                       <td class="px-2 py-2">T4 (Thyroxine)</td>
-                      <td class="px-2 py-2 font-medium">${reportData.t4 || "-"} Âµg/dL</td>
-                      <td class="px-2 py-2 text-gray-600 text-xs">4.5-12.5 Âµg/dL</td>
+                      <td class="px-2 py-2 font-medium">${reportData.t4 || "-"} µg/dL</td>
+                      <td class="px-2 py-2 text-gray-600 text-xs">4.5-12.5 µg/dL</td>
                     </tr>
                     <tr class="border-b">
                       <td class="px-2 py-2">TSH (Thyroid Stimulating Hormone)</td>
-                      <td class="px-2 py-2 font-medium">${reportData.tsh || "-"} ÂµIU/mL</td>
-                      <td class="px-2 py-2 text-gray-600 text-xs">0.4-4.2 ÂµIU/mL</td>
+                      <td class="px-2 py-2 font-medium">${reportData.tsh || "-"} µIU/mL</td>
+                      <td class="px-2 py-2 text-gray-600 text-xs">0.4-4.2 µIU/mL</td>
                     </tr>
                     ${reportData.remarks ? `
                     <tr class="border-b">
@@ -369,7 +369,7 @@ function T3T4TSH() {
 
       row.parentNode?.insertBefore(newRow, row.nextSibling);
       row.classList.add('expanded');
-      btn.textContent = 'âˆ’';
+      btn.textContent = '-';
       btn.style.backgroundColor = '#dc2626';
     };
 

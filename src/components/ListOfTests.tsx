@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from '@/components/DataTable'
 import { useMemo, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { Link } from '@tanstack/react-router'
 import { FlaskConical, CheckCircle, FolderTree, DollarSign } from 'lucide-react'
 import { useCurrency } from '@/hooks/use-currency'
@@ -63,6 +64,33 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
     const { currencySymbol } = useCurrency();
 
     const token = getCookie('accessToken');
+    const queryClient = useQueryClient();
+
+    const deleteMutation = useMutation({
+        mutationFn: async (id: string) => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tests/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(json.message || 'Failed to delete test');
+            return json;
+        },
+        onSuccess: () => {
+            toast.success('Test deleted');
+            queryClient.invalidateQueries({ queryKey: ['tests'] });
+        },
+        onError: (err: Error) => { toast.error(err.message); },
+    });
+
+    // Expose delete function to window for onclick handlers
+    useEffect(() => {
+        (window as any).deleteTest = (id: string) => {
+            if (confirm('Delete this test? This action cannot be undone.')) {
+                deleteMutation.mutate(id);
+            }
+        };
+    }, [deleteMutation]);
 
     // Fetch test tables FIRST (needed to resolve match_table_name → display_name)
     const { data: testTablesData } = useQuery({
@@ -417,7 +445,7 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
             responsivePriority: 1,
             render: (_data: any, _type: string, row: TestItem) => {
                 return `
-                    <div class="flex flex-wrap items-center gap-2">
+                    <div class="flex flex-nowrap items-center gap-2">
                         <a href="/dashboard/outdoor/master/tests/${row.id}"
                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -428,6 +456,10 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                             Edit
                         </a>
+                        <button onclick="window.deleteTest('${row.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            Delete
+                        </button>
                     </div>
                 `;
             },

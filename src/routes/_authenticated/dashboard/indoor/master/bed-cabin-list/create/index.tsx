@@ -21,7 +21,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
 
 export const Route = createFileRoute('/_authenticated/dashboard/indoor/master/bed-cabin-list/create/')({
@@ -41,6 +41,7 @@ type BedCabinValues = z.infer<typeof bedCabinSchema>
 function CreateBedCabin() {
     const navigate = useNavigate()
     const token = getCookie('accessToken');
+    const queryClient = useQueryClient();
     const [typeOpen, setTypeOpen] = useState(false);
     const [wardOpen, setWardOpen] = useState(false);
 
@@ -119,6 +120,7 @@ function CreateBedCabin() {
         },
         onSuccess: () => {
             toast.success("Room/Bed registered successfully");
+            queryClient.invalidateQueries({ queryKey: ['bed-cabin-list'] });
             navigate({ to: '..' });
         },
         onError: (error: Error) => {

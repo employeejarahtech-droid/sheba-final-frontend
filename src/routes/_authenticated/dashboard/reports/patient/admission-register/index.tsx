@@ -41,6 +41,9 @@ interface AdmissionItem {
   due_amount: number | null
   doctor?: {
     doctor_name: string | null
+    title?: string | null
+    qualification?: string | null
+    speciality?: string | null
   } | null
   doctor_name: string | null
   bedCabin?: {
@@ -408,13 +411,16 @@ function AdmissionRegisterPage() {
     {
       data: null,
       title: "Doctor",
-      render: (_data: any, _type: string, row: AdmissionItem) => {
-        const doctorName = row.doctor?.doctor_name || row.doctor_name || '-';
-        return `<div class="flex items-center gap-2">
-          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-          </svg>
-          <span class="font-medium">${doctorName}</span>
+      render: (_data: any, type: string, row: AdmissionItem) => {
+        const d = row.doctor
+        const plainName = d?.doctor_name || row.doctor_name || null
+        if (!plainName) return '-'
+        if (type === 'sort' || type === 'filter' || type === 'type') return plainName
+        const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        const subtitle = [d?.qualification || d?.title, d?.speciality].filter(Boolean).join(' - ')
+        return `<div class="flex flex-col">
+          <span class="font-medium">Dr. ${esc(plainName)}</span>
+          ${subtitle ? `<span class="text-xs text-muted-foreground">${esc(subtitle)}</span>` : ''}
         </div>`
       },
     },

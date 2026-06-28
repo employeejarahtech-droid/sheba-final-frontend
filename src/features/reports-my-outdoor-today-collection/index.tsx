@@ -202,7 +202,7 @@ export default function ReportsMyOutdoorTodayCollection({
       responsivePriority: 3,
       render: (_data: any, _type: string, row: PaymentItem) => {
         const doctorName = row.doctor?.doctor_name;
-        return doctorName || "-";
+        return doctorName ? `<span class="font-semibold text-blue-600 dark:text-blue-400">Dr. ${doctorName}</span>` : "-";
       },
       defaultContent: "-",
     },
@@ -464,6 +464,19 @@ export default function ReportsMyOutdoorTodayCollection({
                     Clear
                   </Button>
                 )}
+                <Link
+                  to="/dashboard/reports/my/outdoor/today-collection/print"
+                  search={{
+                    search: search || undefined,
+                    start_date: from || undefined,
+                    end_date: to || undefined,
+                  }}
+                >
+                  <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
+                    <Printer className="w-4 h-4 mr-2" />
+                    Print Report
+                  </Button>
+                </Link>
               </div>
             }
           />

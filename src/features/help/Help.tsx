@@ -30,12 +30,6 @@ import {
     CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Header } from "@/components/layout/header";
-import { TopNav } from "@/components/layout/top-nav";
-import { topNav } from "@/data/data";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
-import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Main } from "@/components/layout/main";
 
 // --- Help Data ---
@@ -365,19 +359,10 @@ export default function Help() {
 
     return (
         <>
-            <Header fixed>
-                <TopNav links={topNav} />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <Search />
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
             <Main>
                 <div className="flex h-[calc(100vh-4rem)] bg-background">
                     {/* Sidebar for Desktop */}
-                    <aside className="hidden w-80 border-r bg-muted/10 md:flex md:flex-col">
+                    <aside className="hidden w-80 border-r bg-muted/10 md:flex md:flex-col min-h-0">
                         <div className="p-4 border-b">
                             <div className="flex items-center gap-2 mb-4">
                                 <BookOpen className="h-6 w-6 text-primary" />
@@ -394,7 +379,7 @@ export default function Help() {
                                 />
                             </div>
                         </div>
-                        <ScrollArea className="flex-1">
+                        <ScrollArea className="flex-1 min-h-0">
                             <div className="p-4 space-y-2">
                                 {filteredModules.map((module) => (
                                     <button
@@ -433,7 +418,7 @@ export default function Help() {
                     </aside>
 
                     {/* Main Content */}
-                    <section className="flex-1 flex flex-col min-w-0">
+                    <section className="flex-1 flex flex-col min-w-0 min-h-0">
                         <header className="flex items-center border-b px-6 py-4 md:hidden">
                             <Sheet>
                                 <SheetTrigger asChild>
@@ -487,7 +472,7 @@ export default function Help() {
                         </header>
 
                         {selectedModule ? (
-                            <ScrollArea className="flex-1 p-6 md:p-10">
+                            <ScrollArea className="flex-1 min-h-0 p-6 md:p-10">
                                 <div className="max-w-4xl mx-auto space-y-8">
                                     {/* Header Section */}
                                     <div className="space-y-2">

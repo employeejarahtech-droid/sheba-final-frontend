@@ -1,4 +1,4 @@
-﻿import { AppHeader } from '@/components/layout/app-header'
+import { AppHeader } from '@/components/layout/app-header'
 import { DataTable } from '@/components/DataTable'
 import { useMemo, useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -37,7 +37,7 @@ interface IndoorAllCollectionsProps {
 
 export default function IndoorAllCollections({
     page, limit, search, from, to,
-    setPage, setSearch, setFrom, setTo,
+    setPage, setLimit, setSearch, setFrom, setTo,
     scope = 'all', user = 'all', setUser,
 }: IndoorAllCollectionsProps) {
     const token = getCookie('accessToken')
@@ -192,14 +192,38 @@ export default function IndoorAllCollections({
     }, [])
 
     const columns = [
-        { data: 'payment_id', title: 'Payment ID', orderable: true, responsivePriority: 1, defaultContent: '-' },
-        { data: 'admission_prefix', title: 'Admission Number', orderable: true, responsivePriority: 1, render: (d: any) => `<span class="font-semibold text-purple-600">${d || '-'}</span>`, defaultContent: '-' },
+        {
+            data: 'payment_id',
+            title: 'Payment ID',
+            orderable: true,
+            responsivePriority: 1,
+            render: (d: any) => d ? `<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">OPA-${d}</span>` : '-',
+            defaultContent: '-'
+        },
+        {
+            data: 'admission_prefix',
+            title: 'Admission No',
+            orderable: true,
+            responsivePriority: 1,
+            render: (d: any, _type: any, row: any) => {
+                const displayId = d && d.toString().startsWith('ADM-') ? d : (d ? `ADM-${d}` : `ADM-${row.admission_id || row.id}`);
+                return `<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${displayId}</span>`;
+            },
+            defaultContent: '-'
+        },
         { data: 'created_at', title: 'Admission Date & Time', orderable: true, responsivePriority: 4, render: (d: any) => fmtDateTime(d), defaultContent: '-' },
         { data: 'patient_name', title: 'Patient Name', orderable: true, responsivePriority: 1, defaultContent: '-' },
         { data: 'phone', title: 'Phone', orderable: true, className: 'dt-head-left dt-body-left', responsivePriority: 2, defaultContent: '-' },
         {
             data: null, title: 'Reference Doctor', orderable: false, responsivePriority: 3,
-            render: (_d: any, _t: string, row: any) => row.doctor?.doctor_name || '-', defaultContent: '-',
+            render: (_d: any, type: string, row: any) => {
+                const d = row.doctor
+                if (!d?.doctor_name) return '-'
+                if (type === 'sort' || type === 'filter' || type === 'type') return d.doctor_name
+                const esc = (s: string) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                const subtitle = [d.qualification || d.title, d.speciality].filter(Boolean).join(' - ')
+                return `<div class="flex flex-col"><span class="font-semibold text-blue-600 dark:text-blue-400">Dr. ${esc(d.doctor_name)}</span>${subtitle ? `<span class="text-xs text-muted-foreground mt-0.5">${esc(subtitle)}</span>` : ''}</div>`
+            }, defaultContent: '-',
         },
         {
             data: 'total_amount', title: `Bill Amount (${currencySymbol || currency})`, orderable: true, responsivePriority: 4,
@@ -370,6 +394,7 @@ export default function IndoorAllCollections({
                         data={data?.data?.items || []}
                         meta={data?.data?.meta}
                         onPageChange={setPage}
+                        onLimitChange={setLimit}
                         search={search}
                         onSearchChange={(v: string) => setSearch(v)}
                         filterSlot={

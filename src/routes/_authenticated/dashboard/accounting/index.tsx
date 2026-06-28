@@ -202,8 +202,8 @@ function AccountingOverview() {
                             </div>
                         </CardHeader>
                         <CardContent className="pt-4 pb-6">
-                            <div className="h-[300px]">
-                                <ResponsiveContainer width="100%" height="100%">
+                            <div className="h-[300px] w-full min-w-0">
+                                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                                     <BarChart data={chartTrendData}>
                                         <XAxis dataKey="date" />
                                         <YAxis />
@@ -228,8 +228,8 @@ function AccountingOverview() {
                             </div>
                         </CardHeader>
                         <CardContent className="pb-6 pt-4">
-                            <div className="h-[300px] flex items-center justify-center">
-                                <ResponsiveContainer width="100%" height="100%">
+                            <div className="h-[300px] w-full min-w-0 flex items-center justify-center">
+                                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                                     <PieChart>
                                         <Pie
                                             data={expenseBreakdownData}

@@ -28,6 +28,9 @@ type InvoiceItem = {
   id: number;
   invoice_prefix: string | null;
   patient_name: string;
+  age?: string | null;
+  age_text?: string | null;
+  sex?: string | null;
   phone: string | null;
   doctor?: { doctor_name: string; };
   creator?: {
@@ -568,6 +571,23 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
       className: "font-medium",
     },
     {
+      data: null,
+      title: "Age/Sex",
+      orderable: true,
+      responsivePriority: 4,
+      render: (_data: any, type: string, row: InvoiceItem) => {
+        // Sort by numeric years so "3Y" sorts below "10Y" (not alphabetically).
+        if (type === 'sort' || type === 'type') {
+          return row.age ? Number(row.age) : -1;
+        }
+        // Prefer the rich age_text (e.g. "4Y 5M"); fall back to numeric age, then blank.
+        const age = row.age_text || (row.age ? `${row.age}Y` : '');
+        const sex = row.sex ? row.sex.charAt(0).toUpperCase() : '';
+        return age || sex ? `${age}/${sex}` : '-';
+      },
+      defaultContent: "-",
+    },
+    {
       data: "phone",
       title: "Phone",
       className: "dt-head-left dt-body-left",
@@ -576,9 +596,18 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
     {
       data: null,
       title: "Ref. Doctor",
-      render: (_data: any, _type: string, row: InvoiceItem) => {
-        const doctor = (row as any).doctor;
-        return doctor?.doctor_name || '-';
+      render: (_data: any, type: string, row: InvoiceItem) => {
+        const d = (row as any).doctor;
+        const refDoctor = (row as any).reference_doctor;
+        const name = d?.doctor_name || d?.name;
+        const plain = name || refDoctor || '-';
+        if (type === 'sort' || type === 'filter' || type === 'type') return plain;
+        const esc = (s: any) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        if (name) {
+          const subtitle = [d.qualification || d.title, d.speciality].filter(Boolean).join(' - ');
+          return `<div class="flex flex-col"><span class="font-medium">Dr. ${esc(name)}</span>${subtitle ? `<span class="text-xs text-muted-foreground">${esc(subtitle)}</span>` : ''}</div>`;
+        }
+        return refDoctor ? esc(refDoctor) : '-';
       },
     },
     {
