@@ -8,6 +8,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Users, ShieldCheck, XCircle } from 'lucide-react'
 import { useState, useMemo } from 'react'
 import AddNewRoleForm from '@/features/roles/AddNewRoleForm'
+import { useCan } from '@/hooks/use-can'
 
 export const Route = createFileRoute('/_authenticated/dashboard/roles/')({
   component: ListOfRoles,
@@ -21,6 +22,9 @@ function ListOfRoles() {
   const [page, setPage] = useState(1)
   const [open, setOpen] = useState(false)
   const limit = 10
+
+  const can = useCan()
+  const canEditRole = can('roles.edit')
 
   const { data: rolesData } = useGetRolesQuery({
     page,
@@ -105,6 +109,7 @@ function ListOfRoles() {
       title: 'Actions',
       orderable: false,
       render: (_data: any, _type: string, row: Role) => {
+        if (!canEditRole) return `<span class="text-xs text-muted-foreground">—</span>`
         return `<a href="/dashboard/roles/permissions/${row.id}/edit" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3">Edit</a>`
       },
     },
@@ -118,7 +123,7 @@ function ListOfRoles() {
         <PageHeader
           title="System Roles"
           description="Manage user roles and their associated permissions."
-          actions={<AddNewRoleForm open={open} setOpen={setOpen} />}
+          actions={can('roles.create') ? <AddNewRoleForm open={open} setOpen={setOpen} /> : undefined}
         />
 
         {/* Stats Cards */}

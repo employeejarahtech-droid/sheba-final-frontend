@@ -9,10 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Wallet, Eye, Trash2, CheckCircle, Filter, Search, FileText, Clock, Banknote } from "lucide-react";
+import { Wallet, Eye, Trash2, CheckCircle, Filter, Search, FileText, Clock, Banknote, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/layout/app-header";
 import { cn } from "@/lib/utils";
+import { useCurrency } from '@/hooks/use-currency';
 
 type PayrollRecord = {
     id: number;
@@ -43,6 +44,9 @@ function AllPayrollsPage() {
     const [selectedYear, setSelectedYear] = useState<string>("all");
     const [selectedStatus, setSelectedStatus] = useState<string>("all");
     const [searchQuery, setSearchQuery] = useState("");
+    const { currencySymbol, format } = useCurrency();
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     // Mark-paid modal state
     const [markPaidTarget, setMarkPaidTarget] = useState<PayrollRecord | null>(null);
@@ -150,11 +154,19 @@ function AllPayrollsPage() {
         );
     });
 
+    // Reset pagination when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, selectedMonth, selectedYear, selectedStatus]);
+
+    const totalPages = Math.ceil(filteredPayrolls.length / itemsPerPage);
+    const paginatedPayrolls = filteredPayrolls.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
     const totalNetSalary = filteredPayrolls.reduce((sum, p) => sum + (Number(p.net_salary) || 0), 0);
     const pendingCount = filteredPayrolls.filter(p => p.status === 'pending').length;
     const paidCount = filteredPayrolls.filter(p => p.status === 'paid').length;
 
-    const formatCurrency = (amount: number) => `৳${amount.toLocaleString()}`;
+    const formatCurrency = (amount: number) => format(amount);
 
     return (
         <>
@@ -167,48 +179,49 @@ function AllPayrollsPage() {
                         <p className="text-sm text-muted-foreground">View and manage all payroll records</p>
                     </div>
 
-                    {/* Filters Card */}
-                    <Card className="shadow-sm">
-                        <CardContent className="p-4">
-                            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-                                <div className="relative md:col-span-2">
-                                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                                    <Input
-                                        placeholder="Search by name, email, month…"
-                                        className="pl-9"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                    />
-                                </div>
-                                <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                                    <SelectTrigger><SelectValue placeholder="All Months" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Months</SelectItem>
-                                        {MONTHS.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <Select value={selectedYear} onValueChange={setSelectedYear}>
-                                    <SelectTrigger><SelectValue placeholder="All Years" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Years</SelectItem>
-                                        {years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                                    <SelectTrigger><SelectValue placeholder="All Status" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Status</SelectItem>
-                                        <SelectItem value="pending">Pending</SelectItem>
-                                        <SelectItem value="paid">Paid</SelectItem>
-                                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <Button variant="outline" onClick={fetchPayrolls} className="md:col-span-1">
-                                    <Filter className="w-4 h-4 mr-2" /> Refresh
-                                </Button>
+                    {/* Filters */}
+                    <div className="p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                            <div className="relative lg:col-span-2">
+                                <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                                <Input
+                                    placeholder="Search by name, email, month…"
+                                    className="pl-9 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
                             </div>
-                        </CardContent>
-                    </Card>
+                            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                                <SelectTrigger className="w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                                    <SelectValue placeholder="All Months" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Months</SelectItem>
+                                    {MONTHS.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            <Select value={selectedYear} onValueChange={setSelectedYear}>
+                                <SelectTrigger className="w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                                    <SelectValue placeholder="All Years" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Years</SelectItem>
+                                    {years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                                <SelectTrigger className="w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                                    <SelectValue placeholder="All Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Status</SelectItem>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="paid">Paid</SelectItem>
+                                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
 
                     {/* Summary Stats */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -238,11 +251,19 @@ function AllPayrollsPage() {
                     </div>
 
                     {/* Payrolls Table */}
-                    <Card className="shadow-sm">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Wallet className="w-5 h-5" /> Payroll Records ({filteredPayrolls.length})</CardTitle>
+                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border border-slate-200 dark:border-slate-800">
+                        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2.5 px-4 gap-0">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                    <Wallet className="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-lg font-bold">Payroll Records ({filteredPayrolls.length})</CardTitle>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">Comprehensive list of all processed and pending payrolls</p>
+                                </div>
+                            </div>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="p-0">
                             {loading ? (
                                 <div className="text-center py-8">
                                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -260,16 +281,16 @@ function AllPayrollsPage() {
                                             <tr>
                                                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Staff</th>
                                                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Period</th>
-                                                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Basic</th>
+                                                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Basic ({currencySymbol})</th>
                                                 <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Allow.</th>
                                                 <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Deduct.</th>
-                                                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Net Salary</th>
+                                                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Net Salary ({currencySymbol})</th>
                                                 <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
                                                 <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y">
-                                            {filteredPayrolls.map((payroll) => {
+                                            {paginatedPayrolls.map((payroll) => {
                                                 const totalAllowances = Object.values(payroll.allowances || {}).reduce((sum, val) => sum + (Number(val) || 0), 0);
                                                 const totalDeductions = Object.values(payroll.deductions || {}).reduce((sum, val) => sum + (Number(val) || 0), 0);
                                                 return (
@@ -304,6 +325,34 @@ function AllPayrollsPage() {
                                             })}
                                         </tbody>
                                     </table>
+                                    
+                                    {/* Pagination Controls */}
+                                    <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-slate-200 dark:border-slate-800 gap-4">
+                                        <div className="text-sm text-muted-foreground">
+                                            Showing {filteredPayrolls.length > 0 ? ((currentPage - 1) * itemsPerPage) + 1 : 0} to {Math.min(currentPage * itemsPerPage, filteredPayrolls.length)} of {filteredPayrolls.length} entries
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                                disabled={currentPage === 1}
+                                            >
+                                                <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+                                            </Button>
+                                            <div className="text-sm font-medium px-2">
+                                                Page {currentPage} of {Math.max(totalPages, 1)}
+                                            </div>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                                disabled={currentPage >= totalPages}
+                                            >
+                                                Next <ChevronRight className="w-4 h-4 ml-1" />
+                                            </Button>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                         </CardContent>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { DataTable } from "@/components/DataTable";
 import { AppHeader } from "@/components/layout/app-header";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
+import { useCurrency } from '@/hooks/use-currency';
 
 type Department = { id: string; name: string };
 type Role = { id: string; display_name: string };
@@ -72,6 +73,7 @@ function EmployeesPage() {
     const [limit] = useState(10);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+    const { currencySymbol } = useCurrency();
 
     const { data: usersResponse, isLoading } = useQuery({
         queryKey: ["users-list", page, limit, search],
@@ -156,7 +158,7 @@ function EmployeesPage() {
         },
         { data: "position", title: "Position", render: (data: string) => data || '-' },
         {
-            data: "salary", title: "Basic Salary",
+            data: "salary", title: `Basic Salary (${currencySymbol})`,
             render: (_data: any, _type: string, row: Staff) => `<span>${(Number(row.basic_salary) || Number(row.salary) || 0).toLocaleString()}</span>`,
         },
         {
@@ -221,10 +223,10 @@ function EmployeesPage() {
                             const Icon = item.icon;
                             return (
                                 <Card key={idx} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }}>
+                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][idx % 6] + '15' }}>
                                         <div className="flex items-center gap-2.5">
                                             <div className={`p-2 bg-gradient-to-br ${item.gradientClass} rounded-lg shadow-lg`}>
-                                                <Icon className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
+                                                <Icon className="w-4 h-4 text-white" />
                                             </div>
                                             <CardTitle className="text-sm font-semibold">{item.label}</CardTitle>
                                         </div>
@@ -241,7 +243,7 @@ function EmployeesPage() {
                         <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2.5 px-4 gap-0">
                             <div className="flex items-center gap-2.5">
                                 <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
-                                    <Users className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
+                                    <Users className="w-4 h-4 text-white" />
                                 </div>
                                 <div>
                                     <CardTitle className="text-lg font-bold">All Employees</CardTitle>

@@ -4,6 +4,7 @@ import { LayoutProvider } from '@/context/layout-provider'
 import { SearchProvider } from '@/context/search-provider'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
+import { PermissionGuard } from '@/components/layout/permission-guard'
 import { SkipToMain } from '@/components/skip-to-main'
 import { CurrencyProvider } from '@/components/currency-provider'
 import { NotificationDropdown } from '@/components/notification-dropdown'
@@ -69,7 +70,7 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
             <SidebarInset className="overflow-y-auto overflow-x-hidden flex flex-col h-svh rounded-none m-0 shadow-none print:h-auto print:overflow-visible">
               <LayoutHeader />
               <main className="anim-zoom-in p-4 lg:p-4 w-full flex-1">
-                {children ?? <Outlet />}
+                <PermissionGuard>{children ?? <Outlet />}</PermissionGuard>
               </main>
               <footer className="print:hidden">
                 <div className="p-4 text-center text-sm text-muted-foreground flex flex-wrap items-center justify-center gap-3">

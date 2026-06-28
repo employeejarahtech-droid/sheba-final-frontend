@@ -27,10 +27,11 @@ const DEFAULTS: DateControls = {
     indoor_payment_date_changeable: false,
 }
 
-const GROUPS: { title: string; icon: any; rows: { key: Key; label: string; desc: string }[] }[] = [
+const GROUPS: { title: string; icon: any; headerClass: string; rows: { key: Key; label: string; desc: string }[] }[] = [
     {
         title: 'Outdoor',
         icon: Building2,
+        headerClass: 'bg-gradient-to-r from-blue-600 to-indigo-600',
         rows: [
             { key: 'outdoor_invoice_date_changeable', label: 'Invoice Date changeable', desc: 'Let staff edit the invoice date on the outdoor invoice form (off = locked to today).' },
             { key: 'outdoor_due_collection_date_changeable', label: 'Due Collection Date changeable', desc: 'Let staff edit the payment date on due collection (off = locked to today).' },
@@ -39,6 +40,7 @@ const GROUPS: { title: string; icon: any; rows: { key: Key; label: string; desc:
     {
         title: 'Indoor',
         icon: BedDouble,
+        headerClass: 'bg-gradient-to-r from-purple-600 to-violet-600',
         rows: [
             { key: 'indoor_admission_date_changeable', label: 'Patient Admission Date changeable', desc: 'Let staff edit admission date/time (off = locked to now).' },
             { key: 'indoor_advance_payment_date_changeable', label: 'Advance Payment Date changeable', desc: 'Let staff edit the advance payment date (off = locked to today).' },
@@ -133,13 +135,11 @@ export function SettingsDateControls() {
             {GROUPS.map((group) => {
                 const Icon = group.icon
                 return (
-                    <Card key={group.title} className="overflow-hidden shadow-none p-0">
-                        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-3 px-4">
-                            <div className="flex items-center gap-2.5">
-                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow">
-                                    <Icon className="w-4 h-4 text-white" />
-                                </div>
-                                <CardTitle className="text-lg font-bold">{group.title}</CardTitle>
+                    <Card key={group.title} className="overflow-hidden shadow-sm p-0 border border-slate-200 dark:border-slate-800">
+                        <CardHeader className={`${group.headerClass} border-b py-2 px-4 gap-0`}>
+                            <div className="flex items-center gap-2">
+                                <Icon className="w-5 h-5 text-white" />
+                                <CardTitle className="text-sm font-semibold text-white">{group.title}</CardTitle>
                             </div>
                         </CardHeader>
                         <CardContent className="p-2 md:p-3 divide-y divide-gray-100 dark:divide-gray-800">

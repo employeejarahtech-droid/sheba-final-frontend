@@ -330,28 +330,57 @@ function AttendancePage() {
     });
 
     useEffect(() => {
-        if (attendanceResponse?.data) {
-            const mapped = attendanceResponse.data.map((item: any) => ({
-                id: item.id,
-                date: item.date,
-                status: mapBackendStatusToFrontend(item.status),
-                checkIn: formatTimeTo24h(item.check_in),
-                checkOut: formatTimeTo24h(item.check_out),
-                breakTime: item.notes && /^\d+h\s*\d+m$/.test(item.notes) ? item.notes : '1h 0m',
-                workHours: calculateHours(
-                    formatTimeTo24h(item.check_in),
-                    formatTimeTo24h(item.check_out),
-                    item.notes && /^\d+h\s*\d+m$/.test(item.notes) ? item.notes : '1h 0m'
-                ),
-                saved_status: item.saved_status || false
-            }));
-            // Sort by date descending
-            mapped.sort((a: any, b: any) => b.date.localeCompare(a.date));
-            setAttendanceRecords(mapped);
-        } else {
-            setAttendanceRecords([]);
-        }
-    }, [attendanceResponse]);
+        const monthsMap: Record<string, number> = {
+            January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
+            July: 7, August: 8, September: 9, October: 10, November: 11, December: 12
+        };
+        const mNum = monthsMap[attendanceMonth] || 1;
+        const yearNum = parseInt(attendanceYear);
+        const lastDay = new Date(yearNum, mNum, 0).getDate();
+        
+        const allDays = Array.from({ length: lastDay }, (_, i) => {
+            const d = i + 1;
+            return `${yearNum}-${String(mNum).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        });
+
+        const fetchedData = attendanceResponse?.data || [];
+        const dataMap = new Map(fetchedData.map((item: any) => [item.date, item]));
+
+        const mapped = allDays.map(dateStr => {
+            const item = dataMap.get(dateStr);
+            if (item) {
+                return {
+                    id: item.id,
+                    date: item.date,
+                    status: mapBackendStatusToFrontend(item.status),
+                    checkIn: formatTimeTo24h(item.check_in),
+                    checkOut: formatTimeTo24h(item.check_out),
+                    breakTime: item.notes && /^\d+h\s*\d+m$/.test(item.notes) ? item.notes : '1h 0m',
+                    workHours: calculateHours(
+                        formatTimeTo24h(item.check_in),
+                        formatTimeTo24h(item.check_out),
+                        item.notes && /^\d+h\s*\d+m$/.test(item.notes) ? item.notes : '1h 0m'
+                    ),
+                    saved_status: item.saved_status || false
+                };
+            } else {
+                return {
+                    id: undefined,
+                    date: dateStr,
+                    status: 'notyet set',
+                    checkIn: '',
+                    checkOut: '',
+                    breakTime: '-',
+                    workHours: '0h 0m',
+                    saved_status: false
+                };
+            }
+        });
+
+        // Sort by date descending
+        mapped.sort((a: any, b: any) => b.date.localeCompare(a.date));
+        setAttendanceRecords(mapped);
+    }, [attendanceResponse, attendanceMonth, attendanceYear]);
 
     // Check for existing payroll when month/year changes
     useEffect(() => {
@@ -729,109 +758,18 @@ function AttendancePage() {
                                         <Clock className="w-4 h-4 text-indigo-500" /> Monthly Attendance Log
                                     </h4>
                                 </div>
-
-                                {/* Monthly Attendance Table List */}
-                                    <div className="space-y-4">
-                                        {/* Check if any dates are missing */}
-                                        {(() => {
-                                            const monthsMap: Record<string, number> = {
-                                                January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
-                                                July: 7, August: 8, September: 9, October: 10, November: 11, December: 12
-                                            };
-                                            const mNum = monthsMap[attendanceMonth] || 1;
-                                            const yearNum = parseInt(attendanceYear);
-                                            const lastDay = new Date(yearNum, mNum, 0).getDate();
-                                            const existingDates = new Set(attendanceRecords.map(r => r.date));
-                                            const missingDates = [];
-
-                                            for (let day = 1; day <= lastDay; day++) {
-                                                const dateStr = `${yearNum}-${String(mNum).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                                                if (!existingDates.has(dateStr)) {
-                                                    missingDates.push(dateStr);
-                                                }
-                                            }
-
-                                            if (missingDates.length > 0) {
-                                                return (
-                                                    <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                                                        <div className="flex items-center gap-3">
-                                                            <Calendar className="w-5 h-5 text-amber-500" />
-                                                            <p className="text-amber-700 dark:text-amber-400 font-semibold">
-                                                                {missingDates.length} day{missingDates.length > 1 ? 's' : ''} missing
-                                                            </p>
-                                                        </div>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="outline"
-                                                            className="h-8 text-xs font-semibold bg-white dark:bg-slate-800 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30"
-                                                            onClick={async () => {
-                                                                const monthsMap: Record<string, number> = {
-                                                                    January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
-                                                                    July: 7, August: 8, September: 9, October: 10, November: 11, December: 12
-                                                                };
-                                                                const mNum = monthsMap[attendanceMonth] || 1;
-                                                                const yearNum = parseInt(attendanceYear);
-                                                                const lastDay = new Date(yearNum, mNum, 0).getDate();
-
-                                                                // Create records for all missing dates
-                                                                const records = missingDates.map(dateStr => ({
-                                                                    date: dateStr,
-                                                                    check_in: '00:00:00',
-                                                                    check_out: '00:00:00',
-                                                                    status: 'not_set',
-                                                                    notes: null
-                                                                }));
-
-                                                                try {
-                                                                    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/attendance/fill-missing-days`, {
-                                                                        method: 'POST',
-                                                                        headers: {
-                                                                            'Content-Type': 'application/json',
-                                                                            Authorization: `Bearer ${token}`
-                                                                        },
-                                                                        body: JSON.stringify({
-                                                                            staff_id: Number(staffId),
-                                                                            month: mNum,
-                                                                            year: yearNum,
-                                                                            default_status: 'not_set',
-                                                                            default_check_in: '00:00:00',
-                                                                            default_check_out: '00:00:00'
-                                                                        })
-                                                                    });
-
-                                                                    const result = await res.json();
-                                                                    if (!res.ok) {
-                                                                        throw new Error(result.message || 'Failed to create attendance records');
-                                                                    }
-
-                                                                    toast.success(`Created ${result.data?.missing_count || 0} attendance records for ${attendanceMonth} ${attendanceYear}`);
-                                                                    refetchAttendance();
-                                                                } catch (err: any) {
-                                                                    toast.error(err.message || 'Error creating attendance records');
-                                                                }
-                                                            }}
-                                                        >
-                                                            <Plus className="w-3.5 h-3.5 mr-1" /> Fill All Missing Days
-                                                        </Button>
-                                                    </div>
-                                                );
-                                            }
-
-                                            return null;
-                                        })()}
-
-                                        {/* Monthly Attendance Table - Same as Daily Structure */}
-                                        <div className="border rounded-lg overflow-hidden shadow-sm">
-                                            <table className="w-full text-sm text-left">
-                                                <thead className="bg-gradient-to-r from-slate-50 to-slate-100 text-slate-600 dark:from-slate-900/20 dark:to-slate-900/10 font-semibold border-b">
-                                                    <tr>
-                                                        <th className="px-4 py-3 font-semibold text-slate-700">Date</th>
-                                                        <th className="px-4 py-3 font-semibold text-slate-700">Status</th>
-                                                        <th className="px-4 py-3 font-semibold text-slate-700">Check In</th>
-                                                        <th className="px-4 py-3 font-semibold text-slate-700">Check Out</th>
-                                                        <th className="px-4 py-3 font-semibold text-slate-700">Rest/Break</th>
-                                                        <th className="px-4 py-3 font-semibold text-slate-700">Work Hours</th>
-                                                        <th className="px-4 py-3 font-semibold text-slate-700 w-24 text-center">Actions</th>
+                                {/* Monthly Attendance Table - Same as Daily Structure */}
+                                <div className="border rounded-lg overflow-hidden shadow-sm mt-4">
+                                    <table className="w-full text-sm text-left">
+                                        <thead className="bg-gradient-to-r from-slate-50 to-slate-100 text-slate-600 dark:from-slate-900/20 dark:to-slate-900/10 font-semibold border-b">
+                                            <tr>
+                                                <th className="px-4 py-3 font-semibold text-slate-700">Date</th>
+                                                <th className="px-4 py-3 font-semibold text-slate-700">Status</th>
+                                                <th className="px-4 py-3 font-semibold text-slate-700">Check In</th>
+                                                <th className="px-4 py-3 font-semibold text-slate-700">Check Out</th>
+                                                <th className="px-4 py-3 font-semibold text-slate-700">Rest/Break</th>
+                                                <th className="px-4 py-3 font-semibold text-slate-700">Work Hours</th>
+                                                <th className="px-4 py-3 font-semibold text-slate-700 w-24 text-center">Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-slate-100">
@@ -1029,7 +967,6 @@ function AttendancePage() {
                                                 </tbody>
                                             </table>
                                         </div>
-                                    </div>
                             </div>
                         </CardContent>
                     </Card>

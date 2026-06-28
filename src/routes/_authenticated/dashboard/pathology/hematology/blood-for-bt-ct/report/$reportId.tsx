@@ -57,7 +57,7 @@ function BloodForBtctReport() {
             <AppHeader fixed />
             <Main>
                 <div className="print:hidden flex items-center justify-between gap-4">
-                    <Link to="/dashboard/hematology/blood-for-bt-ct">
+                    <Link to="/dashboard/pathology/hematology/blood-for-bt-ct">
                         <Button variant="outline" size="sm">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Blood For BT/CT

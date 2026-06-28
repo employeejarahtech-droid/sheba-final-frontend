@@ -13,14 +13,20 @@ import { Textarea } from '@/components/ui/textarea'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCurrency } from '@/hooks/use-currency'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
+import { CalendarIcon } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { useDateFormat } from '@/hooks/use-date-format'
 import {
+
   useCreateAssetMutation, useUpdateAssetMutation,
   useAssetCategoriesQuery, useAssetLocationsQuery,
 } from '@/features/assets/assetQueries'
 import type { Asset } from '@/types/asset.types'
 
 const schema = z.object({
-  asset_code: z.string().min(1, 'Required'),
+  asset_code: z.string().optional(),
   name: z.string().min(1, 'Required'),
   category_id: z.string(),
   location_id: z.string(),
@@ -41,6 +47,7 @@ const BACK = '/dashboard/assets/list'
 export function AssetForm({ initial }: { initial?: Asset }) {
   const navigate = useNavigate()
   const { currencySymbol } = useCurrency()
+  const { formatDate, parseDate, toISODate, formatHint } = useDateFormat()
   const { data: categories } = useAssetCategoriesQuery()
   const { data: locations } = useAssetLocationsQuery()
   const create = useCreateAssetMutation()
@@ -56,7 +63,7 @@ export function AssetForm({ initial }: { initial?: Asset }) {
       category_id: initial?.category_id ? String(initial.category_id) : 'none',
       location_id: initial?.location_id ? String(initial.location_id) : 'none',
       supplier: initial?.supplier || '',
-      purchase_date: initial?.purchase_date || '',
+      purchase_date: initial?.purchase_date ? formatDate(new Date(initial.purchase_date)) : '',
       purchase_cost: initial?.purchase_cost != null ? String(initial.purchase_cost) : '',
       salvage_value: initial?.salvage_value != null ? String(initial.salvage_value) : '',
       useful_life_years: initial?.useful_life_years != null ? String(initial.useful_life_years) : '',
@@ -74,7 +81,7 @@ export function AssetForm({ initial }: { initial?: Asset }) {
       category_id: values.category_id === 'none' ? null : Number(values.category_id),
       location_id: values.location_id === 'none' ? null : Number(values.location_id),
       supplier: values.supplier || null,
-      purchase_date: values.purchase_date || null,
+      purchase_date: values.purchase_date ? toISODate(parseDate(values.purchase_date) || new Date()) : null,
       purchase_cost: Number(values.purchase_cost) || 0,
       salvage_value: Number(values.salvage_value) || 0,
       useful_life_years: Number(values.useful_life_years) || 0,
@@ -130,7 +137,7 @@ export function AssetForm({ initial }: { initial?: Asset }) {
                   <FormField control={form.control} name="asset_code" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Asset Code</FormLabel>
-                      <FormControl><Input placeholder="e.g. AST-0001" {...field} /></FormControl>
+                      <FormControl><Input placeholder={editing ? "Asset Code" : "Auto-generated"} disabled={!editing} {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
@@ -175,9 +182,34 @@ export function AssetForm({ initial }: { initial?: Asset }) {
                     </FormItem>
                   )} />
                   <FormField control={form.control} name="purchase_date" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Purchase Date</FormLabel>
-                      <FormControl><Input type="date" {...field} /></FormControl>
+                    <FormItem className="flex flex-col gap-2 pt-2">
+                      <FormLabel className="text-sm font-semibold">Purchase Date <span className="text-xs font-normal text-muted-foreground">({formatHint})</span></FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value || <span>Pick a date</span>}
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value ? parseDate(field.value) : undefined}
+                            onSelect={(date) => {
+                              field.onChange(date ? formatDate(date) : "");
+                            }}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )} />

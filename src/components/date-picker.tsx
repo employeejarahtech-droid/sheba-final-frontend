@@ -1,4 +1,3 @@
-import { format } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -7,6 +6,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { useDateFormat } from '@/hooks/use-date-format'
 
 type DatePickerProps = {
   selected: Date | undefined
@@ -19,6 +19,8 @@ export function DatePicker({
   onSelect,
   placeholder = 'Pick a date',
 }: DatePickerProps) {
+  const { formatDate } = useDateFormat()
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -28,7 +30,7 @@ export function DatePicker({
           className='data-[empty=true]:text-muted-foreground w-[240px] justify-start text-start font-normal'
         >
           {selected ? (
-            format(selected, 'MMM d, yyyy')
+            formatDate(selected)
           ) : (
             <span>{placeholder}</span>
           )}

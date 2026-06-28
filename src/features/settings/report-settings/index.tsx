@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Trash2, Save, Loader2 } from 'lucide-react'
+import { Plus, Trash2, Save, Loader2, FileText } from 'lucide-react'
 import { toast } from 'sonner'
-import { AppHeader } from '@/components/layout/app-header'
-import { Main } from '@/components/layout/main'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -54,26 +52,34 @@ export default function ReportSettings() {
     const updateItem = (idx: number, val: string) => setItems(items.map((it, i) => i === idx ? val : it))
 
     return (
-        <>
-            <AppHeader fixed />
-            <Main>
-                <div className="p-6 max-w-2xl mx-auto">
-                    <div className="mb-6">
-                        <h1 className="text-2xl font-bold tracking-tight">Report Settings</h1>
-                        <p className="text-sm text-muted-foreground mt-1">Configure report footer items shown on pathology reports</p>
-                    </div>
+        <div className="space-y-6">
+            <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    Report Settings
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                    Configure report footer items shown on pathology reports
+                </p>
+            </div>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center justify-between">
-                                Report Footer
-                                <Button size="sm" variant="outline" onClick={addItem} disabled={saveMutation.isPending}>
-                                    <Plus className="h-4 w-4 mr-1" /> Add Item
-                                </Button>
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            <>
+            <Card className="overflow-hidden shadow-none p-0">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-3 px-4">
+                    <div className="flex items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow">
+                                <FileText className="w-4 h-4 text-white" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-lg font-bold">Report Footer</CardTitle>
+                                <p className="text-xs text-muted-foreground">Signatories & notes printed at the bottom of reports</p>
+                            </div>
+                        </div>
+                        <Button size="sm" variant="outline" onClick={addItem} disabled={saveMutation.isPending}>
+                            <Plus className="h-4 w-4" /> Add Item
+                        </Button>
+                    </div>
+                </CardHeader>
+                <CardContent className="p-4 space-y-3">
                                     {items.map((item, idx) => (
                                         <div key={idx} className="flex items-center gap-2">
                                             <span className="text-sm text-muted-foreground w-6">{idx + 1}.</span>
@@ -94,24 +100,22 @@ export default function ReportSettings() {
                                             </Button>
                                         </div>
                                     ))}
-                                    <div className="pt-4 border-t">
-                                        <Button
-                                            onClick={() => saveMutation.mutate(items)}
-                                            disabled={saveMutation.isPending}
-                                            className="w-full"
-                                        >
-                                            {saveMutation.isPending ? (
-                                                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Saving...</>
-                                            ) : (
-                                                <><Save className="h-4 w-4 mr-2" /> Save Changes</>
-                                            )}
-                                        </Button>
-                                    </div>
-                                </>
-                        </CardContent>
-                    </Card>
-                </div>
-            </Main>
-        </>
+                    <div className="pt-4 border-t">
+                        <Button
+                            onClick={() => saveMutation.mutate(items)}
+                            disabled={saveMutation.isPending}
+                            className="w-full"
+                        >
+                            {saveMutation.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <Save className="h-4 w-4" />
+                            )}
+                            {saveMutation.isPending ? 'Saving...' : 'Save Changes'}
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
     )
 }

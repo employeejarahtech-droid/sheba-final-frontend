@@ -58,7 +58,7 @@ function BloodForTcdcReport() {
                
             <Main>
                 <div className="print:hidden flex items-center justify-between gap-4">
-                    <Link to="/dashboard/hematology/blood-for-tcdc">
+                    <Link to="/dashboard/pathology/hematology/blood-for-tcdc">
                         <Button variant="outline" size="sm">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Blood For TCDC

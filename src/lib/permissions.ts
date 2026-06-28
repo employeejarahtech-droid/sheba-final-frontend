@@ -9,6 +9,8 @@
  *   • Otherwise → the role must hold the specific permission string
  */
 
+import { PERMISSION_GROUPS } from '@/constants/permissions'
+
 interface PermUser {
     userType?: string | null
     permissions?: string[] | null
@@ -75,4 +77,48 @@ export const filterNavGroups = <G extends { items: any[] }>(
     return groups
         .map((g) => ({ ...g, items: filterNavItems(user, g.items) }))
         .filter((g) => g.items.length > 0)
+}
+
+// ── Page-level access (route guard) ───────────────────────────────────────
+
+// Set of all known ".view" permission strings (one per real page).
+let knownViewPermsCache: Set<string> | null = null
+const knownViewPerms = (): Set<string> => {
+    if (knownViewPermsCache) return knownViewPermsCache
+    const set = new Set<string>()
+    for (const pages of Object.values(PERMISSION_GROUPS)) {
+        for (const page of pages) {
+            for (const action of page.actions) {
+                if (action.value.endsWith('.view')) set.add(action.value)
+            }
+        }
+    }
+    knownViewPermsCache = set
+    return set
+}
+
+/**
+ * The ".view" permission a path requires. Walks up the path until it finds a
+ * known page permission (so /…/list maps to itself, but a detail/edit sub-page
+ * resolves to its nearest known parent). Returns null for paths with no known
+ * permission — those are left accessible (we only gate known pages).
+ */
+export const getRequiredViewPermission = (pathname: string): string | null => {
+    const known = knownViewPerms()
+    let base = urlToPermission(pathname)
+    while (base) {
+        if (known.has(`${base}.view`)) return `${base}.view`
+        const parts = base.split('.')
+        if (parts.length <= 1) break
+        base = parts.slice(0, -1).join('.')
+    }
+    return null
+}
+
+/** Whether the user may open the page at this pathname. */
+export const canAccessPath = (user: PermUser | null | undefined, pathname: string): boolean => {
+    if (isUnrestricted(user)) return true
+    const required = getRequiredViewPermission(pathname)
+    if (!required) return true // unknown page → don't block
+    return hasPermission(user, required)
 }

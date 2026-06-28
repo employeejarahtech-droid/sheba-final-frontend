@@ -10,6 +10,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
 import { AppHeader } from "@/components/layout/app-header";
+import { useCurrency } from "@/hooks/use-currency";
 
 type Item = { name?: string; amount: number };
 type Staff = {
@@ -41,6 +42,7 @@ function SalaryStructurePage() {
     const navigate = useNavigate();
     const token = getCookie('accessToken');
     const [search, setSearch] = useState("");
+    const { currencySymbol, format } = useCurrency();
 
     const { data: usersResponse, isLoading } = useQuery({
         queryKey: ["users-list-salary", 1, 1000],
@@ -83,7 +85,7 @@ function SalaryStructurePage() {
 
     const displayName = (s: Staff) => s.name || `${s.first_name || ''} ${s.last_name || ''}`.trim() || 'Unnamed';
     const deptName = (s: Staff) => (typeof s.department === 'object' ? s.department?.name : s.department) || '-';
-    const fmt = (n: number) => `৳ ${n.toLocaleString()}`;
+    const fmt = (n: number) => format(n);
 
     return (
         <>
@@ -152,10 +154,10 @@ function SalaryStructurePage() {
                                         <thead className="bg-slate-50 dark:bg-slate-900/20 text-slate-600 font-semibold border-b">
                                             <tr>
                                                 <th className="px-4 py-3 text-left">Employee</th>
-                                                <th className="px-4 py-3 text-right">Basic</th>
+                                                <th className="px-4 py-3 text-right">Basic ({currencySymbol})</th>
                                                 <th className="px-4 py-3 text-left">Allowances</th>
                                                 <th className="px-4 py-3 text-left">Deductions</th>
-                                                <th className="px-4 py-3 text-right">Net Salary</th>
+                                                <th className="px-4 py-3 text-right">Net Salary ({currencySymbol})</th>
                                                 <th className="px-4 py-3 text-center">Action</th>
                                             </tr>
                                         </thead>

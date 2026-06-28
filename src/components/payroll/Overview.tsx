@@ -1,4 +1,4 @@
-﻿
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -21,6 +21,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { AppHeader } from "../layout/app-header";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
+import { useCurrency } from "@/hooks/use-currency";
 
 // Dummy types
 type Department = {
@@ -229,6 +230,7 @@ export default function HrPayrollOverview() {
 
     const token = getCookie('accessToken');
     const queryClient = useQueryClient();
+    const { currencySymbol } = useCurrency();
 
     const { data: usersResponse, isLoading } = useQuery({
         queryKey: ["users-list", page, limit, search],
@@ -436,7 +438,7 @@ export default function HrPayrollOverview() {
         },
         {
             data: "salary",
-            title: "Basic Salary",
+            title: `Basic Salary (${currencySymbol})`,
             render: (_data: any, _type: string, row: Staff) => {
                 const salary = row.basic_salary || row.salary || 0;
                 return `<span>${salary.toLocaleString()}</span>`;
@@ -544,10 +546,10 @@ export default function HrPayrollOverview() {
                             const Icon = item.icon;
                             return (
                                 <Card key={idx} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }}>
+                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][idx % 6] }}>
                                         <div className="flex items-center gap-2.5">
                                             <div className={`p-2 bg-gradient-to-br ${item.gradientClass} rounded-lg shadow-lg`}>
-                                                <Icon className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
+                                                <Icon className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][idx % 6] }} />
                                             </div>
                                             <div>
                                                 <CardTitle className="text-sm font-semibold">{item.label}</CardTitle>
@@ -566,7 +568,7 @@ export default function HrPayrollOverview() {
                         <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2.5 px-4 gap-0">
                             <div className="flex items-center gap-2.5">
                                 <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
-                                    <Users className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
+                                    <Users className="w-4 h-4 text-white" />
                                 </div>
                                 <div>
                                     <CardTitle className="text-lg font-bold">All Employees</CardTitle>
@@ -608,10 +610,10 @@ export default function HrPayrollOverview() {
                             {/* 4 Key Metrics */}
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                 <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }}>
+                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }}>
                                         <div className="flex items-center gap-2.5">
                                             <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
-                                                <Building2 className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
+                                                <Building2 className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }} />
                                             </div>
                                             <div>
                                                 <CardTitle className="text-sm font-semibold text-white/90">Total Basic Salary</CardTitle>
@@ -627,10 +629,10 @@ export default function HrPayrollOverview() {
                                 </Card>
 
                                 <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }}>
+                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }}>
                                         <div className="flex items-center gap-2.5">
                                             <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg shadow-lg">
-                                                <ArrowUpCircle className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
+                                                <ArrowUpCircle className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }} />
                                             </div>
                                             <div>
                                                 <CardTitle className="text-sm font-semibold text-white/90">Total Allowances</CardTitle>
@@ -646,10 +648,10 @@ export default function HrPayrollOverview() {
                                 </Card>
 
                                 <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }}>
+                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }}>
                                         <div className="flex items-center gap-2.5">
                                             <div className="p-2 bg-gradient-to-br from-rose-500 to-red-500 rounded-lg shadow-lg">
-                                                <ArrowDownCircle className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
+                                                <ArrowDownCircle className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }} />
                                             </div>
                                             <div>
                                                 <CardTitle className="text-sm font-semibold text-white/90">Total Deductions</CardTitle>
@@ -665,10 +667,10 @@ export default function HrPayrollOverview() {
                                 </Card>
 
                                 <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border bg-gradient-to-br from-white to-purple-50/50 dark:from-gray-900 dark:to-purple-950/10">
-                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }}>
+                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }}>
                                         <div className="flex items-center gap-2.5">
                                             <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg shadow-lg">
-                                                <Banknote className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
+                                                <Banknote className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }} />
                                             </div>
                                             <div>
                                                 <CardTitle className="text-sm font-semibold text-white/90">Est. Net Payable</CardTitle>
@@ -691,7 +693,7 @@ export default function HrPayrollOverview() {
                                     <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2.5 px-4 gap-0">
                                         <div className="flex items-center gap-2.5">
                                             <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg shadow-lg">
-                                                <PieChart className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
+                                                <PieChart className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }} />
                                             </div>
                                             <div>
                                                 <CardTitle className="text-lg font-bold text-emerald-800 dark:text-emerald-300">Allowance Breakdown</CardTitle>
@@ -719,7 +721,7 @@ export default function HrPayrollOverview() {
                                     <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2.5 px-4 gap-0">
                                         <div className="flex items-center gap-2.5">
                                             <div className="p-2 bg-gradient-to-br from-rose-500 to-red-500 rounded-lg shadow-lg">
-                                                <PieChart className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
+                                                <PieChart className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }} />
                                             </div>
                                             <div>
                                                 <CardTitle className="text-lg font-bold text-rose-800 dark:text-rose-300">Deduction Breakdown</CardTitle>

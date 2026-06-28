@@ -409,25 +409,23 @@ export function PaymentAccountSettings() {
                                 {meta.isMoneyIn ? (
                                     <div>
                                         <label className="block text-xs font-medium mb-1 text-gray-500 dark:text-gray-400">
-                                            Credit Account (Revenue / Receivable) — pick a leaf account
+                                            Credit Account (Revenue / Receivable)
                                         </label>
                                         <NestedAccountSelect
                                             value={mapping.credit_account_id || null}
                                             onChange={(id: number | null) => updateMapping(key, 'credit_account_id', id)}
                                             placeholder="Select credit account"
-                                            leafOnly
                                         />
                                     </div>
                                 ) : (
                                     <div>
                                         <label className="block text-xs font-medium mb-1 text-gray-500 dark:text-gray-400">
-                                            Debit Account (Payable / Revenue Reverse) — pick a leaf account
+                                            Debit Account (Payable / Revenue Reverse)
                                         </label>
                                         <NestedAccountSelect
                                             value={mapping.debit_account_id || null}
                                             onChange={(id: number | null) => updateMapping(key, 'debit_account_id', id)}
                                             placeholder="Select debit account"
-                                            leafOnly
                                         />
                                     </div>
                                 )}
@@ -468,7 +466,6 @@ export function PaymentAccountSettings() {
                                                         value={method.account_id || null}
                                                         onChange={(id: number | null) => updateMethod(key, idx, 'account_id', id)}
                                                         placeholder="Select account"
-                                                        leafOnly
                                                     />
                                                     <button
                                                         onClick={() => removeMethod(key, idx)}

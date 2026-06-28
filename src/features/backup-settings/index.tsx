@@ -1,5 +1,5 @@
 import { AppHeader } from '@/components/layout/app-header'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -152,9 +152,14 @@ export default function BackupSettings() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="text-lg font-semibold mb-1">Auto-Backup Configuration</h3>
+                    <Card className="overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800">
+                        <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 border-b py-2 px-4 gap-0">
+                            <div className="flex items-center gap-2">
+                                <Settings className="w-5 h-5 text-white" />
+                                <CardTitle className="text-sm font-semibold text-white">Auto-Backup Configuration</CardTitle>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="pt-4">
                             <p className="text-sm text-muted-foreground mb-6">
                                 Schedule automatic database backups and manage retention.
                             </p>
@@ -237,9 +242,14 @@ export default function BackupSettings() {
                     </Card>
 
                     <div className="space-y-6">
-                        <Card>
-                            <CardContent className="pt-6">
-                                <h3 className="text-lg font-semibold mb-1">Manual Backup</h3>
+                        <Card className="overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800">
+                            <CardHeader className="bg-gradient-to-r from-teal-600 to-cyan-600 border-b py-2 px-4 gap-0">
+                                <div className="flex items-center gap-2">
+                                    <Database className="w-5 h-5 text-white" />
+                                    <CardTitle className="text-sm font-semibold text-white">Manual Backup</CardTitle>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="pt-4">
                                 <p className="text-sm text-muted-foreground mb-4">
                                     Trigger an immediate database backup.
                                 </p>
@@ -250,9 +260,14 @@ export default function BackupSettings() {
                             </CardContent>
                         </Card>
 
-                        <Card>
-                            <CardContent className="pt-6">
-                                <h3 className="text-lg font-semibold mb-4">Current Settings</h3>
+                        <Card className="overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800">
+                            <CardHeader className="bg-gradient-to-r from-purple-600 to-violet-600 border-b py-2 px-4 gap-0">
+                                <div className="flex items-center gap-2">
+                                    <HardDrive className="w-5 h-5 text-white" />
+                                    <CardTitle className="text-sm font-semibold text-white">Current Settings</CardTitle>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="pt-4">
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-3">
                                         <Clock className="h-4 w-4 text-muted-foreground" />
