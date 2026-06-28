@@ -106,8 +106,8 @@ export function PricingSection() {
           </span>
           <button
             onClick={() => setIsYearly(!isYearly)}
-            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2 ${
-              isYearly ? 'bg-purple-600' : 'bg-gray-200'
+            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
+              isYearly ? 'bg-blue-600' : 'bg-gray-200'
             }`}
           >
             <span
@@ -145,13 +145,13 @@ export function PricingSection() {
                 key={plan.id || plan.slug}
                 className={`relative flex flex-col ${
                   isPro
-                    ? 'border-purple-600 border-2 shadow-xl scale-[1.02]'
+                    ? 'border-blue-600 border-2 shadow-xl scale-[1.02]'
                     : 'border-border/50'
                 }`}
               >
                 {isPro && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-purple-600 text-white px-4 py-1 text-xs font-semibold">
+                    <Badge className="bg-blue-600 text-white px-4 py-1 text-xs font-semibold">
                       Most Popular
                     </Badge>
                   </div>
@@ -199,7 +199,7 @@ export function PricingSection() {
                         <Check
                           className={`size-4 mt-0.5 shrink-0 ${
                             f.included
-                              ? 'text-purple-600'
+                              ? 'text-blue-600'
                               : 'text-muted-foreground/40'
                           }`}
                         />
@@ -224,8 +224,8 @@ export function PricingSection() {
                     variant={isPro ? 'default' : 'outline'}
                     className={`w-full ${
                       isPro
-                        ? 'bg-purple-600 hover:bg-purple-700'
-                        : 'hover:border-purple-600 hover:text-purple-600'
+                        ? 'bg-blue-600 hover:bg-blue-700'
+                        : 'hover:border-blue-600 hover:text-blue-600'
                     }`}
                   >
                     <Link

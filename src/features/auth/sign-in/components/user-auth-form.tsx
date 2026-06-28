@@ -140,7 +140,7 @@ export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormPr
           )}
         />
 
-        <Button className="mt-2" disabled={login.isPending}>
+        <Button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-900/20 w-full" disabled={login.isPending}>
           {login.isPending ? <Loader2 className="animate-spin" /> : <LogIn />}
           Sign in
         </Button>

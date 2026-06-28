@@ -139,9 +139,9 @@ export function Login() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50'>
+      <div className='min-h-screen flex items-center justify-center bg-white'>
         <div className='text-center space-y-4'>
-          <div className='h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center mx-auto shadow-lg animate-pulse'>
+          <div className='h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-sky-600 flex items-center justify-center mx-auto shadow-lg animate-pulse'>
             <Building2 className='h-6 w-6 text-white' />
           </div>
           <p className='text-sm text-gray-600'>Loading...</p>
@@ -151,7 +151,7 @@ export function Login() {
   }
 
   return (
-    <div className='relative container grid h-svh flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0'>
+    <div className='relative container grid h-svh flex-col items-center justify-center bg-white lg:max-w-none lg:grid-cols-2 lg:px-0'>
       <div className='lg:p-8'>
         <div className='mx-auto flex w-full flex-col justify-center space-y-2 py-8 sm:w-[480px] sm:p-8'>
           <div className='mb-8 flex flex-col items-center justify-center gap-2'>
@@ -162,7 +162,7 @@ export function Login() {
                 className='h-20 w-20 object-contain rounded-2xl border-2 border-gray-200 shadow-lg bg-white'
               />
             ) : (
-              <div className='h-20 w-20 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg'>
+              <div className='h-20 w-20 rounded-2xl bg-gradient-to-br from-blue-600 to-sky-600 flex items-center justify-center shadow-lg shadow-blue-900/20'>
                 <span className='text-white font-bold text-3xl'>{firstLetter}</span>
               </div>
             )}

@@ -48,11 +48,11 @@ export function LandingHeader() {
       <div className="container flex h-16 items-center justify-between px-4 mx-auto">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-600 text-white font-bold text-sm">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-sm">
             S
           </div>
           <span className="text-xl font-bold">
-            <span className="text-purple-600">Sheba</span> HMS
+            <span className="text-blue-600">Sheba</span> HMS
           </span>
         </Link>
 
@@ -62,7 +62,7 @@ export function LandingHeader() {
             <Link
               key={link.to}
               to={link.to}
-              className="text-muted-foreground hover:text-purple-600 transition-colors font-medium"
+              className="text-muted-foreground hover:text-blue-600 transition-colors font-medium"
               activeOptions={{ exact: link.to === '/' }}
             >
               {link.label}
@@ -73,7 +73,7 @@ export function LandingHeader() {
         {/* Desktop Auth Buttons */}
         <div className="hidden md:flex items-center gap-3">
           {showDashboard ? (
-            <Button asChild variant="default" className="bg-purple-600 hover:bg-purple-700">
+            <Button asChild variant="default" className="bg-blue-600 hover:bg-blue-700">
               {isExternalNavigation ? (
                 <a href={dashboardUrl}>Dashboard</a>
               ) : (
@@ -85,7 +85,7 @@ export function LandingHeader() {
               <Button asChild variant="ghost">
                 <Link to="/login">Sign In</Link>
               </Button>
-              <Button asChild className="bg-purple-600 hover:bg-purple-700">
+              <Button asChild className="bg-blue-600 hover:bg-blue-700">
                 <Link to="/register">Get Started</Link>
               </Button>
             </>
@@ -110,7 +110,7 @@ export function LandingHeader() {
               <Link
                 key={link.to}
                 to={link.to}
-                className="block py-2 text-sm font-medium text-muted-foreground hover:text-purple-600 transition-colors"
+                className="block py-2 text-sm font-medium text-muted-foreground hover:text-blue-600 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.label}
@@ -118,7 +118,7 @@ export function LandingHeader() {
             ))}
             <div className="pt-3 border-t space-y-2">
               {showDashboard ? (
-                <Button asChild className="w-full bg-purple-600 hover:bg-purple-700">
+                <Button asChild className="w-full bg-blue-600 hover:bg-blue-700">
                   {isExternalNavigation ? (
                     <a href={dashboardUrl} onClick={() => setMobileMenuOpen(false)}>
                       Dashboard
@@ -136,7 +136,7 @@ export function LandingHeader() {
                       Sign In
                     </Link>
                   </Button>
-                  <Button asChild className="w-full bg-purple-600 hover:bg-purple-700">
+                  <Button asChild className="w-full bg-blue-600 hover:bg-blue-700">
                     <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
                       Get Started
                     </Link>

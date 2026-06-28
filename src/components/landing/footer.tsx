@@ -23,11 +23,11 @@ export function LandingFooter() {
           {/* Column 1: Logo & Description */}
           <div className="sm:col-span-2 lg:col-span-1">
             <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-600 text-white font-bold text-sm">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-sm">
                 S
               </div>
               <span className="text-xl font-bold">
-                <span className="text-purple-600">Sheba</span> HMS
+                <span className="text-blue-600">Sheba</span> HMS
               </span>
             </Link>
             <p className="mt-3 text-sm text-muted-foreground max-w-xs">
@@ -45,7 +45,7 @@ export function LandingFooter() {
                 <li key={link.label}>
                   <Link
                     to={link.to}
-                    className="text-sm text-muted-foreground hover:text-purple-600 transition-colors"
+                    className="text-sm text-muted-foreground hover:text-blue-600 transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -62,7 +62,7 @@ export function LandingFooter() {
                 <li key={link.label}>
                   <Link
                     to={link.to}
-                    className="text-sm text-muted-foreground hover:text-purple-600 transition-colors"
+                    className="text-sm text-muted-foreground hover:text-blue-600 transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -79,7 +79,7 @@ export function LandingFooter() {
                 <li key={link.label}>
                   <Link
                     to={link.to}
-                    className="text-sm text-muted-foreground hover:text-purple-600 transition-colors"
+                    className="text-sm text-muted-foreground hover:text-blue-600 transition-colors"
                   >
                     {link.label}
                   </Link>
