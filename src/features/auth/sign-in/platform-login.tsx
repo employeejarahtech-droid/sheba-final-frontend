@@ -1,89 +1,85 @@
-import { useState } from 'react'
-import { cn } from '@/lib/utils'
+import { Link } from '@tanstack/react-router'
+import { Building2, Database, Users, Globe, Lock, ShieldCheck } from 'lucide-react'
 import { UserAuthForm } from './components/user-auth-form'
-import { Shield, Building2, Database, Users, Globe, Lock } from 'lucide-react'
+
+const features = [
+  {
+    icon: Building2,
+    title: 'Multi-Tenant Architecture',
+    description: 'Manage multiple hospitals from one platform',
+  },
+  {
+    icon: Database,
+    title: 'Centralized Database',
+    description: 'Secure and scalable data management',
+  },
+  {
+    icon: Users,
+    title: 'Role-Based Access',
+    description: 'Granular permissions for every user',
+  },
+  {
+    icon: Globe,
+    title: 'Subdomain Support',
+    description: 'Custom domains for each hospital',
+  },
+]
 
 export function PlatformLogin() {
-  const [companyName] = useState<string>('HMS Platform')
-  const firstLetter = companyName.charAt(0).toUpperCase()
-
   return (
-    <div className='min-h-screen flex bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900'>
+    <div className='min-h-screen flex bg-slate-50'>
       {/* Left Side - Platform Branding */}
-      <div className='hidden lg:flex lg:w-1/2 relative overflow-hidden'>
-        {/* Animated background pattern */}
-        <div className='absolute inset-0 bg-[url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=")] opacity-30' />
-
-        {/* Gradient overlays */}
-        <div className='absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20' />
-        <div className='absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent' />
+      <div className='hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-sky-700'>
+        {/* Background decoration */}
+        <div className='absolute inset-0 opacity-40'>
+          <div className='absolute top-0 left-1/4 w-[500px] h-[500px] bg-sky-400 rounded-full blur-3xl mix-blend-overlay' />
+          <div className='absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-400 rounded-full blur-3xl mix-blend-overlay' />
+        </div>
 
         <div className='relative z-10 flex flex-col items-center justify-center w-full px-12 text-white'>
           <div className='max-w-lg text-center space-y-8'>
             {/* Logo */}
-            <div className='flex items-center justify-center gap-4'>
-              <div className='h-20 w-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30 shadow-2xl'>
-                <Shield className='h-10 w-10 text-white' />
+            <Link to='/' className='flex items-center justify-center gap-3'>
+              <div className='flex h-14 w-14 items-center justify-center rounded-xl bg-white text-blue-600 font-bold text-2xl shadow-lg'>
+                H
               </div>
-            </div>
+              <span className='text-3xl font-bold tracking-tight'>HMS</span>
+            </Link>
 
             {/* Title */}
             <div className='space-y-3'>
               <h2 className='text-4xl font-bold tracking-tight'>
-                HMS Platform
+                Hospital Management Platform
               </h2>
-              <p className='text-lg text-purple-200'>
-                Enterprise Hospital Management System
+              <p className='text-lg text-blue-100'>
+                Next-generation healthcare, absolute data security
               </p>
             </div>
 
             {/* Features */}
             <div className='space-y-4 pt-4'>
-              <div className='flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20'>
-                <div className='h-12 w-12 rounded-xl bg-blue-500/30 flex items-center justify-center shrink-0'>
-                  <Building2 className='h-6 w-6 text-blue-300' />
+              {features.map(({ icon: Icon, title, description }) => (
+                <div
+                  key={title}
+                  className='flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20'
+                >
+                  <div className='h-12 w-12 rounded-xl bg-white/15 flex items-center justify-center shrink-0'>
+                    <Icon className='h-6 w-6 text-white' />
+                  </div>
+                  <div className='text-left'>
+                    <h3 className='font-semibold text-white'>{title}</h3>
+                    <p className='text-sm text-blue-100'>{description}</p>
+                  </div>
                 </div>
-                <div className='text-left'>
-                  <h3 className='font-semibold text-white'>Multi-Tenant Architecture</h3>
-                  <p className='text-sm text-purple-200'>Manage multiple hospitals from one platform</p>
-                </div>
-              </div>
-
-              <div className='flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20'>
-                <div className='h-12 w-12 rounded-xl bg-purple-500/30 flex items-center justify-center shrink-0'>
-                  <Database className='h-6 w-6 text-purple-300' />
-                </div>
-                <div className='text-left'>
-                  <h3 className='font-semibold text-white'>Centralized Database</h3>
-                  <p className='text-sm text-purple-200'>Secure and scalable data management</p>
-                </div>
-              </div>
-
-              <div className='flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20'>
-                <div className='h-12 w-12 rounded-xl bg-pink-500/30 flex items-center justify-center shrink-0'>
-                  <Users className='h-6 w-6 text-pink-300' />
-                </div>
-                <div className='text-left'>
-                  <h3 className='font-semibold text-white'>Role-Based Access</h3>
-                  <p className='text-sm text-purple-200'>Granular permissions for every user</p>
-                </div>
-              </div>
-
-              <div className='flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20'>
-                <div className='h-12 w-12 rounded-xl bg-indigo-500/30 flex items-center justify-center shrink-0'>
-                  <Globe className='h-6 w-6 text-indigo-300' />
-                </div>
-                <div className='text-left'>
-                  <h3 className='font-semibold text-white'>Subdomain Support</h3>
-                  <p className='text-sm text-purple-200'>Custom domains for each hospital</p>
-                </div>
-              </div>
+              ))}
             </div>
 
             {/* Security badge */}
             <div className='flex items-center justify-center gap-2 pt-6'>
-              <Lock className='h-4 w-4 text-green-400' />
-              <span className='text-sm text-green-400 font-medium'>Enterprise-Grade Security</span>
+              <ShieldCheck className='h-4 w-4 text-emerald-300' />
+              <span className='text-sm text-emerald-200 font-medium'>
+                Enterprise-Grade Security
+              </span>
             </div>
           </div>
         </div>
@@ -93,26 +89,28 @@ export function PlatformLogin() {
       <div className='flex-1 flex items-center justify-center p-6 lg:p-12'>
         <div className='w-full max-w-md space-y-8'>
           {/* Mobile Logo */}
-          <div className='flex lg:hidden flex-col items-center gap-4 text-center mb-8'>
-            <div className='h-16 w-16 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg'>
-              <Shield className='h-8 w-8 text-white' />
+          <Link to='/' className='flex lg:hidden flex-col items-center gap-3 text-center'>
+            <div className='flex h-14 w-14 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-2xl shadow-lg'>
+              H
             </div>
             <div>
-              <h2 className='text-2xl font-bold text-white'>HMS Platform</h2>
-              <p className='text-sm text-purple-200'>Enterprise Hospital Management</p>
+              <h2 className='text-2xl font-bold'>
+                <span className='text-blue-600'>H</span>MS
+              </h2>
+              <p className='text-sm text-slate-500'>Hospital Management Platform</p>
             </div>
-          </div>
+          </Link>
 
           {/* Login Card */}
-          <div className='bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-8 shadow-2xl'>
+          <div className='bg-white rounded-2xl border border-slate-200 p-8 shadow-xl ring-1 ring-slate-900/5'>
             <div className='space-y-6'>
               {/* Header */}
               <div className='text-center space-y-2'>
-                <div className='hidden lg:flex h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 items-center justify-center mx-auto shadow-lg'>
-                  <span className='text-white font-bold text-xl'>{firstLetter}</span>
+                <div className='hidden lg:flex h-12 w-12 rounded-xl bg-blue-600 items-center justify-center mx-auto shadow-lg shadow-blue-200'>
+                  <Lock className='h-6 w-6 text-white' />
                 </div>
-                <h1 className='text-2xl font-bold text-white'>Platform Login</h1>
-                <p className='text-sm text-purple-200'>
+                <h1 className='text-2xl font-bold text-slate-900'>Platform Login</h1>
+                <p className='text-sm text-slate-500'>
                   Sign in to access the HMS platform
                 </p>
               </div>
@@ -121,16 +119,14 @@ export function PlatformLogin() {
               <UserAuthForm />
 
               {/* Additional Links */}
-              <div className='pt-4 border-t border-white/10 space-y-3'>
-                <a
-                  href='https://shebahms.com'
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='block text-center text-sm text-purple-200 hover:text-white transition-colors'
+              <div className='pt-4 border-t border-slate-100 space-y-3'>
+                <Link
+                  to='/about'
+                  className='block text-center text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors'
                 >
-                  Learn about HMS Platform →
-                </a>
-                <div className='text-center text-xs text-purple-300'>
+                  Learn about HMS →
+                </Link>
+                <div className='text-center text-xs text-slate-400'>
                   Platform administrators: Use your platform credentials
                 </div>
               </div>
@@ -138,8 +134,8 @@ export function PlatformLogin() {
           </div>
 
           {/* Footer */}
-          <div className='text-center text-xs text-purple-300'>
-            <p>© 2024 HMS Platform. All rights reserved.</p>
+          <div className='text-center text-xs text-slate-400'>
+            <p>© {new Date().getFullYear()} HMS. All rights reserved.</p>
           </div>
         </div>
       </div>

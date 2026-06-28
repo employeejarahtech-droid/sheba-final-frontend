@@ -1,7 +1,7 @@
 /**
  * Registration Page — New tenant signup form
  *
- * Full-page registration with purple gradient header, 2-column layout
+ * Full-page registration with blue brand gradient header, 2-column layout
  * with plan selector on the left and registration form on the right.
  * Includes real-time subdomain availability check.
  *
@@ -22,7 +22,6 @@ import {
   Building2,
   Eye,
   EyeOff,
-  Hospital,
   CreditCard,
   Wallet,
   ArrowRight,
@@ -30,6 +29,7 @@ import {
   ChevronsUpDown,
 } from 'lucide-react'
 import { getBaseDomain } from '@/lib/subdomain'
+import { LandingPageWrapper } from '@/components/layout/landing-layout'
 import { useAuthStore } from '@/stores/auth-store'
 import api from '@/lib/axios'
 import { Button } from '@/components/ui/button'
@@ -276,16 +276,19 @@ function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50">
-      {/* Purple gradient header */}
-      <div className="bg-gradient-to-r from-purple-600 to-purple-800 px-6 py-8 text-white">
+    <LandingPageWrapper>
+    <div className="bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Blue brand gradient header */}
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-sky-700 px-6 py-8 text-white">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-2 mb-2">
-            <Hospital className="h-6 w-6" />
-            <span className="text-xl font-bold"> HMS</span>
-          </div>
+          <Link to="/" className="flex items-center gap-2 mb-2 w-fit">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-600 font-bold text-sm shadow-sm">
+              H
+            </div>
+            <span className="text-xl font-bold">HMS</span>
+          </Link>
           <h1 className="text-2xl font-bold">Register Your Hospital</h1>
-          <p className="text-purple-200 text-sm mt-1">
+          <p className="text-blue-100 text-sm mt-1">
             Create your hospital account and start managing patients today
           </p>
         </div>
@@ -300,7 +303,7 @@ function RegisterPage() {
               <Card className="shadow-lg border-0 sticky top-6">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <CreditCard className="h-4 w-4 text-purple-600" />
+                    <CreditCard className="h-4 w-4 text-blue-600" />
                     Select a Plan
                   </CardTitle>
                   <CardDescription>
@@ -351,8 +354,8 @@ function RegisterPage() {
                         onClick={() => { setSelectedPlan(String(p.id)); updateUrl(String(p.id), billingCycle) }}
                         className={`w-full text-left p-3 rounded-lg border-2 transition-colors ${
                           selectedPlan === String(p.id)
-                            ? 'border-purple-600 bg-purple-50'
-                            : 'border-gray-200 hover:border-purple-300'
+                            ? 'border-blue-600 bg-blue-50'
+                            : 'border-slate-200 hover:border-blue-300'
                         }`}
                       >
                         <div className="flex justify-between items-center">
@@ -396,7 +399,7 @@ function RegisterPage() {
                 >
                   {/* Company Information */}
                   <div>
-                    <h3 className="text-sm font-semibold text-purple-700 mb-3 flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-blue-700 mb-3 flex items-center gap-2">
                       <Building2 className="h-4 w-4" />
                       Company Information
                     </h3>
@@ -597,7 +600,7 @@ function RegisterPage() {
 
                   {/* Account Details */}
                   <div>
-                    <h3 className="text-sm font-semibold text-purple-700 mb-3">
+                    <h3 className="text-sm font-semibold text-blue-700 mb-3">
                       Account Details
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -656,7 +659,7 @@ function RegisterPage() {
                   {/* Payment Method Selector */}
                   {enabledGateways.length > 1 && (
                     <div>
-                      <h3 className="text-sm font-semibold text-purple-700 mb-3 flex items-center gap-2">
+                      <h3 className="text-sm font-semibold text-blue-700 mb-3 flex items-center gap-2">
                         <Wallet className="h-4 w-4" />
                         Payment Method
                       </h3>
@@ -667,8 +670,8 @@ function RegisterPage() {
                             onClick={() => setPaymentGateway('sslcommerz')}
                             className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-colors text-left ${
                               paymentGateway === 'sslcommerz'
-                                ? 'border-purple-600 bg-purple-50'
-                                : 'border-gray-200 hover:border-purple-300'
+                                ? 'border-blue-600 bg-blue-50'
+                                : 'border-slate-200 hover:border-blue-300'
                             }`}
                           >
                             <div className="flex-shrink-0 p-2 bg-green-100 rounded-lg">
@@ -688,8 +691,8 @@ function RegisterPage() {
                             onClick={() => setPaymentGateway('paypal')}
                             className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-colors text-left ${
                               paymentGateway === 'paypal'
-                                ? 'border-purple-600 bg-purple-50'
-                                : 'border-gray-200 hover:border-purple-300'
+                                ? 'border-blue-600 bg-blue-50'
+                                : 'border-slate-200 hover:border-blue-300'
                             }`}
                           >
                             <div className="flex-shrink-0 p-2 bg-indigo-100 rounded-lg">
@@ -711,8 +714,8 @@ function RegisterPage() {
                             onClick={() => setPaymentGateway('stripe')}
                             className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-colors text-left ${
                               paymentGateway === 'stripe'
-                                ? 'border-purple-600 bg-purple-50'
-                                : 'border-gray-200 hover:border-purple-300'
+                                ? 'border-blue-600 bg-blue-50'
+                                : 'border-slate-200 hover:border-blue-300'
                             }`}
                           >
                             <div className="flex-shrink-0 p-2 bg-blue-100 rounded-lg">
@@ -732,7 +735,7 @@ function RegisterPage() {
 
                   {/* Security */}
                   <div>
-                    <h3 className="text-sm font-semibold text-purple-700 mb-3">
+                    <h3 className="text-sm font-semibold text-blue-700 mb-3">
                       Security
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -798,7 +801,7 @@ function RegisterPage() {
                   <Button
                     type="submit"
                     disabled={loading || subdomainStatus === 'taken'}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                     size="lg"
                   >
                     {loading ? (
@@ -826,7 +829,7 @@ function RegisterPage() {
               Already have an account?{' '}
               <Link
                 to="/login"
-                className="text-purple-600 hover:text-purple-700 font-medium"
+                className="text-blue-600 hover:text-blue-700 font-medium"
               >
                 Sign in
               </Link>
@@ -835,5 +838,6 @@ function RegisterPage() {
         </div>
       </div>
     </div>
+    </LandingPageWrapper>
   )
 }

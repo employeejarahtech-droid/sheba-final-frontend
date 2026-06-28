@@ -72,7 +72,10 @@ export function ForgotPasswordForm({
             </FormItem>
           )}
         />
-        <Button className='mt-2' disabled={isLoading}>
+        <Button
+          className='mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white'
+          disabled={isLoading}
+        >
           Continue
           {isLoading ? <Loader2 className='animate-spin' /> : <ArrowRight />}
         </Button>

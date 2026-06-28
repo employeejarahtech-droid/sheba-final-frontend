@@ -49,10 +49,10 @@ export function LandingHeader() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-sm">
-            S
+            H
           </div>
           <span className="text-xl font-bold">
-            <span className="text-blue-600">Sheba</span> HMS
+            <span className="text-blue-600">H</span>MS
           </span>
         </Link>
 

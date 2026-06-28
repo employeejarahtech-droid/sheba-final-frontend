@@ -2,14 +2,7 @@ import { createFileRoute, useNavigate, Link, redirect } from '@tanstack/react-ro
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import {
-  Shield,
-  Eye,
-  EyeOff,
-  ArrowRight,
-  Lock,
-  Hospital,
-} from 'lucide-react';
+import { Shield, Eye, EyeOff, ArrowRight, Lock } from 'lucide-react';
 
 import { usePlatformAuthStore } from '@/stores/platform-auth-store';
 import { getCookie } from '@/lib/cookies';
@@ -69,29 +62,39 @@ function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left half - Darker purple gradient */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-700 via-purple-800 to-purple-950 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-40" />
+    <div className="min-h-screen flex bg-slate-50">
+      {/* Left half - Blue brand gradient */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-sky-700 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-40">
+          <div className="absolute top-0 left-1/4 h-[500px] w-[500px] rounded-full bg-sky-400 blur-3xl mix-blend-overlay" />
+          <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-blue-400 blur-3xl mix-blend-overlay" />
+        </div>
         <div className="relative z-10 flex flex-col items-center justify-center w-full px-12 text-white">
-          <div className="max-w-md text-center">
-            <div className="mb-8 flex items-center justify-center gap-3">
-              <div className="h-14 w-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+          <div className="max-w-md text-center space-y-8">
+            {/* Logo */}
+            <Link to="/" className="flex items-center justify-center gap-3 w-fit mx-auto">
+              <div className="h-14 w-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30 shadow-2xl">
                 <Shield className="h-8 w-8 text-white" />
               </div>
-            </div>
-            <h2 className="text-3xl font-bold mb-4">Platform Admin</h2>
-            <p className="text-lg text-purple-200 mb-8">
-              Manage companies, plans, subscriptions, and platform-wide settings
-            </p>
+              <span className="text-3xl font-bold tracking-tight">HMS</span>
+            </Link>
+
             <div className="space-y-3">
-              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <Shield className="h-5 w-5 text-purple-200 shrink-0" />
-                <span className="text-sm text-purple-100">Full platform control</span>
+              <h2 className="text-3xl font-bold">Platform Admin</h2>
+              <p className="text-lg text-blue-100">
+                Manage companies, plans, subscriptions, and platform-wide settings
+              </p>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                <Shield className="h-5 w-5 text-white shrink-0" />
+                <span className="text-sm text-blue-100">Full platform control</span>
               </div>
-              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <Lock className="h-5 w-5 text-purple-200 shrink-0" />
-                <span className="text-sm text-purple-100">Secure admin access</span>
+              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                <Lock className="h-5 w-5 text-white shrink-0" />
+                <span className="text-sm text-blue-100">Secure admin access</span>
               </div>
             </div>
           </div>
@@ -99,27 +102,29 @@ function AdminLoginPage() {
       </div>
 
       {/* Right half - Admin login form */}
-      <div className="flex-1 flex items-center justify-center p-6 bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">
             {/* Mobile-only logo */}
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="h-10 w-10 rounded-xl bg-purple-700 flex items-center justify-center lg:hidden">
-                <Hospital className="h-6 w-6 text-white" />
+            <div className="flex lg:hidden items-center justify-center gap-2 mb-4">
+              <div className="h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-200">
+                <Shield className="h-6 w-6 text-white" />
               </div>
-              <h2 className="text-2xl font-bold lg:hidden"> HMS</h2>
+              <h2 className="text-2xl font-bold">
+                <span className="text-blue-600">H</span>MS
+              </h2>
             </div>
 
-            <Badge variant="secondary" className="mb-4 bg-purple-50 text-purple-700 border-purple-200">
+            <Badge variant="secondary" className="mb-4 bg-blue-50 text-blue-700 border border-blue-200">
               Admin Panel
             </Badge>
-            <h3 className="text-xl font-semibold text-gray-900">Admin Login</h3>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h3 className="text-2xl font-bold text-slate-900">Admin Login</h3>
+            <p className="text-sm text-slate-500 mt-1">
               Sign in to access the platform administration panel
             </p>
           </div>
 
-          <Card className="shadow-lg border-0">
+          <Card className="border border-slate-200 shadow-xl ring-1 ring-slate-900/5">
             <CardContent className="pt-6">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
@@ -169,7 +174,7 @@ function AdminLoginPage() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-purple-700 hover:bg-purple-800 text-white"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                   size="lg"
                 >
                   {loading ? 'Signing in...' : 'Sign In'}
@@ -182,7 +187,7 @@ function AdminLoginPage() {
           <div className="mt-6 text-center">
             <Link
               to="/login"
-              className="text-sm text-muted-foreground hover:text-purple-600"
+              className="text-sm text-slate-500 hover:text-blue-600"
             >
               Back to User Login
             </Link>

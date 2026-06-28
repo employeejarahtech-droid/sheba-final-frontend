@@ -2,10 +2,13 @@ import { Link } from '@tanstack/react-router'
 
 const footerLinks = {
   product: [
+    { to: '/features' as const, label: 'Features' },
     { to: '/pricing' as const, label: 'Pricing' },
-    { to: '/' as const, label: 'Features' },
+    { to: '/register' as const, label: 'Get Started' },
+    { to: '/login' as const, label: 'Sign In' },
   ],
   company: [
+    { to: '/' as const, label: 'Home' },
     { to: '/about' as const, label: 'About' },
     { to: '/contact' as const, label: 'Contact' },
   ],
@@ -24,10 +27,10 @@ export function LandingFooter() {
           <div className="sm:col-span-2 lg:col-span-1">
             <Link to="/" className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-sm">
-                S
+                H
               </div>
               <span className="text-xl font-bold">
-                <span className="text-blue-600">Sheba</span> HMS
+                <span className="text-blue-600">H</span>MS
               </span>
             </Link>
             <p className="mt-3 text-sm text-muted-foreground max-w-xs">
