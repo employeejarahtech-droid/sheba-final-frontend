@@ -4,6 +4,7 @@ import { Main } from "@/components/layout/main";
 import { EditLipidProfileForm } from "./components/EditLipidProfileForm";
 import { useState } from "react";
 import { getCookie } from "@/lib/cookies";
+import { useCan } from "@/hooks/use-can";
 import { useQuery } from "@tanstack/react-query";
 import { AppHeader } from "@/components/layout/app-header";
 
@@ -19,6 +20,10 @@ export default function LipidProfile() {
   const [open, setOpen] = useState<boolean>(false);
   const [page, setPage] = useState(1);
   const limit = 10;
+
+  const can = useCan();
+  const canEdit = can('pathology.biochemical.lipid-profile.edit');
+  const canDelete = can('pathology.biochemical.lipid-profile.delete');
 
   const token = getCookie('accessToken');
 
@@ -111,20 +116,20 @@ export default function LipidProfile() {
       render: (_data: any, _type: string, row: ReportsItem) => {
         return `
           <div class="flex gap-2">
-            <button
+            ${canEdit ? `<button
               type="button"
               class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 py-2"
               onclick="window.editLipidProfile('${row.id}')"
             >
               Edit
-            </button>
-            <button
+            </button>` : ''}
+            ${canDelete ? `<button
               type="button"
               class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 h-8 px-4 py-2"
               onclick="window.deleteLipidProfile('${row.id}')"
             >
               Delete
-            </button>
+            </button>` : ''}
           </div>
         `;
       },

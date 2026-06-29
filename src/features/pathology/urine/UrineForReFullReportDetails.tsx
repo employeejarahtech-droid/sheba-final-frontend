@@ -74,8 +74,11 @@ export default function UrineForReFullReportDetails({ report, invoice, paddingTo
             <td className="border px-3 py-2">Sex: {report?.outdoor_invoice?.sex || 'N/A'}</td>
           </tr>
           <tr className="border">
-            <td className="border px-3 py-2" colSpan={3}>
-              Refd. By: {report?.outdoor_invoice?.doctor?.doctor_name || 'Prof./Dr. N/A'}
+            <td className="border px-3 py-2" colSpan={2}>
+              Ref. Doctor: {report?.outdoor_invoice?.doctor?.doctor_name || '-'}
+            </td>
+            <td className="border px-3 py-2">
+              Phone: {invoice?.phone || '-'}
             </td>
           </tr>
         </tbody>

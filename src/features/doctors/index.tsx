@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from '@tanstack/react-router'
 import { useState, useMemo, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
+import { useCan } from '@/hooks/use-can'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Stethoscope, Award, Globe, MapPin, Plus } from 'lucide-react'
@@ -56,6 +57,10 @@ type DoctorsProps = {
 };
 
 export default function Doctors({ page, limit, search, doctorType, setPage, setLimit, setSearch, setDoctorType }: DoctorsProps) {
+    const can = useCan();
+    const canEdit = can('outdoor.master.doctors.edit');
+    const canDelete = can('outdoor.master.doctors.delete');
+
     const token = getCookie('accessToken');
     const queryClient = useQueryClient();
 
@@ -351,10 +356,10 @@ export default function Doctors({ page, limit, search, doctorType, setPage, setL
                                 View
                             </a>
 
-                            <a href="/dashboard/outdoor/master/doctors/${id}/edit"
+                            ${canEdit ? `<a href="/dashboard/outdoor/master/doctors/${id}/edit"
                                class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-teal-600 text-white hover:bg-teal-700 transition h-10 px-5 shadow">
                                 Edit
-                            </a>
+                            </a>` : ''}
                         </div>
                     </div>
                 </div>
@@ -628,14 +633,14 @@ export default function Doctors({ page, limit, search, doctorType, setPage, setL
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                             View
                         </a>
-                        <a href="/dashboard/outdoor/master/doctors/${row.id}/edit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                        ${canEdit ? `<a href="/dashboard/outdoor/master/doctors/${row.id}/edit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                             Edit
-                        </a>
-                        <button onclick="window.deleteDoctor('${row.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                        </a>` : ''}
+                        ${canDelete ? `<button onclick="window.deleteDoctor('${row.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-semibold shadow transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                             Delete
-                        </button>
+                        </button>` : ''}
                     </div>
                 `;
             },

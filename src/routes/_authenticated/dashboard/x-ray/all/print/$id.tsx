@@ -4,8 +4,9 @@ import { useQuery } from '@tanstack/react-query'
 import { Main } from "@/components/layout/main"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Printer } from "lucide-react"
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
+import { ReportFooter } from '@/components/pathology/ReportFooter'
 
 export const Route = createFileRoute('/_authenticated/dashboard/x-ray/all/print/$id')({
   component: PrintXRayReport,
@@ -14,7 +15,6 @@ export const Route = createFileRoute('/_authenticated/dashboard/x-ray/all/print/
 function PrintXRayReport() {
   const { id } = Route.useParams()
   const token = getCookie('accessToken')
-  const hasPrinted = useRef(false)
   const [paddingTop, setPaddingTop] = useState(100)
 
   // Generate padding options from 10 to 200 in increments of 5
@@ -41,22 +41,6 @@ function PrintXRayReport() {
     enabled: !!token,
   })
 
-  // Auto-print only on initial load, not on refresh
-  useEffect(() => {
-    if (xrayData && !hasPrinted.current) {
-      const printKey = `xray-print-${id}`
-      const alreadyPrinted = sessionStorage.getItem(printKey)
-
-      if (!alreadyPrinted) {
-        hasPrinted.current = true
-        sessionStorage.setItem(printKey, 'true')
-        setTimeout(() => {
-          window.print()
-        }, 500)
-      }
-    }
-  }, [xrayData, id])
-
   if (isLoading) {
     return (
       <>
@@ -73,9 +57,15 @@ function PrintXRayReport() {
   const patientInfo = xrayData?.invoice_information
   const testResult = xrayData?.test_result
 
-  const invoiceDate = patientInfo?.invoice_date
-    ? new Date(patientInfo.invoice_date).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })
-    : "N/A"
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
   return (
     <>
@@ -156,17 +146,20 @@ function PrintXRayReport() {
           <table className="w-full text-sm border">
             <tbody>
               <tr className="border">
-                <td className="border px-3 py-2 w-1/4">Receipt ID : {patientInfo?.id || 'N/A'}</td>
-                <td className="border px-3 py-2 w-1/4">Date: {invoiceDate}</td>
-                <td className="border px-3 py-2 w-1/4">Age: {patientInfo?.age_text || patientInfo?.age || 'N/A'}</td>
+                <td className="border px-3 py-2 w-1/4">Receipt ID : {patientInfo?.id || '-'}</td>
+                <td className="border px-3 py-2 w-1/4">Date: {formatDate(patientInfo?.invoice_date || null)}</td>
+                <td className="border px-3 py-2 w-1/4">Age: {patientInfo?.age || '-'} years</td>
               </tr>
               <tr className="border">
-                <td className="border px-3 py-2" colSpan={2}>Patient name: {patientInfo?.patient_name || 'N/A'}</td>
-                <td className="border px-3 py-2">Sex: {patientInfo?.sex || 'N/A'}</td>
+                <td className="border px-3 py-2" colSpan={2}>Patient name: {patientInfo?.patient_name || '-'}</td>
+                <td className="border px-3 py-2">Sex: {patientInfo?.sex || '-'}</td>
               </tr>
               <tr className="border">
-                <td className="border px-3 py-2" colSpan={3}>
-                  Phone: {patientInfo?.phone || 'N/A'}
+                <td className="border px-3 py-2" colSpan={2}>
+                  Ref. Doctor: {patientInfo?.ref_doctor || '-'}
+                </td>
+                <td className="border px-3 py-2">
+                  Phone: {patientInfo?.phone || '-'}
                 </td>
               </tr>
             </tbody>
@@ -189,14 +182,7 @@ function PrintXRayReport() {
           </table>
 
           {/* Footer Signatures */}
-          <div className="grid grid-cols-2 mt-32 text-sm">
-            <div>
-              <p className="border-t border-dashed w-40 pt-1 text-center">Checked By:</p>
-            </div>
-            <div className="text-center">
-              <p className="border-t border-dashed w-56 ml-auto pt-1">Radiologist:</p>
-            </div>
-          </div>
+          <ReportFooter />
 
           {/* Buttons */}
 

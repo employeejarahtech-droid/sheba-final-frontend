@@ -76,10 +76,12 @@ export default function UrineForSugarFullReportDetails({ report, invoice, paddin
             <td className="border px-3 py-2">Sex: {invoice?.patient?.sex || invoice?.patient?.gender || 'N/A'}</td>
           </tr>
           <tr className="border">
-            <td className="border px-3 py-2" colSpan={3}>
-              Refd. By: {invoice?.doctor?.name || invoice?.reference_doctor || 'Prof./Dr. N/A'}
+            <td className="border px-3 py-2" colSpan={2}>
+              Ref. Doctor: {invoice?.doctor?.name || invoice?.reference_doctor || '-'}
             </td>
-
+            <td className="border px-3 py-2">
+              Phone: {invoice?.phone || '-'}
+            </td>
           </tr>
         </tbody>
       </table>

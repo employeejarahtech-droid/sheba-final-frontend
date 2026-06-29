@@ -26,7 +26,7 @@ function AddNotePage() {
   const { data: invoiceData, isLoading } = useQuery({
     queryKey: ['outdoor-invoice', invoiceId],
     queryFn: async () => {
-      const response = await fetch(`http://localhost:5000/api/outdoor-invoice/${invoiceId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/outdoor-invoice/${invoiceId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (!response.ok) throw new Error('Failed to fetch invoice')
@@ -42,7 +42,7 @@ function AddNotePage() {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(`http://localhost:5000/api/outdoor-invoice/${invoiceId}/note`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/outdoor-invoice/${invoiceId}/note`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -27,6 +27,7 @@ import {
 // Layout
 
 import { AppHeader } from '@/components/layout/app-header'
+import { useCan } from "@/hooks/use-can";
 
 
 
@@ -36,6 +37,9 @@ export const Route = createFileRoute('/_authenticated/dashboard/accounting/incom
 })
 
 function IncomesPage() {
+    const can = useCan();
+    const canEdit = can('accounting.income.edit');
+    const canDelete = can('accounting.income.delete');
   const { currencySymbol } = useCurrency();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -230,20 +234,20 @@ function IncomesPage() {
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
-            <button
+            ${canEdit ? `<button
               onclick="window.editIncome(${row.id})"
               class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3"
               title="Edit"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-            </button>
-            <button
+            </button>` : ''}
+            ${canDelete ? `<button
               onclick="window.deleteIncome(${row.id})"
               class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-8 px-3"
               title="Delete"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-            </button>
+            </button>` : ''}
           </div>
         `;
       },

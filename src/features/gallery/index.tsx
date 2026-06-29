@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { getCookie } from '@/lib/cookies'
+import { useCan } from '@/hooks/use-can'
 
 interface GalleryImage {
   id: string
@@ -43,6 +44,9 @@ export function Gallery() {
   const [previewImage, setPreviewImage] = useState<GalleryImage | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const token = getCookie('accessToken')
+  const can = useCan()
+  const canUpload = can('gallery.upload')
+  const canDelete = can('gallery.delete')
 
   const loadImages = async () => {
     setLoading(true)
@@ -171,23 +175,25 @@ export function Gallery() {
           className="hidden"
           onChange={handleUpload}
         />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={loading}
-          className="inline-flex items-center gap-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 disabled:opacity-50"
-        >
-          {loading ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-              Uploading...
-            </>
-          ) : (
-            <>
-              <Upload className="h-4 w-4" />
-              Upload Files
-            </>
-          )}
-        </button>
+        {canUpload && (
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 disabled:opacity-50"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4" />
+                Upload Files
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       {/* Stats */}
@@ -292,13 +298,15 @@ export function Gallery() {
                   >
                     <Copy className="w-4 h-4 text-gray-700" />
                   </button>
-                  <button
-                    onClick={() => handleDelete(image.id)}
-                    className="p-2 bg-red-500 rounded-full hover:bg-red-600 transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-4 h-4 text-white" />
-                  </button>
+                  {canDelete && (
+                    <button
+                      onClick={() => handleDelete(image.id)}
+                      className="p-2 bg-red-500 rounded-full hover:bg-red-600 transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-4 h-4 text-white" />
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="p-3">
@@ -327,7 +335,7 @@ export function Gallery() {
           <p className="text-muted-foreground mb-4">
             {searchQuery ? 'Try a different search term' : 'Upload your first image to get started'}
           </p>
-          {!searchQuery && (
+          {!searchQuery && canUpload && (
             <button
               onClick={() => fileInputRef.current?.click()}
               className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -409,16 +417,18 @@ export function Gallery() {
                       <Copy className="w-4 h-4" />
                       Copy URL
                     </button>
-                    <button
-                      onClick={() => {
-                        handleDelete(previewImage.id)
-                        setPreviewImage(null)
-                      }}
-                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Delete
-                    </button>
+                    {canDelete && (
+                      <button
+                        onClick={() => {
+                          handleDelete(previewImage.id)
+                          setPreviewImage(null)
+                        }}
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete
+                      </button>
+                    )}
                     <button
                       onClick={() => setPreviewImage(null)}
                       className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90"

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/DataTable'
 import { useSuppliersQuery, useDeleteSupplierMutation } from '@/features/purchase/purchaseQueries'
 import { StatCards } from '@/features/assets/components/StatCard'
+import { useCan } from '@/hooks/use-can'
 
 const searchSchema = z.object({
   page: z.coerce.number().catch(1),
@@ -21,6 +22,8 @@ export const Route = createFileRoute('/_authenticated/dashboard/purchase/supplie
 })
 
 function SuppliersPage() {
+    const can = useCan();
+    const canEdit = can('purchase.suppliers.edit');
   const searchParams = Route.useSearch()
   const navigate = Route.useNavigate()
 
@@ -96,7 +99,7 @@ function SuppliersPage() {
       data: null, title: 'Actions', orderable: false,
       render: (_d: any, _t: string, row: any) => `
         <div class="flex gap-2">
-          <a href="/dashboard/purchase/suppliers/edit/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent h-8 px-3">Edit</a>
+          ${canEdit ? `<a href="/dashboard/purchase/suppliers/edit/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent h-8 px-3">Edit</a>` : ''}
           <button type="button" class="js-sup-del inline-flex items-center justify-center rounded-md text-sm font-medium bg-rose-600 text-white hover:bg-rose-700 h-8 px-3" data-id="${row.id}">Delete</button>
         </div>`,
     },

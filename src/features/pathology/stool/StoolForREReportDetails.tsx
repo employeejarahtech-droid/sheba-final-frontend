@@ -79,8 +79,11 @@ export default function StoolForREReportDetails({ report, invoice, paddingTop = 
             <td className="border px-3 py-1.5">Sex: {data?.outdoor_invoice?.sex || data?.sex || 'N/A'}</td>
           </tr>
           <tr className="border">
-            <td className="border px-3 py-1.5" colSpan={3}>
-              Refd. By: Prof./Dr. {data?.outdoor_invoice?.doctor?.doctor_name || 'N/A'}
+            <td className="border px-3 py-2" colSpan={2}>
+              Ref. Doctor: {data?.ref_doctor || data?.outdoor_invoice?.doctor?.doctor_name || '-'}
+            </td>
+            <td className="border px-3 py-2">
+              Phone: {data?.outdoor_invoice?.phone || data?.phone || '-'}
             </td>
           </tr>
         </tbody>

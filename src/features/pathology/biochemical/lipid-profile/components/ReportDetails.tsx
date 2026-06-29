@@ -10,9 +10,15 @@ interface ReportDetailsProps {
 export default function ReportDetails({ invoice: invoice, testName, paddingTop = 40 }: ReportDetailsProps) {
   // Extract patient info from nested outdoor_invoice object
   const patientInfo = invoice?.outdoor_invoice || {};
-  const invoiceDate = patientInfo.invoice_date
-    ? new Date(patientInfo.invoice_date).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })
-    : "N/A";
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
   return (
     <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
@@ -60,20 +66,21 @@ export default function ReportDetails({ invoice: invoice, testName, paddingTop =
       <table className="w-full text-sm border">
         <tbody>
           <tr className="border">
-            <td className="border px-3 py-2 w-1/4">Receipt ID : {invoice.invoice_id || patientInfo.id}</td>
-            <td className="border px-3 py-2 w-1/4">Date: {invoiceDate}</td>
-            <td className="border px-3 py-2 w-1/4">Age: {patientInfo.age_text || patientInfo.age || 'N/A'}</td>
-
+            <td className="border px-3 py-2 w-1/4">Receipt ID : {invoice.invoice_id || patientInfo.id || '-'}</td>
+            <td className="border px-3 py-2 w-1/4">Date: {formatDate(patientInfo.invoice_date || null)}</td>
+            <td className="border px-3 py-2 w-1/4">Age: {patientInfo.age || '-'} years</td>
           </tr>
           <tr className="border">
-            <td className="border px-3 py-2" colSpan={2}>Patient name: {patientInfo.patient_name || 'N/A'}</td>
-            <td className="border px-3 py-2">Sex: {patientInfo.sex || 'N/A'}</td>
+            <td className="border px-3 py-2" colSpan={2}>Patient name: {patientInfo.patient_name || '-'}</td>
+            <td className="border px-3 py-2">Sex: {patientInfo.sex || '-'}</td>
           </tr>
           <tr className="border">
-            <td className="border px-3 py-2" colSpan={3}>
-              Refd. By: {patientInfo.doctor_id ? `Dr. ID: ${patientInfo.doctor_id}` : 'N/A'}
+            <td className="border px-3 py-2" colSpan={2}>
+              Ref. Doctor: {patientInfo.ref_doctor || '-'}
             </td>
-
+            <td className="border px-3 py-2">
+              Phone: {patientInfo.phone || '-'}
+            </td>
           </tr>
         </tbody>
       </table>

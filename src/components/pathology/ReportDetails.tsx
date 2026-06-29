@@ -97,11 +97,11 @@ export default function BiochemistryReport({ invoice, testName = "BIOCHEMISTRY R
             <td className="border px-3 py-2">Sex: {patientInfo?.sex || '-'}</td>
           </tr>
           <tr className="border">
-            <td className="border px-3 py-2">
-              Phone: {patientInfo?.phone || '-'}
-            </td>
             <td className="border px-3 py-2" colSpan={2}>
               Ref. Doctor: {patientInfo?.ref_doctor || '-'}
+            </td>
+            <td className="border px-3 py-2">
+              Phone: {patientInfo?.phone || '-'}
             </td>
           </tr>
         </tbody>

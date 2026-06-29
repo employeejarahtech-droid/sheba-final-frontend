@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DateField } from "@/components/date-field";
+import { useCan } from '@/hooks/use-can';
 
 const searchSchema = z.object({
   page: z.coerce.number().catch(1),
@@ -42,6 +43,8 @@ type ReportsItem = {
 };
 
 function Semen() {
+    const can = useCan();
+    const canEdit = can('pathology.hormone.semen.edit');
 
   const searchParams: any = Route.useSearch();
   const navigate: any = Route.useNavigate();
@@ -212,10 +215,10 @@ function Semen() {
       render: (_data: any, _type: string, row: ReportsItem) => {
         return `
           <div class="flex flex-nowrap items-center gap-2">
-            <a href="/dashboard/pathology/hormone/semen/edit/${row.id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
+            ${canEdit ? `<a href="/dashboard/pathology/hormone/semen/edit/${row.id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
               Edit
-            </a>
+            </a>` : ''}
             <a href="/dashboard/pathology/hormone/semen/report/${row.id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded text-xs font-semibold shadow transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
               Print
@@ -313,10 +316,10 @@ function Semen() {
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
             View Report
           </a>
-          <a href="/dashboard/pathology/hormone/semen/edit/${id}"
+          ${canEdit ? `<a href="/dashboard/pathology/hormone/semen/edit/${id}"
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 h-10 px-5 transition shadow-md">
             Edit
-          </a>
+          </a>` : ''}
         </div>
       `;
 

@@ -86,11 +86,13 @@ export default function TuberculinMTReportDetails({ mtData, invoiceData, padding
                         <td className="border px-3 py-2">Sex: {invoiceData?.sex}</td>
                     </tr>
                     <tr className="border">
-                        <td className="border px-3 py-2" colSpan={3}>
-                            Refd. By: {invoiceData?.reference_doctor ? `Prof./Dr. ${invoiceData.reference_doctor}` : 'N/A'}
-                        </td>
-
-                    </tr>
+            <td className="border px-3 py-2" colSpan={2}>
+              Ref. Doctor: {invoiceData?.reference_doctor ? `Prof./Dr. ${invoiceData.reference_doctor}` : '-'}
+            </td>
+            <td className="border px-3 py-2">
+              Phone: {invoiceData?.phone || '-'}
+            </td>
+          </tr>
                 </tbody>
             </table>
 

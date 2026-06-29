@@ -12,6 +12,7 @@ interface WidalTestData {
   machine_id: number | null;
   test_carried_out_by: string | null;
   created_at: string;
+    ref_doctor?: string | null;
   outdoor_invoice?: {
     id: number;
     patient_name: string;
@@ -20,6 +21,7 @@ interface WidalTestData {
     age_text: string;
     doctor_id: number | null;
     invoice_date: string;
+      phone?: string;
   };
 }
 
@@ -104,10 +106,12 @@ export default function WidalTestReportDetails({ data, paddingTop = 40 }: WidalT
             </td>
           </tr>
           <tr className="border">
-            <td className="border px-3 py-2" colSpan={3}>
-              Refd. By: Prof./Dr. {data.outdoor_invoice?.doctor_id || '--'}
+            <td className="border px-3 py-2" colSpan={2}>
+              Ref. Doctor: {data?.ref_doctor || (data?.outdoor_invoice?.doctor_id ? `Dr. ID: ${data.outdoor_invoice.doctor_id}` : '-')}
             </td>
-
+            <td className="border px-3 py-2">
+              Phone: {data?.outdoor_invoice?.phone || '-'}
+            </td>
           </tr>
         </tbody>
       </table>

@@ -2,6 +2,7 @@
 import { DataTable } from '@/components/DataTable'
 import { useMemo, useEffect, useState } from 'react'
 import { getCookie } from '@/lib/cookies'
+import { useCan } from '@/hooks/use-can'
 import { useQuery } from '@tanstack/react-query'
 import { useCurrency } from '@/hooks/use-currency'
 import { useDateFormat } from '@/hooks/use-date-format'
@@ -51,6 +52,8 @@ type InvoiceItem = {
 
 export default function DueCollection({ page, limit, search, from, to, setPage, setLimit, setSearch, setFrom, setTo }: DueCollectionProps) {
   const token = getCookie('accessToken');
+  const can = useCan();
+  const canCollect = can('outdoor.reception.due-collection.collection');
   const { currency, currencySymbol, format } = useCurrency();
   const fmtNum = (v: any) => Number(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const { dateFormat, formatDate: fmtDate } = useDateFormat();
@@ -507,7 +510,7 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
                  class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
                 Print Invoice
               </a>
-              ${!isPaid ? `
+              ${!isPaid && canCollect ? `
               <a href="/dashboard/outdoor/reception/due-collection/${id}"
                  class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-orange-600 text-white hover:bg-orange-700 h-10 px-5 transition shadow-md">
                 Collect Due
@@ -703,10 +706,10 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
             Print
           </a>
-          <a href="/dashboard/outdoor/reception/due-collection/${id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded text-xs font-semibold shadow transition-colors">
+          ${canCollect ? `<a href="/dashboard/outdoor/reception/due-collection/${id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded text-xs font-semibold shadow transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
             Collect Due
-          </a>
+          </a>` : ''}
         </div>`;
       },
     },

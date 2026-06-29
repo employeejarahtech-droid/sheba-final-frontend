@@ -3,38 +3,19 @@ import {
   SidebarContent,
   SidebarHeader,
 } from '@/components/ui/sidebar'
-import { useQuery } from '@tanstack/react-query'
 import { NavGroup } from './nav-group'
 import { AppTitle } from './app-title'
 import { sidebarData } from './data/sidebar-data'
-import { useAuthStore } from '@/stores/auth-store'
-import { getCookie } from '@/lib/cookies'
+import { useLiveUser } from '@/hooks/use-live-user'
 import { filterNavGroups } from '@/lib/permissions'
 
 export function AppSidebar() {
-  const user = useAuthStore((s) => s.user)
-  const token = getCookie('accessToken')
+  // Effective user reflects the role's CURRENT permissions (live /auth/me),
+  // not a potentially stale cached cookie user. See use-live-user.
+  const { user, storeUser, liveHide } = useLiveUser()
 
-  // Fetch the flag live — the cached user object (from an older session/cookie)
-  // may predate this field, so we don't rely on it alone.
-  const { data: meData } = useQuery({
-    queryKey: ['auth-me-hide-subscription'],
-    queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!res.ok) throw new Error('Failed to fetch user')
-      return res.json()
-    },
-    enabled: !!token,
-    staleTime: 60_000,
-  })
-
-  const liveHide = meData?.data?.hide_subscription_info
   const hideSubscription =
-    liveHide !== undefined
-      ? !!liveHide
-      : !!user?.hide_subscription_info
+    liveHide !== undefined ? !!liveHide : !!storeUser?.hide_subscription_info
 
   // When the company has hide_subscription_info enabled, drop the
   // Subscription link from the sidebar entirely.

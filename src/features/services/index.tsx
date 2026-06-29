@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FolderOpen, Activity, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useCurrency } from '@/hooks/use-currency'
+import { useCan } from '@/hooks/use-can'
 
 type ServiceItem = {
     id: number;
@@ -34,6 +35,10 @@ interface ServicesProps {
 }
 
 export default function Services({ page, limit, search, setPage, setLimit, setSearch }: ServicesProps) {
+    const can = useCan();
+    const canCreate = can('indoor.master.services.create');
+    const canEdit = can('indoor.master.services.edit');
+    const canDelete = can('indoor.master.services.delete');
 
     const token = getCookie('accessToken');
     const queryClient = useQueryClient();
@@ -192,14 +197,14 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                             View
                         </button>
-                        <button data-action="edit" data-id="${row.id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                        ${canEdit ? `<button data-action="edit" data-id="${row.id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                             Edit
-                        </button>
-                        <button data-action="delete" data-id="${row.id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                        </button>` : ''}
+                        ${canDelete ? `<button data-action="delete" data-id="${row.id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-semibold shadow transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                             Delete
-                        </button>
+                        </button>` : ''}
                     </div>
                 `;
             },
@@ -308,10 +313,10 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
                                 View
                             </button>
 
-                            <button data-action="edit" data-id="${id}"
+                            ${canEdit ? `<button data-action="edit" data-id="${id}"
                                     class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition h-10 px-5 shadow">
                                 Edit
-                            </button>
+                            </button>` : ''}
                         </div>
                     </div>
                 </div>
@@ -399,15 +404,13 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
                 {/* Header & Table */}
                 <PageHeader
                     title="List of Services"
-                    actions={
-                        <Button
+                    actions={canCreate ? ( <Button
                             onClick={() => navigate({ to: '/dashboard/indoor/master/services/create' })}
                             className="bg-blue-600 hover:bg-blue-700"
                         >
                             <Plus className="h-4 w-4 mr-2" />
                             Add Service
-                        </Button>
-                    }
+                        </Button> ) : null}
                 />
                 <DataTable
                     columns={columns}

@@ -11,6 +11,7 @@ import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
 import { useCurrency } from '@/hooks/use-currency'
+import { useCan } from '@/hooks/use-can'
 
 interface GrnRow {
   id: number
@@ -28,6 +29,8 @@ export const Route = createFileRoute('/_authenticated/dashboard/reports/inventor
 })
 
 function SupplierPurchasesPage() {
+    const can = useCan();
+    const canEdit = can('reports.inventory.supplier-purchases.edit');
   const searchParams: any = Route.useSearch()
   const navigate = Route.useNavigate()
   const { formatDate } = useDateFormat()
@@ -132,7 +135,7 @@ function SupplierPurchasesPage() {
     {
       data: null, title: 'Actions', orderable: false,
       render: (_d: any, _t: string, row: GrnRow) =>
-        `<a href="/dashboard/purchase/goods-receipt/edit/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent h-8 px-3">View / Edit</a>`,
+        `${canEdit ? `<a href="/dashboard/purchase/goods-receipt/edit/${row.id}" class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent h-8 px-3">View / Edit</a>` : ''}`,
     },
   ]
 

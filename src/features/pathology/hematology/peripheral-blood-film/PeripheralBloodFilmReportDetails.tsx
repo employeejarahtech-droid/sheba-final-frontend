@@ -70,11 +70,13 @@ export default function PeripheralBloodFilmReportDetails({ invoice: invoice, tes
                         <td className="border px-3 py-2">Sex: {patientInfo.sex || 'N/A'}</td>
                     </tr>
                     <tr className="border">
-                        <td className="border px-3 py-2" colSpan={3}>
-                            Refd. By: {patientInfo.doctor_id ? `Dr. ID: ${patientInfo.doctor_id}` : 'N/A'}
-                        </td>
-
-                    </tr>
+            <td className="border px-3 py-2" colSpan={2}>
+              Ref. Doctor: {invoice.ref_doctor || (patientInfo.doctor_id ? `Dr. ID: ${patientInfo.doctor_id}` : '-')}
+            </td>
+            <td className="border px-3 py-2">
+              Phone: {patientInfo.phone || invoice.phone || '-'}
+            </td>
+          </tr>
                 </tbody>
             </table>
 

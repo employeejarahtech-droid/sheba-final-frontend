@@ -9,10 +9,12 @@ interface LoginSettings {
   bgImage?: string
   informationText?: string
   company_name?: string
+  company_details?: string
 }
 
 export function Login() {
   const [companyName, setCompanyName] = useState<string>('HMS')
+  const [companyDetails, setCompanyDetails] = useState<string>('')
   const [profileImage, setProfileImage] = useState<string | null>(null)
   const [bgImage, setBgImage] = useState<string | null>(null)
   const [informationText, setInformationText] = useState<string>('')
@@ -59,6 +61,14 @@ export function Login() {
 
             // Information text
             setInformationText(settings.informationText || '')
+
+            // Company info
+            if (settings.company_name) {
+              setCompanyName(settings.company_name)
+            }
+            if (settings.company_details) {
+              setCompanyDetails(settings.company_details)
+            }
 
             // Update favicon dynamically
             if (logoUrl) {
@@ -168,7 +178,9 @@ export function Login() {
             )}
             <div className='text-center'>
               <h1 className='text-3xl font-bold text-gray-900'>{companyName}</h1>
-              <p className='text-sm text-gray-500'>Hospital Management System</p>
+              <p className='text-sm text-gray-500 whitespace-pre-wrap mt-1'>
+                {companyDetails || 'Hospital Management System'}
+              </p>
             </div>
           </div>
         </div>

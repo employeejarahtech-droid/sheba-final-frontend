@@ -378,9 +378,14 @@ function EditRolePermissions() {
                                                         <CardHeader className={cn("border-b py-2 px-4 gap-0", GROUP_GRADIENTS[0])}>
                                                             <div className="flex items-center justify-between gap-2 w-full">
                                                                 <CardTitle className="text-sm font-bold text-white">Dashboard</CardTitle>
-                                                                <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs text-white hover:bg-white/20 underline" onClick={() => toggleDashboardGroup(values)}>
-                                                                    {allChecked ? "Unselect All" : "Select All"}
-                                                                </Button>
+                                                                <div className="flex items-center gap-2">
+                                                                    <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs text-white hover:bg-white/20 underline" onClick={() => toggleDashboardGroup(values)}>
+                                                                        {allChecked ? "Unselect All" : "Select All"}
+                                                                    </Button>
+                                                                    <Button type="submit" size="sm" disabled={updateRoleIsLoading} className="h-7 px-3 text-xs bg-white/20 hover:bg-white/30 text-white border-0 shadow-none">
+                                                                        {updateRoleIsLoading ? "Saving..." : "Save"}
+                                                                    </Button>
+                                                                </div>
                                                             </div>
                                                         </CardHeader>
                                                         <CardContent className="px-4 py-4">
@@ -415,9 +420,14 @@ function EditRolePermissions() {
                                                             <CardHeader className={cn("border-b py-2 px-4 gap-0", GROUP_GRADIENTS[idx % GROUP_GRADIENTS.length])}>
                                                                 <div className="flex items-center justify-between gap-2 w-full">
                                                                     <CardTitle className="text-sm font-bold text-white">{groupName}</CardTitle>
-                                                                    <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs text-white hover:bg-white/20 underline" onClick={() => toggleGroup(values)}>
-                                                                        {allChecked ? "Unselect All" : "Select All"}
-                                                                    </Button>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs text-white hover:bg-white/20 underline" onClick={() => toggleGroup(values)}>
+                                                                            {allChecked ? "Unselect All" : "Select All"}
+                                                                        </Button>
+                                                                        <Button type="submit" size="sm" disabled={updateRoleIsLoading} className="h-7 px-3 text-xs bg-white/20 hover:bg-white/30 text-white border-0 shadow-none">
+                                                                            {updateRoleIsLoading ? "Saving..." : "Save"}
+                                                                        </Button>
+                                                                    </div>
                                                                 </div>
                                                             </CardHeader>
                                                             <CardContent className="px-4 py-2">

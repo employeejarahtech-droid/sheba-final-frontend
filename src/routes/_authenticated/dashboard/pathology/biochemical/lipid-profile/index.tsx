@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DateField } from "@/components/date-field";
+import { useCan } from '@/hooks/use-can';
 
 const lipidProfileSearchSchema = z.object({
   page: z.coerce.number().catch(1),
@@ -43,6 +44,8 @@ type LipidProfileItem = {
 };
 
 function LipidProfile() {
+    const can = useCan();
+    const canEdit = can('pathology.biochemical.lipid-profile.edit');
   const [open, setOpen] = useState<boolean>(false);
   const [reportId, setReportId] = useState<number>(1);
   const [invoiceId, setInvoiceId] = useState<number>(1);
@@ -219,10 +222,10 @@ function LipidProfile() {
              class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
             View Report
           </a>
-          <button onclick="window.editLipidProfile(${reportId}, ${invoiceId})"
+          ${canEdit ? `<button onclick="window.editLipidProfile(${reportId}, ${invoiceId})"
                   class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-purple-600 text-white hover:bg-purple-700 h-10 px-5 transition shadow-md">
             Edit
-          </button>
+          </button>` : ''}
         </div>
       `;
 
@@ -455,12 +458,12 @@ function LipidProfile() {
       render: (_data: any, _type: string, row: LipidProfileItem) => {
         return `
           <div class="flex flex-nowrap items-center gap-2">
-            <button type="button" onclick="window.editLipidProfile(${row.id}, ${row.invoice_id})" title="Edit"
+            ${canEdit ? `<button type="button" onclick="window.editLipidProfile(${row.id}, ${row.invoice_id})" title="Edit"
               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
               Edit
-            </button>
-            <a href="/dashboard/pathology/biochemical/lipid-profile/report/${row.id}" target="_blank" rel="noopener noreferrer" title="Print / view report"
+            </button>` : ''}
+            <a href="/dashboard/pathology/biochemical/lipid-profile/report/${row.id}" title="Print / view report"
               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded text-xs font-semibold shadow transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
               Print

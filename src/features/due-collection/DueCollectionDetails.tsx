@@ -1,6 +1,7 @@
 import { useParams } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
+import { useCan } from '@/hooks/use-can'
 import { AppHeader } from '@/components/layout/app-header'
 
 
@@ -70,6 +71,8 @@ type InvoiceDetails = {
 export default function DueCollectionDetails() {
     const { invoiceId } = useParams({ from: '/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId' });
     const token = getCookie('accessToken');
+    const can = useCan();
+    const canCollect = can('outdoor.reception.due-collection.collection');
     const queryClient = useQueryClient();
     const navigate = useNavigate();
     const { currencySymbol, format } = useCurrency();
@@ -967,14 +970,16 @@ export default function DueCollectionDetails() {
                                 </div>
                             </CardContent>
                             <CardFooter className="pb-4">
-                                <Button
-                                    className="w-full"
-                                    size="lg"
-                                    onClick={handleConfirmCollection}
-                                    disabled={collectMutation.isPending || isFullyPaid}
-                                >
-                                    {isFullyPaid ? "Fully Paid" : collectMutation.isPending ? "Processing..." : "Confirm & Collect"}
-                                </Button>
+                                {canCollect && (
+                                    <Button
+                                        className="w-full"
+                                        size="lg"
+                                        onClick={handleConfirmCollection}
+                                        disabled={collectMutation.isPending || isFullyPaid}
+                                    >
+                                        {isFullyPaid ? "Fully Paid" : collectMutation.isPending ? "Processing..." : "Confirm & Collect"}
+                                    </Button>
+                                )}
                                 {isFullyPaid && (
                                     <p className="text-sm text-green-600 text-center mt-2">
                                         ✅ This invoice has been fully paid

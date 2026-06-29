@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/stores/auth-store'
+import { useLiveUser } from '@/hooks/use-live-user'
 import { hasPermission } from '@/lib/permissions'
 
 /**
@@ -8,11 +8,16 @@ import { hasPermission } from '@/lib/permissions'
  *   const can = useCan()
  *   {can('users.create') && <AddUserButton />}
  *
+ * Reads the live /auth/me user (via useLiveUser) so action-button visibility
+ * stays consistent with the sidebar and route guard — a role's permissions can
+ * change after the user last logged in, and the cached cookie user would be
+ * stale. React Query dedupes the shared key, so many callers = one request.
+ *
  * Admins and roles with no permissions configured are unrestricted (see
  * lib/permissions). Accepts a single permission or an array (any-of).
  */
 export function useCan() {
-  const user = useAuthStore((s) => s.user)
+  const { user } = useLiveUser()
   return (permission: string | string[]): boolean => {
     const list = Array.isArray(permission) ? permission : [permission]
     return list.some((p) => hasPermission(user, p))

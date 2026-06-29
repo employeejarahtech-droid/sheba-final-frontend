@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, Printer } from "lucide-react"
 import { useEffect, useRef, useState } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
+import { ReportFooter } from '@/components/pathology/ReportFooter'
 
 export const Route = createFileRoute('/_authenticated/dashboard/ecg/all/print/$id')({
   component: PrintECGReport,
@@ -41,21 +42,7 @@ function PrintECGReport() {
     enabled: !!token,
   })
 
-  // Auto-print only on initial load, not on refresh
-  useEffect(() => {
-    if (ecgData && !hasPrinted.current) {
-      const printKey = `ecg-print-${id}`
-      const alreadyPrinted = sessionStorage.getItem(printKey)
 
-      if (!alreadyPrinted) {
-        hasPrinted.current = true
-        sessionStorage.setItem(printKey, 'true')
-        setTimeout(() => {
-          window.print()
-        }, 500)
-      }
-    }
-  }, [ecgData, id])
 
   if (isLoading) {
     return (
@@ -157,17 +144,20 @@ function PrintECGReport() {
           <table className="w-full text-sm border">
             <tbody>
               <tr className="border">
-                <td className="border px-3 py-2 w-1/4">Receipt ID : {patientInfo?.id || 'N/A'}</td>
+                <td className="border px-3 py-2 w-1/4">Receipt ID : {patientInfo?.id || '-'}</td>
                 <td className="border px-3 py-2 w-1/4">Date: {invoiceDate}</td>
-                <td className="border px-3 py-2 w-1/4">Age: {patientInfo?.age_text || patientInfo?.age || 'N/A'}</td>
+                <td className="border px-3 py-2 w-1/4">Age: {patientInfo?.age || '-'} years</td>
               </tr>
               <tr className="border">
-                <td className="border px-3 py-2" colSpan={2}>Patient name: {patientInfo?.patient_name || 'N/A'}</td>
-                <td className="border px-3 py-2">Sex: {patientInfo?.sex || 'N/A'}</td>
+                <td className="border px-3 py-2" colSpan={2}>Patient name: {patientInfo?.patient_name || '-'}</td>
+                <td className="border px-3 py-2">Sex: {patientInfo?.sex || '-'}</td>
               </tr>
               <tr className="border">
-                <td className="border px-3 py-2" colSpan={3}>
-                  Phone: {patientInfo?.phone || 'N/A'}
+                <td className="border px-3 py-2" colSpan={2}>
+                  Ref. Doctor: {patientInfo?.ref_doctor || '-'}
+                </td>
+                <td className="border px-3 py-2">
+                  Phone: {patientInfo?.phone || '-'}
                 </td>
               </tr>
             </tbody>
@@ -193,14 +183,7 @@ function PrintECGReport() {
           </table>
 
           {/* Footer Signatures */}
-          <div className="grid grid-cols-2 mt-32 text-sm">
-            <div>
-              <p className="border-t border-dashed w-40 pt-1 text-center">Checked By:</p>
-            </div>
-            <div className="text-center">
-              <p className="border-t border-dashed w-56 ml-auto pt-1">Radiologist:</p>
-            </div>
-          </div>
+          <ReportFooter />
 
           {/* Buttons */}
          
