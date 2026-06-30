@@ -5,6 +5,7 @@ import { getCookie } from '@/lib/cookies'
 import { AppHeader } from '@/components/layout/app-header'
 import { DataTable } from '@/components/DataTable'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { StatCards, type StatCardData } from '@/features/assets/components/StatCard'
 import { Button } from '@/components/ui/button'
 import { Scale, Printer, FileText, Calendar, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
 import { DateField } from '@/components/date-field'
@@ -107,20 +108,20 @@ function BalanceSheetPage() {
   // Paginate items
   const paginatedItems = allItems.slice((page - 1) * limit, page * limit)
 
-  // Calculate statistics
-  const stats = useMemo(() => {
+  // Calculate statistics → shared StatCards data
+  const cards: StatCardData[] = useMemo(() => {
     const assetCount = balanceSheetData.assets.length
     const liabilityCount = balanceSheetData.liabilities.length
-    const equityCount = balanceSheetData.equity.length
     const isBalanced = Math.abs(balanceSheetData.total_assets - (balanceSheetData.total_liabilities + balanceSheetData.total_equity)) < 0.01
+    const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2 })
 
     return [
-      { label: 'Total Assets', value: balanceSheetData.total_assets, icon: TrendingUp, grad: 'from-emerald-500 to-emerald-600' },
-      { label: 'Total Liabilities', value: balanceSheetData.total_liabilities, icon: TrendingDown, grad: 'from-red-500 to-red-600' },
-      { label: 'Total Equity', value: balanceSheetData.total_equity, icon: DollarSign, grad: 'from-blue-500 to-blue-600' },
-      { label: 'Asset Accounts', value: assetCount, icon: Scale, grad: 'from-teal-500 to-teal-600' },
-      { label: 'Liability Accounts', value: liabilityCount, icon: Scale, grad: 'from-orange-500 to-orange-600' },
-      { label: 'Balance Status', value: isBalanced ? 'BALANCED' : 'DISCREPANCY', icon: Scale, grad: isBalanced ? 'from-green-500 to-green-600' : 'from-red-500 to-red-600' },
+      { label: 'Total Assets',       value: fmt(balanceSheetData.total_assets),      icon: TrendingUp,   headerBg: COLORS[0], iconColor: COLORS[0] },
+      { label: 'Total Liabilities',  value: fmt(balanceSheetData.total_liabilities), icon: TrendingDown, headerBg: COLORS[1], iconColor: COLORS[1] },
+      { label: 'Total Equity',       value: fmt(balanceSheetData.total_equity),      icon: DollarSign,   headerBg: COLORS[2], iconColor: COLORS[2] },
+      { label: 'Asset Accounts',     value: assetCount,                              icon: Scale,        headerBg: COLORS[3], iconColor: COLORS[3] },
+      { label: 'Liability Accounts', value: liabilityCount,                          icon: Scale,        headerBg: COLORS[4], iconColor: COLORS[4] },
+      { label: 'Balance Status',     value: isBalanced ? 'BALANCED' : 'DISCREPANCY', icon: Scale,        headerBg: COLORS[5], iconColor: COLORS[5] },
     ]
   }, [balanceSheetData])
 
@@ -214,46 +215,30 @@ function BalanceSheetPage() {
       />
 
       <main className="">
-        {/* Enhanced Stats Cards - 6 cards in 2 rows */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-          {stats.map((stat, index) => {
-            const Icon = stat.icon
-            const colors = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
-            const isBalance = index === 5;
-            return (
-              <Card key={index} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: colors[index % 6] }}>
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 bg-white rounded-lg shadow-lg">
-                      <Icon className="w-4 h-4" style={{ color: colors[index % 6] }} />
-                    </div>
-                    <CardTitle className="text-sm font-semibold text-white/90">{stat.label}</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <p className="text-2xl font-bold">
-                    {isBalance ? stat.value : stat.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </p>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
+        {/* Stat cards — shared StatCards component */}
+        <StatCards cards={cards} />
 
         {/* Main Balance Sheet Sections */}
-        <div className="grid gap-6 lg:grid-cols-2 mb-6">
+        <div className="grid gap-6 lg:grid-cols-2 mb-6 p-0">
           {/* Assets Section */}
-          <Card className="lg:row-span-2">
-            <CardHeader className="bg-emerald-50 border-b border-emerald-200">
-              <CardTitle className="text-emerald-700 flex items-center gap-2">
-                <Scale className="w-5 h-5" /> Assets
-              </CardTitle>
+          <Card className="lg:row-span-2 overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+            <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg shadow-lg">
+                  <Scale className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold">Assets</CardTitle>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Resources owned by the business</p>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="p-0">
               <DataTable
                 columns={columns}
                 data={balanceSheetData.assets.map(item => ({ ...item, type: 'asset' as const }))}
                 isLoading={isLoading}
+                hideExport
                 showSearch={false}
                 showPagination={false}
               />
@@ -266,11 +251,17 @@ function BalanceSheetPage() {
 
           {/* Liabilities & Equity Section */}
           <div className="space-y-6">
-            <Card>
-              <CardHeader className="bg-red-50 border-b border-red-200">
-                <CardTitle className="text-red-700 flex items-center gap-2">
-                  <Scale className="w-5 h-5 rotate-180" /> Liabilities
-                </CardTitle>
+            <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+              <CardHeader className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30 border-b py-1.5 px-4 gap-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-gradient-to-br from-red-500 to-rose-500 rounded-lg shadow-lg">
+                    <Scale className="w-4 h-4 rotate-180 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-bold">Liabilities</CardTitle>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Obligations owed to others</p>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="p-0">
                 <DataTable
@@ -287,11 +278,17 @@ function BalanceSheetPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="bg-blue-50 border-b border-blue-200">
-                <CardTitle className="text-blue-700 flex items-center gap-2">
-                  <Scale className="w-5 h-5" /> Equity
-                </CardTitle>
+            <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                    <Scale className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-bold">Equity</CardTitle>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Owner's remaining interest</p>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="p-0">
                 <DataTable
@@ -309,8 +306,8 @@ function BalanceSheetPage() {
             </Card>
 
             {/* Accounting Equation Verification */}
-            <Card className="bg-primary/5 border-primary/20 border-2">
-              <CardContent className="py-6 space-y-4">
+            <Card className="bg-primary/5 border-primary/20 border-2 p-0">
+              <CardContent className="py-6 space-y-4 p-0">
                 <div className="flex justify-between items-center text-sm font-medium text-muted-foreground uppercase tracking-widest">
                   <span>Accounting Equation</span>
                   <span className="text-xs lowercase text-muted-foreground/50 italic">(Assets = Liabilities + Equity)</span>
@@ -352,6 +349,7 @@ function BalanceSheetPage() {
           search={search}
           onSearchChange={setSearch}
           isLoading={isLoading}
+          hideExport
           filterSlot={
             <div className="flex items-center gap-1.5">
               <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>

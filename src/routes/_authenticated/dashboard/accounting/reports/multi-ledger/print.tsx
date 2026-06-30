@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 import { ArrowLeft, Printer } from 'lucide-react';
 
@@ -64,12 +64,10 @@ function MultiLedgerPrintPage() {
             <AppHeader fixed />
             <Main>
                 <div className="print:hidden flex items-center justify-between gap-4 mb-4">
-                    <Link to="/dashboard/reports/multi-ledger" search={{ account_ids: search.account_ids, from: search.from, to: search.to }}>
-                        <Button variant="outline" size="sm">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Multi-Ledger
-                        </Button>
-                    </Link>
+                    <Button variant="outline" size="sm" onClick={() => window.history.back()}>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Multi-Ledger
+                    </Button>
                     <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
                             <label htmlFor="padding-select" className="text-sm font-medium">Padding Top:</label>

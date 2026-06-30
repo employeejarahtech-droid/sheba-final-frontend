@@ -108,15 +108,18 @@ function ChartOfAccounts() {
     const { data: trialBalanceData } = useGetTrialBalanceQuery();
 
     const balanceMap = React.useMemo(() => {
-        const map = new Map<string, { debit: number; credit: number; balance: number }>();
-        const items = trialBalanceData?.data?.trial_balance;
+        // Keyed by account id (NOT name) — several accounts share a name
+        // (e.g. "Surgical / OT Supplies"), so name-keying would overwrite and
+        // give the wrong debit/credit. id matches exactly one journal-derived row.
+        const map = new Map<number, { debit: number; credit: number; balance: number }>();
+        const items = trialBalanceData?.trial_balance;
         if (Array.isArray(items)) {
             items.forEach((item: any) => {
                 const debit = parseFloat(item.debit) || 0;
                 const credit = parseFloat(item.credit) || 0;
                 const isDebitNature = ['ASSET', 'EXPENSE'].includes(item.type);
                 const balance = isDebitNature ? (debit - credit) : (credit - debit);
-                map.set(item.account, { debit, credit, balance });
+                map.set(item.id, { debit, credit, balance });
             });
         }
         return map;
@@ -127,7 +130,7 @@ function ChartOfAccounts() {
         const nodeMap = new Map<number, any>();
         
         rawAccounts.forEach((acc) => {
-            const balanceInfo = balanceMap.get(acc.name) || { debit: 0, credit: 0, balance: 0 };
+            const balanceInfo = balanceMap.get(acc.id) || { debit: 0, credit: 0, balance: 0 };
             nodeMap.set(acc.id, {
                 id: acc.id,
                 name: acc.name,
@@ -398,8 +401,11 @@ function ChartOfAccounts() {
 
     const renderCategorySection = (title: string, roots: any[], type: string) => {
         const visibleNodes = getVisibleNodes(roots);
+        const totalCategoryDebit = roots.reduce((sum, root) => sum + root.debit, 0);
+        const totalCategoryCredit = roots.reduce((sum, root) => sum + root.credit, 0);
         const totalCategoryBalance = roots.reduce((sum, root) => sum + root.balance, 0);
         const cfg = TYPE_CONFIG[type.toUpperCase()] || { label: title, color: "text-gray-600", hint: "" };
+        const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
         return (
             <Card className="border shadow-none overflow-hidden p-0 gap-0">
@@ -412,11 +418,19 @@ function ChartOfAccounts() {
                             {roots.length} Head{roots.length !== 1 && "s"}
                         </span>
                     </div>
-                    <div className="text-right">
-                        <span className="text-xs text-muted-foreground mr-1">Total:</span>
-                        <span className="font-semibold text-sm">
-                            {currencySymbol} {totalCategoryBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
+                    <div className="flex items-center gap-4 text-right">
+                        <div>
+                            <span className="text-xs text-muted-foreground mr-1">Dr:</span>
+                            <span className="font-semibold text-sm text-emerald-600">{currencySymbol} {fmt(totalCategoryDebit)}</span>
+                        </div>
+                        <div>
+                            <span className="text-xs text-muted-foreground mr-1">Cr:</span>
+                            <span className="font-semibold text-sm text-red-600">{currencySymbol} {fmt(totalCategoryCredit)}</span>
+                        </div>
+                        <div>
+                            <span className="text-xs text-muted-foreground mr-1">Bal:</span>
+                            <span className="font-semibold text-sm">{currencySymbol} {fmt(totalCategoryBalance)}</span>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -431,7 +445,9 @@ function ChartOfAccounts() {
                                     <tr className="border-b bg-muted/30 text-xs font-semibold text-gray-500 dark:text-gray-400">
                                         <th className="py-2 px-4 text-left w-24">Code</th>
                                         <th className="py-2 px-4 text-left">Account Name</th>
-                                        <th className="py-2 px-4 text-right w-44">Balance</th>
+                                        <th className="py-2 px-4 text-right w-32">Debit</th>
+                                        <th className="py-2 px-4 text-right w-32">Credit</th>
+                                        <th className="py-2 px-4 text-right w-32">Balance</th>
                                         <th className="py-2 px-4 text-right w-24">Actions</th>
                                     </tr>
                                 </thead>
@@ -491,6 +507,20 @@ function ChartOfAccounts() {
                                                             </span>
                                                         )}
                                                     </div>
+                                                </td>
+                                                <td className="py-2 px-4 text-right font-mono align-middle">
+                                                    {node.debit > 0 ? (
+                                                        <span className="text-emerald-600">{currencySymbol} {node.debit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                    ) : (
+                                                        <span className="text-muted-foreground/40">—</span>
+                                                    )}
+                                                </td>
+                                                <td className="py-2 px-4 text-right font-mono align-middle">
+                                                    {node.credit > 0 ? (
+                                                        <span className="text-red-600">{currencySymbol} {node.credit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                    ) : (
+                                                        <span className="text-muted-foreground/40">—</span>
+                                                    )}
                                                 </td>
                                                 <td className="py-2 px-4 text-right font-mono font-semibold align-middle">
                                                     <span className={node.balance > 0 ? "text-emerald-600" : node.balance < 0 ? "text-red-600" : "text-muted-foreground"}>
@@ -741,21 +771,21 @@ function ChartOfAccounts() {
                     {[
                         {
                             label: "Total Debit",
-                            value: (trialBalanceData?.data?.total_debit ?? 0),
+                            value: (trialBalanceData?.total_debit ?? 0),
                             icon: TrendingUp,
                             grad: "from-emerald-500 to-teal-500",
                             sub: "Sum of all debit balances"
                         },
                         {
                             label: "Total Credit",
-                            value: (trialBalanceData?.data?.total_credit ?? 0),
+                            value: (trialBalanceData?.total_credit ?? 0),
                             icon: TrendingDown,
                             grad: "from-rose-500 to-red-500",
                             sub: "Sum of all credit balances"
                         },
                         {
                             label: "Net Balance",
-                            value: ((trialBalanceData?.data?.total_debit ?? 0) - (trialBalanceData?.data?.total_credit ?? 0)),
+                            value: ((trialBalanceData?.total_debit ?? 0) - (trialBalanceData?.total_credit ?? 0)),
                             icon: Scale,
                             grad: "from-violet-500 to-purple-500",
                             sub: "Debit - Credit balance"

@@ -263,13 +263,16 @@ export const accountingService = {
     // GET TRIAL BALANCE
     getTrialBalance: async (params?: { date?: string }) => {
         const response = await api.get<TrialBalanceResponse>('/accounting/reports/trial-balance', { params });
-        return response.data;
+        return response.data?.data || response.data;
     },
 
     // GET PROFIT & LOSS
     getProfitLoss: async (params?: { from?: string; to?: string }) => {
-        const response = await api.get<ProfitLossResponse>('/accounting/reports/profit-and-loss', { params });
-        return response.data;
+        const response = await api.get<{ data: ProfitLossResponse }>('/accounting/reports/profit-and-loss', { params });
+        // The report payload ({ income, expense, total_income, total_expense, net_profit })
+        // is nested under `data` by the success() wrapper; unwrap it so consumers read it flat
+        // (matches the trial-balance / cash-flow services).
+        return response.data?.data ?? ({} as ProfitLossResponse);
     },
 
     // GET BALANCE SHEET

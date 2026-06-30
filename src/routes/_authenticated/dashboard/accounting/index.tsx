@@ -1,6 +1,8 @@
 
+import { useMemo } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
 import { PageHeader } from '@/components/layout/page-header'
+import { cn } from '@/lib/utils'
 
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,11 +12,13 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useGetAccountingChartDataQuery, useGetAccountingOverviewQuery, useGetExpenseBreakdownQuery, useGetRecentActivityQuery } from '@/features/accounting/accountingQueries'
 import {
     ArrowDownLeft,
+    ArrowLeftRight,
     ArrowUpRight,
     Calendar,
     CalendarClock,
     CalendarDays,
     CalendarRange,
+    History,
     Plus,
 } from 'lucide-react'
 import {
@@ -39,12 +43,29 @@ export const Route = createFileRoute('/_authenticated/dashboard/accounting/')({
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
 
+const fmt = (n: number) =>
+    Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+type KpiTone = 'emerald' | 'red' | 'default'
+function Kpi({ label, value, tone = 'default' }: { label: string; value: string; tone?: KpiTone }) {
+    const toneClass =
+        tone === 'emerald' ? 'text-emerald-600 dark:text-emerald-400'
+            : tone === 'red' ? 'text-red-600 dark:text-red-400'
+                : 'text-foreground'
+    return (
+        <div className="rounded-lg border bg-card px-3 py-2">
+            <div className="text-xs text-muted-foreground">{label}</div>
+            <div className={cn('mt-0.5 truncate text-sm font-semibold tabular-nums', toneClass)}>{value}</div>
+        </div>
+    )
+}
+
 function AccountingOverview() {
     const { currencySymbol } = useCurrency()
 
     // Queries
     const { data: accountingOverview } = useGetAccountingOverviewQuery();
-    const { data: recentActivityData } = useGetRecentActivityQuery();
+    const { data: recentActivityData, isLoading: recentLoading, isError: recentError } = useGetRecentActivityQuery();
     const { data: expenseBreakdownResponse } = useGetExpenseBreakdownQuery();
     const { data: chartData } = useGetAccountingChartDataQuery();
 
@@ -59,6 +80,47 @@ function AccountingOverview() {
     // @ts-ignore
     const expenseBreakdownData = expenseBreakdownResponse?.data || [];
     const chartTrendData = chartData?.data || [];
+
+    // Derived stats for the card KPI strips. Depend on the (stable) query results
+    // rather than the inline `|| []` fallbacks, which would recompute every render.
+    const trendStats = useMemo(() => {
+        // ChartResponse is mis-typed as ChartOfAccount[]; runtime rows are { date, income, expense }.
+        const rows = (chartData?.data || []) as unknown as { income?: number; expense?: number }[]
+        let income = 0
+        let expense = 0
+        for (const point of rows) {
+            income += Number(point.income || 0)
+            expense += Number(point.expense || 0)
+        }
+        return { income, expense, net: income - expense }
+    }, [chartData])
+
+    const expenseStats = useMemo(() => {
+        const data = expenseBreakdownResponse?.data || []
+        const total = data.reduce((s, d) => s + Number(d.value || 0), 0)
+        let top: { name: string; value: number } | null = null
+        for (const d of data) {
+            const v = Number(d.value || 0)
+            if (!top || v > top.value) top = { name: d.name || '—', value: v }
+        }
+        return {
+            total,
+            count: data.length,
+            top,
+            topPct: top && total > 0 ? (top.value / total) * 100 : 0,
+        }
+    }, [expenseBreakdownResponse])
+
+    const activityStats = useMemo(() => {
+        const rows = recentActivityData?.data || []
+        let income = 0
+        let expense = 0
+        for (const a of rows) {
+            if (a.type === 'income') income += Number(a.amount || 0)
+            else if (a.type === 'expense') expense += Number(a.amount || 0)
+        }
+        return { count: rows.length, income, expense, net: income - expense }
+    }, [recentActivityData])
 
     const periods: (keyof Overview)[] = ["today", "this_week", "this_month", "this_year"];
 
@@ -198,10 +260,18 @@ function AccountingOverview() {
                                 <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
                                     <Calendar className="w-6 h-6 text-white" />
                                 </div>
-                                <CardTitle>Income vs Expense Trend</CardTitle>
+                                <div>
+                                    <CardTitle>Income vs Expense Trend</CardTitle>
+                                    <p className="text-xs text-muted-foreground">Daily totals · last 30 days</p>
+                                </div>
                             </div>
                         </CardHeader>
                         <CardContent className="pt-4 pb-6">
+                            <div className="mb-4 grid grid-cols-3 gap-3">
+                                <Kpi label="Income" value={`${currencySymbol} ${fmt(trendStats.income)}`} tone="emerald" />
+                                <Kpi label="Expense" value={`${currencySymbol} ${fmt(trendStats.expense)}`} tone="red" />
+                                <Kpi label="Net" value={`${currencySymbol} ${fmt(trendStats.net)}`} tone={trendStats.net >= 0 ? 'emerald' : 'red'} />
+                            </div>
                             <div className="h-[300px] w-full min-w-0">
                                 <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                                     <BarChart data={chartTrendData}>
@@ -224,10 +294,18 @@ function AccountingOverview() {
                                 <div className="p-3 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl shadow-lg shadow-orange-500/30">
                                     <CalendarRange className="w-6 h-6 text-white" />
                                 </div>
-                                <CardTitle>Expense Breakdown</CardTitle>
+                                <div>
+                                    <CardTitle>Expense Breakdown</CardTitle>
+                                    <p className="text-xs text-muted-foreground">Distribution by expense account</p>
+                                </div>
                             </div>
                         </CardHeader>
                         <CardContent className="pb-6 pt-4">
+                            <div className="mb-4 grid grid-cols-3 gap-3">
+                                <Kpi label="Total" value={`${currencySymbol} ${fmt(expenseStats.total)}`} tone="red" />
+                                <Kpi label="Categories" value={String(expenseStats.count)} />
+                                <Kpi label="Largest" value={expenseStats.top ? `${expenseStats.topPct.toFixed(0)}% · ${expenseStats.top.name}` : '—'} />
+                            </div>
                             <div className="h-[300px] w-full min-w-0 flex items-center justify-center">
                                 <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                                     <PieChart>
@@ -256,32 +334,69 @@ function AccountingOverview() {
                 </div>
 
                 {/* Recent Activity */}
-                <Card className="mt-8 overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-6">
-                    <CardHeader>
-                        <CardTitle>Recent Activity</CardTitle>
+                <Card className="mt-8 overflow-hidden border-2 transition-all duration-300 hover:border-violet-200 hover:shadow-lg py-0">
+                    <CardHeader className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 dark:from-violet-950/30 dark:via-purple-950/30 dark:to-violet-950/30 border-b-1 border-violet-100 dark:border-violet-900 py-3 gap-0">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-gradient-to-br from-violet-600 to-purple-500 rounded-xl shadow-lg shadow-violet-500/30">
+                                <History className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <CardTitle>Recent Activity</CardTitle>
+                                <p className="text-xs text-muted-foreground">Latest journal postings</p>
+                            </div>
+                        </div>
                     </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {recentActivity.map((activity: any, idx: number) => {
-                                const IsIncome = activity.amount.toString().trim().startsWith("+");
-                                return (
-                                    <div key={idx} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                                        <div className="flex items-center gap-4">
-                                            <div className={`p-2 rounded-full ${IsIncome ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
-                                                {IsIncome ? <ArrowUpRight className="h-5 w-5" /> : <ArrowDownLeft className="h-5 w-5" />}
-                                            </div>
-                                            <div>
-                                                <p className="font-medium">{activity.title}</p>
-                                                <p className="text-sm text-muted-foreground">{activity.date}</p>
+                    <CardContent className="pt-3 pb-3">
+                        <div className="mb-3 grid grid-cols-3 gap-3">
+                            <Kpi label="Entries" value={String(activityStats.count)} />
+                            <Kpi label="Income" value={`${currencySymbol} ${fmt(activityStats.income)}`} tone="emerald" />
+                            <Kpi label="Expense" value={`${currencySymbol} ${fmt(activityStats.expense)}`} tone="red" />
+                        </div>
+                        <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                            {recentLoading ? (
+                                Array.from({ length: 4 }).map((_, i) => (
+                                    <div key={i} className="flex items-center justify-between py-3.5">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
+                                            <div className="space-y-2">
+                                                <div className="h-4 w-40 bg-muted animate-pulse rounded" />
+                                                <div className="h-3 w-24 bg-muted animate-pulse rounded" />
                                             </div>
                                         </div>
-                                        <div className={`font-semibold ${IsIncome ? 'text-emerald-600' : 'text-red-600'}`}>
-                                            {activity.amount}
-                                        </div>
+                                        <div className="h-4 w-20 bg-muted animate-pulse rounded" />
                                     </div>
-                                );
-                            })}
-
+                                ))
+                            ) : recentError ? (
+                                <p className="py-10 text-center text-sm text-muted-foreground">Couldn&apos;t load recent activity.</p>
+                            ) : recentActivity.length === 0 ? (
+                                <p className="py-10 text-center text-sm text-muted-foreground">No recent activity yet.</p>
+                            ) : (
+                                recentActivity.map((activity: any, idx: number) => {
+                                    const isIncome = activity.type === 'income';
+                                    const isExpense = activity.type === 'expense';
+                                    const amount = Number(activity.amount) || 0;
+                                    return (
+                                        <div key={activity.id ?? idx} className="flex items-center justify-between py-3.5">
+                                            <div className="flex min-w-0 items-center gap-3">
+                                                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${isIncome ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' : isExpense ? 'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'}`}>
+                                                    {isIncome
+                                                        ? <ArrowUpRight className="h-5 w-5" />
+                                                        : isExpense
+                                                            ? <ArrowDownLeft className="h-5 w-5" />
+                                                            : <ArrowLeftRight className="h-5 w-5" />}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="truncate font-medium">{activity.title}</p>
+                                                    <p className="text-sm text-muted-foreground">{activity.date}</p>
+                                                </div>
+                                            </div>
+                                            <div className={`ml-4 shrink-0 font-semibold tabular-nums ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : isExpense ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
+                                                {isIncome ? '+' : isExpense ? '−' : ''}{currencySymbol} {amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
                         </div>
                     </CardContent>
                 </Card>

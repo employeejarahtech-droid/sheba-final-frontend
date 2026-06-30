@@ -1,19 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo } from "react";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Wallet, TrendingUp, TrendingDown, ArrowRightLeft, Printer } from "lucide-react";
+import { Wallet, TrendingUp, ArrowRightLeft, Printer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
+import { DateField } from "@/components/date-field";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataTable } from "@/components/DataTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -22,8 +18,8 @@ import { AppHeader } from '@/components/layout/app-header';
 import { PageHeader } from '@/components/layout/page-header';
 
 const cashFlowSearchSchema = z.object({
-    from: z.string().optional(),
-    to: z.string().optional(),
+    from: z.string().catch(''),
+    to: z.string().catch(''),
 });
 
 export const Route = createFileRoute('/_authenticated/dashboard/accounting/reports/cash-flow/')({
@@ -37,7 +33,8 @@ const columns = [
     {
         data: "code",
         title: "Code",
-        render: (data: any) => `<span class="font-mono text-xs text-muted-foreground">${data || ''}</span>`
+        className: "text-left",
+        render: (data: any) => `<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${data || ''}</span>`
     },
     {
         data: "name",
@@ -56,37 +53,50 @@ const columns = [
     },
 ];
 
+// ---- Date preset helpers (same pattern as the Journal report) ----
+const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+const toYMD = (d: Date) => format(d, 'yyyy-MM-dd');
+
 function CashFlow() {
     const searchParams = Route.useSearch();
     const navigate = Route.useNavigate();
 
-    const today = new Date();
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    // All URL-driven — no local date state, same model as the Journal report.
+    const from = searchParams.from || "";
+    const to = searchParams.to || "";
 
-    const [localFrom, setLocalFrom] = useState<Date | undefined>(
-        searchParams.from ? new Date(searchParams.from) : firstDayOfMonth
-    );
-    const [localTo, setLocalTo] = useState<Date | undefined>(
-        searchParams.to ? new Date(searchParams.to) : today
-    );
+    const setFrom = (v: string) => navigate({ to: '.', search: { from: v, to } });
+    const setTo = (v: string) => navigate({ to: '.', search: { from, to: v } });
+    const clearDates = () => navigate({ to: '.', search: { from: '', to: '' } });
 
-    const fromStr = localFrom ? format(localFrom, "yyyy-MM-dd") : undefined;
-    const toStr = localTo ? format(localTo, "yyyy-MM-dd") : undefined;
+    const datePresets = useMemo(() => ({
+        today: { from: toYMD(today()), to: toYMD(today()) },
+        yesterday: (() => { const d = today(); d.setDate(d.getDate() - 1); return { from: toYMD(d), to: toYMD(d) }; })(),
+        last7: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 6); return d; })()), to: toYMD(today()) },
+        last15: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 14); return d; })()), to: toYMD(today()) },
+        last30: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 29); return d; })()), to: toYMD(today()) },
+        last45: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 44); return d; })()), to: toYMD(today()) },
+        last60: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 59); return d; })()), to: toYMD(today()) },
+        last90: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 89); return d; })()), to: toYMD(today()) },
+        last180: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 179); return d; })()), to: toYMD(today()) },
+        last365: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 364); return d; })()), to: toYMD(today()) },
+    }), []);
+
+    const activePreset = useMemo(() => {
+        if (!from || !to) return 'custom';
+        const match = Object.entries(datePresets).find(([, v]) => v.from === from && v.to === to);
+        return match ? match[0] : 'custom';
+    }, [from, to, datePresets]);
+
+    const applyPreset = (key: string) => {
+        const p = (datePresets as any)[key];
+        if (p) navigate({ to: '.', search: { from: p.from, to: p.to } });
+    };
 
     const { data: reportData, isLoading } = useGetCashFlowQuery({
-        from: fromStr,
-        to: toStr,
+        from: from || undefined,
+        to: to || undefined,
     });
-
-    const handleNavigate = (key: string, date: Date | undefined) => {
-        if (!date) return;
-        navigate({
-            search: (prev: any) => ({
-                ...prev,
-                [key]: format(date, "yyyy-MM-dd"),
-            })
-        });
-    };
 
     const operating = reportData?.operating || { items: [], total: 0 };
     const investing = reportData?.investing || { items: [], total: 0 };
@@ -94,46 +104,47 @@ function CashFlow() {
     const openingCash = reportData?.opening_cash || 0;
     const closingCash = reportData?.closing_cash || 0;
     const netCashChange = reportData?.net_cash_change || 0;
+    const cashItems = reportData?.cash_items || [];
 
     return (
         <div className="space-y-6">
             <AppHeader fixed />
-            <main className='p-6 lg:p-10'>
+            <main className=''>
                 <PageHeader
                     title="Cash Flow"
                     description="Cash inflows and outflows by Operating, Investing, and Financing activities."
                     actions={
-                        <div className="flex items-center gap-2">
-                            <Link to="/dashboard/accounting/reports/cash-flow/print" search={{ from: fromStr, to: toStr }}>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                            <Select value={activePreset} onValueChange={applyPreset}>
+                                <SelectTrigger className="w-[140px] h-9 rounded-md border-gray-200 dark:border-gray-700 bg-transparent text-sm">
+                                    <SelectValue placeholder="Filter by" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="today">Today</SelectItem>
+                                    <SelectItem value="yesterday">Yesterday</SelectItem>
+                                    <SelectItem value="last7">Last 7 days</SelectItem>
+                                    <SelectItem value="last15">Last 15 days</SelectItem>
+                                    <SelectItem value="last30">Last 30 days</SelectItem>
+                                    <SelectItem value="last45">Last 45 days</SelectItem>
+                                    <SelectItem value="last60">Last 60 days</SelectItem>
+                                    <SelectItem value="last90">Last 90 days</SelectItem>
+                                    <SelectItem value="last180">Last 180 days</SelectItem>
+                                    <SelectItem value="last365">Last 365 days</SelectItem>
+                                    <SelectItem value="custom">Custom range</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <DateField value={from} onChange={setFrom} placeholder="From" />
+                            <span className="text-xs text-muted-foreground">to</span>
+                            <DateField value={to} onChange={setTo} placeholder="To" />
+                            {(from || to) && (
+                                <Button variant="ghost" size="sm" onClick={clearDates}>Clear</Button>
+                            )}
+                            <Link to="/dashboard/accounting/reports/cash-flow/print" search={{ from: from || undefined, to: to || undefined }}>
                                 <Button variant="outline" size="sm">
                                     <Printer className="mr-2 h-4 w-4" />
                                     Print
                                 </Button>
                             </Link>
-                            <span className="text-sm font-medium">From:</span>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant={"outline"} className={cn("w-[200px] justify-start text-left font-normal", !localFrom && "text-muted-foreground")}>
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {localFrom ? format(localFrom, "PP") : <span>Pick a date</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="end">
-                                    <Calendar mode="single" selected={localFrom} onSelect={(d) => { setLocalFrom(d); handleNavigate("from", d); }} initialFocus />
-                                </PopoverContent>
-                            </Popover>
-                            <span className="text-sm font-medium">To:</span>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant={"outline"} className={cn("w-[200px] justify-start text-left font-normal", !localTo && "text-muted-foreground")}>
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {localTo ? format(localTo, "PP") : <span>Pick a date</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="end">
-                                    <Calendar mode="single" selected={localTo} onSelect={(d) => { setLocalTo(d); handleNavigate("to", d); }} initialFocus />
-                                </PopoverContent>
-                            </Popover>
                         </div>
                     }
                     showBackButton={false}
@@ -195,7 +206,7 @@ function CashFlow() {
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <DataTable columns={columns} data={operating.items} isLoading={isLoading} />
+                            <DataTable columns={columns} data={operating.items} isLoading={isLoading} hideExport />
                             <div className="p-4 bg-muted/30 border-t flex justify-between font-bold text-base">
                                 <span>Net Cash from Operations</span>
                                 <span className={operating.total >= 0 ? "text-emerald-700" : "text-red-700"}>{fmt(operating.total)}</span>
@@ -217,7 +228,7 @@ function CashFlow() {
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <DataTable columns={columns} data={investing.items} isLoading={isLoading} />
+                            <DataTable columns={columns} data={investing.items} isLoading={isLoading} hideExport />
                             <div className="p-4 bg-muted/30 border-t flex justify-between font-bold text-base">
                                 <span>Net Cash from Investing</span>
                                 <span className={investing.total >= 0 ? "text-emerald-700" : "text-red-700"}>{fmt(investing.total)}</span>
@@ -239,7 +250,7 @@ function CashFlow() {
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <DataTable columns={columns} data={financing.items} isLoading={isLoading} />
+                            <DataTable columns={columns} data={financing.items} isLoading={isLoading} hideExport />
                             <div className="p-4 bg-muted/30 border-t flex justify-between font-bold text-base">
                                 <span>Net Cash from Financing</span>
                                 <span className={financing.total >= 0 ? "text-emerald-700" : "text-red-700"}>{fmt(financing.total)}</span>
@@ -279,8 +290,32 @@ function CashFlow() {
                             </div>
                         </CardContent>
                     </Card>
+
+                    {/* Cash & Bank Movement — the accounts that make up the net change */}
+                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 lg:col-span-2">
+                        <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border-b py-1.5 px-4 gap-0">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-lg shadow-lg">
+                                    <Wallet className="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-lg font-bold">Cash & Bank Movement</CardTitle>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">How the net cash change breaks down by cash &amp; bank account</p>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <DataTable columns={columns} data={cashItems} isLoading={isLoading} hideExport />
+                            <div className="p-4 bg-muted/30 border-t flex justify-between font-bold text-base">
+                                <span>Net Change in Cash</span>
+                                <span className={netCashChange >= 0 ? "text-emerald-700" : "text-red-700"}>{fmt(netCashChange)}</span>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
             </main>
         </div>
     );
 }
+
+export default CashFlow;

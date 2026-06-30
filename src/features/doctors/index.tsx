@@ -105,7 +105,7 @@ export default function Doctors({ page, limit, search, doctorType, setPage, setL
     });
 
     // Fetch doctor types
-    const { data: doctorTypesData } = useQuery({
+    const { data: doctorTypes = [] } = useQuery({
         queryKey: ["doctor-types"],
         queryFn: async () => {
             const res = await fetch(
@@ -115,12 +115,12 @@ export default function Doctors({ page, limit, search, doctorType, setPage, setL
                 }
             );
             if (!res.ok) throw new Error("Failed to fetch doctor types");
-            return res.json();
+            const result = await res.json();
+            const items = result.data?.items || result.data || [];
+            return Array.isArray(items) ? items : [];
         },
         enabled: !!token,
     });
-
-    const doctorTypes = doctorTypesData?.data?.items || doctorTypesData?.data || [];
 
     const { data, isFetching } = useQuery({
         queryKey: ["doctor", page, limit, search, doctorType],

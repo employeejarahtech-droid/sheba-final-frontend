@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { useMemo, useEffect, useState } from 'react'
-import { getCookie } from '@/lib/cookies'
+import { useMemo, useEffect, useRef, useState } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
 import { DataTable } from '@/components/DataTable'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,6 +10,7 @@ import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
 import { useCurrency } from '@/hooks/use-currency'
+import { accountingService } from '@/features/accounting/accountingService'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
 
@@ -72,25 +72,15 @@ function JournalReportPage() {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, to: newTo, page: 1 }) });
   };
 
-  const token = getCookie('accessToken')
-
   const { data, isLoading } = useQuery({
     queryKey: ['journal-report', page, limit, search, from, to],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(limit),
-        search,
-        ...(from ? { from } : {}),
-        ...(to ? { to } : {}),
-      })
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/accounting/journal?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!res.ok) throw new Error('Failed to fetch journal data')
-      return res.json()
-    },
-    enabled: !!token,
+    queryFn: () => accountingService.getJournalReport({
+      page,
+      limit,
+      search: search || undefined,
+      from: from || undefined,
+      to: to || undefined,
+    }),
     placeholderData: (prev) => prev ? prev : { data: [], pagination: { total: 0, page: 1, limit: 10, totalPage: 0 } },
   })
 
@@ -164,9 +154,15 @@ function JournalReportPage() {
     setPresetOpen(false);
   };
 
-  // Handle expand button clicks
+  // Keep a ref so the DOM event listener always sees the latest items
+  const itemsRef = useRef<JournalEntry[]>([]);
   useEffect(() => {
-    const handleExpandClick = async (e: Event) => {
+    itemsRef.current = items;
+  }, [items]);
+
+  // Handle expand button clicks — reads detail data from already-loaded items (no extra API call)
+  useEffect(() => {
+    const handleExpandClick = (e: Event) => {
       const button = (e.target as HTMLElement).closest('.expand-btn');
       if (!button) return;
 
@@ -174,9 +170,9 @@ function JournalReportPage() {
       const row = btn.closest('tr');
       if (!row) return;
 
-      const isExpanded = row.classList.contains('expanded');
       const nextRow = row.nextElementSibling;
 
+      // Toggle off if already expanded
       if (nextRow && nextRow.classList.contains('child-row-detail')) {
         nextRow.remove();
         row.classList.remove('expanded');
@@ -185,24 +181,83 @@ function JournalReportPage() {
         return;
       }
 
-      if (isExpanded) return;
+      if (row.classList.contains('expanded')) return;
 
-      const id = btn.dataset.id || '';
+      const id = Number(btn.dataset.id);
+
+      // Look up entry from already-loaded data — no network call needed
+      const entry = itemsRef.current.find((item) => item.id === id);
 
       const details = document.createElement('div');
       details.className = 'max-w-4xl mx-auto bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden';
 
-      details.innerHTML = `
-        <div class="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-4">
-          <h2 class="text-xl font-semibold">Journal Entry Details</h2>
-          <p class="text-sm opacity-90">Entry #${id}</p>
-        </div>
-        <div class="p-6">
-          <div id="journal-details-${id}" class="text-gray-500 text-sm">
-            Loading journal details...
+      if (!entry) {
+        details.innerHTML = `<div class="p-6 text-red-500 text-sm">Entry not found in current page data.</div>`;
+      } else {
+        const formatDateTime = (date: string | null) => {
+          if (!date) return '-';
+          try { return formatDate(new Date(date)); } catch { return date; }
+        };
+
+        details.innerHTML = `
+          <div class="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-4">
+            <h2 class="text-xl font-semibold">Journal Entry Details</h2>
+            <p class="text-sm opacity-90">Entry #${id}</p>
           </div>
-        </div>
-      `;
+          <div class="p-6">
+            <div class="space-y-6">
+              <div class="grid grid-cols-2 gap-x-8 gap-y-4 text-sm border-b pb-6">
+                <div>
+                  <p class="text-gray-500">Entry ID</p>
+                  <p class="font-semibold text-gray-800">#${entry.id}</p>
+                </div>
+                <div>
+                  <p class="text-gray-500">Reference Type</p>
+                  <p class="font-semibold capitalize">${entry.reference_type || '-'}</p>
+                </div>
+                <div>
+                  <p class="text-gray-500">Date</p>
+                  <p class="font-semibold text-gray-800">${formatDateTime(entry.date)}</p>
+                </div>
+                <div>
+                  <p class="text-gray-500">Narration</p>
+                  <p class="font-semibold text-gray-800">${entry.narration || '-'}</p>
+                </div>
+              </div>
+              <div class="border-t pt-4">
+                <h3 class="font-semibold text-gray-800 mb-3">Entry Lines</h3>
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="bg-gray-50">
+                      <th class="px-3 py-2 text-left border">Account</th>
+                      <th class="px-3 py-2 text-right border w-28">Debit</th>
+                      <th class="px-3 py-2 text-right border w-28">Credit</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${(entry.entries || []).map((line: any) => `
+                      <tr>
+                        <td class="px-3 py-2 border">
+                          <span class="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded mr-2">${line.account?.code || '-'}</span>
+                          ${line.account?.name || '-'}
+                        </td>
+                        <td class="px-3 py-2 text-right border font-mono">${parseFloat(line.debit) > 0 ? parseFloat(line.debit).toFixed(2) : '-'}</td>
+                        <td class="px-3 py-2 text-right border font-mono">${parseFloat(line.credit) > 0 ? parseFloat(line.credit).toFixed(2) : '-'}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+              <div class="flex justify-end gap-3 pt-4 border-t">
+                <a href="/dashboard/accounting/reports/journal/print?id=${id}"
+                   class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
+                  Print Entry
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      }
 
       const newRow = document.createElement('tr');
       newRow.className = 'child-row-detail';
@@ -216,100 +271,11 @@ function JournalReportPage() {
       row.classList.add('expanded');
       btn.textContent = '−';
       btn.style.backgroundColor = '#dc2626';
-
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/accounting/journal/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!res.ok) throw new Error("Failed to fetch journal details");
-
-        const result = await res.json();
-        const entry = result.data;
-
-        const formatDateTime = (date: string | null) => {
-          if (!date) return '-';
-          return formatDate(new Date(date));
-        };
-
-        const journalDetailsHTML = `
-          <div class="space-y-6">
-            <div class="grid grid-cols-2 gap-x-8 gap-y-4 text-sm border-b pb-6">
-              <div>
-                <p class="text-gray-500">Entry ID</p>
-                <p class="font-semibold text-gray-800">#${entry.id || '-'}</p>
-              </div>
-              <div>
-                <p class="text-gray-500">Reference Type</p>
-                <p class="font-semibold capitalize">${entry.reference_type || '-'}</p>
-              </div>
-              <div>
-                <p class="text-gray-500">Date</p>
-                <p class="font-semibold text-gray-800">${formatDateTime(entry.date)}</p>
-              </div>
-              <div>
-                <p class="text-gray-500">Narration</p>
-                <p class="font-semibold text-gray-800">${entry.narration || '-'}</p>
-              </div>
-            </div>
-
-            <div class="border-t pt-4">
-              <h3 class="font-semibold text-gray-800 mb-3">Entry Lines</h3>
-              <table class="w-full text-sm">
-                <thead>
-                  <tr class="bg-gray-50">
-                    <th class="px-3 py-2 text-left border">Account</th>
-                    <th class="px-3 py-2 text-right border w-28">Debit</th>
-                    <th class="px-3 py-2 text-right border w-28">Credit</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${(entry.entries || []).map((line: any) => `
-                    <tr>
-                      <td class="px-3 py-2 border">
-                        <span class="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded mr-2">${line.account?.code || '-'}</span>
-                        ${line.account?.name || '-'}
-                      </td>
-                      <td class="px-3 py-2 text-right border font-mono">${parseFloat(line.debit) > 0 ? parseFloat(line.debit).toFixed(2) : '-'}</td>
-                      <td class="px-3 py-2 text-right border font-mono">${parseFloat(line.credit) > 0 ? parseFloat(line.credit).toFixed(2) : '-'}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-
-            <div class="flex justify-end gap-3 pt-4 border-t">
-              <a href="/dashboard/accounting/reports/journal/print?id=${id}"
-                 class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 h-10 px-5 transition">
-                Print Entry
-              </a>
-            </div>
-          </div>
-        `;
-
-        const container = document.getElementById(`journal-details-${id}`);
-        if (container) {
-          container.innerHTML = journalDetailsHTML;
-        }
-      } catch (error) {
-        console.error('Error fetching journal details:', error);
-        const container = document.getElementById(`journal-details-${id}`);
-        if (container) {
-          container.innerHTML = `
-            <div class="text-red-500 text-sm">
-              Failed to load journal details. Please try again.
-            </div>
-          `;
-        }
-      }
     };
 
     document.addEventListener('click', handleExpandClick);
-
-    return () => {
-      document.removeEventListener('click', handleExpandClick);
-    };
-  }, [token, formatDate]);
+    return () => document.removeEventListener('click', handleExpandClick);
+  }, [formatDate]);
 
   const refTypeBadge: Record<string, { label: string; color: string }> = {
     TRANSACTION: { label: "Transaction", color: "bg-blue-100 text-blue-700" },

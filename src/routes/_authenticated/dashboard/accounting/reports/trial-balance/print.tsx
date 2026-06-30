@@ -34,10 +34,10 @@ function TrialBalancePrintPage() {
         date: dateStr
     });
 
-    const trialBalanceData = reportData?.data?.trial_balance || [];
-    const totalDebit = reportData?.data?.total_debit || 0;
-    const totalCredit = reportData?.data?.total_credit || 0;
-    const status = reportData?.data?.status || "UNBALANCED";
+    const trialBalanceData = reportData?.trial_balance || [];
+    const totalDebit = reportData?.total_debit || 0;
+    const totalCredit = reportData?.total_credit || 0;
+    const status = reportData?.status || "UNBALANCED";
     const isBalanced = status === "BALANCED";
 
     return (
@@ -45,12 +45,10 @@ function TrialBalancePrintPage() {
             <AppHeader fixed />
             <Main>
                 <div className="print:hidden flex items-center justify-between gap-4 mb-4">
-                    <Link to="/dashboard/accounting/reports/trial-balance" search={{ date: search.date }}>
-                        <Button variant="outline" size="sm">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Trial Balance
-                        </Button>
-                    </Link>
+                    <Button variant="outline" size="sm" onClick={() => window.history.back()}>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Trial Balance
+                    </Button>
                     <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
                             <label htmlFor="padding-select" className="text-sm font-medium">Padding Top:</label>

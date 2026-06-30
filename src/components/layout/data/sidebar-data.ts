@@ -320,6 +320,7 @@ export const sidebarData: SidebarData = {
             { title: 'Journal Report', url: '/dashboard/accounting/reports/journal', icon: FileText },
             { title: 'Daily Summary', url: '/dashboard/accounting/reports/daily-summary', icon: Activity },
             { title: 'Ledger Report', url: '/dashboard/accounting/reports/ledger', icon: FileText },
+            { title: 'Multi-Ledger Report', url: '/dashboard/accounting/reports/multi-ledger', icon: FileText },
             { title: 'Trial Balance', url: '/dashboard/accounting/reports/trial-balance', icon: Scale },
             { title: 'Profit & Loss', url: '/dashboard/accounting/reports/profit-and-loss', icon: PieChart },
             { title: 'Balance Sheet', url: '/dashboard/accounting/reports/balance-sheet', icon: FileText },

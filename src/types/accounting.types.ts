@@ -318,6 +318,7 @@ export type CashFlowReport = {
     opening_cash: number;
     closing_cash: number;
     net_cash_change: number;
+    cash_items: CashFlowItem[];
 };
 
 export type CashFlowResponse = {

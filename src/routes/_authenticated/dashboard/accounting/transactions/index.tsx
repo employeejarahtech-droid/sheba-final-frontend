@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useState, Fragment, useEffect } from "react";
+import { useState, Fragment, useEffect, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Search, Calendar as CalendarIcon, X, Plus, ChevronDown, ChevronUp, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Calendar as CalendarIcon, Plus, ChevronDown, ChevronUp, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { createFileRoute } from '@tanstack/react-router';
@@ -40,15 +40,15 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { DateField } from "@/components/date-field";
 
-import { useAddTransactionMutation, useGetJournalReportQuery, useAddJournalEntryMutation } from "@/features/accounting/accountingQueries";
+import { useAddTransactionMutation, useGetJournalReportQuery, useAddJournalEntryMutation, useGetTrialBalanceQuery } from "@/features/accounting/accountingQueries";
 import { NestedAccountSelect } from "@/components/accounting/NestedAccountSelect";
 import { useDateFormat } from "@/hooks/use-date-format";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import type { CreateTransactionInput } from "@/types/accounting.types";
-import type { DateRange } from "react-day-picker";
+// Date range uses the Journal-report style (presets + DateField), not a range picker.
 import { AppHeader } from "@/components/layout/app-header";
 
 
@@ -109,21 +109,38 @@ function Transactions() {
         navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) });
     };
 
-    // Filter Query States driven by URL
-    const dateRange = {
-        from: from ? new Date(from) : undefined,
-        to: to ? new Date(to) : undefined,
+    // Date range — URL-driven, Journal-report style (presets + From/To fields)
+    const setFrom = (newFrom: string) => {
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, from: newFrom, page: 1 }) });
     };
-    const setDateRange = (range: DateRange | undefined) => {
-        navigate({
-            to: '.',
-            search: (prev: any) => ({
-                ...prev,
-                from: range?.from ? format(range.from, 'yyyy-MM-dd') : '',
-                to: range?.to ? format(range.to, 'yyyy-MM-dd') : '',
-                page: 1
-            })
-        });
+    const setTo = (newTo: string) => {
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, to: newTo, page: 1 }) });
+    };
+
+    const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+    const toYMD = (d: Date) => format(d, 'yyyy-MM-dd');
+    const datePresets = useMemo(() => ({
+        today: { from: toYMD(today()), to: toYMD(today()) },
+        yesterday: (() => { const d = today(); d.setDate(d.getDate() - 1); return { from: toYMD(d), to: toYMD(d) }; })(),
+        last7: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 6); return d; })()), to: toYMD(today()) },
+        last15: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 14); return d; })()), to: toYMD(today()) },
+        last30: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 29); return d; })()), to: toYMD(today()) },
+        last45: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 44); return d; })()), to: toYMD(today()) },
+        last60: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 59); return d; })()), to: toYMD(today()) },
+        last90: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 89); return d; })()), to: toYMD(today()) },
+        last180: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 179); return d; })()), to: toYMD(today()) },
+        last365: { from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 364); return d; })()), to: toYMD(today()) },
+    }), []);
+
+    const activePreset = useMemo(() => {
+        if (!from || !to) return 'custom';
+        const match = Object.entries(datePresets).find(([, v]) => v.from === from && v.to === to);
+        return match ? match[0] : 'custom';
+    }, [from, to, datePresets]);
+
+    const applyPreset = (key: string) => {
+        const p = (datePresets as any)[key];
+        if (p) { setFrom(p.from); setTo(p.to); }
     };
 
     const [searchVal, setSearchVal] = useState(search);
@@ -150,6 +167,23 @@ function Transactions() {
 
     const journalEntries = journalData?.data || [];
     const { mutateAsync: addJournalEntry, isPending: isAddingJournal } = useAddJournalEntryMutation();
+
+    // Current balance per account (nature-adjusted net from the trial balance)
+    // so each journal line can show the balance of its selected account.
+    const { data: trialBalanceData } = useGetTrialBalanceQuery();
+    const accountBalanceMap = useMemo(() => {
+        const map = new Map<number, number>();
+        const items = trialBalanceData?.trial_balance;
+        if (Array.isArray(items)) {
+            items.forEach((item: any) => {
+                const debit = parseFloat(item.debit) || 0;
+                const credit = parseFloat(item.credit) || 0;
+                const isDebitNature = ['ASSET', 'EXPENSE'].includes(item.type);
+                map.set(item.id, isDebitNature ? (debit - credit) : (credit - debit));
+            });
+        }
+        return map;
+    }, [trialBalanceData]);
 
     // Double Entry Form States
     const [narration, setNarration] = useState("");
@@ -352,10 +386,11 @@ function Transactions() {
                                         <Table>
                                             <TableHeader className="bg-muted/50">
                                                 <TableRow>
-                                                    <TableHead className="w-[50%]">Account Head</TableHead>
-                                                    <TableHead className="text-right w-[20%]">Debit</TableHead>
-                                                    <TableHead className="text-right w-[20%]">Credit</TableHead>
-                                                    <TableHead className="w-[10%]"></TableHead>
+                                                    <TableHead className="w-[36%]">Account Head</TableHead>
+                                                    <TableHead className="text-right w-[13%]">Debit</TableHead>
+                                                    <TableHead className="text-right w-[13%]">Credit</TableHead>
+                                                    <TableHead className="text-right w-[26%]">Balance</TableHead>
+                                                    <TableHead className="w-[8%]"></TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -390,6 +425,15 @@ function Transactions() {
                                                                 onChange={(e) => updateLine(index, 'credit', parseFloat(e.target.value) || 0)}
                                                             />
                                                         </TableCell>
+                                                        <TableCell className="p-2 text-right">
+                                                            {line.accountId !== null ? (
+                                                                <span className={cn("font-mono text-sm", (accountBalanceMap.get(line.accountId) ?? 0) < 0 ? "text-red-600" : "text-muted-foreground")}>
+                                                                    {(accountBalanceMap.get(line.accountId) ?? 0).toFixed(2)}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-muted-foreground/40">—</span>
+                                                            )}
+                                                        </TableCell>
                                                         <TableCell className="p-2 text-center">
                                                             <Button
                                                                 type="button"
@@ -414,6 +458,7 @@ function Transactions() {
                                                     <TableCell className="text-right font-mono pr-3">
                                                         {totalCredit.toFixed(2)}
                                                     </TableCell>
+                                                    <TableCell></TableCell>
                                                     <TableCell></TableCell>
                                                 </TableRow>
                                             </TableBody>
@@ -457,18 +502,31 @@ function Transactions() {
                         />
                     </div>
 
-                    <div className="flex gap-2 w-full sm:w-auto">
-                        <DateRangePicker
-                            dateRange={dateRange}
-                            onDateRangeChange={setDateRange}
-                            placeholder="Pick a date range"
-                            className="w-[240px]"
-                            numberOfMonths={2}
-                        />
-
+                    <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                        <Select value={activePreset} onValueChange={applyPreset}>
+                            <SelectTrigger className="w-[140px] h-9 rounded-md border-gray-200 dark:border-gray-700 bg-transparent text-sm">
+                                <SelectValue placeholder="Filter by" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="today">Today</SelectItem>
+                                <SelectItem value="yesterday">Yesterday</SelectItem>
+                                <SelectItem value="last7">Last 7 days</SelectItem>
+                                <SelectItem value="last15">Last 15 days</SelectItem>
+                                <SelectItem value="last30">Last 30 days</SelectItem>
+                                <SelectItem value="last45">Last 45 days</SelectItem>
+                                <SelectItem value="last60">Last 60 days</SelectItem>
+                                <SelectItem value="last90">Last 90 days</SelectItem>
+                                <SelectItem value="last180">Last 180 days</SelectItem>
+                                <SelectItem value="last365">Last 365 days</SelectItem>
+                                <SelectItem value="custom">Custom range</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <DateField value={from} onChange={setFrom} placeholder="From" />
+                        <span className="text-xs text-muted-foreground">to</span>
+                        <DateField value={to} onChange={setTo} placeholder="To" />
                         {hasActiveFilters && (
-                            <Button variant="ghost" size="icon" onClick={clearFilters} title="Clear Filters">
-                                <X className="h-4 w-4" />
+                            <Button variant="ghost" size="sm" onClick={clearFilters}>
+                                Clear
                             </Button>
                         )}
                     </div>

@@ -48,12 +48,10 @@ function LedgerPrintPage() {
             <AppHeader fixed />
             <Main>
                 <div className="print:hidden flex items-center justify-between gap-4 mb-4">
-                    <Link to="/dashboard/reports/ledger" search={{ account_id: search.account_id, from: search.from, to: search.to }}>
-                        <Button variant="outline" size="sm">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Ledger
-                        </Button>
-                    </Link>
+                    <Button variant="outline" size="sm" onClick={() => window.history.back()}>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Ledger
+                    </Button>
                     <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
                             <label htmlFor="padding-select" className="text-sm font-medium">Padding Top:</label>

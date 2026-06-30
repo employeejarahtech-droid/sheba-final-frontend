@@ -55,19 +55,19 @@ function TrialBalance() {
     };
 
     // @ts-ignore
-    const trialBalanceData = reportData?.data?.trial_balance || [];
+    const trialBalanceData = reportData?.trial_balance || [];
     // @ts-ignore
-    const totalDebit = reportData?.data?.total_debit || 0;
+    const totalDebit = reportData?.total_debit || 0;
     // @ts-ignore
-    const totalCredit = reportData?.data?.total_credit || 0;
+    const totalCredit = reportData?.total_credit || 0;
     // @ts-ignore
-    const status = reportData?.data?.status || "UNBALANCED";
+    const status = reportData?.status || "UNBALANCED";
     const isBalanced = status === "BALANCED";
 
     return (
         <div className="space-y-6">
             <AppHeader fixed />
-            <main className='p-6 lg:p-10'>
+            <main className=''>
                 <PageHeader
                     title="Trial Balance"
                     description="Summary of all ledger account balances."
@@ -128,7 +128,8 @@ function TrialBalance() {
                                 {
                                     data: "code",
                                     title: "Code",
-                                    render: (data: any) => `<span class="font-mono text-xs text-muted-foreground">${data || ''}</span>`
+                                    className: "text-left",
+                                    render: (data: any) => `<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${data || ''}</span>`
                                 },
                                 {
                                     data: "account",

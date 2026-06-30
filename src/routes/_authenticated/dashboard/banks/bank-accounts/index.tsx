@@ -1,213 +1,179 @@
+import { useMemo, useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { Main } from "@/components/layout/main";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Building2, CreditCard, DollarSign, TrendingUp, Loader2 } from 'lucide-react';
-import { AddBankAccountModal } from '@/components/banks/AddBankAccountModal';
-import { getCookie } from '@/lib/cookies';
-import { useQuery } from '@tanstack/react-query';
 import { AppHeader } from '@/components/layout/app-header';
+import { DataTable } from '@/components/DataTable';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Building2, Wallet, Landmark, AlertTriangle } from 'lucide-react';
+import { AddBankAccountModal } from '@/components/banks/AddBankAccountModal';
+import { useCurrency } from '@/hooks/use-currency';
+import {
+    useGetAccountingAccountsQuery,
+    useGetTrialBalanceQuery,
+} from '@/features/accounting/accountingQueries';
+import type { ChartOfAccount } from '@/types/accounting.types';
 
 export const Route = createFileRoute('/_authenticated/dashboard/banks/bank-accounts/')({
     component: BankAccountsPage,
 })
 
+type TrialItem = { id: number; debit?: string | number; credit?: string | number };
+
 type BankAccount = {
     id: number;
-    accountName: string;
-    accountNumber: string;
-    bankName: string;
-    branchName: string;
-    accountType: 'savings' | 'current' | 'fixed-deposit';
+    name: string;
+    code: string;
+    isActive: boolean;
+    isProtected: boolean;
     balance: number;
-    currency: string;
-    status: 'active' | 'inactive' | 'closed';
-    openingDate: string;
 };
 
+const fmt = (n: number) =>
+    Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 function BankAccountsPage() {
-    const token = getCookie('accessToken');
+    const { currencySymbol } = useCurrency();
+    const [search, setSearch] = useState('');
 
-    const { data: bankAccounts = [], isLoading } = useQuery({
-        queryKey: ["bank-accounts"],
-        queryFn: async (): Promise<BankAccount[]> => {
-            const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/bank-accounts`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-            if (!res.ok) throw new Error("Failed to fetch bank accounts");
-            const json = await res.json();
-            return json.data;
+    // Bank accounts live in the Chart of Accounts: ASSET accounts under the
+    // "Bank Balances" (code 1200) group. Balances come from the trial balance
+    // (the journal) — the same source the rest of accounting uses.
+    const { data: accountsData, isLoading: accountsLoading } = useGetAccountingAccountsQuery({ page: 1, limit: 1000 });
+    const { data: trialBalanceData, isLoading: tbLoading } = useGetTrialBalanceQuery();
+    const isLoading = accountsLoading || tbLoading;
+
+    const bankAccounts: BankAccount[] = useMemo(() => {
+        const accounts: ChartOfAccount[] = accountsData?.data ?? [];
+        const trialItems: TrialItem[] =
+            ((trialBalanceData as { trial_balance?: TrialItem[] } | undefined)?.trial_balance) ?? [];
+
+        // A "bank account" is any ASSET account that has "Bank" in its own name
+        // OR in an ancestor's name. This is robust across chart variants
+        // (1100 "Bank", 1200 "Bank Balances", 1210 "Bank — Operating Account",
+        // a user-created "City Bank", or any account nested under a bank group).
+        const byId = new Map(accounts.map((a) => [a.id, a]));
+        const bankInName = (a?: ChartOfAccount | null) => !!a && /bank/i.test(a.name || '');
+        const hasBankAncestor = (a: ChartOfAccount): boolean => {
+            let cur: ChartOfAccount | undefined = a.parent_id ? byId.get(a.parent_id) : undefined;
+            while (cur) {
+                if (bankInName(cur)) return true;
+                cur = cur.parent_id ? byId.get(cur.parent_id) : undefined;
+            }
+            return false;
+        };
+
+        const balanceById = new Map<number, number>();
+        for (const it of trialItems) {
+            balanceById.set(it.id, parseFloat(String(it.debit ?? 0)) - parseFloat(String(it.credit ?? 0)));
+        }
+
+        return accounts
+            .filter((a) => a.type?.toUpperCase() === 'ASSET' && (bankInName(a) || hasBankAncestor(a)))
+            .map((a) => ({
+                id: a.id,
+                name: a.name,
+                code: a.code,
+                isActive: a.is_active !== false,
+                isProtected: !!a.is_protected,
+                balance: balanceById.get(a.id) ?? 0,
+            }))
+            .sort((a, b) => a.code.localeCompare(b.code));
+    }, [accountsData, trialBalanceData]);
+
+    const filtered = useMemo(() => {
+        if (!search.trim()) return bankAccounts;
+        const q = search.toLowerCase();
+        return bankAccounts.filter((a) => a.name.toLowerCase().includes(q) || a.code.toLowerCase().includes(q));
+    }, [bankAccounts, search]);
+
+    const totalBalance = bankAccounts.reduce((s, a) => s + a.balance, 0);
+    const activeCount = bankAccounts.filter((a) => a.isActive).length;
+    const inactiveCount = bankAccounts.length - activeCount;
+
+    const stats = useMemo(() => [
+        { label: 'Bank Accounts', value: String(bankAccounts.length), icon: Building2, color: '#3B82F6' },
+        { label: 'Total Balance', value: `${currencySymbol} ${fmt(totalBalance)}`, icon: Wallet, color: '#10B981' },
+        { label: 'Active', value: String(activeCount), icon: Landmark, color: '#8B5CF6' },
+        { label: 'Inactive', value: String(inactiveCount), icon: AlertTriangle, color: '#F59E0B' },
+    ], [bankAccounts.length, totalBalance, activeCount, inactiveCount, currencySymbol]);
+
+    const columns = [
+        {
+            data: 'code',
+            title: 'Code',
+            render: (d: number | string) => `<span class="font-mono text-xs text-muted-foreground">${d}</span>`,
         },
-        enabled: !!token,
-    });
-
-    const totalBalance = bankAccounts.reduce((sum, account) => sum + account.balance, 0);
-    const activeAccounts = bankAccounts.filter(acc => acc.status === 'active').length;
-
-    if (isLoading) {
-        return (
-            <>
-                <AppHeader fixed />
-                <Main>
-                    <div className="flex items-center justify-center h-64">
-                        <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
-                    </div>
-                </Main>
-            </>
-        );
-    }
+        {
+            data: 'name',
+            title: 'Account',
+            render: (_d: unknown, _type: string, row: BankAccount) =>
+                `<span class="font-medium">${row.name}</span>${row.isProtected ? '<span class="ml-2 text-[10px] font-semibold text-amber-600">Protected</span>' : ''}`,
+        },
+        {
+            data: 'balance',
+            title: 'Balance',
+            className: 'text-right',
+            render: (d: number | string) => {
+                const v = Number(d) || 0;
+                return `<span class="font-mono font-semibold ${v < 0 ? 'text-red-600' : ''}">${currencySymbol} ${fmt(v)}</span>`;
+            },
+        },
+        {
+            data: 'isActive',
+            title: 'Status',
+            render: (d: boolean) => d
+                ? '<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">Active</span>'
+                : '<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">Inactive</span>',
+        },
+        {
+            data: null,
+            title: 'Actions',
+            orderable: false,
+            render: (_d: unknown, _type: string, row: BankAccount) => `
+                <div class="flex gap-2 justify-end">
+                    <a href="/dashboard/accounting/reports/ledger?account_id=${row.id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow transition-colors">Ledger</a>
+                    <a href="/dashboard/accounting/accounts" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">Edit</a>
+                </div>`,
+        },
+    ]
 
     return (
         <>
-           <AppHeader fixed />
-            <Main>
-                <div className="space-y-6">
-                    <div className='flex items-center justify-between'>
-                        <div>
-                            <h1 className='text-2xl font-bold tracking-tight'>Bank Accounts</h1>
-                            <p className='text-muted-foreground'>Manage hospital bank accounts and view balances</p>
-                        </div>
-                        <AddBankAccountModal />
-                    </div>
+            <AppHeader fixed />
 
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        {/* Total Accounts */}
-                        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-blue-400 p-6 shadow-lg shadow-blue-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-                            <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-                            <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-                            <div className="relative flex items-start justify-between mb-4">
-                                <div>
-                                    <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Accounts</p>
-                                    <h3 className="mt-2 text-2xl font-bold text-white">{bankAccounts.length}</h3>
-                                </div>
-                                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                                    <Building2 className="w-6 h-6 text-white" />
-                                </div>
-                            </div>
-                            <div className="relative flex justify-between text-white/90 text-sm">
-                                <span>Active</span>
-                                <span className="font-semibold">{activeAccounts} accounts</span>
-                            </div>
-                        </div>
-
-                        {/* Total Balance */}
-                        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-400 p-6 shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-                            <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-                            <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-                            <div className="relative flex items-start justify-between mb-4">
-                                <div>
-                                    <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Total Balance</p>
-                                    <h3 className="mt-2 text-2xl font-bold text-white">৳{totalBalance.toLocaleString()}</h3>
-                                </div>
-                                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                                    <DollarSign className="w-6 h-6 text-white" />
-                                </div>
-                            </div>
-                            <div className="relative flex justify-between text-white/90 text-sm">
-                                <span>Across all</span>
-                                <span className="font-semibold">All accounts</span>
-                            </div>
-                        </div>
-
-                        {/* Current Accounts */}
-                        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 to-violet-400 p-6 shadow-lg shadow-violet-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-                            <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-                            <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-                            <div className="relative flex items-start justify-between mb-4">
-                                <div>
-                                    <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Current Accounts</p>
-                                    <h3 className="mt-2 text-2xl font-bold text-white">{bankAccounts.filter(a => a.accountType === 'current').length}</h3>
-                                </div>
-                                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                                    <CreditCard className="w-6 h-6 text-white" />
-                                </div>
-                            </div>
-                            <div className="relative flex justify-between text-white/90 text-sm">
-                                <span>Operational</span>
-                                <span className="font-semibold">Accounts</span>
-                            </div>
-                        </div>
-
-                        {/* Savings & FD */}
-                        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-600 to-amber-400 p-6 shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]">
-                            <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-                            <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
-                            <div className="relative flex items-start justify-between mb-4">
-                                <div>
-                                    <p className="text-sm font-medium text-white/90 uppercase tracking-widest">Savings & FD</p>
-                                    <h3 className="mt-2 text-2xl font-bold text-white">{bankAccounts.filter(a => a.accountType !== 'current').length}</h3>
-                                </div>
-                                <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                                    <TrendingUp className="w-6 h-6 text-white" />
-                                </div>
-                            </div>
-                            <div className="relative flex justify-between text-white/90 text-sm">
-                                <span>Investment</span>
-                                <span className="font-semibold">Accounts</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Bank Accounts List</CardTitle>
-                            <CardDescription>View and manage all bank accounts</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Account Name</TableHead>
-                                        <TableHead>Account Number</TableHead>
-                                        <TableHead>Bank & Branch</TableHead>
-                                        <TableHead>Type</TableHead>
-                                        <TableHead className="text-right">Balance</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Opening Date</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {bankAccounts.map((account) => (
-                                        <TableRow key={account.id}>
-                                            <TableCell className="font-medium">{account.accountName}</TableCell>
-                                            <TableCell className="font-mono text-sm">{account.accountNumber}</TableCell>
-                                            <TableCell>
-                                                <div className="font-medium">{account.bankName}</div>
-                                                <div className="text-xs text-muted-foreground">{account.branchName}</div>
-                                            </TableCell>
-                                            <TableCell className="capitalize">{account.accountType.replace('-', ' ')}</TableCell>
-                                            <TableCell className="text-right font-semibold">৳{account.balance.toLocaleString()}</TableCell>
-                                            <TableCell>
-                                                <Badge variant={account.status === 'active' ? 'default' : account.status === 'inactive' ? 'secondary' : 'destructive'}>
-                                                    {account.status}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>{account.openingDate}</TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    <Button size="sm" variant="outline">View</Button>
-                                                    <Button size="sm" variant="outline">Edit</Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                    <TableRow className="font-bold bg-muted/50">
-                                        <TableCell colSpan={4} className="text-right">Total Balance</TableCell>
-                                        <TableCell className="text-right">৳{totalBalance.toLocaleString()}</TableCell>
-                                        <TableCell colSpan={3}></TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
+            <main className="">
+                {/* Stats Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                    {stats.map((stat, index) => {
+                        const Icon = stat.icon;
+                        return (
+                            <Card key={index} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: stat.color }}>
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="p-2 bg-white rounded-lg shadow-lg">
+                                            <Icon className="w-4 h-4" style={{ color: stat.color }} />
+                                        </div>
+                                        <CardTitle className="text-sm font-semibold text-white/90">{stat.label}</CardTitle>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="p-4">
+                                    <p className="text-2xl font-bold">{stat.value}</p>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
                 </div>
-            </Main>
+
+                <DataTable
+                    tableTitle="Bank Accounts List"
+                    columns={columns}
+                    data={filtered}
+                    meta={{ total: filtered.length, page: 1, limit: 100 }}
+                    search={search}
+                    onSearchChange={setSearch}
+                    isLoading={isLoading}
+                    filterSlot={<AddBankAccountModal />}
+                />
+            </main>
         </>
     );
 }
