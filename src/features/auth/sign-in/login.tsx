@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils'
 import { UserAuthForm } from './components/user-auth-form'
 import { getSubdomainInfo } from '@/lib/subdomain'
 import { Building2 } from 'lucide-react'
+import { TenantNotFoundView } from '@/features/tenant/tenant-not-found'
 
 interface LoginSettings {
   logo?: string
@@ -19,11 +20,13 @@ export function Login() {
   const [bgImage, setBgImage] = useState<string | null>(null)
   const [informationText, setInformationText] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
+  const [tenantNotFound, setTenantNotFound] = useState(false)
 
   // Fetch tenant login settings (public endpoint - no auth required)
   useEffect(() => {
     const fetchSettings = async () => {
       setIsLoading(true)
+      setTenantNotFound(false)
       try {
         const { isCompanyPortal, subdomain } = getSubdomainInfo()
 
@@ -36,10 +39,13 @@ export function Login() {
 
         // Try to fetch tenant-specific login settings
         let settingsFetched = false
+        let loginStatus = 0
+        let fallbackStatus = 0
 
         try {
           const url = `${import.meta.env.VITE_API_URL || ''}/api/public/app-settings/login-settings/${subdomain}`
           const res = await fetch(url)
+          loginStatus = res.status
 
           if (res.ok) {
             const response = await res.json()
@@ -86,6 +92,7 @@ export function Login() {
           try {
             const fallbackUrl = `${import.meta.env.VITE_API_URL || ''}/api/public/tenant-settings/${subdomain}`
             const fallbackRes = await fetch(fallbackUrl)
+            fallbackStatus = fallbackRes.status
 
             if (fallbackRes.ok) {
               const response = await fallbackRes.json()
@@ -107,6 +114,11 @@ export function Login() {
           }
         }
 
+        // Both public endpoints return HTTP 404 when the subdomain has no
+        // registered tenant — surface that to the user with a Register link.
+        if (loginStatus === 404 || fallbackStatus === 404) {
+          setTenantNotFound(true)
+        }
       } catch (error) {
         console.error('Failed to fetch settings:', error)
       } finally {
@@ -158,6 +170,13 @@ export function Login() {
         </div>
       </div>
     )
+  }
+
+  // Subdomain has no registered tenant — reuse the shared not-found view
+  // (same UI as the tenant home page at /).
+  if (tenantNotFound) {
+    const { subdomain } = getSubdomainInfo()
+    return <TenantNotFoundView subdomain={subdomain} />
   }
 
   return (

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/auth-store'
+import { useTenantExists, TenantNotFoundView } from './tenant-not-found'
 
 /**
  * Tenant subdomain home page (e.g. sheba.lvh.me/).
@@ -109,6 +110,7 @@ export function TenantHome() {
   const isAuthenticated = !!accessToken
 
   const [settings, setSettings] = useState<CompanySettings>({})
+  const { status: tenantStatus, subdomain } = useTenantExists()
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -131,6 +133,19 @@ export function TenantHome() {
     }
     fetchSettings()
   }, [])
+
+  // Hooks above have already run. Now gate on tenant existence: an unregistered
+  // subdomain shows "Hospital not found" + a Register link (same as /login).
+  if (tenantStatus === 'loading') {
+    return (
+      <div className="flex min-h-svh items-center justify-center bg-white">
+        <div className="text-sm text-slate-500">Loading...</div>
+      </div>
+    )
+  }
+  if (tenantStatus === 'notfound') {
+    return <TenantNotFoundView subdomain={subdomain} />
+  }
 
   const companyName = settings.company_name || 'HMS'
   const logo = settings.company_logo || null
