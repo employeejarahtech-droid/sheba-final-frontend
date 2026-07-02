@@ -122,9 +122,13 @@ export const useAuthStore = create<AuthState>()((set, get) => {
     }
   };
 
-  // If token exists but no user, fetch from API
+  // If token exists but no user, fetch from API. MUST be deferred — calling it
+  // synchronously here (during create()) runs before zustand assigns state, so
+  // get() is undefined and `const { accessToken } = get()` throws. This state
+  // is reached e.g. by the admin "login as tenant" hand-off, which sets only
+  // the accessToken cookie.
   if (initialToken && !initialUser) {
-    fetchUser();
+    queueMicrotask(() => fetchUser());
   }
 
   return {
