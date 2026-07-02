@@ -9,7 +9,7 @@ import {
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { Provider } from 'react-redux'
-import { getCookie } from '@/lib/cookies'
+import { getCookie, setCookie } from '@/lib/cookies'
 import { handleServerError } from '@/lib/handle-server-error'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
@@ -20,6 +20,31 @@ import { routeTree } from './routeTree.gen'
 // Styles
 import './styles/index.css'
 import 'datatables.net-dt/css/dataTables.dataTables.min.css'
+
+// ── Admin "Login as tenant" hand-off ────────────────────────────────────
+// When a super-admin impersonates a company from the admin console, the tenant
+// app is opened at <subdomain>.<basedomain>/?loginAsToken=<jwt>. Consume it
+// once on boot: set the tenant accessToken cookie, then strip the param from
+// the URL so the token isn't left in history/shared links.
+;(function consumeLoginAsToken() {
+  if (typeof window === 'undefined') return
+  try {
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get('loginAsToken')
+    if (token) {
+      setCookie('accessToken', token)
+      params.delete('loginAsToken')
+      const qs = params.toString()
+      window.history.replaceState(
+        null,
+        '',
+        `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`
+      )
+    }
+  } catch {
+    // never block app boot
+  }
+})()
 
 const queryClient = new QueryClient({
   defaultOptions: {

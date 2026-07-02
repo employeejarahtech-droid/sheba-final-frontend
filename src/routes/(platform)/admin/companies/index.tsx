@@ -48,8 +48,12 @@ import {
   CheckCircle,
   XCircle,
   ArrowLeft,
+  LogIn,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getBaseDomain } from '@/lib/subdomain'
+import { loginAsCompany } from '@/services/platform-admin'
+import { toast } from 'sonner'
 import {
   useCompanies,
   useToggleCompanyActive,
@@ -201,6 +205,23 @@ function CompaniesListPage() {
   const handleSearchChange = (value: string) => {
     setSearch(value)
     setPage(1)
+  }
+
+  // Super-admin "Login as tenant": mint a company_admin token for this
+  // company and open its tenant app in a new tab (token handed off via URL).
+  const handleLoginAs = async (company: PlatformCompany) => {
+    try {
+      const res = await loginAsCompany(company.id)
+      const token = res?.data?.token
+      const subdomain = res?.data?.subdomain || company.subdomain
+      if (!token) throw new Error('No login token returned')
+      const base = getBaseDomain()
+      const port = window.location.port ? `:${window.location.port}` : ''
+      const tenantUrl = `${window.location.protocol}//${subdomain}.${base}${port}/?loginAsToken=${encodeURIComponent(token)}`
+      window.open(tenantUrl, '_blank')
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to log in as company')
+    }
   }
 
   // ── Render ───────────────────────────────────────────────────────────
@@ -413,6 +434,15 @@ function CompaniesListPage() {
                     {/* Actions */}
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleLoginAs(company)}
+                          title={`Log in to ${company.subdomain} as its admin`}
+                          className="border-emerald-300 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+                        >
+                          <LogIn className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"

@@ -81,6 +81,28 @@ export async function deleteCompany(id: number): Promise<ApiResponse<void>> {
   return platformFetchJson(`/api/admin/companies/${id}`, { method: 'DELETE' })
 }
 
+// Super-admin "login as tenant" — issues a company_admin JWT for the company's
+// owner so the admin can open the tenant app without its password.
+export interface LoginAsCompanyResponse {
+  token: string
+  subdomain: string
+  user: {
+    id: number
+    name: string
+    email: string
+    userType: string
+    companyId: number
+  }
+}
+
+export async function loginAsCompany(
+  id: number
+): Promise<ApiResponse<LoginAsCompanyResponse>> {
+  return platformFetchJson(`/api/admin/companies/${id}/login-as`, {
+    method: 'POST',
+  })
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 //  PLANS
 // ═══════════════════════════════════════════════════════════════════════
