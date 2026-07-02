@@ -335,8 +335,6 @@ export const sidebarData: SidebarData = {
           items: [
             { title: 'Bank Accounts', url: '/dashboard/banks/bank-accounts', icon: Landmark },
             { title: 'Transactions', url: '/dashboard/banks/bank-transactions', icon: FileText },
-            { title: 'Deposits', url: '/dashboard/banks/bank-deposits', icon: TrendingUp },
-            { title: 'Withdrawals', url: '/dashboard/banks/bank-withdrawals', icon: TrendingDown },
           ],
         },
         {

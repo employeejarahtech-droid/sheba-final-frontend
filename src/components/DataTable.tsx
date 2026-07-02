@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search as SearchIcon, Loader2 } from 'lucide-react';
 import { getPageNumbers } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useDebounce } from '@/hooks/useDebounce';
 import {
   Select,
@@ -39,6 +40,7 @@ interface DataTableProps<TData> {
   onSearchChange?: (value: string) => void;
   onSort?: (columnData: string | null, direction: 'ASC' | 'DESC') => void;
   isLoading?: boolean;
+  loadingVariant?: 'spinner' | 'skeleton';
   filterSlot?: React.ReactNode;
   tableTitle?: string;
   hideExport?: boolean;
@@ -56,6 +58,7 @@ export function DataTable<TData extends Record<string, any>>({
   onSearchChange,
   onSort,
   isLoading,
+  loadingVariant = 'skeleton',
   filterSlot,
   tableTitle,
   hideExport,
@@ -336,11 +339,23 @@ export function DataTable<TData extends Record<string, any>>({
         ref={scrollWrapperRef}
         className="relative rounded-md border overflow-x-auto"
       >
-        {/* Loading overlay */}
+        {/* Loading state — per table-design-loader.md: 3 centered full-width
+            skeleton bars while loading. Rendered as an overlay because jQuery
+            DataTables owns <tbody>; the visible result matches the spec. */}
         {isLoading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-[1px]">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+          loadingVariant === 'skeleton' ? (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 backdrop-blur-[1px] p-6">
+              <div className="flex flex-col items-center justify-center gap-2 w-full">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+              </div>
+            </div>
+          ) : (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-[1px]">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          )
         )}
         {/* Sticky-first-column styles */}
         <style>{`
