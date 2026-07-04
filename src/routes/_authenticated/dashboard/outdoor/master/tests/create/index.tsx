@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { getCookie } from '@/lib/cookies'
 import { showSubmittedData } from '@/lib/show-submitted-data'
 import { cn } from '@/lib/utils'
+import { useCurrency } from '@/hooks/use-currency'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
@@ -64,6 +65,7 @@ type Category = {
 }
 
 function CreateTest() {
+  const { currencySymbol } = useCurrency()
   const [open, setOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [roomOpen, setRoomOpen] = useState(false);
@@ -492,14 +494,14 @@ function CreateTest() {
                     name="price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Price (৳)</FormLabel>
+                        <FormLabel>Price ({currencySymbol})</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">৳</span>
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{currencySymbol}</span>
                             <Input
                               type="number"
                               placeholder="0.00"
-                              className="pl-7"
+                              style={{ paddingLeft: `${Math.max(1.75, 1 + 0.6 * currencySymbol.length)}rem` }}
                               {...field}
                             />
                           </div>

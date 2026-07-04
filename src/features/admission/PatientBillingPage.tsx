@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from '@tanstack/react-router'
@@ -88,6 +88,7 @@ type Consultant = {
     visit_date: string
     fees: number
     consultant_name?: string
+    note?: string
     created_at?: string
 }
 
@@ -353,6 +354,23 @@ export function PatientBillingPage() {
     const [selectedDoctorId, setSelectedDoctorId] = useState<string>('')
     const [discountNotes, setDiscountNotes] = useState<string>('')
     const [customRowOrderKeys, setCustomRowOrderKeys] = useState<string[] | null>(null)
+    const [openReorderDialog, setOpenReorderDialog] = useState(false)
+    const orderKeysRef = useRef<string[] | null>(null)
+    useEffect(() => { orderKeysRef.current = customRowOrderKeys }, [customRowOrderKeys])
+
+    // Load the persisted bill-item order for this admission (saved after drag-and-drop)
+    useEffect(() => {
+        if (!admissionId || !token) return
+        fetch(`${API_URL}/api/admission/${admissionId}/bill-item-order`, {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((json) => {
+                const order = json?.data?.order
+                if (Array.isArray(order) && order.length) setCustomRowOrderKeys(order)
+            })
+            .catch(() => {})
+    }, [admissionId, token])
     const [customFinalBillItemsOrder, setCustomFinalBillItemsOrder] = useState<any[] | null>(null)
     const [isDoctorDropdownOpen, setIsDoctorDropdownOpen] = useState(false)
     const [doctorSearchQuery, setDoctorSearchQuery] = useState('')
@@ -547,6 +565,7 @@ export function PatientBillingPage() {
                 visit_date: c.visit_date,
                 fees: typeof c.fees === 'string' ? parseFloat(c.fees) : (c.fees || 0),
                 consultant_name: c.consultant_name || 'Unknown',
+                note: c.note || '',
             }))
             setConsultants(fetchedCons)
         }
@@ -817,6 +836,7 @@ export function PatientBillingPage() {
                     consultant_id: consultant.consultant_id,
                     visit_date: consultant.visit_date,
                     fees: consultant.fees,
+                    note: consultant.note || '',
                 }),
             })
             if (!res.ok) {
@@ -1293,48 +1313,57 @@ export function PatientBillingPage() {
     // Final-bill editable grid: one row per charge line the final bill snapshots
     // (bed/cabin, operations, consultants, surgeons, assistants, services — mirrors create-final-bill)
     const billGridRows = useMemo(() => {
-        const rows: { key: string; label: string; refTable: string; refId: number; qty: number; amount: number }[] = []
+        const rows: { key: string; category: string; label: string; refTable: string; refId: number; qty: number; rate: number; amount: number }[] = []
         bedBills.forEach((b: any) => rows.push({
             key: `indoor_billing_bed_cabin:${b.id}`,
+            category: 'Bed Charges',
             label: `${b.bed_code || 'Bed'} (${b.bed_type || 'Bed'})`,
             refTable: 'indoor_billing_bed_cabin', refId: b.id,
-            qty: Number(b.days) || 1, amount: Number(b.total_amount) || 0,
+            qty: Number(b.days) || 1,
+            rate: Number(b.rate_per_day) || 0,
+            amount: Number(b.total_amount) || 0,
         }))
         operations.forEach((o: any) => rows.push({
             key: `indoor_billing_operations:${o.id}`,
+            category: 'Operation',
             label: o.operation_type || 'Operation',
             refTable: 'indoor_billing_operations', refId: o.id,
-            qty: 1, amount: Number(o.charges) || 0,
+            qty: 1, rate: Number(o.charges) || 0, amount: Number(o.charges) || 0,
         }))
         consultants.forEach((c: any) => rows.push({
             key: `indoor_billing_consultants:${c.id}`,
+            category: 'Consultant',
             label: `Consultation - ${c.consultant_name || 'Unknown'}`,
             refTable: 'indoor_billing_consultants', refId: c.id,
-            qty: 1, amount: Number(c.fees) || 0,
+            qty: 1, rate: Number(c.fees) || 0, amount: Number(c.fees) || 0,
         }))
         surgeons.forEach((s: any) => rows.push({
             key: `indoor_billing_surgeons:${s.id}`,
+            category: 'Surgeon',
             label: `Surgeon Fee - ${s.surgeon_name || 'Unknown'}`,
             refTable: 'indoor_billing_surgeons', refId: s.id,
-            qty: 1, amount: Number(s.fees) || 0,
+            qty: 1, rate: Number(s.fees) || 0, amount: Number(s.fees) || 0,
         }))
         assistants.forEach((a: any) => rows.push({
             key: `indoor_billing_assistants:${a.id}`,
+            category: 'Assistant',
             label: `Assistant Fee - ${a.assistant_name || 'Unknown'}`,
             refTable: 'indoor_billing_assistants', refId: a.id,
-            qty: 1, amount: Number(a.fees) || 0,
+            qty: 1, rate: Number(a.fees) || 0, amount: Number(a.fees) || 0,
         }))
         anesthesiologists.forEach((a: any) => rows.push({
             key: `indoor_billing_anesthesiologists:${a.id}`,
+            category: 'Anesthesia',
             label: `Anesthesia - ${a.anesthesiologist_name || 'Unknown'}`,
             refTable: 'indoor_billing_anesthesiologists', refId: a.id,
-            qty: 1, amount: Number(a.fees) || 0,
+            qty: 1, rate: Number(a.fees) || 0, amount: Number(a.fees) || 0,
         }))
         servicesList.forEach((sv: any) => rows.push({
             key: `indoor_billing_services:${sv.id}`,
-            label: sv.note || 'Service',
+            category: 'Clinical Service',
+            label: sv.service_name || sv.note || 'Service',
             refTable: 'indoor_billing_services', refId: sv.id,
-            qty: 1, amount: Number(sv.amount) || 0,
+            qty: 1, rate: Number(sv.amount) || 0, amount: Number(sv.amount) || 0,
         }))
         return rows
     }, [bedBills, operations, consultants, surgeons, assistants, anesthesiologists, servicesList])
@@ -2442,7 +2471,7 @@ export function PatientBillingPage() {
                                                     <thead>
                                                         <tr className="border-b">
                                                             <th className="text-left p-3">SL</th>
-                                                            <th className="text-left p-3">Consultant Name</th>
+                                                            <th className="text-left p-3">Consultant Name</th><th className="text-left p-3">Note</th>
                                                             <th className="text-left p-3">Date</th>
                                                             <th className="text-right p-3">Fees</th>
                                                             <th className="text-left p-3">Created At</th>
@@ -2453,7 +2482,7 @@ export function PatientBillingPage() {
                                                         {consultants.map((cons, index) => (
                                                             <tr key={cons.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
                                                                 <td className="p-3">{index + 1}</td>
-                                                                <td className="p-3">{cons.consultant_name}</td>
+                                                                <td className="p-3">{cons.consultant_name}</td><td className="p-3 max-w-[260px] align-top">{cons.note ? <span className="block truncate text-muted-foreground" title={cons.note}>{cons.note}</span> : <span className="text-muted-foreground/40">-</span>}</td>
                                                                 <td className="p-3">{safeFormatDate(cons.visit_date)}</td>
                                                                 <td className="p-3 text-right">{format(cons.fees)}</td>
                                                                 <td className="p-3 text-sm text-muted-foreground">{cons.created_at ? safeFormatDate(cons.created_at) : '-'}</td>
@@ -2463,7 +2492,7 @@ export function PatientBillingPage() {
                                                                             <button
                                                                                 type="button"
                                                                                 onClick={() => {
-                                                                                    setEditConsultant({ id: cons.id!, consultant_id: cons.consultant_id, visit_date: cons.visit_date, fees: cons.fees })
+                                                                                    setEditConsultant({ id: cons.id!, consultant_id: cons.consultant_id, visit_date: cons.visit_date, fees: cons.fees, note: cons.note })
                                                                                     setOpenConsultantForm(true)
                                                                                 }}
                                                                                 className="text-blue-500 hover:text-blue-700"
@@ -2983,16 +3012,29 @@ export function PatientBillingPage() {
                                                         </div>
                                                         <CardTitle className="text-sm font-bold text-white">Billing Summary</CardTitle>
                                                     </div>
-                                                    <Button
-                                                        type="button"
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={handlePrintBilling}
-                                                        className="h-7 text-xs bg-white/20 border-white/30 text-white hover:bg-white/30 print:hidden"
-                                                    >
-                                                        <Printer className="h-3 w-3 mr-1" />
-                                                        Print
-                                                    </Button>
+                                                    <div className="flex items-center gap-2">
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => setOpenReorderDialog(true)}
+                                                            className="h-7 text-xs bg-white/20 border-white/30 text-white hover:bg-white/30"
+                                                            title="Reorder bill items"
+                                                        >
+                                                            <Pencil className="h-3 w-3 mr-1" />
+                                                            Order
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={handlePrintBilling}
+                                                            className="h-7 text-xs bg-white/20 border-white/30 text-white hover:bg-white/30 print:hidden"
+                                                        >
+                                                            <Printer className="h-3 w-3 mr-1" />
+                                                            Print
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                             </CardHeader>
                                             <CardContent className="p-0">
@@ -4827,9 +4869,149 @@ export function PatientBillingPage() {
                         </DialogContent>
                     </Dialog>
 
+                    {/* Reorder Bill Items Dialog — drag to set the print/final-bill order */}
+                    <Dialog open={openReorderDialog} onOpenChange={setOpenReorderDialog}>
+                        <DialogContent className="sm:max-w-[850px] max-h-[85vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                    <ArrowUpDown className="h-4 w-4" />
+                                    Reorder Bill Items
+                                </DialogTitle>
+                                <DialogDescription>
+                                    Drag rows to set the order. It is applied to the printed/finalized bill.
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            {sortedBillGridRows.length === 0 ? (
+                                <p className="text-sm text-muted-foreground text-center py-6">
+                                    No billable items yet.
+                                </p>
+                            ) : (
+                                <div className="border rounded-md overflow-hidden">
+                                    <div className="grid grid-cols-12 gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-900/60 text-[11px] font-bold uppercase tracking-wide text-muted-foreground border-b">
+                                        <div className="col-span-1" />
+                                        <div className="col-span-1 text-center">#</div>
+                                        <div className="col-span-2">Category</div>
+                                        <div className="col-span-3">Description</div>
+                                        <div className="col-span-1 text-center">Qty</div>
+                                        <div className="col-span-2 text-right">Rate ({currencySymbol})</div>
+                                        <div className="col-span-2 text-right">Amount ({currencySymbol})</div>
+                                    </div>
+                                    <DndContext
+                                        collisionDetection={closestCenter}
+                                        onDragEnd={(event) => {
+                                            const { active, over } = event
+                                            if (!over || active.id === over.id) return
+                                            const cur = orderKeysRef.current ?? sortedBillGridRows.map((r) => r.key)
+                                            const oldIndex = cur.indexOf(String(active.id))
+                                            const newIndex = cur.indexOf(String(over.id))
+                                            if (oldIndex === -1 || newIndex === -1) return
+                                            const next = arrayMove(cur, oldIndex, newIndex)
+                                            setCustomRowOrderKeys(next)
+                                            // persist the new serial order
+                                            fetch(`${API_URL}/api/admission/${admissionId}/bill-item-order`, {
+                                                method: 'PUT',
+                                                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ order: next }),
+                                            }).catch(() => {})
+                                        }}
+                                    >
+                                        <SortableContext
+                                            items={sortedBillGridRows.map((r) => r.key)}
+                                            strategy={verticalListSortingStrategy}
+                                        >
+                                            {sortedBillGridRows.map((row, idx) => (
+                                                <SortableReorderRow
+                                                    key={row.key}
+                                                    id={row.key}
+                                                    idx={idx}
+                                                    category={row.category}
+                                                    label={row.label}
+                                                    qty={row.qty}
+                                                    rate={row.rate}
+                                                    amount={row.amount}
+                                                    formatNumber={formatNumber}
+                                                />
+                                            ))}
+                                        </SortableContext>
+                                    </DndContext>
+                                </div>
+                            )}
+
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setOpenReorderDialog(false)}>
+                                    Done
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+
                 </div>
             </Main>
         </>
+    )
+}
+
+function SortableReorderRow({
+    id,
+    idx,
+    category,
+    label,
+    qty,
+    rate,
+    amount,
+    formatNumber,
+}: {
+    id: string
+    idx: number
+    category: string
+    label: string
+    qty: number
+    rate: number
+    amount: number
+    formatNumber: (val: number) => string
+}) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id })
+
+    const style = {
+        transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+        transition,
+        zIndex: isDragging ? 50 : undefined,
+    }
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className={cn(
+                "grid grid-cols-12 gap-2 items-center px-3 py-2.5 text-xs border-b last:border-b-0 bg-white dark:bg-slate-950",
+                isDragging ? "opacity-60 bg-indigo-50/40" : "hover:bg-slate-50 dark:hover:bg-slate-900/40"
+            )}
+        >
+            <div className="col-span-1 flex items-center">
+                <button
+                    type="button"
+                    className="cursor-grab text-muted-foreground hover:text-indigo-600 focus:outline-none p-0.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+                    {...attributes}
+                    {...listeners}
+                >
+                    <GripVertical className="h-4 w-4" />
+                </button>
+            </div>
+            <div className="col-span-1 text-center text-muted-foreground tabular-nums">{idx + 1}</div>
+            <div className="col-span-2 font-semibold uppercase text-gray-700 dark:text-gray-300 truncate">{category}</div>
+            <div className="col-span-3 font-medium truncate">{label}</div>
+            <div className="col-span-1 text-center tabular-nums">{qty}</div>
+            <div className="col-span-2 text-right tabular-nums text-muted-foreground">{formatNumber(rate)}</div>
+            <div className="col-span-2 text-right tabular-nums font-semibold">{formatNumber(amount)}</div>
+        </div>
     )
 }
 

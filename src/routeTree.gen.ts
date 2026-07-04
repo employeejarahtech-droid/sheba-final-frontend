@@ -147,9 +147,10 @@ import { Route as AuthenticatedDashboardReportsPayrollPayrollSummaryIndexRouteIm
 import { Route as AuthenticatedDashboardReportsPayrollLeaveReportIndexRouteImport } from './routes/_authenticated/dashboard/reports/payroll/leave-report/index'
 import { Route as AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRouteImport } from './routes/_authenticated/dashboard/reports/payroll/department-wise-staff/index'
 import { Route as AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRouteImport } from './routes/_authenticated/dashboard/reports/payroll/attendance-summary/index'
+import { Route as AuthenticatedDashboardReportsPatientRefDoctorWisePatientsIndexRouteImport } from './routes/_authenticated/dashboard/reports/patient/ref-doctor-wise-patients/index'
 import { Route as AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRouteImport } from './routes/_authenticated/dashboard/reports/patient/patient-type-stats/index'
-import { Route as AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRouteImport } from './routes/_authenticated/dashboard/reports/patient/doctor-wise-patients/index'
 import { Route as AuthenticatedDashboardReportsPatientDischargeSummaryIndexRouteImport } from './routes/_authenticated/dashboard/reports/patient/discharge-summary/index'
+import { Route as AuthenticatedDashboardReportsPatientConsultantWisePatientsIndexRouteImport } from './routes/_authenticated/dashboard/reports/patient/consultant-wise-patients/index'
 import { Route as AuthenticatedDashboardReportsPatientBedOccupancyIndexRouteImport } from './routes/_authenticated/dashboard/reports/patient/bed-occupancy/index'
 import { Route as AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRouteImport } from './routes/_authenticated/dashboard/reports/patient/admission-register/index'
 import { Route as AuthenticatedDashboardReportsPathologyTestWiseCountIndexRouteImport } from './routes/_authenticated/dashboard/reports/pathology/test-wise-count/index'
@@ -291,9 +292,10 @@ import { Route as AuthenticatedDashboardReportsPayrollPayrollSummaryPrintRouteIm
 import { Route as AuthenticatedDashboardReportsPayrollLeaveReportPrintRouteImport } from './routes/_authenticated/dashboard/reports/payroll/leave-report/print'
 import { Route as AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRouteImport } from './routes/_authenticated/dashboard/reports/payroll/department-wise-staff/print'
 import { Route as AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRouteImport } from './routes/_authenticated/dashboard/reports/payroll/attendance-summary/print'
+import { Route as AuthenticatedDashboardReportsPatientRefDoctorWisePatientsPrintRouteImport } from './routes/_authenticated/dashboard/reports/patient/ref-doctor-wise-patients/print'
 import { Route as AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRouteImport } from './routes/_authenticated/dashboard/reports/patient/patient-type-stats/print'
-import { Route as AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRouteImport } from './routes/_authenticated/dashboard/reports/patient/doctor-wise-patients/print'
 import { Route as AuthenticatedDashboardReportsPatientDischargeSummaryPrintRouteImport } from './routes/_authenticated/dashboard/reports/patient/discharge-summary/print'
+import { Route as AuthenticatedDashboardReportsPatientConsultantWisePatientsPrintRouteImport } from './routes/_authenticated/dashboard/reports/patient/consultant-wise-patients/print'
 import { Route as AuthenticatedDashboardReportsPatientBedOccupancyPrintRouteImport } from './routes/_authenticated/dashboard/reports/patient/bed-occupancy/print'
 import { Route as AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRouteImport } from './routes/_authenticated/dashboard/reports/patient/admission-register/print'
 import { Route as AuthenticatedDashboardReportsPathologyTestWiseCountPrintRouteImport } from './routes/_authenticated/dashboard/reports/pathology/test-wise-count/print'
@@ -1207,26 +1209,34 @@ const AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute =
     path: '/dashboard/reports/payroll/attendance-summary/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardReportsPatientRefDoctorWisePatientsIndexRoute =
+  AuthenticatedDashboardReportsPatientRefDoctorWisePatientsIndexRouteImport.update(
+    {
+      id: '/dashboard/reports/patient/ref-doctor-wise-patients/',
+      path: '/dashboard/reports/patient/ref-doctor-wise-patients/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute =
   AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRouteImport.update({
     id: '/dashboard/reports/patient/patient-type-stats/',
     path: '/dashboard/reports/patient/patient-type-stats/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute =
-  AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRouteImport.update(
-    {
-      id: '/dashboard/reports/patient/doctor-wise-patients/',
-      path: '/dashboard/reports/patient/doctor-wise-patients/',
-      getParentRoute: () => AuthenticatedRouteRoute,
-    } as any,
-  )
 const AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute =
   AuthenticatedDashboardReportsPatientDischargeSummaryIndexRouteImport.update({
     id: '/dashboard/reports/patient/discharge-summary/',
     path: '/dashboard/reports/patient/discharge-summary/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardReportsPatientConsultantWisePatientsIndexRoute =
+  AuthenticatedDashboardReportsPatientConsultantWisePatientsIndexRouteImport.update(
+    {
+      id: '/dashboard/reports/patient/consultant-wise-patients/',
+      path: '/dashboard/reports/patient/consultant-wise-patients/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute =
   AuthenticatedDashboardReportsPatientBedOccupancyIndexRouteImport.update({
     id: '/dashboard/reports/patient/bed-occupancy/',
@@ -2123,26 +2133,34 @@ const AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute =
     path: '/dashboard/reports/payroll/attendance-summary/print',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardReportsPatientRefDoctorWisePatientsPrintRoute =
+  AuthenticatedDashboardReportsPatientRefDoctorWisePatientsPrintRouteImport.update(
+    {
+      id: '/dashboard/reports/patient/ref-doctor-wise-patients/print',
+      path: '/dashboard/reports/patient/ref-doctor-wise-patients/print',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute =
   AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRouteImport.update({
     id: '/dashboard/reports/patient/patient-type-stats/print',
     path: '/dashboard/reports/patient/patient-type-stats/print',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute =
-  AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRouteImport.update(
-    {
-      id: '/dashboard/reports/patient/doctor-wise-patients/print',
-      path: '/dashboard/reports/patient/doctor-wise-patients/print',
-      getParentRoute: () => AuthenticatedRouteRoute,
-    } as any,
-  )
 const AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute =
   AuthenticatedDashboardReportsPatientDischargeSummaryPrintRouteImport.update({
     id: '/dashboard/reports/patient/discharge-summary/print',
     path: '/dashboard/reports/patient/discharge-summary/print',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardReportsPatientConsultantWisePatientsPrintRoute =
+  AuthenticatedDashboardReportsPatientConsultantWisePatientsPrintRouteImport.update(
+    {
+      id: '/dashboard/reports/patient/consultant-wise-patients/print',
+      path: '/dashboard/reports/patient/consultant-wise-patients/print',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute =
   AuthenticatedDashboardReportsPatientBedOccupancyPrintRouteImport.update({
     id: '/dashboard/reports/patient/bed-occupancy/print',
@@ -3155,9 +3173,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/reports/pathology/test-wise-count/print': typeof AuthenticatedDashboardReportsPathologyTestWiseCountPrintRoute
   '/dashboard/reports/patient/admission-register/print': typeof AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRoute
   '/dashboard/reports/patient/bed-occupancy/print': typeof AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute
+  '/dashboard/reports/patient/consultant-wise-patients/print': typeof AuthenticatedDashboardReportsPatientConsultantWisePatientsPrintRoute
   '/dashboard/reports/patient/discharge-summary/print': typeof AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute
-  '/dashboard/reports/patient/doctor-wise-patients/print': typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute
   '/dashboard/reports/patient/patient-type-stats/print': typeof AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute
+  '/dashboard/reports/patient/ref-doctor-wise-patients/print': typeof AuthenticatedDashboardReportsPatientRefDoctorWisePatientsPrintRoute
   '/dashboard/reports/payroll/attendance-summary/print': typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute
   '/dashboard/reports/payroll/department-wise-staff/print': typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRoute
   '/dashboard/reports/payroll/leave-report/print': typeof AuthenticatedDashboardReportsPayrollLeaveReportPrintRoute
@@ -3299,9 +3318,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/reports/pathology/test-wise-count': typeof AuthenticatedDashboardReportsPathologyTestWiseCountIndexRoute
   '/dashboard/reports/patient/admission-register': typeof AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRoute
   '/dashboard/reports/patient/bed-occupancy': typeof AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute
+  '/dashboard/reports/patient/consultant-wise-patients': typeof AuthenticatedDashboardReportsPatientConsultantWisePatientsIndexRoute
   '/dashboard/reports/patient/discharge-summary': typeof AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute
-  '/dashboard/reports/patient/doctor-wise-patients': typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute
   '/dashboard/reports/patient/patient-type-stats': typeof AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute
+  '/dashboard/reports/patient/ref-doctor-wise-patients': typeof AuthenticatedDashboardReportsPatientRefDoctorWisePatientsIndexRoute
   '/dashboard/reports/payroll/attendance-summary': typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute
   '/dashboard/reports/payroll/department-wise-staff': typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRoute
   '/dashboard/reports/payroll/leave-report': typeof AuthenticatedDashboardReportsPayrollLeaveReportIndexRoute
@@ -3560,9 +3580,10 @@ export interface FileRoutesByTo {
   '/dashboard/reports/pathology/test-wise-count/print': typeof AuthenticatedDashboardReportsPathologyTestWiseCountPrintRoute
   '/dashboard/reports/patient/admission-register/print': typeof AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRoute
   '/dashboard/reports/patient/bed-occupancy/print': typeof AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute
+  '/dashboard/reports/patient/consultant-wise-patients/print': typeof AuthenticatedDashboardReportsPatientConsultantWisePatientsPrintRoute
   '/dashboard/reports/patient/discharge-summary/print': typeof AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute
-  '/dashboard/reports/patient/doctor-wise-patients/print': typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute
   '/dashboard/reports/patient/patient-type-stats/print': typeof AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute
+  '/dashboard/reports/patient/ref-doctor-wise-patients/print': typeof AuthenticatedDashboardReportsPatientRefDoctorWisePatientsPrintRoute
   '/dashboard/reports/payroll/attendance-summary/print': typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute
   '/dashboard/reports/payroll/department-wise-staff/print': typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRoute
   '/dashboard/reports/payroll/leave-report/print': typeof AuthenticatedDashboardReportsPayrollLeaveReportPrintRoute
@@ -3704,9 +3725,10 @@ export interface FileRoutesByTo {
   '/dashboard/reports/pathology/test-wise-count': typeof AuthenticatedDashboardReportsPathologyTestWiseCountIndexRoute
   '/dashboard/reports/patient/admission-register': typeof AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRoute
   '/dashboard/reports/patient/bed-occupancy': typeof AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute
+  '/dashboard/reports/patient/consultant-wise-patients': typeof AuthenticatedDashboardReportsPatientConsultantWisePatientsIndexRoute
   '/dashboard/reports/patient/discharge-summary': typeof AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute
-  '/dashboard/reports/patient/doctor-wise-patients': typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute
   '/dashboard/reports/patient/patient-type-stats': typeof AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute
+  '/dashboard/reports/patient/ref-doctor-wise-patients': typeof AuthenticatedDashboardReportsPatientRefDoctorWisePatientsIndexRoute
   '/dashboard/reports/payroll/attendance-summary': typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute
   '/dashboard/reports/payroll/department-wise-staff': typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRoute
   '/dashboard/reports/payroll/leave-report': typeof AuthenticatedDashboardReportsPayrollLeaveReportIndexRoute
@@ -3972,9 +3994,10 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/reports/pathology/test-wise-count/print': typeof AuthenticatedDashboardReportsPathologyTestWiseCountPrintRoute
   '/_authenticated/dashboard/reports/patient/admission-register/print': typeof AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRoute
   '/_authenticated/dashboard/reports/patient/bed-occupancy/print': typeof AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute
+  '/_authenticated/dashboard/reports/patient/consultant-wise-patients/print': typeof AuthenticatedDashboardReportsPatientConsultantWisePatientsPrintRoute
   '/_authenticated/dashboard/reports/patient/discharge-summary/print': typeof AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute
-  '/_authenticated/dashboard/reports/patient/doctor-wise-patients/print': typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute
   '/_authenticated/dashboard/reports/patient/patient-type-stats/print': typeof AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute
+  '/_authenticated/dashboard/reports/patient/ref-doctor-wise-patients/print': typeof AuthenticatedDashboardReportsPatientRefDoctorWisePatientsPrintRoute
   '/_authenticated/dashboard/reports/payroll/attendance-summary/print': typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute
   '/_authenticated/dashboard/reports/payroll/department-wise-staff/print': typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRoute
   '/_authenticated/dashboard/reports/payroll/leave-report/print': typeof AuthenticatedDashboardReportsPayrollLeaveReportPrintRoute
@@ -4116,9 +4139,10 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/reports/pathology/test-wise-count/': typeof AuthenticatedDashboardReportsPathologyTestWiseCountIndexRoute
   '/_authenticated/dashboard/reports/patient/admission-register/': typeof AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRoute
   '/_authenticated/dashboard/reports/patient/bed-occupancy/': typeof AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute
+  '/_authenticated/dashboard/reports/patient/consultant-wise-patients/': typeof AuthenticatedDashboardReportsPatientConsultantWisePatientsIndexRoute
   '/_authenticated/dashboard/reports/patient/discharge-summary/': typeof AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute
-  '/_authenticated/dashboard/reports/patient/doctor-wise-patients/': typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute
   '/_authenticated/dashboard/reports/patient/patient-type-stats/': typeof AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute
+  '/_authenticated/dashboard/reports/patient/ref-doctor-wise-patients/': typeof AuthenticatedDashboardReportsPatientRefDoctorWisePatientsIndexRoute
   '/_authenticated/dashboard/reports/payroll/attendance-summary/': typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute
   '/_authenticated/dashboard/reports/payroll/department-wise-staff/': typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRoute
   '/_authenticated/dashboard/reports/payroll/leave-report/': typeof AuthenticatedDashboardReportsPayrollLeaveReportIndexRoute
@@ -4381,9 +4405,10 @@ export interface FileRouteTypes {
     | '/dashboard/reports/pathology/test-wise-count/print'
     | '/dashboard/reports/patient/admission-register/print'
     | '/dashboard/reports/patient/bed-occupancy/print'
+    | '/dashboard/reports/patient/consultant-wise-patients/print'
     | '/dashboard/reports/patient/discharge-summary/print'
-    | '/dashboard/reports/patient/doctor-wise-patients/print'
     | '/dashboard/reports/patient/patient-type-stats/print'
+    | '/dashboard/reports/patient/ref-doctor-wise-patients/print'
     | '/dashboard/reports/payroll/attendance-summary/print'
     | '/dashboard/reports/payroll/department-wise-staff/print'
     | '/dashboard/reports/payroll/leave-report/print'
@@ -4525,9 +4550,10 @@ export interface FileRouteTypes {
     | '/dashboard/reports/pathology/test-wise-count'
     | '/dashboard/reports/patient/admission-register'
     | '/dashboard/reports/patient/bed-occupancy'
+    | '/dashboard/reports/patient/consultant-wise-patients'
     | '/dashboard/reports/patient/discharge-summary'
-    | '/dashboard/reports/patient/doctor-wise-patients'
     | '/dashboard/reports/patient/patient-type-stats'
+    | '/dashboard/reports/patient/ref-doctor-wise-patients'
     | '/dashboard/reports/payroll/attendance-summary'
     | '/dashboard/reports/payroll/department-wise-staff'
     | '/dashboard/reports/payroll/leave-report'
@@ -4786,9 +4812,10 @@ export interface FileRouteTypes {
     | '/dashboard/reports/pathology/test-wise-count/print'
     | '/dashboard/reports/patient/admission-register/print'
     | '/dashboard/reports/patient/bed-occupancy/print'
+    | '/dashboard/reports/patient/consultant-wise-patients/print'
     | '/dashboard/reports/patient/discharge-summary/print'
-    | '/dashboard/reports/patient/doctor-wise-patients/print'
     | '/dashboard/reports/patient/patient-type-stats/print'
+    | '/dashboard/reports/patient/ref-doctor-wise-patients/print'
     | '/dashboard/reports/payroll/attendance-summary/print'
     | '/dashboard/reports/payroll/department-wise-staff/print'
     | '/dashboard/reports/payroll/leave-report/print'
@@ -4930,9 +4957,10 @@ export interface FileRouteTypes {
     | '/dashboard/reports/pathology/test-wise-count'
     | '/dashboard/reports/patient/admission-register'
     | '/dashboard/reports/patient/bed-occupancy'
+    | '/dashboard/reports/patient/consultant-wise-patients'
     | '/dashboard/reports/patient/discharge-summary'
-    | '/dashboard/reports/patient/doctor-wise-patients'
     | '/dashboard/reports/patient/patient-type-stats'
+    | '/dashboard/reports/patient/ref-doctor-wise-patients'
     | '/dashboard/reports/payroll/attendance-summary'
     | '/dashboard/reports/payroll/department-wise-staff'
     | '/dashboard/reports/payroll/leave-report'
@@ -5197,9 +5225,10 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/reports/pathology/test-wise-count/print'
     | '/_authenticated/dashboard/reports/patient/admission-register/print'
     | '/_authenticated/dashboard/reports/patient/bed-occupancy/print'
+    | '/_authenticated/dashboard/reports/patient/consultant-wise-patients/print'
     | '/_authenticated/dashboard/reports/patient/discharge-summary/print'
-    | '/_authenticated/dashboard/reports/patient/doctor-wise-patients/print'
     | '/_authenticated/dashboard/reports/patient/patient-type-stats/print'
+    | '/_authenticated/dashboard/reports/patient/ref-doctor-wise-patients/print'
     | '/_authenticated/dashboard/reports/payroll/attendance-summary/print'
     | '/_authenticated/dashboard/reports/payroll/department-wise-staff/print'
     | '/_authenticated/dashboard/reports/payroll/leave-report/print'
@@ -5341,9 +5370,10 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/reports/pathology/test-wise-count/'
     | '/_authenticated/dashboard/reports/patient/admission-register/'
     | '/_authenticated/dashboard/reports/patient/bed-occupancy/'
+    | '/_authenticated/dashboard/reports/patient/consultant-wise-patients/'
     | '/_authenticated/dashboard/reports/patient/discharge-summary/'
-    | '/_authenticated/dashboard/reports/patient/doctor-wise-patients/'
     | '/_authenticated/dashboard/reports/patient/patient-type-stats/'
+    | '/_authenticated/dashboard/reports/patient/ref-doctor-wise-patients/'
     | '/_authenticated/dashboard/reports/payroll/attendance-summary/'
     | '/_authenticated/dashboard/reports/payroll/department-wise-staff/'
     | '/_authenticated/dashboard/reports/payroll/leave-report/'
@@ -6419,6 +6449,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/reports/patient/ref-doctor-wise-patients/': {
+      id: '/_authenticated/dashboard/reports/patient/ref-doctor-wise-patients/'
+      path: '/dashboard/reports/patient/ref-doctor-wise-patients'
+      fullPath: '/dashboard/reports/patient/ref-doctor-wise-patients'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientRefDoctorWisePatientsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/reports/patient/patient-type-stats/': {
       id: '/_authenticated/dashboard/reports/patient/patient-type-stats/'
       path: '/dashboard/reports/patient/patient-type-stats'
@@ -6426,18 +6463,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/dashboard/reports/patient/doctor-wise-patients/': {
-      id: '/_authenticated/dashboard/reports/patient/doctor-wise-patients/'
-      path: '/dashboard/reports/patient/doctor-wise-patients'
-      fullPath: '/dashboard/reports/patient/doctor-wise-patients'
-      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/dashboard/reports/patient/discharge-summary/': {
       id: '/_authenticated/dashboard/reports/patient/discharge-summary/'
       path: '/dashboard/reports/patient/discharge-summary'
       fullPath: '/dashboard/reports/patient/discharge-summary'
       preLoaderRoute: typeof AuthenticatedDashboardReportsPatientDischargeSummaryIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/patient/consultant-wise-patients/': {
+      id: '/_authenticated/dashboard/reports/patient/consultant-wise-patients/'
+      path: '/dashboard/reports/patient/consultant-wise-patients'
+      fullPath: '/dashboard/reports/patient/consultant-wise-patients'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientConsultantWisePatientsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/reports/patient/bed-occupancy/': {
@@ -7427,6 +7464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/reports/patient/ref-doctor-wise-patients/print': {
+      id: '/_authenticated/dashboard/reports/patient/ref-doctor-wise-patients/print'
+      path: '/dashboard/reports/patient/ref-doctor-wise-patients/print'
+      fullPath: '/dashboard/reports/patient/ref-doctor-wise-patients/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientRefDoctorWisePatientsPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/reports/patient/patient-type-stats/print': {
       id: '/_authenticated/dashboard/reports/patient/patient-type-stats/print'
       path: '/dashboard/reports/patient/patient-type-stats/print'
@@ -7434,18 +7478,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/dashboard/reports/patient/doctor-wise-patients/print': {
-      id: '/_authenticated/dashboard/reports/patient/doctor-wise-patients/print'
-      path: '/dashboard/reports/patient/doctor-wise-patients/print'
-      fullPath: '/dashboard/reports/patient/doctor-wise-patients/print'
-      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/dashboard/reports/patient/discharge-summary/print': {
       id: '/_authenticated/dashboard/reports/patient/discharge-summary/print'
       path: '/dashboard/reports/patient/discharge-summary/print'
       fullPath: '/dashboard/reports/patient/discharge-summary/print'
       preLoaderRoute: typeof AuthenticatedDashboardReportsPatientDischargeSummaryPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/reports/patient/consultant-wise-patients/print': {
+      id: '/_authenticated/dashboard/reports/patient/consultant-wise-patients/print'
+      path: '/dashboard/reports/patient/consultant-wise-patients/print'
+      fullPath: '/dashboard/reports/patient/consultant-wise-patients/print'
+      preLoaderRoute: typeof AuthenticatedDashboardReportsPatientConsultantWisePatientsPrintRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/reports/patient/bed-occupancy/print': {
@@ -8510,9 +8554,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardReportsPathologyTestWiseCountPrintRoute: typeof AuthenticatedDashboardReportsPathologyTestWiseCountPrintRoute
   AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRoute: typeof AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRoute
   AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute: typeof AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute
+  AuthenticatedDashboardReportsPatientConsultantWisePatientsPrintRoute: typeof AuthenticatedDashboardReportsPatientConsultantWisePatientsPrintRoute
   AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute: typeof AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute
-  AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute: typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute
   AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute: typeof AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute
+  AuthenticatedDashboardReportsPatientRefDoctorWisePatientsPrintRoute: typeof AuthenticatedDashboardReportsPatientRefDoctorWisePatientsPrintRoute
   AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute: typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute
   AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRoute: typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRoute
   AuthenticatedDashboardReportsPayrollLeaveReportPrintRoute: typeof AuthenticatedDashboardReportsPayrollLeaveReportPrintRoute
@@ -8654,9 +8699,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardReportsPathologyTestWiseCountIndexRoute: typeof AuthenticatedDashboardReportsPathologyTestWiseCountIndexRoute
   AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRoute: typeof AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRoute
   AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute: typeof AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute
+  AuthenticatedDashboardReportsPatientConsultantWisePatientsIndexRoute: typeof AuthenticatedDashboardReportsPatientConsultantWisePatientsIndexRoute
   AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute: typeof AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute
-  AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute: typeof AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute
   AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute: typeof AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute
+  AuthenticatedDashboardReportsPatientRefDoctorWisePatientsIndexRoute: typeof AuthenticatedDashboardReportsPatientRefDoctorWisePatientsIndexRoute
   AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute: typeof AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute
   AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRoute: typeof AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRoute
   AuthenticatedDashboardReportsPayrollLeaveReportIndexRoute: typeof AuthenticatedDashboardReportsPayrollLeaveReportIndexRoute
@@ -8983,12 +9029,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardReportsPatientAdmissionRegisterPrintRoute,
   AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute:
     AuthenticatedDashboardReportsPatientBedOccupancyPrintRoute,
+  AuthenticatedDashboardReportsPatientConsultantWisePatientsPrintRoute:
+    AuthenticatedDashboardReportsPatientConsultantWisePatientsPrintRoute,
   AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute:
     AuthenticatedDashboardReportsPatientDischargeSummaryPrintRoute,
-  AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute:
-    AuthenticatedDashboardReportsPatientDoctorWisePatientsPrintRoute,
   AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute:
     AuthenticatedDashboardReportsPatientPatientTypeStatsPrintRoute,
+  AuthenticatedDashboardReportsPatientRefDoctorWisePatientsPrintRoute:
+    AuthenticatedDashboardReportsPatientRefDoctorWisePatientsPrintRoute,
   AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute:
     AuthenticatedDashboardReportsPayrollAttendanceSummaryPrintRoute,
   AuthenticatedDashboardReportsPayrollDepartmentWiseStaffPrintRoute:
@@ -9271,12 +9319,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardReportsPatientAdmissionRegisterIndexRoute,
   AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute:
     AuthenticatedDashboardReportsPatientBedOccupancyIndexRoute,
+  AuthenticatedDashboardReportsPatientConsultantWisePatientsIndexRoute:
+    AuthenticatedDashboardReportsPatientConsultantWisePatientsIndexRoute,
   AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute:
     AuthenticatedDashboardReportsPatientDischargeSummaryIndexRoute,
-  AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute:
-    AuthenticatedDashboardReportsPatientDoctorWisePatientsIndexRoute,
   AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute:
     AuthenticatedDashboardReportsPatientPatientTypeStatsIndexRoute,
+  AuthenticatedDashboardReportsPatientRefDoctorWisePatientsIndexRoute:
+    AuthenticatedDashboardReportsPatientRefDoctorWisePatientsIndexRoute,
   AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute:
     AuthenticatedDashboardReportsPayrollAttendanceSummaryIndexRoute,
   AuthenticatedDashboardReportsPayrollDepartmentWiseStaffIndexRoute:

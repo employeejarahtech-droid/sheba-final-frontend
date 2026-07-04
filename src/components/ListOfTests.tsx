@@ -10,7 +10,7 @@ import { useMemo, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { FlaskConical, CheckCircle, FolderTree, DollarSign } from 'lucide-react'
 import { useCurrency } from '@/hooks/use-currency'
 import {
@@ -65,6 +65,7 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
 
     const token = getCookie('accessToken');
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     const deleteMutation = useMutation({
         mutationFn: async (id: string) => {
@@ -91,6 +92,34 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
             }
         };
     }, [deleteMutation]);
+
+    // Client-side navigation for the DataTable action buttons. They are rendered
+    // as raw <a href> HTML strings, and plain anchors are NOT intercepted by
+    // TanStack Router — so they trigger full document navigations. That destroys
+    // the SPA/React-Query state (the list cache is gone on the edit page) and
+    // makes window.history.back() restore the list from bfcache with STALE rows.
+    // Expose helpers (matching window.deleteTest) so View/Edit route client-side.
+    useEffect(() => {
+        (window as any).viewTest = (testId: string | number) => {
+            navigate({ to: '/dashboard/outdoor/master/tests/$id', params: { id: String(testId) } });
+        };
+        (window as any).editTest = (testId: string | number) => {
+            navigate({ to: '/dashboard/outdoor/master/tests/edit/$id', params: { id: String(testId) } });
+        };
+    }, [navigate]);
+
+    // Safety net: if the list is ever restored from the browser back/forward
+    // cache (bfcache) — e.g. a full-document back navigation — the frozen page
+    // shows stale rows and no React lifecycle runs. Refetch on restore.
+    useEffect(() => {
+        const onPageShow = (e: PageTransitionEvent) => {
+            if (e.persisted) {
+                queryClient.invalidateQueries({ queryKey: ['tests'] });
+            }
+        };
+        window.addEventListener('pageshow', onPageShow);
+        return () => window.removeEventListener('pageshow', onPageShow);
+    }, [queryClient]);
 
     // Fetch test tables FIRST (needed to resolve match_table_name → display_name)
     const { data: testTablesData } = useQuery({
@@ -130,6 +159,12 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
             return res.json();
         },
         enabled: !!token && testTables.length > 0,
+        // Global default is refetchOnMount: false, so returning to the list
+        // (e.g. via window.history.back() from the edit page) would otherwise
+        // keep showing cached rows. 'always' guarantees a refetch every time
+        // the list mounts, so back-navigation always shows fresh data — with
+        // or without a prior save/invalidation.
+        refetchOnMount: 'always',
     });
 
     // Fetch categories for filter dropdown
@@ -263,12 +298,12 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
 
                         <!-- Actions -->
                         <div class="mt-8 flex justify-end gap-3 border-t pt-5">
-                            <a href="/dashboard/outdoor/master/tests/${id}"
+                            <a href="/dashboard/outdoor/master/tests/${id}" onclick="window.viewTest('${id}'); return false;"
                                class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 transition h-10 px-5">
                                 View
                             </a>
 
-                            <a href="/dashboard/outdoor/master/tests/edit/${id}"
+                            <a href="/dashboard/outdoor/master/tests/edit/${id}" onclick="window.editTest('${id}'); return false;"
                                class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition h-10 px-5 shadow">
                                 Edit
                             </a>
@@ -446,12 +481,12 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
             render: (_data: any, _type: string, row: TestItem) => {
                 return `
                     <div class="flex flex-nowrap items-center gap-2">
-                        <a href="/dashboard/outdoor/master/tests/${row.id}"
+                        <a href="/dashboard/outdoor/master/tests/${row.id}" onclick="window.viewTest('${row.id}'); return false;"
                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                             View
                         </a>
-                        <a href="/dashboard/outdoor/master/tests/edit/${row.id}"
+                        <a href="/dashboard/outdoor/master/tests/edit/${row.id}" onclick="window.editTest('${row.id}'); return false;"
                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                             Edit

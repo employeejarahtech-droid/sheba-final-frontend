@@ -405,7 +405,8 @@ export const sidebarData: SidebarData = {
             { title: 'Discharge Summary', url: '/dashboard/reports/patient/discharge-summary', icon: FileText },
             { title: 'Bed Occupancy', url: '/dashboard/reports/patient/bed-occupancy', icon: BedDouble },
             { title: 'Patient Type Stats', url: '/dashboard/reports/patient/patient-type-stats', icon: BarChart3 },
-            { title: 'Doctor-wise Patients', url: '/dashboard/reports/patient/doctor-wise-patients', icon: Users },
+            { title: 'Ref. Doctor-wise Patients', url: '/dashboard/reports/patient/ref-doctor-wise-patients', icon: Users },
+            { title: 'Consultant Wise Patients', url: '/dashboard/reports/patient/consultant-wise-patients', icon: Stethoscope },
           ],
         },
         {

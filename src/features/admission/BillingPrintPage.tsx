@@ -238,6 +238,21 @@ export function BillingPrintPage() {
         enabled: !!token && !!admissionId,
     })
 
+    // User's saved drag-and-drop order (admissions.bill_item_order)
+    const { data: billItemOrderData } = useQuery({
+        queryKey: ['bill-item-order', admissionId],
+        queryFn: async () => {
+            const res = await fetch(`${API_URL}/api/admission/${admissionId}/bill-item-order`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (!res.ok) return { order: [] as string[] }
+            const json = await res.json()
+            return { order: Array.isArray(json?.data?.order) ? json.data.order : [] } as { order: string[] }
+        },
+        enabled: !!token && !!admissionId,
+    })
+    const billItemOrder: string[] = billItemOrderData?.order || []
+
     const admission = admissionData?.data as BillingData
     const finalBillItems = admissionData?.data?.finalBill?.items || []
     const companyLogo = companySettings?.company_logo
@@ -293,6 +308,7 @@ export function BillingPrintPage() {
 
     const consolidatedItems = useMemo(() => {
         const list: {
+            key?: string
             category: string
             description: string
             note?: string
@@ -300,6 +316,7 @@ export function BillingPrintPage() {
             qty: number
             rate: number
             amount: number
+            discount?: number
             serial_no?: number
         }[] = []
 
@@ -344,13 +361,17 @@ export function BillingPrintPage() {
                 }
 
                 list.push({
+                    key: item.service_reference_table && item.service_reference_id
+                        ? `${item.service_reference_table}:${item.service_reference_id}`
+                        : undefined,
                     serial_no: item.serial_no || item.item_order || 0,
                     category,
                     description,
                     note: item.service_note || undefined,
                     qty: Number(item.quantity) || 1,
                     rate: Number(item.unit_price) || 0,
-                    amount: Number(item.final_amount) || 0
+                    amount: Number(item.final_amount) || 0,
+                    discount: Number(item.total_discount) || 0
                 })
             })
 
@@ -363,6 +384,7 @@ export function BillingPrintPage() {
         if (bedBills.length > 0) {
             bedBills.forEach((b: BedBill) => {
                 list.push({
+                    key: `indoor_billing_bed_cabin:${b.id}`,
                     serial_no: b.id || 0,
                     category: 'Bed Charges',
                     description: `${b.bed_code} (${b.bed_type})`,
@@ -375,6 +397,7 @@ export function BillingPrintPage() {
         } else if (bedCharges?.breakdown?.length > 0) {
             bedCharges.breakdown.forEach((b: any) => {
                 list.push({
+                    key: `indoor_billing_bed_cabin:${b.id}`,
                     serial_no: b.id || 0,
                     category: 'Bed Charges',
                     description: `${b.bed_code} (${b.bed_type})`,
@@ -389,6 +412,7 @@ export function BillingPrintPage() {
         // 2. Operations
         operations.forEach((op: Operation) => {
             list.push({
+                key: `indoor_billing_operations:${op.id}`,
                 serial_no: op.id || 0,
                 category: 'Operation',
                 description: op.operation_type,
@@ -402,6 +426,7 @@ export function BillingPrintPage() {
         // 3. Consultants
         consultants.forEach((c: Consultant) => {
             list.push({
+                key: `indoor_billing_consultants:${c.id}`,
                 serial_no: c.id || 0,
                 category: 'Consultant',
                 description: c.consultant_name,
@@ -415,6 +440,7 @@ export function BillingPrintPage() {
         // 4. Surgeons
         surgeons.forEach((s: Surgeon) => {
             list.push({
+                key: `indoor_billing_surgeons:${s.id}`,
                 serial_no: s.id || 0,
                 category: 'Surgeon',
                 description: s.surgeon_name,
@@ -428,6 +454,7 @@ export function BillingPrintPage() {
         // 5. Assistants
         assistants.forEach((a: Assistant) => {
             list.push({
+                key: `indoor_billing_assistants:${a.id}`,
                 serial_no: a.id || 0,
                 category: 'Assistant',
                 description: a.assistant_name,
@@ -441,6 +468,7 @@ export function BillingPrintPage() {
         // 6. Clinical Services
         services.forEach((s: Service) => {
             list.push({
+                key: `indoor_billing_services:${s.id}`,
                 serial_no: s.id || 0,
                 category: 'Clinical Service',
                 description: s.service_name,
@@ -451,9 +479,24 @@ export function BillingPrintPage() {
             })
         })
 
-        // Sort by ID (as fallback when no serial_no exists)
-        return list.sort((a, b) => (a.serial_no || 0) - (b.serial_no || 0))
+        // Keep logical insertion order (bed → operation → consultant → …). SL is
+        // rendered as a running index (idx + 1) in the table, so no sort needed.
+        return list
     }, [admissionData, finalBillItems, bedBills, bedCharges, operations, consultants, surgeons, assistants, services, safeFormatDate])
+
+    // Apply the user's saved drag-and-drop order (matches by item key).
+    const orderedItems = useMemo(() => {
+        if (!billItemOrder.length) return consolidatedItems
+        const indexByKey = new Map(billItemOrder.map((k, i) => [k, i]))
+        return [...consolidatedItems].sort((a, b) => {
+            const ai = a.key ? indexByKey.get(a.key) : undefined
+            const bi = b.key ? indexByKey.get(b.key) : undefined
+            if (ai !== undefined && bi !== undefined) return ai - bi
+            if (ai !== undefined) return -1
+            if (bi !== undefined) return 1
+            return 0
+        })
+    }, [consolidatedItems, billItemOrder])
 
     if (admissionLoading) {
         return (
@@ -595,17 +638,18 @@ export function BillingPrintPage() {
                 <thead>
                     <tr className="border-t border-b bg-row-blue">
                         <th className="px-2 py-1 text-left text-xs w-[4%]">#</th>
-                        <th className="px-2 py-1 text-left text-xs w-[20%]">Category</th>
-                        <th className="px-2 py-1 text-left text-xs w-[40%]">Description</th>
-                        <th className="px-2 py-1 text-center text-xs w-[10%]">Qty/Days</th>
-                        <th className="px-2 py-1 text-right text-xs w-[13%]">Rate ({currencySymbol})</th>
-                        <th className="px-2 py-1 text-right text-xs w-[13%]">Amount ({currencySymbol})</th>
+                        <th className="px-2 py-1 text-left text-xs w-[18%]">Category</th>
+                        <th className="px-2 py-1 text-left text-xs w-[30%]">Description</th>
+                        <th className="px-2 py-1 text-center text-xs w-[8%]">Qty/Days</th>
+                        <th className="px-2 py-1 text-right text-xs w-[12%]">Rate ({currencySymbol})</th>
+                        <th className="px-2 py-1 text-right text-xs w-[12%]">Disc. ({currencySymbol})</th>
+                        <th className="px-2 py-1 text-right text-xs w-[16%]">Amount ({currencySymbol})</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {consolidatedItems.map((item, idx) => (
+                    {orderedItems.map((item, idx) => (
                         <tr key={idx} className="border-b border-dashed">
-                            <td className="px-2 py-1 text-xs text-gray-500">{item.serial_no || idx + 1}</td>
+                            <td className="px-2 py-1 text-xs text-gray-500">{idx + 1}</td>
                             <td className="px-2 py-1 text-xs font-semibold text-gray-700 uppercase">
                                 {item.category}
                             </td>
@@ -616,12 +660,13 @@ export function BillingPrintPage() {
                             </td>
                             <td className="px-2 py-1 text-center text-xs">{item.qty}</td>
                             <td className="px-2 py-1 text-right text-xs">{fmtNum(item.rate)}</td>
+                            <td className="px-2 py-1 text-right text-xs text-red-600">{(item.discount || 0) > 0 ? `- ${fmtNum(item.discount || 0)}` : '-'}</td>
                             <td className="px-2 py-1 text-right text-xs font-semibold">{fmtNum(item.amount)}</td>
                         </tr>
                     ))}
                     {/* Grand totals row */}
                     <tr className="font-bold text-xs border-t-2 border-b border-gray-500">
-                        <td className="px-2 py-1" colSpan={4}>Total</td>
+                        <td className="px-2 py-1" colSpan={5}>Total</td>
                         <td className="px-2 py-1 text-right" colSpan={2}>{fmtNum(grandTotal)}</td>
                     </tr>
                 </tbody>

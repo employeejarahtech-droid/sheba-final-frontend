@@ -1,11 +1,10 @@
 import { AppHeader } from '@/components/layout/app-header'
 import { DataTable } from '@/components/DataTable'
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { FileText, DollarSign, TrendingUp, Calendar, CreditCard, Printer } from 'lucide-react'
-import { DateField } from '@/components/date-field'
 import { Button } from '@/components/ui/button'
 
 type PaymentItem = {
@@ -46,41 +45,31 @@ interface ReportsMyOutdoorTodayCollectionProps {
   page: number
   limit: number
   search: string
-  from: string
-  to: string
   setPage: (page: number) => void
   setLimit: (limit: number) => void
   setSearch: (search: string) => void
-  setFrom: (from: string) => void
-  setTo: (to: string) => void
 }
 
 export default function ReportsMyOutdoorTodayCollection({
   page,
   limit,
   search,
-  from,
-  to,
   setPage,
   setLimit,
   setSearch,
-  setFrom,
-  setTo,
 }: ReportsMyOutdoorTodayCollectionProps) {
 
   const token = getCookie('accessToken');
 
-  // Fetch today's collection (payments made today by current user)
+  // Fetch today's collection (all users)
   const { data, isLoading } = useQuery({
-    queryKey: ["my-outdoor-today-collection", page, limit, search, from, to],
+    queryKey: ["my-outdoor-today-collection", page, limit, search],
 
     queryFn: async () => {
       const params = new URLSearchParams({
         page: String(page),
         limit: String(limit),
         search,
-        ...(from ? { start_date: from } : {}),
-        ...(to ? { end_date: to } : {}),
       })
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/outdoor-invoice/today-collection?${params}`,
@@ -125,7 +114,7 @@ export default function ReportsMyOutdoorTodayCollection({
 
     return [
       {
-        label: "Payments Today",
+        label: "Payments",
         value: paymentCount,
         gradient: "from-blue-600 to-blue-400",
         shadow: "shadow-blue-500/30",
@@ -315,12 +304,12 @@ export default function ReportsMyOutdoorTodayCollection({
     <>
       <AppHeader fixed />
 
-      <main className='p-6 lg:p-10'>
+      <main className=''>
         <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">My Collection: Today</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Today's Collection</h1>
             <p className="text-sm text-gray-500 mt-1">
-              Payments collected today by you
+              Outdoor payments collected today — all users
             </p>
             <p className="text-xs text-gray-400 mt-1">
               {new Date().toLocaleDateString('en-US', {
@@ -334,9 +323,7 @@ export default function ReportsMyOutdoorTodayCollection({
           <Link
             to="/dashboard/reports/my/outdoor/today-collection/print"
             search={{
-              search: search || undefined,
-              start_date: from || undefined,
-              end_date: to || undefined
+              search: search || undefined
             }}
           >
             <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium shadow-sm hover:bg-gray-50 transition-colors">
@@ -431,7 +418,7 @@ export default function ReportsMyOutdoorTodayCollection({
 
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="text-gray-500">Loading today's collection...</div>
+            <div className="text-gray-500">Loading collection...</div>
           </div>
         ) : (
           <DataTable
@@ -443,41 +430,17 @@ export default function ReportsMyOutdoorTodayCollection({
             search={search}
             onSearchChange={setSearch}
             filterSlot={
-              <div className="flex items-center gap-1.5">
-                <DateField
-                  value={from}
-                  onChange={(v: string) => setFrom(v)}
-                  placeholder="From"
-                />
-                <span className="text-xs text-muted-foreground">to</span>
-                <DateField
-                  value={to}
-                  onChange={(v: string) => setTo(v)}
-                  placeholder="To"
-                />
-                {(from || to) && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => { setFrom(""); setTo(""); }}
-                  >
-                    Clear
-                  </Button>
-                )}
-                <Link
-                  to="/dashboard/reports/my/outdoor/today-collection/print"
-                  search={{
-                    search: search || undefined,
-                    start_date: from || undefined,
-                    end_date: to || undefined,
-                  }}
-                >
-                  <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
-                    <Printer className="w-4 h-4 mr-2" />
-                    Print Report
-                  </Button>
-                </Link>
-              </div>
+              <Link
+                to="/dashboard/reports/my/outdoor/today-collection/print"
+                search={{
+                  search: search || undefined
+                }}
+              >
+                <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
+                  <Printer className="w-4 h-4 mr-2" />
+                  Print Report
+                </Button>
+              </Link>
             }
           />
         )}

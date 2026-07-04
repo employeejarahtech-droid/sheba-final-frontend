@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { getCookie } from '@/lib/cookies'
 import { cn } from '@/lib/utils'
+import { useCurrency } from '@/hooks/use-currency'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
@@ -43,6 +44,7 @@ const testSchema = z.object({
 type TestValues = z.infer<typeof testSchema>
 
 function EditTest() {
+    const { currencySymbol } = useCurrency()
     const [open, setOpen] = useState(false);
     const [categoryOpen, setCategoryOpen] = useState(false);
     const [roomOpen, setRoomOpen] = useState(false);
@@ -180,10 +182,16 @@ function EditTest() {
             return res.json();
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["tests"] });
             queryClient.invalidateQueries({ queryKey: ["test", id] });
+            // The list query ("tests") is inactive while we're on the edit
+            // page, so invalidateQueries() won't fetch it — it only refetches
+            // *active* queries, and the global default is refetchOnMount:false.
+            // That left the list cache stale after a save, so going back via
+            // window.history.back() showed the old row. Force-refetch every
+            // cached "tests" query (active or not) so the list is fresh the
+            // moment the user returns.
+            queryClient.refetchQueries({ queryKey: ["tests"], type: "all" });
             toast.success("Test updated successfully");
-            navigate({ to: '/dashboard/outdoor/master/tests', search: { page: 1, limit: 10, search: '' } });
         },
         onError: (error: Error) => {
             toast.error(error.message || "Failed to update test");
@@ -253,7 +261,7 @@ function EditTest() {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => navigate({ to: '/dashboard/outdoor/master/tests' })}
+                                    onClick={() => window.history.back()}
                                 >
                                     <ArrowLeft className="h-5 w-5" />
                                 </Button>
@@ -531,14 +539,14 @@ function EditTest() {
                                         name="price"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Price (৳)</FormLabel>
+                                                <FormLabel>Price ({currencySymbol})</FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
-                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">৳</span>
+                                                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{currencySymbol}</span>
                                                         <Input
                                                             type="number"
                                                             placeholder="0.00"
-                                                            className="pl-7"
+                                                            style={{ paddingLeft: `${Math.max(1.75, 1 + 0.6 * currencySymbol.length)}rem` }}
                                                             {...field}
                                                         />
                                                     </div>

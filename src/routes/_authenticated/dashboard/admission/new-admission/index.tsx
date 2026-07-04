@@ -662,6 +662,7 @@ function IndoorNewAdmission() {
                 },
                 body: JSON.stringify({
                     patient_name: values.patientName,
+                    patient_type: patientTypes.find((t: any) => String(t.id) === values.patientType)?.name || null,
                     age: Number(values.ageYears) || 0,
                     age_unit: 'Y',
                     age_text: `${values.ageYears || 0}Y ${values.ageMonths || 0}M`,

@@ -6,41 +6,34 @@ import { getCookie } from '@/lib/cookies'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Printer, Loader2 } from 'lucide-react'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
 
 const searchSchema = z.object({
-  search: z.string().optional(),
+  search: z.string().optional().default(''),
+  start_date: z.string().optional().default(''),
+  end_date: z.string().optional().default(''),
 })
 
-export const Route = createFileRoute('/_authenticated/dashboard/reports/patient/bed-occupancy/print')({
+export const Route = createFileRoute('/_authenticated/dashboard/reports/patient/ref-doctor-wise-patients/print')({
   validateSearch: searchSchema,
-  component: BedOccupancyPrint,
+  component: DoctorWisePatientsPrint,
 })
 
-interface BedItem {
+interface DoctorItem {
   id: number
   name: string
-  code: string | null
-  type: string | null
-  ward_name: string | null
-  ward: string | null
-  status: 'occupied' | 'available' | 'maintenance' | string
-  patient_name: string | null
-  notes: string | null
-  current_admission?: {
-    patient_name: string | null
-  } | null
-  admission?: {
-    patient_name: string | null
-  } | null
-  patient?: {
-    name: string | null
-  } | null
+  doctor_name: string
+  patient_count: number
+  total_bill: number
+  total_collected: number
+  total_discount: number
 }
 
-function BedOccupancyPrint() {
-  const { search } = Route.useSearch()
+function DoctorWisePatientsPrint() {
+  const { search, start_date, end_date } = Route.useSearch()
   const token = getCookie('accessToken')
   const { formatDate } = useDateFormat()
+  const { currencySymbol } = useCurrency()
   const API_URL = import.meta.env.VITE_API_URL || ''
 
   const safeFormatDate = (dateVal: any) => {
@@ -55,13 +48,15 @@ function BedOccupancyPrint() {
   }
 
   const { data, isLoading } = useQuery({
-    queryKey: ['print-bed-occupancy', search],
+    queryKey: ['print-ref-doctor-wise-patients', search, start_date, end_date],
     queryFn: async () => {
       const params = new URLSearchParams({ page: '1', limit: '9999', search: search ?? '' })
-      const res = await fetch(`${API_URL}/api/bed-cabin?${params}`, {
+      if (start_date) params.set('start_date', start_date)
+      if (end_date) params.set('end_date', end_date)
+      const res = await fetch(`${API_URL}/api/admission/doctor-wise-patients?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      if (!res.ok) throw new Error('Failed to fetch bed occupancy data')
+      if (!res.ok) throw new Error('Failed to fetch doctor-wise patient data')
       return res.json()
     },
     enabled: !!token,
@@ -82,24 +77,25 @@ function BedOccupancyPrint() {
   })
 
   const items = useMemo(() => data?.data?.items ?? [], [data?.data?.items])
-  const flatItems = items.length > 0 && Array.isArray(items[0]) ? items[0] : items
 
   const stats = useMemo(() => {
-    const occupiedCount = flatItems.filter((r: any) => r.status === 'occupied').length
-    const availableCount = flatItems.filter((r: any) => r.status === 'available').length
-    const maintenanceCount = flatItems.filter((r: any) => r.status === 'maintenance').length
-    const totalFromMeta = data?.data?.meta?.total ?? flatItems.length
-    const occupancyRate = flatItems.length > 0 ? Math.round((occupiedCount / flatItems.length) * 100) : 0
+    const totalDoctors = items.length
+    const totalPatients = items.reduce((sum: number, r: DoctorItem) => sum + (r.patient_count ?? 0), 0)
+    const totalRevenue = items.reduce((sum: number, r: DoctorItem) => sum + (r.total_bill ?? 0), 0)
+    const totalCollected = items.reduce((sum: number, r: DoctorItem) => sum + (r.total_collected ?? 0), 0)
+    const totalDiscount = items.reduce((sum: number, r: DoctorItem) => sum + (r.total_discount ?? 0), 0)
+    const collectionRate = totalRevenue > 0 ? ((totalCollected / totalRevenue) * 100).toFixed(1) : '0.0'
+    const avgPatients = totalDoctors > 0 ? Math.round(totalPatients / totalDoctors) : 0
 
     return [
-      { label: 'Total Beds', value: totalFromMeta },
-      { label: 'Occupied', value: occupiedCount },
-      { label: 'Available', value: availableCount },
-      { label: 'Maintenance', value: maintenanceCount },
-      { label: 'Occupancy Rate (%)', value: occupancyRate },
-      { label: 'Records in Period', value: flatItems.length },
+      { label: 'Total Doctors', value: totalDoctors },
+      { label: 'Total Patients', value: totalPatients },
+      { label: 'Total Revenue', value: `${currencySymbol} ${totalRevenue.toLocaleString()}` },
+      { label: 'Total Collected', value: `${currencySymbol} ${totalCollected.toLocaleString()}` },
+      { label: 'Collection Rate', value: `${collectionRate}%` },
+      { label: 'Avg per Doctor', value: avgPatients },
     ]
-  }, [flatItems, data])
+  }, [items])
 
   const companyLogo = companySettings?.company_logo
     ? (companySettings.company_logo.startsWith('http') || companySettings.company_logo.startsWith('data:'))
@@ -257,14 +253,24 @@ function BedOccupancyPrint() {
 
       {/* ── Title ──────────────────────────────────────────────────────── */}
       <h1 className="text-lg font-bold text-center underline mb-1 tracking-wide uppercase">
-        BED OCCUPANCY REPORT
+        DOCTOR-WISE PATIENT REPORT
       </h1>
-      <p className="text-center text-xs text-gray-600 mb-2">Bed status and occupancy overview</p>
+      <p className="text-center text-xs text-gray-600 mb-2">Patient distribution and revenue collection by referring doctor</p>
 
-      {/* ── Filter Info ───────────────────────────────────────────────── */}
-      {search && (
+      {/* ── Filter Period ───────────────────────────────────────────────── */}
+      {(start_date || end_date || search) && (
         <div className="mb-2 p-2 bg-gray-50 rounded border text-xs">
-          <div><strong>Search:</strong> {search}</div>
+          <div className="grid grid-cols-3 gap-2">
+            {start_date && (
+              <div><strong>From:</strong> {safeFormatDate(start_date)}</div>
+            )}
+            {end_date && (
+              <div><strong>To:</strong> {safeFormatDate(end_date)}</div>
+            )}
+            {search && (
+              <div><strong>Search:</strong> {search}</div>
+            )}
+          </div>
         </div>
       )}
 
@@ -273,8 +279,8 @@ function BedOccupancyPrint() {
         <div className="flex flex-wrap gap-x-4 gap-y-1">
           {stats.map((stat, index) => (
             <span key={index}>
-              <span className="text-gray-600">{stat.label}:</span>{' '}
-              <span className="font-bold">{stat.value.toLocaleString()}</span>
+              <span className="text-gray-600">{stat.label}:</span>{" "}
+              <span className="font-bold">{typeof stat.value === "number" ? stat.value.toLocaleString() : stat.value}</span>
               {index < stats.length - 1 && <span className="mx-2 text-gray-400">|</span>}
             </span>
           ))}
@@ -286,43 +292,36 @@ function BedOccupancyPrint() {
         <thead>
           <tr className="border-t border-b bg-row-blue">
             <th className="px-1.5 py-1 text-left text-[10px] w-[5%]">#</th>
-            <th className="px-1.5 py-1 text-left text-[10px] w-[14%]">Bed Name</th>
-            <th className="px-1.5 py-1 text-left text-[10px] w-[11%]">Type</th>
-            <th className="px-1.5 py-1 text-left text-[10px] w-[14%]">Ward</th>
-            <th className="px-1.5 py-1 text-center text-[10px] w-[11%]">Status</th>
-            <th className="px-1.5 py-1 text-left text-[10px] w-[19%]">Current Patient</th>
-            <th className="px-1.5 py-1 text-left text-[10px] w-[26%]">Notes</th>
+            <th className="px-1.5 py-1 text-left text-[10px] w-[23%]">Doctor Name</th>
+            <th className="px-1.5 py-1 text-right text-[10px] w-[11%]">Total Patients</th>
+            <th className="px-1.5 py-1 text-right text-[10px] w-[13%]">{`Total Bill (${currencySymbol})`}</th>
+            <th className="px-1.5 py-1 text-right text-[10px] w-[13%]">{`Total Collected (${currencySymbol})`}</th>
+            <th className="px-1.5 py-1 text-right text-[10px] w-[13%]">{`Total Discount (${currencySymbol})`}</th>
+            <th className="px-1.5 py-1 text-right text-[10px] w-[12%]">Collection Rate</th>
           </tr>
         </thead>
         <tbody>
-          {flatItems.map((item: BedItem, idx: number) => (
-            <tr key={item.id || idx} className="border-b border-dashed">
-              <td className="px-1.5 py-1 text-[10px] text-gray-500">{idx + 1}</td>
-              <td className="px-1.5 py-1 text-[10px] font-medium">{item.code || '-'}</td>
-              <td className="px-1.5 py-1 text-[10px]">{item.type || '-'}</td>
-              <td className="px-1.5 py-1 text-[10px]">{item.ward || '-'}</td>
-              <td className="px-1.5 py-1 text-[10px] text-center capitalize">
-                {item.status ? (
-                  <span className={`px-2 py-0.5 rounded text-[9px] font-medium ${
-                    item.status === 'occupied' ? 'bg-red-100 text-red-700' :
-                    item.status === 'available' ? 'bg-green-100 text-green-700' :
-                    item.status === 'maintenance' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-gray-100 text-gray-700'
-                  }`}>
-                    {item.status}
-                  </span>
-                ) : '-'}
-              </td>
-              <td className="px-1.5 py-1 text-[10px]">
-                {item.current_admission?.patient_name || item.admission?.patient_name || item.patient?.name || item.patient_name || <span className="text-gray-400 italic text-[9px]">None</span>}
-              </td>
-              <td className="px-1.5 py-1 text-[10px]">{item.notes || <span className="text-gray-400 italic text-[9px]">No notes</span>}</td>
-            </tr>
-          ))}
-          {flatItems.length === 0 && (
+          {items.map((item: DoctorItem, idx: number) => {
+            const bill = item.total_bill || 0
+            const collected = item.total_collected || 0
+            const rate = bill > 0 ? ((collected / bill) * 100).toFixed(1) : '0.0'
+
+            return (
+              <tr key={item.id || idx} className="border-b border-dashed">
+                <td className="px-1.5 py-1 text-[10px] text-gray-500">{idx + 1}</td>
+                <td className="px-1.5 py-1 text-[10px] font-medium">{item.name || item.doctor_name || "-"}</td>
+                <td className="px-1.5 py-1 text-[10px] text-right font-mono font-semibold text-blue-600">{(item.patient_count || 0).toLocaleString()}</td>
+                <td className="px-1.5 py-1 text-[10px] text-right font-mono">{currencySymbol} {(item.total_bill || 0).toLocaleString()}</td>
+                <td className="px-1.5 py-1 text-[10px] text-right font-mono text-green-600">{currencySymbol} {(item.total_collected || 0).toLocaleString()}</td>
+                <td className="px-1.5 py-1 text-[10px] text-right font-mono text-red-600">{currencySymbol} {(item.total_discount || 0).toLocaleString()}</td>
+                <td className="px-1.5 py-1 text-[10px] text-right font-semibold">{rate}%</td>
+              </tr>
+            )
+          })}
+          {items.length === 0 && (
             <tr>
               <td colSpan={7} className="px-2 py-4 text-center text-gray-500">
-                No bed records found for the selected criteria
+                No doctor records found for the selected criteria
               </td>
             </tr>
           )}
@@ -333,7 +332,7 @@ function BedOccupancyPrint() {
       <div className="mt-3 pt-2 border-t text-xs">
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <strong>Total Records:</strong> {flatItems.length}
+            <strong>Total Records:</strong> {items.length}
           </div>
           <div className="text-right">
             <strong>Generated:</strong> {safeFormatDate(new Date())}

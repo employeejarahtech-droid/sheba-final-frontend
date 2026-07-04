@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import {
@@ -25,6 +26,7 @@ const consultantSchema = z.object({
     consultant_id: z.number().positive('Consultant is required'),
     visit_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
     fees: z.number().nonnegative('Fees must be non-negative'),
+    note: z.string().optional(),
 })
 
 type ConsultantFormData = z.infer<typeof consultantSchema>
@@ -38,6 +40,7 @@ interface AddConsultantFormProps {
         visit_date: string
         fees: number
         consultant_name?: string
+        note?: string
     }) => void
     doctors: any[]
     editConsultant?: {
@@ -45,6 +48,7 @@ interface AddConsultantFormProps {
         consultant_id: number
         visit_date: string
         fees: number
+        note?: string
     } | null
 }
 
@@ -67,6 +71,7 @@ export function AddConsultantForm({ open, setOpen, onAdd, doctors, editConsultan
             consultant_id: 0,
             visit_date: new Date().toISOString().split('T')[0],
             fees: 0,
+            note: '',
         },
     });
 
@@ -77,12 +82,14 @@ export function AddConsultantForm({ open, setOpen, onAdd, doctors, editConsultan
                 consultant_id: editConsultant.consultant_id,
                 visit_date: editConsultant.visit_date,
                 fees: editConsultant.fees,
+                note: editConsultant.note || '',
             })
         } else {
             form.reset({
                 consultant_id: 0,
                 visit_date: new Date().toISOString().split('T')[0],
                 fees: 0,
+                note: '',
             })
         }
         setConsultantOpen(false); // Close dropdown when opening or changing edit mode
@@ -96,6 +103,7 @@ export function AddConsultantForm({ open, setOpen, onAdd, doctors, editConsultan
             visit_date: data.visit_date,
             fees: data.fees,
             consultant_name: doctor?.doctor_name || 'Unknown',
+            note: data.note || '',
         });
         form.reset();
         setOpen(false);
@@ -280,6 +288,25 @@ export function AddConsultantForm({ open, setOpen, onAdd, doctors, editConsultan
                                                         {...field}
                                                         value={field.value || ''}
                                                         onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="note"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Note</FormLabel>
+                                                <FormControl>
+                                                    <Textarea
+                                                        placeholder="Optional note / remark for this visit..."
+                                                        className="resize-none"
+                                                        rows={3}
+                                                        {...field}
+                                                        value={field.value || ''}
                                                     />
                                                 </FormControl>
                                             </FormItem>

@@ -3,11 +3,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 
 const todayCollectionSearchSchema = z.object({
-  page: z.coerce.number().catch(1),
-  limit: z.coerce.number().catch(10),
-  search: z.string().catch(''),
-  from: z.string().catch(''),
-  to: z.string().catch(''),
+  page: z.coerce.number().optional(),
+  limit: z.coerce.number().optional(),
+  search: z.string().optional(),
 })
 
 export const Route = createFileRoute('/_authenticated/dashboard/reports/my/outdoor/today-collection/')({
@@ -22,23 +20,15 @@ function TodayCollectionPage() {
   const page = Number(searchParams?.page) || 1
   const limit = Number(searchParams?.limit) || 10
   const search = searchParams?.search || ""
-  const from = searchParams?.from || ""
-  const to = searchParams?.to || ""
 
   const setPage = (newPage: number) => {
-    navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) })
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage === 1 ? undefined : newPage }) })
   }
   const setLimit = (newLimit: number) => {
-    navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) })
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit === 10 ? undefined : newLimit, page: undefined }) })
   }
   const setSearch = (newSearch: string) => {
-    navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) })
-  }
-  const setFrom = (newFrom: string) => {
-    navigate({ to: '.', search: (prev: any) => ({ ...prev, from: newFrom, page: 1 }) })
-  }
-  const setTo = (newTo: string) => {
-    navigate({ to: '.', search: (prev: any) => ({ ...prev, to: newTo, page: 1 }) })
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch || undefined, page: undefined }) })
   }
 
   return (
@@ -46,13 +36,9 @@ function TodayCollectionPage() {
       page={page}
       limit={limit}
       search={search}
-      from={from}
-      to={to}
       setPage={setPage}
       setLimit={setLimit}
       setSearch={setSearch}
-      setFrom={setFrom}
-      setTo={setTo}
     />
   )
 }

@@ -10,6 +10,7 @@ import { UserCog, Users, DollarSign, TrendingUp, Printer, FileText, Stethoscope 
 import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
 
@@ -30,7 +31,7 @@ interface Meta {
   totalPages: number
 }
 
-export const Route = createFileRoute('/_authenticated/dashboard/reports/patient/doctor-wise-patients/')({
+export const Route = createFileRoute('/_authenticated/dashboard/reports/patient/ref-doctor-wise-patients/')({
   component: DoctorWisePatientsPage,
 })
 
@@ -38,6 +39,7 @@ function DoctorWisePatientsPage() {
   const searchParams: any = Route.useSearch()
   const navigate = Route.useNavigate()
   const { formatDate } = useDateFormat()
+  const { currencySymbol } = useCurrency()
 
   const page = Number(searchParams?.page) || 1
   const limit = Number(searchParams?.limit) || 10
@@ -61,10 +63,10 @@ function DoctorWisePatientsPage() {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, to: newTo, page: 1 }) })
   }
 
-  const token = getCookie('token')
+  const token = getCookie('accessToken')
 
   const { data, isLoading } = useQuery({
-    queryKey: ['doctor-wise-patients', page, limit, search, from, to],
+    queryKey: ['ref-doctor-wise-patients', page, limit, search, from, to],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: String(page),
@@ -73,7 +75,7 @@ function DoctorWisePatientsPage() {
         ...(from ? { start_date: from } : {}),
         ...(to ? { end_date: to } : {}),
       })
-      const res = await fetch(`/api/outdoor-invoice/referrers?${params}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admission/doctor-wise-patients?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (!res.ok) throw new Error('Failed to fetch doctor-wise patient data')
@@ -98,12 +100,12 @@ function DoctorWisePatientsPage() {
     return [
       { label: 'Total Doctors', value: totalDoctors, icon: UserCog, grad: 'from-green-500 to-green-600' },
       { label: 'Total Patients', value: totalPatients, icon: Users, grad: 'from-blue-500 to-blue-600' },
-      { label: 'Total Revenue', value: `৳${totalRevenue.toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
+      { label: 'Total Revenue', value: `${currencySymbol} ${totalRevenue.toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
       { label: 'Avg per Doctor', value: avgPatients, icon: TrendingUp, grad: 'from-teal-500 to-teal-600' },
       { label: 'Collection Rate', value: `${collectionRate}%`, icon: Stethoscope, grad: 'from-pink-500 to-pink-600' },
       { label: 'This Page', value: items.length, icon: FileText, grad: 'from-yellow-500 to-yellow-600' },
     ]
-  }, [items])
+  }, [items, currencySymbol])
 
   // ---- Date filter presets ----
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
@@ -167,26 +169,26 @@ function DoctorWisePatientsPage() {
     },
     {
       data: "total_bill",
-      title: "Total Bill",
+      title: `Total Bill (${currencySymbol})`,
       className: "text-right",
       render: (data: number) => {
-        return `<span class="font-mono">৳${(data || 0).toLocaleString()}</span>`
+        return `<span class="font-mono">${currencySymbol} ${(data || 0).toLocaleString()}</span>`
       },
     },
     {
       data: "total_collected",
-      title: "Total Collected",
+      title: `Total Collected (${currencySymbol})`,
       className: "text-right",
       render: (data: number) => {
-        return `<span class="font-mono text-green-600">৳${(data || 0).toLocaleString()}</span>`
+        return `<span class="font-mono text-green-600">${currencySymbol} ${(data || 0).toLocaleString()}</span>`
       },
     },
     {
       data: "total_discount",
-      title: "Total Discount",
+      title: `Total Discount (${currencySymbol})`,
       className: "text-right",
       render: (data: number) => {
-        return `<span class="font-mono text-red-600">৳${(data || 0).toLocaleString()}</span>`
+        return `<span class="font-mono text-red-600">${currencySymbol} ${(data || 0).toLocaleString()}</span>`
       },
     },
     {
@@ -208,7 +210,7 @@ function DoctorWisePatientsPage() {
       render: (_data: any, _type: string, row: DoctorItem) => {
         const id = row.id
         return `<div class="flex gap-2">
-          <a href="/dashboard/reports/patient/doctor-wise-patients/print?search=${encodeURIComponent(search)}&start_date=${from || ''}&end_date=${to || ''}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow transition-colors">
+          <a href="/dashboard/reports/patient/ref-doctor-wise-patients/print?search=${encodeURIComponent(search)}&start_date=${from || ""}&end_date=${to || ""}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
             Print
           </a>
@@ -241,7 +243,7 @@ function DoctorWisePatientsPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <p className="text-2xl font-bold">{typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}</p>
+                  <p className="text-2xl font-bold">{typeof stat.value === "number" ? stat.value.toLocaleString() : stat.value}</p>
                 </CardContent>
               </Card>
             )
@@ -299,7 +301,7 @@ function DoctorWisePatientsPage() {
                 </Button>
               )}
               <Link
-                to="/dashboard/reports/patient/doctor-wise-patients/print"
+                to="/dashboard/reports/patient/ref-doctor-wise-patients/print"
                 search={{
                   search: search || undefined,
                   start_date: from || undefined,

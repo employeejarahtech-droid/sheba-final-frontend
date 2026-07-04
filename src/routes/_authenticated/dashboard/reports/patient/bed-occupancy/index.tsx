@@ -1,14 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { useMemo, useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { AppHeader } from '@/components/layout/app-header'
 import { DataTable } from '@/components/DataTable'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Bed, CheckCircle, XCircle, Percent, Printer, FileText } from 'lucide-react'
-import { DateField } from '@/components/date-field'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
@@ -53,8 +51,6 @@ function BedOccupancyPage() {
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 10;
   const search = searchParams?.search || "";
-  const from = searchParams?.from || "";
-  const to = searchParams?.to || "";
 
   const setPage = (newPage: number) => {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
@@ -65,24 +61,16 @@ function BedOccupancyPage() {
   const setSearch = (newSearch: string) => {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
   };
-  const setFrom = (newFrom: string) => {
-    navigate({ to: '.', search: (prev: any) => ({ ...prev, from: newFrom, page: 1 }) });
-  };
-  const setTo = (newTo: string) => {
-    navigate({ to: '.', search: (prev: any) => ({ ...prev, to: newTo, page: 1 }) });
-  };
 
   const token = getCookie('accessToken')
 
   const { data, isLoading } = useQuery({
-    queryKey: ['bed-occupancy', page, limit, search, from, to],
+    queryKey: ['bed-occupancy', page, limit, search],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: String(page),
         limit: String(limit),
         search,
-        ...(from ? { start_date: from } : {}),
-        ...(to ? { end_date: to } : {}),
       })
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/bed-cabin?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -114,40 +102,6 @@ function BedOccupancyPage() {
     ]
   }, [items, meta])
 
-  // ---- Date filter presets ----
-  const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
-  const toYMD = (d: Date) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  };
-  const datePresets = useMemo(() => ({
-    today: { label: 'Today', from: toYMD(today()), to: toYMD(today()) },
-    yesterday: (() => { const d = today(); d.setDate(d.getDate() - 1); return { label: 'Yesterday', from: toYMD(d), to: toYMD(d) }; })(),
-    last7: { label: 'Last 7 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 6); return d; })()), to: toYMD(today()) },
-    last15: { label: 'Last 15 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 14); return d; })()), to: toYMD(today()) },
-    last30: { label: 'Last 30 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 29); return d; })()), to: toYMD(today()) },
-    last45: { label: 'Last 45 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 44); return d; })()), to: toYMD(today()) },
-    last60: { label: 'Last 60 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 59); return d; })()), to: toYMD(today()) },
-    last90: { label: 'Last 90 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 89); return d; })()), to: toYMD(today()) },
-    last180: { label: 'Last 180 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 179); return d; })()), to: toYMD(today()) },
-    last365: { label: 'Last 365 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 364); return d; })()), to: toYMD(today()) },
-  }), []);
-
-  const activePreset = useMemo(() => {
-    if (!from || !to) return 'custom';
-    const match = Object.entries(datePresets).find(([, v]) => v.from === from && v.to === to);
-    return match ? match[0] : 'custom';
-  }, [from, to, datePresets]);
-
-  const [presetOpen, setPresetOpen] = useState(false);
-  const applyPreset = (key: string) => {
-    const p = (datePresets as any)[key];
-    if (p) { setFrom(p.from); setTo(p.to); }
-    setPresetOpen(false);
-  };
-
   const columns = useMemo(() => [
     {
       data: null,
@@ -162,7 +116,7 @@ function BedOccupancyPage() {
       },
     },
     {
-      data: "name",
+      data: "code",
       title: "Bed Name",
       render: (data: string) => {
         return `<div class="flex items-center gap-2">
@@ -186,7 +140,7 @@ function BedOccupancyPage() {
       },
     },
     {
-      data: "ward_name",
+      data: "ward",
       title: "Ward",
       render: (data: string | null) => {
         return `<div class="flex items-center gap-2">
@@ -304,59 +258,15 @@ function BedOccupancyPage() {
           onSearchChange={setSearch}
           isLoading={isLoading}
           filterSlot={
-            <div className="flex items-center gap-1.5">
-              <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>
-                <SelectTrigger className="w-[140px] h-9 rounded-md border-gray-200 dark:border-gray-700 bg-transparent text-sm">
-                  <SelectValue placeholder="Filter by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="yesterday">Yesterday</SelectItem>
-                  <SelectItem value="last7">Last 7 days</SelectItem>
-                  <SelectItem value="last15">Last 15 days</SelectItem>
-                  <SelectItem value="last30">Last 30 days</SelectItem>
-                  <SelectItem value="last45">Last 45 days</SelectItem>
-                  <SelectItem value="last60">Last 60 days</SelectItem>
-                  <SelectItem value="last90">Last 90 days</SelectItem>
-                  <SelectItem value="last180">Last 180 days</SelectItem>
-                  <SelectItem value="last365">Last 365 days</SelectItem>
-                  <SelectItem value="custom">Custom range</SelectItem>
-                </SelectContent>
-              </Select>
-              <DateField
-                value={from}
-                onChange={(v: string) => { setFrom(v); setPresetOpen(false); }}
-                placeholder="From"
-              />
-              <span className="text-xs text-muted-foreground">to</span>
-              <DateField
-                value={to}
-                onChange={(v: string) => { setTo(v); setPresetOpen(false); }}
-                placeholder="To"
-              />
-              {(from || to) && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => { setFrom(""); setTo(""); }}
-                >
-                  Clear
-                </Button>
-              )}
-              <Link
-                to="/dashboard/reports/patient/bed-occupancy/print"
-                search={{
-                  search: search || undefined,
-                  start_date: from || undefined,
-                  end_date: to || undefined
-                }}
-              >
-                <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
-                  <Printer className="w-4 h-4 mr-2" />
-                  Print Report
-                </Button>
-              </Link>
-            </div>
+            <Link
+              to="/dashboard/reports/patient/bed-occupancy/print"
+              search={{ search: search || undefined }}
+            >
+              <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
+                <Printer className="w-4 h-4 mr-2" />
+                Print Report
+              </Button>
+            </Link>
           }
           emptyState={
             <div className="text-center py-12">
