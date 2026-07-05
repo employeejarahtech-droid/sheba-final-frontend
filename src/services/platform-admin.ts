@@ -69,6 +69,18 @@ export async function recheckDomainSSL(companyId: number, domainId: number): Pro
   })
 }
 
+export async function verifyDomainDNS(companyId: number, domainId: number): Promise<ApiResponse<{ message: string; domain: string }>> {
+  return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/verify-dns`, {
+    method: 'POST',
+  })
+}
+
+export async function goLiveDomain(companyId: number, domainId: number): Promise<ApiResponse<{ message: string; domain: string }>> {
+  return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/go-live`, {
+    method: 'POST',
+  })
+}
+
 export async function installDomainSSL(companyId: number, domainId: number): Promise<ApiResponse<{ message: string; domain: string }>> {
   return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/install-ssl`, {
     method: 'POST',

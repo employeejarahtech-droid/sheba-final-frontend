@@ -38,6 +38,8 @@ import {
   useCompanyDomains,
   useRecheckDomainSSL,
   useInstallDomainSSL,
+  useVerifyDomainDNS,
+  useGoLiveDomain,
   useDeactivateDomain,
 } from '@/hooks/usePlatformAdmin'
 import type { PlatformCompany, PlatformSubscription, CompanyDomain } from '@/types/platform.types'
@@ -98,6 +100,8 @@ function CompanyDetailPage() {
   // SSL and domain management mutations
   const recheckSSL = useRecheckDomainSSL()
   const installSSL = useInstallDomainSSL()
+  const verifyDNS = useVerifyDomainDNS()
+  const goLive = useGoLiveDomain()
   const deactivateDomain = useDeactivateDomain()
 
   // Debug logging
@@ -340,9 +344,24 @@ function CompanyDetailPage() {
                           </div>
                         </div>
 
-                        {/* SSL Management */}
-                        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                        {/* Domain Management */}
+                        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 space-y-2">
                           <div className="flex gap-2">
+                            {!domain.dnsVerifiedAt && (
+                              <Button
+                                onClick={() => verifyDNS.mutate({ companyId: id, domainId: domain.id })}
+                                disabled={verifyDNS.isPending}
+                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-xs"
+                                size="sm"
+                              >
+                                {verifyDNS.isPending ? (
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                ) : (
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                )}
+                                Verify DNS
+                              </Button>
+                            )}
                             <Button
                               onClick={() => recheckSSL.mutate({ companyId: id, domainId: domain.id })}
                               disabled={recheckSSL.isPending}
@@ -373,6 +392,21 @@ function CompanyDetailPage() {
                               </Button>
                             )}
                           </div>
+                          {domain.status === 'ssl_installed' && (
+                            <Button
+                              onClick={() => goLive.mutate({ companyId: id, domainId: domain.id })}
+                              disabled={goLive.isPending}
+                              className="w-full bg-emerald-600 hover:bg-emerald-700 text-xs"
+                              size="sm"
+                            >
+                              {goLive.isPending ? (
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              ) : (
+                                <Globe className="h-3 w-3 mr-1" />
+                              )}
+                              Go Live
+                            </Button>
+                          )}
                         </div>
                       </>
                     ) : (

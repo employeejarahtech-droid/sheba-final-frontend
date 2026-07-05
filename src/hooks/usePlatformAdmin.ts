@@ -106,6 +106,32 @@ export function useInstallDomainSSL() {
   })
 }
 
+export function useVerifyDomainDNS() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ companyId, domainId }: { companyId: number; domainId: number }) =>
+      adminService.verifyDomainDNS(companyId, domainId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'company-domains'] })
+      toast.success('DNS verified')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+export function useGoLiveDomain() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ companyId, domainId }: { companyId: number; domainId: number }) =>
+      adminService.goLiveDomain(companyId, domainId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'company-domains'] })
+      toast.success('Domain is now live!')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
 export function useDeactivateDomain() {
   const qc = useQueryClient()
   return useMutation({
