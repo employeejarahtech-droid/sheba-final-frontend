@@ -28,6 +28,7 @@ import {
   XCircle,
   AlertTriangle,
   Server,
+  RefreshCw,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -306,72 +307,74 @@ function CompanyDetailPage() {
                   <dl className="space-y-1.5 text-xs">
                     {/* Real SSL Verification */}
                     {domain.realSSL ? (
-                      <div className={`p-2 rounded text-xs ${domain.realSSL.valid ? 'bg-green-50 dark:bg-green-950/20' : 'bg-amber-50 dark:bg-amber-950/20'}`}>
-                        <div className="flex items-center gap-1.5 mb-1">
-                          {domain.realSSL.valid ? (
-                            <CheckCircle className="h-3 w-3 text-green-600" />
-                          ) : (
-                            <AlertTriangle className="h-3 w-3 text-amber-600" />
-                          )}
-                          <span className="font-medium">
-                            {domain.realSSL.valid ? 'SSL Verified' : 'SSL Check Failed'}
-                          </span>
-                        </div>
-                        <div className="space-y-0.5 text-muted-foreground">
-                          {domain.realSSL.subject && (
-                            <div>Subject: {domain.realSSL.subject}</div>
-                          )}
-                          {domain.realSSL.issuer && (
-                            <div>Issuer: {domain.realSSL.issuer}</div>
-                          )}
-                          {domain.realSSL.expiresAt && (
-                            <div>Expires: {fmtDate(domain.realSSL.expiresAt)}</div>
-                          )}
-                          {domain.realSSL.daysUntilExpiry !== undefined && (
-                            <div>
-                              {domain.realSSL.daysUntilExpiry > 0
-                                ? `${domain.realSSL.daysUntilExpiry} days until expiry`
-                                : `Expired by ${Math.abs(domain.realSSL.daysUntilExpiry)} days`}
-                            </div>
-                          )}
-                          <div className="text-[10px] opacity-75">{domain.realSSL.message}</div>
-                        </div>
-                      </div>
-
-                      {/* SSL Management Actions */}
-                      <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => recheckSSL.mutate({ companyId: id, domainId: domain.id })}
-                            disabled={recheckSSL.isPending}
-                            variant="outline"
-                            size="sm"
-                            className="flex-1 text-xs"
-                          >
-                            {recheckSSL.isPending ? (
-                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                      <>
+                        <div className={`p-2 rounded text-xs ${domain.realSSL.valid ? 'bg-green-50 dark:bg-green-950/20' : 'bg-amber-50 dark:bg-amber-950/20'}`}>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            {domain.realSSL.valid ? (
+                              <CheckCircle className="h-3 w-3 text-green-600" />
                             ) : (
-                              <RefreshCw className="h-3 w-3 mr-1" />
+                              <AlertTriangle className="h-3 w-3 text-amber-600" />
                             )}
-                            Re-Check SSL
-                          </Button>
-                          {domain.status === 'verified' && (
+                            <span className="font-medium">
+                              {domain.realSSL.valid ? 'SSL Verified' : 'SSL Check Failed'}
+                            </span>
+                          </div>
+                          <div className="space-y-0.5 text-muted-foreground">
+                            {domain.realSSL.subject && (
+                              <div>Subject: {domain.realSSL.subject}</div>
+                            )}
+                            {domain.realSSL.issuer && (
+                              <div>Issuer: {domain.realSSL.issuer}</div>
+                            )}
+                            {domain.realSSL.expiresAt && (
+                              <div>Expires: {fmtDate(domain.realSSL.expiresAt)}</div>
+                            )}
+                            {domain.realSSL.daysUntilExpiry !== undefined && (
+                              <div>
+                                {domain.realSSL.daysUntilExpiry > 0
+                                  ? `${domain.realSSL.daysUntilExpiry} days until expiry`
+                                  : `Expired by ${Math.abs(domain.realSSL.daysUntilExpiry)} days`}
+                              </div>
+                            )}
+                            <div className="text-[10px] opacity-75">{domain.realSSL.message}</div>
+                          </div>
+                        </div>
+
+                        {/* SSL Management */}
+                        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                          <div className="flex gap-2">
                             <Button
-                              onClick={() => installSSL.mutate({ companyId: id, domainId: domain.id })}
-                              disabled={installSSL.isPending}
-                              className="flex-1 bg-green-600 hover:bg-green-700 text-xs"
+                              onClick={() => recheckSSL.mutate({ companyId: id, domainId: domain.id })}
+                              disabled={recheckSSL.isPending}
+                              variant="outline"
                               size="sm"
+                              className="flex-1 text-xs"
                             >
-                              {installSSL.isPending ? (
+                              {recheckSSL.isPending ? (
                                 <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                               ) : (
-                                <Lock className="h-3 w-3 mr-1" />
+                                <RefreshCw className="h-3 w-3 mr-1" />
                               )}
-                              Install SSL
+                              Re-Check SSL
                             </Button>
-                          )}
+                            {domain.status === 'verified' && (
+                              <Button
+                                onClick={() => installSSL.mutate({ companyId: id, domainId: domain.id })}
+                                disabled={installSSL.isPending}
+                                className="flex-1 bg-green-600 hover:bg-green-700 text-xs"
+                                size="sm"
+                              >
+                                {installSSL.isPending ? (
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                ) : (
+                                  <Lock className="h-3 w-3 mr-1" />
+                                )}
+                                Install SSL
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                      </div>
+                      </>
                     ) : (
                       <DetailRow
                         icon={<Lock className="h-3 w-3" />}
@@ -391,9 +394,9 @@ function CompanyDetailPage() {
                     />
                   </dl>
 
-                  {/* Domain Management Actions */}
-                  {domain.status === 'live' && (
-                    <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                {/* Domain Management */}
+                {domain.status === 'live' && (
+                  <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                       <Button
                         onClick={() => deactivateDomain.mutate({ companyId: id, domainId: domain.id })}
                         disabled={deactivateDomain.isPending}
