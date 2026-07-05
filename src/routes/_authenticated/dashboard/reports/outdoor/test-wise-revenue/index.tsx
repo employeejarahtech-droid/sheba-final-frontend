@@ -10,17 +10,24 @@ import { Users, DollarSign, Banknote, AlertCircle, Hash, Printer, FileText } fro
 import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
+import { z } from 'zod'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
 
 interface InvoiceItem {
   id: number
-  custom_id?: string
+  invoice_prefix?: string | null
   patient_name: string
-  department_name?: string
-  bill_amount: number
-  collected_amount: number
+  total_amount?: number
+  net_amount?: number
+  total_paid?: number
+  due_amount?: number
+  discount?: number
   created_at: string
+  doctor?: { doctor_name?: string | null } | null
+  selected_tests?: any[]
+  [key: string]: any
 }
 
 interface Meta {
@@ -30,7 +37,16 @@ interface Meta {
   totalPages: number
 }
 
+const testWiseRevenueSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+  from: z.string().catch(''),
+  to: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/dashboard/reports/outdoor/test-wise-revenue/')({
+  validateSearch: (search) => testWiseRevenueSearchSchema.parse(search),
   component: TestWiseRevenueReport,
 })
 
@@ -38,6 +54,7 @@ function TestWiseRevenueReport() {
   const searchParams: any = Route.useSearch();
   const navigate = Route.useNavigate();
   const { formatDate } = useDateFormat();
+  const { currencySymbol } = useCurrency();
 
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 10;
@@ -86,21 +103,22 @@ function TestWiseRevenueReport() {
   const items: InvoiceItem[] = data?.data?.items || []
   const meta: Meta = data?.data?.meta || { total: 0, page: 1, limit: 10, totalPages: 1 }
 
-  // Calculate statistics
+  // Calculate statistics (from server-side aggregates for accuracy)
   const stats = useMemo(() => {
-    const totalRevenue = items.reduce((s, i) => s + Number(i.bill_amount || 0), 0)
-    const totalCollected = items.reduce((s, i) => s + Number(i.collected_amount || 0), 0)
-    const outstanding = totalRevenue - totalCollected
+    const serverStats = data?.data?.stats || {}
+    const totalBill = Number(serverStats.total_bill || 0)
+    const totalPaid = Number(serverStats.total_paid || 0)
+    const totalDue = Number(serverStats.total_due || 0)
 
     return [
       { label: 'Total Invoices', value: meta.total, icon: FileText, grad: 'from-green-500 to-green-600' },
-      { label: 'Total Revenue', value: `৳${totalRevenue.toLocaleString()}`, icon: Banknote, grad: 'from-blue-500 to-blue-600' },
-      { label: 'Total Collected', value: `৳${totalCollected.toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
+      { label: 'Total Revenue', value: `${currencySymbol} ${totalBill.toLocaleString()}`, icon: Banknote, grad: 'from-blue-500 to-blue-600' },
+      { label: 'Total Collected', value: `${currencySymbol} ${totalPaid.toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
       { label: 'This Page', value: items.length, icon: Hash, grad: 'from-teal-500 to-teal-600' },
-      { label: 'Outstanding', value: `৳${outstanding.toLocaleString()}`, icon: AlertCircle, grad: 'from-pink-500 to-pink-600' },
-      { label: 'Collection Rate', value: `${totalRevenue > 0 ? ((totalCollected / totalRevenue) * 100).toFixed(1) : 0}%`, icon: Users, grad: 'from-yellow-500 to-yellow-600' },
+      { label: 'Outstanding', value: `${currencySymbol} ${totalDue.toLocaleString()}`, icon: AlertCircle, grad: 'from-pink-500 to-pink-600' },
+      { label: 'Collection Rate', value: `${totalBill > 0 ? ((totalPaid / totalBill) * 100).toFixed(1) : 0}%`, icon: Users, grad: 'from-yellow-500 to-yellow-600' },
     ]
-  }, [items, meta])
+  }, [data, meta, currencySymbol])
 
   // ---- Date filter presets ----
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
@@ -164,38 +182,36 @@ function TestWiseRevenueReport() {
       },
     },
     {
-      data: "department_name",
+      data: null,
       title: "Department",
-      render: (data: string | null) => {
-        return `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">${data || '-'}</span>`
+      render: (_data: any, _type: string, row: InvoiceItem) => {
+        const dept = row.selected_tests?.[0]?.test?.category?.name;
+        return `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">${dept || '-'}</span>`
       },
     },
     {
-      data: "bill_amount",
-      title: "Bill Amount (৳)",
+      data: "total_amount",
+      title: `Bill Amount (${currencySymbol})`,
       orderable: true,
-      render: (data: number | null) => {
-        const amount = Number(data || 0).toFixed(2)
-        return `<span class="font-medium">৳${amount}</span>`
-      },
+      className: "text-right",
+      render: (data: number | null) => `<span class="font-medium">${Number(data || 0).toFixed(2)}</span>`,
     },
     {
-      data: "collected_amount",
-      title: "Collected (৳)",
+      data: "total_paid",
+      title: `Collected (${currencySymbol})`,
       orderable: true,
-      render: (data: number | null) => {
-        const amount = Number(data || 0).toFixed(2)
-        return `<span class="text-emerald-600 font-bold">৳${amount}</span>`
-      },
+      className: "text-right",
+      render: (data: number | null) => `<span class="text-emerald-600 font-bold">${Number(data || 0).toFixed(2)}</span>`,
     },
     {
       data: null,
-      title: "Outstanding (৳)",
+      title: `Outstanding (${currencySymbol})`,
       orderable: false,
+      className: "text-right",
       render: (_data: any, _type: string, row: InvoiceItem) => {
-        const outstanding = Number(row.bill_amount || 0) - Number(row.collected_amount || 0)
+        const outstanding = Number(row.total_amount || 0) - Number(row.total_paid || 0)
         const colorClass = outstanding > 0 ? 'text-red-500 font-semibold' : 'text-emerald-500 font-semibold'
-        return `<span class="${colorClass}">৳${outstanding.toFixed(2)}</span>`
+        return `<span class="${colorClass}">${outstanding.toFixed(2)}</span>`
       },
     },
     {

@@ -10,20 +10,23 @@ import { Receipt, DollarSign, CheckCircle2, TrendingDown, Printer, FileText, Cal
 import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
+import { z } from 'zod'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
 
 interface BillDistributionItem {
   id: number
-  admission_no: string
+  admission_prefix?: string | null
   patient_name: string
-  ward_name: string | null
   admission_date: string | null
   discharge_date: string | null
-  total_bill: number | null
-  advance_payment: number | null
-  due_amount: number | null
+  total_bill_amount?: number
   status: string | null
+  bedCabin?: { code?: string | null; type?: string | null; ward?: string | null } | null
+  finalBill?: { total_bill_amount?: number; paid_amount?: number; due_amount?: number } | null
+  advancePayments?: { total_amount?: number } | null
+  [key: string]: any
 }
 
 interface Meta {
@@ -33,7 +36,16 @@ interface Meta {
   totalPages: number
 }
 
+const billDistributionSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+  from: z.string().catch(''),
+  to: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/dashboard/reports/indoor/bill-distribution/')({
+  validateSearch: (search) => billDistributionSearchSchema.parse(search),
   component: BillDistributionPage,
 })
 
@@ -41,6 +53,7 @@ function BillDistributionPage() {
   const searchParams: any = Route.useSearch();
   const navigate = Route.useNavigate();
   const { formatDate } = useDateFormat();
+  const { currencySymbol } = useCurrency();
 
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 10;
@@ -89,22 +102,26 @@ function BillDistributionPage() {
   const items: BillDistributionItem[] = data?.data?.items || []
   const meta: Meta = data?.data?.meta || { total: 0, page: 1, limit: 10, totalPages: 1 }
 
+  // Billing fields are nested (finalBill/advancePayments) on the admission payload
+  const billOf = (i: BillDistributionItem) => Number(i.total_bill_amount || i.finalBill?.total_bill_amount || 0)
+  const paidOf = (i: BillDistributionItem) => Number(i.finalBill?.paid_amount ?? i.advancePayments?.total_amount ?? 0)
+
   // Calculate statistics
   const stats = useMemo(() => {
-    const totalBilled = items.reduce((sum, item) => sum + (item.total_bill || 0), 0)
-    const totalPaid = items.reduce((sum, item) => sum + (item.advance_payment || 0), 0)
-    const paidInFull = items.filter((item) => (item.advance_payment || 0) >= (item.total_bill || 0)).length
-    const outstanding = items.filter((item) => (item.advance_payment || 0) < (item.total_bill || 0)).length
+    const totalBilled = items.reduce((sum, item) => sum + billOf(item), 0)
+    const totalPaid = items.reduce((sum, item) => sum + paidOf(item), 0)
+    const paidInFull = items.filter((item) => paidOf(item) >= billOf(item)).length
+    const outstanding = items.filter((item) => paidOf(item) < billOf(item)).length
 
     return [
       { label: 'Total Admissions', value: meta.total, icon: Users, grad: 'from-green-500 to-green-600' },
-      { label: 'Total Billed', value: `৳${totalBilled.toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
-      { label: 'Total Paid', value: `৳${totalPaid.toLocaleString()}`, icon: Wallet, grad: 'from-blue-500 to-blue-600' },
+      { label: 'Total Billed', value: `${currencySymbol} ${totalBilled.toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
+      { label: 'Total Paid', value: `${currencySymbol} ${totalPaid.toLocaleString()}`, icon: Wallet, grad: 'from-blue-500 to-blue-600' },
       { label: 'Paid In Full', value: paidInFull, icon: CheckCircle2, grad: 'from-teal-500 to-teal-600' },
       { label: 'Outstanding', value: outstanding, icon: AlertCircle, grad: 'from-red-500 to-red-600' },
       { label: 'This Page', value: items.length, icon: Calendar, grad: 'from-yellow-500 to-yellow-600' },
     ]
-  }, [items, meta])
+  }, [items, meta, currencySymbol])
 
   // ---- Date filter presets ----
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
@@ -142,7 +159,7 @@ function BillDistributionPage() {
 
   const columns = [
     {
-      data: "admission_no",
+      data: "admission_prefix",
       title: "Admission No",
       orderable: true,
       render: (data: any, _type: string, row: BillDistributionItem) => {
@@ -169,10 +186,11 @@ function BillDistributionPage() {
       },
     },
     {
-      data: "ward_name",
+      data: null,
       title: "Ward",
-      render: (data: string | null) => {
-        return `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">${data || '-'}</span>`
+      render: (_data: any, _type: string, row: BillDistributionItem) => {
+        const ward = row.bedCabin?.ward || row.bedCabin?.type || '-'
+        return `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">${ward}</span>`
       },
     },
     {
@@ -198,33 +216,32 @@ function BillDistributionPage() {
       },
     },
     {
-      data: "total_bill",
-      title: "Total Bill",
-      render: (data: number | null) => {
-        return `<span class="font-semibold text-gray-800">৳${(data || 0).toLocaleString()}</span>`
-      },
+      data: null,
+      title: `Total Bill (${currencySymbol})`,
+      className: "text-right",
+      render: (_d: any, _t: string, row: BillDistributionItem) => `<span class="font-semibold text-gray-800">${billOf(row).toLocaleString()}</span>`,
     },
     {
-      data: "advance_payment",
-      title: "Amount Paid",
-      render: (data: number | null) => {
-        return `<span class="font-semibold text-green-600">৳${(data || 0).toLocaleString()}</span>`
+      data: null,
+      title: `Amount Paid (${currencySymbol})`,
+      className: "text-right",
+      render: (_d: any, _t: string, row: BillDistributionItem) => `<span class="font-semibold text-green-600">${paidOf(row).toLocaleString()}</span>`,
+    },
+    {
+      data: null,
+      title: `Balance (${currencySymbol})`,
+      className: "text-right",
+      render: (_d: any, _t: string, row: BillDistributionItem) => {
+        const balance = billOf(row) - paidOf(row);
+        const colorClass = balance > 0 ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold';
+        return `<span class="${colorClass}">${balance.toLocaleString()}</span>`
       },
     },
     {
       data: null,
-      title: "Balance",
-      render: (_data: any, _type: string, row: BillDistributionItem) => {
-        const balance = (row.total_bill || 0) - (row.advance_payment || 0);
-        const colorClass = balance > 0 ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold';
-        return `<span class="${colorClass}">৳${balance.toLocaleString()}</span>`
-      },
-    },
-    {
-      data: "status",
       title: "Status",
-      render: (data: string | null, _type: string, row: BillDistributionItem) => {
-        const isPaid = (row.advance_payment || 0) >= (row.total_bill || 0);
+      render: (_data: any, _type: string, row: BillDistributionItem) => {
+        const isPaid = paidOf(row) >= billOf(row);
         const status = isPaid ? 'paid' : 'outstanding';
         const colorMap: Record<string, string> = {
           paid: 'bg-green-100 text-green-700 border-green-200',

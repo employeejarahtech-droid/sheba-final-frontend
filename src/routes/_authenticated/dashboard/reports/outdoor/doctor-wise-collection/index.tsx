@@ -10,6 +10,8 @@ import { Stethoscope, Users, DollarSign, Banknote, Printer, FileText, Calendar }
 import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
+import { z } from 'zod'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
 
@@ -29,7 +31,16 @@ interface Meta {
   totalPages: number
 }
 
+const doctorWiseCollectionSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+  from: z.string().catch(''),
+  to: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/dashboard/reports/outdoor/doctor-wise-collection/')({
+  validateSearch: (search) => doctorWiseCollectionSearchSchema.parse(search),
   component: DoctorWiseCollectionReport,
 })
 
@@ -37,6 +48,7 @@ function DoctorWiseCollectionReport() {
   const searchParams: any = Route.useSearch();
   const navigate = Route.useNavigate();
   const { formatDate } = useDateFormat();
+  const { currencySymbol } = useCurrency();
 
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 10;
@@ -72,7 +84,7 @@ function DoctorWiseCollectionReport() {
         ...(from ? { start_date: from } : {}),
         ...(to ? { end_date: to } : {}),
       })
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/outdoor-invoice/referrers?${params}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/outdoor-invoice/doctor-wise-collection?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (!res.ok) throw new Error('Failed to fetch doctor-wise collection')
@@ -97,12 +109,12 @@ function DoctorWiseCollectionReport() {
     return [
       { label: 'Total Doctors', value: metaTotal, icon: Stethoscope, grad: 'from-green-500 to-green-600' },
       { label: 'Total Patients', value: totalPatients, icon: Users, grad: 'from-blue-500 to-blue-600' },
-      { label: 'Total Collected', value: `৳${totalCollected.toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
-      { label: 'Total Bill', value: `৳${totalBill.toLocaleString()}`, icon: Banknote, grad: 'from-teal-500 to-teal-600' },
-      { label: 'Total Discount', value: `৳${totalDiscount.toLocaleString()}`, icon: Calendar, grad: 'from-pink-500 to-pink-600' },
+      { label: 'Total Collected', value: `${currencySymbol} ${totalCollected.toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
+      { label: 'Total Bill', value: `${currencySymbol} ${totalBill.toLocaleString()}`, icon: Banknote, grad: 'from-teal-500 to-teal-600' },
+      { label: 'Total Discount', value: `${currencySymbol} ${totalDiscount.toLocaleString()}`, icon: Calendar, grad: 'from-pink-500 to-pink-600' },
       { label: 'This Page', value: items.length, icon: FileText, grad: 'from-yellow-500 to-yellow-600' },
     ]
-  }, [items, meta])
+  }, [items, meta, currencySymbol])
 
   // ---- Date filter presets ----
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
@@ -171,24 +183,27 @@ function DoctorWiseCollectionReport() {
     },
     {
       data: 'total_bill',
-      title: 'Total Bill (৳)',
+      title: `Total Bill (${currencySymbol})`,
       orderable: true,
-      render: (d: any) => `<span class="font-medium">৳${Number(d || 0).toLocaleString()}</span>`,
-      defaultContent: '৳0',
+      className: "text-right",
+      render: (d: any) => `<span class="font-medium">${Number(d || 0).toLocaleString()}</span>`,
+      defaultContent: '0',
     },
     {
       data: 'total_collected',
-      title: 'Total Collected (৳)',
+      title: `Total Collected (${currencySymbol})`,
       orderable: true,
-      render: (d: any) => `<span class="text-emerald-600 font-bold">৳${Number(d || 0).toLocaleString()}</span>`,
-      defaultContent: '৳0',
+      className: "text-right",
+      render: (d: any) => `<span class="text-emerald-600 font-bold">${Number(d || 0).toLocaleString()}</span>`,
+      defaultContent: '0',
     },
     {
       data: 'total_discount',
-      title: 'Total Discount (৳)',
+      title: `Total Discount (${currencySymbol})`,
       orderable: false,
-      render: (d: any) => `<span class="text-orange-600 font-medium">৳${Number(d || 0).toLocaleString()}</span>`,
-      defaultContent: '৳0',
+      className: "text-right",
+      render: (d: any) => `<span class="text-orange-600 font-medium">${Number(d || 0).toLocaleString()}</span>`,
+      defaultContent: '0',
     },
     {
       data: null,

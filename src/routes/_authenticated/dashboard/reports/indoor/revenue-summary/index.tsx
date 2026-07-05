@@ -10,19 +10,25 @@ import { Users, Banknote, DollarSign, AlertCircle, Printer, FileText, BedDouble 
 import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
 
 interface AdmissionItem {
   id: number
-  admission_no: string
+  admission_prefix?: string | null
   patient_name: string
   admission_date: string | null
   discharge_date: string | null
-  total_bill: number
-  advance_payment: number
-  due_amount: number
+  total_bill_amount?: number
   status: string
+  finalBill?: {
+    total_bill_amount?: number
+    paid_amount?: number
+    due_amount?: number
+  } | null
+  advancePayments?: { total_amount?: number } | null
+  [key: string]: any
 }
 
 interface Meta {
@@ -40,6 +46,7 @@ function IndoorRevenueSummaryPage() {
   const searchParams: any = Route.useSearch();
   const navigate = Route.useNavigate();
   const { formatDate } = useDateFormat();
+  const { currencySymbol } = useCurrency();
 
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 10;
@@ -88,23 +95,29 @@ function IndoorRevenueSummaryPage() {
   const items: AdmissionItem[] = data?.data?.items || []
   const meta: Meta = data?.data?.meta || { total: 0, page: 1, limit: 10, totalPages: 1 }
 
+  // Billing fields are nested (finalBill/advancePayments) on the admission payload
+  const billOf = (i: AdmissionItem) => Number(i.total_bill_amount || i.finalBill?.total_bill_amount || 0)
+  const paidOf = (i: AdmissionItem) => Number(i.finalBill?.paid_amount ?? i.advancePayments?.total_amount ?? 0)
+  const dueOf = (i: AdmissionItem) =>
+    i.finalBill?.due_amount != null ? Number(i.finalBill.due_amount) : Math.max(0, billOf(i) - paidOf(i))
+
   // Calculate statistics
   const stats = useMemo(() => {
-    const totalRevenue = items.reduce((s, i) => s + Number(i.total_bill || 0), 0)
-    const totalCollected = items.reduce((s, i) => s + Number(i.advance_payment || 0), 0)
-    const outstanding = items.reduce((s, i) => s + Number(i.due_amount || 0), 0)
+    const totalRevenue = items.reduce((s, i) => s + billOf(i), 0)
+    const totalCollected = items.reduce((s, i) => s + paidOf(i), 0)
+    const outstanding = items.reduce((s, i) => s + dueOf(i), 0)
     const activeCount = items.filter((i) => i.status === 'active').length
     const dischargedCount = items.filter((i) => i.status === 'discharged').length
 
     return [
       { label: 'Total Admissions', value: meta.total, icon: Users, grad: 'from-green-500 to-green-600' },
-      { label: 'Total Revenue', value: `৳${totalRevenue.toLocaleString()}`, icon: Banknote, grad: 'from-blue-500 to-blue-600' },
-      { label: 'Total Collected', value: `৳${totalCollected.toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
-      { label: 'Outstanding', value: `৳${outstanding.toLocaleString()}`, icon: AlertCircle, grad: 'from-red-500 to-red-600' },
+      { label: 'Total Revenue', value: `${currencySymbol} ${totalRevenue.toLocaleString()}`, icon: Banknote, grad: 'from-blue-500 to-blue-600' },
+      { label: 'Total Collected', value: `${currencySymbol} ${totalCollected.toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
+      { label: 'Outstanding', value: `${currencySymbol} ${outstanding.toLocaleString()}`, icon: AlertCircle, grad: 'from-red-500 to-red-600' },
       { label: 'Active Patients', value: activeCount, icon: BedDouble, grad: 'from-teal-500 to-teal-600' },
       { label: 'Discharged', value: dischargedCount, icon: BedDouble, grad: 'from-pink-500 to-pink-600' },
     ]
-  }, [items, meta])
+  }, [items, meta, currencySymbol])
 
   // ---- Date filter presets ----
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
@@ -153,7 +166,7 @@ function IndoorRevenueSummaryPage() {
 
   const columns = [
     {
-      data: "admission_no",
+      data: "admission_prefix",
       title: "Admission No",
       orderable: true,
       render: (data: any, _type: string, row: AdmissionItem) => {
@@ -200,26 +213,29 @@ function IndoorRevenueSummaryPage() {
       },
     },
     {
-      data: "total_bill",
-      title: "Total Bill (৳)",
-      orderable: true,
-      render: (data: number) => `<span class="font-semibold text-gray-800">৳${Number(data || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`,
+      data: null,
+      title: `Total Bill (${currencySymbol})`,
+      orderable: false,
+      className: "text-right",
+      render: (_d: any, _t: string, row: AdmissionItem) => `<span class="font-semibold text-gray-800">${billOf(row).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`,
     },
     {
-      data: "advance_payment",
-      title: "Advance Paid (৳)",
-      orderable: true,
-      render: (data: number) => `<span class="font-bold text-emerald-600">৳${Number(data || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`,
+      data: null,
+      title: `Advance Paid (${currencySymbol})`,
+      orderable: false,
+      className: "text-right",
+      render: (_d: any, _t: string, row: AdmissionItem) => `<span class="font-bold text-emerald-600">${paidOf(row).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`,
     },
     {
-      data: "due_amount",
-      title: "Due Amount (৳)",
-      orderable: true,
-      render: (data: number) => {
-        const val = Number(data || 0)
+      data: null,
+      title: `Due Amount (${currencySymbol})`,
+      orderable: false,
+      className: "text-right",
+      render: (_d: any, _t: string, row: AdmissionItem) => {
+        const val = dueOf(row)
         return val > 0
-          ? `<span class="font-bold text-red-600">৳${val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`
-          : `<span class="font-bold text-emerald-600">৳0.00</span>`
+          ? `<span class="font-bold text-red-600">${val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`
+          : `<span class="font-bold text-emerald-600">0.00</span>`
       },
     },
     {

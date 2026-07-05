@@ -95,7 +95,7 @@ export function IndoorBillReport({
   search,
   from,
   to,
-  status,
+  status = 'all',
   setPage,
   setLimit,
   setSearch,
@@ -109,26 +109,26 @@ export function IndoorBillReport({
   search: string
   from: string
   to: string
-  status: string
+  status?: string
   setPage: (p: number) => void
   setLimit: (l: number) => void
   setSearch: (s: string) => void
   setFrom: (f: string) => void
   setTo: (t: string) => void
-  setStatus: (s: string) => void
+  setStatus?: (s: string) => void
 }) {
   const { currencySymbol } = useCurrency()
   const token = getCookie('accessToken')
   const API_URL = import.meta.env.VITE_API_URL || ''
 
   const { data, isFetching } = useQuery<ApiResponse>({
-    queryKey: ['indoor-bill-report', config.endpoint, page, limit, search, from, to, status],
+    queryKey: setStatus ? ['indoor-bill-report', config.endpoint, page, limit, search, from, to, status] : ['indoor-bill-report', config.endpoint, page, limit, search, from, to],
     queryFn: async () => {
       const params = new URLSearchParams({ page: String(page), limit: String(limit) })
       if (search) params.set('search', search)
       if (from) params.set('from', from)
       if (to) params.set('to', to)
-      if (status !== 'all') params.set('payment_status', status)
+      if (setStatus && status !== 'all') params.set('payment_status', status)
       const res = await fetch(
         `${API_URL}/api/bill-distribution/final/${config.endpoint}?${params.toString()}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -318,19 +318,21 @@ export function IndoorBillReport({
               <DateField value={from} onChange={(v: string) => { setFrom(v); setPresetOpen(false) }} placeholder="From" />
               <span className="text-xs text-muted-foreground">to</span>
               <DateField value={to} onChange={(v: string) => { setTo(v); setPresetOpen(false) }} placeholder="To" />
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="h-9 text-sm w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="partial">Partial</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
-                </SelectContent>
-              </Select>
-              {(from || to || status !== 'all') && (
-                <Button variant="ghost" size="sm" onClick={() => { setFrom(''); setTo(''); setStatus('all') }}>
+              {setStatus && (
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger className="h-9 text-sm w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="partial">Partial</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+              {(from || to || (setStatus && status !== 'all')) && (
+                <Button variant="ghost" size="sm" onClick={() => { setFrom(''); setTo(''); setStatus?.('all') }}>
                   Clear
                 </Button>
               )}
@@ -340,7 +342,7 @@ export function IndoorBillReport({
                   search: search || undefined,
                   from: from || undefined,
                   to: to || undefined,
-                  status: status !== 'all' ? status : undefined,
+                  ...(setStatus && { status: status !== 'all' ? status : undefined }),
                 }}
               >
                 <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>

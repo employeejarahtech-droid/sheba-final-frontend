@@ -6,6 +6,8 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { FileText, DollarSign, TrendingUp, Calendar, CreditCard, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useCurrency } from '@/hooks/use-currency'
 
 type PaymentItem = {
   id: number;
@@ -60,6 +62,7 @@ export default function ReportsMyOutdoorTodayCollection({
 }: ReportsMyOutdoorTodayCollectionProps) {
 
   const token = getCookie('accessToken');
+  const { currencySymbol } = useCurrency();
 
   // Fetch today's collection (all users)
   const { data, isLoading } = useQuery({
@@ -122,21 +125,21 @@ export default function ReportsMyOutdoorTodayCollection({
       },
       {
         label: "Total Collected",
-        value: `৳${(serverStats.total_collected || 0).toLocaleString()}`,
+        value: `${currencySymbol} ${(serverStats.total_collected || 0).toLocaleString()}`,
         gradient: "from-emerald-600 to-emerald-400",
         shadow: "shadow-emerald-500/30",
         icon: <DollarSign className="w-6 h-6 text-white" />,
       },
       {
         label: "Total Discount",
-        value: `৳${(serverStats.total_discount || 0).toLocaleString()}`,
+        value: `${currencySymbol} ${(serverStats.total_discount || 0).toLocaleString()}`,
         gradient: "from-orange-600 to-orange-400",
         shadow: "shadow-orange-500/30",
         icon: <TrendingUp className="w-6 h-6 text-white" />,
       },
       {
         label: "Gross Bill",
-        value: `৳${(serverStats.total_bill || 0).toLocaleString()}`,
+        value: `${currencySymbol} ${(serverStats.total_bill || 0).toLocaleString()}`,
         gradient: "from-purple-600 to-purple-400",
         shadow: "shadow-purple-500/30",
         icon: <FileText className="w-6 h-6 text-white" />,
@@ -208,7 +211,7 @@ export default function ReportsMyOutdoorTodayCollection({
     },
     {
       data: "total_amount",
-      title: "Bill Amount (৳)",
+      title: `Bill Amount (${currencySymbol})`,
       orderable: true,
       responsivePriority: 4,
       render: (data: any) => `<span class="font-medium text-gray-600">${Number(data || 0).toFixed(2)}</span>`,
@@ -216,7 +219,7 @@ export default function ReportsMyOutdoorTodayCollection({
     },
     {
       data: null,
-      title: "Discount (৳)",
+      title: `Discount (${currencySymbol})`,
       orderable: false,
       responsivePriority: 5,
       render: (_data: any, _type: string, row: PaymentItem) => {
@@ -231,7 +234,7 @@ export default function ReportsMyOutdoorTodayCollection({
     },
     {
       data: "payment_amount",
-      title: "Collected (৳)",
+      title: `Collected (${currencySymbol})`,
       orderable: true,
       responsivePriority: 2,
       render: (data: any) => `<span class="text-emerald-600 font-bold">${Number(data || 0).toFixed(2)}</span>`,
@@ -365,56 +368,68 @@ export default function ReportsMyOutdoorTodayCollection({
           ))}
         </div>
 
-        {/* Summary Card */}
-        <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Collection Summary</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                <CreditCard className="w-6 h-6 text-blue-600" />
+        {/* Collection Summary */}
+        <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 mb-6">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                <DollarSign className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Payments</p>
-                <p className="text-xl font-bold text-gray-800">
-                  {data?.data?.stats?.payment_count || 0}
-                </p>
+                <CardTitle className="text-lg font-bold">Collection Summary</CardTitle>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Today's payment breakdown</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-emerald-600" />
+          </CardHeader>
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <CreditCard className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Payments</p>
+                  <p className="text-xl font-bold text-gray-800">
+                    {data?.data?.stats?.payment_count || 0}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Total Collected</p>
-                <p className="text-xl font-bold text-emerald-600">
-                  ৳{(data?.data?.stats?.total_collected || 0).toLocaleString()}
-                </p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Total Collected</p>
+                  <p className="text-xl font-bold text-emerald-600">
+                    {currencySymbol} {(data?.data?.stats?.total_collected || 0).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Total Discount</p>
+                  <p className="text-xl font-bold text-orange-600">
+                    -{currencySymbol} {(data?.data?.stats?.total_discount || 0).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Gross Bill</p>
+                  <p className="text-xl font-bold text-purple-600">
+                    {currencySymbol} {(data?.data?.stats?.total_bill || 0).toLocaleString()}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Total Discount</p>
-                <p className="text-xl font-bold text-orange-600">
-                  -৳{(data?.data?.stats?.total_discount || 0).toLocaleString()}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                <FileText className="w-6 h-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Gross Bill</p>
-                <p className="text-xl font-bold text-purple-600">
-                  ৳{(data?.data?.stats?.total_bill || 0).toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {isLoading ? (
           <div className="flex items-center justify-center h-64">

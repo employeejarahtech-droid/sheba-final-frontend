@@ -10,26 +10,26 @@ import { FileText, Receipt, DollarSign, TrendingDown, Printer, User, Calendar, W
 import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
+import { z } from 'zod'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
 
 interface FinalBillItem {
   id: number
-  admission_no: string
+  admission_prefix?: string | null
   patient_name: string
-  patient_age: number | null
-  patient_gender: string | null
+  age?: number | null
+  sex?: string | null
+  phone?: string | null
   admission_date: string | null
   discharge_date: string | null
-  bed_name: string | null
-  ward_name: string | null
-  doctor_name: string | null
-  department_name: string | null
-  phone: string | null
-  total_bill: number | null
-  advance_payment: number | null
-  due_amount: number | null
+  doctor?: { doctor_name?: string | null } | null
+  bedCabin?: { code?: string | null; type?: string | null; ward?: string | null } | null
+  finalBill?: { total_bill_amount?: number; paid_amount?: number; due_amount?: number } | null
+  advancePayments?: { total_amount?: number } | null
   status: string | null
+  [key: string]: any
 }
 
 interface Meta {
@@ -39,7 +39,16 @@ interface Meta {
   totalPages: number
 }
 
+const finalBillRegisterSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+  from: z.string().catch(''),
+  to: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/dashboard/reports/indoor/final-bill-register/')({
+  validateSearch: (search) => finalBillRegisterSearchSchema.parse(search),
   component: FinalBillRegisterPage,
 })
 
@@ -47,6 +56,7 @@ function FinalBillRegisterPage() {
   const searchParams: any = Route.useSearch();
   const navigate = Route.useNavigate();
   const { formatDate } = useDateFormat();
+  const { currencySymbol } = useCurrency();
 
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 10;
@@ -96,23 +106,28 @@ function FinalBillRegisterPage() {
   const items: FinalBillItem[] = data?.data?.items || []
   const meta: Meta = data?.data?.meta || { total: 0, page: 1, limit: 10, totalPages: 1 }
 
+  // "Final Bill" = finalBill.total_bill_amount; billing is nested on the payload
+  const billOf = (i: FinalBillItem) => Number(i.finalBill?.total_bill_amount ?? i.total_bill_amount ?? 0)
+  const paidOf = (i: FinalBillItem) => Number(i.finalBill?.paid_amount ?? i.advancePayments?.total_amount ?? 0)
+  const dueOf = (i: FinalBillItem) => i.finalBill?.due_amount != null ? Number(i.finalBill.due_amount) : Math.max(0, billOf(i) - paidOf(i))
+
   // Calculate statistics
   const stats = useMemo(() => {
-    const totalRevenue = items.reduce((sum, item) => sum + (item.total_bill || 0), 0)
-    const totalCollected = items.reduce((sum, item) => sum + (item.advance_payment || 0), 0)
-    const totalOutstanding = items.reduce((sum, item) => sum + Math.max(0, (item.total_bill || 0) - (item.advance_payment || 0)), 0)
-    const settledCount = items.filter((item) => (item.total_bill || 0) - (item.advance_payment || 0) <= 0).length
-    const pendingCount = items.filter((item) => (item.total_bill || 0) - (item.advance_payment || 0) > 0).length
+    const totalRevenue = items.reduce((sum, item) => sum + billOf(item), 0)
+    const totalCollected = items.reduce((sum, item) => sum + paidOf(item), 0)
+    const totalOutstanding = items.reduce((sum, item) => sum + dueOf(item), 0)
+    const settledCount = items.filter((item) => dueOf(item) <= 0).length
+    const pendingCount = items.filter((item) => dueOf(item) > 0).length
 
     return [
       { label: 'Total Bills', value: meta.total, icon: FileText, grad: 'from-green-500 to-green-600' },
-      { label: 'Total Revenue', value: `৳${totalRevenue.toLocaleString()}`, icon: Receipt, grad: 'from-blue-500 to-blue-600' },
-      { label: 'Collected', value: `৳${totalCollected.toLocaleString()}`, icon: DollarSign, grad: 'from-teal-500 to-teal-600' },
-      { label: 'Outstanding', value: `৳${totalOutstanding.toLocaleString()}`, icon: TrendingDown, grad: 'from-red-500 to-red-600' },
+      { label: 'Total Revenue', value: `${currencySymbol} ${totalRevenue.toLocaleString()}`, icon: Receipt, grad: 'from-blue-500 to-blue-600' },
+      { label: 'Collected', value: `${currencySymbol} ${totalCollected.toLocaleString()}`, icon: DollarSign, grad: 'from-teal-500 to-teal-600' },
+      { label: 'Outstanding', value: `${currencySymbol} ${totalOutstanding.toLocaleString()}`, icon: TrendingDown, grad: 'from-red-500 to-red-600' },
       { label: 'Settled', value: settledCount, icon: CheckCircle, grad: 'from-emerald-500 to-emerald-600' },
       { label: 'Pending', value: pendingCount, icon: XCircle, grad: 'from-amber-500 to-amber-600' },
     ]
-  }, [items, meta])
+  }, [items, meta, currencySymbol])
 
   // ---- Date filter presets ----
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
@@ -217,9 +232,9 @@ function FinalBillRegisterPage() {
           return time ? `${dateStr} ${time}` : dateStr;
         };
 
-        const totalBill = bill.total_bill || 0;
-        const advancePayment = bill.advance_payment || 0;
-        const dueAmount = Math.max(0, totalBill - advancePayment);
+        const totalBill = Number(bill.finalBill?.total_bill_amount ?? bill.total_bill_amount ?? 0);
+        const advancePayment = Number(bill.finalBill?.paid_amount ?? bill.advancePayments?.total_amount ?? 0);
+        const dueAmount = bill.finalBill?.due_amount != null ? Number(bill.finalBill.due_amount) : Math.max(0, totalBill - advancePayment);
         const isSettled = dueAmount <= 0;
 
         const billDetailsHTML = `
@@ -269,16 +284,16 @@ function FinalBillRegisterPage() {
 
             <div class="bg-gray-50 rounded-lg p-4 space-y-3">
               <div class="flex justify-between items-center">
-                <span class="text-gray-600">Total Bill</span>
-                <span class="font-bold text-lg">৳${totalBill.toLocaleString()}</span>
+                <span class="text-gray-600">Final Bill</span>
+                <span class="font-bold text-lg">${currencySymbol} ${totalBill.toLocaleString()}</span>
               </div>
               <div class="flex justify-between items-center">
                 <span class="text-gray-600">Advance Payment</span>
-                <span class="font-semibold text-green-600">৳${advancePayment.toLocaleString()}</span>
+                <span class="font-semibold text-green-600">${currencySymbol} ${advancePayment.toLocaleString()}</span>
               </div>
               <div class="border-t pt-3 flex justify-between items-center">
                 <span class="text-gray-800 font-medium">Due Amount</span>
-                <span class="font-bold text-xl ${isSettled ? 'text-green-600' : 'text-red-600'}">৳${dueAmount.toLocaleString()}</span>
+                <span class="font-bold text-xl ${isSettled ? 'text-green-600' : 'text-red-600'}">${currencySymbol} ${dueAmount.toLocaleString()}</span>
               </div>
             </div>
 
@@ -325,7 +340,7 @@ function FinalBillRegisterPage() {
       title: "Bill No",
       orderable: true,
       render: (data: any, _type: string, row: FinalBillItem) => {
-        const value = row.admission_no || `FBL-${String(row.id).padStart(4, '0')}`;
+        const value = row.admission_prefix || `FBL-${String(row.id).padStart(4, '0')}`;
         return `
           <div class="flex items-center gap-2">
             <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
@@ -351,12 +366,12 @@ function FinalBillRegisterPage() {
       },
     },
     {
-      data: "patient_age",
+      data: "age",
       title: "Age",
       render: (data: number | null) => data ? `${data} yrs` : '-',
     },
     {
-      data: "patient_gender",
+      data: "sex",
       title: "Gender",
       render: (data: string | null) => {
         const gender = (data || '').toLowerCase()
@@ -376,9 +391,10 @@ function FinalBillRegisterPage() {
       render: (data: string | null) => data ? `<span class="font-mono text-xs">${data}</span>` : '-',
     },
     {
-      data: "doctor_name",
+      data: null,
       title: "Doctor",
-      render: (data: string | null) => {
+      render: (_d: any, _t: string, row: FinalBillItem) => {
+        const data = row.doctor?.doctor_name
         return `<div class="flex items-center gap-2">
           <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -410,33 +426,31 @@ function FinalBillRegisterPage() {
       },
     },
     {
-      data: "total_bill",
-      title: "Total Bill",
-      render: (data: number | null) => {
-        return `<span class="font-semibold text-blue-600">৳${(data || 0).toLocaleString()}</span>`
-      },
-    },
-    {
-      data: "advance_payment",
-      title: "Collected",
-      render: (data: number | null) => {
-        return `<span class="font-semibold text-green-600">৳${(data || 0).toLocaleString()}</span>`
-      },
+      data: null,
+      title: `Final Bill (${currencySymbol})`,
+      className: "text-right",
+      render: (_d: any, _t: string, row: FinalBillItem) => `<span class="font-semibold text-blue-600">${billOf(row).toLocaleString()}</span>`,
     },
     {
       data: null,
-      title: "Due",
-      render: (_data: any, _type: string, row: FinalBillItem) => {
-        const due = Math.max(0, (row.total_bill || 0) - (row.advance_payment || 0))
-        return `<span class="font-bold ${due > 0 ? 'text-red-600' : 'text-green-600'}">৳${due.toLocaleString()}</span>`
+      title: `Collected (${currencySymbol})`,
+      className: "text-right",
+      render: (_d: any, _t: string, row: FinalBillItem) => `<span class="font-semibold text-green-600">${paidOf(row).toLocaleString()}</span>`,
+    },
+    {
+      data: null,
+      title: `Due (${currencySymbol})`,
+      className: "text-right",
+      render: (_d: any, _t: string, row: FinalBillItem) => {
+        const due = dueOf(row)
+        return `<span class="font-bold ${due > 0 ? 'text-red-600' : 'text-green-600'}">${due.toLocaleString()}</span>`
       },
     },
     {
       data: null,
       title: "Status",
       render: (_data: any, _type: string, row: FinalBillItem) => {
-        const due = (row.total_bill || 0) - (row.advance_payment || 0)
-        const isSettled = due <= 0
+        const isSettled = dueOf(row) <= 0
         return `<span class="px-3 py-1 rounded-full text-xs font-semibold capitalize border ${isSettled ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'}">
           ${isSettled ? 'Settled' : 'Pending'}
         </span>`

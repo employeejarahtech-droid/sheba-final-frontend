@@ -4,7 +4,12 @@ import { useState, useMemo, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { FileText, DollarSign, TrendingUp, Calendar, CreditCard, Printer } from 'lucide-react'
+import { FileText, DollarSign, TrendingUp, CreditCard, Printer } from 'lucide-react'
+import { DateField } from '@/components/date-field'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useCurrency } from '@/hooks/use-currency'
 
 type PaymentItem = {
   id: number;
@@ -40,18 +45,79 @@ type PaymentItem = {
   created_at: string;
 };
 
-export default function ReportsMyOutdoorDateWiseCollection() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const limit = 10;
+interface ReportsMyOutdoorDateWiseCollectionProps {
+  page: number
+  limit: number
+  search: string
+  from: string
+  to: string
+  setPage: (page: number) => void
+  setLimit: (limit: number) => void
+  setSearch: (search: string) => void
+  setFrom: (from: string) => void
+  setTo: (to: string) => void
+  endpoint?: string
+  title?: string
+  subtitle?: string
+  printPath?: string
+}
 
+export default function ReportsMyOutdoorDateWiseCollection({
+  page,
+  limit,
+  search,
+  from,
+  to,
+  setPage,
+  setLimit,
+  setSearch,
+  setFrom,
+  setTo,
+  endpoint = '/api/outdoor-invoice/my-outdoor-invoice/date-wise-collection',
+  title = 'Date-Wise Collection Report',
+  subtitle = 'Payments collected by you within a date range',
+  printPath = '/dashboard/reports/my/outdoor/date-wise-collection/print',
+}: ReportsMyOutdoorDateWiseCollectionProps) {
   const token = getCookie('accessToken');
+  const { currencySymbol } = useCurrency();
+
+  // ---- Date filter presets (mirrors admission-register) ----
+  const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
+  const toYMD = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+  const datePresets = useMemo(() => ({
+    today: { label: 'Today', from: toYMD(today()), to: toYMD(today()) },
+    yesterday: (() => { const d = today(); d.setDate(d.getDate() - 1); return { label: 'Yesterday', from: toYMD(d), to: toYMD(d) }; })(),
+    last7: { label: 'Last 7 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 6); return d; })()), to: toYMD(today()) },
+    last15: { label: 'Last 15 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 14); return d; })()), to: toYMD(today()) },
+    last30: { label: 'Last 30 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 29); return d; })()), to: toYMD(today()) },
+    last45: { label: 'Last 45 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 44); return d; })()), to: toYMD(today()) },
+    last60: { label: 'Last 60 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 59); return d; })()), to: toYMD(today()) },
+    last90: { label: 'Last 90 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 89); return d; })()), to: toYMD(today()) },
+    last180: { label: 'Last 180 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 179); return d; })()), to: toYMD(today()) },
+    last365: { label: 'Last 365 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 364); return d; })()), to: toYMD(today()) },
+  }), []);
+
+  const activePreset = useMemo(() => {
+    if (!from || !to) return 'custom';
+    const match = Object.entries(datePresets).find(([, v]) => v.from === from && v.to === to);
+    return match ? match[0] : 'custom';
+  }, [from, to, datePresets]);
+
+  const [presetOpen, setPresetOpen] = useState(false);
+  const applyPreset = (key: string) => {
+    const p = (datePresets as any)[key];
+    if (p) { setFrom(p.from); setTo(p.to); }
+    setPresetOpen(false);
+  };
 
   // Fetch date-wise collection (payments made by current user in date range)
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["my-outdoor-date-wise-collection", page, search, startDate, endDate],
+  const { data, isLoading } = useQuery({
+    queryKey: ["my-outdoor-date-wise-collection", page, limit, search, from, to],
 
     queryFn: async () => {
       const params = new URLSearchParams({
@@ -60,11 +126,11 @@ export default function ReportsMyOutdoorDateWiseCollection() {
         search: search,
       });
 
-      if (startDate) params.append('start_date', startDate);
-      if (endDate) params.append('end_date', endDate);
+      if (from) params.append('start_date', from);
+      if (to) params.append('end_date', to);
 
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/outdoor-invoice/my-outdoor-invoice/date-wise-collection?${params.toString()}`,
+        `${import.meta.env.VITE_API_URL}${endpoint}?${params.toString()}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -114,21 +180,21 @@ export default function ReportsMyOutdoorDateWiseCollection() {
       },
       {
         label: "Total Collected",
-        value: `৳${(serverStats.total_collected || 0).toLocaleString()}`,
+        value: `${currencySymbol} ${(serverStats.total_collected || 0).toLocaleString()}`,
         gradient: "from-emerald-600 to-emerald-400",
         shadow: "shadow-emerald-500/30",
         icon: <DollarSign className="w-6 h-6 text-white" />,
       },
       {
         label: "Total Discount",
-        value: `৳${(serverStats.total_discount || 0).toLocaleString()}`,
+        value: `${currencySymbol} ${(serverStats.total_discount || 0).toLocaleString()}`,
         gradient: "from-orange-600 to-orange-400",
         shadow: "shadow-orange-500/30",
         icon: <TrendingUp className="w-6 h-6 text-white" />,
       },
       {
         label: "Gross Bill",
-        value: `৳${(serverStats.total_bill || 0).toLocaleString()}`,
+        value: `${currencySymbol} ${(serverStats.total_bill || 0).toLocaleString()}`,
         gradient: "from-purple-600 to-purple-400",
         shadow: "shadow-purple-500/30",
         icon: <FileText className="w-6 h-6 text-white" />,
@@ -459,23 +525,23 @@ export default function ReportsMyOutdoorDateWiseCollection() {
               <div class="space-y-3 text-sm">
                 <div class="flex justify-between items-center">
                   <span class="text-gray-600">Gross Total:</span>
-                  <span class="font-semibold text-gray-800">৳${Number(invoice.total_amount || 0).toFixed(2)}</span>
+                  <span class="font-semibold text-gray-800">${currencySymbol} ${Number(invoice.total_amount || 0).toFixed(2)}</span>
                 </div>
                 <div class="flex justify-between items-center">
                   <span class="text-gray-600">Total Discount:</span>
-                  <span class="font-semibold text-orange-600">- ৳${totalDiscounts.toFixed(2)}</span>
+                  <span class="font-semibold text-orange-600">- ${currencySymbol} ${totalDiscounts.toFixed(2)}</span>
                 </div>
                 <div class="flex justify-between items-center border-t border-gray-300 pt-2">
                   <span class="text-gray-700 font-medium">Net Payable:</span>
-                  <span class="font-bold text-lg text-gray-900">৳${Number(invoice.net_amount || 0).toFixed(2)}</span>
+                  <span class="font-bold text-lg text-gray-900">${currencySymbol} ${Number(invoice.net_amount || 0).toFixed(2)}</span>
                 </div>
                 <div class="flex justify-between items-center">
                   <span class="text-gray-600">Paid Amount:</span>
-                  <span class="font-semibold text-emerald-600">৳${totalPayments.toFixed(2)}</span>
+                  <span class="font-semibold text-emerald-600">${currencySymbol} ${totalPayments.toFixed(2)}</span>
                 </div>
                 <div class="flex justify-between items-center border-t-2 border-gray-400 pt-3 mt-2">
                   <span class="text-gray-800 font-bold text-base">Balance Due:</span>
-                  <span class="font-bold text-2xl ${dueAmount > 0 ? 'text-red-600' : 'text-emerald-600'}">৳${dueAmount.toFixed(2)}</span>
+                  <span class="font-bold text-2xl ${dueAmount > 0 ? 'text-red-600' : 'text-emerald-600'}">${currencySymbol} ${dueAmount.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -575,7 +641,7 @@ export default function ReportsMyOutdoorDateWiseCollection() {
     },
     {
       data: "total_amount",
-      title: "Bill Amount (৳)",
+      title: `Bill Amount (${currencySymbol})`,
       orderable: true,
       responsivePriority: 4,
       render: (data: any) => `<span class="font-medium text-gray-600">${Number(data || 0).toFixed(2)}</span>`,
@@ -583,7 +649,7 @@ export default function ReportsMyOutdoorDateWiseCollection() {
     },
     {
       data: null,
-      title: "Discount (৳)",
+      title: `Discount (${currencySymbol})`,
       orderable: false,
       responsivePriority: 5,
       render: (_data: any, _type: string, row: PaymentItem) => {
@@ -598,7 +664,7 @@ export default function ReportsMyOutdoorDateWiseCollection() {
     },
     {
       data: "payment_amount",
-      title: "Collected (৳)",
+      title: `Collected (${currencySymbol})`,
       orderable: true,
       responsivePriority: 2,
       render: (data: any) => `<span class="text-emerald-600 font-bold">${Number(data || 0).toFixed(2)}</span>`,
@@ -683,87 +749,17 @@ export default function ReportsMyOutdoorDateWiseCollection() {
     },
   ];
 
-  const handleFilter = () => {
-    setPage(1);
-    refetch();
-  };
-
-  const handleClear = () => {
-    setStartDate("");
-    setEndDate("");
-    setPage(1);
-  };
-
   return (
     <>
       <AppHeader fixed />
 
-      <main className='p-6 lg:p-10'>
+      <main className=''>
         <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Date-Wise Collection Report</h1>
+            <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
             <p className="text-sm text-gray-500 mt-1">
-              Payments collected by you within a date range
+              {subtitle}
             </p>
-          </div>
-          <Link to="/dashboard/reports/my/outdoor/date-wise-collection/print">
-            <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium shadow-sm hover:bg-gray-50 transition-colors">
-              <Printer className="w-4 h-4" />
-              Print Report
-            </button>
-          </Link>
-        </div>
-
-        {/* Date Range Filter */}
-        <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Filter by Date Range</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-            </div>
-            <div className="flex items-end gap-2">
-              <button
-                onClick={handleFilter}
-                className="flex-1 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
-              >
-                Apply Filter
-              </button>
-              <button
-                onClick={handleClear}
-                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-              >
-                Clear
-              </button>
-            </div>
-            <div className="flex items-end">
-              <div className="text-sm text-gray-500">
-                {(startDate || endDate) && (
-                  <span>
-                    {startDate && <span>From: {startDate}</span>}
-                    {startDate && endDate && <span> | </span>}
-                    {endDate && <span>To: {endDate}</span>}
-                  </span>
-                )}
-                {!startDate && !endDate && (
-                  <span className="text-gray-400">Showing all payments</span>
-                )}
-              </div>
-            </div>
           </div>
         </div>
 
@@ -799,71 +795,134 @@ export default function ReportsMyOutdoorDateWiseCollection() {
           ))}
         </div>
 
-        {/* Summary Card */}
-        <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Collection Summary</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                <CreditCard className="w-6 h-6 text-blue-600" />
+        {/* Collection Summary */}
+        <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 mb-6">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                <DollarSign className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Payments</p>
-                <p className="text-xl font-bold text-gray-800">
-                  {data?.data?.stats?.payment_count || 0}
-                </p>
+                <CardTitle className="text-lg font-bold">Collection Summary</CardTitle>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Payment breakdown for the selected range</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-emerald-600" />
+          </CardHeader>
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <CreditCard className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Payments</p>
+                  <p className="text-xl font-bold text-gray-800">
+                    {data?.data?.stats?.payment_count || 0}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Total Collected</p>
-                <p className="text-xl font-bold text-emerald-600">
-                  ৳{(data?.data?.stats?.total_collected || 0).toLocaleString()}
-                </p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Total Collected</p>
+                  <p className="text-xl font-bold text-emerald-600">
+                    {currencySymbol} {(data?.data?.stats?.total_collected || 0).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Total Discount</p>
+                  <p className="text-xl font-bold text-orange-600">
+                    -{currencySymbol} {(data?.data?.stats?.total_discount || 0).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Gross Bill</p>
+                  <p className="text-xl font-bold text-purple-600">
+                    {currencySymbol} {(data?.data?.stats?.total_bill || 0).toLocaleString()}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Total Discount</p>
-                <p className="text-xl font-bold text-orange-600">
-                  -৳{(data?.data?.stats?.total_discount || 0).toLocaleString()}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                <FileText className="w-6 h-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Gross Bill</p>
-                <p className="text-xl font-bold text-purple-600">
-                  ৳{(data?.data?.stats?.total_bill || 0).toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-gray-500">Loading collection data...</div>
-          </div>
-        ) : (
-          <DataTable
-            columns={columns}
-            data={data?.data?.items || []}
-            meta={data?.data?.meta}
-            onPageChange={setPage}
-            search={search}
-            onSearchChange={setSearch}
-          />
-        )}
+        <DataTable
+          columns={columns}
+          data={data?.data?.items || []}
+          meta={data?.data?.meta}
+          onPageChange={setPage}
+          onLimitChange={setLimit}
+          search={search}
+          onSearchChange={setSearch}
+          isLoading={isLoading}
+          filterSlot={
+            <div className="flex items-center gap-1.5">
+              <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>
+                <SelectTrigger className="w-[140px] h-9 rounded-md border-gray-200 dark:border-gray-700 bg-transparent text-sm">
+                  <SelectValue placeholder="Filter by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="yesterday">Yesterday</SelectItem>
+                  <SelectItem value="last7">Last 7 days</SelectItem>
+                  <SelectItem value="last15">Last 15 days</SelectItem>
+                  <SelectItem value="last30">Last 30 days</SelectItem>
+                  <SelectItem value="last45">Last 45 days</SelectItem>
+                  <SelectItem value="last60">Last 60 days</SelectItem>
+                  <SelectItem value="last90">Last 90 days</SelectItem>
+                  <SelectItem value="last180">Last 180 days</SelectItem>
+                  <SelectItem value="last365">Last 365 days</SelectItem>
+                  <SelectItem value="custom">Custom range</SelectItem>
+                </SelectContent>
+              </Select>
+              <DateField
+                value={from}
+                onChange={(v: string) => { setFrom(v); setPresetOpen(false); }}
+                placeholder="From"
+              />
+              <span className="text-xs text-muted-foreground">to</span>
+              <DateField
+                value={to}
+                onChange={(v: string) => { setTo(v); setPresetOpen(false); }}
+                placeholder="To"
+              />
+              {(from || to) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setFrom(""); setTo(""); }}
+                >
+                  Clear
+                </Button>
+              )}
+              <Link
+                to={printPath as any}
+                search={{
+                  search: search || undefined,
+                  start_date: from || undefined,
+                  end_date: to || undefined,
+                } as any}
+              >
+                <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
+                  <Printer className="w-4 h-4 mr-2" />
+                  Print Report
+                </Button>
+              </Link>
+            </div>
+          }
+        />
       </main>
     </>
   )

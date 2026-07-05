@@ -10,20 +10,25 @@ import { Users, DollarSign, TrendingDown, Banknote, Printer, FileText, User } fr
 import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
+import { z } from 'zod'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
 
 interface OutdoorPatientItem {
   id: number
-  custom_id?: string
+  invoice_prefix?: string | null
   patient_name: string
-  patient_phone?: string
-  reference_doctor?: string
-  department_name?: string
-  bill_amount: number
-  discount: number
-  collected_amount: number
+  phone?: string | null
+  total_amount?: number
+  net_amount?: number
+  total_paid?: number
+  due_amount?: number
+  discount?: number
   created_at: string
+  doctor?: { doctor_name?: string | null } | null
+  selected_tests?: any[]
+  [key: string]: any
 }
 
 interface Meta {
@@ -33,7 +38,16 @@ interface Meta {
   totalPages: number
 }
 
+const patientListSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+  from: z.string().catch(''),
+  to: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/dashboard/reports/outdoor/patient-list/')({
+  validateSearch: (search) => patientListSearchSchema.parse(search),
   component: OutdoorPatientListPage,
 })
 
@@ -41,6 +55,7 @@ function OutdoorPatientListPage() {
   const searchParams: any = Route.useSearch();
   const navigate = Route.useNavigate();
   const { formatDate } = useDateFormat();
+  const { currencySymbol } = useCurrency();
 
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 10;
@@ -89,19 +104,16 @@ function OutdoorPatientListPage() {
   const items: OutdoorPatientItem[] = data?.data?.items || []
   const meta: Meta = data?.data?.meta || { total: 0, page: 1, limit: 10, totalPages: 1 }
 
-  // Calculate statistics
+  // Calculate statistics (from server-side aggregates for accuracy)
   const stats = useMemo(() => {
-    const totalBill = items.reduce((sum, i) => sum + Number(i.bill_amount || 0), 0)
-    const totalCollected = items.reduce((sum, i) => sum + Number(i.collected_amount || 0), 0)
-    const totalDiscount = items.reduce((sum, i) => sum + Number(i.discount || 0), 0)
-
+    const serverStats = data?.data?.stats || {}
     return [
       { label: 'Total Patients', value: meta.total, icon: Users, grad: 'from-green-500 to-green-600' },
-      { label: 'Total Bill', value: `৳${totalBill.toLocaleString()}`, icon: Banknote, grad: 'from-blue-500 to-blue-600' },
-      { label: 'Total Collected', value: `৳${totalCollected.toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
-      { label: 'Total Discount', value: `৳${totalDiscount.toLocaleString()}`, icon: TrendingDown, grad: 'from-teal-500 to-teal-600' },
+      { label: 'Total Bill', value: `${currencySymbol} ${(serverStats.total_bill || 0).toLocaleString()}`, icon: Banknote, grad: 'from-blue-500 to-blue-600' },
+      { label: 'Total Collected', value: `${currencySymbol} ${(serverStats.total_paid || 0).toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
+      { label: 'Total Discount', value: `${currencySymbol} ${(serverStats.total_discount || 0).toLocaleString()}`, icon: TrendingDown, grad: 'from-teal-500 to-teal-600' },
     ]
-  }, [items, meta])
+  }, [data, meta, currencySymbol])
 
   // ---- Date filter presets ----
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
@@ -147,7 +159,7 @@ function OutdoorPatientListPage() {
       },
     },
     {
-      data: "custom_id",
+      data: "invoice_prefix",
       title: "Custom ID",
       render: (data: string | null) => {
         return `<span class="font-mono text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">${data || '-'}</span>`;
@@ -168,44 +180,49 @@ function OutdoorPatientListPage() {
       },
     },
     {
-      data: "patient_phone",
+      data: "phone",
       title: "Phone",
       render: (data: string | null) => data ? `<span class="font-mono text-xs">${data}</span>` : '-',
     },
     {
-      data: "reference_doctor",
+      data: null,
       title: "Reference Doctor",
-      render: (data: string | null) => {
-        if (!data) return '-';
+      render: (_data: any, _type: string, row: OutdoorPatientItem) => {
+        const doc = row.doctor?.doctor_name;
+        if (!doc) return '-';
         return `<div class="flex items-center gap-2">
           <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
           </svg>
-          <span class="font-semibold text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-0.5 rounded w-fit">${data}</span>
+          <span class="font-semibold text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-0.5 rounded w-fit">${doc}</span>
         </div>`
       },
     },
     {
-      data: "department_name",
+      data: null,
       title: "Department",
-      render: (data: string | null) => {
-        return `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">${data || '-'}</span>`
+      render: (_data: any, _type: string, row: OutdoorPatientItem) => {
+        const dept = row.selected_tests?.[0]?.test?.category?.name;
+        return `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">${dept || '-'}</span>`
       },
     },
     {
-      data: "bill_amount",
-      title: "Bill Amount (৳)",
-      render: (data: number) => `<span class="font-semibold text-gray-800">৳${Number(data || 0).toFixed(2)}</span>`,
+      data: "total_amount",
+      title: `Bill Amount (${currencySymbol})`,
+      className: "text-right",
+      render: (data: number) => `<span class="font-semibold text-gray-800">${Number(data || 0).toFixed(2)}</span>`,
     },
     {
       data: "discount",
-      title: "Discount (৳)",
-      render: (data: number) => `<span class="font-semibold text-orange-600">৳${Number(data || 0).toFixed(2)}</span>`,
+      title: `Discount (${currencySymbol})`,
+      className: "text-right",
+      render: (data: number) => `<span class="font-semibold text-orange-600">${Number(data || 0).toFixed(2)}</span>`,
     },
     {
-      data: "collected_amount",
-      title: "Collected (৳)",
-      render: (data: number) => `<span class="font-semibold text-green-600">৳${Number(data || 0).toFixed(2)}</span>`,
+      data: null,
+      title: `Collected (${currencySymbol})`,
+      className: "text-right",
+      render: (_data: any, _type: string, row: OutdoorPatientItem) => `<span class="font-semibold text-green-600">${Number(row.total_paid || 0).toFixed(2)}</span>`,
     },
     {
       data: "created_at",

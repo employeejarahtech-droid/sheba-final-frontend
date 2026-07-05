@@ -10,16 +10,20 @@ import { Wallet, DollarSign, TrendingUp, CheckCircle2, Printer, FileText, Calend
 import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
+import { z } from 'zod'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
 
 interface AdvancePaymentItem {
   id: number
-  admission_no: string
+  admission_prefix?: string | null
   patient_name: string
   admission_date: string | null
-  total_bill: number
-  advance_payment: number
+  total_bill_amount?: number
+  finalBill?: { total_bill_amount?: number; paid_amount?: number; due_amount?: number } | null
+  advancePayments?: { total_amount?: number } | null
+  [key: string]: any
 }
 
 interface Meta {
@@ -29,7 +33,16 @@ interface Meta {
   totalPages: number
 }
 
+const advancePaymentsSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+  from: z.string().catch(''),
+  to: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/dashboard/reports/indoor/advance-payments/')({
+  validateSearch: (search) => advancePaymentsSearchSchema.parse(search),
   component: AdvancePaymentsPage,
 })
 
@@ -37,6 +50,7 @@ function AdvancePaymentsPage() {
   const searchParams: any = Route.useSearch();
   const navigate = Route.useNavigate();
   const { formatDate } = useDateFormat();
+  const { currencySymbol } = useCurrency();
 
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 10;
@@ -85,21 +99,25 @@ function AdvancePaymentsPage() {
   const items: AdvancePaymentItem[] = data?.data?.items || []
   const meta: Meta = data?.data?.meta || { total: 0, page: 1, limit: 10, totalPages: 1 }
 
+  // Billing fields are nested (finalBill/advancePayments) on the admission payload
+  const billOf = (i: AdvancePaymentItem) => Number(i.total_bill_amount || i.finalBill?.total_bill_amount || 0)
+  const paidOf = (i: AdvancePaymentItem) => Number(i.finalBill?.paid_amount ?? i.advancePayments?.total_amount ?? 0)
+
   // Calculate statistics
   const stats = useMemo(() => {
     const count = items.length
-    const totalAdvance = items.reduce((s, d) => s + (d.advance_payment || 0), 0)
+    const totalAdvance = items.reduce((s, d) => s + paidOf(d), 0)
     const avg = count > 0 ? Math.round(totalAdvance / count) : 0
-    const fullyCovered = items.filter(d => (d.advance_payment || 0) >= (d.total_bill || 0)).length
+    const fullyCovered = items.filter(d => paidOf(d) >= billOf(d)).length
 
     return [
       { label: 'Total Admissions', value: meta.total, icon: Wallet, grad: 'from-green-500 to-green-600' },
-      { label: 'Total Advance Paid', value: `৳${totalAdvance.toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
-      { label: 'Avg Advance', value: `৳${avg.toLocaleString()}`, icon: TrendingUp, grad: 'from-pink-500 to-pink-600' },
+      { label: 'Total Advance Paid', value: `${currencySymbol} ${totalAdvance.toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
+      { label: 'Avg Advance', value: `${currencySymbol} ${avg.toLocaleString()}`, icon: TrendingUp, grad: 'from-pink-500 to-pink-600' },
       { label: 'Fully Covered', value: fullyCovered, icon: CheckCircle2, grad: 'from-teal-500 to-teal-600' },
       { label: 'This Page', value: count, icon: Calendar, grad: 'from-yellow-500 to-yellow-600' },
     ]
-  }, [items, meta])
+  }, [items, meta, currencySymbol])
 
   // ---- Date filter presets ----
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
@@ -137,7 +155,7 @@ function AdvancePaymentsPage() {
 
   const columns = [
     {
-      data: "admission_no",
+      data: "admission_prefix",
       title: "Admission No",
       orderable: true,
       render: (data: any, _type: string, row: AdvancePaymentItem) => {
@@ -173,33 +191,43 @@ function AdvancePaymentsPage() {
       },
     },
     {
-      data: "total_bill",
-      title: "Total Bill",
-      render: (data: number) => {
-        return `<span class="font-semibold text-gray-700">৳${(data || 0).toLocaleString()}</span>`
-      },
-    },
-    {
-      data: "advance_payment",
-      title: "Advance Paid",
-      render: (data: number) => {
-        return `<span class="font-semibold text-green-600">৳${(data || 0).toLocaleString()}</span>`
+      data: null,
+      title: "Advance Paid?",
+      render: (_d: any, _t: string, row: AdvancePaymentItem) => {
+        const has = paidOf(row) > 0
+        const cls = has ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+        return `<span class="px-2 py-0.5 rounded-full text-xs font-semibold ${cls}">${has ? 'Yes' : 'No'}</span>`
       },
     },
     {
       data: null,
-      title: "Remaining Balance",
-      render: (_data: any, _type: string, row: AdvancePaymentItem) => {
-        const remaining = (row.total_bill || 0) - (row.advance_payment || 0);
+      title: `Total Bill (${currencySymbol})`,
+      className: "text-right",
+      render: (_d: any, _t: string, row: AdvancePaymentItem) => `<span class="font-semibold text-gray-700">${billOf(row).toLocaleString()}</span>`,
+    },
+    {
+      data: null,
+      title: `Advance Paid (${currencySymbol})`,
+      className: "text-right",
+      render: (_d: any, _t: string, row: AdvancePaymentItem) => `<span class="font-semibold text-green-600">${paidOf(row).toLocaleString()}</span>`,
+    },
+    {
+      data: null,
+      title: `Remaining Balance (${currencySymbol})`,
+      className: "text-right",
+      render: (_d: any, _t: string, row: AdvancePaymentItem) => {
+        const remaining = billOf(row) - paidOf(row);
         const colorClass = remaining > 0 ? 'text-red-600' : 'text-green-600';
-        return `<span class="font-semibold ${colorClass}">৳${remaining.toLocaleString()}</span>`;
+        return `<span class="font-semibold ${colorClass}">${remaining.toLocaleString()}</span>`;
       },
     },
     {
       data: null,
       title: "Coverage %",
-      render: (_data: any, _type: string, row: AdvancePaymentItem) => {
-        const pct = row.total_bill > 0 ? ((row.advance_payment || 0) / row.total_bill * 100).toFixed(1) : '0.0';
+      className: "text-right",
+      render: (_d: any, _t: string, row: AdvancePaymentItem) => {
+        const bill = billOf(row);
+        const pct = bill > 0 ? ((paidOf(row) / bill) * 100).toFixed(1) : '0.0';
         const pctNum = parseFloat(pct);
         let colorClass = 'bg-gray-100 text-gray-700';
         if (pctNum >= 100) colorClass = 'bg-green-100 text-green-700';

@@ -13,7 +13,7 @@ const searchSchema = z.object({
   end_date: z.string().optional().default(''),
 })
 
-export const Route = createFileRoute('/_authenticated/dashboard/reports/pathology/test-wise-count/print')({
+export const Route = createFileRoute('/_authenticated/dashboard/reports/pathology/test-table-wise-count/print')({
   validateSearch: searchSchema,
   component: TestWiseCountPrint,
 })
@@ -330,7 +330,7 @@ function TestWiseCountPrint() {
 
       {/* ── Title ──────────────────────────────────────────────────────── */}
       <h1 className="text-lg font-bold text-center underline mb-1 tracking-wide uppercase">
-        TEST-WISE COUNT REPORT
+        TEST TABLE-WISE COUNT REPORT
       </h1>
       <p className="text-center text-xs text-gray-600 mb-2">Aggregated count of pathology tests by test name and department</p>
 

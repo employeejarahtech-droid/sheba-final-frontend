@@ -10,19 +10,22 @@ import { BarChart3, Building2, DollarSign, TrendingDown, Printer, FileText, Cale
 import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
+import { z } from 'zod'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
 
 interface ServiceWiseRevenueItem {
   id: number
-  admission_no: string
+  admission_prefix?: string | null
   patient_name: string
-  ward_name: string | null
-  service_type: string | null
   admission_date: string | null
-  total_bill: number
-  advance_payment: number
+  total_bill_amount?: number
   status: string
+  bedCabin?: { code?: string | null; type?: string | null; ward?: string | null } | null
+  finalBill?: { total_bill_amount?: number; paid_amount?: number; due_amount?: number } | null
+  advancePayments?: { total_amount?: number } | null
+  [key: string]: any
 }
 
 interface Meta {
@@ -32,7 +35,16 @@ interface Meta {
   totalPages: number
 }
 
+const serviceWiseRevenueSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+  from: z.string().catch(''),
+  to: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/dashboard/reports/indoor/service-wise-revenue/')({
+  validateSearch: (search) => serviceWiseRevenueSearchSchema.parse(search),
   component: ServiceWiseRevenuePage,
 })
 
@@ -40,6 +52,7 @@ function ServiceWiseRevenuePage() {
   const searchParams: any = Route.useSearch();
   const navigate = Route.useNavigate();
   const { formatDate } = useDateFormat();
+  const { currencySymbol } = useCurrency();
 
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 10;
@@ -88,22 +101,28 @@ function ServiceWiseRevenuePage() {
   const items: ServiceWiseRevenueItem[] = data?.data?.items || []
   const meta: Meta = data?.data?.meta || { total: 0, page: 1, limit: 10, totalPages: 1 }
 
+  // Billing fields are nested (finalBill/advancePayments) on the admission payload
+  const billOf = (i: ServiceWiseRevenueItem) => Number(i.total_bill_amount || i.finalBill?.total_bill_amount || 0)
+  const paidOf = (i: ServiceWiseRevenueItem) => Number(i.finalBill?.paid_amount ?? i.advancePayments?.total_amount ?? 0)
+  const dueOf = (i: ServiceWiseRevenueItem) =>
+    i.finalBill?.due_amount != null ? Number(i.finalBill.due_amount) : Math.max(0, billOf(i) - paidOf(i))
+
   // Calculate statistics
   const stats = useMemo(() => {
-    const totalRevenue = items.reduce((sum, r) => sum + (r.total_bill || 0), 0)
-    const totalCollected = items.reduce((sum, r) => sum + (r.advance_payment || 0), 0)
-    const totalDue = totalRevenue - totalCollected
+    const totalRevenue = items.reduce((sum, r) => sum + billOf(r), 0)
+    const totalCollected = items.reduce((sum, r) => sum + paidOf(r), 0)
+    const totalDue = items.reduce((sum, r) => sum + dueOf(r), 0)
     const activePatients = items.filter(r => r.status === 'active').length
 
     return [
       { label: 'Total Admissions', value: meta.total, icon: Users, grad: 'from-green-500 to-green-600' },
       { label: 'Active Patients', value: activePatients, icon: BarChart3, grad: 'from-blue-500 to-blue-600' },
-      { label: 'Total Revenue', value: `৳${totalRevenue.toLocaleString()}`, icon: Building2, grad: 'from-orange-500 to-orange-600' },
-      { label: 'Total Collected', value: `৳${totalCollected.toLocaleString()}`, icon: DollarSign, grad: 'from-pink-500 to-pink-600' },
-      { label: 'Total Due', value: `৳${totalDue.toLocaleString()}`, icon: TrendingDown, grad: 'from-teal-500 to-teal-600' },
+      { label: 'Total Revenue', value: `${currencySymbol} ${totalRevenue.toLocaleString()}`, icon: Building2, grad: 'from-orange-500 to-orange-600' },
+      { label: 'Total Collected', value: `${currencySymbol} ${totalCollected.toLocaleString()}`, icon: DollarSign, grad: 'from-pink-500 to-pink-600' },
+      { label: 'Total Due', value: `${currencySymbol} ${totalDue.toLocaleString()}`, icon: TrendingDown, grad: 'from-teal-500 to-teal-600' },
       { label: 'This Page', value: items.length, icon: Receipt, grad: 'from-yellow-500 to-yellow-600' },
     ]
-  }, [items, meta])
+  }, [items, meta, currencySymbol])
 
   // ---- Date filter presets ----
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
@@ -141,7 +160,7 @@ function ServiceWiseRevenuePage() {
 
   const columns = [
     {
-      data: "admission_no",
+      data: "admission_prefix",
       title: "Admission No",
       orderable: true,
       render: (data: any, _type: string, row: ServiceWiseRevenueItem) => {
@@ -168,10 +187,10 @@ function ServiceWiseRevenuePage() {
       },
     },
     {
-      data: "ward_name",
+      data: null,
       title: "Ward / Service",
-      render: (data: string | null, type: string, row: ServiceWiseRevenueItem) => {
-        const ward = data || row.service_type || '-'
+      render: (_data: any, _type: string, row: ServiceWiseRevenueItem) => {
+        const ward = row.bedCabin?.ward || row.bedCabin?.type || '-'
         return `<div class="text-sm">
           <div class="font-medium">${ward}</div>
         </div>`
@@ -189,26 +208,25 @@ function ServiceWiseRevenuePage() {
       },
     },
     {
-      data: "total_bill",
-      title: "Total Bill",
-      render: (data: number) => {
-        return `<div class="text-sm font-semibold text-gray-800">৳${Number(data || 0).toLocaleString()}</div>`
-      },
-    },
-    {
-      data: "advance_payment",
-      title: "Collected",
-      render: (data: number) => {
-        return `<div class="text-sm font-semibold text-green-600">৳${Number(data || 0).toLocaleString()}</div>`
-      },
+      data: null,
+      title: `Total Bill (${currencySymbol})`,
+      className: "text-right",
+      render: (_d: any, _t: string, row: ServiceWiseRevenueItem) => `<div class="text-sm font-semibold text-gray-800">${billOf(row).toLocaleString()}</div>`,
     },
     {
       data: null,
-      title: "Due",
-      render: (_data: any, _type: string, row: ServiceWiseRevenueItem) => {
-        const due = (row.total_bill || 0) - (row.advance_payment || 0)
+      title: `Collected (${currencySymbol})`,
+      className: "text-right",
+      render: (_d: any, _t: string, row: ServiceWiseRevenueItem) => `<div class="text-sm font-semibold text-green-600">${paidOf(row).toLocaleString()}</div>`,
+    },
+    {
+      data: null,
+      title: `Due (${currencySymbol})`,
+      className: "text-right",
+      render: (_d: any, _t: string, row: ServiceWiseRevenueItem) => {
+        const due = dueOf(row)
         const colorClass = due > 0 ? 'text-red-600' : 'text-green-600'
-        return `<div class="text-sm font-semibold ${colorClass}">৳${due.toLocaleString()}</div>`
+        return `<div class="text-sm font-semibold ${colorClass}">${due.toLocaleString()}</div>`
       },
     },
     {

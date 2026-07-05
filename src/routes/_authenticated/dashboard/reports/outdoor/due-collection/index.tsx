@@ -10,19 +10,24 @@ import { TrendingDown, AlertCircle, DollarSign, Clock, Printer, FileText, Calend
 import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
+import { z } from 'zod'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
 
 interface DueCollectionItem {
   id: number
+  invoice_prefix?: string | null
   patient_name: string
-  patient_phone: string | null
-  phone: string | null
-  department_name: string | null
-  bill_amount: number | null
-  collected_amount: number | null
+  phone?: string | null
+  total_amount?: number
+  net_amount?: number
+  total_paid?: number
+  due_amount?: number
+  discount?: number
   created_at: string | null
-  invoice_no: string | null
+  selected_tests?: any[]
+  [key: string]: any
 }
 
 interface Meta {
@@ -32,7 +37,16 @@ interface Meta {
   totalPages: number
 }
 
+const dueCollectionSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+  from: z.string().catch(''),
+  to: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/dashboard/reports/outdoor/due-collection/')({
+  validateSearch: (search) => dueCollectionSearchSchema.parse(search),
   component: DueCollectionPage,
 })
 
@@ -40,6 +54,7 @@ function DueCollectionPage() {
   const searchParams: any = Route.useSearch();
   const navigate = Route.useNavigate();
   const { formatDate } = useDateFormat();
+  const { currencySymbol } = useCurrency();
 
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 10;
@@ -72,6 +87,7 @@ function DueCollectionPage() {
         page: String(page),
         limit: String(limit),
         search,
+        due_only: 'true',
         ...(from ? { start_date: from } : {}),
         ...(to ? { end_date: to } : {}),
       })
@@ -88,16 +104,16 @@ function DueCollectionPage() {
   const allItems: DueCollectionItem[] = data?.data?.items || []
   const meta: Meta = data?.data?.meta || { total: 0, page: 1, limit: 10, totalPages: 1 }
 
-  // Filter only items with due amount > 0
+  // Filter only items with due amount > 0 (uses server-computed due_amount)
   const items = useMemo(() =>
-    allItems.filter(item => (item.bill_amount || 0) - (item.collected_amount || 0) > 0),
+    allItems.filter(item => Number(item.due_amount || 0) > 0),
     [allItems]
   )
 
   // Calculate statistics
   const stats = useMemo(() => {
-    const totalDueAmount = items.reduce((sum, item) => sum + ((item.bill_amount || 0) - (item.collected_amount || 0)), 0)
-    const totalBilledAmount = items.reduce((sum, item) => sum + (item.bill_amount || 0), 0)
+    const totalDueAmount = items.reduce((sum, item) => sum + Number(item.due_amount || 0), 0)
+    const totalBilledAmount = items.reduce((sum, item) => sum + Number(item.total_amount || 0), 0)
     const avgDueAmount = items.length > 0 ? Math.round(totalDueAmount / items.length) : 0
 
     const oldest = items.length > 0
@@ -106,13 +122,13 @@ function DueCollectionPage() {
 
     return [
       { label: 'Total Due Invoices', value: items.length, icon: TrendingDown, grad: 'from-green-500 to-green-600' },
-      { label: 'Total Due Amount', value: `৳${totalDueAmount.toLocaleString()}`, icon: AlertCircle, grad: 'from-red-500 to-red-600' },
-      { label: 'Total Billed', value: `৳${totalBilledAmount.toLocaleString()}`, icon: DollarSign, grad: 'from-blue-500 to-blue-600' },
-      { label: 'Avg Due Amount', value: `৳${avgDueAmount.toLocaleString()}`, icon: Calendar, grad: 'from-orange-500 to-orange-600' },
+      { label: 'Total Due Amount', value: `${currencySymbol} ${totalDueAmount.toLocaleString()}`, icon: AlertCircle, grad: 'from-red-500 to-red-600' },
+      { label: 'Total Billed', value: `${currencySymbol} ${totalBilledAmount.toLocaleString()}`, icon: DollarSign, grad: 'from-blue-500 to-blue-600' },
+      { label: 'Avg Due Amount', value: `${currencySymbol} ${avgDueAmount.toLocaleString()}`, icon: Calendar, grad: 'from-orange-500 to-orange-600' },
       { label: 'Oldest Due', value: oldest ? formatDate(new Date(oldest.created_at || '')) : '-', icon: Clock, grad: 'from-purple-500 to-purple-600' },
       { label: 'This Page', value: items.length, icon: FileText, grad: 'from-teal-500 to-teal-600' },
     ]
-  }, [items, formatDate])
+  }, [items, formatDate, currencySymbol])
 
   // ---- Date filter presets ----
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
@@ -216,14 +232,15 @@ function DueCollectionPage() {
           return formatDate(new Date(date));
         };
 
-        const dueAmount = (invoice.bill_amount || 0) - (invoice.collected_amount || 0);
+        const dueAmount = Number(invoice.due_amount || (Number(invoice.total_amount || 0) - Number(invoice.total_paid || 0)));
+        const deptName = invoice.selected_tests?.[0]?.test?.category?.name;
 
         const invoiceDetailsHTML = `
           <div class="space-y-6">
             <div class="grid grid-cols-2 gap-x-8 gap-y-4 text-sm border-b pb-6">
               <div>
                 <p class="text-gray-500">Invoice ID</p>
-                <p class="font-semibold text-gray-800">${invoice.invoice_no || invoice.id || '-'}</p>
+                <p class="font-semibold text-gray-800">${invoice.invoice_prefix || invoice.id || '-'}</p>
               </div>
               <div>
                 <p class="text-gray-500">Patient Name</p>
@@ -231,23 +248,23 @@ function DueCollectionPage() {
               </div>
               <div>
                 <p class="text-gray-500">Phone</p>
-                <p class="font-semibold text-gray-800">${invoice.patient_phone || invoice.phone || '-'}</p>
+                <p class="font-semibold text-gray-800">${invoice.phone || '-'}</p>
               </div>
               <div>
                 <p class="text-gray-500">Department</p>
-                <p class="font-semibold text-gray-800">${invoice.department_name || '-'}</p>
+                <p class="font-semibold text-gray-800">${deptName || '-'}</p>
               </div>
               <div>
                 <p class="text-gray-500">Bill Amount</p>
-                <p class="font-semibold text-gray-800">৳${(invoice.bill_amount || 0).toLocaleString()}</p>
+                <p class="font-semibold text-gray-800">${currencySymbol} ${Number(invoice.total_amount || 0).toLocaleString()}</p>
               </div>
               <div>
                 <p class="text-gray-500">Collected Amount</p>
-                <p class="font-semibold text-gray-800">৳${(invoice.collected_amount || 0).toLocaleString()}</p>
+                <p class="font-semibold text-gray-800">${currencySymbol} ${Number(invoice.total_paid || 0).toLocaleString()}</p>
               </div>
               <div>
                 <p class="text-gray-500">Due Amount</p>
-                <p class="font-semibold text-red-600">৳${dueAmount.toLocaleString()}</p>
+                <p class="font-semibold text-red-600">${currencySymbol} ${dueAmount.toLocaleString()}</p>
               </div>
               <div>
                 <p class="text-gray-500">Invoice Date</p>
@@ -298,7 +315,7 @@ function DueCollectionPage() {
       title: "Invoice ID",
       orderable: true,
       render: (data: any, _type: string, row: DueCollectionItem) => {
-        const value = row.invoice_no || `INV-${String(row.id).padStart(4, '0')}`;
+        const value = row.invoice_prefix || `INV-${String(row.id).padStart(4, '0')}`;
         return `
           <div class="flex items-center gap-2">
             <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
@@ -326,39 +343,35 @@ function DueCollectionPage() {
     {
       data: "phone",
       title: "Phone",
-      render: (data: string | null, _type: string, row: DueCollectionItem) => {
-        const phone = data || row.patient_phone || '-';
-        return phone ? `<span class="font-mono text-xs">${phone}</span>` : '-';
-      },
-    },
-    {
-      data: "department_name",
-      title: "Department",
       render: (data: string | null) => {
-        return `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">${data || '-'}</span>`
+        return data ? `<span class="font-mono text-xs">${data}</span>` : '-';
       },
     },
     {
-      data: "bill_amount",
-      title: "Bill Amount",
-      render: (data: number | null) => {
-        return `<span class="font-semibold">৳${(data || 0).toLocaleString()}</span>`
+      data: null,
+      title: "Department",
+      render: (_data: any, _type: string, row: DueCollectionItem) => {
+        const dept = row.selected_tests?.[0]?.test?.category?.name;
+        return `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">${dept || '-'}</span>`
       },
     },
     {
-      data: "collected_amount",
-      title: "Paid",
-      render: (data: number | null) => {
-        return `<span class="text-green-600 font-semibold">৳${(data || 0).toLocaleString()}</span>`
-      },
+      data: "total_amount",
+      title: `Bill Amount (${currencySymbol})`,
+      className: "text-right",
+      render: (data: number | null) => `<span class="font-semibold">${Number(data || 0).toLocaleString()}</span>`,
+    },
+    {
+      data: "total_paid",
+      title: `Paid (${currencySymbol})`,
+      className: "text-right",
+      render: (data: number | null) => `<span class="text-green-600 font-semibold">${Number(data || 0).toLocaleString()}</span>`,
     },
     {
       data: "due_amount",
-      title: "Due Amount",
-      render: (_data: any, _type: string, row: DueCollectionItem) => {
-        const due = (row.bill_amount || 0) - (row.collected_amount || 0);
-        return `<span class="text-red-600 font-bold">৳${due.toLocaleString()}</span>`
-      },
+      title: `Due Amount (${currencySymbol})`,
+      className: "text-right",
+      render: (data: number | null) => `<span class="text-red-600 font-bold">${Number(data || 0).toLocaleString()}</span>`,
     },
     {
       data: "created_at",

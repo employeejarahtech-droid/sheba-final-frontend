@@ -57,6 +57,9 @@ import {
   Package,
   ShoppingCart,
   Truck,
+  RotateCcw,
+  AlertTriangle,
+  Trash2,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -275,6 +278,13 @@ export const sidebarData: SidebarData = {
             { title: 'T3 T4 TSH', url: '/dashboard/pathology/hormone/t3t4tsh', icon: Activity },
           ],
         },
+        {
+          title: 'Custom Tests',
+          icon: FileText,
+          items: [
+            { title: 'Custom Test Report', url: '/dashboard/pathology/custom-tests', icon: FileText },
+          ],
+        },
       ],
     },
 
@@ -414,12 +424,14 @@ export const sidebarData: SidebarData = {
           icon: Receipt,
           items: [
             { title: "Today's Collection", url: '/dashboard/reports/my/outdoor/today-collection', icon: DollarSign },
-            { title: 'Date-wise Collection', url: '/dashboard/reports/my/outdoor/date-wise-collection', icon: Calendar },
+            { title: 'My Date-wise Collection', url: '/dashboard/reports/my/outdoor/date-wise-collection', icon: Calendar },
+            { title: 'Date Wise Collections', url: '/dashboard/reports/outdoor/date-wise-collection', icon: Calendar },
             { title: 'Patient List', url: '/dashboard/reports/outdoor/patient-list', icon: Users },
             { title: 'Test-wise Revenue', url: '/dashboard/reports/outdoor/test-wise-revenue', icon: TrendingUp },
             { title: 'Category-wise Revenue', url: '/dashboard/reports/outdoor/category-wise-revenue', icon: PieChart },
             { title: 'Due Collection', url: '/dashboard/reports/outdoor/due-collection', icon: TrendingDown },
             { title: 'Doctor-wise Collection', url: '/dashboard/reports/outdoor/doctor-wise-collection', icon: UserCog },
+            { title: 'Department Wise Review', url: '/dashboard/reports/outdoor/department-wise-review', icon: Building2 },
           ],
         },
         {
@@ -442,7 +454,8 @@ export const sidebarData: SidebarData = {
           title: 'Pathology Reports',
           icon: TestTube2,
           items: [
-            { title: 'Test-wise Count', url: '/dashboard/reports/pathology/test-wise-count', icon: BarChart3 },
+            { title: 'Test Table Wise Count', url: '/dashboard/reports/pathology/test-table-wise-count', icon: BarChart3 },
+            { title: 'Test Wise Count', url: '/dashboard/reports/pathology/test-wise-count', icon: FlaskConical },
             { title: 'Department Volume', url: '/dashboard/reports/pathology/department-wise-volume', icon: PieChart },
             { title: 'Pending Results', url: '/dashboard/reports/pathology/pending-results', icon: Activity },
             { title: 'Machine Utilization', url: '/dashboard/reports/pathology/machine-utilization', icon: Monitor },
@@ -513,6 +526,7 @@ export const sidebarData: SidebarData = {
             { title: 'Database Browser', url: '/dashboard/database', icon: Database },
             { title: 'Backups', url: '/dashboard/backups', icon: Database },
             { title: 'Backup Settings', url: '/dashboard/backup-settings', icon: Settings },
+            { title: 'Reset Database', url: '/dashboard/settings/reset-database', icon: AlertTriangle },
           ],
         },
         {

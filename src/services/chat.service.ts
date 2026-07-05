@@ -1,6 +1,6 @@
 import { getCookie } from '@/lib/cookies'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : 'http://localhost:5000/api'
 
 export type Message = {
   id: string
@@ -47,7 +47,7 @@ export type ChatUser = {
 
 // Get auth token
 const getAuthHeaders = () => {
-  const token = getCookie('token')
+  const token = getCookie('accessToken')
   return {
     'Content-Type': 'application/json',
     ...(token && { Authorization: `Bearer ${token}` }),
@@ -57,7 +57,7 @@ const getAuthHeaders = () => {
 // Fetch all users for chat
 export const fetchChatUsers = async (): Promise<ChatUser[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/users/list`, {
+    const response = await fetch(`${API_BASE_URL}/users/list?page=1&limit=99999`, {
       headers: getAuthHeaders(),
     })
 

@@ -10,18 +10,22 @@ import { PieChart, TrendingUp, DollarSign, BarChart3, Printer, FileText } from '
 import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
+import { z } from 'zod'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
 
 interface OutdoorInvoiceItem {
   id: number
-  invoice_no: string
+  invoice_prefix?: string | null
   patient_name: string
-  department_name: string
-  bill_amount: number
-  collected_amount: number
-  discount: number
-  invoice_date: string
+  total_amount?: number
+  net_amount?: number
+  total_paid?: number
+  discount?: number
+  created_at: string
+  selected_tests?: any[]
+  [key: string]: any
 }
 
 interface Meta {
@@ -37,9 +41,19 @@ interface GroupedData {
   revenue: number
   collected: number
   discount: number
+  due: number
 }
 
+const categoryWiseRevenueSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+  from: z.string().catch(''),
+  to: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/dashboard/reports/outdoor/category-wise-revenue/')({
+  validateSearch: (search) => categoryWiseRevenueSearchSchema.parse(search),
   component: CategoryWiseRevenuePage,
 })
 
@@ -47,6 +61,7 @@ function CategoryWiseRevenuePage() {
   const searchParams: any = Route.useSearch();
   const navigate = Route.useNavigate();
   const { formatDate } = useDateFormat();
+  const { currencySymbol } = useCurrency();
 
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 10;
@@ -99,12 +114,13 @@ function CategoryWiseRevenuePage() {
   const grouped = useMemo(() => {
     const map: Record<string, GroupedData> = {}
     for (const item of items) {
-      const dept = item.department_name || 'Unknown'
-      if (!map[dept]) map[dept] = { department: dept, count: 0, revenue: 0, collected: 0, discount: 0 }
+      const dept = item.selected_tests?.[0]?.test?.category?.name || 'Unknown'
+      if (!map[dept]) map[dept] = { department: dept, count: 0, revenue: 0, collected: 0, discount: 0, due: 0 }
       map[dept].count += 1
-      map[dept].revenue += item.bill_amount || 0
-      map[dept].collected += item.collected_amount || 0
-      map[dept].discount += item.discount || 0
+      map[dept].revenue += Number(item.total_amount || 0)
+      map[dept].collected += Number(item.total_paid || 0)
+      map[dept].discount += Number(item.discount || 0)
+      map[dept].due += Number(item.total_amount || 0) - Number(item.total_paid || 0)
     }
     return Object.values(map)
   }, [items])
@@ -119,13 +135,13 @@ function CategoryWiseRevenuePage() {
 
     return [
       { label: 'Total Categories', value: totalCategories, icon: PieChart, grad: 'from-green-500 to-green-600' },
-      { label: 'Total Revenue', value: `৳${totalRevenue.toLocaleString()}`, icon: TrendingUp, grad: 'from-blue-500 to-blue-600' },
-      { label: 'Total Collected', value: `৳${totalCollected.toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
-      { label: 'Total Discount', value: `৳${totalDiscount.toLocaleString()}`, icon: BarChart3, grad: 'from-pink-500 to-pink-600' },
-      { label: 'Avg per Category', value: `৳${avg.toLocaleString()}`, icon: DollarSign, grad: 'from-teal-500 to-teal-600' },
+      { label: 'Total Revenue', value: `${currencySymbol} ${totalRevenue.toLocaleString()}`, icon: TrendingUp, grad: 'from-blue-500 to-blue-600' },
+      { label: 'Total Collected', value: `${currencySymbol} ${totalCollected.toLocaleString()}`, icon: DollarSign, grad: 'from-orange-500 to-orange-600' },
+      { label: 'Total Discount', value: `${currencySymbol} ${totalDiscount.toLocaleString()}`, icon: BarChart3, grad: 'from-pink-500 to-pink-600' },
+      { label: 'Avg per Category', value: `${currencySymbol} ${avg.toLocaleString()}`, icon: DollarSign, grad: 'from-teal-500 to-teal-600' },
       { label: 'Records in Page', value: grouped.length, icon: BarChart3, grad: 'from-yellow-500 to-yellow-600' },
     ]
-  }, [grouped])
+  }, [grouped, currencySymbol])
 
   // ---- Date filter presets ----
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
@@ -184,18 +200,31 @@ function CategoryWiseRevenuePage() {
     },
     {
       data: "revenue",
-      title: "Total Revenue",
-      render: (data: number) => `<span class="font-semibold text-green-600">৳${data.toLocaleString()}</span>`,
+      title: `Total Revenue (${currencySymbol})`,
+      className: "text-right",
+      render: (data: number) => `<span class="font-semibold text-green-600">${Number(data || 0).toLocaleString()}</span>`,
     },
     {
       data: "collected",
-      title: "Total Collected",
-      render: (data: number) => `<span class="font-semibold text-blue-600">৳${data.toLocaleString()}</span>`,
+      title: `Total Collected (${currencySymbol})`,
+      className: "text-right",
+      render: (data: number) => `<span class="font-semibold text-blue-600">${Number(data || 0).toLocaleString()}</span>`,
     },
     {
       data: "discount",
-      title: "Total Discount",
-      render: (data: number) => `<span class="font-semibold text-red-600">৳${data.toLocaleString()}</span>`,
+      title: `Total Discount (${currencySymbol})`,
+      className: "text-right",
+      render: (data: number) => `<span class="font-semibold text-red-600">${Number(data || 0).toLocaleString()}</span>`,
+    },
+    {
+      data: "due",
+      title: `Total Due (${currencySymbol})`,
+      className: "text-right",
+      render: (data: number) => {
+        const due = Number(data || 0)
+        const colorClass = due > 0 ? 'text-red-600' : 'text-emerald-600'
+        return `<span class="font-semibold ${colorClass}">${due.toLocaleString()}</span>`
+      },
     },
     {
       data: null,

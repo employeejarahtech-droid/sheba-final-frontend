@@ -11,24 +11,24 @@ const printSearchSchema = z.object({
   end_date: z.string().optional(),
 })
 
-export const Route = createFileRoute('/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/print')({
+export const Route = createFileRoute('/_authenticated/dashboard/reports/outdoor/date-wise-collection/print')({
   validateSearch: (search) => printSearchSchema.parse(search),
-  component: DateWiseCollectionPrint,
+  component: AllDateWiseCollectionPrint,
 })
 
-function DateWiseCollectionPrint() {
+function AllDateWiseCollectionPrint() {
   const { search, start_date, end_date } = Route.useSearch()
   const token = getCookie('accessToken')
   const API_URL = import.meta.env.VITE_API_URL || ''
 
-  // Fetch date-wise collection data
+  // Fetch all-users date-wise collection data
   const { data, isLoading } = useQuery({
-    queryKey: ["my-outdoor-date-wise-collection-print", search, start_date, end_date],
+    queryKey: ["outdoor-date-wise-collection-print", search, start_date, end_date],
     queryFn: async () => {
       const params = new URLSearchParams({ limit: '999', search: search ?? '' })
       if (start_date) params.set('start_date', start_date)
       if (end_date) params.set('end_date', end_date)
-      const res = await fetch(`${API_URL}/api/outdoor-invoice/date-wise-collection?${params}`, {
+      const res = await fetch(`${API_URL}/api/outdoor-invoice/all-collection?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (!res.ok) throw new Error("Failed to fetch date-wise collection")
@@ -118,8 +118,8 @@ function DateWiseCollectionPrint() {
 
   return (
     <ReportPrintLayout
-      title="Date-wise Collection Report"
-      subtitle="Your payment collection history by date"
+      title="Date Wise Collections"
+      subtitle="All outdoor payments collected within a date range"
       hospitalName={companyName}
       hospitalAddress={companyAddress}
       companyLogo={companyLogo}

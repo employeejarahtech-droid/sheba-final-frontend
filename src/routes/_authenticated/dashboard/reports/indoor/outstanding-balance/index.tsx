@@ -10,19 +10,22 @@ import { Users, Banknote, DollarSign, AlertCircle, Printer, FileText, Calendar, 
 import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useCurrency } from '@/hooks/use-currency'
+import { z } from 'zod'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
 
 interface AdmissionItem {
   id: number
-  admission_no: string
+  admission_prefix?: string | null
   patient_name: string
   admission_date: string
   discharge_date?: string
-  total_bill: number
-  advance_payment: number
-  due_amount: number
+  total_bill_amount?: number
   status: string
+  finalBill?: { total_bill_amount?: number; paid_amount?: number; due_amount?: number } | null
+  advancePayments?: { total_amount?: number } | null
+  [key: string]: any
 }
 
 interface Meta {
@@ -32,7 +35,16 @@ interface Meta {
   totalPages: number
 }
 
+const outstandingBalanceSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+  from: z.string().catch(''),
+  to: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/dashboard/reports/indoor/outstanding-balance/')({
+  validateSearch: (search) => outstandingBalanceSearchSchema.parse(search),
   component: OutstandingBalanceReport,
 })
 
@@ -40,6 +52,7 @@ function OutstandingBalanceReport() {
   const searchParams: any = Route.useSearch();
   const navigate = Route.useNavigate();
   const { formatDate } = useDateFormat();
+  const { currencySymbol } = useCurrency();
 
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 10;
@@ -89,24 +102,29 @@ function OutstandingBalanceReport() {
   const items: AdmissionItem[] = data?.data?.items || []
   const meta: Meta = data?.data?.meta || { total: 0, page: 1, limit: 10, totalPages: 1 }
 
+  // Billing fields are nested (finalBill/advancePayments) on the admission payload
+  const billOf = (i: AdmissionItem) => Number(i.total_bill_amount || i.finalBill?.total_bill_amount || 0)
+  const paidOf = (i: AdmissionItem) => Number(i.finalBill?.paid_amount ?? i.advancePayments?.total_amount ?? 0)
+  const dueOf = (i: AdmissionItem) => i.finalBill?.due_amount != null ? Number(i.finalBill.due_amount) : Math.max(0, billOf(i) - paidOf(i))
+
   // Filter items to show only those with outstanding balance
-  const filteredItems = items.filter(item => Number(item.due_amount || 0) > 0)
+  const filteredItems = items.filter(item => dueOf(item) > 0)
 
   // Calculate statistics
   const stats = useMemo(() => {
-    const totalBilled = filteredItems.reduce((sum, i) => sum + Number(i.total_bill || 0), 0)
-    const totalPaid = filteredItems.reduce((sum, i) => sum + Number(i.advance_payment || 0), 0)
-    const totalOutstanding = filteredItems.reduce((sum, i) => sum + Number(i.due_amount || 0), 0)
+    const totalBilled = filteredItems.reduce((sum, i) => sum + billOf(i), 0)
+    const totalPaid = filteredItems.reduce((sum, i) => sum + paidOf(i), 0)
+    const totalOutstanding = filteredItems.reduce((sum, i) => sum + dueOf(i), 0)
 
     return [
       { label: 'Total Patients', value: meta.total, icon: Users, grad: 'from-green-500 to-green-600' },
       { label: 'With Outstanding', value: filteredItems.length, icon: AlertCircle, grad: 'from-red-500 to-red-600' },
-      { label: 'Total Billed', value: `৳${totalBilled.toLocaleString()}`, icon: Banknote, grad: 'from-blue-500 to-blue-600' },
-      { label: 'Total Paid', value: `৳${totalPaid.toLocaleString()}`, icon: DollarSign, grad: 'from-emerald-500 to-emerald-600' },
-      { label: 'Total Outstanding', value: `৳${totalOutstanding.toLocaleString()}`, icon: AlertCircle, grad: 'from-orange-500 to-orange-600' },
+      { label: 'Total Billed', value: `${currencySymbol} ${totalBilled.toLocaleString()}`, icon: Banknote, grad: 'from-blue-500 to-blue-600' },
+      { label: 'Total Paid', value: `${currencySymbol} ${totalPaid.toLocaleString()}`, icon: DollarSign, grad: 'from-emerald-500 to-emerald-600' },
+      { label: 'Total Outstanding', value: `${currencySymbol} ${totalOutstanding.toLocaleString()}`, icon: AlertCircle, grad: 'from-orange-500 to-orange-600' },
       { label: 'This Page', value: filteredItems.length, icon: Hash, grad: 'from-purple-500 to-purple-600' },
     ]
-  }, [filteredItems, meta])
+  }, [filteredItems, meta, currencySymbol])
 
   // ---- Date filter presets ----
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
@@ -165,7 +183,7 @@ function OutstandingBalanceReport() {
 
   const columns = [
     {
-      data: "admission_no",
+      data: "admission_prefix",
       title: "Admission No",
       orderable: true,
       render: (data: any) => {
@@ -199,20 +217,23 @@ function OutstandingBalanceReport() {
       },
     },
     {
-      data: "total_bill",
-      title: "Total Bill (৳)",
-      render: (data: number) => `<span class="font-medium">${Number(data || 0).toFixed(2)}</span>`,
+      data: null,
+      title: `Total Bill (${currencySymbol})`,
+      className: "text-right",
+      render: (_d: any, _t: string, row: AdmissionItem) => `<span class="font-medium">${billOf(row).toFixed(2)}</span>`,
     },
     {
-      data: "advance_payment",
-      title: "Paid Amount (৳)",
-      render: (data: number) => `<span class="text-emerald-600 font-bold">${Number(data || 0).toFixed(2)}</span>`,
+      data: null,
+      title: `Paid Amount (${currencySymbol})`,
+      className: "text-right",
+      render: (_d: any, _t: string, row: AdmissionItem) => `<span class="text-emerald-600 font-bold">${paidOf(row).toFixed(2)}</span>`,
     },
     {
-      data: "due_amount",
-      title: "Outstanding (৳)",
-      render: (data: number) => {
-        const val = Number(data || 0)
+      data: null,
+      title: `Outstanding (${currencySymbol})`,
+      className: "text-right",
+      render: (_d: any, _t: string, row: AdmissionItem) => {
+        const val = dueOf(row)
         return val > 0
           ? `<span class="text-red-500 font-bold">${val.toFixed(2)}</span>`
           : `<span class="text-emerald-500 font-semibold">0.00</span>`

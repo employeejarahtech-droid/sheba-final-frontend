@@ -10,7 +10,7 @@ const dateWiseSearchSchema = z.object({
   to: z.string().catch(''),
 })
 
-export const Route = createFileRoute('/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/')({
+export const Route = createFileRoute('/_authenticated/dashboard/reports/outdoor/date-wise-collection/')({
   validateSearch: (search) => dateWiseSearchSchema.parse(search),
   component: DateWiseCollectionPage,
 })
@@ -53,6 +53,10 @@ function DateWiseCollectionPage() {
       setSearch={setSearch}
       setFrom={setFrom}
       setTo={setTo}
+      endpoint="/api/outdoor-invoice/all-collection"
+      title="Date Wise Collections"
+      subtitle="All outdoor payments collected within a date range"
+      printPath="/dashboard/reports/outdoor/date-wise-collection/print"
     />
   )
 }
