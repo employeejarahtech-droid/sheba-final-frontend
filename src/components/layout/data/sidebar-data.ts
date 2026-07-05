@@ -45,6 +45,7 @@ import {
   Landmark,
   Images,
   FilePlus,
+  Globe,
   LogOut,
   CheckCircle2,
   AlertCircle,
@@ -527,6 +528,7 @@ export const sidebarData: SidebarData = {
             { title: 'Backups', url: '/dashboard/backups', icon: Database },
             { title: 'Backup Settings', url: '/dashboard/backup-settings', icon: Settings },
             { title: 'Reset Database', url: '/dashboard/settings/reset-database', icon: AlertTriangle },
+            { title: 'Domain Configuration', url: '/dashboard/settings/domain-configuration', icon: Globe },
           ],
         },
         {

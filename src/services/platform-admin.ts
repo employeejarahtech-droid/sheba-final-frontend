@@ -59,6 +59,10 @@ export async function fetchCompany(id: number): Promise<ApiResponse<PlatformComp
   return platformFetchJson(`/api/admin/companies/${id}`)
 }
 
+export async function fetchCompanyDomains(id: number): Promise<ApiResponse<CompanyDomain[]>> {
+  return platformFetchJson(`/api/admin/companies/${id}/domains`)
+}
+
 export async function createCompany(data: Partial<PlatformCompany>): Promise<ApiResponse<PlatformCompany>> {
   return platformFetchJson('/api/admin/companies', {
     method: 'POST',

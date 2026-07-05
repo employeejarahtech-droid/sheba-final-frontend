@@ -66,6 +66,20 @@ export function useCompany(id: number) {
   })
 }
 
+export function useCompanyDomains(id: number) {
+  return useQuery({
+    queryKey: ['platform-admin', 'company-domains', id] as const,
+    queryFn: () => {
+      console.log('[useCompanyDomains] Fetching domains for company ID:', id)
+      return adminService.fetchCompanyDomains(id).then((r) => {
+        console.log('[useCompanyDomains] Response:', r)
+        return r.data || []
+      })
+    },
+    enabled: !!id,
+  })
+}
+
 export function useCreateCompany() {
   const qc = useQueryClient()
   return useMutation({

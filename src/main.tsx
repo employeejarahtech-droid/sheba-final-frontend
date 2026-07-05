@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { Provider } from 'react-redux'
 import { getCookie, setCookie } from '@/lib/cookies'
 import { handleServerError } from '@/lib/handle-server-error'
+import { resolveCustomDomainOnBoot } from '@/lib/subdomain'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 import { ThemeProvider } from './context/theme-provider'
@@ -126,19 +127,30 @@ declare module '@tanstack/react-router' {
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
-  root.render(
-    <StrictMode>
-      <Provider store={store}>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider>
-            <FontProvider>
-              <DirectionProvider>
-                <RouterProvider router={router} />
-              </DirectionProvider>
-            </FontProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </Provider>
-    </StrictMode>
-  )
+
+  // Resolve custom-domain → tenant mapping before the router mounts, so
+  // route guards (e.g. _authenticated/route.tsx's beforeLoad) see the
+  // correct subdomain from the very first navigation. Bounded by a 3s
+  // timeout so a slow/unreachable API never blocks app boot — on timeout
+  // the app proceeds exactly as it does today (no custom domain resolved).
+  const timeout = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
+  ;(async () => {
+    await Promise.race([resolveCustomDomainOnBoot(), timeout(3000)])
+
+    root.render(
+      <StrictMode>
+        <Provider store={store}>
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider>
+              <FontProvider>
+                <DirectionProvider>
+                  <RouterProvider router={router} />
+                </DirectionProvider>
+              </FontProvider>
+            </ThemeProvider>
+          </QueryClientProvider>
+        </Provider>
+      </StrictMode>
+    )
+  })()
 }

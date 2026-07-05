@@ -176,6 +176,53 @@ export interface PlatformContact {
   updated_at?: string
 }
 
+// ── Company Domain (custom domain configuration) ───────────────────────────
+export interface CompanyDomain {
+  id: number
+  domain: string
+  status: 'pending' | 'verifying' | 'verified' | 'ssl_generating' | 'ssl_installed' | 'live' | 'error'
+  error?: string | null
+  sslExpiry?: string | null
+  dnsToken?: string | null
+  dnsVerifiedAt?: string | null
+  sslGeneratedAt?: string | null
+  activatedAt?: string | null
+  nameservers?: string[] | null
+  ipAddress?: string | null
+  sslProvider?: 'letsencrypt' | 'custom' | 'none' | null
+  sslAutoRenew?: boolean | null
+  wwwPreference?: 'www' | 'non-www' | 'both' | null
+  enforceHttps?: boolean | null
+  enableHSTS?: boolean | null
+  emailProvider?: string | null
+  spfRecord?: string | null
+  dmarcRecord?: string | null
+  cdnEnabled?: boolean | null
+  cdnProvider?: string | null
+  monitoringEnabled?: boolean | null
+  lastDnsCheck?: string | null
+  createdAt: string
+  updatedAt: string
+  realSSL?: RealSSLCertificate | null
+}
+
+// ── Real SSL Certificate (actual server verification) ──────────────────────
+export interface RealSSLCertificate {
+  valid: boolean
+  domain: string
+  isValid?: boolean
+  subject?: string
+  issuer?: string
+  validFrom?: string
+  validTo?: string
+  expiresAt?: string
+  daysUntilExpiry?: number
+  serial?: string
+  fingerprint?: string
+  message: string
+  httpOnly?: boolean
+}
+
 // ── Subscription (derived from company) ─────────────────────────────────
 export interface PlatformSubscription {
   id: number

@@ -377,7 +377,7 @@ export default function Services({ page, limit, search, setPage, setLimit, setSe
     return <>
         <AppHeader fixed />
 
-        <main className="p-4">
+        <main className="">
             <div className="space-y-4">
                 {/* Statistics Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

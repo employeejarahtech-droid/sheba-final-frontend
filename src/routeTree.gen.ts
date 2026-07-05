@@ -77,6 +77,7 @@ import { Route as AuthenticatedDashboardSettingsPrefixRouteImport } from './rout
 import { Route as AuthenticatedDashboardSettingsPaymentAccountsRouteImport } from './routes/_authenticated/dashboard/settings/payment-accounts'
 import { Route as AuthenticatedDashboardSettingsNotificationsRouteImport } from './routes/_authenticated/dashboard/settings/notifications'
 import { Route as AuthenticatedDashboardSettingsInventoryAccountsRouteImport } from './routes/_authenticated/dashboard/settings/inventory-accounts'
+import { Route as AuthenticatedDashboardSettingsDomainConfigurationRouteImport } from './routes/_authenticated/dashboard/settings/domain-configuration'
 import { Route as AuthenticatedDashboardSettingsDisplayRouteImport } from './routes/_authenticated/dashboard/settings/display'
 import { Route as AuthenticatedDashboardSettingsDateControlsRouteImport } from './routes/_authenticated/dashboard/settings/date-controls'
 import { Route as AuthenticatedDashboardSettingsAppearanceRouteImport } from './routes/_authenticated/dashboard/settings/appearance'
@@ -795,6 +796,12 @@ const AuthenticatedDashboardSettingsInventoryAccountsRoute =
   AuthenticatedDashboardSettingsInventoryAccountsRouteImport.update({
     id: '/inventory-accounts',
     path: '/inventory-accounts',
+    getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
+  } as any)
+const AuthenticatedDashboardSettingsDomainConfigurationRoute =
+  AuthenticatedDashboardSettingsDomainConfigurationRouteImport.update({
+    id: '/domain-configuration',
+    path: '/domain-configuration',
     getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
   } as any)
 const AuthenticatedDashboardSettingsDisplayRoute =
@@ -3111,6 +3118,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/appearance': typeof AuthenticatedDashboardSettingsAppearanceRoute
   '/dashboard/settings/date-controls': typeof AuthenticatedDashboardSettingsDateControlsRoute
   '/dashboard/settings/display': typeof AuthenticatedDashboardSettingsDisplayRoute
+  '/dashboard/settings/domain-configuration': typeof AuthenticatedDashboardSettingsDomainConfigurationRoute
   '/dashboard/settings/inventory-accounts': typeof AuthenticatedDashboardSettingsInventoryAccountsRoute
   '/dashboard/settings/notifications': typeof AuthenticatedDashboardSettingsNotificationsRoute
   '/dashboard/settings/payment-accounts': typeof AuthenticatedDashboardSettingsPaymentAccountsRoute
@@ -3527,6 +3535,7 @@ export interface FileRoutesByTo {
   '/dashboard/settings/appearance': typeof AuthenticatedDashboardSettingsAppearanceRoute
   '/dashboard/settings/date-controls': typeof AuthenticatedDashboardSettingsDateControlsRoute
   '/dashboard/settings/display': typeof AuthenticatedDashboardSettingsDisplayRoute
+  '/dashboard/settings/domain-configuration': typeof AuthenticatedDashboardSettingsDomainConfigurationRoute
   '/dashboard/settings/inventory-accounts': typeof AuthenticatedDashboardSettingsInventoryAccountsRoute
   '/dashboard/settings/notifications': typeof AuthenticatedDashboardSettingsNotificationsRoute
   '/dashboard/settings/payment-accounts': typeof AuthenticatedDashboardSettingsPaymentAccountsRoute
@@ -3950,6 +3959,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/settings/appearance': typeof AuthenticatedDashboardSettingsAppearanceRoute
   '/_authenticated/dashboard/settings/date-controls': typeof AuthenticatedDashboardSettingsDateControlsRoute
   '/_authenticated/dashboard/settings/display': typeof AuthenticatedDashboardSettingsDisplayRoute
+  '/_authenticated/dashboard/settings/domain-configuration': typeof AuthenticatedDashboardSettingsDomainConfigurationRoute
   '/_authenticated/dashboard/settings/inventory-accounts': typeof AuthenticatedDashboardSettingsInventoryAccountsRoute
   '/_authenticated/dashboard/settings/notifications': typeof AuthenticatedDashboardSettingsNotificationsRoute
   '/_authenticated/dashboard/settings/payment-accounts': typeof AuthenticatedDashboardSettingsPaymentAccountsRoute
@@ -4370,6 +4380,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/date-controls'
     | '/dashboard/settings/display'
+    | '/dashboard/settings/domain-configuration'
     | '/dashboard/settings/inventory-accounts'
     | '/dashboard/settings/notifications'
     | '/dashboard/settings/payment-accounts'
@@ -4786,6 +4797,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/date-controls'
     | '/dashboard/settings/display'
+    | '/dashboard/settings/domain-configuration'
     | '/dashboard/settings/inventory-accounts'
     | '/dashboard/settings/notifications'
     | '/dashboard/settings/payment-accounts'
@@ -5208,6 +5220,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/settings/appearance'
     | '/_authenticated/dashboard/settings/date-controls'
     | '/_authenticated/dashboard/settings/display'
+    | '/_authenticated/dashboard/settings/domain-configuration'
     | '/_authenticated/dashboard/settings/inventory-accounts'
     | '/_authenticated/dashboard/settings/notifications'
     | '/_authenticated/dashboard/settings/payment-accounts'
@@ -6084,6 +6097,13 @@ declare module '@tanstack/react-router' {
       path: '/inventory-accounts'
       fullPath: '/dashboard/settings/inventory-accounts'
       preLoaderRoute: typeof AuthenticatedDashboardSettingsInventoryAccountsRouteImport
+      parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
+    }
+    '/_authenticated/dashboard/settings/domain-configuration': {
+      id: '/_authenticated/dashboard/settings/domain-configuration'
+      path: '/domain-configuration'
+      fullPath: '/dashboard/settings/domain-configuration'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsDomainConfigurationRouteImport
       parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
     }
     '/_authenticated/dashboard/settings/display': {
@@ -8558,6 +8578,7 @@ interface AuthenticatedDashboardSettingsRouteRouteChildren {
   AuthenticatedDashboardSettingsAppearanceRoute: typeof AuthenticatedDashboardSettingsAppearanceRoute
   AuthenticatedDashboardSettingsDateControlsRoute: typeof AuthenticatedDashboardSettingsDateControlsRoute
   AuthenticatedDashboardSettingsDisplayRoute: typeof AuthenticatedDashboardSettingsDisplayRoute
+  AuthenticatedDashboardSettingsDomainConfigurationRoute: typeof AuthenticatedDashboardSettingsDomainConfigurationRoute
   AuthenticatedDashboardSettingsInventoryAccountsRoute: typeof AuthenticatedDashboardSettingsInventoryAccountsRoute
   AuthenticatedDashboardSettingsNotificationsRoute: typeof AuthenticatedDashboardSettingsNotificationsRoute
   AuthenticatedDashboardSettingsPaymentAccountsRoute: typeof AuthenticatedDashboardSettingsPaymentAccountsRoute
@@ -8579,6 +8600,8 @@ const AuthenticatedDashboardSettingsRouteRouteChildren: AuthenticatedDashboardSe
       AuthenticatedDashboardSettingsDateControlsRoute,
     AuthenticatedDashboardSettingsDisplayRoute:
       AuthenticatedDashboardSettingsDisplayRoute,
+    AuthenticatedDashboardSettingsDomainConfigurationRoute:
+      AuthenticatedDashboardSettingsDomainConfigurationRoute,
     AuthenticatedDashboardSettingsInventoryAccountsRoute:
       AuthenticatedDashboardSettingsInventoryAccountsRoute,
     AuthenticatedDashboardSettingsNotificationsRoute:
