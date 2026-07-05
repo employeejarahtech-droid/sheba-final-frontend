@@ -13,7 +13,7 @@ function DomainConfiguration() {
           Domain Configuration
         </h1>
         <p className="text-muted-foreground">
-          Add custom domains, verify DNS ownership, and manage SSL certificates
+          Request a custom domain — our team will handle DNS and SSL setup for you
         </p>
       </div>
       <SettingsDomainConfiguration />

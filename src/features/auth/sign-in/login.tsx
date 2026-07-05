@@ -22,113 +22,6 @@ export function Login() {
   const [isLoading, setIsLoading] = useState(true)
   const [tenantNotFound, setTenantNotFound] = useState(false)
 
-  // Fetch tenant login settings (public endpoint - no auth required)
-  useEffect(() => {
-    const fetchSettings = async () => {
-      setIsLoading(true)
-      setTenantNotFound(false)
-      try {
-        const { isCompanyPortal, subdomain } = getSubdomainInfo()
-
-        // Only fetch settings for tenant subdomains
-        if (!isCompanyPortal || !subdomain) {
-          console.log('Platform domain detected - should use PlatformLogin component')
-          setIsLoading(false)
-          return
-        }
-
-        // Try to fetch tenant-specific login settings
-        let settingsFetched = false
-        let loginStatus = 0
-        let fallbackStatus = 0
-
-        try {
-          const url = `${import.meta.env.VITE_API_URL || ''}/api/public/app-settings/login-settings/${subdomain}`
-          const res = await fetch(url)
-          loginStatus = res.status
-
-          if (res.ok) {
-            const response = await res.json()
-            const settings: LoginSettings = response.data || {}
-
-            // Logo
-            let logoUrl = settings.logo || null
-            if (logoUrl && !logoUrl.startsWith('http') && !logoUrl.startsWith('data:')) {
-              logoUrl = `${import.meta.env.VITE_API_URL || ''}${logoUrl}`
-            }
-            setProfileImage(logoUrl)
-
-            // Background image
-            let bgImageUrl = settings.bgImage || null
-            if (bgImageUrl && !bgImageUrl.startsWith('http') && !bgImageUrl.startsWith('data:')) {
-              bgImageUrl = `${import.meta.env.VITE_API_URL || ''}${bgImageUrl}`
-            }
-            setBgImage(bgImageUrl)
-
-            // Information text
-            setInformationText(settings.informationText || '')
-
-            // Company info
-            if (settings.company_name) {
-              setCompanyName(settings.company_name)
-            }
-            if (settings.company_details) {
-              setCompanyDetails(settings.company_details)
-            }
-
-            // Update favicon dynamically
-            if (logoUrl) {
-              updateFavicon(logoUrl)
-            }
-
-            settingsFetched = true
-          }
-        } catch (err) {
-          console.log('Login settings endpoint not available, using defaults')
-        }
-
-        // If login settings failed, try tenant settings as fallback for company name/logo
-        if (!settingsFetched) {
-          try {
-            const fallbackUrl = `${import.meta.env.VITE_API_URL || ''}/api/public/tenant-settings/${subdomain}`
-            const fallbackRes = await fetch(fallbackUrl)
-            fallbackStatus = fallbackRes.status
-
-            if (fallbackRes.ok) {
-              const response = await fallbackRes.json()
-              if (response.data?.company_name) {
-                setCompanyName(response.data.company_name)
-              }
-              let logoUrl = response.data?.company_logo || null
-              if (logoUrl && !logoUrl.startsWith('http') && !logoUrl.startsWith('data:')) {
-                logoUrl = `${import.meta.env.VITE_API_URL || ''}${logoUrl}`
-              }
-              setProfileImage(logoUrl)
-
-              if (logoUrl) {
-                updateFavicon(logoUrl)
-              }
-            }
-          } catch (err) {
-            console.log('Tenant settings endpoint not available, using defaults')
-          }
-        }
-
-        // Both public endpoints return HTTP 404 when the subdomain has no
-        // registered tenant — surface that to the user with a Register link.
-        if (loginStatus === 404 || fallbackStatus === 404) {
-          setTenantNotFound(true)
-        }
-      } catch (error) {
-        console.error('Failed to fetch settings:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchSettings()
-  }, [])
-
   // Function to update favicon
   const updateFavicon = (imageUrl: string) => {
     try {
@@ -154,6 +47,111 @@ export function Login() {
       console.error('Failed to update favicon:', error)
     }
   }
+
+  // Fetch tenant login settings (public endpoint - no auth required)
+  useEffect(() => {
+    const fetchSettings = async () => {
+      setIsLoading(true)
+      setTenantNotFound(false)
+      const { isCompanyPortal, subdomain } = getSubdomainInfo()
+
+        // Only fetch settings for tenant subdomains
+        if (!isCompanyPortal || !subdomain) {
+          console.log('Platform domain detected - should use PlatformLogin component')
+          setIsLoading(false)
+          return
+        }
+
+        // Try to fetch tenant-specific login settings (parallel requests)
+        let settingsFetched = false
+        let loginStatus = 0
+        let fallbackStatus = 0
+
+        try {
+          const [loginRes, fallbackRes] = await Promise.allSettled([
+            fetch(`${import.meta.env.VITE_API_URL || ''}/api/public/app-settings/login-settings/${subdomain}`),
+            fetch(`${import.meta.env.VITE_API_URL || ''}/api/public/tenant-settings/${subdomain}`)
+          ])
+
+          // Process login settings response
+          if (loginRes.status === 'fulfilled' && loginRes.value) {
+            const res = loginRes.value
+            loginStatus = res.status
+
+            if (res.ok) {
+              const response = await res.json()
+              const settings: LoginSettings = response.data || {}
+
+              // Logo
+              let logoUrl = settings.logo || null
+              if (logoUrl && !logoUrl.startsWith('http') && !logoUrl.startsWith('data:')) {
+                logoUrl = `${import.meta.env.VITE_API_URL || ''}${logoUrl}`
+              }
+              setProfileImage(logoUrl)
+
+              // Background image
+              let bgImageUrl = settings.bgImage || null
+              if (bgImageUrl && !bgImageUrl.startsWith('http') && !bgImageUrl.startsWith('data:')) {
+                bgImageUrl = `${import.meta.env.VITE_API_URL || ''}${bgImageUrl}`
+              }
+              setBgImage(bgImageUrl)
+
+              // Information text
+              setInformationText(settings.informationText || '')
+
+              // Company info
+              if (settings.company_name) {
+                setCompanyName(settings.company_name)
+              }
+              if (settings.company_details) {
+                setCompanyDetails(settings.company_details)
+              }
+
+              // Update favicon dynamically
+              if (logoUrl) {
+                updateFavicon(logoUrl)
+              }
+
+              settingsFetched = true
+            }
+          }
+
+          // Process fallback response only if login settings failed
+          if (!settingsFetched && fallbackRes.status === 'fulfilled' && fallbackRes.value) {
+            const fallbackResValue = fallbackRes.value
+            fallbackStatus = fallbackResValue.status
+
+            if (fallbackResValue.ok) {
+              const response = await fallbackResValue.json()
+              if (response.data?.company_name) {
+                setCompanyName(response.data.company_name)
+              }
+              let logoUrl = response.data?.company_logo || null
+              if (logoUrl && !logoUrl.startsWith('http') && !logoUrl.startsWith('data:')) {
+                logoUrl = `${import.meta.env.VITE_API_URL || ''}${logoUrl}`
+              }
+              setProfileImage(logoUrl)
+
+              if (logoUrl) {
+                updateFavicon(logoUrl)
+              }
+            }
+          }
+
+          // Both public endpoints return HTTP 404 when the subdomain has no
+          // registered tenant — surface that to the user with a Register link.
+          if (loginStatus === 404 || fallbackStatus === 404) {
+            setTenantNotFound(true)
+          }
+        } catch (error) {
+          console.error('Failed to fetch settings:', error)
+        } finally {
+          setIsLoading(false)
+        }
+      }
+
+      fetchSettings()
+    }, [])
 
   // Get first letter for fallback
   const firstLetter = companyName.charAt(0).toUpperCase()
