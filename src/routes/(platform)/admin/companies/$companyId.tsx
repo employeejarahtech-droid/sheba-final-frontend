@@ -357,7 +357,7 @@ function CompanyDetailPage() {
                               )}
                               Re-Check SSL
                             </Button>
-                            {domain.status === 'verified' && (
+                            {domain.dnsVerifiedAt && !domain.realSSL?.valid && (
                               <Button
                                 onClick={() => installSSL.mutate({ companyId: id, domainId: domain.id })}
                                 disabled={installSSL.isPending}
