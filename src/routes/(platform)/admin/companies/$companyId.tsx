@@ -35,6 +35,9 @@ import {
   useSubscription,
   useToggleCompanyActive,
   useCompanyDomains,
+  useRecheckDomainSSL,
+  useInstallDomainSSL,
+  useDeactivateDomain,
 } from '@/hooks/usePlatformAdmin'
 import type { PlatformCompany, PlatformSubscription, CompanyDomain } from '@/types/platform.types'
 import { getAdminRoleFromToken } from '@/stores/platform-auth-store'
@@ -90,6 +93,11 @@ function CompanyDetailPage() {
   const { data: subscription, isLoading: subLoading } = useSubscription(id)
   const { data: domains = [], isLoading: domainsLoading, error: domainsError } = useCompanyDomains(id)
   const toggleActive = useToggleCompanyActive()
+
+  // SSL and domain management mutations
+  const recheckSSL = useRecheckDomainSSL()
+  const installSSL = useInstallDomainSSL()
+  const deactivateDomain = useDeactivateDomain()
 
   // Debug logging
   console.log('[CompanyDetailPage] Company ID:', id)
@@ -329,6 +337,41 @@ function CompanyDetailPage() {
                           <div className="text-[10px] opacity-75">{domain.realSSL.message}</div>
                         </div>
                       </div>
+
+                      {/* SSL Management Actions */}
+                      <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => recheckSSL.mutate({ companyId: id, domainId: domain.id })}
+                            disabled={recheckSSL.isPending}
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 text-xs"
+                          >
+                            {recheckSSL.isPending ? (
+                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            ) : (
+                              <RefreshCw className="h-3 w-3 mr-1" />
+                            )}
+                            Re-Check SSL
+                          </Button>
+                          {domain.status === 'verified' && (
+                            <Button
+                              onClick={() => installSSL.mutate({ companyId: id, domainId: domain.id })}
+                              disabled={installSSL.isPending}
+                              className="flex-1 bg-green-600 hover:bg-green-700 text-xs"
+                              size="sm"
+                            >
+                              {installSSL.isPending ? (
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              ) : (
+                                <Lock className="h-3 w-3 mr-1" />
+                              )}
+                              Install SSL
+                            </Button>
+                          )}
+                        </div>
+                      </div>
                     ) : (
                       <DetailRow
                         icon={<Lock className="h-3 w-3" />}
@@ -347,6 +390,26 @@ function CompanyDetailPage() {
                       value={fmtDateTime(domain.createdAt)}
                     />
                   </dl>
+
+                  {/* Domain Management Actions */}
+                  {domain.status === 'live' && (
+                    <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <Button
+                        onClick={() => deactivateDomain.mutate({ companyId: id, domainId: domain.id })}
+                        disabled={deactivateDomain.isPending}
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs"
+                      >
+                        {deactivateDomain.isPending ? (
+                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                        ) : (
+                          <Globe className="h-3 w-3 mr-1" />
+                        )}
+                        Deactivate Domain
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

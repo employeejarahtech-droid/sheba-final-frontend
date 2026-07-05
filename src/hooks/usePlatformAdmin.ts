@@ -80,6 +80,45 @@ export function useCompanyDomains(id: number) {
   })
 }
 
+export function useRecheckDomainSSL() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ companyId, domainId }: { companyId: number; domainId: number }) =>
+      adminService.recheckDomainSSL(companyId, domainId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'company-domains'] })
+      toast.success('SSL re-checked successfully')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+export function useInstallDomainSSL() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ companyId, domainId }: { companyId: number; domainId: number }) =>
+      adminService.installDomainSSL(companyId, domainId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'company-domains'] })
+      toast.success('SSL installation triggered')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+export function useDeactivateDomain() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ companyId, domainId }: { companyId: number; domainId: number }) =>
+      adminService.deactivateCompanyDomain(companyId, domainId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'company-domains'] })
+      toast.success('Domain deactivated successfully')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
 export function useCreateCompany() {
   const qc = useQueryClient()
   return useMutation({

@@ -63,6 +63,24 @@ export async function fetchCompanyDomains(id: number): Promise<ApiResponse<Compa
   return platformFetchJson(`/api/admin/companies/${id}/domains`)
 }
 
+export async function recheckDomainSSL(companyId: number, domainId: number): Promise<ApiResponse<RealSSLCertificate>> {
+  return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/recheck-ssl`, {
+    method: 'POST',
+  })
+}
+
+export async function installDomainSSL(companyId: number, domainId: number): Promise<ApiResponse<{ message: string; domain: string }>> {
+  return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/install-ssl`, {
+    method: 'POST',
+  })
+}
+
+export async function deactivateCompanyDomain(companyId: number, domainId: number): Promise<ApiResponse<{ message: string; domain: string }>> {
+  return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/deactivate`, {
+    method: 'POST',
+  })
+}
+
 export async function createCompany(data: Partial<PlatformCompany>): Promise<ApiResponse<PlatformCompany>> {
   return platformFetchJson('/api/admin/companies', {
     method: 'POST',
