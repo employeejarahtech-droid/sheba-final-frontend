@@ -163,6 +163,11 @@ const SECTIONS: CommandSection[] = [
       { id: 'memory', command: 'free -h', description: 'Check memory usage' },
       { id: 'listening-ports', command: 'ss -tlnp', description: 'List listening ports and the process bound to each' },
       { id: 'mysql-status', command: 'sudo systemctl status mysql', description: 'Check whether MySQL is running' },
+      {
+        id: 'dns-flush-cache',
+        command: 'resolvectl flush-caches',
+        description: 'Clear the stale local DNS cache (fixes "TXT record not found" when the record is actually correct but was cached before a token was regenerated)',
+      },
       { id: 'api-health-check', command: 'curl http://127.0.0.1:5001/api/public/landing', description: 'Verify the API is responding locally, bypassing nginx/CORS' },
       {
         id: 'server-reboot',

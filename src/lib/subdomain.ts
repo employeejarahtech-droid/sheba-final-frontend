@@ -13,6 +13,48 @@ const RESERVED_SUBDOMAINS = [
 
 export { RESERVED_SUBDOMAINS }
 
+/**
+ * Custom-domain resolution cache. Unlike a tenant subdomain (recognizable
+ * from the hostname pattern alone — `<subdomain>.${BASE_DOMAIN}`), a custom
+ * domain like "siteatoz.com" has no pattern to match against — the only way
+ * to know it belongs to a tenant is to ask the backend (GET
+ * /api/public/resolve-domain, matched against companies.domain). That lookup
+ * is async, but getSubdomainInfo()/getSubdomain() are called synchronously
+ * all over the routing code, so main.tsx awaits resolveCustomDomain() once
+ * at boot (before the router renders anything) and this cache is what lets
+ * the synchronous functions below see the result afterward.
+ *
+ * undefined = not checked yet, null = checked, not a registered custom domain.
+ */
+let customDomainSubdomainCache: string | null | undefined
+
+/**
+ * Resolve the current hostname against companies.domain, if it doesn't
+ * already match the platform base domain or a *.baseDomain subdomain. Must
+ * be awaited once at app boot, before the router renders — see main.tsx.
+ */
+export async function resolveCustomDomain(): Promise<void> {
+  if (typeof window === 'undefined') return
+
+  const base = getBaseDomain().toLowerCase()
+  const hostname = window.location.hostname.toLowerCase()
+
+  // Already a recognizable platform/subdomain host — nothing to resolve.
+  if (hostname === base || hostname === `www.${base}` || hostname.endsWith(`.${base}`)) {
+    return
+  }
+  if (hostname === 'localhost' || hostname === '127.0.0.1') return
+
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || ''
+    const res = await fetch(`${apiUrl}/api/public/resolve-domain?host=${encodeURIComponent(hostname)}`)
+    const data = await res.json()
+    customDomainSubdomainCache = data?.subdomain || null
+  } catch {
+    customDomainSubdomainCache = null
+  }
+}
+
 interface SubdomainInfo {
   isCompanyPortal: boolean
   isPlatform: boolean
@@ -86,7 +128,9 @@ export function getSubdomain(baseDomain?: string): string | null {
     return primary
   }
 
-  return null
+  // Not a *.baseDomain host — check whether it's a resolved custom domain
+  // (see resolveCustomDomain(), awaited once at boot in main.tsx).
+  return customDomainSubdomainCache || null
 }
 
 /**
@@ -128,7 +172,13 @@ export function getSubdomainInfo(): SubdomainInfo {
     return { isCompanyPortal: true, isPlatform: false, subdomain, baseDomain: BASE_DOMAIN, host }
   }
 
-  // Custom domain support: assume platform for unknown domains
+  // Custom domain: resolved once at boot via resolveCustomDomain() (see
+  // main.tsx), which populates customDomainSubdomainCache by checking
+  // companies.domain against this hostname. Falls back to platform if it
+  // isn't a registered custom domain (or resolution hasn't run/failed).
+  if (customDomainSubdomainCache) {
+    return { isCompanyPortal: true, isPlatform: false, subdomain: customDomainSubdomainCache, baseDomain: BASE_DOMAIN, host }
+  }
   return { isCompanyPortal: false, isPlatform: true, subdomain: null, baseDomain: BASE_DOMAIN, host }
 }
 
