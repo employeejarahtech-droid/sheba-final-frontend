@@ -82,6 +82,16 @@ export async function deleteCompany(id: number): Promise<ApiResponse<void>> {
   return platformFetchJson(`/api/admin/companies/${id}`, { method: 'DELETE' })
 }
 
+export interface LoginAsResult {
+  token: string
+  subdomain: string
+  user: { id: number; name: string; email: string; userType: string; companyId: number }
+}
+
+export async function loginAsCompany(id: number): Promise<ApiResponse<LoginAsResult>> {
+  return platformFetchJson(`/api/admin/companies/${id}/login-as`, { method: 'POST' })
+}
+
 // ── Company Custom Domain (superadmin review workflow) ─────────────────
 
 export async function fetchCompanyDomains(companyId: number): Promise<ApiResponse<PlatformCompanyDomain[]>> {

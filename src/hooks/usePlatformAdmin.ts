@@ -118,6 +118,13 @@ export function useDeleteCompany() {
   })
 }
 
+export function useLoginAsCompany() {
+  return useMutation({
+    mutationFn: adminService.loginAsCompany,
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
 // ── Company Custom Domain (superadmin review workflow) ─────────────────
 
 export function useCompanyDomains(companyId: number) {

@@ -8,8 +8,36 @@
  */
 
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
+import { useState, useMemo } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Building2,
   ArrowLeft,
@@ -29,12 +57,18 @@ import {
   PowerOff,
   RefreshCw,
   AlertCircle,
+  LogIn,
+  Pencil,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getBaseDomain } from '@/lib/subdomain'
 import {
   useCompany,
   useSubscription,
   useToggleCompanyActive,
+  useUpdateCompany,
+  useLoginAsCompany,
+  useAdminPlans,
   useCompanyDomains,
   useVerifyDomainDNS,
   useInstallDomainSSL,
@@ -95,9 +129,23 @@ function CompanyDetailPage() {
   const { data: company, isLoading: companyLoading } = useCompany(id)
   const { data: subscription, isLoading: subLoading } = useSubscription(id)
   const toggleActive = useToggleCompanyActive()
+  const loginAs = useLoginAsCompany()
+  const [showEditDialog, setShowEditDialog] = useState(false)
 
   const isLoading = companyLoading || subLoading
   const active = Boolean(company?.is_active)
+
+  const handleLoginAs = () => {
+    loginAs.mutate(id, {
+      onSuccess: (res) => {
+        if (!res.success) return
+        const { token, subdomain, user } = res.data
+        const baseDomain = getBaseDomain()
+        const url = `${window.location.protocol}//${subdomain}.${baseDomain}/auth-callback?token=${encodeURIComponent(token)}&user=${encodeURIComponent(JSON.stringify(user))}`
+        window.open(url, '_blank', 'noopener')
+      },
+    })
+  }
 
   if (isLoading) {
     return (
@@ -141,22 +189,47 @@ function CompanyDetailPage() {
               </p>
             </div>
           </div>
-          <Button
-            onClick={() => toggleActive.mutate(company.id)}
-            disabled={toggleActive.isPending}
-            className="bg-white text-purple-700 hover:bg-white/90 font-medium"
-          >
-            {toggleActive.isPending ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : active ? (
-              <ToggleRight className="h-4 w-4 mr-2" />
-            ) : (
-              <ToggleLeft className="h-4 w-4 mr-2" />
-            )}
-            {active ? 'Deactivate' : 'Activate'}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setShowEditDialog(true)}
+              variant="outline"
+              className="bg-white/10 text-white border-white/30 hover:bg-white/20 font-medium"
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+            <Button
+              onClick={handleLoginAs}
+              disabled={loginAs.isPending}
+              variant="outline"
+              className="bg-white/10 text-white border-white/30 hover:bg-white/20 font-medium"
+            >
+              {loginAs.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <LogIn className="h-4 w-4 mr-2" />
+              )}
+              Login as Tenant
+            </Button>
+            <Button
+              onClick={() => toggleActive.mutate(company.id)}
+              disabled={toggleActive.isPending}
+              className="bg-white text-purple-700 hover:bg-white/90 font-medium"
+            >
+              {toggleActive.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : active ? (
+                <ToggleRight className="h-4 w-4 mr-2" />
+              ) : (
+                <ToggleLeft className="h-4 w-4 mr-2" />
+              )}
+              {active ? 'Deactivate' : 'Activate'}
+            </Button>
+          </div>
         </div>
       </div>
+
+      <EditCompanyDialog company={company} open={showEditDialog} onOpenChange={setShowEditDialog} />
 
       {/* Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -257,6 +330,207 @@ function CompanyDetailPage() {
       {/* Custom Domain — superadmin review workflow */}
       <DomainReviewSection companyId={company.id} />
     </div>
+  )
+}
+
+// ── Edit Company Dialog ──────────────────────────────────────────────────
+
+const editCompanySchema = z.object({
+  name: z.string().min(1, 'Company name is required'),
+  email: z.string().email('Invalid email address').or(z.literal('')).optional(),
+  plan_id: z.string().optional(),
+  subscription_status: z.string().optional(),
+  subscription_expires_at: z.string().optional(),
+})
+
+type EditCompanyFormValues = z.infer<typeof editCompanySchema>
+
+const SUBSCRIPTION_STATUSES = ['trialing', 'active', 'past_due', 'expired', 'canceled']
+
+function EditCompanyDialog({
+  company,
+  open,
+  onOpenChange,
+}: {
+  company: PlatformCompany
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  const updateCompany = useUpdateCompany()
+  const { data: plansData } = useAdminPlans({ status: 'active' })
+
+  const plans: Array<Record<string, unknown>> = useMemo(() => {
+    if (Array.isArray(plansData)) return plansData as Array<Record<string, unknown>>
+    const maybe = plansData as
+      | { items?: Array<Record<string, unknown>>; data?: Array<Record<string, unknown>> }
+      | undefined
+    return maybe?.items ?? maybe?.data ?? []
+  }, [plansData])
+
+  const form = useForm<EditCompanyFormValues>({
+    resolver: zodResolver(editCompanySchema),
+    values: {
+      name: company.name,
+      email: company.email ?? '',
+      plan_id: company.plan_id ? String(company.plan_id) : '',
+      subscription_status: company.subscription_status || '',
+      subscription_expires_at: company.subscription_expires_at
+        ? company.subscription_expires_at.slice(0, 10)
+        : '',
+    },
+  })
+
+  const onSubmit = (values: EditCompanyFormValues) => {
+    const payload: Record<string, unknown> = { name: values.name }
+    if (values.email !== undefined) payload.email = values.email || null
+    if (values.plan_id) payload.plan_id = Number(values.plan_id)
+    if (values.subscription_status) payload.subscription_status = values.subscription_status
+    if (values.subscription_expires_at) payload.subscription_expires_at = values.subscription_expires_at
+
+    updateCompany.mutate(
+      { id: company.id, data: payload },
+      { onSuccess: () => onOpenChange(false) }
+    )
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Edit Company</DialogTitle>
+          <DialogDescription>
+            Update {company.name}'s details, plan, and subscription status.
+          </DialogDescription>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Company Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="plan_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subscription Plan</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a plan" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {plans.length === 0 ? (
+                        <SelectItem value="_none" disabled>
+                          No plans available
+                        </SelectItem>
+                      ) : (
+                        plans.map((plan) => (
+                          <SelectItem key={String(plan.id)} value={String(plan.id)}>
+                            {String(plan.name)}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="subscription_status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subscription Status</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {SUBSCRIPTION_STATUSES.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="subscription_expires_at"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subscription Expires</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter className="gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={updateCompany.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={updateCompany.isPending}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                {updateCompany.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Changes'
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   )
 }
 
