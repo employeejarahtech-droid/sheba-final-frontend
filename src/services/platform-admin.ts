@@ -9,7 +9,8 @@ import { platformFetchJson } from '@/lib/platform-authenticated-fetch'
 import type {
   PlatformDashboardStats,
   PlatformCompany,
-  PlatformCompanyDomain,
+  CompanyDomain,
+  RealSSLCertificate,
   PlatformNginxDomainsResult,
   PlatformSubscriptionPlan,
   PlatformRegistration,
@@ -89,12 +90,6 @@ export async function installDomainSSL(companyId: number, domainId: number): Pro
   })
 }
 
-export async function deactivateCompanyDomain(companyId: number, domainId: number): Promise<ApiResponse<{ message: string; domain: string }>> {
-  return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/deactivate`, {
-    method: 'POST',
-  })
-}
-
 export async function createCompany(data: Partial<PlatformCompany>): Promise<ApiResponse<PlatformCompany>> {
   return platformFetchJson('/api/admin/companies', {
     method: 'POST',
@@ -117,30 +112,6 @@ export async function deleteCompany(id: number): Promise<ApiResponse<void>> {
   return platformFetchJson(`/api/admin/companies/${id}`, { method: 'DELETE' })
 }
 
-<<<<<<< HEAD
-// Super-admin "login as tenant" — issues a company_admin JWT for the company's
-// owner so the admin can open the tenant app without its password.
-export interface LoginAsCompanyResponse {
-  token: string
-  subdomain: string
-  user: {
-    id: number
-    name: string
-    email: string
-    userType: string
-    companyId: number
-  }
-}
-
-export async function loginAsCompany(
-  id: number
-): Promise<ApiResponse<LoginAsCompanyResponse>> {
-  return platformFetchJson(`/api/admin/companies/${id}/login-as`, {
-    method: 'POST',
-  })
-}
-
-=======
 export interface LoginAsResult {
   token: string
   subdomain: string
@@ -230,36 +201,10 @@ export async function updateNginxDomain(
   })
 }
 
-// ── Company Custom Domain (superadmin review workflow) ─────────────────
-
-export async function fetchCompanyDomains(companyId: number): Promise<ApiResponse<PlatformCompanyDomain[]>> {
-  return platformFetchJson(`/api/admin/companies/${companyId}/domains`)
-}
-
-export async function recheckDomainSSL(
-  companyId: number,
-  domainId: number
-): Promise<ApiResponse<{ valid: boolean; message: string }>> {
-  return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/recheck-ssl`, { method: 'POST' })
-}
-
-export async function verifyDomainDNS(companyId: number, domainId: number): Promise<ApiResponse<{ domain: string }>> {
-  return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/verify-dns`, { method: 'POST' })
-}
-
-export async function installDomainSSL(companyId: number, domainId: number): Promise<ApiResponse<{ domain: string }>> {
-  return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/install-ssl`, { method: 'POST' })
-}
-
-export async function goLiveDomain(companyId: number, domainId: number): Promise<ApiResponse<{ domain: string }>> {
-  return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/go-live`, { method: 'POST' })
-}
-
 export async function deactivateDomain(companyId: number, domainId: number): Promise<ApiResponse<{ domain: string }>> {
   return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/deactivate`, { method: 'POST' })
 }
 
->>>>>>> recovered-work
 // ═══════════════════════════════════════════════════════════════════════
 //  PLANS
 // ═══════════════════════════════════════════════════════════════════════

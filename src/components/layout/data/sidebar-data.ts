@@ -58,14 +58,9 @@ import {
   Package,
   ShoppingCart,
   Truck,
-<<<<<<< HEAD
   RotateCcw,
   AlertTriangle,
   Trash2,
-=======
-  AlertTriangle,
-  Globe,
->>>>>>> recovered-work
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -533,12 +528,7 @@ export const sidebarData: SidebarData = {
             { title: 'Database Browser', url: '/dashboard/database', icon: Database },
             { title: 'Backups', url: '/dashboard/backups', icon: Database },
             { title: 'Backup Settings', url: '/dashboard/backup-settings', icon: Settings },
-<<<<<<< HEAD
             { title: 'Reset Database', url: '/dashboard/settings/reset-database', icon: AlertTriangle },
-            { title: 'Domain Configuration', url: '/dashboard/settings/domain-configuration', icon: Globe },
-=======
-            { title: 'Reset Database', url: '/dashboard/reset-database', icon: AlertTriangle },
->>>>>>> recovered-work
           ],
         },
         {
