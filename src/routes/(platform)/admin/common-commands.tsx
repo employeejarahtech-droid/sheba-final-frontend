@@ -106,7 +106,6 @@ const SECTIONS: CommandSection[] = [
     icon: Activity,
     commands: [
       { id: 'pm2-status', command: 'pm2 status', description: 'Check if sheba-api is running and its restart count' },
-      { id: 'pm2-restart', command: 'pm2 restart sheba-api', description: 'Restart the API (picks up new code + .env). The connection will drop briefly.', danger: true },
       { id: 'pm2-logs', command: 'pm2 logs sheba-api --lines 200 --nostream', description: 'Dump recent API logs without following' },
       { id: 'pm2-save', command: 'pm2 save', description: 'Persist the current process list (survives reboot with pm2 startup)' },
     ],
