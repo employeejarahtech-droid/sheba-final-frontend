@@ -1,0 +1,110 @@
+240d5a0 refs/heads/backup-maksud@{Mon Jul 6 23:34:28 2026}: branch: Created from HEAD
+240d5a0 HEAD@{Mon Jul 6 23:34:28 2026}: checkout: moving from maksud to backup-maksud
+240d5a0 HEAD@{Mon Jul 6 22:43:35 2026}: checkout: moving from maksud to maksud
+240d5a0 HEAD@{Mon Jul 6 22:38:11 2026}: checkout: moving from 9d28b8e1690ead94ad1d015e37313055b4d823dc to maksud
+9d28b8e HEAD@{Mon Jul 6 18:39:32 2026}: commit: custom-domain-dashboard
+e1c2f1e HEAD@{Mon Jul 6 18:26:13 2026}: commit: custom doamin solve
+c7b10d8 HEAD@{Mon Jul 6 15:43:37 2026}: commit: terminal added
+622e489 HEAD@{Mon Jul 6 15:35:58 2026}: commit: common
+a5386ab HEAD@{Mon Jul 6 13:23:14 2026}: commit: nginx - setup
+d76a027 HEAD@{Mon Jul 6 13:13:05 2026}: commit: added nginx functionality
+2e2ecd1 HEAD@{Mon Jul 6 12:55:21 2026}: commit: modal height changes
+bcd0c9f HEAD@{Mon Jul 6 12:42:37 2026}: commit: nging settings
+b87543b HEAD@{Mon Jul 6 12:15:30 2026}: commit: nginx added
+f41f519 HEAD@{Mon Jul 6 11:40:39 2026}: commit: subdomain routing setup
+3cad6be HEAD@{Mon Jul 6 10:47:42 2026}: commit: subdomain related issue
+d8a4969 HEAD@{Mon Jul 6 03:29:59 2026}: commit: fontend add 3:29 AM
+92bb1cf HEAD@{Mon Jul 6 03:26:35 2026}: checkout: moving from maksud to 92bb1cf28517b0cf7479f5cc25e850a35a18acd2
+240d5a0 refs/remotes/origin/maksud@{Mon Jul 6 03:25:31 2026}: update by push
+240d5a0 refs/heads/maksud@{Mon Jul 6 03:25:09 2026}: commit: last changes 3:24 AM
+240d5a0 HEAD@{Mon Jul 6 03:25:09 2026}: commit: last changes 3:24 AM
+7759bad refs/heads/maksud@{Mon Jul 6 01:51:01 2026}: commit: ssl fast load
+7759bad HEAD@{Mon Jul 6 01:51:01 2026}: commit: ssl fast load
+13ec7a9 refs/heads/maksud@{Mon Jul 6 00:13:19 2026}: commit: ssl-fixed 1
+13ec7a9 HEAD@{Mon Jul 6 00:13:19 2026}: commit: ssl-fixed 1
+6a95315 refs/heads/maksud@{Sun Jul 5 23:36:52 2026}: commit: ssl issue
+6a95315 HEAD@{Sun Jul 5 23:36:52 2026}: commit: ssl issue
+f0eee4d refs/heads/maksud@{Sun Jul 5 23:18:15 2026}: commit: add-changes for ssl
+f0eee4d HEAD@{Sun Jul 5 23:18:15 2026}: commit: add-changes for ssl
+ad006b0 refs/heads/maksud@{Sun Jul 5 22:30:46 2026}: commit: deploy-ssl
+ad006b0 HEAD@{Sun Jul 5 22:30:46 2026}: commit: deploy-ssl
+22a23fa refs/heads/maksud@{Sun Jul 5 09:52:18 2026}: commit: changes 5-7-2026
+22a23fa HEAD@{Sun Jul 5 09:52:18 2026}: commit: changes 5-7-2026
+2284063 refs/heads/maksud@{Sat Jul 4 09:13:06 2026}: commit: 4-7-2026 9:12
+2284063 HEAD@{Sat Jul 4 09:13:06 2026}: commit: 4-7-2026 9:12
+8304e10 refs/heads/maksud@{Thu Jul 2 12:28:56 2026}: commit: frontend for super admin
+8304e10 HEAD@{Thu Jul 2 12:28:56 2026}: commit: frontend for super admin
+8a5ddb7 refs/heads/maksud@{Thu Jul 2 12:27:19 2026}: commit: updated superadmin
+8a5ddb7 HEAD@{Thu Jul 2 12:27:19 2026}: commit: updated superadmin
+fdbf7ac refs/heads/maksud@{Thu Jul 2 11:56:07 2026}: commit: datatable-updated
+fdbf7ac HEAD@{Thu Jul 2 11:56:07 2026}: commit: datatable-updated
+92bb1cf refs/heads/maksud@{Wed Jul 1 09:07:47 2026}: commit: many files changes for backup
+92bb1cf HEAD@{Wed Jul 1 09:07:47 2026}: commit: many files changes for backup
+098c734 refs/heads/maksud@{Tue Jun 30 21:23:16 2026}: commit: 30-06-2026 9:23 pm
+098c734 HEAD@{Tue Jun 30 21:23:16 2026}: commit: 30-06-2026 9:23 pm
+bee802f refs/heads/maksud@{Mon Jun 29 19:13:03 2026}: commit: change 29-6-2026 - 7:12 pm
+bee802f HEAD@{Mon Jun 29 19:13:03 2026}: commit: change 29-6-2026 - 7:12 pm
+2728bda refs/heads/maksud@{Sun Jun 28 19:26:08 2026}: commit: changes 28-06-2026 7:25 pm
+2728bda HEAD@{Sun Jun 28 19:26:08 2026}: commit: changes 28-06-2026 7:25 pm
+ac653a4 refs/heads/maksud@{Sun Jun 28 16:24:07 2026}: commit: many changes done 4:23
+ac653a4 HEAD@{Sun Jun 28 16:24:07 2026}: commit: many changes done 4:23
+c0fdb16 refs/heads/maksud@{Sun Jun 28 09:31:18 2026}: commit: change design
+c0fdb16 HEAD@{Sun Jun 28 09:31:18 2026}: commit: change design
+c7ae8ab refs/heads/maksud@{Sun Jun 28 08:00:57 2026}: commit: changes home page
+c7ae8ab HEAD@{Sun Jun 28 08:00:57 2026}: commit: changes home page
+8283b35 refs/heads/maksud@{Sun Jun 28 07:53:43 2026}: commit: changes pages based on work
+8283b35 HEAD@{Sun Jun 28 07:53:43 2026}: commit: changes pages based on work
+7a30f1c refs/heads/maksud@{Sat Jun 27 00:15:29 2026}: commit: changing admission form
+7a30f1c HEAD@{Sat Jun 27 00:15:29 2026}: commit: changing admission form
+088c641 refs/heads/maksud@{Fri Jun 26 22:34:01 2026}: commit: changes Outdoor Invoice
+088c641 HEAD@{Fri Jun 26 22:34:01 2026}: commit: changes Outdoor Invoice
+a3ab0e2 refs/heads/maksud@{Fri Jun 26 22:26:03 2026}: commit: changes cols
+a3ab0e2 HEAD@{Fri Jun 26 22:26:03 2026}: commit: changes cols
+67a0670 refs/heads/maksud@{Fri Jun 26 20:44:05 2026}: commit: change 26-06-2026 8:43 pm
+67a0670 HEAD@{Fri Jun 26 20:44:05 2026}: commit: change 26-06-2026 8:43 pm
+5c624c2 refs/heads/maksud@{Thu Jun 25 08:20:49 2026}: commit: changes 25-6-2026 8:20
+5c624c2 HEAD@{Thu Jun 25 08:20:49 2026}: commit: changes 25-6-2026 8:20
+c165cd0 refs/heads/maksud@{Thu Jun 25 07:34:34 2026}: commit: 25-6-2026 7:34 AM
+c165cd0 HEAD@{Thu Jun 25 07:34:34 2026}: commit: 25-6-2026 7:34 AM
+bc640df refs/heads/maksud@{Thu Jun 25 00:36:53 2026}: commit: changes 25-6-2026 12:36 AM
+bc640df HEAD@{Thu Jun 25 00:36:53 2026}: commit: changes 25-6-2026 12:36 AM
+cb4b1d8 refs/heads/maksud@{Wed Jun 24 17:30:30 2026}: commit: 24-06-5:30 pm
+cb4b1d8 HEAD@{Wed Jun 24 17:30:30 2026}: commit: 24-06-5:30 pm
+86c1e38 refs/heads/maksud@{Wed Jun 24 12:42:42 2026}: commit: changes cards 12:42 24/06/2026
+86c1e38 HEAD@{Wed Jun 24 12:42:42 2026}: commit: changes cards 12:42 24/06/2026
+25a369d refs/heads/maksud@{Wed Jun 24 09:07:41 2026}: commit: Changes 24/6/2026 9:07 AM
+25a369d HEAD@{Wed Jun 24 09:07:41 2026}: commit: Changes 24/6/2026 9:07 AM
+b124477 refs/heads/maksud@{Tue Jun 23 00:21:30 2026}: commit: changes 23-06 - 12:21 am
+b124477 HEAD@{Tue Jun 23 00:21:30 2026}: commit: changes 23-06 - 12:21 am
+c0c8fd6 refs/heads/maksud@{Mon Jun 22 23:40:21 2026}: commit: Changes 22-06-11:40 pm
+c0c8fd6 HEAD@{Mon Jun 22 23:40:21 2026}: commit: Changes 22-06-11:40 pm
+7ae4a38 refs/heads/maksud@{Mon Jun 22 08:03:40 2026}: commit: cahnges
+7ae4a38 HEAD@{Mon Jun 22 08:03:40 2026}: commit: cahnges
+7bbde5d refs/heads/maksud@{Mon Jun 22 07:15:24 2026}: commit: changed 22-6-2026 7:15 AM
+7bbde5d HEAD@{Mon Jun 22 07:15:24 2026}: commit: changed 22-6-2026 7:15 AM
+00c2dd2 refs/heads/maksud@{Thu Jun 18 05:10:32 2026}: commit: changes 18-06-2026
+00c2dd2 HEAD@{Thu Jun 18 05:10:32 2026}: commit: changes 18-06-2026
+cc04367 refs/heads/maksud@{Wed Jun 17 05:01:33 2026}: commit: chnages 17-06-2026 5:01
+cc04367 HEAD@{Wed Jun 17 05:01:33 2026}: commit: chnages 17-06-2026 5:01
+009ae47 refs/heads/maksud@{Tue Jun 16 22:34:32 2026}: commit: changed
+009ae47 HEAD@{Tue Jun 16 22:34:32 2026}: commit: changed
+cc9daa8 refs/heads/maksud@{Tue Jun 16 22:19:44 2026}: commit: changes invoice
+cc9daa8 HEAD@{Tue Jun 16 22:19:44 2026}: commit: changes invoice
+7409d2a refs/heads/maksud@{Tue Jun 16 22:16:43 2026}: commit: Changes 16-06-2026
+7409d2a HEAD@{Tue Jun 16 22:16:43 2026}: commit: Changes 16-06-2026
+c8bcf56 refs/heads/maksud@{Tue Jun 16 16:11:12 2026}: commit: changes design
+c8bcf56 HEAD@{Tue Jun 16 16:11:12 2026}: commit: changes design
+4a6d6a9 refs/heads/maksud@{Tue Jun 16 15:16:56 2026}: commit: 16-6-2026 3:15 PM
+4a6d6a9 HEAD@{Tue Jun 16 15:16:56 2026}: commit: 16-6-2026 3:15 PM
+a29c88b refs/heads/maksud@{Tue Jun 16 14:43:55 2026}: commit: resource added
+a29c88b HEAD@{Tue Jun 16 14:43:55 2026}: commit: resource added
+9f3c37b refs/heads/maksud@{Tue Jun 16 13:12:21 2026}: commit: change 16-06-2026
+9f3c37b HEAD@{Tue Jun 16 13:12:21 2026}: commit: change 16-06-2026
+a962f08 refs/heads/maksud@{Sat May 16 07:01:41 2026}: commit: 16-5 morning
+a962f08 HEAD@{Sat May 16 07:01:41 2026}: commit: 16-5 morning
+687c33c refs/heads/maksud@{Fri May 15 17:56:15 2026}: commit: pagination added
+687c33c HEAD@{Fri May 15 17:56:15 2026}: commit: pagination added
+6a091aa refs/heads/maksud@{Fri May 15 11:32:30 2026}: commit: fontend 11.32
+6a091aa HEAD@{Fri May 15 11:32:30 2026}: commit: fontend 11.32
+801919c refs/heads/maksud@{Fri May 15 05:22:59 2026}: commit: 15-5-2026
+801919c HEAD@{Fri May 15 05:22:59 2026}: commit: 15-5-2026
