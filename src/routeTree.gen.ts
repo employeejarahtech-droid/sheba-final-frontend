@@ -49,6 +49,7 @@ import { Route as platformAdminNginxDomainListRouteImport } from './routes/(plat
 import { Route as platformAdminModulesRouteImport } from './routes/(platform)/admin/modules'
 import { Route as platformAdminLoginRouteImport } from './routes/(platform)/admin/login'
 import { Route as platformAdminContactsRouteImport } from './routes/(platform)/admin/contacts'
+import { Route as platformAdminCommonCommandsRouteImport } from './routes/(platform)/admin/common-commands'
 import { Route as platformAdminAdminsRouteImport } from './routes/(platform)/admin/admins'
 import { Route as AuthenticatedDashboardSettingsRouteRouteImport } from './routes/_authenticated/dashboard/settings/route'
 import { Route as AuthenticatedDashboardUsersIndexRouteImport } from './routes/_authenticated/dashboard/users/index'
@@ -623,6 +624,12 @@ const platformAdminContactsRoute = platformAdminContactsRouteImport.update({
   path: '/contacts',
   getParentRoute: () => platformAdminRouteRoute,
 } as any)
+const platformAdminCommonCommandsRoute =
+  platformAdminCommonCommandsRouteImport.update({
+    id: '/common-commands',
+    path: '/common-commands',
+    getParentRoute: () => platformAdminRouteRoute,
+  } as any)
 const platformAdminAdminsRoute = platformAdminAdminsRouteImport.update({
   id: '/admins',
   path: '/admins',
@@ -3020,6 +3027,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof platformTermsRoute
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRouteRouteWithChildren
   '/admin/admins': typeof platformAdminAdminsRoute
+  '/admin/common-commands': typeof platformAdminCommonCommandsRoute
   '/admin/contacts': typeof platformAdminContactsRoute
   '/admin/login': typeof platformAdminLoginRoute
   '/admin/modules': typeof platformAdminModulesRoute
@@ -3428,6 +3436,7 @@ export interface FileRoutesByTo {
   '/register': typeof platformRegisterRoute
   '/terms': typeof platformTermsRoute
   '/admin/admins': typeof platformAdminAdminsRoute
+  '/admin/common-commands': typeof platformAdminCommonCommandsRoute
   '/admin/contacts': typeof platformAdminContactsRoute
   '/admin/login': typeof platformAdminLoginRoute
   '/admin/modules': typeof platformAdminModulesRoute
@@ -3843,6 +3852,7 @@ export interface FileRoutesById {
   '/(platform)/terms': typeof platformTermsRoute
   '/_authenticated/dashboard/settings': typeof AuthenticatedDashboardSettingsRouteRouteWithChildren
   '/(platform)/admin/admins': typeof platformAdminAdminsRoute
+  '/(platform)/admin/common-commands': typeof platformAdminCommonCommandsRoute
   '/(platform)/admin/contacts': typeof platformAdminContactsRoute
   '/(platform)/admin/login': typeof platformAdminLoginRoute
   '/(platform)/admin/modules': typeof platformAdminModulesRoute
@@ -4255,6 +4265,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/dashboard/settings'
     | '/admin/admins'
+    | '/admin/common-commands'
     | '/admin/contacts'
     | '/admin/login'
     | '/admin/modules'
@@ -4663,6 +4674,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/terms'
     | '/admin/admins'
+    | '/admin/common-commands'
     | '/admin/contacts'
     | '/admin/login'
     | '/admin/modules'
@@ -5077,6 +5089,7 @@ export interface FileRouteTypes {
     | '/(platform)/terms'
     | '/_authenticated/dashboard/settings'
     | '/(platform)/admin/admins'
+    | '/(platform)/admin/common-commands'
     | '/(platform)/admin/contacts'
     | '/(platform)/admin/login'
     | '/(platform)/admin/modules'
@@ -5770,6 +5783,13 @@ declare module '@tanstack/react-router' {
       path: '/contacts'
       fullPath: '/admin/contacts'
       preLoaderRoute: typeof platformAdminContactsRouteImport
+      parentRoute: typeof platformAdminRouteRoute
+    }
+    '/(platform)/admin/common-commands': {
+      id: '/(platform)/admin/common-commands'
+      path: '/common-commands'
+      fullPath: '/admin/common-commands'
+      preLoaderRoute: typeof platformAdminCommonCommandsRouteImport
       parentRoute: typeof platformAdminRouteRoute
     }
     '/(platform)/admin/admins': {
@@ -9545,6 +9565,7 @@ const ClerkRouteRouteWithChildren = ClerkRouteRoute._addFileChildren(
 
 interface platformAdminRouteRouteChildren {
   platformAdminAdminsRoute: typeof platformAdminAdminsRoute
+  platformAdminCommonCommandsRoute: typeof platformAdminCommonCommandsRoute
   platformAdminContactsRoute: typeof platformAdminContactsRoute
   platformAdminLoginRoute: typeof platformAdminLoginRoute
   platformAdminModulesRoute: typeof platformAdminModulesRoute
@@ -9565,6 +9586,7 @@ interface platformAdminRouteRouteChildren {
 
 const platformAdminRouteRouteChildren: platformAdminRouteRouteChildren = {
   platformAdminAdminsRoute: platformAdminAdminsRoute,
+  platformAdminCommonCommandsRoute: platformAdminCommonCommandsRoute,
   platformAdminContactsRoute: platformAdminContactsRoute,
   platformAdminLoginRoute: platformAdminLoginRoute,
   platformAdminModulesRoute: platformAdminModulesRoute,

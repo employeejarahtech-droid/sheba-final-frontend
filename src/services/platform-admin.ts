@@ -99,6 +99,35 @@ export async function fetchNginxDomains(): Promise<ApiResponse<PlatformNginxDoma
   return platformFetchJson('/api/admin/nginx/domains')
 }
 
+// ── Server Commands (whitelisted remote execution) ──────────────────────
+
+export interface ServerCommandResult {
+  code: number
+  stdout: string
+  stderr: string
+}
+
+// Distinct from ApiResponse<T>: a 200 response can carry `success: false`
+// (the command ran but exited non-zero — still useful diagnostic output, not
+// a request failure) and the self-restart commands respond with no `data` at
+// all. Only 4xx/5xx (unknown command, missing confirmation) throw via
+// platformFetchJson and surface through the mutation's onError instead.
+export interface ServerCommandRunResponse {
+  success: boolean
+  message?: string
+  data?: ServerCommandResult
+}
+
+export async function runServerCommand(
+  id: string,
+  confirm?: boolean
+): Promise<ServerCommandRunResponse> {
+  return platformFetchJson(`/api/admin/commands/${encodeURIComponent(id)}/run`, {
+    method: 'POST',
+    body: JSON.stringify(confirm ? { confirm: true } : {}),
+  })
+}
+
 export async function deleteNginxDomain(
   file: string
 ): Promise<ApiResponse<{ file: string; nginxTestOutput: string | null }>> {

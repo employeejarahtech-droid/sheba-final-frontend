@@ -167,6 +167,16 @@ export function useUpdateNginxDomain() {
   })
 }
 
+// ── Server Commands (whitelisted remote execution) ──────────────────────
+
+export function useRunServerCommand() {
+  return useMutation({
+    mutationFn: ({ id, confirm }: { id: string; confirm?: boolean }) =>
+      adminService.runServerCommand(id, confirm),
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
 // ── Company Custom Domain (superadmin review workflow) ─────────────────
 
 export function useCompanyDomains(companyId: number) {
