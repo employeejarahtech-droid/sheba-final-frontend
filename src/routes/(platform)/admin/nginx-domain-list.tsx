@@ -291,7 +291,7 @@ function EditNginxDomainDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="sm:max-w-3xl max-h-[700px] flex flex-col">
         <DialogHeader>
           <DialogTitle className="font-mono">{file}</DialogTitle>
           <DialogDescription>
@@ -309,7 +309,7 @@ function EditNginxDomainDialog({
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="font-mono text-xs min-h-[400px]"
+            className="font-mono text-xs flex-1 min-h-0 resize-none overflow-y-auto"
             spellCheck={false}
           />
         )}
