@@ -25,6 +25,8 @@ import {
   AlertTriangle,
   Play,
   Loader2,
+  Globe,
+  Cpu,
 } from 'lucide-react'
 import { getAdminRoleFromToken } from '@/stores/platform-auth-store'
 import { useRunServerCommand } from '@/hooks/usePlatformAdmin'
@@ -57,6 +59,37 @@ interface CommandSection {
 // the matching backend `id` instead, which already executes as root and
 // applies extra safety (delayed reboot, non-streaming logs, confirm-gating).
 const SECTIONS: CommandSection[] = [
+  {
+    title: 'hmsap.com (frontend)',
+    icon: Globe,
+    commands: [
+      {
+        id: 'frontend-git-pull',
+        command: 'git pull',
+        description: 'Pull the latest built frontend (/var/www/hmsap.com) — nginx serves it directly, no restart needed',
+        danger: true,
+      },
+    ],
+  },
+  {
+    title: 'api.hmsap.com (backend)',
+    icon: Cpu,
+    commands: [
+      { id: 'git-pull', command: 'git pull', description: 'Pull the latest API code (/var/www/api.hmsap.com)', danger: true },
+      {
+        id: 'api-npm-install',
+        command: 'npm install',
+        description: 'Install/update dependencies after a git pull that changed package.json',
+        danger: true,
+      },
+      {
+        id: 'pm2-restart-all',
+        command: 'pm2 restart all',
+        description: 'Restart every PM2-managed process to pick up the new code. The connection will drop briefly.',
+        danger: true,
+      },
+    ],
+  },
   {
     title: 'Nginx',
     icon: Server,
