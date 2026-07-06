@@ -125,6 +125,15 @@ export function useLoginAsCompany() {
   })
 }
 
+// ── Nginx Domains (diagnostic) ──────────────────────────────────────────
+
+export function useNginxDomains() {
+  return useQuery({
+    queryKey: ['platform-admin', 'nginx-domains'],
+    queryFn: () => adminService.fetchNginxDomains().then((r) => r.data),
+  })
+}
+
 // ── Company Custom Domain (superadmin review workflow) ─────────────────
 
 export function useCompanyDomains(companyId: number) {

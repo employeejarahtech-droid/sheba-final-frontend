@@ -10,6 +10,7 @@ import type {
   PlatformDashboardStats,
   PlatformCompany,
   PlatformCompanyDomain,
+  PlatformNginxDomainsResult,
   PlatformSubscriptionPlan,
   PlatformRegistration,
   PlatformAdminUser,
@@ -90,6 +91,12 @@ export interface LoginAsResult {
 
 export async function loginAsCompany(id: number): Promise<ApiResponse<LoginAsResult>> {
   return platformFetchJson(`/api/admin/companies/${id}/login-as`, { method: 'POST' })
+}
+
+// ── Nginx Domains (diagnostic) ──────────────────────────────────────────
+
+export async function fetchNginxDomains(): Promise<ApiResponse<PlatformNginxDomainsResult>> {
+  return platformFetchJson('/api/admin/nginx/domains')
 }
 
 // ── Company Custom Domain (superadmin review workflow) ─────────────────

@@ -19,6 +19,7 @@ import {
   Mail,
   Settings,
   UserCircle,
+  Server,
 } from 'lucide-react'
 import type { SidebarData } from '@/components/layout/types'
 
@@ -57,6 +58,7 @@ export const adminSidebarData: SidebarData = {
     {
       title: 'System',
       items: [
+        { title: 'Nginx Domains', url: '/admin/nginx-domain-list', icon: Server },
         { title: 'Settings', url: '/admin/settings', icon: Settings },
         { title: 'Profile', url: '/admin/profile', icon: UserCircle },
       ],

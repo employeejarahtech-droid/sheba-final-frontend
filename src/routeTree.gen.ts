@@ -45,6 +45,7 @@ import { Route as platformAdminSubscriptionsRouteImport } from './routes/(platfo
 import { Route as platformAdminSettingsRouteImport } from './routes/(platform)/admin/settings'
 import { Route as platformAdminRegistrationsRouteImport } from './routes/(platform)/admin/registrations'
 import { Route as platformAdminProfileRouteImport } from './routes/(platform)/admin/profile'
+import { Route as platformAdminNginxDomainListRouteImport } from './routes/(platform)/admin/nginx-domain-list'
 import { Route as platformAdminModulesRouteImport } from './routes/(platform)/admin/modules'
 import { Route as platformAdminLoginRouteImport } from './routes/(platform)/admin/login'
 import { Route as platformAdminContactsRouteImport } from './routes/(platform)/admin/contacts'
@@ -601,6 +602,12 @@ const platformAdminProfileRoute = platformAdminProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => platformAdminRouteRoute,
 } as any)
+const platformAdminNginxDomainListRoute =
+  platformAdminNginxDomainListRouteImport.update({
+    id: '/nginx-domain-list',
+    path: '/nginx-domain-list',
+    getParentRoute: () => platformAdminRouteRoute,
+  } as any)
 const platformAdminModulesRoute = platformAdminModulesRouteImport.update({
   id: '/modules',
   path: '/modules',
@@ -3016,6 +3023,7 @@ export interface FileRoutesByFullPath {
   '/admin/contacts': typeof platformAdminContactsRoute
   '/admin/login': typeof platformAdminLoginRoute
   '/admin/modules': typeof platformAdminModulesRoute
+  '/admin/nginx-domain-list': typeof platformAdminNginxDomainListRoute
   '/admin/profile': typeof platformAdminProfileRoute
   '/admin/registrations': typeof platformAdminRegistrationsRoute
   '/admin/settings': typeof platformAdminSettingsRoute
@@ -3423,6 +3431,7 @@ export interface FileRoutesByTo {
   '/admin/contacts': typeof platformAdminContactsRoute
   '/admin/login': typeof platformAdminLoginRoute
   '/admin/modules': typeof platformAdminModulesRoute
+  '/admin/nginx-domain-list': typeof platformAdminNginxDomainListRoute
   '/admin/profile': typeof platformAdminProfileRoute
   '/admin/registrations': typeof platformAdminRegistrationsRoute
   '/admin/settings': typeof platformAdminSettingsRoute
@@ -3837,6 +3846,7 @@ export interface FileRoutesById {
   '/(platform)/admin/contacts': typeof platformAdminContactsRoute
   '/(platform)/admin/login': typeof platformAdminLoginRoute
   '/(platform)/admin/modules': typeof platformAdminModulesRoute
+  '/(platform)/admin/nginx-domain-list': typeof platformAdminNginxDomainListRoute
   '/(platform)/admin/profile': typeof platformAdminProfileRoute
   '/(platform)/admin/registrations': typeof platformAdminRegistrationsRoute
   '/(platform)/admin/settings': typeof platformAdminSettingsRoute
@@ -4248,6 +4258,7 @@ export interface FileRouteTypes {
     | '/admin/contacts'
     | '/admin/login'
     | '/admin/modules'
+    | '/admin/nginx-domain-list'
     | '/admin/profile'
     | '/admin/registrations'
     | '/admin/settings'
@@ -4655,6 +4666,7 @@ export interface FileRouteTypes {
     | '/admin/contacts'
     | '/admin/login'
     | '/admin/modules'
+    | '/admin/nginx-domain-list'
     | '/admin/profile'
     | '/admin/registrations'
     | '/admin/settings'
@@ -5068,6 +5080,7 @@ export interface FileRouteTypes {
     | '/(platform)/admin/contacts'
     | '/(platform)/admin/login'
     | '/(platform)/admin/modules'
+    | '/(platform)/admin/nginx-domain-list'
     | '/(platform)/admin/profile'
     | '/(platform)/admin/registrations'
     | '/(platform)/admin/settings'
@@ -5729,6 +5742,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/admin/profile'
       preLoaderRoute: typeof platformAdminProfileRouteImport
+      parentRoute: typeof platformAdminRouteRoute
+    }
+    '/(platform)/admin/nginx-domain-list': {
+      id: '/(platform)/admin/nginx-domain-list'
+      path: '/nginx-domain-list'
+      fullPath: '/admin/nginx-domain-list'
+      preLoaderRoute: typeof platformAdminNginxDomainListRouteImport
       parentRoute: typeof platformAdminRouteRoute
     }
     '/(platform)/admin/modules': {
@@ -9528,6 +9548,7 @@ interface platformAdminRouteRouteChildren {
   platformAdminContactsRoute: typeof platformAdminContactsRoute
   platformAdminLoginRoute: typeof platformAdminLoginRoute
   platformAdminModulesRoute: typeof platformAdminModulesRoute
+  platformAdminNginxDomainListRoute: typeof platformAdminNginxDomainListRoute
   platformAdminProfileRoute: typeof platformAdminProfileRoute
   platformAdminRegistrationsRoute: typeof platformAdminRegistrationsRoute
   platformAdminSettingsRoute: typeof platformAdminSettingsRoute
@@ -9547,6 +9568,7 @@ const platformAdminRouteRouteChildren: platformAdminRouteRouteChildren = {
   platformAdminContactsRoute: platformAdminContactsRoute,
   platformAdminLoginRoute: platformAdminLoginRoute,
   platformAdminModulesRoute: platformAdminModulesRoute,
+  platformAdminNginxDomainListRoute: platformAdminNginxDomainListRoute,
   platformAdminProfileRoute: platformAdminProfileRoute,
   platformAdminRegistrationsRoute: platformAdminRegistrationsRoute,
   platformAdminSettingsRoute: platformAdminSettingsRoute,
