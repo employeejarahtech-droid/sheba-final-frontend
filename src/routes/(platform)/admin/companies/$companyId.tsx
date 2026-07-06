@@ -9,6 +9,7 @@
 
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import {
   Building2,
   ArrowLeft,
@@ -22,14 +23,26 @@ import {
   Hash,
   ToggleLeft,
   ToggleRight,
+  ShieldCheck,
+  Lock,
+  Rocket,
+  PowerOff,
+  RefreshCw,
+  AlertCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   useCompany,
   useSubscription,
   useToggleCompanyActive,
+  useCompanyDomains,
+  useVerifyDomainDNS,
+  useInstallDomainSSL,
+  useGoLiveDomain,
+  useDeactivateDomain,
+  useRecheckDomainSSL,
 } from '@/hooks/usePlatformAdmin'
-import type { PlatformCompany, PlatformSubscription } from '@/types/platform.types'
+import type { PlatformCompany, PlatformCompanyDomain, PlatformSubscription } from '@/types/platform.types'
 import { getAdminRoleFromToken } from '@/stores/platform-auth-store'
 
 export const Route = createFileRoute('/(platform)/admin/companies/$companyId')({
@@ -239,6 +252,208 @@ function CompanyDetailPage() {
             />
           </dl>
         </section>
+      </div>
+
+      {/* Custom Domain — superadmin review workflow */}
+      <DomainReviewSection companyId={company.id} />
+    </div>
+  )
+}
+
+// ── Domain Review Section ────────────────────────────────────────────────
+
+const domainStatusColorMap: Record<string, string> = {
+  pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+  verifying: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  verified: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  ssl_generating: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  ssl_installed: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  live: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  error: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+}
+
+function DomainReviewSection({ companyId }: { companyId: number }) {
+  const { data: domains, isLoading } = useCompanyDomains(companyId)
+  const verifyDNS = useVerifyDomainDNS(companyId)
+  const installSSL = useInstallDomainSSL(companyId)
+  const goLive = useGoLiveDomain(companyId)
+  const deactivate = useDeactivateDomain(companyId)
+  const recheckSSL = useRecheckDomainSSL(companyId)
+
+  return (
+    <section className="rounded-lg border bg-card p-5">
+      <div className="mb-4 flex items-center gap-2">
+        <Globe className="h-5 w-5 text-purple-500" />
+        <h2 className="font-semibold">Custom Domain Requests</h2>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-5 w-5 animate-spin text-purple-500" />
+        </div>
+      ) : !domains || domains.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No custom domain has been requested by this tenant yet.
+        </p>
+      ) : (
+        <div className="space-y-4">
+          {domains.map((d) => (
+            <DomainReviewRow
+              key={d.id}
+              domain={d}
+              onVerifyDNS={() => verifyDNS.mutate(d.id)}
+              onInstallSSL={() => installSSL.mutate(d.id)}
+              onGoLive={() => goLive.mutate(d.id)}
+              onDeactivate={() => deactivate.mutate(d.id)}
+              onRecheckSSL={() => recheckSSL.mutate(d.id)}
+              verifyPending={verifyDNS.isPending}
+              installPending={installSSL.isPending}
+              goLivePending={goLive.isPending}
+              deactivatePending={deactivate.isPending}
+              recheckPending={recheckSSL.isPending}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
+interface DomainReviewRowProps {
+  domain: PlatformCompanyDomain
+  onVerifyDNS: () => void
+  onInstallSSL: () => void
+  onGoLive: () => void
+  onDeactivate: () => void
+  onRecheckSSL: () => void
+  verifyPending: boolean
+  installPending: boolean
+  goLivePending: boolean
+  deactivatePending: boolean
+  recheckPending: boolean
+}
+
+function DomainReviewRow({
+  domain,
+  onVerifyDNS,
+  onInstallSSL,
+  onGoLive,
+  onDeactivate,
+  onRecheckSSL,
+  verifyPending,
+  installPending,
+  goLivePending,
+  deactivatePending,
+  recheckPending,
+}: DomainReviewRowProps) {
+  return (
+    <div className="rounded-lg border p-4 space-y-3">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="font-medium">{domain.domain}</p>
+          <p className="text-xs text-muted-foreground">
+            Requested {fmtDateTime(domain.createdAt)}
+          </p>
+        </div>
+        <Badge
+          className={cn(
+            'font-medium',
+            domainStatusColorMap[domain.status] || 'bg-gray-100 text-gray-700'
+          )}
+        >
+          {domain.status.replace('_', ' ')}
+        </Badge>
+      </div>
+
+      {domain.error && (
+        <div className="flex items-start gap-2 rounded-md bg-red-50 dark:bg-red-950/30 p-3 text-xs text-red-700 dark:text-red-400">
+          <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+          <span>{domain.error}</span>
+        </div>
+      )}
+
+      {domain.status !== 'live' && domain.status !== 'verified' && domain.status !== 'ssl_installed' && (
+        <div className="rounded-md bg-blue-50 dark:bg-blue-950/20 p-3 text-xs space-y-2">
+          <div>
+            <p className="text-blue-900 dark:text-blue-100 mb-1">
+              Expected A record (host <span className="font-mono">@</span>) — required before SSL install:
+            </p>
+            <p className="font-mono text-blue-800 dark:text-blue-200 break-all">
+              {domain.ipAddress || 'not set — install will fail until this domain has an A record'}
+            </p>
+          </div>
+          {domain.dnsToken && (
+            <div>
+              <p className="text-blue-900 dark:text-blue-100 mb-1">
+                Expected DNS TXT record (host <span className="font-mono">@</span>):
+              </p>
+              <p className="font-mono text-blue-800 dark:text-blue-200 break-all">{domain.dnsToken}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {domain.status === 'live' && domain.realSSL && (
+        <p className="text-xs text-muted-foreground">
+          Live SSL check: {domain.realSSL.valid ? '✅ ' : '⚠️ '}
+          {domain.realSSL.message}
+        </p>
+      )}
+
+      <div className="flex flex-wrap gap-2">
+        {(domain.status === 'pending' || domain.status === 'error') && (
+          <Button size="sm" onClick={onVerifyDNS} disabled={verifyPending}>
+            {verifyPending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <ShieldCheck className="h-4 w-4 mr-2" />
+            )}
+            Verify DNS
+          </Button>
+        )}
+
+        {domain.status === 'verified' && (
+          <Button size="sm" onClick={onInstallSSL} disabled={installPending}>
+            {installPending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Lock className="h-4 w-4 mr-2" />
+            )}
+            Install SSL
+          </Button>
+        )}
+
+        {domain.status === 'ssl_installed' && (
+          <Button size="sm" onClick={onGoLive} disabled={goLivePending}>
+            {goLivePending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Rocket className="h-4 w-4 mr-2" />
+            )}
+            Go Live
+          </Button>
+        )}
+
+        {domain.status === 'live' && (
+          <>
+            <Button size="sm" variant="outline" onClick={onRecheckSSL} disabled={recheckPending}>
+              {recheckPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Recheck SSL
+            </Button>
+            <Button size="sm" variant="destructive" onClick={onDeactivate} disabled={deactivatePending}>
+              {deactivatePending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <PowerOff className="h-4 w-4 mr-2" />
+              )}
+              Deactivate
+            </Button>
+          </>
+        )}
       </div>
     </div>
   )

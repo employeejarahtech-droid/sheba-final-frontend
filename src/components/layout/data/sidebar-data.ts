@@ -57,6 +57,8 @@ import {
   Package,
   ShoppingCart,
   Truck,
+  AlertTriangle,
+  Globe,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -511,9 +513,11 @@ export const sidebarData: SidebarData = {
             { title: 'Date Controls', url: '/dashboard/settings/date-controls', icon: Clock },
             { title: 'Payment Accounts', url: '/dashboard/settings/payment-accounts', icon: Landmark },
             { title: 'Inventory Accounts', url: '/dashboard/settings/inventory-accounts', icon: Package },
+            { title: 'Domain Configuration', url: '/dashboard/settings/domain-configuration', icon: Globe },
             { title: 'Database Browser', url: '/dashboard/database', icon: Database },
             { title: 'Backups', url: '/dashboard/backups', icon: Database },
             { title: 'Backup Settings', url: '/dashboard/backup-settings', icon: Settings },
+            { title: 'Reset Database', url: '/dashboard/reset-database', icon: AlertTriangle },
           ],
         },
         {
