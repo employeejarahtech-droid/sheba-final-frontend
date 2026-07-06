@@ -134,6 +134,39 @@ export function useNginxDomains() {
   })
 }
 
+export function useDeleteNginxDomain() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: adminService.deleteNginxDomain,
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'nginx-domains'] })
+      toast.success(res.success ? res.message || 'Deleted' : 'Deleted')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+export function useNginxDomainContent(file: string | null) {
+  return useQuery({
+    queryKey: ['platform-admin', 'nginx-domain-content', file],
+    queryFn: () => adminService.fetchNginxDomainContent(file as string).then((r) => r.data),
+    enabled: !!file,
+  })
+}
+
+export function useUpdateNginxDomain() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ file, content }: { file: string; content: string }) =>
+      adminService.updateNginxDomain(file, content),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['platform-admin', 'nginx-domains'] })
+      toast.success('Saved and reloaded nginx')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
 // ── Company Custom Domain (superadmin review workflow) ─────────────────
 
 export function useCompanyDomains(companyId: number) {

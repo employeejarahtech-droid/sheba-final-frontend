@@ -1,5 +1,6 @@
 /**
- * Nginx Domain List — Diagnostic view of nginx server blocks on the API host
+ * Nginx Domain List — Diagnostic + management view of nginx server blocks on
+ * the API host.
  *
  * Route: /(platform)/admin/nginx-domain-list
  * Reads /etc/nginx/sites-available (+ sites-enabled) directly off disk via
@@ -7,11 +8,27 @@
  * companies.domain / companies.subdomain so you can spot orphaned or
  * misconfigured blocks (e.g. a custom domain that never got matched to a
  * tenant, or one still pointing at the API's own proxy config).
+ *
+ * Delete and Edit both act directly on the live file on disk:
+ *   - Delete removes the file (+ its sites-enabled symlink) and reloads nginx.
+ *   - Edit writes new content, runs `nginx -t`, and only reloads if that
+ *     passes — otherwise the previous content is restored automatically, so
+ *     a bad edit can never take nginx down.
  */
 
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   Server,
   RefreshCw,
@@ -22,9 +39,16 @@ import {
   FileCode,
   ArrowUpRight,
   AlertTriangle,
+  Pencil,
+  Trash2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useNginxDomains } from '@/hooks/usePlatformAdmin'
+import {
+  useNginxDomains,
+  useDeleteNginxDomain,
+  useNginxDomainContent,
+  useUpdateNginxDomain,
+} from '@/hooks/usePlatformAdmin'
 import type { PlatformNginxDomain } from '@/types/platform.types'
 import { getAdminRoleFromToken } from '@/stores/platform-auth-store'
 
@@ -40,6 +64,7 @@ export const Route = createFileRoute('/(platform)/admin/nginx-domain-list')({
 function NginxDomainListPage() {
   const { data, isLoading, isFetching, refetch } = useNginxDomains()
   const domains = data?.domains ?? []
+  const [editingFile, setEditingFile] = useState<string | null>(null)
 
   return (
     <div className="space-y-6">
@@ -95,16 +120,39 @@ function NginxDomainListPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {domains.map((d) => (
-            <NginxDomainCard key={d.file} domain={d} />
+            <NginxDomainCard key={d.file} domain={d} onEdit={() => setEditingFile(d.file)} />
           ))}
         </div>
       )}
+
+      <EditNginxDomainDialog
+        file={editingFile}
+        open={editingFile !== null}
+        onOpenChange={(open) => !open && setEditingFile(null)}
+      />
     </div>
   )
 }
 
-function NginxDomainCard({ domain }: { domain: PlatformNginxDomain }) {
+function NginxDomainCard({
+  domain,
+  onEdit,
+}: {
+  domain: PlatformNginxDomain
+  onEdit: () => void
+}) {
   const orphaned = !domain.matchedCompany
+  const deleteDomain = useDeleteNginxDomain()
+
+  const handleDelete = () => {
+    const warning = domain.matchedCompany
+      ? `"${domain.file}" is currently matched to tenant "${domain.matchedCompany.name}". Deleting it will take that domain offline immediately. This cannot be undone. Continue?`
+      : `Delete "${domain.file}"? This removes the config from disk and reloads nginx. This cannot be undone.`
+    if (window.confirm(warning)) {
+      deleteDomain.mutate(domain.file)
+    }
+  }
+
   return (
     <section className="rounded-lg border bg-card p-5 space-y-3">
       <div className="flex items-start justify-between gap-3">
@@ -160,7 +208,7 @@ function NginxDomainCard({ domain }: { domain: PlatformNginxDomain }) {
         )}
       </div>
 
-      <div className="pt-2 border-t">
+      <div className="pt-2 border-t space-y-3">
         {domain.matchedCompany ? (
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Tenant</span>
@@ -183,7 +231,114 @@ function NginxDomainCard({ domain }: { domain: PlatformNginxDomain }) {
             {orphaned ? 'Not matched to any company — check for a stale or orphaned config' : ''}
           </div>
         )}
+
+        <div className="flex justify-end gap-2">
+          <Button size="sm" variant="outline" onClick={onEdit}>
+            <Pencil className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={deleteDomain.isPending}
+          >
+            {deleteDomain.isPending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4 mr-2" />
+            )}
+            Delete
+          </Button>
+        </div>
       </div>
     </section>
+  )
+}
+
+function EditNginxDomainDialog({
+  file,
+  open,
+  onOpenChange,
+}: {
+  file: string | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  const { data, isLoading } = useNginxDomainContent(file)
+  const updateDomain = useUpdateNginxDomain()
+  const [content, setContent] = useState('')
+
+  // Sync local textarea state whenever a fresh fetch comes in for this file.
+  useEffect(() => {
+    if (data && data.file === file) {
+      setContent(data.content)
+    }
+  }, [data, file])
+
+  const handleClose = (nextOpen: boolean) => {
+    if (!nextOpen) setContent('')
+    onOpenChange(nextOpen)
+  }
+
+  const handleSave = () => {
+    if (!file) return
+    updateDomain.mutate(
+      { file, content },
+      { onSuccess: () => handleClose(false) }
+    )
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="font-mono">{file}</DialogTitle>
+          <DialogDescription>
+            Editing writes directly to this file on disk, then runs <code>nginx -t</code> and
+            reloads. If the test fails, your changes are automatically reverted and nginx keeps
+            running the previous config.
+          </DialogDescription>
+        </DialogHeader>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-purple-500" />
+          </div>
+        ) : (
+          <Textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="font-mono text-xs min-h-[400px]"
+            spellCheck={false}
+          />
+        )}
+
+        <DialogFooter className="gap-2 pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handleClose(false)}
+            disabled={updateDomain.isPending}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={updateDomain.isPending || isLoading || !content.trim()}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
+            {updateDomain.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              'Save & Reload nginx'
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

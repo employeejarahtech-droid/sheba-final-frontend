@@ -99,6 +99,28 @@ export async function fetchNginxDomains(): Promise<ApiResponse<PlatformNginxDoma
   return platformFetchJson('/api/admin/nginx/domains')
 }
 
+export async function deleteNginxDomain(
+  file: string
+): Promise<ApiResponse<{ file: string; nginxTestOutput: string | null }>> {
+  return platformFetchJson(`/api/admin/nginx/domains/${encodeURIComponent(file)}`, { method: 'DELETE' })
+}
+
+export async function fetchNginxDomainContent(
+  file: string
+): Promise<ApiResponse<{ file: string; content: string }>> {
+  return platformFetchJson(`/api/admin/nginx/domains/${encodeURIComponent(file)}/content`)
+}
+
+export async function updateNginxDomain(
+  file: string,
+  content: string
+): Promise<ApiResponse<{ file: string; nginxTestOutput: string | null }>> {
+  return platformFetchJson(`/api/admin/nginx/domains/${encodeURIComponent(file)}`, {
+    method: 'PUT',
+    body: JSON.stringify({ content }),
+  })
+}
+
 // ── Company Custom Domain (superadmin review workflow) ─────────────────
 
 export async function fetchCompanyDomains(companyId: number): Promise<ApiResponse<PlatformCompanyDomain[]>> {
