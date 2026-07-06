@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
-import { getBaseDomain } from '@/lib/subdomain'
+import { getBaseDomain, getSubdomain } from '@/lib/subdomain'
 import { removeCookie, removeUserCookie } from '@/lib/cookies'
 import api from '@/lib/axios'
 import { Button } from '@/components/ui/button'
@@ -64,7 +64,11 @@ function RegistrationSuccessPage() {
       clearOldCredentials()
 
       // Same host → set auth in-place and navigate; otherwise cross-subdomain redirect
-      if (currentHost === targetHost || currentHost === `${targetHost}:${window.location.port}`) {
+      if (
+        currentHost === targetHost ||
+        currentHost === `${targetHost}:${window.location.port}` ||
+        getSubdomain() === subdomain
+      ) {
         setAuth(result.user, result.token, result.company)
         navigate({ to: '/dashboard', replace: true })
       } else {
