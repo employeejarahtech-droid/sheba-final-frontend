@@ -21,6 +21,7 @@ import {
   UserCircle,
   Server,
   Terminal,
+  SquareTerminal,
 } from 'lucide-react'
 import type { SidebarData } from '@/components/layout/types'
 
@@ -61,6 +62,7 @@ export const adminSidebarData: SidebarData = {
       items: [
         { title: 'Nginx Domains', url: '/admin/nginx-domain-list', icon: Server },
         { title: 'Common Commands', url: '/admin/common-commands', icon: Terminal },
+        { title: 'Terminal', url: '/admin/terminal', icon: SquareTerminal },
         { title: 'Settings', url: '/admin/settings', icon: Settings },
         { title: 'Profile', url: '/admin/profile', icon: UserCircle },
       ],

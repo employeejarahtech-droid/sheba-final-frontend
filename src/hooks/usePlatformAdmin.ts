@@ -177,6 +177,16 @@ export function useRunServerCommand() {
   })
 }
 
+// ── Terminal (unrestricted remote shell) ────────────────────────────────
+
+export function useRunTerminalCommand() {
+  return useMutation({
+    mutationFn: ({ command, cwd }: { command: string; cwd?: string }) =>
+      adminService.runTerminalCommand(command, cwd),
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
 // ── Company Custom Domain (superadmin review workflow) ─────────────────
 
 export function useCompanyDomains(companyId: number) {

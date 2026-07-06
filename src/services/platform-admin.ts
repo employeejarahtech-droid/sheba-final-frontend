@@ -128,6 +128,28 @@ export async function runServerCommand(
   })
 }
 
+// ── Terminal (unrestricted remote shell) ────────────────────────────────
+
+export interface TerminalExecResult {
+  code: number
+  stdout: string
+  stderr: string
+  cwd: string
+}
+
+export interface TerminalExecResponse {
+  success: boolean
+  message?: string
+  data?: TerminalExecResult
+}
+
+export async function runTerminalCommand(command: string, cwd?: string): Promise<TerminalExecResponse> {
+  return platformFetchJson('/api/admin/terminal/exec', {
+    method: 'POST',
+    body: JSON.stringify({ command, cwd }),
+  })
+}
+
 export async function deleteNginxDomain(
   file: string
 ): Promise<ApiResponse<{ file: string; nginxTestOutput: string | null }>> {

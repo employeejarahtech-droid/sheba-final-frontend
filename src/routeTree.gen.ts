@@ -41,6 +41,7 @@ import { Route as platformAdminIndexRouteImport } from './routes/(platform)/admi
 import { Route as ClerkAuthenticatedUserManagementRouteImport } from './routes/clerk/_authenticated/user-management'
 import { Route as ClerkauthSignUpRouteImport } from './routes/clerk/(auth)/sign-up'
 import { Route as ClerkauthSignInRouteImport } from './routes/clerk/(auth)/sign-in'
+import { Route as platformAdminTerminalRouteImport } from './routes/(platform)/admin/terminal'
 import { Route as platformAdminSubscriptionsRouteImport } from './routes/(platform)/admin/subscriptions'
 import { Route as platformAdminSettingsRouteImport } from './routes/(platform)/admin/settings'
 import { Route as platformAdminRegistrationsRouteImport } from './routes/(platform)/admin/registrations'
@@ -580,6 +581,11 @@ const ClerkauthSignInRoute = ClerkauthSignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
   getParentRoute: () => ClerkauthRouteRoute,
+} as any)
+const platformAdminTerminalRoute = platformAdminTerminalRouteImport.update({
+  id: '/terminal',
+  path: '/terminal',
+  getParentRoute: () => platformAdminRouteRoute,
 } as any)
 const platformAdminSubscriptionsRoute =
   platformAdminSubscriptionsRouteImport.update({
@@ -3036,6 +3042,7 @@ export interface FileRoutesByFullPath {
   '/admin/registrations': typeof platformAdminRegistrationsRoute
   '/admin/settings': typeof platformAdminSettingsRoute
   '/admin/subscriptions': typeof platformAdminSubscriptionsRoute
+  '/admin/terminal': typeof platformAdminTerminalRoute
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
@@ -3445,6 +3452,7 @@ export interface FileRoutesByTo {
   '/admin/registrations': typeof platformAdminRegistrationsRoute
   '/admin/settings': typeof platformAdminSettingsRoute
   '/admin/subscriptions': typeof platformAdminSubscriptionsRoute
+  '/admin/terminal': typeof platformAdminTerminalRoute
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
@@ -3861,6 +3869,7 @@ export interface FileRoutesById {
   '/(platform)/admin/registrations': typeof platformAdminRegistrationsRoute
   '/(platform)/admin/settings': typeof platformAdminSettingsRoute
   '/(platform)/admin/subscriptions': typeof platformAdminSubscriptionsRoute
+  '/(platform)/admin/terminal': typeof platformAdminTerminalRoute
   '/clerk/(auth)/sign-in': typeof ClerkauthSignInRoute
   '/clerk/(auth)/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/_authenticated/user-management': typeof ClerkAuthenticatedUserManagementRoute
@@ -4274,6 +4283,7 @@ export interface FileRouteTypes {
     | '/admin/registrations'
     | '/admin/settings'
     | '/admin/subscriptions'
+    | '/admin/terminal'
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
@@ -4683,6 +4693,7 @@ export interface FileRouteTypes {
     | '/admin/registrations'
     | '/admin/settings'
     | '/admin/subscriptions'
+    | '/admin/terminal'
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
@@ -5098,6 +5109,7 @@ export interface FileRouteTypes {
     | '/(platform)/admin/registrations'
     | '/(platform)/admin/settings'
     | '/(platform)/admin/subscriptions'
+    | '/(platform)/admin/terminal'
     | '/clerk/(auth)/sign-in'
     | '/clerk/(auth)/sign-up'
     | '/clerk/_authenticated/user-management'
@@ -5728,6 +5740,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/clerk/sign-in'
       preLoaderRoute: typeof ClerkauthSignInRouteImport
       parentRoute: typeof ClerkauthRouteRoute
+    }
+    '/(platform)/admin/terminal': {
+      id: '/(platform)/admin/terminal'
+      path: '/terminal'
+      fullPath: '/admin/terminal'
+      preLoaderRoute: typeof platformAdminTerminalRouteImport
+      parentRoute: typeof platformAdminRouteRoute
     }
     '/(platform)/admin/subscriptions': {
       id: '/(platform)/admin/subscriptions'
@@ -9574,6 +9593,7 @@ interface platformAdminRouteRouteChildren {
   platformAdminRegistrationsRoute: typeof platformAdminRegistrationsRoute
   platformAdminSettingsRoute: typeof platformAdminSettingsRoute
   platformAdminSubscriptionsRoute: typeof platformAdminSubscriptionsRoute
+  platformAdminTerminalRoute: typeof platformAdminTerminalRoute
   platformAdminIndexRoute: typeof platformAdminIndexRoute
   platformAdminBillingStripeRoute: typeof platformAdminBillingStripeRoute
   platformAdminCompaniesCompanyIdRoute: typeof platformAdminCompaniesCompanyIdRoute
@@ -9595,6 +9615,7 @@ const platformAdminRouteRouteChildren: platformAdminRouteRouteChildren = {
   platformAdminRegistrationsRoute: platformAdminRegistrationsRoute,
   platformAdminSettingsRoute: platformAdminSettingsRoute,
   platformAdminSubscriptionsRoute: platformAdminSubscriptionsRoute,
+  platformAdminTerminalRoute: platformAdminTerminalRoute,
   platformAdminIndexRoute: platformAdminIndexRoute,
   platformAdminBillingStripeRoute: platformAdminBillingStripeRoute,
   platformAdminCompaniesCompanyIdRoute: platformAdminCompaniesCompanyIdRoute,
