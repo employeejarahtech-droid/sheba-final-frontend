@@ -50,6 +50,40 @@ export interface PlatformCompany {
   updated_at: string
 }
 
+// ── Company Custom Domain (tenant-owned "domains" table row) ───────────
+export interface PlatformCompanyDomain {
+  id: number
+  domain: string
+  status: 'pending' | 'verifying' | 'verified' | 'ssl_generating' | 'ssl_installed' | 'live' | 'error'
+  error: string | null
+  sslExpiry: string | null
+  dnsToken: string | null
+  ipAddress: string | null
+  dnsVerifiedAt: string | null
+  sslGeneratedAt: string | null
+  activatedAt: string | null
+  createdAt: string
+  updatedAt: string
+  realSSL: { valid: boolean; message: string; [key: string]: unknown } | null
+}
+
+// ── Nginx Server Block (diagnostic view — read from disk on the API host) ──
+export interface PlatformNginxDomain {
+  file: string
+  serverNames: string[]
+  enabled: boolean
+  configType: 'static' | 'proxy' | 'unknown'
+  target: string | null
+  hasSSL: boolean
+  matchedCompany: { id: number; name: string; subdomain: string; isActive: boolean } | null
+}
+
+export interface PlatformNginxDomainsResult {
+  availableDir: string
+  enabledDir: string
+  domains: PlatformNginxDomain[]
+}
+
 // ── Subscription Plan ───────────────────────────────────────────────────
 export interface PlatformSubscriptionPlan {
   id: number

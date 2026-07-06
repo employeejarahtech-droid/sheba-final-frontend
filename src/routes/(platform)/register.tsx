@@ -28,7 +28,7 @@ import {
   Check,
   ChevronsUpDown,
 } from 'lucide-react'
-import { getBaseDomain } from '@/lib/subdomain'
+import { getBaseDomain, getSubdomain } from '@/lib/subdomain'
 import { LandingPageWrapper } from '@/components/layout/landing-layout'
 import { useAuthStore } from '@/stores/auth-store'
 import api from '@/lib/axios'
@@ -260,7 +260,7 @@ function RegisterPage() {
         const currentHost = window.location.hostname
         const targetHost = `${data.subdomain}.${baseDomain}`
 
-        if (currentHost === targetHost) {
+        if (currentHost === targetHost || getSubdomain() === data.subdomain) {
           navigate({ to: '/dashboard' })
         } else {
           window.location.href = `${protocol}//${targetHost}${portSuffix}/auth-callback?token=${encodeURIComponent(result.token)}&user=${encodeURIComponent(JSON.stringify(result.user))}&company=${encodeURIComponent(JSON.stringify(company))}`

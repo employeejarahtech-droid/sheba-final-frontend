@@ -9,6 +9,8 @@ import { platformFetchJson } from '@/lib/platform-authenticated-fetch'
 import type {
   PlatformDashboardStats,
   PlatformCompany,
+  PlatformCompanyDomain,
+  PlatformNginxDomainsResult,
   PlatformSubscriptionPlan,
   PlatformRegistration,
   PlatformAdminUser,
@@ -115,6 +117,7 @@ export async function deleteCompany(id: number): Promise<ApiResponse<void>> {
   return platformFetchJson(`/api/admin/companies/${id}`, { method: 'DELETE' })
 }
 
+<<<<<<< HEAD
 // Super-admin "login as tenant" — issues a company_admin JWT for the company's
 // owner so the admin can open the tenant app without its password.
 export interface LoginAsCompanyResponse {
@@ -137,6 +140,126 @@ export async function loginAsCompany(
   })
 }
 
+=======
+export interface LoginAsResult {
+  token: string
+  subdomain: string
+  user: { id: number; name: string; email: string; userType: string; companyId: number }
+}
+
+export async function loginAsCompany(id: number): Promise<ApiResponse<LoginAsResult>> {
+  return platformFetchJson(`/api/admin/companies/${id}/login-as`, { method: 'POST' })
+}
+
+// ── Nginx Domains (diagnostic) ──────────────────────────────────────────
+
+export async function fetchNginxDomains(): Promise<ApiResponse<PlatformNginxDomainsResult>> {
+  return platformFetchJson('/api/admin/nginx/domains')
+}
+
+// ── Server Commands (whitelisted remote execution) ──────────────────────
+
+export interface ServerCommandResult {
+  code: number
+  stdout: string
+  stderr: string
+}
+
+// Distinct from ApiResponse<T>: a 200 response can carry `success: false`
+// (the command ran but exited non-zero — still useful diagnostic output, not
+// a request failure) and the self-restart commands respond with no `data` at
+// all. Only 4xx/5xx (unknown command, missing confirmation) throw via
+// platformFetchJson and surface through the mutation's onError instead.
+export interface ServerCommandRunResponse {
+  success: boolean
+  message?: string
+  data?: ServerCommandResult
+}
+
+export async function runServerCommand(
+  id: string,
+  confirm?: boolean
+): Promise<ServerCommandRunResponse> {
+  return platformFetchJson(`/api/admin/commands/${encodeURIComponent(id)}/run`, {
+    method: 'POST',
+    body: JSON.stringify(confirm ? { confirm: true } : {}),
+  })
+}
+
+// ── Terminal (unrestricted remote shell) ────────────────────────────────
+
+export interface TerminalExecResult {
+  code: number
+  stdout: string
+  stderr: string
+  cwd: string
+}
+
+export interface TerminalExecResponse {
+  success: boolean
+  message?: string
+  data?: TerminalExecResult
+}
+
+export async function runTerminalCommand(command: string, cwd?: string): Promise<TerminalExecResponse> {
+  return platformFetchJson('/api/admin/terminal/exec', {
+    method: 'POST',
+    body: JSON.stringify({ command, cwd }),
+  })
+}
+
+export async function deleteNginxDomain(
+  file: string
+): Promise<ApiResponse<{ file: string; nginxTestOutput: string | null }>> {
+  return platformFetchJson(`/api/admin/nginx/domains/${encodeURIComponent(file)}`, { method: 'DELETE' })
+}
+
+export async function fetchNginxDomainContent(
+  file: string
+): Promise<ApiResponse<{ file: string; content: string }>> {
+  return platformFetchJson(`/api/admin/nginx/domains/${encodeURIComponent(file)}/content`)
+}
+
+export async function updateNginxDomain(
+  file: string,
+  content: string
+): Promise<ApiResponse<{ file: string; nginxTestOutput: string | null }>> {
+  return platformFetchJson(`/api/admin/nginx/domains/${encodeURIComponent(file)}`, {
+    method: 'PUT',
+    body: JSON.stringify({ content }),
+  })
+}
+
+// ── Company Custom Domain (superadmin review workflow) ─────────────────
+
+export async function fetchCompanyDomains(companyId: number): Promise<ApiResponse<PlatformCompanyDomain[]>> {
+  return platformFetchJson(`/api/admin/companies/${companyId}/domains`)
+}
+
+export async function recheckDomainSSL(
+  companyId: number,
+  domainId: number
+): Promise<ApiResponse<{ valid: boolean; message: string }>> {
+  return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/recheck-ssl`, { method: 'POST' })
+}
+
+export async function verifyDomainDNS(companyId: number, domainId: number): Promise<ApiResponse<{ domain: string }>> {
+  return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/verify-dns`, { method: 'POST' })
+}
+
+export async function installDomainSSL(companyId: number, domainId: number): Promise<ApiResponse<{ domain: string }>> {
+  return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/install-ssl`, { method: 'POST' })
+}
+
+export async function goLiveDomain(companyId: number, domainId: number): Promise<ApiResponse<{ domain: string }>> {
+  return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/go-live`, { method: 'POST' })
+}
+
+export async function deactivateDomain(companyId: number, domainId: number): Promise<ApiResponse<{ domain: string }>> {
+  return platformFetchJson(`/api/admin/companies/${companyId}/domains/${domainId}/deactivate`, { method: 'POST' })
+}
+
+>>>>>>> recovered-work
 // ═══════════════════════════════════════════════════════════════════════
 //  PLANS
 // ═══════════════════════════════════════════════════════════════════════

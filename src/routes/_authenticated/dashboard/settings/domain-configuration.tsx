@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { SettingsDomainConfiguration } from '@/features/settings/domain-configuration'
 
 export const Route = createFileRoute('/_authenticated/dashboard/settings/domain-configuration')({
+<<<<<<< HEAD
   component: DomainConfiguration,
 })
 
@@ -20,3 +21,7 @@ function DomainConfiguration() {
     </div>
   )
 }
+=======
+    component: SettingsDomainConfiguration,
+})
+>>>>>>> recovered-work

@@ -9,7 +9,12 @@ import {
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { Provider } from 'react-redux'
+<<<<<<< HEAD
 import { getCookie, setCookie } from '@/lib/cookies'
+=======
+import { getCookie } from '@/lib/cookies'
+import { resolveCustomDomain } from '@/lib/subdomain'
+>>>>>>> recovered-work
 import { handleServerError } from '@/lib/handle-server-error'
 import { resolveCustomDomainOnBoot } from '@/lib/subdomain'
 import { DirectionProvider } from './context/direction-provider'
@@ -123,9 +128,14 @@ declare module '@tanstack/react-router' {
   }
 }
 
-// Render the app
+// Render the app. Custom-domain resolution must complete first — route
+// guards (e.g. _authenticated/route.tsx) call getSubdomainInfo() synchronously
+// on the very first render, so if this hostname turns out to be a tenant's
+// custom domain (not a *.BASE_DOMAIN subdomain), that has to be known before
+// the router evaluates anything, not discovered after.
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
+<<<<<<< HEAD
   const root = ReactDOM.createRoot(rootElement)
 
   // Resolve custom-domain → tenant mapping before the router mounts, so
@@ -137,6 +147,10 @@ if (!rootElement.innerHTML) {
   ;(async () => {
     await Promise.race([resolveCustomDomainOnBoot(), timeout(3000)])
 
+=======
+  resolveCustomDomain().finally(() => {
+    const root = ReactDOM.createRoot(rootElement)
+>>>>>>> recovered-work
     root.render(
       <StrictMode>
         <Provider store={store}>
@@ -152,5 +166,9 @@ if (!rootElement.innerHTML) {
         </Provider>
       </StrictMode>
     )
+<<<<<<< HEAD
   })()
+=======
+  })
+>>>>>>> recovered-work
 }

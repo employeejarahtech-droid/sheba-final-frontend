@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useLogin } from '@/hooks/useLogin'
-import { getBaseDomain } from '@/lib/subdomain'
+import { getBaseDomain, getSubdomain } from '@/lib/subdomain'
 
 const formSchema = z.object({
   email: z.email({
@@ -59,8 +59,14 @@ export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormPr
           const currentHost = window.location.hostname
           const tenantHost = `${subdomain}.${baseDomain}`
 
-          // If already on the correct subdomain, do a client-side navigate
-          if (currentHost === tenantHost) {
+          // getSubdomain() also recognizes a resolved custom domain (e.g.
+          // siteatoz.com), not just the *.baseDomain form — so logging in
+          // from a tenant's custom domain stays there instead of bouncing to
+          // their <subdomain>.hmsap.com host. Falls back to the old exact
+          // hostname compare in case resolution hasn't populated yet.
+          const alreadyOnThisTenant = currentHost === tenantHost || getSubdomain() === subdomain
+
+          if (alreadyOnThisTenant) {
             navigate({ to: redirectTo || '/dashboard', replace: true })
           } else {
             // Cross-subdomain redirect via auth-callback
