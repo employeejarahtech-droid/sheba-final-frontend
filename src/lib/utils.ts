@@ -91,6 +91,10 @@ export function amountToWords(amount: number) {
 
   amount = parseInt(amount.toString());
 
+  if (amount === 0) {
+    return "Zero Only";
+  }
+
   const atemp = amount.toString().split(".").map(Number);
   const number = atemp[0];
   const n_length = number.toString().length;

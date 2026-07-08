@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Building2 } from "lucide-react";
 import { getCookie } from "@/lib/cookies";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -134,8 +135,20 @@ export function EditSampleCollectionRoomForm({
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetContent side="right" className="w-[400px] sm:w-[450px] overflow-y-auto">
-                <SheetHeader className="pb-0">
-                    <SheetTitle>Update Sample Collection Room</SheetTitle>
+                <SheetHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-3 px-4 gap-0">
+                    <div className="flex items-center gap-2.5">
+                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                            <Building2 className="h-4 w-4" />
+                        </div>
+                        <div>
+                            <SheetTitle className="text-lg font-bold">
+                                Update Sample Collection Room
+                            </SheetTitle>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                Modify room details, location, and availability status
+                            </p>
+                        </div>
+                    </div>
                 </SheetHeader>
 
                 <div className="space-y-6 p-4 pt-2">

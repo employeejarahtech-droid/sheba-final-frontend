@@ -360,12 +360,12 @@ function InvoiceDetails() {
                     <p className="text-sm mt-6 italic">In words: &nbsp; <span className="font-semibold capitalize text-slate-800">{amountToWords(Number(totalPayments || 0))}</span></p>
 
                     {/* ── Signature Row ───────────────────────────────────────────────── */}
-                    <div className="grid grid-cols-2 mt-24 text-sm">
-                        <div>
-                            <p className="border-t border-dashed border-slate-400 w-40 pt-1.5 text-center text-slate-500 font-medium">Prepared By</p>
+                    <div className="flex justify-between mt-32 text-sm w-full">
+                        <div style={{ textAlign: 'left' }}>
+                            <span className="inline-block border-t border-dashed pt-1">Prepared By:</span>
                         </div>
-                        <div className="text-right">
-                            <p className="border-t border-dashed border-slate-400 w-48 ml-auto pt-1.5 text-center text-slate-500 font-medium">Authorized Signature</p>
+                        <div style={{ textAlign: 'right' }}>
+                            <span className="inline-block border-t border-dashed pt-1">Authorized Signature:</span>
                         </div>
                     </div>
 

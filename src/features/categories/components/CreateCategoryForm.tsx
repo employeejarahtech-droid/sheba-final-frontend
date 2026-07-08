@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
+import { Plus, Tag } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { getCookie } from "@/lib/cookies";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -105,8 +105,20 @@ export function CreateCategoryForm() {
             </SheetTrigger>
 
             <SheetContent side="right" className="w-[400px] sm:w-[450px] overflow-y-auto">
-                <SheetHeader className="pb-0">
-                    <SheetTitle>Add New Category</SheetTitle>
+                <SheetHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-3 px-4 gap-0">
+                    <div className="flex items-center gap-2.5">
+                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                            <Tag className="h-4 w-4" />
+                        </div>
+                        <div>
+                            <SheetTitle className="text-lg font-bold">
+                                Add New Category
+                            </SheetTitle>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                Create a new test category under a department
+                            </p>
+                        </div>
+                    </div>
                 </SheetHeader>
 
                 <div className="p-4 pt-2">
