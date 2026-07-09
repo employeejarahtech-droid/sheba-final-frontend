@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
 import { amountToWords } from '@/lib/utils'
@@ -24,6 +24,18 @@ const PAPER_SIZES: Record<string, { label: string; cssSize: string; margin: stri
     thermal80: { label: '80mm (Thermal)', cssSize: '80mm auto', margin: '2mm' },
 }
 
+// Overall scale for the invoice content. Most cells/headings here use
+// Tailwind text-size utilities (text-sm, text-lg, ...), which set their own
+// explicit rem font-size and don't inherit a parent's font-size — so scaling
+// via `zoom` (which resizes everything: text, padding, borders, the QR code)
+// is used instead of trying to override every element's own font size.
+const FONT_SIZES: Record<string, { label: string; zoom: number }> = {
+    sm: { label: 'Small', zoom: 0.85 },
+    base: { label: 'Medium', zoom: 1 },
+    lg: { label: 'Large', zoom: 1.15 },
+    xl: { label: 'Extra Large', zoom: 1.3 },
+}
+
 export const Route = createFileRoute(
     '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/',
 )({
@@ -35,6 +47,7 @@ function InvoiceDetails() {
     const token = getCookie('accessToken')
     const [paperSize, setPaperSize] = useState<keyof typeof PAPER_SIZES>('a4')
     const { cssSize, margin } = PAPER_SIZES[paperSize]
+    const [fontSize, setFontSize] = useState<keyof typeof FONT_SIZES>('base')
 
     // Tenant date format (from company settings), used for each test row's
     // per-test delivery date below.
@@ -177,6 +190,11 @@ function InvoiceDetails() {
                     .invoice-totals-col-1 { width: 35% !important; min-width: 0 !important; }
                     .invoice-totals-col-2 { width: 25% !important; min-width: 0 !important; }
                     .invoice-totals-col-3 { width: 40% !important; min-width: 0 !important; }
+                    /* Some print engines ignore the Tailwind text-right/w-32 utilities on th/td */
+                    .invoice-charge-col {
+                        text-align: right !important;
+                        width: 128px !important;
+                    }
                     /* Avoid breaking rows across pages */
                     tr, td, th {
                         page-break-inside: avoid;
@@ -214,22 +232,38 @@ function InvoiceDetails() {
                         Back
                     </Button>
 
-                    <Select value={paperSize} onValueChange={(v) => setPaperSize(v as keyof typeof PAPER_SIZES)}>
-                        <SelectTrigger className="w-[160px]">
-                            <SelectValue placeholder="Paper size" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {Object.entries(PAPER_SIZES).map(([key, { label }]) => (
-                                <SelectItem key={key} value={key}>{label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <div className="flex items-center gap-2">
+                        <Select value={fontSize} onValueChange={(v) => setFontSize(v as keyof typeof FONT_SIZES)}>
+                            <SelectTrigger className="w-[160px]">
+                                <SelectValue placeholder="Font size" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Object.entries(FONT_SIZES).map(([key, { label }]) => (
+                                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={paperSize} onValueChange={(v) => setPaperSize(v as keyof typeof PAPER_SIZES)}>
+                            <SelectTrigger className="w-[160px]">
+                                <SelectValue placeholder="Paper size" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Object.entries(PAPER_SIZES).map(([key, { label }]) => (
+                                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
-                <div className="invoice-print-area max-w-3xl mx-auto w-full p-8 bg-white mt-10 print:mt-0 shadow-sm print:shadow-none border border-slate-100 print:border-none rounded-lg print:rounded-none">
+                <div
+                    className="invoice-print-area max-w-3xl mx-auto w-full p-8 bg-white mt-10 print:mt-0 shadow-sm print:shadow-none border border-slate-100 print:border-none rounded-lg print:rounded-none"
+                    style={{ zoom: FONT_SIZES[fontSize].zoom } as CSSProperties}
+                >
 
                     {/* Header */}
-                    <div className="mb-6 flex items-start justify-between gap-6">
+                    <div className="mb-2 flex items-start justify-between gap-6">
                         {/* Column 1: Logo + Company Info */}
                         <div className="flex items-center gap-4">
                             {companyLogo ? (
@@ -262,7 +296,7 @@ function InvoiceDetails() {
 
 
                     {/* Patient Info Table */}
-                    <table className="w-full text-sm border mt-4" data-table-ignore="true">
+                    <table className="w-full text-sm border mt-1" data-table-ignore="true">
                         <tbody>
                             <tr className="border">
                                 <td className="border px-2 py-1 w-1/2">
@@ -292,28 +326,28 @@ function InvoiceDetails() {
                     </table>
 
                     {/* Test Table */}
-                    <div className="mt-6">
+                    <div className="mt-3">
                         <table className="w-full text-sm border" data-table-ignore="true">
                             <thead>
                                 <tr className="border">
-                                    <th className="py-1.5 px-2 border text-center font-bold w-12 ">SL</th>
-                                    <th className="py-1.5 px-2 border text-left font-bold">Test Name</th>
-                                    <th className="py-1.5 px-2 border text-left font-bold w-40">Del. Date &amp; Time</th>
-                                    <th className="py-1.5 px-2 border text-right font-bold w-32">Charge ({companySettings?.currency || 'BDT'})</th>
+                                    <th className="py-1 px-1 border text-center font-bold w-12 ">SL</th>
+                                    <th className="py-1 px-1 border text-left font-bold">Test Name</th>
+                                    <th className="py-1 px-1 border text-left font-bold w-40">Del. Date &amp; Time</th>
+                                    <th className="invoice-charge-col py-1 px-1 border text-right font-bold w-32" style={{ textAlign: 'right', width: '128px' }}>Charge ({companySettings?.currency || 'BDT'})</th>
                                 </tr>
                             </thead>
 
                             <tbody>
                                 {invoice?.selected_tests?.map((test: any, index: number) => (
                                     <tr key={test.id}>
-                                        <td className="border px-2 py-1.5 text-center">{index + 1}</td>
-                                        <td className="border px-2 py-1.5">{test?.test?.name}</td>
-                                        <td className="border px-2 py-1.5">
+                                        <td className="border px-1 py-1 text-center">{index + 1}</td>
+                                        <td className="border px-1 py-1">{test?.test?.name}</td>
+                                        <td className="border px-1 py-1">
                                             {!test?.delivery_date && !test?.delivery_time
                                                 ? '-'
                                                 : `${formatItemDeliveryDate(test?.delivery_date)} ${formatItemDeliveryTime(test?.delivery_time)}`.trim()}
                                         </td>
-                                        <td className="border px-2 py-1.5 text-right font-semibold">
+                                        <td className="invoice-charge-col border px-1 py-1 text-right font-semibold" style={{ textAlign: 'right', width: '128px' }}>
                                             {Number(test?.price || 0).toFixed(2)}
                                         </td>
                                     </tr>
