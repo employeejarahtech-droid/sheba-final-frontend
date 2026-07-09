@@ -199,8 +199,8 @@ export const sidebarData: SidebarData = {
           icon: BedDouble,
           items: [
             { title: 'Bills Not Distributed', url: '/dashboard/admission/patients/bill-not-distributed-list', icon: AlertCircle },
-            { title: 'Bills Distributed (Partial)', url: '/dashboard/admission/patients/bill-distributed-partial-list', icon: TrendingUp },
-            { title: 'Bills Distributed (Full)', url: '/dashboard/admission/patients/bill-distributed-list', icon: CheckCircle2 },
+            { title: 'Pay. Dist. Incompleted', url: '/dashboard/admission/patients/bill-distributed-partial-list', icon: TrendingUp },
+            { title: 'Pay. Dist. Completed', url: '/dashboard/admission/patients/bill-distributed-list', icon: CheckCircle2 },
             { title: 'Bills Distributed (Completed)', url: '/dashboard/admission/patients/balance-distributed-list', icon: Scale },
             { title: 'Doctor Referred', url: '/dashboard/indoor/management/doctor-referred', icon: UserCog },
             { title: 'Anesthesia Bill', url: '/dashboard/indoor/management/anesthesia-bill', icon: DollarSign },
@@ -529,6 +529,7 @@ export const sidebarData: SidebarData = {
             { title: 'Backups', url: '/dashboard/backups', icon: Database },
             { title: 'Backup Settings', url: '/dashboard/backup-settings', icon: Settings },
             { title: 'Reset Database', url: '/dashboard/settings/reset-database', icon: AlertTriangle },
+            { title: 'Pages & Modals & Drawers (List)', url: '/dashboard/settings/app-inventory', icon: List },
           ],
         },
         {

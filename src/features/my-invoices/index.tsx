@@ -128,6 +128,12 @@ export default function MyInvoices({ page, limit, search, statusFilter, from, to
                 grad: "from-emerald-500 to-teal-500",
             },
             {
+                label: `Total Discount (${currency})`,
+                value: fmtNum(serverStats.total_discount || 0),
+                icon: DollarSign,
+                grad: "from-purple-500 to-fuchsia-500",
+            },
+            {
                 label: `Total Paid (${currency})`,
                 value: fmtNum(serverStats.total_paid || 0),
                 icon: Calendar,
@@ -769,7 +775,7 @@ export default function MyInvoices({ page, limit, search, statusFilter, from, to
     return <>
         <AppHeader fixed />
 
-        <main className='p-4'>
+        <main className=''>
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <h1 className="text-2xl font-bold tracking-tight">My Invoices</h1>
                 <Button onClick={() => window.location.href = '/outdoor/reception/invoices/create'}>
@@ -779,7 +785,7 @@ export default function MyInvoices({ page, limit, search, statusFilter, from, to
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
                 {stats.map((card, index) => {
                     const Icon = card.icon;
                     return (

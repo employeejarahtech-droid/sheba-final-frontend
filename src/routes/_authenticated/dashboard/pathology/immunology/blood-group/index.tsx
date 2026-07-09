@@ -7,7 +7,6 @@ import { EditBloodGroupForm } from '@/features/pathology/immunology/EditBloodGro
 import { getCookie } from '@/lib/cookies';
 import { useDateFormat } from '@/hooks/use-date-format';
 import { useQuery } from '@tanstack/react-query';
-import { bloodGroupReports } from '@/data/data';
 import { AppHeader } from '@/components/layout/app-header';
 import { FileText, Droplets, Clock, Users, Check, Filter } from 'lucide-react';
 import { cn } from "@/lib/utils";
@@ -120,24 +119,7 @@ function BloodGroup() {
         },
   });
 
-  // Fallback to static data if API fails
-  const items = useMemo(() => {
-    if (data?.data?.items && data.data.items.length > 0) {
-      return data.data.items;
-    }
-    return bloodGroupReports;
-  }, [data]);
-
-  const meta = useMemo(() => {
-    if (data?.data?.meta) {
-      return data.data.meta;
-    }
-    return {
-      page,
-      limit,
-      total: bloodGroupReports.length,
-    };
-  }, [data, page, limit]);
+  const items = data?.data?.items || [];
 
   // ---- Date filter presets (Filter By dropdown) — mirrors the invoices list.
   // Presets produce from/to (YYYY-MM-DD) which the API applies to
@@ -536,7 +518,7 @@ function BloodGroup() {
             tableTitle="Blood Group"
             columns={columns}
             data={items}
-            meta={meta}
+            meta={data?.data?.meta}
             onPageChange={setPage}
             onLimitChange={setLimit}
             search={search}

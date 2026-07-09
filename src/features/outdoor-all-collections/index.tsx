@@ -3,7 +3,7 @@ import { DataTable } from '@/components/DataTable'
 import { useMemo, useState, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
-import { FileText, DollarSign, TrendingUp, CreditCard } from 'lucide-react'
+import { DollarSign, CreditCard } from 'lucide-react'
 import { useCurrency } from '@/hooks/use-currency'
 import { useDateFormat } from '@/hooks/use-date-format'
 import { Button } from '@/components/ui/button'
@@ -115,10 +115,8 @@ export default function OutdoorAllCollections({
     const stats = useMemo(() => {
         const s = data?.data?.stats || {}
         return [
-            { label: 'Total Payments', value: s.payment_count || 0, icon: CreditCard, grad: 'from-blue-500 to-indigo-500' },
+            { label: 'Total Number of Payments', value: s.payment_count || 0, icon: CreditCard, grad: 'from-blue-500 to-indigo-500' },
             { label: `Total Collected (${currencySymbol || currency})`, value: fmtNum(s.total_collected || 0), icon: DollarSign, grad: 'from-emerald-500 to-teal-500' },
-            { label: `Total Discount (${currencySymbol || currency})`, value: fmtNum(s.total_discount || 0), icon: TrendingUp, grad: 'from-amber-500 to-orange-500' },
-            { label: `Gross Bill (${currencySymbol || currency})`, value: fmtNum(s.total_bill || 0), icon: FileText, grad: 'from-purple-500 to-indigo-500' },
         ]
     }, [data, currencySymbol, currency])
 
@@ -336,7 +334,7 @@ export default function OutdoorAllCollections({
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
                     {stats.map((card, index) => {
                         const Icon = card.icon;
                         return (

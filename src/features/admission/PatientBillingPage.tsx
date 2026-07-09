@@ -735,7 +735,7 @@ export function PatientBillingPage() {
 
     // Fetch available beds/cabins
     const { data: bedsCabinsData } = useQuery({
-        queryKey: ['beds-cabins'],
+        queryKey: ['beds-cabins-all-for-billing'],
         queryFn: async () => {
             const res = await fetch(`${API_URL}/api/bed-cabin?limit=1000`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -1411,6 +1411,41 @@ export function PatientBillingPage() {
     const [txnDialogMode, setTxnDialogMode] = useState<'advance' | 'payment' | 'refund' | null>(null)
     const [txnAmount, setTxnAmount] = useState<number>(0)
     const [txnMethod, setTxnMethod] = useState<string>('cash')
+
+    // Payment method options come from Settings → Payment Accounts (same source
+    // the backend uses to resolve journal accounts for these scenarios), so the
+    // list here can never drift from what accounting has actually configured.
+    const { data: paymentMappingsData } = useQuery({
+        queryKey: ['payment-mappings'],
+        queryFn: async () => {
+            const res = await fetch(`${API_URL}/api/app-settings/payment-mappings`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (!res.ok) throw new Error('Failed to fetch payment mappings')
+            const json = await res.json()
+            return json.data || {}
+        },
+        enabled: !!token,
+    })
+    const txnScenarioKey = txnDialogMode === 'advance' ? 'indoor_advance_payment'
+        : txnDialogMode === 'refund' ? 'indoor_refund'
+            : 'indoor_final_bill_payment'
+    const txnMethodOptions: string[] = (paymentMappingsData?.[txnScenarioKey]?.methods || [])
+        .map((m: { name: string }) => m.name)
+        .filter(Boolean)
+
+    // Keep the selected method valid as the dialog mode (and therefore the
+    // available option list) changes — otherwise a stale value like the
+    // initial 'cash' default wouldn't match any configured option name.
+    useEffect(() => {
+        if (!txnDialogMode) return
+        const options = txnMethodOptions.length > 0 ? txnMethodOptions : ['Cash', 'Card', 'Bank Transfer', 'Mobile Banking']
+        if (!options.some((o) => o.toLowerCase() === txnMethod.toLowerCase())) {
+            setTxnMethod(options[0])
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [txnDialogMode, paymentMappingsData])
+
     const [txnNotes, setTxnNotes] = useState<string>('')
     // Payment date for the advance/payment dialog (ISO YYYY-MM-DD).
     const [txnDate, setTxnDate] = useState<string>('')
@@ -1800,6 +1835,11 @@ export function PatientBillingPage() {
     const handlePrintBilling = () => {
         // Navigate to the billing print page
         window.open(`/dashboard/admission/patients/${admissionId}/billing-print`, '_blank')
+    }
+
+    // Handle print final bill (only meaningful once the final bill is created)
+    const handlePrintFinalBill = () => {
+        window.open(`/dashboard/admission/patients/${admissionId}/final-bill-print`, '_blank')
     }
 
     // Note: Items are saved individually when added (operations, consultants)
@@ -3364,29 +3404,12 @@ export function PatientBillingPage() {
                                                                     View Final Bill
                                                                 </Button>
                                                                 <Button
-                                                                    onClick={() => {
-                                                                        const initialDiscounts: Record<string, number> = {}
-                                                                        const existingDoctorId = finalBill?.discounted_by_doctor_id
-                                                                            ? String(finalBill.discounted_by_doctor_id)
-                                                                            : ''
-                                                                        const existingNotes = finalBill?.notes || ''
-                                                                        
-                                                                        if (finalBill?.items) {
-                                                                            finalBill.items.forEach((item: any) => {
-                                                                                initialDiscounts[item.id] = Number(item.total_discount) || 0
-                                                                            })
-                                                                        }
-                                                                        setRowDiscounts(initialDiscounts)
-                                                                        setSelectedDoctorId(existingDoctorId)
-                                                                        setDiscountNotes(existingNotes)
-                                                                        setIsEditingFinalBill(true)
-                                                                        setOpenFinalBillDialog(true)
-                                                                    }}
+                                                                    onClick={handlePrintFinalBill}
                                                                     variant="outline"
-                                                                    className="flex-1 text-sm h-9 border-indigo-300 hover:bg-indigo-100 hover:text-indigo-800 text-indigo-700 dark:border-indigo-800 dark:hover:bg-indigo-900/30"
+                                                                    className="flex-1 text-sm h-9 border-green-300 hover:bg-green-100 hover:text-green-800 text-green-700 dark:border-green-800 dark:hover:bg-green-900/30"
                                                                 >
-                                                                    <Pencil className="h-3.5 w-3.5 mr-2" />
-                                                                    Edit Final Bill
+                                                                    <Printer className="h-3.5 w-3.5 mr-2" />
+                                                                    Print
                                                                 </Button>
                                                             </div>
                                                         </div>
@@ -4724,7 +4747,15 @@ export function PatientBillingPage() {
                                             </>
                                         )}
                                     </Button>
-                                ) : null}
+                                ) : (
+                                    <Button
+                                        onClick={handlePrintFinalBill}
+                                        className="bg-green-600 hover:bg-green-700"
+                                    >
+                                        <Printer className="h-4 w-4 mr-2" />
+                                        Print Final Bill
+                                    </Button>
+                                )}
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
@@ -4776,10 +4807,14 @@ export function PatientBillingPage() {
                                     <Select value={txnMethod} onValueChange={setTxnMethod}>
                                         <SelectTrigger><SelectValue placeholder="Method" /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="cash">Cash</SelectItem>
-                                            <SelectItem value="card">Card</SelectItem>
-                                            <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                                            <SelectItem value="mobile_banking">Mobile Banking</SelectItem>
+                                            {(txnMethodOptions.length > 0
+                                                ? txnMethodOptions
+                                                : ['Cash', 'Card', 'Bank Transfer', 'Mobile Banking']
+                                            ).map((name) => (
+                                                <SelectItem key={name} value={name}>
+                                                    {name}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>

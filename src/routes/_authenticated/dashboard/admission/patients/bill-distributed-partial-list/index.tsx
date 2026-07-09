@@ -53,6 +53,7 @@ function BillDistributedPartialListPage() {
             setSearch={setSearch}
             setStatusFilter={setStatus}
             setPaymentFilter={setPaymentStatus}
+            providerPaymentStatus="incomplete"
         />
     );
 }

@@ -968,7 +968,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                   render={({ field }) => (
                     <FormItem className="flex flex-col gap-2">
                       <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        Invoice Prefix
+                        Invoice Number
                       </FormLabel>
                       <FormControl>
                         <Input

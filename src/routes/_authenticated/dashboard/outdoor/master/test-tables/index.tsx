@@ -38,6 +38,7 @@ type TestItem = {
   created_at: string;
   created_by?: string;
   creator?: { id: number; name: string };
+  total_test_count?: number;
 };
 
 function TestTables() {
@@ -199,6 +200,12 @@ function TestTables() {
 
             </ul>
 
+            <!-- Matched Tests -->
+            <div class="mt-6 border-t pt-5">
+              <span class="text-gray-500 text-sm">Matched Tests</span>
+              <div id="matched-tests-${id}" class="mt-2 text-sm text-gray-500">Loading matched tests...</div>
+            </div>
+
             <!-- Actions -->
             <div class="mt-8 flex justify-end gap-3 border-t pt-5">
               <button onclick="window.location.href='/dashboard/outdoor/master/test-tables/${id}'"
@@ -228,6 +235,40 @@ function TestTables() {
       row.classList.add('expanded');
       btn.textContent = '−';
       btn.style.backgroundColor = '#dc2626';
+
+      // Fetch matched tests for this table
+      fetch(
+        `${import.meta.env.VITE_API_URL}/api/test-tables/matched-tests/${encodeURIComponent(tableName)}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+        .then((res) => (res.ok ? res.json() : Promise.reject(res)))
+        .then((json) => {
+          const container = document.getElementById(`matched-tests-${id}`);
+          if (!container) return;
+          const tests = json?.data?.tests || [];
+          if (tests.length === 0) {
+            container.innerHTML = '<span class="text-gray-400 italic">No tests matched to this table</span>';
+            return;
+          }
+          container.innerHTML = `
+            <ul class="divide-y divide-gray-100 border rounded-lg overflow-hidden">
+              ${tests
+                .map(
+                  (t: any) => `
+                <li class="flex items-center justify-between px-3 py-2 bg-white">
+                  <span class="text-gray-800">${t.name}</span>
+                  <span class="font-mono text-xs text-gray-500">${t.price != null ? t.price : '-'}</span>
+                </li>
+              `
+                )
+                .join('')}
+            </ul>
+          `;
+        })
+        .catch(() => {
+          const container = document.getElementById(`matched-tests-${id}`);
+          if (container) container.innerHTML = '<span class="text-red-500">Failed to load matched tests</span>';
+        });
     };
 
     // Add event listener to document for delegation
@@ -282,6 +323,17 @@ function TestTables() {
         return row.table_name || 'N/A';
       },
       defaultContent: "N/A",
+    },
+    {
+      data: "total_test_count",
+      title: "Total Test Count",
+      orderable: true,
+      responsivePriority: 2,
+      render: (_data: any, _type: string, row: TestItem) => {
+        const count = Number(row.total_test_count || 0);
+        return `<span class="font-mono text-xs text-blue-600 bg-blue-50 dark:bg-blue-950/30 dark:text-blue-400 px-2 py-1 rounded">${count}</span>`;
+      },
+      defaultContent: "0",
     },
     {
       data: null,

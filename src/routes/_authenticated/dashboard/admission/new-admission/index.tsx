@@ -595,10 +595,10 @@ function IndoorNewAdmission() {
 
     // Fetch beds/cabins - only available ones for new admission
     const { data: bedsData, isLoading: bedsLoading } = useQuery({
-        queryKey: ['beds-cabins'],
+        queryKey: ['beds-cabins-available-for-admission'],
         queryFn: async () => {
             const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/bed-cabin?limit=100&status=Active&available_only=true`,
+                `${import.meta.env.VITE_API_URL}/api/bed-cabin?limit=500&status=Active&available_only=true`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
@@ -663,6 +663,8 @@ function IndoorNewAdmission() {
                 body: JSON.stringify({
                     patient_name: values.patientName,
                     patient_type: patientTypes.find((t: any) => String(t.id) === values.patientType)?.name || null,
+                    father_name: values.fatherName || null,
+                    address: values.address || null,
                     age: Number(values.ageYears) || 0,
                     age_unit: 'Y',
                     age_text: `${values.ageYears || 0}Y ${values.ageMonths || 0}M`,
@@ -672,6 +674,7 @@ function IndoorNewAdmission() {
                     admission_time: values.admissionTime,
                     bed_cabin_id: parseInt(values.bedNumber),
                     doctor_id: values.underConsultant ? parseInt(values.underConsultant) : null,
+                    referred_by_doctor_id: values.referredBy ? parseInt(values.referredBy) : null,
                     diagnosis: values.reason,
                     status: 'active',
                     id_card_number: values.idCardNumber || null,
@@ -688,7 +691,12 @@ function IndoorNewAdmission() {
         },
         onSuccess: () => {
             toast.success("Patient admitted successfully");
-            queryClient.invalidateQueries({ queryKey: ['admissions'] });
+            // refetchType: 'all' is required because the patients list isn't mounted
+            // yet at this point (we're about to navigate to it), and the global
+            // refetchOnMount: false setting means a plain invalidate would leave it
+            // showing stale cached data once it mounts.
+            queryClient.invalidateQueries({ queryKey: ['admissions'], refetchType: 'all' });
+            queryClient.invalidateQueries({ queryKey: ['admission-statistics'], refetchType: 'all' });
             navigate({ to: '/dashboard/admission/patients' });
         },
         onError: (error: Error) => {

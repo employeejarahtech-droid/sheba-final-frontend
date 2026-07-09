@@ -335,12 +335,12 @@ export function FinalBillPrintPage({
 
 
             {/* ── Signature Row ───────────────────────────────────────────────── */}
-            <div className="grid grid-cols-2 mt-32 text-sm">
-                <div>
-                    <p className="border-t border-dashed w-40 pt-1 text-center">Prepared By:</p>
+            <div className="flex justify-between mt-32 text-sm w-full">
+                <div style={{ textAlign: 'left' }}>
+                    <span className="inline-block border-t border-dashed pt-1">Prepared By:</span>
                 </div>
-                <div className="text-right">
-                    <p className="border-t border-dashed w-56 ml-auto pt-1">Authority Signature:</p>
+                <div style={{ textAlign: 'right' }}>
+                    <span className="inline-block border-t border-dashed pt-1">Authorized Signature:</span>
                 </div>
             </div>
 

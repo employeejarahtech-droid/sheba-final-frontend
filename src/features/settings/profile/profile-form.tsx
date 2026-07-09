@@ -265,6 +265,7 @@ const TIMEZONES = [
 
 const profileFormSchema = z.object({
   company_name: z.string().optional(),
+  tagline: z.string().optional(),
   address1: z.string().optional(),
   address2: z.string().optional(),
   currency: z.string().optional(),
@@ -277,6 +278,7 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>
 type SettingsResponse = {
   id: number
   company_name: string | null
+  tagline?: string | null
   company_logo: string | null
   address1?: string | null
   address2?: string | null
@@ -307,6 +309,7 @@ export function ProfileForm() {
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       company_name: '',
+      tagline: '',
       address1: '',
       address2: '',
       currency: 'BDT',
@@ -328,6 +331,7 @@ export function ProfileForm() {
     if (settingsData) {
       form.reset({
         company_name: settingsData.company_name || '',
+        tagline: settingsData.tagline || '',
         address1: settingsData.address1 || '',
         address2: settingsData.address2 || '',
         currency: settingsData.currency || 'BDT',
@@ -386,6 +390,7 @@ export function ProfileForm() {
     mutationFn: async (data: ProfileFormValues & { company_logo?: string }) => {
       const res = await api.put('/company-settings', {
         company_name: data.company_name || '',
+        tagline: data.tagline || '',
         address1: data.address1 || '',
         address2: data.address2 || '',
         currency: data.currency || 'BDT',
@@ -477,6 +482,23 @@ export function ProfileForm() {
                     <FormControl>
                       <Input placeholder='Company Name' {...field} className="text-sm" />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='tagline'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-semibold">Tagline</FormLabel>
+                    <FormControl>
+                      <Input placeholder='e.g. Hospital Management, Diagnostic Center' {...field} className="text-sm" />
+                    </FormControl>
+                    <FormDescription className="text-xs">
+                      Shown under the company name in the sidebar header.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

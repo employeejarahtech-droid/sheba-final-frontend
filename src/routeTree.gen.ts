@@ -85,6 +85,7 @@ import { Route as AuthenticatedDashboardSettingsDomainConfigurationRouteImport }
 import { Route as AuthenticatedDashboardSettingsDisplayRouteImport } from './routes/_authenticated/dashboard/settings/display'
 import { Route as AuthenticatedDashboardSettingsDateControlsRouteImport } from './routes/_authenticated/dashboard/settings/date-controls'
 import { Route as AuthenticatedDashboardSettingsAppearanceRouteImport } from './routes/_authenticated/dashboard/settings/appearance'
+import { Route as AuthenticatedDashboardSettingsAppInventoryRouteImport } from './routes/_authenticated/dashboard/settings/app-inventory'
 import { Route as AuthenticatedDashboardSettingsAccountRouteImport } from './routes/_authenticated/dashboard/settings/account'
 import { Route as AuthenticatedDashboardNotificationsIdRouteImport } from './routes/_authenticated/dashboard/notifications/$id'
 import { Route as AuthenticatedDashboardErrorsErrorRouteImport } from './routes/_authenticated/dashboard/errors/$error'
@@ -343,7 +344,6 @@ import { Route as AuthenticatedDashboardReportsAccountingCashFlowPrintRouteImpor
 import { Route as AuthenticatedDashboardReportsAccountingBankBookPrintRouteImport } from './routes/_authenticated/dashboard/reports/accounting/bank-book/print'
 import { Route as AuthenticatedDashboardPathologyCustomTestsReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/custom-tests/report/$reportId'
 import { Route as AuthenticatedDashboardPathologyCustomTestsEditIdRouteImport } from './routes/_authenticated/dashboard/pathology/custom-tests/edit/$id'
-import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId'
 import { Route as AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId'
 import { Route as AuthenticatedDashboardOutdoorMasterTestsIdRouteImport } from './routes/_authenticated/dashboard/outdoor/master/tests/$id'
 import { Route as AuthenticatedDashboardOutdoorMasterTestTablesIdRouteImport } from './routes/_authenticated/dashboard/outdoor/master/test-tables/$id'
@@ -370,6 +370,7 @@ import { Route as AuthenticatedDashboardPurchaseRequestsEditIdIndexRouteImport }
 import { Route as AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRouteImport } from './routes/_authenticated/dashboard/purchase/goods-receipt/edit/$id/index'
 import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/list/index'
 import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/create/index'
+import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/index'
 import { Route as AuthenticatedDashboardOutdoorMasterTestsCreateIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/tests/create/index'
 import { Route as AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/doctors/$doctorId/index'
 import { Route as AuthenticatedDashboardIndoorMasterServicesCreateIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/services/create/index'
@@ -847,6 +848,12 @@ const AuthenticatedDashboardSettingsAppearanceRoute =
   AuthenticatedDashboardSettingsAppearanceRouteImport.update({
     id: '/appearance',
     path: '/appearance',
+    getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
+  } as any)
+const AuthenticatedDashboardSettingsAppInventoryRoute =
+  AuthenticatedDashboardSettingsAppInventoryRouteImport.update({
+    id: '/app-inventory',
+    path: '/app-inventory',
     getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
   } as any)
 const AuthenticatedDashboardSettingsAccountRoute =
@@ -2480,12 +2487,6 @@ const AuthenticatedDashboardPathologyCustomTestsEditIdRoute =
     path: '/dashboard/pathology/custom-tests/edit/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute =
-  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteImport.update({
-    id: '/dashboard/outdoor/reception/invoices/$invoiceId',
-    path: '/dashboard/outdoor/reception/invoices/$invoiceId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute =
   AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRouteImport.update(
     {
@@ -2646,6 +2647,14 @@ const AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute =
     path: '/dashboard/outdoor/reception/invoices/create/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRoute =
+  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRouteImport.update(
+    {
+      id: '/dashboard/outdoor/reception/invoices/$invoiceId/',
+      path: '/dashboard/outdoor/reception/invoices/$invoiceId/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute =
   AuthenticatedDashboardOutdoorMasterTestsCreateIndexRouteImport.update({
     id: '/dashboard/outdoor/master/tests/create/',
@@ -3025,10 +3034,9 @@ const AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRoute =
 const AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRoute =
   AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRouteImport.update(
     {
-      id: '/note',
-      path: '/note',
-      getParentRoute: () =>
-        AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute,
+      id: '/dashboard/outdoor/reception/invoices/$invoiceId/note',
+      path: '/dashboard/outdoor/reception/invoices/$invoiceId/note',
+      getParentRoute: () => AuthenticatedRouteRoute,
     } as any,
   )
 const AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute =
@@ -3145,6 +3153,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/errors/$error': typeof AuthenticatedDashboardErrorsErrorRoute
   '/dashboard/notifications/$id': typeof AuthenticatedDashboardNotificationsIdRoute
   '/dashboard/settings/account': typeof AuthenticatedDashboardSettingsAccountRoute
+  '/dashboard/settings/app-inventory': typeof AuthenticatedDashboardSettingsAppInventoryRoute
   '/dashboard/settings/appearance': typeof AuthenticatedDashboardSettingsAppearanceRoute
   '/dashboard/settings/date-controls': typeof AuthenticatedDashboardSettingsDateControlsRoute
   '/dashboard/settings/display': typeof AuthenticatedDashboardSettingsDisplayRoute
@@ -3253,7 +3262,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/outdoor/master/test-tables/$id': typeof AuthenticatedDashboardOutdoorMasterTestTablesIdRoute
   '/dashboard/outdoor/master/tests/$id': typeof AuthenticatedDashboardOutdoorMasterTestsIdRoute
   '/dashboard/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
-  '/dashboard/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteWithChildren
   '/dashboard/pathology/custom-tests/edit/$id': typeof AuthenticatedDashboardPathologyCustomTestsEditIdRoute
   '/dashboard/pathology/custom-tests/report/$reportId': typeof AuthenticatedDashboardPathologyCustomTestsReportReportIdRoute
   '/dashboard/reports/accounting/bank-book/print': typeof AuthenticatedDashboardReportsAccountingBankBookPrintRoute
@@ -3508,6 +3516,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/indoor/master/services/create': typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
   '/dashboard/outdoor/master/doctors/$doctorId': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
   '/dashboard/outdoor/master/tests/create': typeof AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute
+  '/dashboard/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRoute
   '/dashboard/outdoor/reception/invoices/create': typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
   '/dashboard/outdoor/reception/invoices/list': typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
   '/dashboard/purchase/goods-receipt/edit/$id': typeof AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute
@@ -3566,6 +3575,7 @@ export interface FileRoutesByTo {
   '/dashboard/errors/$error': typeof AuthenticatedDashboardErrorsErrorRoute
   '/dashboard/notifications/$id': typeof AuthenticatedDashboardNotificationsIdRoute
   '/dashboard/settings/account': typeof AuthenticatedDashboardSettingsAccountRoute
+  '/dashboard/settings/app-inventory': typeof AuthenticatedDashboardSettingsAppInventoryRoute
   '/dashboard/settings/appearance': typeof AuthenticatedDashboardSettingsAppearanceRoute
   '/dashboard/settings/date-controls': typeof AuthenticatedDashboardSettingsDateControlsRoute
   '/dashboard/settings/display': typeof AuthenticatedDashboardSettingsDisplayRoute
@@ -3674,7 +3684,6 @@ export interface FileRoutesByTo {
   '/dashboard/outdoor/master/test-tables/$id': typeof AuthenticatedDashboardOutdoorMasterTestTablesIdRoute
   '/dashboard/outdoor/master/tests/$id': typeof AuthenticatedDashboardOutdoorMasterTestsIdRoute
   '/dashboard/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
-  '/dashboard/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteWithChildren
   '/dashboard/pathology/custom-tests/edit/$id': typeof AuthenticatedDashboardPathologyCustomTestsEditIdRoute
   '/dashboard/pathology/custom-tests/report/$reportId': typeof AuthenticatedDashboardPathologyCustomTestsReportReportIdRoute
   '/dashboard/reports/accounting/bank-book/print': typeof AuthenticatedDashboardReportsAccountingBankBookPrintRoute
@@ -3929,6 +3938,7 @@ export interface FileRoutesByTo {
   '/dashboard/indoor/master/services/create': typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
   '/dashboard/outdoor/master/doctors/$doctorId': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
   '/dashboard/outdoor/master/tests/create': typeof AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute
+  '/dashboard/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRoute
   '/dashboard/outdoor/reception/invoices/create': typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
   '/dashboard/outdoor/reception/invoices/list': typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
   '/dashboard/purchase/goods-receipt/edit/$id': typeof AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute
@@ -3994,6 +4004,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/errors/$error': typeof AuthenticatedDashboardErrorsErrorRoute
   '/_authenticated/dashboard/notifications/$id': typeof AuthenticatedDashboardNotificationsIdRoute
   '/_authenticated/dashboard/settings/account': typeof AuthenticatedDashboardSettingsAccountRoute
+  '/_authenticated/dashboard/settings/app-inventory': typeof AuthenticatedDashboardSettingsAppInventoryRoute
   '/_authenticated/dashboard/settings/appearance': typeof AuthenticatedDashboardSettingsAppearanceRoute
   '/_authenticated/dashboard/settings/date-controls': typeof AuthenticatedDashboardSettingsDateControlsRoute
   '/_authenticated/dashboard/settings/display': typeof AuthenticatedDashboardSettingsDisplayRoute
@@ -4102,7 +4113,6 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/outdoor/master/test-tables/$id': typeof AuthenticatedDashboardOutdoorMasterTestTablesIdRoute
   '/_authenticated/dashboard/outdoor/master/tests/$id': typeof AuthenticatedDashboardOutdoorMasterTestsIdRoute
   '/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
-  '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteWithChildren
   '/_authenticated/dashboard/pathology/custom-tests/edit/$id': typeof AuthenticatedDashboardPathologyCustomTestsEditIdRoute
   '/_authenticated/dashboard/pathology/custom-tests/report/$reportId': typeof AuthenticatedDashboardPathologyCustomTestsReportReportIdRoute
   '/_authenticated/dashboard/reports/accounting/bank-book/print': typeof AuthenticatedDashboardReportsAccountingBankBookPrintRoute
@@ -4357,6 +4367,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/indoor/master/services/create/': typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
   '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
   '/_authenticated/dashboard/outdoor/master/tests/create/': typeof AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute
+  '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRoute
   '/_authenticated/dashboard/outdoor/reception/invoices/create/': typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
   '/_authenticated/dashboard/outdoor/reception/invoices/list/': typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
   '/_authenticated/dashboard/purchase/goods-receipt/edit/$id/': typeof AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute
@@ -4419,6 +4430,7 @@ export interface FileRouteTypes {
     | '/dashboard/errors/$error'
     | '/dashboard/notifications/$id'
     | '/dashboard/settings/account'
+    | '/dashboard/settings/app-inventory'
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/date-controls'
     | '/dashboard/settings/display'
@@ -4527,7 +4539,6 @@ export interface FileRouteTypes {
     | '/dashboard/outdoor/master/test-tables/$id'
     | '/dashboard/outdoor/master/tests/$id'
     | '/dashboard/outdoor/reception/due-collection/$invoiceId'
-    | '/dashboard/outdoor/reception/invoices/$invoiceId'
     | '/dashboard/pathology/custom-tests/edit/$id'
     | '/dashboard/pathology/custom-tests/report/$reportId'
     | '/dashboard/reports/accounting/bank-book/print'
@@ -4782,6 +4793,7 @@ export interface FileRouteTypes {
     | '/dashboard/indoor/master/services/create'
     | '/dashboard/outdoor/master/doctors/$doctorId'
     | '/dashboard/outdoor/master/tests/create'
+    | '/dashboard/outdoor/reception/invoices/$invoiceId'
     | '/dashboard/outdoor/reception/invoices/create'
     | '/dashboard/outdoor/reception/invoices/list'
     | '/dashboard/purchase/goods-receipt/edit/$id'
@@ -4840,6 +4852,7 @@ export interface FileRouteTypes {
     | '/dashboard/errors/$error'
     | '/dashboard/notifications/$id'
     | '/dashboard/settings/account'
+    | '/dashboard/settings/app-inventory'
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/date-controls'
     | '/dashboard/settings/display'
@@ -4948,7 +4961,6 @@ export interface FileRouteTypes {
     | '/dashboard/outdoor/master/test-tables/$id'
     | '/dashboard/outdoor/master/tests/$id'
     | '/dashboard/outdoor/reception/due-collection/$invoiceId'
-    | '/dashboard/outdoor/reception/invoices/$invoiceId'
     | '/dashboard/pathology/custom-tests/edit/$id'
     | '/dashboard/pathology/custom-tests/report/$reportId'
     | '/dashboard/reports/accounting/bank-book/print'
@@ -5203,6 +5215,7 @@ export interface FileRouteTypes {
     | '/dashboard/indoor/master/services/create'
     | '/dashboard/outdoor/master/doctors/$doctorId'
     | '/dashboard/outdoor/master/tests/create'
+    | '/dashboard/outdoor/reception/invoices/$invoiceId'
     | '/dashboard/outdoor/reception/invoices/create'
     | '/dashboard/outdoor/reception/invoices/list'
     | '/dashboard/purchase/goods-receipt/edit/$id'
@@ -5267,6 +5280,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/errors/$error'
     | '/_authenticated/dashboard/notifications/$id'
     | '/_authenticated/dashboard/settings/account'
+    | '/_authenticated/dashboard/settings/app-inventory'
     | '/_authenticated/dashboard/settings/appearance'
     | '/_authenticated/dashboard/settings/date-controls'
     | '/_authenticated/dashboard/settings/display'
@@ -5375,7 +5389,6 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/outdoor/master/test-tables/$id'
     | '/_authenticated/dashboard/outdoor/master/tests/$id'
     | '/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId'
-    | '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId'
     | '/_authenticated/dashboard/pathology/custom-tests/edit/$id'
     | '/_authenticated/dashboard/pathology/custom-tests/report/$reportId'
     | '/_authenticated/dashboard/reports/accounting/bank-book/print'
@@ -5630,6 +5643,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/indoor/master/services/create/'
     | '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/'
     | '/_authenticated/dashboard/outdoor/master/tests/create/'
+    | '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/'
     | '/_authenticated/dashboard/outdoor/reception/invoices/create/'
     | '/_authenticated/dashboard/outdoor/reception/invoices/list/'
     | '/_authenticated/dashboard/purchase/goods-receipt/edit/$id/'
@@ -6204,6 +6218,13 @@ declare module '@tanstack/react-router' {
       path: '/appearance'
       fullPath: '/dashboard/settings/appearance'
       preLoaderRoute: typeof AuthenticatedDashboardSettingsAppearanceRouteImport
+      parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
+    }
+    '/_authenticated/dashboard/settings/app-inventory': {
+      id: '/_authenticated/dashboard/settings/app-inventory'
+      path: '/app-inventory'
+      fullPath: '/dashboard/settings/app-inventory'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsAppInventoryRouteImport
       parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
     }
     '/_authenticated/dashboard/settings/account': {
@@ -8012,13 +8033,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardPathologyCustomTestsEditIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId': {
-      id: '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId'
-      path: '/dashboard/outdoor/reception/invoices/$invoiceId'
-      fullPath: '/dashboard/outdoor/reception/invoices/$invoiceId'
-      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId': {
       id: '/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId'
       path: '/dashboard/outdoor/reception/due-collection/$invoiceId'
@@ -8199,6 +8213,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/outdoor/reception/invoices/create'
       fullPath: '/dashboard/outdoor/reception/invoices/create'
       preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/': {
+      id: '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/'
+      path: '/dashboard/outdoor/reception/invoices/$invoiceId'
+      fullPath: '/dashboard/outdoor/reception/invoices/$invoiceId'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/outdoor/master/tests/create/': {
@@ -8574,10 +8595,10 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/note': {
       id: '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/note'
-      path: '/note'
+      path: '/dashboard/outdoor/reception/invoices/$invoiceId/note'
       fullPath: '/dashboard/outdoor/reception/invoices/$invoiceId/note'
       preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRouteImport
-      parentRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/edit': {
       id: '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/edit'
@@ -8654,6 +8675,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedDashboardSettingsRouteRouteChildren {
   AuthenticatedDashboardSettingsAccountRoute: typeof AuthenticatedDashboardSettingsAccountRoute
+  AuthenticatedDashboardSettingsAppInventoryRoute: typeof AuthenticatedDashboardSettingsAppInventoryRoute
   AuthenticatedDashboardSettingsAppearanceRoute: typeof AuthenticatedDashboardSettingsAppearanceRoute
   AuthenticatedDashboardSettingsDateControlsRoute: typeof AuthenticatedDashboardSettingsDateControlsRoute
   AuthenticatedDashboardSettingsDisplayRoute: typeof AuthenticatedDashboardSettingsDisplayRoute
@@ -8673,6 +8695,8 @@ const AuthenticatedDashboardSettingsRouteRouteChildren: AuthenticatedDashboardSe
   {
     AuthenticatedDashboardSettingsAccountRoute:
       AuthenticatedDashboardSettingsAccountRoute,
+    AuthenticatedDashboardSettingsAppInventoryRoute:
+      AuthenticatedDashboardSettingsAppInventoryRoute,
     AuthenticatedDashboardSettingsAppearanceRoute:
       AuthenticatedDashboardSettingsAppearanceRoute,
     AuthenticatedDashboardSettingsDateControlsRoute:
@@ -8704,21 +8728,6 @@ const AuthenticatedDashboardSettingsRouteRouteChildren: AuthenticatedDashboardSe
 const AuthenticatedDashboardSettingsRouteRouteWithChildren =
   AuthenticatedDashboardSettingsRouteRoute._addFileChildren(
     AuthenticatedDashboardSettingsRouteRouteChildren,
-  )
-
-interface AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteChildren {
-  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRoute
-}
-
-const AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteChildren: AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteChildren =
-  {
-    AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRoute:
-      AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRoute,
-  }
-
-const AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteWithChildren =
-  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute._addFileChildren(
-    AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteChildren,
   )
 
 interface AuthenticatedRouteRouteChildren {
@@ -8817,7 +8826,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardOutdoorMasterTestTablesIdRoute: typeof AuthenticatedDashboardOutdoorMasterTestTablesIdRoute
   AuthenticatedDashboardOutdoorMasterTestsIdRoute: typeof AuthenticatedDashboardOutdoorMasterTestsIdRoute
   AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute: typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
-  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteWithChildren
   AuthenticatedDashboardPathologyCustomTestsEditIdRoute: typeof AuthenticatedDashboardPathologyCustomTestsEditIdRoute
   AuthenticatedDashboardPathologyCustomTestsReportReportIdRoute: typeof AuthenticatedDashboardPathologyCustomTestsReportReportIdRoute
   AuthenticatedDashboardReportsAccountingBankBookPrintRoute: typeof AuthenticatedDashboardReportsAccountingBankBookPrintRoute
@@ -9018,6 +9026,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardEcgAllEditBuilderIdRoute: typeof AuthenticatedDashboardEcgAllEditBuilderIdRoute
   AuthenticatedDashboardIndoorMasterServicesEditIdRoute: typeof AuthenticatedDashboardIndoorMasterServicesEditIdRoute
   AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute: typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute
+  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRoute
   AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRoute: typeof AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRoute
   AuthenticatedDashboardPathologyBiochemicalAllReportReportIdRoute: typeof AuthenticatedDashboardPathologyBiochemicalAllReportReportIdRoute
   AuthenticatedDashboardPathologyBiochemicalLipidProfileReportReportIdRoute: typeof AuthenticatedDashboardPathologyBiochemicalLipidProfileReportReportIdRoute
@@ -9071,6 +9080,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute: typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
   AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute: typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
   AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute: typeof AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute
+  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRoute
   AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
   AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
   AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute: typeof AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute
@@ -9269,8 +9279,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardOutdoorMasterTestsIdRoute,
   AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute:
     AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute,
-  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRoute:
-    AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdRouteWithChildren,
   AuthenticatedDashboardPathologyCustomTestsEditIdRoute:
     AuthenticatedDashboardPathologyCustomTestsEditIdRoute,
   AuthenticatedDashboardPathologyCustomTestsReportReportIdRoute:
@@ -9671,6 +9679,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardIndoorMasterServicesEditIdRoute,
   AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute:
     AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute,
+  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRoute:
+    AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRoute,
   AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRoute:
     AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRoute,
   AuthenticatedDashboardPathologyBiochemicalAllReportReportIdRoute:
@@ -9777,6 +9787,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute,
   AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute:
     AuthenticatedDashboardOutdoorMasterTestsCreateIndexRoute,
+  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRoute:
+    AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRoute,
   AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute:
     AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute,
   AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute:

@@ -65,6 +65,7 @@ type UserInfo = {
     id: number;
     name: string;
     email?: string;
+    type: 'staff' | 'company_admin';
 };
 
 export default function UserInvoices({ page, limit, search, statusFilter, selectedUser, from, to, setPage, setLimit, setSearch, setStatusFilter, setSelectedUser, setFrom, setTo }: UserInvoicesProps) {
@@ -97,7 +98,13 @@ export default function UserInvoices({ page, limit, search, statusFilter, select
 
         queryFn: async () => {
             const statusParam = statusFilter !== "all" ? `&status=${statusFilter}` : "";
-            const userParam = selectedUser !== "all" ? `&user_id=${selectedUser}` : "";
+            // selectedUser is "all" or a composite "<type>:<id>" (staff/company_admin ids
+            // live in separate tables and can collide, so the type must travel with the id).
+            let userParam = "";
+            if (selectedUser !== "all") {
+                const [userType, userId] = selectedUser.split(":");
+                userParam = `&user_id=${encodeURIComponent(userId)}&user_type=${encodeURIComponent(userType)}`;
+            }
             const fromParam = from ? `&from=${encodeURIComponent(from)}` : "";
             const toParam = to ? `&to=${encodeURIComponent(to)}` : "";
             const res = await fetch(
@@ -151,6 +158,12 @@ export default function UserInvoices({ page, limit, search, statusFilter, select
                 value: fmtNum(serverStats.total_bill || 0),
                 icon: DollarSign,
                 grad: "from-emerald-500 to-teal-500",
+            },
+            {
+                label: `Total Discount (${currency})`,
+                value: fmtNum(serverStats.total_discount || 0),
+                icon: DollarSign,
+                grad: "from-purple-500 to-fuchsia-500",
             },
             {
                 label: `Total Paid (${currency})`,
@@ -796,7 +809,7 @@ export default function UserInvoices({ page, limit, search, statusFilter, select
     return <>
         <AppHeader fixed />
 
-        <main className='p-4'>
+        <main className=''>
 
             <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
                 <h1 className="text-2xl font-bold tracking-tight">Invoices by Users</h1>
@@ -814,8 +827,9 @@ export default function UserInvoices({ page, limit, search, statusFilter, select
                         <SelectContent>
                             <SelectItem value="all">All Users</SelectItem>
                             {users.map((user: UserInfo) => (
-                                <SelectItem key={user.id} value={user.id.toString()}>
+                                <SelectItem key={`${user.type}:${user.id}`} value={`${user.type}:${user.id}`}>
                                     {user.name} {user.email && `(${user.email})`}
+                                    {user.type === 'company_admin' && ' — Admin'}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -835,7 +849,7 @@ export default function UserInvoices({ page, limit, search, statusFilter, select
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
                 {stats.map((card, index) => {
                     const Icon = card.icon;
                     return (

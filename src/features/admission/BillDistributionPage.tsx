@@ -757,15 +757,13 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
         }
     }, [distributions, retentionProfit, retentionPayable, sumProviderInputs])
 
-    // Populate custom allocations when payment is selected
+    // Reset custom allocations when a payment is selected — the modal opens
+    // with every "New Allocation" field at 0 and the user types in the
+    // amount themselves, rather than being pre-filled with a proportional
+    // auto-calculated split.
     useEffect(() => {
-        if (selectedPaymentForDist) {
-            const initialAllocations = calculateDistributionsForAmount(selectedPaymentForDist.cumulativeAmount)
-            setCustomAllocations(initialAllocations)
-        } else {
-            setCustomAllocations({ providers: {}, retention: 0 })
-        }
-    }, [selectedPaymentForDist, calculateDistributionsForAmount])
+        setCustomAllocations({ providers: {}, retention: 0 })
+    }, [selectedPaymentForDist])
 
     const totalNewAllocations = useMemo(() => {
         const providersSum = Object.values(customAllocations.providers).reduce((sum, val) => sum + (Number(val) || 0), 0)
@@ -1446,7 +1444,7 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
     }
 
     const handleBack = () => {
-        navigate({ to: '/dashboard/admission/patients/$admissionId/final-bill', params: { admissionId: String(admissionId) } })
+        navigate({ to: '/dashboard/admission/patients/$admissionId/billing', params: { admissionId: String(admissionId) } })
     }
 
     // Loading state
@@ -1468,7 +1466,7 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="sm" onClick={handleBack}>
                         <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Final Bill
+                        Back to Billing
                     </Button>
                 </div>
                 <Card>
@@ -1481,7 +1479,7 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                             </p>
                             <Button onClick={handleBack}>
                                 <ArrowLeft className="w-4 h-4 mr-2" />
-                                Go to Final Bill
+                                Go to Billing
                             </Button>
                         </div>
                     </CardContent>
@@ -2214,7 +2212,7 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                                                                 setOpenDistDialog(true)
                                                             }}
                                                         >
-                                                            Final Distribute
+                                                            Payment Distribute
                                                         </Button>
                                                     ) : (
                                                         <Button
@@ -2224,7 +2222,7 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                                                             className="text-[11px] py-1 h-8 opacity-50"
                                                             title="Please distribute previous payments first"
                                                         >
-                                                            Final Distribute
+                                                            Payment Distribute
                                                         </Button>
                                                     )}
                                                 </TableCell>
@@ -2273,7 +2271,7 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
             <div className="flex justify-between">
                 <Button variant="outline" onClick={handleBack}>
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Final Bill
+                    Back to Billing
                 </Button>
             </div>
 
@@ -2551,11 +2549,12 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                                             {/* Provider List */}
                                             {distributions.map(d => {
                                                 const currentSaved = Number(d.pay_now) || 0
-                                                const addAmt = customAllocations.providers[d.id] ?? ''
+                                                const addAmt = customAllocations.providers[d.id] ?? '0'
                                                 const numericAddAmt = Number(addAmt) || 0
                                                 const newTotal = currentSaved + numericAddAmt
                                                 const hasNewAllocation = numericAddAmt > 0.005
 
+                                                const { icon } = getProviderInfo(d.service_provided_by)
                                                 const matchingItem = distToItemMap.get(d.id)
                                                 const providerDisplayName = d.doctor?.doctor_name || d.clinicService?.name || d.provider_name || matchingItem?.provider_name
 
@@ -2577,11 +2576,14 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                                                 return (
                                                     <TableRow key={d.id} className={cn("hover:bg-muted/30 text-xs py-1", hasNewAllocation && "bg-blue-50/20 dark:bg-blue-950/10")}>
                                                         <TableCell className="font-medium py-2">
-                                                            <div className="flex flex-col">
-                                                                <span>{d.service_provided_by}</span>
-                                                                {providerDisplayName && providerDisplayName !== '-' && (
-                                                                    <span className="text-[10px] text-muted-foreground font-normal">{providerDisplayName}</span>
-                                                                )}
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-base" role="img" aria-label={d.service_provided_by}>{icon}</span>
+                                                                <div className="flex flex-col">
+                                                                    <span>{d.service_provided_by}</span>
+                                                                    {providerDisplayName && providerDisplayName !== '-' && (
+                                                                        <span className="text-[10px] text-muted-foreground font-normal">{providerDisplayName}</span>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </TableCell>
                                                         <TableCell className="text-right py-2">{format(displayedBilledAmount)}</TableCell>
@@ -2637,7 +2639,7 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                                                 const currentSaved = retentionPayable
                                                 const totalPayable = retentionProfit
                                                 const currentDue = Math.max(0, totalPayable - currentSaved)
-                                                const addAmt = customAllocations.retention ?? ''
+                                                const addAmt = customAllocations.retention ?? '0'
                                                 const numericAddAmt = Number(addAmt) || 0
                                                 const newTotal = currentSaved + numericAddAmt
                                                 const newDue = currentDue - numericAddAmt

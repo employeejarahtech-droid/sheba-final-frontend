@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Tag } from "lucide-react";
 import { getCookie } from "@/lib/cookies";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -130,58 +131,79 @@ export function EditCategoryForm({
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetContent side="right" className="w-[400px] sm:w-[450px] overflow-y-auto">
-                <SheetHeader className="pb-0">
-                    <SheetTitle>Update Category</SheetTitle>
+                <SheetHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-3 px-4 gap-0">
+                    <div className="flex items-center gap-2.5">
+                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-md text-white">
+                            <Tag className="h-4 w-4" />
+                        </div>
+                        <div>
+                            <SheetTitle className="text-lg font-bold">
+                                Edit Category
+                            </SheetTitle>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                Update the test category details
+                            </p>
+                        </div>
+                    </div>
                 </SheetHeader>
 
-                <div className="space-y-6 p-4 pt-2">
+                <div className="p-4 pt-2">
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            handleSubmit();
+                        }}
+                        className="space-y-6"
+                    >
 
-                    {/* Department Selection */}
-                    <div className="space-y-2">
-                        <Label>Department Name</Label>
-                        <Select
-                            value={departmentId}
-                            onValueChange={setDepartmentId}
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select a department" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {departmentsData?.data?.items?.map((dept: any) => (
-                                    <SelectItem key={dept.id} value={String(dept.id)}>
-                                        {dept.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
+                        {/* Department Selection */}
+                        <div className="space-y-2">
+                            <Label>Department Name</Label>
+                            <Select
+                                value={departmentId}
+                                onValueChange={setDepartmentId}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select a department" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {departmentsData?.data?.items?.map((dept: any) => (
+                                        <SelectItem key={dept.id} value={String(dept.id)}>
+                                            {dept.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-                    {/* Category Name */}
-                    <div className="space-y-2">
-                        <Label>Category Name</Label>
-                        <Input
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="Enter category name"
-                        />
-                    </div>
+                        {/* Category Name */}
+                        <div className="space-y-2">
+                            <Label>Category Name</Label>
+                            <Input
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Enter category name"
+                            />
+                        </div>
 
-                    {/* Submit */}
-                    <div className="flex justify-center gap-5">
-                        <Button
-                            onClick={handleCancel}
-                            variant="outline"
-                            disabled={updateMutation.isPending}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            onClick={handleSubmit}
-                            disabled={updateMutation.isPending}
-                        >
-                            {updateMutation.isPending ? "Updating..." : "Update"}
-                        </Button>
-                    </div>
+                        {/* Submit */}
+                        <div className="flex justify-center gap-5">
+                            <Button
+                                type="button"
+                                onClick={handleCancel}
+                                variant="outline"
+                                disabled={updateMutation.isPending}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={updateMutation.isPending}
+                            >
+                                {updateMutation.isPending ? "Updating..." : "Update"}
+                            </Button>
+                        </div>
+                    </form>
                 </div>
             </SheetContent>
         </Sheet>

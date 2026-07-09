@@ -11,6 +11,7 @@ export function AppTitle() {
   const { setOpenMobile } = useSidebar()
   const [profileImage, setProfileImage] = useState<string | null>(null)
   const [companyName, setCompanyName] = useState<string>('HMS')
+  const [tagline, setTagline] = useState<string>('Hospital Management')
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -20,6 +21,9 @@ export function AppTitle() {
           const response = await res.json()
           if (response.data?.company_name) {
             setCompanyName(response.data.company_name)
+          }
+          if (response.data?.tagline) {
+            setTagline(response.data.tagline)
           }
           let logoUrl = response.data?.company_logo || null
           if (logoUrl && !logoUrl.startsWith('http') && !logoUrl.startsWith('data:')) {
@@ -81,7 +85,7 @@ export function AppTitle() {
             <div className="grid flex-1 text-start text-sm leading-tight">
               <span className="truncate font-semibold">{companyName || 'HMS'}</span>
               <span className="truncate text-xs text-muted-foreground">
-                Hospital Management
+                {tagline}
               </span>
             </div>
           </Link>

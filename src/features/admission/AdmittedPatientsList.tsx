@@ -27,11 +27,15 @@ type AdmissionItem = {
     sex: string
     phone: string
     id_card_number?: string | null
+    father_name?: string | null
+    address?: string | null
     admission_date: string
+    admission_time?: string | null
     discharge_date: string | null
     status: 'active' | 'discharged' | 'critical'
     bed_cabin_id: number | null
     doctor_id: number | null
+    referred_by_doctor_id?: number | null
     diagnosis: string | null
     created_at: string
     created_by?: string | number | null
@@ -97,6 +101,13 @@ type AdmissionItem = {
         ward: string
     }
     doctor?: {
+        id: number
+        doctor_name: string
+        title?: string
+        qualification?: string
+        speciality: string
+    }
+    referredByDoctor?: {
         id: number
         doctor_name: string
         title?: string
@@ -440,6 +451,7 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                 const dischargeDate = row.discharge_date ? new Date(row.discharge_date).toLocaleDateString() : '-';
                 const bedCabinInfo = row.bedCabin ? `${row.bedCabin.code} (${row.bedCabin.type})` : '-';
                 const doctorName = row.doctor?.doctor_name || '-';
+                const referredByName = row.referredByDoctor?.doctor_name || '-';
                 const finalBillData = row.finalBill ? JSON.stringify(row.finalBill) : '';
                 const advancePaymentsData = row.advancePayments ? JSON.stringify(row.advancePayments) : '';
 
@@ -480,6 +492,10 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                                 data-status="${row.status}"
                                 data-bed-cabin="${bedCabinInfo.replace(/"/g, '&quot;')}"
                                 data-doctor="${doctorName.replace(/"/g, '&quot;')}"
+                                data-referred-by="${referredByName.replace(/"/g, '&quot;')}"
+                                data-father-name="${(row.father_name || '-').replace(/"/g, '&quot;')}"
+                                data-address="${(row.address || '-').replace(/"/g, '&quot;')}"
+                                data-admission-time="${(row.admission_time || '-').replace(/"/g, '&quot;')}"
                                 data-diagnosis="${(row.diagnosis || '-').replace(/"/g, '&quot;')}"
                                 data-created-by="${String(row.created_by || '-').replace(/"/g, '&quot;')}"
                                 data-final-bill="${finalBillData.replace(/"/g, '&quot;')}"
@@ -497,6 +513,13 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             orderable: true,
             responsivePriority: 1,
             defaultContent: "",
+        },
+        {
+            data: "father_name",
+            title: "Father Name",
+            orderable: true,
+            responsivePriority: 6,
+            defaultContent: "-",
         },
         {
             data: null,
@@ -525,6 +548,22 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             defaultContent: "-",
         },
         {
+            data: "address",
+            title: "Address",
+            orderable: true,
+            responsivePriority: 6,
+            render: (_data: any, type: string, row: AdmissionItem) => {
+                const address = row.address || ''
+                if (type === 'sort' || type === 'filter' || type === 'type') return address
+                if (!address) return '-'
+                const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                const escaped = esc(address)
+                const truncated = escaped.length > 30 ? `${escaped.slice(0, 30)}…` : escaped
+                return `<span title="${escaped.replace(/"/g, '&quot;')}">${truncated}</span>`
+            },
+            defaultContent: "-",
+        },
+        {
             data: "admission_date",
             title: "Admission Date & Time",
             orderable: true,
@@ -536,9 +575,12 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                 const dateStr = dateParts.length === 3
                     ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`
                     : row.admission_date.split('T')[0]
-                // Extract time from created_at
+                // Prefer the actual recorded admission_time; fall back to the
+                // created_at clock time for rows saved before that column existed.
                 let timeStr = ''
-                if (row.created_at) {
+                if (row.admission_time) {
+                    timeStr = String(row.admission_time).slice(0, 5)
+                } else if (row.created_at) {
                     const d = new Date(row.created_at)
                     const hh = String(d.getHours()).padStart(2, '0')
                     const mm = String(d.getMinutes()).padStart(2, '0')
@@ -577,13 +619,33 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
         },
         {
             data: null,
-            title: "Doctor",
+            title: "Consultant",
             orderable: true,
             responsivePriority: 4,
             render: (_data: any, type: string, row: AdmissionItem) => {
                 const d = row.doctor
                 if (!d?.doctor_name) return '-'
                 // Sort/search on the plain name so the rich markup doesn't break ordering.
+                if (type === 'sort' || type === 'filter' || type === 'type') return d.doctor_name
+                const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                const subtitle = [d.qualification || d.title, d.speciality].filter(Boolean).join(' - ')
+                return `
+                    <div class="flex flex-col">
+                        <span class="font-medium">Dr. ${esc(d.doctor_name)}</span>
+                        ${subtitle ? `<span class="text-xs text-muted-foreground">${esc(subtitle)}</span>` : ''}
+                    </div>
+                `
+            },
+            defaultContent: "",
+        },
+        {
+            data: null,
+            title: "Referred By",
+            orderable: true,
+            responsivePriority: 6,
+            render: (_data: any, type: string, row: AdmissionItem) => {
+                const d = row.referredByDoctor
+                if (!d?.doctor_name) return '-'
                 if (type === 'sort' || type === 'filter' || type === 'type') return d.doctor_name
                 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 const subtitle = [d.qualification || d.title, d.speciality].filter(Boolean).join(' - ')
@@ -917,6 +979,10 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             const sex = btn.dataset.sex || '-'
             const phone = btn.dataset.phone || '-'
             const idCardNumber = btn.dataset.idCardNumber || '-'
+            const fatherName = btn.dataset.fatherName || '-'
+            const address = btn.dataset.address || '-'
+            const admissionTime = btn.dataset.admissionTime || '-'
+            const referredBy = btn.dataset.referredBy || '-'
             const admissionDate = btn.dataset.admissionDate || '-'
             const dischargeDate = btn.dataset.dischargeDate || '-'
             const status = btn.dataset.status || '-'
@@ -1237,9 +1303,12 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                                     <div><span class='font-medium text-gray-500 dark:text-gray-400'>Age/Sex:</span> ${age} / ${sex.charAt(0).toUpperCase() + sex.slice(1).toLowerCase()}</div>
                                     <div><span class='font-medium text-gray-500 dark:text-gray-400'>Phone:</span> ${phone}</div>
                                     <div><span class='font-medium text-gray-500 dark:text-gray-400'>ID Card Number:</span> ${idCardNumber}</div>
-                                    <div><span class='font-medium text-gray-500 dark:text-gray-400'>Doctor:</span> ${doctor}</div>
+                                    <div><span class='font-medium text-gray-500 dark:text-gray-400'>Father Name:</span> ${fatherName}</div>
+                                    <div class='md:col-span-2'><span class='font-medium text-gray-500 dark:text-gray-400'>Address:</span> ${address}</div>
+                                    <div><span class='font-medium text-gray-500 dark:text-gray-400'>Consultant:</span> ${doctor}</div>
+                                    <div><span class='font-medium text-gray-500 dark:text-gray-400'>Referred By:</span> ${referredBy}</div>
                                     <div><span class='font-medium text-gray-500 dark:text-gray-400'>Diagnosis / Treatment:</span> ${diagnosis}</div>
-                                    <div><span class='font-medium text-gray-500 dark:text-gray-400'>Admission Date:</span> ${safeFormatDate(admissionDate)}</div>
+                                    <div><span class='font-medium text-gray-500 dark:text-gray-400'>Admission Date:</span> ${safeFormatDate(admissionDate)} ${admissionTime !== '-' ? admissionTime : ''}</div>
                                     <div><span class='font-medium text-gray-500 dark:text-gray-400'>Discharge Date:</span> ${safeFormatDate(dischargeDate)}</div>
                                 </div>
                             </div>
@@ -1534,7 +1603,7 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                             <div class="info-item"><span class="info-label">Admission Date:</span> <span class="info-value">${data.admissionDate}</span></div>
                             <div class="info-item"><span class="info-label">Discharge Date:</span> <span class="info-value">${data.dischargeDate}</span></div>
                             <div class="info-item"><span class="info-label">Bed/Cabin:</span> <span class="info-value">${data.bedCabin}</span></div>
-                            <div class="info-item"><span class="info-label">Doctor:</span> <span class="info-value">${data.doctor}</span></div>
+                            <div class="info-item"><span class="info-label">Consultant:</span> <span class="info-value">${data.doctor}</span></div>
                         </div>
                         <div class="info-item" style="margin-top: 10px;"><span class="info-label">Diagnosis / Treatment:</span> <span class="info-value">${data.diagnosis}</span></div>
                     </div>
@@ -1845,7 +1914,7 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                             </p>
                         </div>
                         <Button
-                            onClick={() => window.location.href = '/admission/new-admission'}
+                            onClick={() => window.location.href = '/dashboard/admission/new-admission'}
                         >
                             <UserPlus className="h-4 w-4" />
                             New Admission

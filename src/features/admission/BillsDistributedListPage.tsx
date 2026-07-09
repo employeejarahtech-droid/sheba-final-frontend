@@ -54,6 +54,15 @@ interface BillsDistributedListPageProps {
     setSearch?: (search: string) => void;
     setStatusFilter?: (status: string) => void;
     setPaymentFilter?: (payment: string) => void;
+    /**
+     * Whether providers have been fully paid out from what's been distributed
+     * to them so far ('complete') or still have a due amount ('incomplete').
+     * This is the actual distinction between the "Pay. Dist. Incompleted" and
+     * "Pay. Dist. Completed" sidebar pages — without it both routes queried
+     * the same bills_distributed=1/balance_distributed=0 admissions and
+     * showed identical results.
+     */
+    providerPaymentStatus: 'complete' | 'incomplete';
 }
 
 export function BillsDistributedListPage({
@@ -67,6 +76,7 @@ export function BillsDistributedListPage({
     setSearch: propSetSearch,
     setStatusFilter: propSetStatusFilter,
     setPaymentFilter: propSetPaymentFilter,
+    providerPaymentStatus,
 }: BillsDistributedListPageProps) {
     const navigate = useNavigate()
     const token = getCookie('accessToken')
@@ -92,7 +102,7 @@ export function BillsDistributedListPage({
     const setPaymentFilter = propSetPaymentFilter || localSetPaymentFilter;
 
     const { data: allAdmissionsData, isFetching } = useQuery({
-        queryKey: ['admissions', 'bills_distributed_partial', page, limit, search, statusFilter, paymentFilter],
+        queryKey: ['admissions', 'bills_distributed', providerPaymentStatus, page, limit, search, statusFilter, paymentFilter],
         queryFn: async () => {
             const params = new URLSearchParams({
                 page: page.toString(),
@@ -102,6 +112,7 @@ export function BillsDistributedListPage({
                 payment_status: paymentFilter,
                 bills_distributed: '1',
                 balance_distributed: '0',
+                provider_payment_status: providerPaymentStatus,
             })
             const res = await fetch(`${API_URL}/api/admission/discharged?${params}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -200,6 +211,16 @@ export function BillsDistributedListPage({
                     `
                 }
 
+                if (providerPaymentStatus === 'incomplete') {
+                    buttons += `
+                        <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/distribute-bill'"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            Pay. Distribute
+                        </button>
+                    `
+                }
+
                 if (hasOverpayment) {
                     buttons += `
                         <button onclick="window.location.href='/dashboard/admission/patients/${row.id}/billing'"
@@ -259,8 +280,10 @@ export function BillsDistributedListPage({
             <Main fluid>
                 <div className="flex-1 space-y-8 px-4 py-6 overflow-auto w-full">
                 <PageHeader
-                    title="Bills Distributed List"
-                    description="Patients whose bills have been distributed"
+                    title={providerPaymentStatus === 'complete' ? 'Pay. Dist. Completed' : 'Pay. Dist. Incompleted'}
+                    description={providerPaymentStatus === 'complete'
+                        ? 'Providers have been fully paid from the amounts distributed to them'
+                        : 'Providers still have a due amount from the bill distributed to them'}
                     backTo="/admission/patients"
                     backLabel="Back to Patients"
                 />

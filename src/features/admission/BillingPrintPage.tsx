@@ -506,6 +506,22 @@ export function BillingPrintPage() {
         )
     }
 
+    if (!admissionData?.data?.bill_created) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <p className="text-red-500 mb-4">
+                        Preliminary bill not created yet. Please create the bill first.
+                    </p>
+                    <Button variant="outline" size="sm" onClick={() => window.history.back()}>
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back
+                    </Button>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div className="invoice-print-area max-w-3xl mx-auto w-full p-8 bg-white mt-10 print:mt-0 shadow-sm print:shadow-none border border-slate-100 print:border-none rounded-lg print:rounded-none">
             <style>{`
@@ -637,13 +653,11 @@ export function BillingPrintPage() {
             <table className="w-full text-sm mt-6">
                 <thead>
                     <tr className="border-t border-b bg-row-blue">
-                        <th className="px-2 py-1 text-left text-xs w-[4%]">#</th>
-                        <th className="px-2 py-1 text-left text-xs w-[18%]">Category</th>
-                        <th className="px-2 py-1 text-left text-xs w-[30%]">Description</th>
-                        <th className="px-2 py-1 text-center text-xs w-[8%]">Qty/Days</th>
-                        <th className="px-2 py-1 text-right text-xs w-[12%]">Rate ({currencySymbol})</th>
-                        <th className="px-2 py-1 text-right text-xs w-[12%]">Disc. ({currencySymbol})</th>
-                        <th className="px-2 py-1 text-right text-xs w-[16%]">Amount ({currencySymbol})</th>
+                        <th className="px-2 py-1 text-left text-xs w-[5%]">#</th>
+                        <th className="px-2 py-1 text-left text-xs w-[22%]">Category</th>
+                        <th className="px-2 py-1 text-left text-xs w-[45%]">Description</th>
+                        <th className="px-2 py-1 text-center text-xs w-[10%]">Qty/Days</th>
+                        <th className="px-2 py-1 text-right text-xs w-[18%]">Rate ({currencySymbol})</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -659,16 +673,9 @@ export function BillingPrintPage() {
                                 {item.date && <span className="block text-gray-400 text-[10px] mt-0.5">{item.date}</span>}
                             </td>
                             <td className="px-2 py-1 text-center text-xs">{item.qty}</td>
-                            <td className="px-2 py-1 text-right text-xs">{fmtNum(item.rate)}</td>
-                            <td className="px-2 py-1 text-right text-xs text-red-600">{(item.discount || 0) > 0 ? `- ${fmtNum(item.discount || 0)}` : '-'}</td>
-                            <td className="px-2 py-1 text-right text-xs font-semibold">{fmtNum(item.amount)}</td>
+                            <td className="px-2 py-1 text-right text-xs font-semibold">{fmtNum(item.rate)}</td>
                         </tr>
                     ))}
-                    {/* Grand totals row */}
-                    <tr className="font-bold text-xs border-t-2 border-b border-gray-500">
-                        <td className="px-2 py-1" colSpan={5}>Total</td>
-                        <td className="px-2 py-1 text-right" colSpan={2}>{fmtNum(grandTotal)}</td>
-                    </tr>
                 </tbody>
             </table>
 
@@ -685,12 +692,12 @@ export function BillingPrintPage() {
             <p className="text-sm mt-6 italic">Total In Words: {amountToWords(grandTotal)}</p>
 
             {/* ── Signature Row ───────────────────────────────────────────────── */}
-            <div className="grid grid-cols-2 mt-32 text-sm">
-                <div>
-                    <p className="border-t border-dashed w-40 pt-1 text-center">Prepared By:</p>
+            <div className="flex justify-between mt-32 text-sm w-full">
+                <div style={{ textAlign: 'left' }}>
+                    <span className="inline-block border-t border-dashed pt-1">Prepared By:</span>
                 </div>
-                <div className="text-right">
-                    <p className="border-t border-dashed w-56 ml-auto pt-1">Authority Signature:</p>
+                <div style={{ textAlign: 'right' }}>
+                    <span className="inline-block border-t border-dashed pt-1">Authorized Signature:</span>
                 </div>
             </div>
         </div>

@@ -1,7 +1,6 @@
 
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
-import { useEffect, useRef } from 'react'
 import { amountToWords } from '@/lib/utils'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
@@ -11,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { useDateFormat } from '@/hooks/use-date-format'
 
 export const Route = createFileRoute(
-    '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId',
+    '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/',
 )({
     component: InvoiceDetails,
 })
@@ -19,7 +18,6 @@ export const Route = createFileRoute(
 function InvoiceDetails() {
     const { invoiceId } = Route.useParams();
     const token = getCookie('accessToken')
-    const hasPrinted = useRef(false);
 
     // Tenant date format (from company settings) — date portion only; time is
     // appended separately to preserve the existing "date + time" display.
@@ -117,44 +115,6 @@ function InvoiceDetails() {
         });
     };
 
-    // Auto-print only on initial load, not on refresh
-    useEffect(() => {
-        if (invoice && !hasPrinted.current) {
-            const printKey = `invoice-print-${invoiceId}`
-            const alreadyPrinted = sessionStorage.getItem(printKey)
-
-            if (!alreadyPrinted) {
-                hasPrinted.current = true
-                sessionStorage.setItem(printKey, 'true')
-
-                // Remove DataTables responsive markers before printing
-                setTimeout(() => {
-                    // Remove any [col-X] text nodes
-                    const cleanTextNodes = () => {
-                        const walker = document.createTreeWalker(
-                            document.body,
-                            NodeFilter.SHOW_TEXT,
-                            null
-                        );
-                        const textNodes = [];
-                        let node;
-                        while (node = walker.nextNode()) {
-                            if (node.nodeValue && node.nodeValue.includes('[col-')) {
-                                textNodes.push(node);
-                            }
-                        }
-                        textNodes.forEach(node => {
-                            node.nodeValue = node.nodeValue.replace(/\[col-\d+\]*/g, '').trim();
-                        });
-                    };
-
-                    cleanTextNodes();
-                    window.print();
-                }, 500)
-            }
-        }
-    }, [invoice, invoiceId])
-
     return (
         <>
             {/* ===== Print Styles ===== */}
@@ -238,9 +198,12 @@ function InvoiceDetails() {
 
                             <div className="text-center">
                                 <h1 className="text-2xl font-bold text-slate-900">{companyName}</h1>
-                                <p className="text-sm mt-1 leading-5 text-slate-600">
-                                    {[companySettings?.address1, companySettings?.address2].filter(Boolean).join(', ')}
-                                </p>
+                                {companySettings?.address1 && (
+                                    <p className="text-sm mt-1 leading-5 text-slate-600">{companySettings.address1}</p>
+                                )}
+                                {companySettings?.address2 && (
+                                    <p className="text-sm leading-5 text-slate-600">{companySettings.address2}</p>
+                                )}
                             </div>
                         </div>
                     </div>

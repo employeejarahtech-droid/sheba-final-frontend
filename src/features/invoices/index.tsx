@@ -63,6 +63,7 @@ type InvoiceItem = {
     due_amount: number;
     created_at: string;
     created_by?: string | number | null;
+    created_by_type?: "staff" | "company_admin" | null;
     status: string | null;
     sample_collection_rooms?: Array<{
         id: number;
@@ -838,6 +839,22 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
                 // Fallback to showing created_by ID or dash
                 const value = row.created_by || '-';
                 return `<span class="text-sm text-muted-foreground">${value}</span>`;
+            },
+            defaultContent: "-",
+        },
+        {
+            data: null,
+            title: "Create Type",
+            orderable: true,
+            responsivePriority: 5,
+            render: (_data: any, _type: string, row: InvoiceItem) => {
+                if (!row.created_by_type) return `<span class="text-sm text-muted-foreground">-</span>`;
+                const isAdmin = row.created_by_type === 'company_admin';
+                const label = isAdmin ? 'Admin' : 'Staff';
+                const classes = isAdmin
+                    ? 'bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400'
+                    : 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400';
+                return `<span class="${classes} px-2 py-0.5 rounded text-xs font-semibold">${label}</span>`;
             },
             defaultContent: "-",
         },
