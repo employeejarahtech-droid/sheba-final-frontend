@@ -73,6 +73,7 @@ import { Route as AuthenticatedDashboardBackupSettingsIndexRouteImport } from '.
 import { Route as AuthenticatedDashboardAssetsIndexRouteImport } from './routes/_authenticated/dashboard/assets/index'
 import { Route as AuthenticatedDashboardAppsIndexRouteImport } from './routes/_authenticated/dashboard/apps/index'
 import { Route as AuthenticatedDashboardAccountingIndexRouteImport } from './routes/_authenticated/dashboard/accounting/index'
+import { Route as publicInvoiceStatusInvoiceIdIndexRouteImport } from './routes/(public)/invoice-status/$invoiceId/index'
 import { Route as platformAdminPlansIndexRouteImport } from './routes/(platform)/admin/plans/index'
 import { Route as platformAdminCompaniesIndexRouteImport } from './routes/(platform)/admin/companies/index'
 import { Route as platformAdminBillingIndexRouteImport } from './routes/(platform)/admin/billing/index'
@@ -778,6 +779,12 @@ const AuthenticatedDashboardAccountingIndexRoute =
     id: '/dashboard/accounting/',
     path: '/dashboard/accounting/',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const publicInvoiceStatusInvoiceIdIndexRoute =
+  publicInvoiceStatusInvoiceIdIndexRouteImport.update({
+    id: '/(public)/invoice-status/$invoiceId/',
+    path: '/invoice-status/$invoiceId/',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const platformAdminPlansIndexRoute = platformAdminPlansIndexRouteImport.update({
   id: '/plans/',
@@ -3166,6 +3173,7 @@ export interface FileRoutesByFullPath {
   '/admin/billing': typeof platformAdminBillingIndexRoute
   '/admin/companies': typeof platformAdminCompaniesIndexRoute
   '/admin/plans': typeof platformAdminPlansIndexRoute
+  '/invoice-status/$invoiceId': typeof publicInvoiceStatusInvoiceIdIndexRoute
   '/dashboard/accounting': typeof AuthenticatedDashboardAccountingIndexRoute
   '/dashboard/apps': typeof AuthenticatedDashboardAppsIndexRoute
   '/dashboard/assets': typeof AuthenticatedDashboardAssetsIndexRoute
@@ -3588,6 +3596,7 @@ export interface FileRoutesByTo {
   '/admin/billing': typeof platformAdminBillingIndexRoute
   '/admin/companies': typeof platformAdminCompaniesIndexRoute
   '/admin/plans': typeof platformAdminPlansIndexRoute
+  '/invoice-status/$invoiceId': typeof publicInvoiceStatusInvoiceIdIndexRoute
   '/dashboard/accounting': typeof AuthenticatedDashboardAccountingIndexRoute
   '/dashboard/apps': typeof AuthenticatedDashboardAppsIndexRoute
   '/dashboard/assets': typeof AuthenticatedDashboardAssetsIndexRoute
@@ -4017,6 +4026,7 @@ export interface FileRoutesById {
   '/(platform)/admin/billing/': typeof platformAdminBillingIndexRoute
   '/(platform)/admin/companies/': typeof platformAdminCompaniesIndexRoute
   '/(platform)/admin/plans/': typeof platformAdminPlansIndexRoute
+  '/(public)/invoice-status/$invoiceId/': typeof publicInvoiceStatusInvoiceIdIndexRoute
   '/_authenticated/dashboard/accounting/': typeof AuthenticatedDashboardAccountingIndexRoute
   '/_authenticated/dashboard/apps/': typeof AuthenticatedDashboardAppsIndexRoute
   '/_authenticated/dashboard/assets/': typeof AuthenticatedDashboardAssetsIndexRoute
@@ -4443,6 +4453,7 @@ export interface FileRouteTypes {
     | '/admin/billing'
     | '/admin/companies'
     | '/admin/plans'
+    | '/invoice-status/$invoiceId'
     | '/dashboard/accounting'
     | '/dashboard/apps'
     | '/dashboard/assets'
@@ -4865,6 +4876,7 @@ export interface FileRouteTypes {
     | '/admin/billing'
     | '/admin/companies'
     | '/admin/plans'
+    | '/invoice-status/$invoiceId'
     | '/dashboard/accounting'
     | '/dashboard/apps'
     | '/dashboard/assets'
@@ -5293,6 +5305,7 @@ export interface FileRouteTypes {
     | '/(platform)/admin/billing/'
     | '/(platform)/admin/companies/'
     | '/(platform)/admin/plans/'
+    | '/(public)/invoice-status/$invoiceId/'
     | '/_authenticated/dashboard/accounting/'
     | '/_authenticated/dashboard/apps/'
     | '/_authenticated/dashboard/assets/'
@@ -5684,6 +5697,7 @@ export interface RootRouteChildren {
   platformPrivacyRoute: typeof platformPrivacyRoute
   platformRegisterRoute: typeof platformRegisterRoute
   platformTermsRoute: typeof platformTermsRoute
+  publicInvoiceStatusInvoiceIdIndexRoute: typeof publicInvoiceStatusInvoiceIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -6135,6 +6149,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/accounting'
       preLoaderRoute: typeof AuthenticatedDashboardAccountingIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/(public)/invoice-status/$invoiceId/': {
+      id: '/(public)/invoice-status/$invoiceId/'
+      path: '/invoice-status/$invoiceId'
+      fullPath: '/invoice-status/$invoiceId'
+      preLoaderRoute: typeof publicInvoiceStatusInvoiceIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/(platform)/admin/plans/': {
       id: '/(platform)/admin/plans/'
@@ -9934,6 +9955,8 @@ const rootRouteChildren: RootRouteChildren = {
   platformPrivacyRoute: platformPrivacyRoute,
   platformRegisterRoute: platformRegisterRoute,
   platformTermsRoute: platformTermsRoute,
+  publicInvoiceStatusInvoiceIdIndexRoute:
+    publicInvoiceStatusInvoiceIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

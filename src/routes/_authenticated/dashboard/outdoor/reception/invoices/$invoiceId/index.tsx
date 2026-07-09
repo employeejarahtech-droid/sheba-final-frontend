@@ -225,7 +225,7 @@ function InvoiceDetails() {
                         <div className="text-right shrink-0">
                             <h2 className="text-xl font-bold tracking-widest text-slate-800 uppercase">INVOICE</h2>
                             <div className="flex justify-end mt-2">
-                                <QRCodeSVG value={window.location.href} size={72} />
+                                <QRCodeSVG value={`${window.location.origin}/invoice-status/${invoiceId}`} size={72} />
                             </div>
                         </div>
                     </div>
@@ -290,8 +290,34 @@ function InvoiceDetails() {
                     </div>
 
                     {/* Totals Area */}
-                    <div className="flex items-center mt-0">
-                        <div className="flex justify-center w-1/2">
+                    <div className="grid grid-cols-3 items-center gap-4 mt-4">
+                        {/* Column 1: Sample Collection Rooms */}
+                        <div className="text-sm">
+                            {invoice?.sample_collection_rooms?.length > 0 ? (
+                                <>
+                                    <p className="font-semibold text-slate-700 mb-1">Sample Collection Room{invoice.sample_collection_rooms.length > 1 ? 's' : ''}</p>
+                                    <table className="text-xs border" data-table-ignore="true">
+                                        <thead>
+                                            <tr className="border">
+                                                <th className="py-1 px-2 border text-left font-bold">Room</th>
+                                                <th className="py-1 px-2 border text-left font-bold">Location</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {invoice.sample_collection_rooms.map((r: any) => (
+                                                <tr key={r.id} className="border">
+                                                    <td className="py-1 px-2 border">{r.room?.name || '-'}</td>
+                                                    <td className="py-1 px-2 border">{r.room?.location || '-'}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </>
+                            ) : null}
+                        </div>
+
+                        {/* Column 2: Paid / Due stamp */}
+                        <div className="flex justify-center">
                             {dueAmount <= 0 ? (
                                 <div className="border border-slate-600 text-slate-600 rounded px-6 py-2 text-lg font-bold uppercase tracking-wider rotate-[-10deg]">
                                     Paid
@@ -303,7 +329,8 @@ function InvoiceDetails() {
                             )}
                         </div>
 
-                        <div className="text-sm max-w-[260px] w-full ml-auto space-y-2 border-t border-b border-slate-400 py-3 mt-4">
+                        {/* Column 3: Summary details */}
+                        <div className="text-sm max-w-[260px] w-full ml-auto space-y-2 border-t border-b border-slate-400 py-3">
                             <div className="flex justify-between text-slate-600">
                                 <span>Total Amt. ({companySettings?.currency || 'BDT'})</span>
                                 <span className="font-semibold text-slate-800">{Number(invoice?.total_amount || 0).toFixed(2)}</span>
