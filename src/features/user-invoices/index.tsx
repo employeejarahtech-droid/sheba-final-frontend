@@ -425,11 +425,21 @@ export default function UserInvoices({ page, limit, search, statusFilter, select
                     }).join('')
                     : '<tr><td colspan="6" class="py-4 text-center text-gray-500">No department breakdown available</td></tr>';
 
-                // Format delivery date and time
+                // Format delivery date and time. delivery_time comes from an HTML
+                // <input type="time"> as 24h "HH:MM" — convert to 12h AM/PM for display.
+                const to12Hour = (time: string) => {
+                    const match = time.match(/^(\d{1,2}):(\d{2})$/);
+                    if (!match) return time;
+                    const hours24 = parseInt(match[1], 10);
+                    const minutes = match[2];
+                    const period = hours24 >= 12 ? 'PM' : 'AM';
+                    const hours12 = hours24 % 12 || 12;
+                    return `${String(hours12).padStart(2, '0')}:${minutes} ${period}`;
+                };
                 const formatDateTime = (date: string | null, time: string | null) => {
                     if (!date) return '-';
                     const dateStr = formatDate(date);
-                    return time ? `${dateStr} ${time}` : dateStr;
+                    return time ? `${dateStr} ${to12Hour(time)}` : dateStr;
                 };
 
                 const invoiceDetailsHTML = `

@@ -8,6 +8,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { QRCodeSVG } from 'qrcode.react'
 
 export const Route = createFileRoute(
     '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/',
@@ -36,15 +37,27 @@ function InvoiceDetails() {
         return `${fmtDate(date)} ${timeStr}`;
     };
 
-    // Format the delivery date. delivery_time is stored as a separate string field
-    // (e.g. "06:00 PM"), so we only take the date portion from delivery_date and
-    // append delivery_time when present. Returns '-' when no date.
+    // delivery_time is saved from an HTML <input type="time">, which yields a
+    // 24h "HH:MM" string — convert it to 12h AM/PM for display. Already-formatted
+    // strings (e.g. "06:00 PM") are left as-is.
+    const to12Hour = (timeString: string) => {
+        const match = timeString.match(/^(\d{1,2}):(\d{2})$/);
+        if (!match) return timeString;
+        const hours24 = parseInt(match[1], 10);
+        const minutes = match[2];
+        const period = hours24 >= 12 ? 'PM' : 'AM';
+        const hours12 = hours24 % 12 || 12;
+        return `${String(hours12).padStart(2, '0')}:${minutes} ${period}`;
+    };
+
+    // Format the delivery date: date portion from delivery_date, plus the
+    // delivery_time (converted to 12h AM/PM) when present. Returns '-' when no date.
     const formatDeliveryDate = (dateString: string | null, timeString: string | null) => {
         if (!dateString) return '-';
         const date = new Date(dateString);
         if (Number.isNaN(date.getTime())) return '-';
         const dateStr = fmtDate(date);
-        return timeString ? `${dateStr} ${timeString}` : dateStr;
+        return timeString ? `${dateStr} ${to12Hour(timeString)}` : dateStr;
     };
 
     // Fetch existing test data
@@ -186,8 +199,9 @@ function InvoiceDetails() {
                 <div className="invoice-print-area max-w-3xl mx-auto w-full p-8 bg-white mt-10 print:mt-0 shadow-sm print:shadow-none border border-slate-100 print:border-none rounded-lg print:rounded-none">
 
                     {/* Header */}
-                    <div className="mb-6">
-                        <div className='flex justify-center items-center gap-8'>
+                    <div className="mb-6 flex items-start justify-between gap-6">
+                        {/* Column 1: Logo + Company Info */}
+                        <div className="flex items-center gap-4">
                             {companyLogo ? (
                                 <img
                                     src={companyLogo}
@@ -196,7 +210,7 @@ function InvoiceDetails() {
                                 />
                             ) : null}
 
-                            <div className="text-center">
+                            <div>
                                 <h1 className="text-2xl font-bold text-slate-900">{companyName}</h1>
                                 {companySettings?.address1 && (
                                     <p className="text-sm mt-1 leading-5 text-slate-600">{companySettings.address1}</p>
@@ -206,11 +220,14 @@ function InvoiceDetails() {
                                 )}
                             </div>
                         </div>
-                    </div>
 
-                    <div className="text-center mb-6">
-                        <h2 className="text-xl font-bold tracking-widest text-slate-800 uppercase">INVOICE</h2>
-                        <div className="w-16 h-0.5 bg-slate-800 mx-auto mt-2 rounded"></div>
+                        {/* Column 2: Invoice title + QR */}
+                        <div className="text-right shrink-0">
+                            <h2 className="text-xl font-bold tracking-widest text-slate-800 uppercase">INVOICE</h2>
+                            <div className="flex justify-end mt-2">
+                                <QRCodeSVG value={window.location.href} size={72} />
+                            </div>
+                        </div>
                     </div>
 
 
@@ -231,12 +248,9 @@ function InvoiceDetails() {
                             <tr className="border">
                                 <td className="border px-2 py-1" colSpan={2}>
                                     Patient's Name: <strong>{invoice?.patient_name}</strong>
-                                    {invoice?.age_text || invoice?.age
-                                        ? ` — ${invoice?.age_text || `${invoice?.age}Y`}`
-                                        : ''}
                                 </td>
                                 <td className="border px-2 py-1">
-                                    Sex: {invoice?.sex?.toUpperCase() || '-'}
+                                    Age & Sex: {invoice?.age_text || invoice?.age ? (invoice?.age_text || `${invoice?.age}Y`) : '-'} / {invoice?.sex?.toUpperCase() || '-'}
                                 </td>
                             </tr>
                             <tr className="border">
@@ -323,7 +337,7 @@ function InvoiceDetails() {
                     <p className="text-sm mt-6 italic">In words: &nbsp; <span className="font-semibold capitalize text-slate-800">{amountToWords(Number(totalPayments || 0))}</span></p>
 
                     {/* ── Signature Row ───────────────────────────────────────────────── */}
-                    <div className="flex justify-between mt-32 text-sm w-full">
+                    <div className="flex justify-between mt-12 text-sm w-full">
                         <div style={{ textAlign: 'left' }}>
                             <span className="inline-block border-t border-dashed pt-1">Prepared By:</span>
                         </div>
