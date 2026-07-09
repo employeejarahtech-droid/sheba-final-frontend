@@ -1,4 +1,5 @@
 
+import { useState } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
 import { amountToWords } from '@/lib/utils'
@@ -7,8 +8,21 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useDateFormat } from '@/hooks/use-date-format'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { QRCodeSVG } from 'qrcode.react'
+import { useDateFormat } from '@/hooks/use-date-format'
+
+// Paper sizes offered for printing this invoice. `cssSize` feeds the @page
+// size (browsers use this to pick/suggest the matching physical paper), and
+// `margin` is tuned per size — the 80mm thermal option needs a near-zero
+// margin since receipt printers have almost no physical border.
+const PAPER_SIZES: Record<string, { label: string; cssSize: string; margin: string }> = {
+    a4: { label: 'A4', cssSize: 'A4 portrait', margin: '12mm' },
+    a5: { label: 'A5', cssSize: 'A5 portrait', margin: '8mm' },
+    letter: { label: 'Letter', cssSize: 'letter portrait', margin: '12mm' },
+    legal: { label: 'Legal', cssSize: 'legal portrait', margin: '12mm' },
+    thermal80: { label: '80mm (Thermal)', cssSize: '80mm auto', margin: '2mm' },
+}
 
 export const Route = createFileRoute(
     '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/',
@@ -19,30 +33,29 @@ export const Route = createFileRoute(
 function InvoiceDetails() {
     const { invoiceId } = Route.useParams();
     const token = getCookie('accessToken')
+    const [paperSize, setPaperSize] = useState<keyof typeof PAPER_SIZES>('a4')
+    const { cssSize, margin } = PAPER_SIZES[paperSize]
 
-    // Tenant date format (from company settings) — date portion only; time is
-    // appended separately to preserve the existing "date + time" display.
+    // Tenant date format (from company settings), used for each test row's
+    // per-test delivery date below.
     const { formatDate: fmtDate } = useDateFormat();
 
-    // Format an invoice timestamp using the tenant date format + a 12h time.
-    const formatDate = (dateString: string | null) => {
-        if (!dateString) return '-';
-        const date = new Date(dateString);
-        if (Number.isNaN(date.getTime())) return '-';
-        const timeStr = date.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        });
-        return `${fmtDate(date)} ${timeStr}`;
+    // delivery_date comes back as a plain "YYYY-MM-DD" (Sequelize DATEONLY).
+    // Parse the components directly instead of `new Date(str)` — that parses
+    // as UTC midnight, which can shift the displayed date in timezones west
+    // of UTC once local getters are applied.
+    const formatItemDeliveryDate = (dateStr: string | null) => {
+        if (!dateStr) return '-';
+        const [y, m, d] = dateStr.split('-').map(Number);
+        if (!y || !m || !d) return '-';
+        return fmtDate(new Date(y, m - 1, d));
     };
 
-    // delivery_time is saved from an HTML <input type="time">, which yields a
-    // 24h "HH:MM" string — convert it to 12h AM/PM for display. Already-formatted
-    // strings (e.g. "06:00 PM") are left as-is.
-    const to12Hour = (timeString: string) => {
-        const match = timeString.match(/^(\d{1,2}):(\d{2})$/);
-        if (!match) return timeString;
+    // delivery_time is a raw 24h "HH:MM" — convert to 12h AM/PM for display.
+    const formatItemDeliveryTime = (timeStr: string | null) => {
+        if (!timeStr) return '-';
+        const match = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+        if (!match) return timeStr;
         const hours24 = parseInt(match[1], 10);
         const minutes = match[2];
         const period = hours24 >= 12 ? 'PM' : 'AM';
@@ -50,14 +63,14 @@ function InvoiceDetails() {
         return `${String(hours12).padStart(2, '0')}:${minutes} ${period}`;
     };
 
-    // Format the delivery date: date portion from delivery_date, plus the
-    // delivery_time (converted to 12h AM/PM) when present. Returns '-' when no date.
-    const formatDeliveryDate = (dateString: string | null, timeString: string | null) => {
-        if (!dateString) return '-';
-        const date = new Date(dateString);
+    // Invoice-level invoice_date / delivery_date are full DATETIME values
+    // (unlike the per-item DATEONLY delivery_date above), so plain
+    // `new Date(str)` parsing is safe here.
+    const formatInvoiceLevelDate = (dateStr: string | null) => {
+        if (!dateStr) return '-';
+        const date = new Date(dateStr);
         if (Number.isNaN(date.getTime())) return '-';
-        const dateStr = fmtDate(date);
-        return timeString ? `${dateStr} ${to12Hour(timeString)}` : dateStr;
+        return fmtDate(date);
     };
 
     // Fetch existing test data
@@ -134,8 +147,8 @@ function InvoiceDetails() {
             <style>{`
                 @media print {
                     @page {
-                        size: A4 portrait;
-                        margin: 12mm;
+                        size: ${cssSize};
+                        margin: ${margin};
                     }
                     html, body {
                         margin: 0 !important;
@@ -157,6 +170,13 @@ function InvoiceDetails() {
                     .invoice-print-area table {
                         width: 100% !important;
                     }
+                    /* Preserve the 35/25/40 Totals Area column split on print */
+                    .invoice-totals-row {
+                        display: flex !important;
+                    }
+                    .invoice-totals-col-1 { width: 35% !important; min-width: 0 !important; }
+                    .invoice-totals-col-2 { width: 25% !important; min-width: 0 !important; }
+                    .invoice-totals-col-3 { width: 40% !important; min-width: 0 !important; }
                     /* Avoid breaking rows across pages */
                     tr, td, th {
                         page-break-inside: avoid;
@@ -184,16 +204,26 @@ function InvoiceDetails() {
             {/* ===== Top Heading ===== */}
             <AppHeader fixed className="print:hidden" />
             <Main>
-                {/* Back Button */}
-                <div className="max-w-3xl mx-auto w-full px-8 pt-6 print:hidden">
+                {/* Back Button + Paper Size */}
+                <div className="max-w-3xl mx-auto w-full px-8 pt-6 print:hidden flex items-center justify-between mb-4">
                     <Button
                         variant="outline"
-                        className="mb-4"
                         onClick={() => window.history.back()}
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Back
                     </Button>
+
+                    <Select value={paperSize} onValueChange={(v) => setPaperSize(v as keyof typeof PAPER_SIZES)}>
+                        <SelectTrigger className="w-[160px]">
+                            <SelectValue placeholder="Paper size" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {Object.entries(PAPER_SIZES).map(([key, { label }]) => (
+                                <SelectItem key={key} value={key}>{label}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 <div className="invoice-print-area max-w-3xl mx-auto w-full p-8 bg-white mt-10 print:mt-0 shadow-sm print:shadow-none border border-slate-100 print:border-none rounded-lg print:rounded-none">
@@ -235,30 +265,27 @@ function InvoiceDetails() {
                     <table className="w-full text-sm border mt-4" data-table-ignore="true">
                         <tbody>
                             <tr className="border">
-                                <td className="border px-2 py-1 w-1/3">
-                                    Receipt ID: <strong>{invoice?.invoice_prefix || invoice?.id}</strong>
+                                <td className="border px-2 py-1 w-1/2">
+                                    Receipt ID : {invoice?.invoice_prefix || invoice?.id}
                                 </td>
-                                <td className="border px-2 py-1 w-1/3">
-                                    Inv. Date: {formatDate(invoice?.invoice_date)}
-                                </td>
-                                <td className="border px-2 py-1 w-1/3">
-                                    Del. Date: {formatDeliveryDate(invoice?.delivery_date, invoice?.delivery_time)}
+                                <td className="border px-2 py-1 w-1/2">
+                                    Age : {invoice?.age_text || (invoice?.age ? `${invoice.age}Y` : '-')}
                                 </td>
                             </tr>
                             <tr className="border">
-                                <td className="border px-2 py-1" colSpan={2}>
-                                    Patient's Name: <strong>{invoice?.patient_name}</strong>
+                                <td className="border px-2 py-1 w-1/2">
+                                    Patient's Name : {invoice?.patient_name}
                                 </td>
-                                <td className="border px-2 py-1">
-                                    Age & Sex: {invoice?.age_text || invoice?.age ? (invoice?.age_text || `${invoice?.age}Y`) : '-'} / {invoice?.sex?.toUpperCase() || '-'}
+                                <td className="border px-2 py-1 w-1/2">
+                                    Sex : {invoice?.sex?.toUpperCase() || '-'}
                                 </td>
                             </tr>
                             <tr className="border">
-                                <td className="border px-2 py-1 w-1/3" colSpan={2}>
-                                    Ref. Doctor: <strong>{invoice?.doctor?.doctor_name || '-'}</strong>
+                                <td className="border px-2 py-1 w-1/2">
+                                    Ref. Doctor : {invoice?.doctor?.doctor_name || '-'}
                                 </td>
-                                <td className="border px-2 py-1 w-1/3" >
-                                    Contact No: <strong>{invoice?.phone || '-'}</strong>
+                                <td className="border px-2 py-1 w-1/2">
+                                    Contact No : {invoice?.phone || '-'}
                                 </td>
                             </tr>
                         </tbody>
@@ -269,9 +296,10 @@ function InvoiceDetails() {
                         <table className="w-full text-sm border" data-table-ignore="true">
                             <thead>
                                 <tr className="border">
-                                    <th className="py-1.5 px-2 border text-left font-bold w-12">SL</th>
+                                    <th className="py-1.5 px-2 border text-center font-bold w-12 ">SL</th>
                                     <th className="py-1.5 px-2 border text-left font-bold">Test Name</th>
-                                    <th className="py-1.5 px-2 border text-right font-bold w-32">Test Charge</th>
+                                    <th className="py-1.5 px-2 border text-left font-bold w-40">Del. Date &amp; Time</th>
+                                    <th className="py-1.5 px-2 border text-right font-bold w-32">Charge ({companySettings?.currency || 'BDT'})</th>
                                 </tr>
                             </thead>
 
@@ -280,6 +308,11 @@ function InvoiceDetails() {
                                     <tr key={test.id}>
                                         <td className="border px-2 py-1.5 text-center">{index + 1}</td>
                                         <td className="border px-2 py-1.5">{test?.test?.name}</td>
+                                        <td className="border px-2 py-1.5">
+                                            {!test?.delivery_date && !test?.delivery_time
+                                                ? '-'
+                                                : `${formatItemDeliveryDate(test?.delivery_date)} ${formatItemDeliveryTime(test?.delivery_time)}`.trim()}
+                                        </td>
                                         <td className="border px-2 py-1.5 text-right font-semibold">
                                             {Number(test?.price || 0).toFixed(2)}
                                         </td>
@@ -290,34 +323,38 @@ function InvoiceDetails() {
                     </div>
 
                     {/* Totals Area */}
-                    <div className="grid grid-cols-3 items-center gap-4 mt-4">
-                        {/* Column 1: Sample Collection Rooms */}
-                        <div className="text-sm">
+                    <div className="invoice-totals-row flex items-center gap-4 mt-4">
+                        {/* Column 1: Sample Collection Rooms — 35% */}
+                        <div className="invoice-totals-col-1 w-[35%] min-w-0 text-sm">
                             {invoice?.sample_collection_rooms?.length > 0 ? (
                                 <>
                                     <p className="font-semibold text-slate-700 mb-1">Sample Collection Room{invoice.sample_collection_rooms.length > 1 ? 's' : ''}</p>
-                                    <table className="text-xs border" data-table-ignore="true">
+                                    <table className="w-full text-xs border" data-table-ignore="true">
                                         <thead>
                                             <tr className="border">
                                                 <th className="py-1 px-2 border text-left font-bold">Room</th>
-                                                <th className="py-1 px-2 border text-left font-bold">Location</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {invoice.sample_collection_rooms.map((r: any) => (
                                                 <tr key={r.id} className="border">
                                                     <td className="py-1 px-2 border">{r.room?.name || '-'}</td>
-                                                    <td className="py-1 px-2 border">{r.room?.location || '-'}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
                                     </table>
                                 </>
                             ) : null}
+
+                            <div className="mt-2 space-y-0.5">
+                                <p>Inv. Date: <strong>{formatInvoiceLevelDate(invoice?.invoice_date)}</strong></p>
+                                <p>Del. Date: <strong>{formatInvoiceLevelDate(invoice?.delivery_date)}</strong></p>
+                                <p>Created By: <strong>{invoice?.creator?.name || invoice?.created_by || '-'}</strong></p>
+                            </div>
                         </div>
 
-                        {/* Column 2: Paid / Due stamp */}
-                        <div className="flex justify-center">
+                        {/* Column 2: Paid / Due stamp — 25% */}
+                        <div className="invoice-totals-col-2 w-[25%] min-w-0 flex justify-center">
                             {dueAmount <= 0 ? (
                                 <div className="border border-slate-600 text-slate-600 rounded px-6 py-2 text-lg font-bold uppercase tracking-wider rotate-[-10deg]">
                                     Paid
@@ -329,10 +366,10 @@ function InvoiceDetails() {
                             )}
                         </div>
 
-                        {/* Column 3: Summary details */}
-                        <div className="text-sm max-w-[260px] w-full ml-auto space-y-2 border-t border-b border-slate-400 py-3">
+                        {/* Column 3: Summary details — 40% */}
+                        <div className="invoice-totals-col-3 w-[40%] min-w-0 text-sm space-y-2 border-t border-b border-slate-400 py-3">
                             <div className="flex justify-between text-slate-600">
-                                <span>Total Amt. ({companySettings?.currency || 'BDT'})</span>
+                                <span>Total Amt.</span>
                                 <span className="font-semibold text-slate-800">{Number(invoice?.total_amount || 0).toFixed(2)}</span>
                             </div>
 
@@ -372,6 +409,13 @@ function InvoiceDetails() {
                             <span className="inline-block border-t border-dashed pt-1">Authorized Signature:</span>
                         </div>
                     </div>
+
+                    {/* Footer Note (from Settings → Report Settings) */}
+                    {companySettings?.footer_note && (
+                        <p className="text-xs text-slate-500 text-center mt-8 pt-3 border-t whitespace-pre-line">
+                            {companySettings.footer_note}
+                        </p>
+                    )}
 
                     {/* Print & Download Buttons */}
                     <div className="flex justify-end gap-3 mt-8 print:hidden">

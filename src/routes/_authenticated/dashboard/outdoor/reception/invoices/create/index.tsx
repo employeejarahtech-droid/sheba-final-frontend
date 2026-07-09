@@ -20,7 +20,7 @@ function CreateInvoice() {
       <AppHeader fixed />
 
       <Main className="flex flex-1 flex-col gap-6">
-        <div className="space-y-5 w-full min-w-[650px] max-w-[950px] mx-auto px-4">
+        <div className="space-y-5 w-full min-w-[650px] max-w-[1100px] mx-auto px-4">
           {/* Header Section */}
           <div className="flex flex-wrap justify-between items-center gap-4 mb-4 pb-4 border-b">
             <div className="flex items-center gap-3">

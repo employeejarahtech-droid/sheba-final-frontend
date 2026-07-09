@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Trash2, Save, Loader2, FileText } from 'lucide-react'
+import { Plus, Trash2, Save, Loader2, FileText, StickyNote } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCookie } from '@/lib/cookies'
 import api from '@/lib/axios'
@@ -14,6 +15,7 @@ export default function ReportSettings() {
     const token = getCookie('accessToken')
     const queryClient = useQueryClient()
     const [items, setItems] = useState<string[]>(DEFAULT_ITEMS)
+    const [footerNote, setFooterNote] = useState<string>('')
 
     const { data, isLoading } = useQuery({
         queryKey: ['company-settings'],
@@ -33,6 +35,12 @@ export default function ReportSettings() {
         }
     }, [data])
 
+    useEffect(() => {
+        if (data?.footer_note !== undefined && data?.footer_note !== null) {
+            setFooterNote(data.footer_note)
+        }
+    }, [data])
+
     const saveMutation = useMutation({
         mutationFn: async (itemsToSave: string[]) => {
             const formData = new FormData()
@@ -42,6 +50,20 @@ export default function ReportSettings() {
         },
         onSuccess: () => {
             toast.success('Report footer items saved')
+            queryClient.invalidateQueries({ queryKey: ['company-settings'] })
+        },
+        onError: () => toast.error('Failed to save'),
+    })
+
+    const saveFooterNoteMutation = useMutation({
+        mutationFn: async (note: string) => {
+            const formData = new FormData()
+            formData.append('footer_note', note)
+            const res = await api.put('/company-settings', formData)
+            return res.data
+        },
+        onSuccess: () => {
+            toast.success('Footer note saved')
             queryClient.invalidateQueries({ queryKey: ['company-settings'] })
         },
         onError: () => toast.error('Failed to save'),
@@ -112,6 +134,43 @@ export default function ReportSettings() {
                                 <Save className="h-4 w-4" />
                             )}
                             {saveMutation.isPending ? 'Saving...' : 'Save Changes'}
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card className="overflow-hidden shadow-none p-0">
+                <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-b py-3 px-4">
+                    <div className="flex items-center gap-2.5">
+                        <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg shadow">
+                            <StickyNote className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                            <CardTitle className="text-lg font-bold">Footer Note</CardTitle>
+                            <p className="text-xs text-muted-foreground">A general note printed at the bottom of reports</p>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="p-4 space-y-3">
+                    <Textarea
+                        value={footerNote}
+                        onChange={(e) => setFooterNote(e.target.value)}
+                        placeholder="Enter a footer note, e.g. a disclaimer or thank-you message"
+                        rows={4}
+                        disabled={saveFooterNoteMutation.isPending}
+                    />
+                    <div className="pt-4 border-t">
+                        <Button
+                            onClick={() => saveFooterNoteMutation.mutate(footerNote)}
+                            disabled={saveFooterNoteMutation.isPending}
+                            className="w-full"
+                        >
+                            {saveFooterNoteMutation.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <Save className="h-4 w-4" />
+                            )}
+                            {saveFooterNoteMutation.isPending ? 'Saving...' : 'Save Changes'}
                         </Button>
                     </div>
                 </CardContent>

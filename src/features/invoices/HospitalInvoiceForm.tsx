@@ -28,6 +28,8 @@ type TestItem = {
   category_id: number
   created_at: string
   sample_collection_room_id?: number | null
+  delivery_date?: string // Tenant date-format display string (e.g. DD/MM/YYYY) — same as the invoice-level deliveryDate field; converted to ISO at submission
+  delivery_time?: string // 24h HH:MM, per-test expected delivery time
 }
 
 type TestsResponse = {
@@ -361,10 +363,28 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
   const toggleTest = (test: TestItem) => {
     setSelectedTests((prev) => {
       const exists = prev.some((t) => t.id === test.id);
-      return exists
-        ? prev.filter((t) => t.id !== test.id)
-        : [...prev, test];
+      if (exists) return prev.filter((t) => t.id !== test.id);
+
+      // Default the new row's delivery date/time from the invoice-level
+      // "Expected Delivery" fields (still per-row editable afterward) so
+      // reception isn't forced to fill every row from scratch. Stored in the
+      // tenant's display format (matching deliveryDate) — not ISO — since the
+      // per-row picker uses the same format-aware Calendar as that field.
+      const defaultDeliveryDate = watch('deliveryDate') || formatDate(new Date());
+
+      return [
+        ...prev,
+        {
+          ...test,
+          delivery_date: test.delivery_date || defaultDeliveryDate,
+          delivery_time: test.delivery_time || watch('deliveryTime') || '',
+        },
+      ];
     });
+  };
+
+  const updateTestDelivery = (testId: number, field: 'delivery_date' | 'delivery_time', value: string) => {
+    setSelectedTests((prev) => prev.map((t) => (t.id === testId ? { ...t, [field]: value } : t)));
   };
 
   const handleSelectAdmission = async (admissionId: number) => {
@@ -568,6 +588,8 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
         id: test.id,
         category_id: test.category_id,
         price: Number(test.price),
+        delivery_date: test.delivery_date ? toISODate(parseDate(test.delivery_date) || new Date()) : null,
+        delivery_time: test.delivery_time || null,
       })),
       department_payments: Object.entries(departmentWiseTests)
         .map(([deptName, dept]) => {
@@ -810,6 +832,8 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
         id: test.id,
         category_id: test.category_id,
         price: Number(test.price),
+        delivery_date: test.delivery_date ? toISODate(parseDate(test.delivery_date) || new Date()) : null,
+        delivery_time: test.delivery_time || null,
       })),
 
       // Department Payments → outdoor_invoice_department_payments table
@@ -1648,6 +1672,8 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Room No</th>
                       <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Department</th>
                       <th className="px-4 py-2.5 text-right font-medium text-muted-foreground w-32">Price</th>
+                      <th className="px-4 py-2.5 text-left font-medium text-muted-foreground w-40">Delivery Date</th>
+                      <th className="px-4 py-2.5 text-left font-medium text-muted-foreground w-32">Delivery Time</th>
                       <th className="px-4 py-2.5 text-center font-medium text-muted-foreground w-16">Action</th>
                     </tr>
                   </thead>
@@ -1669,6 +1695,40 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                           <td className="px-4 py-3 text-right font-mono font-semibold text-foreground">
                             {Number(test.price).toLocaleString()}
                           </td>
+                          <td className="px-4 py-3">
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className={cn(
+                                    "h-8 w-full justify-start text-xs font-normal px-2 border-gray-200 dark:border-gray-800",
+                                    !test.delivery_date && "text-muted-foreground"
+                                  )}
+                                >
+                                  <CalendarIcon className="mr-1.5 h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                  <span className="truncate">{test.delivery_date || formatHint}</span>
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={test.delivery_date ? parseDate(test.delivery_date) : undefined}
+                                  onSelect={(date) => updateTestDelivery(test.id, 'delivery_date', date ? formatDate(date) : '')}
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </td>
+                          <td className="px-4 py-3">
+                            <Input
+                              type="time"
+                              value={test.delivery_time || ''}
+                              onChange={(e) => updateTestDelivery(test.id, 'delivery_time', e.target.value)}
+                              className="h-8 text-xs px-2 border-gray-200 dark:border-gray-800"
+                            />
+                          </td>
                           <td className="px-4 py-3 text-center">
                             <Button
                               variant="ghost"
@@ -1687,7 +1747,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       <tr>
                         <td
                           className="px-4 py-12 text-center text-muted-foreground italic bg-gray-50/30 dark:bg-transparent"
-                          colSpan={6}
+                          colSpan={8}
                         >
                           <div className="flex flex-col items-center gap-2">
                             <Activity className="h-8 w-8 opacity-20" />
@@ -1706,7 +1766,7 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                         <td className="px-4 py-3 text-right font-mono font-bold text-foreground text-base">
                           {totalCharge.toLocaleString()}
                         </td>
-                        <td></td>
+                        <td colSpan={3}></td>
                       </tr>
                     </tfoot>
                   )}
