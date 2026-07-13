@@ -98,7 +98,7 @@ export default function BiochemistryReport({ invoice, testName = "BIOCHEMISTRY R
           </tr>
           <tr className="border">
             <td className="border px-3 py-2" colSpan={2}>
-              Ref. Doctor: {patientInfo?.ref_doctor || '-'}
+              Ref. By: {patientInfo?.ref_doctor || '-'}
             </td>
             <td className="border px-3 py-2">
               Phone: {patientInfo?.phone || '-'}
@@ -111,8 +111,8 @@ export default function BiochemistryReport({ invoice, testName = "BIOCHEMISTRY R
       <table className="w-full text-sm mt-6">
         <thead>
           <tr className="border-t border-b bg-row-blue">
-            <th className="px-3 py-2 text-left w-[40%]">Test Name</th>
-            <th className="px-3 py-2 text-left w-[60%]">Test Result</th>
+            <th className="px-3 py-2 text-left w-[60%]">Test Name</th>
+            <th className="px-3 py-2 text-left w-[40%]">Test Result</th>
           </tr>
         </thead>
 

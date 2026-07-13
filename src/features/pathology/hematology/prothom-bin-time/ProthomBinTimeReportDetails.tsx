@@ -106,7 +106,7 @@ export default function ProthomBinTimeReportDetails({ data, paddingTop = 40 }: P
                     </tr>
                     <tr className="border">
             <td className="border px-3 py-2" colSpan={2}>
-              Ref. Doctor: {data?.ref_doctor || (data?.outdoor_invoice?.doctor_id ? `Dr. ID: ${data.outdoor_invoice.doctor_id}` : '-')}
+              Ref. By: {data?.ref_doctor || (data?.outdoor_invoice?.doctor_id ? `Dr. ID: ${data.outdoor_invoice.doctor_id}` : '-')}{data?.outdoor_invoice?.doctor?.qualification ? ` (${data.outdoor_invoice.doctor.qualification})` : ''}
             </td>
             <td className="border px-3 py-2">
               Phone: {data?.outdoor_invoice?.phone || '-'}

@@ -83,7 +83,7 @@ export default function ReportDetails({ invoice, testName = "Custom Test Report"
           </tr>
           <tr className="border">
             <td className="border px-3 py-2" colSpan={2}>
-              Ref. Doctor: {patientInfo.doctor?.doctor_name || '-'}
+              Ref. By: {patientInfo.doctor?.doctor_name || '-'}{patientInfo.doctor?.qualification ? ` (${patientInfo.doctor.qualification})` : ''}
             </td>
             <td className="border px-3 py-2">
               Phone: {patientInfo.phone || '-'}

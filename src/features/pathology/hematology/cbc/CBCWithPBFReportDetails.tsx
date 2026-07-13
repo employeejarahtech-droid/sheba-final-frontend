@@ -70,7 +70,7 @@ export default function CBCWithPBFReportDetails({ report: invoice, paddingTop = 
                     </tr>
                     <tr className="border">
             <td className="border px-3 py-2" colSpan={2}>
-              Ref. Doctor: {invoice.ref_doctor || (patientInfo.doctor_id ? `Dr. ID: ${patientInfo.doctor_id}` : '-')}
+              Ref. By: {invoice.ref_doctor || (patientInfo.doctor_id ? `Dr. ID: ${patientInfo.doctor_id}` : '-')}{patientInfo?.doctor?.qualification ? ` (${patientInfo.doctor.qualification})` : ''}
             </td>
             <td className="border px-3 py-2">
               Phone: {patientInfo.phone || invoice.phone || '-'}

@@ -26,6 +26,7 @@ const searchSchema = z.object({
   status: z.string().catch('all'),
   from: z.string().catch(''),
   to: z.string().catch(''),
+  orderBy: z.string().optional(),
 })
 
 export const Route = createFileRoute('/_authenticated/dashboard/pathology/custom-tests/')({
@@ -38,6 +39,7 @@ type ReportsItem = {
   ReciptID: number;
   PatientId: number | null;
   PatientName: string | null;
+  ref_doctor?: string | null;
   Date: string | null;
   Status: string;
 };
@@ -58,6 +60,14 @@ function CustomTestsReports() {
   const statusFilter = searchParams?.status || "all";
   const from = searchParams?.from || "";
   const to = searchParams?.to || "";
+  const orderBy = searchParams?.orderBy || "DESC";
+
+  // Reflect the default sort (Receipt ID DESC) in the URL.
+  useEffect(() => {
+    if (!searchParams?.orderBy) {
+      navigate({ to: '.', search: (prev: any) => ({ ...prev, orderBy: 'DESC' }), replace: true });
+    }
+  }, []);
 
   const setPage = (newPage: number) => {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
@@ -82,13 +92,13 @@ function CustomTestsReports() {
   const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data: customTestReports, isFetching, refetch } = useQuery({
-    queryKey: ["custom-tests", page, limit, search, statusFilter, from, to],
+    queryKey: ["custom-tests", page, limit, search, statusFilter, from, to, orderBy],
     queryFn: async () => {
       const statusParam = statusFilter !== "all" ? `&status=${encodeURIComponent(statusFilter)}` : "";
       const fromParam = from ? `&from=${encodeURIComponent(from)}` : "";
       const toParam = to ? `&to=${encodeURIComponent(to)}` : "";
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/custom-tests-results?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}`,
+        `${import.meta.env.VITE_API_URL}/api/custom-tests-results?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}&orderBy=${encodeURIComponent(orderBy)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -158,7 +168,9 @@ function CustomTestsReports() {
       data: "ReciptID",
       title: "Invoice ID",
       orderable: true,
-      render: (data: any, _type: string, row: ReportsItem) => {
+      render: (data: any, type: string, row: ReportsItem) => {
+        // Sort/type use the raw numeric Receipt ID so DataTables orders numerically.
+        if (type === 'sort' || type === 'type') return row.ReciptID;
         return `
           <div class="flex items-center gap-2">
             <span>${data}</span>
@@ -168,18 +180,25 @@ function CustomTestsReports() {
       defaultContent: "",
     },
     {
-      data: "PatientId",
-      title: "Patient ID",
-      orderable: true,
-      defaultContent: "",
-      render: (data: any) => data || '-',
-    },
-    {
       data: "PatientName",
       title: "Patient Name",
       orderable: true,
       defaultContent: "",
       render: (data: any) => data || '-',
+    },
+    {
+      data: "ref_doctor",
+      title: "Ref. By",
+      defaultContent: "-",
+      render: (data: any) => {
+        if (!data) return '-';
+        // If data contains qualification in parentheses, extract it and display
+        const match = data.match(/^(.+?)\s*\(([^)]+)\)$/);
+        if (match) {
+          return `${match[1].trim()} (${match[2].trim()})`;
+        }
+        return data;
+      }
     },
     {
       data: "Date",

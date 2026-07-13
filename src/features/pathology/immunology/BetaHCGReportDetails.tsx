@@ -87,7 +87,7 @@ export default function BetaHCGReportDetails({ hcgData, invoiceData, paddingTop 
                     </tr>
                     <tr className="border">
             <td className="border px-3 py-2" colSpan={2}>
-              Ref. Doctor: {invoiceData?.reference_doctor ? `Prof./Dr. ${invoiceData.reference_doctor}` : '-'}
+              Ref. By: {invoiceData?.reference_doctor ? `Prof./Dr. ${invoiceData.reference_doctor}` : '-'}{invoiceData?.doctor?.qualification ? ` (${invoiceData.doctor.qualification})` : ''}
             </td>
             <td className="border px-3 py-2">
               Phone: {invoiceData?.phone || '-'}

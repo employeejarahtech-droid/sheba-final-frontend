@@ -146,9 +146,10 @@ function Sputum() {
 
   const columns = [
     {
-      data: 'id',
-      title: 'ID',
+      data: 'invoice_id',
+      title: 'Invoice ID',
       orderable: true,
+      defaultContent: '',
       render: (data: any, _type: string, row: ReportsItem) => {
         const invoiceId = row.invoice_id || '-';
         const patientName = row.patient_name || '-';
@@ -157,7 +158,7 @@ function Sputum() {
           <div class="flex items-center gap-2">
             <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
                     type="button"
-                    data-id="${data}"
+                    data-id="${row.id}"
                     data-invoice-id="${invoiceId}"
                     data-patient-name="${patientName.replace(/"/g, "&quot;")}"
                     data-date="${date}">+</button>
@@ -165,13 +166,6 @@ function Sputum() {
           </div>
         `;
       },
-      defaultContent: '',
-    },
-    {
-      data: 'invoice_id',
-      title: 'Invoice ID',
-      orderable: true,
-      defaultContent: '',
     },
     {
       data: 'patient_name',
@@ -410,7 +404,7 @@ function Sputum() {
       newRow.className = 'child-row-detail';
       const cell = document.createElement('td');
       cell.className = 'p-4 bg-gray-50';
-      cell.colSpan = 6;
+      cell.colSpan = 5;
       cell.appendChild(details);
       newRow.appendChild(cell);
 

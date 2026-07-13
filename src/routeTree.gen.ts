@@ -88,6 +88,7 @@ import { Route as AuthenticatedDashboardSettingsDateControlsRouteImport } from '
 import { Route as AuthenticatedDashboardSettingsAppearanceRouteImport } from './routes/_authenticated/dashboard/settings/appearance'
 import { Route as AuthenticatedDashboardSettingsAppInventoryRouteImport } from './routes/_authenticated/dashboard/settings/app-inventory'
 import { Route as AuthenticatedDashboardSettingsAccountRouteImport } from './routes/_authenticated/dashboard/settings/account'
+import { Route as AuthenticatedDashboardSalesOrderRouteImport } from './routes/_authenticated/dashboard/sales/order'
 import { Route as AuthenticatedDashboardNotificationsIdRouteImport } from './routes/_authenticated/dashboard/notifications/$id'
 import { Route as AuthenticatedDashboardErrorsErrorRouteImport } from './routes/_authenticated/dashboard/errors/$error'
 import { Route as platformAdminPlansAddRouteImport } from './routes/(platform)/admin/plans/add'
@@ -109,7 +110,9 @@ import { Route as AuthenticatedDashboardPayrollOverviewIndexRouteImport } from '
 import { Route as AuthenticatedDashboardPayrollEmployeesIndexRouteImport } from './routes/_authenticated/dashboard/payroll/employees/index'
 import { Route as AuthenticatedDashboardPayrollAttendanceListIndexRouteImport } from './routes/_authenticated/dashboard/payroll/attendance-list/index'
 import { Route as AuthenticatedDashboardPayrollAllPayrollsIndexRouteImport } from './routes/_authenticated/dashboard/payroll/all-payrolls/index'
+import { Route as AuthenticatedDashboardPathologyDashboardIndexRouteImport } from './routes/_authenticated/dashboard/pathology/dashboard/index'
 import { Route as AuthenticatedDashboardPathologyCustomTestsIndexRouteImport } from './routes/_authenticated/dashboard/pathology/custom-tests/index'
+import { Route as AuthenticatedDashboardOutdoorDashboardIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/dashboard/index'
 import { Route as AuthenticatedDashboardFinancePaymentsIndexRouteImport } from './routes/_authenticated/dashboard/finance/payments/index'
 import { Route as AuthenticatedDashboardEcgAllIndexRouteImport } from './routes/_authenticated/dashboard/ecg/all/index'
 import { Route as AuthenticatedDashboardBanksBankWithdrawalsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-withdrawals/index'
@@ -869,6 +872,12 @@ const AuthenticatedDashboardSettingsAccountRoute =
     path: '/account',
     getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
   } as any)
+const AuthenticatedDashboardSalesOrderRoute =
+  AuthenticatedDashboardSalesOrderRouteImport.update({
+    id: '/dashboard/sales/order',
+    path: '/dashboard/sales/order',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardNotificationsIdRoute =
   AuthenticatedDashboardNotificationsIdRouteImport.update({
     id: '/dashboard/notifications/$id',
@@ -994,10 +1003,22 @@ const AuthenticatedDashboardPayrollAllPayrollsIndexRoute =
     path: '/dashboard/payroll/all-payrolls/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardPathologyDashboardIndexRoute =
+  AuthenticatedDashboardPathologyDashboardIndexRouteImport.update({
+    id: '/dashboard/pathology/dashboard/',
+    path: '/dashboard/pathology/dashboard/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardPathologyCustomTestsIndexRoute =
   AuthenticatedDashboardPathologyCustomTestsIndexRouteImport.update({
     id: '/dashboard/pathology/custom-tests/',
     path: '/dashboard/pathology/custom-tests/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardOutdoorDashboardIndexRoute =
+  AuthenticatedDashboardOutdoorDashboardIndexRouteImport.update({
+    id: '/dashboard/outdoor/dashboard/',
+    path: '/dashboard/outdoor/dashboard/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardFinancePaymentsIndexRoute =
@@ -3159,6 +3180,7 @@ export interface FileRoutesByFullPath {
   '/admin/plans/add': typeof platformAdminPlansAddRoute
   '/dashboard/errors/$error': typeof AuthenticatedDashboardErrorsErrorRoute
   '/dashboard/notifications/$id': typeof AuthenticatedDashboardNotificationsIdRoute
+  '/dashboard/sales/order': typeof AuthenticatedDashboardSalesOrderRoute
   '/dashboard/settings/account': typeof AuthenticatedDashboardSettingsAccountRoute
   '/dashboard/settings/app-inventory': typeof AuthenticatedDashboardSettingsAppInventoryRoute
   '/dashboard/settings/appearance': typeof AuthenticatedDashboardSettingsAppearanceRoute
@@ -3234,7 +3256,9 @@ export interface FileRoutesByFullPath {
   '/dashboard/banks/bank-withdrawals': typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
   '/dashboard/ecg/all': typeof AuthenticatedDashboardEcgAllIndexRoute
   '/dashboard/finance/payments': typeof AuthenticatedDashboardFinancePaymentsIndexRoute
+  '/dashboard/outdoor/dashboard': typeof AuthenticatedDashboardOutdoorDashboardIndexRoute
   '/dashboard/pathology/custom-tests': typeof AuthenticatedDashboardPathologyCustomTestsIndexRoute
+  '/dashboard/pathology/dashboard': typeof AuthenticatedDashboardPathologyDashboardIndexRoute
   '/dashboard/payroll/all-payrolls': typeof AuthenticatedDashboardPayrollAllPayrollsIndexRoute
   '/dashboard/payroll/attendance-list': typeof AuthenticatedDashboardPayrollAttendanceListIndexRoute
   '/dashboard/payroll/employees': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
@@ -3582,6 +3606,7 @@ export interface FileRoutesByTo {
   '/admin/plans/add': typeof platformAdminPlansAddRoute
   '/dashboard/errors/$error': typeof AuthenticatedDashboardErrorsErrorRoute
   '/dashboard/notifications/$id': typeof AuthenticatedDashboardNotificationsIdRoute
+  '/dashboard/sales/order': typeof AuthenticatedDashboardSalesOrderRoute
   '/dashboard/settings/account': typeof AuthenticatedDashboardSettingsAccountRoute
   '/dashboard/settings/app-inventory': typeof AuthenticatedDashboardSettingsAppInventoryRoute
   '/dashboard/settings/appearance': typeof AuthenticatedDashboardSettingsAppearanceRoute
@@ -3657,7 +3682,9 @@ export interface FileRoutesByTo {
   '/dashboard/banks/bank-withdrawals': typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
   '/dashboard/ecg/all': typeof AuthenticatedDashboardEcgAllIndexRoute
   '/dashboard/finance/payments': typeof AuthenticatedDashboardFinancePaymentsIndexRoute
+  '/dashboard/outdoor/dashboard': typeof AuthenticatedDashboardOutdoorDashboardIndexRoute
   '/dashboard/pathology/custom-tests': typeof AuthenticatedDashboardPathologyCustomTestsIndexRoute
+  '/dashboard/pathology/dashboard': typeof AuthenticatedDashboardPathologyDashboardIndexRoute
   '/dashboard/payroll/all-payrolls': typeof AuthenticatedDashboardPayrollAllPayrollsIndexRoute
   '/dashboard/payroll/attendance-list': typeof AuthenticatedDashboardPayrollAttendanceListIndexRoute
   '/dashboard/payroll/employees': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
@@ -4012,6 +4039,7 @@ export interface FileRoutesById {
   '/(platform)/admin/plans/add': typeof platformAdminPlansAddRoute
   '/_authenticated/dashboard/errors/$error': typeof AuthenticatedDashboardErrorsErrorRoute
   '/_authenticated/dashboard/notifications/$id': typeof AuthenticatedDashboardNotificationsIdRoute
+  '/_authenticated/dashboard/sales/order': typeof AuthenticatedDashboardSalesOrderRoute
   '/_authenticated/dashboard/settings/account': typeof AuthenticatedDashboardSettingsAccountRoute
   '/_authenticated/dashboard/settings/app-inventory': typeof AuthenticatedDashboardSettingsAppInventoryRoute
   '/_authenticated/dashboard/settings/appearance': typeof AuthenticatedDashboardSettingsAppearanceRoute
@@ -4087,7 +4115,9 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/banks/bank-withdrawals/': typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
   '/_authenticated/dashboard/ecg/all/': typeof AuthenticatedDashboardEcgAllIndexRoute
   '/_authenticated/dashboard/finance/payments/': typeof AuthenticatedDashboardFinancePaymentsIndexRoute
+  '/_authenticated/dashboard/outdoor/dashboard/': typeof AuthenticatedDashboardOutdoorDashboardIndexRoute
   '/_authenticated/dashboard/pathology/custom-tests/': typeof AuthenticatedDashboardPathologyCustomTestsIndexRoute
+  '/_authenticated/dashboard/pathology/dashboard/': typeof AuthenticatedDashboardPathologyDashboardIndexRoute
   '/_authenticated/dashboard/payroll/all-payrolls/': typeof AuthenticatedDashboardPayrollAllPayrollsIndexRoute
   '/_authenticated/dashboard/payroll/attendance-list/': typeof AuthenticatedDashboardPayrollAttendanceListIndexRoute
   '/_authenticated/dashboard/payroll/employees/': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
@@ -4439,6 +4469,7 @@ export interface FileRouteTypes {
     | '/admin/plans/add'
     | '/dashboard/errors/$error'
     | '/dashboard/notifications/$id'
+    | '/dashboard/sales/order'
     | '/dashboard/settings/account'
     | '/dashboard/settings/app-inventory'
     | '/dashboard/settings/appearance'
@@ -4514,7 +4545,9 @@ export interface FileRouteTypes {
     | '/dashboard/banks/bank-withdrawals'
     | '/dashboard/ecg/all'
     | '/dashboard/finance/payments'
+    | '/dashboard/outdoor/dashboard'
     | '/dashboard/pathology/custom-tests'
+    | '/dashboard/pathology/dashboard'
     | '/dashboard/payroll/all-payrolls'
     | '/dashboard/payroll/attendance-list'
     | '/dashboard/payroll/employees'
@@ -4862,6 +4895,7 @@ export interface FileRouteTypes {
     | '/admin/plans/add'
     | '/dashboard/errors/$error'
     | '/dashboard/notifications/$id'
+    | '/dashboard/sales/order'
     | '/dashboard/settings/account'
     | '/dashboard/settings/app-inventory'
     | '/dashboard/settings/appearance'
@@ -4937,7 +4971,9 @@ export interface FileRouteTypes {
     | '/dashboard/banks/bank-withdrawals'
     | '/dashboard/ecg/all'
     | '/dashboard/finance/payments'
+    | '/dashboard/outdoor/dashboard'
     | '/dashboard/pathology/custom-tests'
+    | '/dashboard/pathology/dashboard'
     | '/dashboard/payroll/all-payrolls'
     | '/dashboard/payroll/attendance-list'
     | '/dashboard/payroll/employees'
@@ -5291,6 +5327,7 @@ export interface FileRouteTypes {
     | '/(platform)/admin/plans/add'
     | '/_authenticated/dashboard/errors/$error'
     | '/_authenticated/dashboard/notifications/$id'
+    | '/_authenticated/dashboard/sales/order'
     | '/_authenticated/dashboard/settings/account'
     | '/_authenticated/dashboard/settings/app-inventory'
     | '/_authenticated/dashboard/settings/appearance'
@@ -5366,7 +5403,9 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/banks/bank-withdrawals/'
     | '/_authenticated/dashboard/ecg/all/'
     | '/_authenticated/dashboard/finance/payments/'
+    | '/_authenticated/dashboard/outdoor/dashboard/'
     | '/_authenticated/dashboard/pathology/custom-tests/'
+    | '/_authenticated/dashboard/pathology/dashboard/'
     | '/_authenticated/dashboard/payroll/all-payrolls/'
     | '/_authenticated/dashboard/payroll/attendance-list/'
     | '/_authenticated/dashboard/payroll/employees/'
@@ -6255,6 +6294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardSettingsAccountRouteImport
       parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
     }
+    '/_authenticated/dashboard/sales/order': {
+      id: '/_authenticated/dashboard/sales/order'
+      path: '/dashboard/sales/order'
+      fullPath: '/dashboard/sales/order'
+      preLoaderRoute: typeof AuthenticatedDashboardSalesOrderRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/notifications/$id': {
       id: '/_authenticated/dashboard/notifications/$id'
       path: '/dashboard/notifications/$id'
@@ -6402,11 +6448,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardPayrollAllPayrollsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/pathology/dashboard/': {
+      id: '/_authenticated/dashboard/pathology/dashboard/'
+      path: '/dashboard/pathology/dashboard'
+      fullPath: '/dashboard/pathology/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyDashboardIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/pathology/custom-tests/': {
       id: '/_authenticated/dashboard/pathology/custom-tests/'
       path: '/dashboard/pathology/custom-tests'
       fullPath: '/dashboard/pathology/custom-tests'
       preLoaderRoute: typeof AuthenticatedDashboardPathologyCustomTestsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/outdoor/dashboard/': {
+      id: '/_authenticated/dashboard/outdoor/dashboard/'
+      path: '/dashboard/outdoor/dashboard'
+      fullPath: '/dashboard/outdoor/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/finance/payments/': {
@@ -8756,6 +8816,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
   AuthenticatedDashboardErrorsErrorRoute: typeof AuthenticatedDashboardErrorsErrorRoute
   AuthenticatedDashboardNotificationsIdRoute: typeof AuthenticatedDashboardNotificationsIdRoute
+  AuthenticatedDashboardSalesOrderRoute: typeof AuthenticatedDashboardSalesOrderRoute
   AuthenticatedDashboardAccountingIndexRoute: typeof AuthenticatedDashboardAccountingIndexRoute
   AuthenticatedDashboardAppsIndexRoute: typeof AuthenticatedDashboardAppsIndexRoute
   AuthenticatedDashboardAssetsIndexRoute: typeof AuthenticatedDashboardAssetsIndexRoute
@@ -8814,7 +8875,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardBanksBankWithdrawalsIndexRoute: typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
   AuthenticatedDashboardEcgAllIndexRoute: typeof AuthenticatedDashboardEcgAllIndexRoute
   AuthenticatedDashboardFinancePaymentsIndexRoute: typeof AuthenticatedDashboardFinancePaymentsIndexRoute
+  AuthenticatedDashboardOutdoorDashboardIndexRoute: typeof AuthenticatedDashboardOutdoorDashboardIndexRoute
   AuthenticatedDashboardPathologyCustomTestsIndexRoute: typeof AuthenticatedDashboardPathologyCustomTestsIndexRoute
+  AuthenticatedDashboardPathologyDashboardIndexRoute: typeof AuthenticatedDashboardPathologyDashboardIndexRoute
   AuthenticatedDashboardPayrollAllPayrollsIndexRoute: typeof AuthenticatedDashboardPayrollAllPayrollsIndexRoute
   AuthenticatedDashboardPayrollAttendanceListIndexRoute: typeof AuthenticatedDashboardPayrollAttendanceListIndexRoute
   AuthenticatedDashboardPayrollEmployeesIndexRoute: typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
@@ -9124,6 +9187,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardErrorsErrorRoute,
   AuthenticatedDashboardNotificationsIdRoute:
     AuthenticatedDashboardNotificationsIdRoute,
+  AuthenticatedDashboardSalesOrderRoute: AuthenticatedDashboardSalesOrderRoute,
   AuthenticatedDashboardAccountingIndexRoute:
     AuthenticatedDashboardAccountingIndexRoute,
   AuthenticatedDashboardAppsIndexRoute: AuthenticatedDashboardAppsIndexRoute,
@@ -9234,8 +9298,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardEcgAllIndexRoute,
   AuthenticatedDashboardFinancePaymentsIndexRoute:
     AuthenticatedDashboardFinancePaymentsIndexRoute,
+  AuthenticatedDashboardOutdoorDashboardIndexRoute:
+    AuthenticatedDashboardOutdoorDashboardIndexRoute,
   AuthenticatedDashboardPathologyCustomTestsIndexRoute:
     AuthenticatedDashboardPathologyCustomTestsIndexRoute,
+  AuthenticatedDashboardPathologyDashboardIndexRoute:
+    AuthenticatedDashboardPathologyDashboardIndexRoute,
   AuthenticatedDashboardPayrollAllPayrollsIndexRoute:
     AuthenticatedDashboardPayrollAllPayrollsIndexRoute,
   AuthenticatedDashboardPayrollAttendanceListIndexRoute:

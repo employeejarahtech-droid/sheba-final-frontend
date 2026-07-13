@@ -54,13 +54,15 @@ interface ListOfTestsProps {
     limit: number;
     search: string;
     categoryId?: number;
+    matchTableName?: string;
     setPage: (page: number) => void;
     setLimit: (limit: number) => void;
     setSearch: (search: string) => void;
     setCategoryId: (categoryId: number | undefined) => void;
+    setMatchTableName: (matchTableName: string | undefined) => void;
 }
 
-export default function ListOfTests({ page, limit, search, categoryId, setPage, setLimit, setSearch, setCategoryId }: ListOfTestsProps) {
+export default function ListOfTests({ page, limit, search, categoryId, matchTableName, setPage, setLimit, setSearch, setCategoryId, setMatchTableName }: ListOfTestsProps) {
     const { currencySymbol } = useCurrency();
 
     const token = getCookie('accessToken');
@@ -140,7 +142,7 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
 
     // Fetch tests — gated on testTables loaded so display names resolve on first render
     const { data, isFetching } = useQuery({
-        queryKey: ["tests", page, limit, search, categoryId],
+        queryKey: ["tests", page, limit, search, categoryId, matchTableName],
         queryFn: async () => {
             const params = new URLSearchParams({
                 page: String(page),
@@ -148,6 +150,7 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
                 search: search,
             });
             if (categoryId) params.set('category_id', String(categoryId));
+            if (matchTableName) params.set('match_table_name', matchTableName);
 
             const res = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/tests?${params.toString()}`,
@@ -545,6 +548,7 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
                 isLoading={isFetching}
                 onSearchChange={setSearch}
                 filterSlot={
+                    <>
                     <Select
                         value={categoryId ? String(categoryId) : 'all'}
                         onValueChange={(val) => setCategoryId(val === 'all' ? undefined : Number(val))}
@@ -561,6 +565,23 @@ export default function ListOfTests({ page, limit, search, categoryId, setPage, 
                             ))}
                         </SelectContent>
                     </Select>
+                    <Select
+                        value={matchTableName || 'all'}
+                        onValueChange={(val) => setMatchTableName(val === 'all' ? undefined : val)}
+                    >
+                        <SelectTrigger className="w-[200px] h-9">
+                            <SelectValue placeholder="All Report Templates" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Report Templates</SelectItem>
+                            {testTables.map((tt: any) => (
+                                <SelectItem key={tt.id ?? tt.table_name} value={String(tt.table_name)}>
+                                    {tt.display_name || tt.table_name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    </>
                 }
             />
         </main>

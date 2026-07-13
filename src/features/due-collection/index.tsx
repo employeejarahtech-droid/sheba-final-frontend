@@ -371,8 +371,8 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
                 <p class="font-semibold text-gray-800">${invoice.age ? `${invoice.age} ${invoice.age_text || ''}` : '-'} / ${invoice.sex?.toUpperCase() || '-'}</p>
               </div>
               <div>
-                <p class="text-gray-500">Reference Doctor</p>
-                <p class="font-semibold text-gray-800">${invoice.doctor?.name || invoice.reference_doctor || '-'}</p>
+                <p class="text-gray-500">Ref. By</p>
+                <p class="font-semibold text-gray-800">${invoice.doctor?.doctor_name || invoice.reference_doctor || '-'}${invoice.doctor?.qualification ? ` (${invoice.doctor.qualification})` : ''}</p>
               </div>
               <div>
                 <p class="text-gray-500">Invoice Date</p>
@@ -598,17 +598,23 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
     },
     {
       data: null,
-      title: "Ref. Doctor",
+      title: "Ref. By",
       render: (_data: any, type: string, row: InvoiceItem) => {
         const d = (row as any).doctor;
         const refDoctor = (row as any).reference_doctor;
         const name = d?.doctor_name || d?.name;
+        const qualification = d?.qualification || d?.title;
         const plain = name || refDoctor || '-';
         if (type === 'sort' || type === 'filter' || type === 'type') return plain;
         const esc = (s: any) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         if (name) {
-          const subtitle = [d.qualification || d.title, d.speciality].filter(Boolean).join(' - ');
-          return `<div class="flex flex-col"><span class="font-medium">Dr. ${esc(name)}</span>${subtitle ? `<span class="text-xs text-muted-foreground">${esc(subtitle)}</span>` : ''}</div>`;
+          // Show name with qualification in parentheses, following the same pattern as other reports
+          if (qualification) {
+            return `<div class="flex flex-col"><span class="font-medium">${esc(name)}</span><span class="text-xs text-muted-foreground">(${esc(qualification)})</span></div>`;
+          }
+          // Show additional info like specialty if qualification not available
+          const subtitle = [d.speciality].filter(Boolean).join(' - ');
+          return subtitle ? `<div class="flex flex-col"><span class="font-medium">${esc(name)}</span>${subtitle ? `<span class="text-xs text-muted-foreground">${esc(subtitle)}</span>` : ''}</div>` : `<span class="font-medium">${esc(name)}</span>`;
         }
         return refDoctor ? esc(refDoctor) : '-';
       },

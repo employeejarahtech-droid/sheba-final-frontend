@@ -284,7 +284,7 @@ function AllReportsHematology() {
       newRow.className = 'child-row-detail';
       const cell = document.createElement('td');
       cell.className = 'p-4 bg-gray-50';
-      cell.colSpan = 8;
+      cell.colSpan = 7;
       cell.appendChild(details);
       newRow.appendChild(cell);
 
@@ -364,12 +364,6 @@ function AllReportsHematology() {
       defaultContent: "",
     },
     {
-      data: "PatientId",
-      title: "Patient ID",
-      orderable: true,
-      defaultContent: "",
-    },
-    {
       data: "PatientName",
       title: "Patient Name",
       orderable: true,
@@ -389,10 +383,18 @@ function AllReportsHematology() {
     },
     {
       data: "RefDoctor",
-      title: "Ref. Doctor",
+      title: "Ref. By",
       orderable: true,
-      render: (_data: any, _type: string, row: ReportsItem) => row.RefDoctor || '-',
       defaultContent: "",
+      render: (data: any) => {
+        if (!data) return '-';
+        // If data contains qualification in parentheses, extract it and display
+        const match = data.match(/^(.+?)\s*\(([^)]+)\)$/);
+        if (match) {
+          return `${match[1].trim()} (${match[2].trim()})`;
+        }
+        return data;
+      }
     },
     {
       data: "TestNames",

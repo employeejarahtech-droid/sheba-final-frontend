@@ -98,7 +98,7 @@ export default function HormoneReportDetails({ invoice, testName = "HORMONE REPO
           </tr>
           <tr className="border">
             <td className="border px-3 py-2" colSpan={2}>
-              Ref. Doctor: {patientInfo?.ref_doctor || '-'}
+              Ref. By: {patientInfo?.ref_doctor || '-'}{patientInfo?.doctor?.qualification ? ` (${patientInfo.doctor.qualification})` : ''}
             </td>
             <td className="border px-3 py-2">
               Phone: {patientInfo?.phone || '-'}

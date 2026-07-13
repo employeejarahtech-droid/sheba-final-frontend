@@ -80,7 +80,7 @@ export default function StoolForREReportDetails({ report, invoice, paddingTop = 
           </tr>
           <tr className="border">
             <td className="border px-3 py-2" colSpan={2}>
-              Ref. Doctor: {data?.ref_doctor || data?.outdoor_invoice?.doctor?.doctor_name || '-'}
+              Ref. By: {data?.ref_doctor || data?.outdoor_invoice?.doctor?.doctor_name || '-'}{data?.outdoor_invoice?.doctor?.qualification ? ` (${data.outdoor_invoice.doctor.qualification})` : ''}
             </td>
             <td className="border px-3 py-2">
               Phone: {data?.outdoor_invoice?.phone || data?.phone || '-'}

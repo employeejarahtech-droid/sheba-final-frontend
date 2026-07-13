@@ -286,7 +286,7 @@ function ReportsImmunology() {
       newRow.className = 'child-row-detail';
       const cell = document.createElement('td');
       cell.className = 'p-4 bg-gray-50';
-      cell.colSpan = 10;
+      cell.colSpan = 9;
       cell.appendChild(details);
       newRow.appendChild(cell);
 
@@ -366,12 +366,6 @@ function ReportsImmunology() {
       defaultContent: "",
     },
     {
-      data: "PatientId",
-      title: "Patient ID",
-      orderable: true,
-      defaultContent: "",
-    },
-    {
       data: "PatientName",
       title: "Patient Name",
       orderable: true,
@@ -389,10 +383,18 @@ function ReportsImmunology() {
     },
     {
       data: "RefDoctor",
-      title: "Ref. Doctor",
+      title: "Ref. By",
       orderable: true,
       defaultContent: "",
-      render: (data: any) => data || '-'
+      render: (data: any) => {
+        if (!data) return '-';
+        // If data contains qualification in parentheses, extract it and display
+        const match = data.match(/^(.+?)\s*\(([^)]+)\)$/);
+        if (match) {
+          return `${match[1].trim()} (${match[2].trim()})`;
+        }
+        return data;
+      }
     },
     {
       data: "TestNames",

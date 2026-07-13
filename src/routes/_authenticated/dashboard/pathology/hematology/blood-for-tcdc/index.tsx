@@ -416,8 +416,17 @@ function BloodForTcdc() {
     },
     {
       data: "ref_doctor",
-      title: "Ref. Doctor",
+      title: "Ref. By",
       defaultContent: "-",
+      render: (data: any) => {
+        if (!data) return '-';
+        // If data contains qualification in parentheses, extract it and display
+        const match = data.match(/^(.+?)\s*\(([^)]+)\)$/);
+        if (match) {
+          return `${match[1].trim()} (${match[2].trim()})`;
+        }
+        return data;
+      }
     },
     {
       data: "created_at",

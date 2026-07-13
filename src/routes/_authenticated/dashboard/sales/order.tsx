@@ -22,7 +22,7 @@ import {
 import { AppHeader } from '@/components/layout/app-header'
 import { useCan } from "@/hooks/use-can";
 
-export const Route = createFileRoute('/_authenticated/dashboard/sales/order/')({
+export const Route = createFileRoute('/_authenticated/dashboard/sales/order')({
   component: SalesOrdersPage,
 })
 
@@ -195,7 +195,7 @@ function SalesOrdersPage() {
         } else {
           className += "bg-blue-100 text-blue-700 border-blue-200";
         }
-        return `<span class="${className}">${status}</span>`;
+        return '<span class="' + className + '">' + status + '</span>';
       },
       defaultContent: "pending",
     },
@@ -294,10 +294,10 @@ function SalesOrdersPage() {
               const Icon = card.icon;
               return (
                 <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                  <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }}>
+                  <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ["#10B981","#F97316","#EC4899","#14B8A6","#F59E0B","#3B82F6"][index % 6] }}>
                     <div className="flex items-center gap-2.5">
                       <div className="p-2 bg-white rounded-lg shadow-lg">
-                        <Icon className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][index % 6] }} />
+                        <Icon className="w-4 h-4" style={{ color: ["#10B981","#F97316","#EC4899","#14B8A6","#F59E0B","#3B82F6"][index % 6] }} />
                       </div>
                       <CardTitle className="text-sm font-semibold text-white/90">{card.label}</CardTitle>
                     </div>
@@ -353,7 +353,7 @@ function SalesOrdersPage() {
                 <span className="text-xs text-muted-foreground">to</span>
                 <DateField value={to} onChange={(v: string) => { setTo(v); setPresetOpen(false); setPage(1) }} placeholder="To" />
                 {(from || to) && (
-                  <Button variant="ghost" size="sm" onClick={() => { setFrom(''); setTo(''); setPage(1) }}>
+                  <Button variant="ghost" size="sm" onClick={() => { setFrom(""); setTo(""); setPage(1) }}>
                     Clear
                   </Button>
                 )}

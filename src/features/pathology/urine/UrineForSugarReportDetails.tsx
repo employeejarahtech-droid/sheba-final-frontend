@@ -77,7 +77,7 @@ export default function UrineForSugarFullReportDetails({ report, invoice, paddin
           </tr>
           <tr className="border">
             <td className="border px-3 py-2" colSpan={2}>
-              Ref. Doctor: {invoice?.doctor?.name || invoice?.reference_doctor || '-'}
+              Ref. By: {invoice?.doctor?.name || invoice?.reference_doctor || '-'}{invoice?.doctor?.qualification ? ` (${invoice.doctor.qualification})` : ''}
             </td>
             <td className="border px-3 py-2">
               Phone: {invoice?.phone || '-'}

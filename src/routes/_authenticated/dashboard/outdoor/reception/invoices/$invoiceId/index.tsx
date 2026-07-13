@@ -10,6 +10,8 @@ import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { Settings2 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { useDateFormat } from '@/hooks/use-date-format'
 import { useAuthStore } from '@/stores/auth-store'
@@ -52,6 +54,15 @@ function InvoiceDetails() {
     const { cssSize, margin } = PAPER_SIZES[paperSize]
     const [fontSize, setFontSize] = useState<keyof typeof FONT_SIZES>('base')
     const [showPayments, setShowPayments] = useState(false)
+
+    // Column visibility state
+    const [visibleColumns, setVisibleColumns] = useState({
+        sl: true,
+        testName: true,
+        roomNo: true,
+        deliveryDate: false,
+        charge: true,
+    })
 
     // Tenant date format (from company settings), used for each test row's
     // per-test delivery date below.
@@ -253,6 +264,50 @@ function InvoiceDetails() {
                             </label>
                         </div>
 
+                        {/* Column Visibility Dropdown */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm" className="h-8 gap-2 print:hidden">
+                                    <Settings2 className="h-4 w-4" />
+                                    <span>Columns</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuLabel>Visible Columns</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuCheckboxItem
+                                    checked={visibleColumns.sl}
+                                    onCheckedChange={(checked) => setVisibleColumns(prev => ({ ...prev, sl: checked === true }))}
+                                >
+                                    SL
+                                </DropdownMenuCheckboxItem>
+                                <DropdownMenuCheckboxItem
+                                    checked={visibleColumns.testName}
+                                    onCheckedChange={(checked) => setVisibleColumns(prev => ({ ...prev, testName: checked === true }))}
+                                >
+                                    Test Name
+                                </DropdownMenuCheckboxItem>
+                                <DropdownMenuCheckboxItem
+                                    checked={visibleColumns.roomNo}
+                                    onCheckedChange={(checked) => setVisibleColumns(prev => ({ ...prev, roomNo: checked === true }))}
+                                >
+                                    Room No
+                                </DropdownMenuCheckboxItem>
+                                <DropdownMenuCheckboxItem
+                                    checked={visibleColumns.deliveryDate}
+                                    onCheckedChange={(checked) => setVisibleColumns(prev => ({ ...prev, deliveryDate: checked === true }))}
+                                >
+                                    Del. Date & Time
+                                </DropdownMenuCheckboxItem>
+                                <DropdownMenuCheckboxItem
+                                    checked={visibleColumns.charge}
+                                    onCheckedChange={(checked) => setVisibleColumns(prev => ({ ...prev, charge: checked === true }))}
+                                >
+                                    Charge
+                                </DropdownMenuCheckboxItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
                         <Select value={fontSize} onValueChange={(v) => setFontSize(v as keyof typeof FONT_SIZES)}>
                             <SelectTrigger className="w-[160px]">
                                 <SelectValue placeholder="Font size" />
@@ -336,7 +391,7 @@ function InvoiceDetails() {
                             </tr>
                             <tr className="border">
                                 <td className="border px-2 py-1 w-1/2">
-                                    Ref. Doctor : {invoice?.doctor?.doctor_name || '-'}
+                                    Ref. By : {invoice?.doctor?.doctor_name || '-'}{invoice?.doctor?.qualification ? ` (${invoice.doctor.qualification})` : ''}
                                 </td>
                                 <td className="border px-2 py-1 w-1/2">
                                     Contact No : {invoice?.phone || '-'}
@@ -350,28 +405,28 @@ function InvoiceDetails() {
                         <table className="w-full text-sm border" data-table-ignore="true">
                             <thead>
                                 <tr className="border">
-                                    <th className="py-1 px-1 border text-center font-bold w-12 ">SL</th>
-                                    <th className="py-1 px-1 border text-left font-bold">Test Name</th>
-                                    <th className="invoice-room-col py-1 px-1 border text-center font-bold" style={{ textAlign: 'center', maxWidth: '80px' }}>Room No</th>
-                                    <th className="py-1 px-1 border text-left font-bold w-40">Del. Date &amp; Time</th>
-                                    <th className="invoice-charge-col py-1 px-1 border text-right font-bold" style={{ textAlign: 'right', maxWidth: '100px' }}>Charge ({companySettings?.currency || 'BDT'})</th>
+                                    {visibleColumns.sl && <th className="py-1 px-1 border text-center font-bold w-12 ">SL</th>}
+                                    {visibleColumns.testName && <th className="py-1 px-1 border text-left font-bold">Test Name</th>}
+                                    {visibleColumns.roomNo && <th className="invoice-room-col py-1 px-1 border text-center font-bold" style={{ textAlign: 'center', maxWidth: '80px' }}>Room No</th>}
+                                    {visibleColumns.deliveryDate && <th className="py-1 px-1 border text-left font-bold w-40">Del. Date &amp; Time</th>}
+                                    {visibleColumns.charge && <th className="invoice-charge-col py-1 px-1 border text-right font-bold" style={{ textAlign: 'right', maxWidth: '100px' }}>Charge ({companySettings?.currency || 'BDT'})</th>}
                                 </tr>
                             </thead>
 
                             <tbody>
                                 {invoice?.selected_tests?.map((test: any, index: number) => (
                                     <tr key={test.id}>
-                                        <td className="border px-1 py-1 text-center">{index + 1}</td>
-                                        <td className="border px-1 py-1">{test?.test?.name}</td>
-                                        <td className="invoice-room-col border px-1 py-1 text-center" style={{ textAlign: 'center', maxWidth: '80px' }}>{test?.test?.sampleCollectionRoom?.name || '-'}</td>
-                                        <td className="border px-1 py-1">
+                                        {visibleColumns.sl && <td className="border px-1 py-1 text-center">{index + 1}</td>}
+                                        {visibleColumns.testName && <td className="border px-1 py-1">{test?.test?.name}</td>}
+                                        {visibleColumns.roomNo && <td className="invoice-room-col border px-1 py-1 text-center" style={{ textAlign: 'center', maxWidth: '80px' }}>{test?.test?.sampleCollectionRoom?.name || '-'}</td>}
+                                        {visibleColumns.deliveryDate && <td className="border px-1 py-1">
                                             {!test?.delivery_date && !test?.delivery_time
                                                 ? '-'
                                                 : `${formatItemDeliveryDate(test?.delivery_date)} ${formatItemDeliveryTime(test?.delivery_time)}`.trim()}
-                                        </td>
-                                        <td className="invoice-charge-col border px-1 py-1 text-right font-semibold" style={{ textAlign: 'right', maxWidth: '100px' }}>
+                                        </td>}
+                                        {visibleColumns.charge && <td className="invoice-charge-col border px-1 py-1 text-right font-semibold" style={{ textAlign: 'right', maxWidth: '100px' }}>
                                             {Number(test?.price || 0).toFixed(2)}
-                                        </td>
+                                        </td>}
                                     </tr>
                                 ))}
                             </tbody>

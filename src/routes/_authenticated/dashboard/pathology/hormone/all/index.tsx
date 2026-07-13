@@ -162,12 +162,6 @@ function AllHormones() {
       defaultContent: '',
     },
     {
-      data: 'PatientId',
-      title: 'Patient ID',
-      orderable: true,
-      defaultContent: '',
-    },
-    {
       data: 'PatientName',
       title: 'Patient Name',
       orderable: true,
@@ -424,7 +418,7 @@ function AllHormones() {
       newRow.className = 'child-row-detail';
       const cell = document.createElement('td');
       cell.className = 'p-4 bg-gray-50';
-      cell.colSpan = 10;
+      cell.colSpan = 9;
       cell.appendChild(details);
       newRow.appendChild(cell);
 

@@ -1485,6 +1485,29 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
             <CardContent className="p-4 md:p-6 space-y-6">
               <div className="space-y-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* col-6: Category filter */}
+                  <div className="space-y-2">
+                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Category
+                    </FormLabel>
+                    <Select
+                      value={categoryFilter}
+                      onValueChange={(v) => { setCategoryFilter(v); setPage(1); }}
+                    >
+                      <SelectTrigger className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all" style={{ height: '40px' }}>
+                        <SelectValue placeholder="All Categories" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {categoriesData?.data?.items?.map((cat) => (
+                          <SelectItem key={cat.id} value={String(cat.id)}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   {/* col-6: Select Tests */}
                   <div className="space-y-2">
                     <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -1507,29 +1530,6 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                       </span>
                       <ChevronDown className="ml-auto h-4 w-4 opacity-50 shrink-0" />
                     </Button>
-                  </div>
-
-                  {/* col-6: Category filter */}
-                  <div className="space-y-2">
-                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      Category
-                    </FormLabel>
-                    <Select
-                      value={categoryFilter}
-                      onValueChange={(v) => { setCategoryFilter(v); setPage(1); }}
-                    >
-                      <SelectTrigger className="w-full rounded-md border-gray-200 dark:border-gray-800 bg-transparent transition-all" style={{ height: '40px' }}>
-                        <SelectValue placeholder="All Categories" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
-                        {categoriesData?.data?.items?.map((cat) => (
-                          <SelectItem key={cat.id} value={String(cat.id)}>
-                            {cat.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                   </div>
                 </div>
 

@@ -410,12 +410,18 @@ function LipidProfile() {
 
     {
       data: "ref_doctor",
-      title: "Ref. Doctor",
+      title: "Ref. By",
       orderable: true,
       defaultContent: "",
-      render: (_data: any, _type: string, row: LipidProfileItem) => {
-        return row.ref_doctor ? `<span class="text-sm text-gray-700 dark:text-gray-300">${row.ref_doctor}</span>` : `<span class="text-sm text-gray-400">-</span>`;
-      },
+      render: (data: any) => {
+        if (!data) return '-';
+        // If data contains qualification in parentheses, extract it and display
+        const match = data.match(/^(.+?)\s*\(([^)]+)\)$/);
+        if (match) {
+          return `${match[1].trim()} (${match[2].trim()})`;
+        }
+        return data;
+      }
     },
 
     {

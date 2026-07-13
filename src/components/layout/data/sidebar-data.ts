@@ -141,6 +141,7 @@ export const sidebarData: SidebarData = {
           title: 'Reception',
           icon: Stethoscope,
           items: [
+            { title: 'Dashboard', url: '/dashboard/outdoor/dashboard', icon: LayoutDashboard },
             { title: 'Create Invoice', url: '/dashboard/outdoor/reception/invoices/create', icon: FilePlus },
             { title: 'Due Invoices', url: '/dashboard/outdoor/reception/due-collection', icon: AlertCircle },
             { title: 'Paid Invoices', url: '/dashboard/outdoor/reception/paid-invoices', icon: CheckCircle2 },
@@ -217,6 +218,7 @@ export const sidebarData: SidebarData = {
     {
       title: 'Pathology',
       items: [
+        { title: 'Dashboard', url: '/dashboard/pathology/dashboard', icon: LayoutDashboard },
         {
           title: 'Biochemical',
           icon: Beaker,

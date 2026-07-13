@@ -23,6 +23,7 @@ const searchSchema = z.object({
   status: z.string().catch('all'),
   from: z.string().catch(''),
   to: z.string().catch(''),
+  orderBy: z.string().optional(),
 })
 
 export const Route = createFileRoute('/_authenticated/dashboard/ecg/all/')({
@@ -35,9 +36,11 @@ type ReportsItem = {
   ReciptID: number;
   PatientId: number | null;
   PatientName: string | null;
+  RefDoctor?: string | null;
   Date: string | null;
   Tests: string;
   TestNames: string;
+  TestStatuses?: string;
   Status: string;
 };
 
@@ -53,6 +56,14 @@ function AllECGReports() {
   const statusFilter = searchParams?.status || "all";
   const from = searchParams?.from || "";
   const to = searchParams?.to || "";
+  const orderBy = searchParams?.orderBy || "DESC";
+
+  // Reflect the default sort (Receipt ID DESC) in the URL.
+  useEffect(() => {
+    if (!searchParams?.orderBy) {
+      navigate({ to: '.', search: (prev: any) => ({ ...prev, orderBy: 'DESC' }), replace: true });
+    }
+  }, []);
 
   const setPage = (newPage: number) => {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
@@ -77,13 +88,13 @@ function AllECGReports() {
   const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data: ecgAllReports, isFetching } = useQuery({
-    queryKey: ["ecg-all", page, limit, search, statusFilter, from, to],
+    queryKey: ["ecg-all", page, limit, search, statusFilter, from, to, orderBy],
     queryFn: async () => {
       const statusParam = statusFilter !== "all" ? `&status=${encodeURIComponent(statusFilter)}` : "";
       const fromParam = from ? `&from=${encodeURIComponent(from)}` : "";
       const toParam = to ? `&to=${encodeURIComponent(to)}` : "";
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/ecg-all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}`,
+        `${import.meta.env.VITE_API_URL}/api/ecg-all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}&orderBy=${encodeURIComponent(orderBy)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -146,7 +157,10 @@ function AllECGReports() {
       data: "ReciptID",
       title: "Receipt ID",
       orderable: true,
-      render: (data: any, _type: string, row: ReportsItem) => {
+      render: (data: any, type: string, row: ReportsItem) => {
+        // Sort/type use the raw numeric Receipt ID so DataTables orders numerically
+        // (the HTML render below would otherwise sort as a string: "9","8","20"…).
+        if (type === 'sort' || type === 'type') return row.ReciptID;
         const date = fmtDateTime(row.Date);
         const status = row.Status || 'Pending';
         return `
@@ -166,13 +180,6 @@ function AllECGReports() {
       defaultContent: "",
     },
     {
-      data: "PatientId",
-      title: "Patient ID",
-      orderable: true,
-      defaultContent: "",
-      render: (data: any) => data || '-',
-    },
-    {
       data: "PatientName",
       title: "Patient Name",
       orderable: true,
@@ -180,24 +187,64 @@ function AllECGReports() {
       render: (data: any) => data || '-',
     },
     {
+      data: "RefDoctor",
+      title: "Ref. By",
+      orderable: true,
+      defaultContent: "",
+      render: (data: any) => {
+        if (!data) return '-';
+        // If data contains qualification in parentheses, extract it and display
+        const match = data.match(/^(.+?)\s*\(([^)]+)\)$/);
+        if (match) {
+          return `${match[1].trim()} (${match[2].trim()})`;
+        }
+        return data;
+      }
+    },
+    {
       data: "Date",
-      title: "Date",
+      title: "Rec. Date",
       orderable: true,
       defaultContent: "",
       render: (data: any) => fmtDateTime(data),
     },
     {
-      data: "TestNames",
+      data: "TestStatuses",
       title: "Tests",
       orderable: false,
       defaultContent: "",
-      render: (data: any, _type: string, row: ReportsItem) => {
-        const testNames = data || row.Tests || '';
+      render: (_data: any, _type: string, row: ReportsItem) => {
+        // Prefer per-test completion (TestStatuses = "name||1##name||0", 1=completed).
+        const raw = row.TestStatuses || '';
+        if (raw) {
+          const tests = raw
+            .split('##')
+            .filter(Boolean)
+            .map((entry: string) => {
+              const [name, done] = entry.split('||');
+              return { name: (name || '').trim(), completed: done === '1' };
+            })
+            .filter((t) => t.name);
+          if (tests.length === 0) return '-';
+          return tests
+            .map((t) => {
+              const cls = t.completed
+                ? 'bg-emerald-100 text-emerald-800'
+                : 'bg-amber-100 text-amber-800';
+              const label = t.completed ? 'Completed' : 'Incompleted';
+              return `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${cls} mr-1 mb-1">${t.name} - ${label}</span>`;
+            })
+            .join('');
+        }
+        // Fallback: just show test names if no status info.
+        const testNames = row.TestNames || row.Tests || '';
         if (!testNames) return '-';
         const names = testNames.split(',').filter((name: string) => name.trim() !== '');
-        return names.map((name: string) =>
-          `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1">${name.trim()}</span>`
-        ).join('');
+        return names
+          .map((name: string) =>
+            `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1">${name.trim()}</span>`,
+          )
+          .join('');
       },
     },
     {
@@ -359,7 +406,7 @@ function AllECGReports() {
         newRow.className = 'child-row-detail';
         const cell = document.createElement('td');
         cell.className = 'p-4 bg-gray-50';
-        cell.colSpan = 7;
+        cell.colSpan = 6;
         cell.appendChild(details);
         newRow.appendChild(cell);
 

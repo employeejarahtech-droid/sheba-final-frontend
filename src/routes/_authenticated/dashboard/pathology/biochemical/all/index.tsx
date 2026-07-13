@@ -88,7 +88,7 @@ function AllReportsBiochemical() {
       const fromParam = from ? `&from=${encodeURIComponent(from)}` : "";
       const toParam = to ? `&to=${encodeURIComponent(to)}` : "";
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/biochemical-all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}`,
+        `${import.meta.env.VITE_API_URL}/api/biochemical-all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}&orderBy=DESC`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -383,10 +383,18 @@ function AllReportsBiochemical() {
     },
     {
       data: "RefDoctor",
-      title: "Ref. Doctor",
+      title: "Ref. By",
       orderable: true,
       defaultContent: "",
-      render: (data: any) => data || '-'
+      render: (data: any) => {
+        if (!data) return '-';
+        // If data contains qualification in parentheses, extract it and display
+        const match = data.match(/^(.+?)\s*\(([^)]+)\)$/);
+        if (match) {
+          return `${match[1].trim()} (${match[2].trim()})`;
+        }
+        return data;
+      }
     },
     {
       data: "TestNames",
