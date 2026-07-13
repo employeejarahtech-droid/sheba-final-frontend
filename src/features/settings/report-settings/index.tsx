@@ -5,16 +5,35 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCookie } from '@/lib/cookies'
 import api from '@/lib/axios'
 
-const DEFAULT_ITEMS = ['Checked by', 'Medical Technologist Lab.']
+type FooterItemType = 'blank' | 'current_user'
+type FooterItem = { text: string; type: FooterItemType }
+
+const DEFAULT_ITEMS: FooterItem[] = [
+    { text: 'Checked by', type: 'blank' },
+    { text: 'Medical Technologist Lab.', type: 'blank' },
+]
+
+// Older saved data is a plain string[] — upgrade each entry to the new
+// { text, type } shape (defaulting to 'blank', the prior behavior) so
+// existing tenant settings keep working after this change.
+function normalizeItems(raw: unknown): FooterItem[] | null {
+    if (!Array.isArray(raw) || raw.length === 0) return null
+    return raw.map((it) =>
+        typeof it === 'string'
+            ? { text: it, type: 'blank' as const }
+            : { text: it?.text ?? '', type: it?.type === 'current_user' ? 'current_user' : 'blank' }
+    )
+}
 
 export default function ReportSettings() {
     const token = getCookie('accessToken')
     const queryClient = useQueryClient()
-    const [items, setItems] = useState<string[]>(DEFAULT_ITEMS)
+    const [items, setItems] = useState<FooterItem[]>(DEFAULT_ITEMS)
     const [footerNote, setFooterNote] = useState<string>('')
 
     const { data, isLoading } = useQuery({
@@ -29,8 +48,8 @@ export default function ReportSettings() {
     useEffect(() => {
         if (data?.report_footer_items) {
             try {
-                const parsed = JSON.parse(data.report_footer_items)
-                if (Array.isArray(parsed) && parsed.length > 0) setItems(parsed)
+                const normalized = normalizeItems(JSON.parse(data.report_footer_items))
+                if (normalized) setItems(normalized)
             } catch { /* keep defaults */ }
         }
     }, [data])
@@ -42,7 +61,7 @@ export default function ReportSettings() {
     }, [data])
 
     const saveMutation = useMutation({
-        mutationFn: async (itemsToSave: string[]) => {
+        mutationFn: async (itemsToSave: FooterItem[]) => {
             const formData = new FormData()
             formData.append('report_footer_items', JSON.stringify(itemsToSave))
             const res = await api.put('/company-settings', formData)
@@ -69,9 +88,10 @@ export default function ReportSettings() {
         onError: () => toast.error('Failed to save'),
     })
 
-    const addItem = () => setItems([...items, ''])
+    const addItem = () => setItems([...items, { text: '', type: 'blank' }])
     const removeItem = (idx: number) => setItems(items.filter((_, i) => i !== idx))
-    const updateItem = (idx: number, val: string) => setItems(items.map((it, i) => i === idx ? val : it))
+    const updateItemText = (idx: number, text: string) => setItems(items.map((it, i) => i === idx ? { ...it, text } : it))
+    const updateItemType = (idx: number, type: FooterItemType) => setItems(items.map((it, i) => i === idx ? { ...it, type } : it))
 
     return (
         <div className="space-y-6">
@@ -106,12 +126,25 @@ export default function ReportSettings() {
                                         <div key={idx} className="flex items-center gap-2">
                                             <span className="text-sm text-muted-foreground w-6">{idx + 1}.</span>
                                             <Input
-                                                value={item}
-                                                onChange={(e) => updateItem(idx, e.target.value)}
+                                                value={item.text}
+                                                onChange={(e) => updateItemText(idx, e.target.value)}
                                                 placeholder="Enter footer item text"
                                                 className="flex-1"
                                                 disabled={saveMutation.isPending}
                                             />
+                                            <Select
+                                                value={item.type}
+                                                onValueChange={(v) => updateItemType(idx, v as FooterItemType)}
+                                                disabled={saveMutation.isPending}
+                                            >
+                                                <SelectTrigger className="w-[150px]">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="blank">Blank</SelectItem>
+                                                    <SelectItem value="current_user">Current User</SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                             <Button
                                                 size="icon"
                                                 variant="ghost"

@@ -2,8 +2,29 @@ import { useQuery } from '@tanstack/react-query'
 import api from '@/lib/axios'
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useAuthStore } from '@/stores/auth-store'
 
-const DEFAULT_ITEMS = ['Checked by', 'Medical Technologist Lab.']
+type FooterItemType = 'blank' | 'current_user'
+type FooterItem = { text: string; type: FooterItemType }
+
+const DEFAULT_ITEMS: FooterItem[] = [
+    { text: 'Checked by', type: 'blank' },
+    { text: 'Medical Technologist Lab.', type: 'blank' },
+]
+
+// Older saved settings are a plain string[] — upgrade each entry to the
+// current { text, type } shape (defaulting to 'blank').
+function normalizeItems(raw: unknown): FooterItem[] | null {
+    if (!Array.isArray(raw) || raw.length === 0) return null
+    const items = raw
+        .map((it) =>
+            typeof it === 'string'
+                ? { text: it, type: 'blank' as const }
+                : { text: it?.text ?? '', type: it?.type === 'current_user' ? 'current_user' as const : 'blank' as const }
+        )
+        .filter((it) => it.text?.trim())
+    return items.length > 0 ? items : null
+}
 
 export function ReportFooter() {
     const [portalTarget, setPortalTarget] = useState<HTMLDivElement | null>(null)
@@ -21,6 +42,8 @@ export function ReportFooter() {
         },
         staleTime: 5 * 60 * 1000,
     })
+
+    const currentUserName = useAuthStore((s) => s.user?.name)
 
     useEffect(() => {
         let container: HTMLDivElement | null = null
@@ -65,8 +88,8 @@ export function ReportFooter() {
     let items = DEFAULT_ITEMS
     if (data?.report_footer_items) {
         try {
-            const parsed = JSON.parse(data.report_footer_items)
-            if (Array.isArray(parsed) && parsed.length > 0) items = parsed.filter((s: string) => s?.trim())
+            const normalized = normalizeItems(JSON.parse(data.report_footer_items))
+            if (normalized) items = normalized
         } catch { /* defaults */ }
     }
 
@@ -94,11 +117,18 @@ export function ReportFooter() {
                     className="flex mt-32 text-sm w-full report-signature-footer"
                     style={{ justifyContent: items.length === 1 ? 'center' : 'space-between' }}
                 >
-                    {items.map((item: string, i: number) => {
+                    {items.map((item: FooterItem, i: number) => {
                         const align = items.length === 1 ? 'center' : i === 0 ? 'left' : i === items.length - 1 ? 'right' : 'center'
                         return (
                             <div key={i} style={{ textAlign: align }}>
-                                <span className="inline-block border-t border-dashed pt-1">{item}:</span>
+                                {item.type === 'current_user' ? (
+                                    <>
+                                        <p className="font-medium">{currentUserName || '-'}</p>
+                                        <span className="inline-block border-t border-dashed pt-1">{item.text}:</span>
+                                    </>
+                                ) : (
+                                    <span className="inline-block border-t border-dashed pt-1">{item.text}:</span>
+                                )}
                             </div>
                         )
                     })}

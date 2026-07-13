@@ -8,9 +8,11 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { QRCodeSVG } from 'qrcode.react'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { useAuthStore } from '@/stores/auth-store'
 
 // Paper sizes offered for printing this invoice. `cssSize` feeds the @page
 // size (browsers use this to pick/suggest the matching physical paper), and
@@ -45,13 +47,15 @@ export const Route = createFileRoute(
 function InvoiceDetails() {
     const { invoiceId } = Route.useParams();
     const token = getCookie('accessToken')
+    const currentUserName = useAuthStore((s) => s.user?.name)
     const [paperSize, setPaperSize] = useState<keyof typeof PAPER_SIZES>('a4')
     const { cssSize, margin } = PAPER_SIZES[paperSize]
     const [fontSize, setFontSize] = useState<keyof typeof FONT_SIZES>('base')
+    const [showPayments, setShowPayments] = useState(false)
 
     // Tenant date format (from company settings), used for each test row's
     // per-test delivery date below.
-    const { formatDate: fmtDate } = useDateFormat();
+    const { formatDate: fmtDate, formatDateTime: fmtDateTime } = useDateFormat();
 
     // delivery_date comes back as a plain "YYYY-MM-DD" (Sequelize DATEONLY).
     // Parse the components directly instead of `new Date(str)` — that parses
@@ -187,13 +191,18 @@ function InvoiceDetails() {
                     .invoice-totals-row {
                         display: flex !important;
                     }
-                    .invoice-totals-col-1 { width: 35% !important; min-width: 0 !important; }
+                    .invoice-totals-col-1 { width: 40% !important; min-width: 0 !important; }
                     .invoice-totals-col-2 { width: 25% !important; min-width: 0 !important; }
-                    .invoice-totals-col-3 { width: 40% !important; min-width: 0 !important; }
+                    .invoice-totals-col-3 { width: 35% !important; min-width: 0 !important; }
                     /* Some print engines ignore the Tailwind text-right/w-32 utilities on th/td */
                     .invoice-charge-col {
                         text-align: right !important;
-                        width: 128px !important;
+                        max-width: 100px !important;
+                    }
+                    /* Some print engines ignore the Tailwind text-center utility on th/td */
+                    .invoice-room-col {
+                        text-align: center !important;
+                        max-width: 80px !important;
                     }
                     /* Avoid breaking rows across pages */
                     tr, td, th {
@@ -232,7 +241,18 @@ function InvoiceDetails() {
                         Back
                     </Button>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="show-payments"
+                                checked={showPayments}
+                                onCheckedChange={(checked) => setShowPayments(checked === true)}
+                            />
+                            <label htmlFor="show-payments" className="text-sm font-medium cursor-pointer select-none">
+                                Show Payments
+                            </label>
+                        </div>
+
                         <Select value={fontSize} onValueChange={(v) => setFontSize(v as keyof typeof FONT_SIZES)}>
                             <SelectTrigger className="w-[160px]">
                                 <SelectValue placeholder="Font size" />
@@ -311,7 +331,7 @@ function InvoiceDetails() {
                                     Patient's Name : {invoice?.patient_name}
                                 </td>
                                 <td className="border px-2 py-1 w-1/2">
-                                    Sex : {invoice?.sex?.toUpperCase() || '-'}
+                                    Sex : {invoice?.sex ? invoice.sex.charAt(0).toUpperCase() + invoice.sex.slice(1).toLowerCase() : '-'}
                                 </td>
                             </tr>
                             <tr className="border">
@@ -332,8 +352,9 @@ function InvoiceDetails() {
                                 <tr className="border">
                                     <th className="py-1 px-1 border text-center font-bold w-12 ">SL</th>
                                     <th className="py-1 px-1 border text-left font-bold">Test Name</th>
+                                    <th className="invoice-room-col py-1 px-1 border text-center font-bold" style={{ textAlign: 'center', maxWidth: '80px' }}>Room No</th>
                                     <th className="py-1 px-1 border text-left font-bold w-40">Del. Date &amp; Time</th>
-                                    <th className="invoice-charge-col py-1 px-1 border text-right font-bold w-32" style={{ textAlign: 'right', width: '128px' }}>Charge ({companySettings?.currency || 'BDT'})</th>
+                                    <th className="invoice-charge-col py-1 px-1 border text-right font-bold" style={{ textAlign: 'right', maxWidth: '100px' }}>Charge ({companySettings?.currency || 'BDT'})</th>
                                 </tr>
                             </thead>
 
@@ -342,12 +363,13 @@ function InvoiceDetails() {
                                     <tr key={test.id}>
                                         <td className="border px-1 py-1 text-center">{index + 1}</td>
                                         <td className="border px-1 py-1">{test?.test?.name}</td>
+                                        <td className="invoice-room-col border px-1 py-1 text-center" style={{ textAlign: 'center', maxWidth: '80px' }}>{test?.test?.sampleCollectionRoom?.name || '-'}</td>
                                         <td className="border px-1 py-1">
                                             {!test?.delivery_date && !test?.delivery_time
                                                 ? '-'
                                                 : `${formatItemDeliveryDate(test?.delivery_date)} ${formatItemDeliveryTime(test?.delivery_time)}`.trim()}
                                         </td>
-                                        <td className="invoice-charge-col border px-1 py-1 text-right font-semibold" style={{ textAlign: 'right', width: '128px' }}>
+                                        <td className="invoice-charge-col border px-1 py-1 text-right font-semibold" style={{ textAlign: 'right', maxWidth: '100px' }}>
                                             {Number(test?.price || 0).toFixed(2)}
                                         </td>
                                     </tr>
@@ -358,32 +380,35 @@ function InvoiceDetails() {
 
                     {/* Totals Area */}
                     <div className="invoice-totals-row flex items-center gap-4 mt-4">
-                        {/* Column 1: Sample Collection Rooms — 35% */}
-                        <div className="invoice-totals-col-1 w-[35%] min-w-0 text-sm">
-                            {invoice?.sample_collection_rooms?.length > 0 ? (
-                                <>
-                                    <p className="font-semibold text-slate-700 mb-1">Sample Collection Room{invoice.sample_collection_rooms.length > 1 ? 's' : ''}</p>
+                        {/* Column 1: Invoice meta — 35% */}
+                        <div className="invoice-totals-col-1 w-[40%] min-w-0 text-sm">
+                            {showPayments && invoice?.payments?.length > 0 && (
+                                <div className="mb-2">
+                                    <p className="font-semibold text-slate-700 mb-1">Payments</p>
                                     <table className="w-full text-xs border" data-table-ignore="true">
                                         <thead>
                                             <tr className="border">
-                                                <th className="py-1 px-2 border text-left font-bold">Room</th>
+                                                <th className="py-1 px-1 border text-left font-bold">Date</th>
+                                                <th className="py-1 px-1 border text-left font-bold">Method</th>
+                                                <th className="py-1 px-1 border text-right font-bold">Amount</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {invoice.sample_collection_rooms.map((r: any) => (
-                                                <tr key={r.id} className="border">
-                                                    <td className="py-1 px-2 border">{r.room?.name || '-'}</td>
+                                            {invoice.payments.map((p: any) => (
+                                                <tr key={p.id} className="border">
+                                                    <td className="py-1 px-2 border">{fmtDateTime(p.created_at || p.payment_date)}</td>
+                                                    <td className="py-1 px-2 border">{p.method || '-'}</td>
+                                                    <td className="py-1 px-2 border text-right">{Number(p.amount || 0).toFixed(2)}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
                                     </table>
-                                </>
-                            ) : null}
+                                </div>
+                            )}
 
-                            <div className="mt-2 space-y-0.5">
-                                <p>Inv. Date: <strong>{formatInvoiceLevelDate(invoice?.invoice_date)}</strong></p>
-                                <p>Del. Date: <strong>{formatInvoiceLevelDate(invoice?.delivery_date)}</strong></p>
-                                <p>Created By: <strong>{invoice?.creator?.name || invoice?.created_by || '-'}</strong></p>
+                            <div className="space-y-0.5">
+                                <p>Inv. Date: {formatInvoiceLevelDate(invoice?.invoice_date)}</p>
+                                <p>Del. Date: {formatInvoiceLevelDate(invoice?.delivery_date)}</p>
                             </div>
                         </div>
 
@@ -401,9 +426,9 @@ function InvoiceDetails() {
                         </div>
 
                         {/* Column 3: Summary details — 40% */}
-                        <div className="invoice-totals-col-3 w-[40%] min-w-0 text-sm space-y-2 border-t border-b border-slate-400 py-3">
+                        <div className="invoice-totals-col-3 w-[35%] min-w-0 text-sm space-y-2 border-t border-b border-slate-400 py-3">
                             <div className="flex justify-between text-slate-600">
-                                <span>Total Amt.</span>
+                                <span>Total Amount</span>
                                 <span className="font-semibold text-slate-800">{Number(invoice?.total_amount || 0).toFixed(2)}</span>
                             </div>
 
@@ -413,7 +438,7 @@ function InvoiceDetails() {
                             </div>
 
                             <div className="border-t border-slate-250 pt-1.5 flex justify-between text-slate-700 font-medium">
-                                <span>Discounted Amt.</span>
+                                <span>Discounted Amount</span>
                                 <span className="font-bold text-slate-800">{Number(invoice?.net_amount || 0).toFixed(2)}</span>
                             </div>
 
@@ -423,7 +448,7 @@ function InvoiceDetails() {
                             </div>
 
                             <div className="border-t border-slate-700 pt-1.5 flex justify-between font-bold text-slate-900">
-                                <span>Due Amt.</span>
+                                <span>Due Amount</span>
                                 <span className="font-bold">
                                     {Number(dueAmount || 0).toFixed(2)}
                                 </span>
@@ -432,12 +457,13 @@ function InvoiceDetails() {
                     </div>
 
                     {/* Paid Stamp */}
-                    <p className="text-sm mt-6 italic">In words: &nbsp; <span className="font-semibold capitalize text-slate-800">{amountToWords(Number(totalPayments || 0))}</span></p>
+                    <p className="text-sm mt-1 italic">In words: &nbsp; <span className="font-semibold capitalize text-slate-800">{amountToWords(Number(totalPayments || 0))}</span></p>
 
                     {/* ── Signature Row ───────────────────────────────────────────────── */}
                     <div className="flex justify-between mt-12 text-sm w-full">
                         <div style={{ textAlign: 'left' }}>
                             <span className="inline-block border-t border-dashed pt-1">Prepared By:</span>
+                             <p className="font-medium">{currentUserName || '-'}</p>
                         </div>
                         <div style={{ textAlign: 'right' }}>
                             <span className="inline-block border-t border-dashed pt-1">Authorized Signature:</span>

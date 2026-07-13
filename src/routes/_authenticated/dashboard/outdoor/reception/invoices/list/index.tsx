@@ -9,6 +9,8 @@ const invoicesSearchSchema = z.object({
     status: z.string().catch('all'),
     from: z.string().catch(''),
     to: z.string().catch(''),
+    sort: z.string().catch('invoice_prefix'),
+    order: z.string().catch('DESC'),
 })
 
 export const Route = createFileRoute(
@@ -28,6 +30,8 @@ function InvoicesPage() {
     const statusFilter = searchParams?.status || "all";
     const from = searchParams?.from || "";
     const to = searchParams?.to || "";
+    const sort = searchParams?.sort || "invoice_prefix";
+    const order = searchParams?.order || "DESC";
 
     const setPage = (newPage: number) => {
         navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
@@ -47,6 +51,9 @@ function InvoicesPage() {
     const setTo = (newTo: string) => {
         navigate({ to: '.', search: (prev: any) => ({ ...prev, to: newTo, page: 1 }) });
     };
+    const setSort = (newSort: string, newOrder: string) => {
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, sort: newSort, order: newOrder, page: 1 }) });
+    };
 
     return (
         <Invoices
@@ -56,12 +63,15 @@ function InvoicesPage() {
             statusFilter={statusFilter}
             from={from}
             to={to}
+            sort={sort}
+            order={order}
             setPage={setPage}
             setLimit={setLimit}
             setSearch={setSearch}
             setStatusFilter={setStatusFilter}
             setFrom={setFrom}
             setTo={setTo}
+            setSort={setSort}
         />
     )
 }

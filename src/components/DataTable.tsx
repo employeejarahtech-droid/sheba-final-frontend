@@ -69,6 +69,7 @@ export function DataTable<TData extends Record<string, any>>({
   const dataTableRef = useRef<any>(null);
   const columnsRef = useRef(columns);
   const searchRef = useRef(search);
+  const onSortRef = useRef(onSort);
   const scrollWrapperRef = useRef<HTMLDivElement>(null);
   const [localSearch, setLocalSearch] = useState(search || "");
   const debouncedSearch = useDebounce(localSearch, 500);
@@ -91,7 +92,8 @@ export function DataTable<TData extends Record<string, any>>({
   useEffect(() => {
     columnsRef.current = columns;
     searchRef.current = search;
-  }, [columns, search]);
+    onSortRef.current = onSort;
+  }, [columns, search, onSort]);
 
   // ── Drag-to-scroll on hover ──────────────────────────────────────────────
   useEffect(() => {
@@ -199,6 +201,20 @@ export function DataTable<TData extends Record<string, any>>({
     });
 
     dataTableRef.current = table;
+
+    // Attached AFTER construction, so the initial programmatic `order` above
+    // doesn't itself trigger onSort — only subsequent user clicks on a
+    // sortable header do. When a parent passes `onSort`, it's expected to
+    // refetch server-side sorted data; DataTables then re-sorts that (already
+    // server-sorted) page client-side too, which is a harmless no-op as long
+    // as the two agree on ordering.
+    table.on('order.dt', () => {
+      const currentOrder = table.order();
+      if (!currentOrder || currentOrder.length === 0) return;
+      const [colIdx, dir] = currentOrder[0];
+      const colData = columnsRef.current[colIdx]?.data ?? null;
+      onSortRef.current?.(colData, dir === 'asc' ? 'ASC' : 'DESC');
+    });
 
     return () => {
       if (dataTableRef.current) {

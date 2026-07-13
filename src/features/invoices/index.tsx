@@ -34,6 +34,12 @@ type InvoicesProps = {
     setDoctorId?: (v: string) => void;
     showReferrerFilter?: boolean;
     tableTitle?: string;
+    // Server-side sort — optional since not every caller (e.g. Patients by
+    // Referrer) wires this up yet; falls back to id-desc and client-only
+    // DataTables sorting when omitted.
+    sort?: string;
+    order?: string;
+    setSort?: (newSort: string, newOrder: string) => void;
 };
 
 type InvoiceItem = {
@@ -79,7 +85,7 @@ type InvoiceItem = {
     }>;
 };
 
-export default function Invoices({ page, limit, search, statusFilter, from, to, setPage, setLimit, setSearch, setStatusFilter, setFrom, setTo, doctorId, setDoctorId, showReferrerFilter, tableTitle }: InvoicesProps) {
+export default function Invoices({ page, limit, search, statusFilter, from, to, setPage, setLimit, setSearch, setStatusFilter, setFrom, setTo, doctorId, setDoctorId, showReferrerFilter, tableTitle, sort = 'invoice_prefix', order = 'DESC', setSort }: InvoicesProps) {
     const [openFilter, setOpenFilter] = useState(false);
     const [openReferrer, setOpenReferrer] = useState(false);
 
@@ -106,15 +112,16 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
     const selectedDoctor = doctors.find((d: any) => String(d.id) === String(doctorId));
 
     const { data, isFetching } = useQuery({
-        queryKey: ["invoices", page, limit, search, statusFilter, from, to, doctorId],
+        queryKey: ["invoices", page, limit, search, statusFilter, from, to, doctorId, sort, order],
 
         queryFn: async () => {
             const statusParam = statusFilter !== "all" ? `&status=${statusFilter}` : "";
             const fromParam = from ? `&from=${encodeURIComponent(from)}` : "";
             const toParam = to ? `&to=${encodeURIComponent(to)}` : "";
             const doctorParam = doctorId ? `&doctor_id=${encodeURIComponent(doctorId)}` : "";
+            const sortParam = sort ? `&sort=${encodeURIComponent(sort)}&order=${encodeURIComponent(order)}` : "";
             const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/outdoor-invoice?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}${doctorParam}`,
+                `${import.meta.env.VITE_API_URL}/api/outdoor-invoice?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}${doctorParam}${sortParam}`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
@@ -687,10 +694,14 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
     const columns = [
         {
             data: "invoice_prefix",
-            title: "Custom ID",
+            title: "ID",
             orderable: true,
             responsivePriority: 1,
-            render: (data: any, _type: string, row: InvoiceItem) => {
+            render: (data: any, type: string, row: InvoiceItem) => {
+                // Sort/filter by the actual numeric invoice id (newest first by
+                // default), not the invoice_prefix text — otherwise DataTables'
+                // default column-0-desc ordering sorts alphabetically instead.
+                if (type === 'sort' || type === 'filter' || type === 'type') return String(row.id);
                 const display = data ? `<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${data}</span>` : '<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">-</span>';
                 return `
                     <div class="flex items-center gap-2">
@@ -722,7 +733,7 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
         {
             data: null, // Use null for computed fields
             title: "Reference Doctor",
-            orderable: true,
+            orderable: false, // computed (joined doctor name), not a real sortable DB column
             responsivePriority: 3, // Hide earlier
             render: (_data: any, type: string, row: InvoiceItem) => {
                 const d: any = row.doctor;
@@ -756,30 +767,30 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
                 const total = Number(row.total_amount || 0);
                 const net = Number(row.net_amount || 0);
                 const discount = total - net;
-                return String(discount > 0 ? discount : "-");
+                return discount > 0 ? discount.toFixed(2) : "-";
             },
             defaultContent: "-",
         },
         {
             data: "total_paid",
             title: `Paid (${currencySymbol})`,
-            orderable: true,
+            orderable: false, // computed from payments, not a real sortable DB column
             responsivePriority: 2,
-            render: (data: any) => `<span class="text-emerald-600 font-medium">${data ?? 0}</span>`,
-            defaultContent: "0",
+            render: (data: any) => `<span class="text-emerald-600 font-medium">${Number(data || 0).toFixed(2)}</span>`,
+            defaultContent: "0.00",
         },
         {
             data: "due_amount",
             title: `Due (${currencySymbol})`,
-            orderable: true,
+            orderable: false, // computed from payments, not a real sortable DB column
             responsivePriority: 2, // Always show due amount
-            render: (data: any) => `<span class="text-red-600 font-bold">${data ?? 0}</span>`,
-            defaultContent: "0",
+            render: (data: any) => `<span class="text-red-600 font-bold">${Number(data || 0).toFixed(2)}</span>`,
+            defaultContent: "0.00",
         },
         {
             data: null,
             title: "Inv. Date and Time",
-            orderable: true,
+            orderable: false, // combines invoice_date + created_at display, not a single sortable column
             responsivePriority: 3,
             render: (_data: any, _type: string, row: InvoiceItem) => {
                 const invDate = row.invoice_date ? new Date(row.invoice_date) : null;
@@ -829,7 +840,7 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
         {
             data: null,
             title: "Created By",
-            orderable: true,
+            orderable: false, // resolved creator name, not a real sortable DB column
             responsivePriority: 4,
             render: (_data: any, _type: string, row: InvoiceItem) => {
                 // Check if creator object exists with name
@@ -845,7 +856,7 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
         {
             data: null,
             title: "Create Type",
-            orderable: true,
+            orderable: false, // computed, not a real sortable DB column
             responsivePriority: 5,
             render: (_data: any, _type: string, row: InvoiceItem) => {
                 if (!row.created_by_type) return `<span class="text-sm text-muted-foreground">-</span>`;
@@ -861,7 +872,7 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
         {
             data: null, // Computed field
             title: "Status",
-            orderable: true,
+            orderable: false, // derived from due_amount, not a real sortable DB column
             responsivePriority: 1, // Always visible
             render: (_data: any, _type: string, row: InvoiceItem) => {
                 const dueAmount = Number(row.due_amount || 0);
@@ -915,6 +926,14 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
             defaultContent: "",
         },
     ];
+
+    // Sync DataTables' visual sort indicator with the URL-driven sort on
+    // load/reload — falls back to column 0 if `sort` doesn't match any
+    // column's `data` key (e.g. for callers like Patients by Referrer that
+    // don't pass sort/order at all).
+    const sortColumnIndex = columns.findIndex((c) => c.data === sort);
+    const defaultOrder: [number, 'asc' | 'desc'][] = [[sortColumnIndex >= 0 ? sortColumnIndex : 0, order === 'ASC' ? 'asc' : 'desc']];
+
     return <>
         <AppHeader fixed />
 
@@ -954,6 +973,14 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
                 search={search}
                 onSearchChange={setSearch}
                 isLoading={isFetching}
+                onSort={setSort ? (columnData, direction) => {
+                    // DataTables already computed the toggled direction (asc
+                    // the first click on a column, desc on re-click, etc.) —
+                    // just forward it to the URL.
+                    if (!columnData) return;
+                    setSort(columnData, direction);
+                } : undefined}
+                defaultOrder={defaultOrder}
                 filterSlot={
                     <>
                         <Popover open={openFilter} onOpenChange={setOpenFilter}>
