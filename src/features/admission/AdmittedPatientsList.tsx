@@ -447,6 +447,14 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             render: (data: any, _type: string, row: AdmissionItem) => {
                 // Ensure admission number always has ADM- prefix
                 const displayId = data && data.toString().startsWith('ADM-') ? data : (data ? `ADM-${data}` : `ADM-${row.id}`);
+
+                // Sorting/type-detection must use the numeric id, not the HTML
+                // markup below — otherwise DataTables' default column-0 sort
+                // (see DataTable.tsx's `order: defaultOrder || [[0, 'desc']]`)
+                // compares raw HTML strings and produces a scrambled order.
+                if (_type === 'sort' || _type === 'type') return row.id;
+                if (_type === 'filter') return displayId;
+
                 const admissionDate = row.admission_date ? new Date(row.admission_date).toLocaleDateString() : '-';
                 const dischargeDate = row.discharge_date ? new Date(row.discharge_date).toLocaleDateString() : '-';
                 const bedCabinInfo = row.bedCabin ? `${row.bedCabin.code} (${row.bedCabin.type})` : '-';
@@ -1895,14 +1903,14 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
 
             <AppHeader fixed />
 
-            <Main fluid className="p-4 w-full flex-1 dark:bg-black/20">
+            <Main fluid className=" w-full flex-1 dark:bg-black/20">
                 <style>{`
                     .status-sub-row td { border: none !important; }
                     .status-sub-row:hover td { background: transparent !important; }
                     tr.status-sub-row { pointer-events: none; }
                     tr.status-sub-row span { pointer-events: auto; }
                 `}</style>
-                <div className="space-y-4 mx-auto">
+                <div className="space-y-3 mx-auto">
                     {/* Header */}
                     <div className="flex flex-wrap justify-between items-start gap-4">
                         <div className="">

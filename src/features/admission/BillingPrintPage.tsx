@@ -15,7 +15,9 @@ type BillingData = {
     age: number
     sex: string
     phone: string
+    age_text?: string | null
     admission_date: string
+    discharge_date?: string | null
     bedCabin?: {
         code: string
         type: string
@@ -26,6 +28,8 @@ type BillingData = {
         doctor_name: string
     }
     diagnosis?: string
+    bill_created_by_user?: { id: number; name: string } | null
+    created_by_user?: { id: number; name: string } | null
 }
 
 type Operation = {
@@ -269,9 +273,12 @@ export function BillingPrintPage() {
     const bedBills = bedBillingData?.data || []
     const bedCharges = bedChargesData?.data || { total: 0, breakdown: [] }
 
-    // Calculate totals - prefer final bill totals if available, otherwise calculate from individual items
+    // Calculate totals - prefer final bill totals if available, otherwise calculate from individual items.
+    // This is the PRELIMINARY billing statement, so it must show the bill
+    // BEFORE any discount — total_bill_amount (gross), not
+    // total_discounted_amount (net after discount, shown on the final bill).
     const finalBillTotals = finalBillItems.length > 0 ? {
-        total: finalBillItems.reduce((sum: number, item: any) => sum + Number(item.final_amount || 0), 0),
+        total: Number(admissionData?.data?.finalBill?.total_bill_amount ?? 0),
         paid: Number(admissionData?.data?.finalBill?.paid_amount || 0),
         due: Number(admissionData?.data?.finalBill?.due_amount || 0)
     } : null
@@ -578,9 +585,9 @@ export function BillingPrintPage() {
                 </Button>
             </div>
 
-            {/* Header */}
-            <div className="mb-6">
-                <div className='flex justify-center items-center gap-8'>
+            {/* Header: Logo/Company (left 50%) + Title (right 50%) */}
+            <div className="mb-6 flex items-start justify-between gap-6">
+                <div className="w-1/2 flex items-center gap-4">
                     {companyLogo ? (
                         <img
                             src={companyLogo}
@@ -589,19 +596,27 @@ export function BillingPrintPage() {
                         />
                     ) : null}
 
-                    <div className="text-center">
+                    <div>
                         <h1 className="text-2xl font-bold">{companyName}</h1>
-                        <p className="text-sm mt-1 leading-5">
-                            {[companySettings?.address1, companySettings?.address2].filter(Boolean).join(', ')}
-                        </p>
+                        {companySettings?.address1 && (
+                            <p className="text-sm mt-1 leading-5">{companySettings.address1}</p>
+                        )}
+                        {companySettings?.address2 && (
+                            <p className="text-sm leading-5">{companySettings.address2}</p>
+                        )}
                     </div>
                 </div>
-            </div>
 
-            {/* ── Title ──────────────────────────────────────────────────────── */}
-            <h1 className="text-2xl font-bold text-center underline mb-6 tracking-wide uppercase">
-                PRELIMINARY BILLING STATEMENT
-            </h1>
+                <div className="w-1/2 text-right">
+                    <h2 className="text-xl font-bold tracking-widest uppercase">PRELIMINARY BILLING STATEMENT</h2>
+                    <p className="text-sm mt-1 leading-5">
+                        Admission Date: {admission?.admission_date ? safeFormatDate(admission.admission_date) : '-'}
+                    </p>
+                    <p className="text-sm leading-5">
+                        Discharged Date: {admission?.discharge_date ? safeFormatDate(admission.discharge_date) : '-'}
+                    </p>
+                </div>
+            </div>
 
             {/* ── Patient Info Table ──────────────────────────────────────────── */}
             <table className="w-full text-sm border">
@@ -620,9 +635,6 @@ export function BillingPrintPage() {
                     <tr className="border">
                         <td className="border px-2 py-1" colSpan={2}>
                             Patient Name: <strong>{admission?.patient_name || 'Unknown'}</strong>
-                            {admission?.age && admission?.sex
-                                ? ` — ${admission.age} yrs / ${admission.sex}`
-                                : ''}
                         </td>
                         <td className="border px-2 py-1">
                             Phone: {admission?.phone || 'N/A'}
@@ -630,13 +642,15 @@ export function BillingPrintPage() {
                     </tr>
                     <tr className="border">
                         <td className="border px-2 py-1">
-                            Admission Date: {admission?.admission_date ? safeFormatDate(admission.admission_date) : '-'}
-                        </td>
-                        <td className="border px-2 py-1">
-                            Attending Doctor: {admission?.doctor?.doctor_name ? `Dr. ${admission.doctor.doctor_name}` : 'N/A'}
-                        </td>
-                        <td className="border px-2 py-1">
                             Bed/Cabin: {admission?.bedCabin ? `${admission.bedCabin.code} (${admission.bedCabin.type})` : 'N/A'}
+                        </td>
+                        <td className="border px-2 py-1">
+                            Age: {admission?.age_text
+                                ? admission.age_text.replace(/^(\d+)Y/, '$1 yrs')
+                                : admission?.age ? `${admission.age} yrs` : 'N/A'}
+                        </td>
+                        <td className="border px-2 py-1">
+                            Sex: {admission?.sex || 'N/A'}
                         </td>
                     </tr>
                     {admission?.diagnosis && (
@@ -695,6 +709,9 @@ export function BillingPrintPage() {
             <div className="flex justify-between mt-32 text-sm w-full">
                 <div style={{ textAlign: 'left' }}>
                     <span className="inline-block border-t border-dashed pt-1">Prepared By:</span>
+                    <p className="font-medium">
+                        {admission?.bill_created_by_user?.name || admission?.created_by_user?.name || '-'}
+                    </p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                     <span className="inline-block border-t border-dashed pt-1">Authorized Signature:</span>

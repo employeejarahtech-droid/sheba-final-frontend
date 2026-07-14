@@ -1627,6 +1627,7 @@ export function PatientBillingPage() {
             queryClient.invalidateQueries({ queryKey: ['admission', admissionId] })
             queryClient.invalidateQueries({ queryKey: ['final-bill', admissionId] })
             queryClient.invalidateQueries({ queryKey: ['payments', admissionId] })
+            queryClient.invalidateQueries({ queryKey: ['admission-payments', admissionId] })
         },
         onError: (error: Error) => toast.error(error.message || 'Failed to record transaction'),
     })
@@ -3034,7 +3035,18 @@ export function PatientBillingPage() {
                                 </Card>
 
                                 {/* Payment History Section */}
-                                <PaymentHistoryView admissionId={admissionId} />
+                                <PaymentHistoryView
+                                    admissionId={admissionId}
+                                    hasFinalBill={!!admissionData?.data?.final_bill_created_date}
+                                    recordPaymentDisabled={!!admissionData?.data?.final_bill_created_date && maxPayment <= 0}
+                                    onRecordPayment={() => {
+                                        const mode = admissionData?.data?.final_bill_created_date ? 'payment' : 'advance'
+                                        setTxnAmount(mode === 'payment' ? maxPayment : 0)
+                                        setTxnNotes('')
+                                        setTxnDate(toISODate(new Date()))
+                                        setTxnDialogMode(mode)
+                                    }}
+                                />
 
 
                                     </div>{/* ===== END LEFT COLUMN ===== */}

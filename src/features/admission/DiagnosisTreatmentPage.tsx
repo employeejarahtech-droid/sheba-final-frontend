@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { getCookie } from '@/lib/cookies'
-import { ArrowLeft, Stethoscope, Save, Loader2, Activity, User, Home, Phone } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Activity, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AppHeader } from '@/components/layout/app-header'
@@ -81,7 +81,7 @@ export function DiagnosisTreatmentPage({ admissionId }: DiagnosisTreatmentPagePr
                 <AppHeader fixed />
                 <Main className="flex items-center justify-center min-h-[60vh]">
                     <div className="flex flex-col items-center gap-2">
-                        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+                        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
                         <p className="text-sm text-muted-foreground">Loading details...</p>
                     </div>
                 </Main>
@@ -108,36 +108,41 @@ export function DiagnosisTreatmentPage({ admissionId }: DiagnosisTreatmentPagePr
     return (
         <>
             <AppHeader fixed />
-            <Main fluid className="p-4 w-full flex-1 dark:bg-black/20">
-                <div className="max-w-3xl mx-auto space-y-6">
-                    {/* Breadcrumbs & Header */}
-                    <div className="flex items-center gap-4">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => navigate({ to: '/dashboard/admission/patients' })}
-                            className="rounded-full hover:bg-purple-50 hover:text-purple-600 dark:hover:bg-purple-950/20"
-                        >
-                            <ArrowLeft className="w-5 h-5" />
-                        </Button>
-                        <div>
-                            <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                                Diagnosis & Treatment
-                            </h1>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                                Update diagnosis and clinical treatments for Patient Admission #{admissionId}
-                            </p>
+            <Main className="flex flex-1 flex-col gap-6">
+                <div className="space-y-5 w-full max-w-3xl mx-auto px-4">
+                    {/* Header */}
+                    <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
+                        <div className="flex items-center gap-4">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => navigate({ to: '/dashboard/admission/patients' })}
+                            >
+                                <ArrowLeft className="h-5 w-5" />
+                            </Button>
+                            <div>
+                                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                                    Diagnosis & Treatment
+                                </h1>
+                                <p className="text-muted-foreground text-sm">
+                                    Update diagnosis and clinical treatments for Patient Admission #{admissionId}
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Patient Information Banner */}
-                    <Card className="shadow-sm border border-purple-100 dark:border-purple-950/40 bg-gradient-to-r from-purple-50/50 to-indigo-50/30 dark:from-purple-950/10 dark:to-indigo-950/5 overflow-hidden">
-                        <CardHeader className="py-3 px-4 border-b border-purple-100/50 dark:border-purple-950/30">
-                            <div className="flex items-center gap-2">
-                                <User className="w-4 h-4 text-purple-600" />
-                                <span className="text-xs font-semibold uppercase tracking-wider text-purple-800 dark:text-purple-300">
-                                    Patient Profile
-                                </span>
+                    {/* Patient Profile */}
+                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                    <User className="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-lg font-bold">Patient Profile</CardTitle>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">Admission and bed assignment details</p>
+                                </div>
                             </div>
                         </CardHeader>
                         <CardContent className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
@@ -163,15 +168,20 @@ export function DiagnosisTreatmentPage({ admissionId }: DiagnosisTreatmentPagePr
                     </Card>
 
                     {/* Form Card */}
-                    <Card className="shadow-md border">
-                        <CardHeader className="py-4 border-b">
-                            <CardTitle className="text-lg font-bold flex items-center gap-2">
-                                <Activity className="w-5 h-5 text-purple-600" />
-                                Clinical Diagnosis & Treatment Records
-                            </CardTitle>
+                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                    <Activity className="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-lg font-bold">Clinical Diagnosis & Treatment Records</CardTitle>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">Primary diagnosis, medicine, and treatment notes</p>
+                                </div>
+                            </div>
                         </CardHeader>
-                        <CardContent className="p-6">
-                            <form onSubmit={handleSave} className="space-y-6">
+                        <CardContent className="p-4">
+                            <form onSubmit={handleSave} className="space-y-4">
                                 <div className="space-y-2">
                                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                                         Diagnosis & Treatment Details <span className="text-red-500">*</span>
@@ -182,25 +192,26 @@ export function DiagnosisTreatmentPage({ admissionId }: DiagnosisTreatmentPagePr
                                     <textarea
                                         value={diagnosis}
                                         onChange={(e) => setDiagnosis(e.target.value)}
-                                        className="w-full min-h-[250px] p-4 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-800 text-sm font-medium leading-relaxed"
+                                        className="w-full min-h-[250px] p-4 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 text-sm font-medium leading-relaxed"
                                         placeholder="Type primary diagnosis details, clinical observations and treatments..."
                                         required
                                     />
                                 </div>
 
-                                <div className="flex gap-4 pt-4 border-t">
+                                <div className="flex items-center justify-end gap-3 pt-2">
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        className="flex-1"
+                                        size="lg"
                                         onClick={() => navigate({ to: '/dashboard/admission/patients' })}
                                     >
                                         Cancel
                                     </Button>
                                     <Button
                                         type="submit"
+                                        size="lg"
                                         disabled={updateDiagnosisMutation.isPending || !diagnosis.trim()}
-                                        className="flex-1 bg-purple-600 hover:bg-purple-700 text-white shadow-md flex items-center justify-center gap-2"
+                                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white min-w-[200px] flex items-center justify-center gap-2"
                                     >
                                         {updateDiagnosisMutation.isPending ? (
                                             <>

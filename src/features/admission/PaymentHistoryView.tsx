@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Receipt, Loader2, DollarSign, Calendar, CheckCircle, Plus } from 'lucide-react'
 import { getCookie } from '@/lib/cookies'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,25 +7,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useCurrency } from '@/hooks/use-currency'
 import { useDateFormat } from '@/hooks/use-date-format'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { toast } from 'sonner'
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -43,20 +23,17 @@ type PaymentRecord = {
 
 type PaymentHistoryViewProps = {
     admissionId: string | number
+    /** Whether a final bill exists — determines the "Record Payment"/"Record Advance" label. */
+    hasFinalBill: boolean
+    /** Opens the parent's Advance/Payment/Refund dialog (same form used elsewhere on the billing page). */
+    onRecordPayment: () => void
+    recordPaymentDisabled?: boolean
 }
 
-export function PaymentHistoryView({ admissionId }: PaymentHistoryViewProps) {
+export function PaymentHistoryView({ admissionId, hasFinalBill, onRecordPayment, recordPaymentDisabled }: PaymentHistoryViewProps) {
     const { format } = useCurrency()
     const { formatDateTime } = useDateFormat()
     const token = getCookie('accessToken')
-    const queryClient = useQueryClient()
-
-    // Add modal state
-    const [addModalOpen, setAddModalOpen] = useState(false)
-    const [amount, setAmount] = useState('')
-    const [method, setMethod] = useState('cash')
-    const [notes, setNotes] = useState('')
-    const [isSubmitting, setIsSubmitting] = useState(false)
 
     // Fetch payment records
     const { data: paymentsData, isLoading } = useQuery({
@@ -75,80 +52,8 @@ export function PaymentHistoryView({ admissionId }: PaymentHistoryViewProps) {
 
     const payments: PaymentRecord[] = paymentsData?.data || []
 
-    // Fetch final bill to check if created and get due amount
-    const { data: finalBillData } = useQuery({
-        queryKey: ['final-bill', admissionId],
-        queryFn: async () => {
-            const res = await fetch(`${API_URL}/api/admission/${admissionId}/final-bill`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            if (!res.ok) return null
-            return res.json()
-        },
-        enabled: !!token && !!admissionId,
-    })
-    const finalBill = finalBillData?.data || null
-
     // Calculate total paid
     const totalPaid = payments.reduce((sum: number, p: PaymentRecord) => sum + Number(p.amount), 0)
-
-    // Record Payment Mutation
-    const addMutation = useMutation({
-        mutationFn: async () => {
-            setIsSubmitting(true)
-            try {
-                // If final bill exists, we pay against the final bill. Otherwise, it is an advance payment.
-                const endpoint = finalBill 
-                    ? `${API_URL}/api/admission/${admissionId}/final-bill/payment` 
-                    : `${API_URL}/api/admission/${admissionId}/advance-payment`
-
-                const bodyPayload = finalBill
-                    ? {
-                        amount: Number(amount),
-                        payment_method: method,
-                        notes: notes,
-                      }
-                    : {
-                        amount: Number(amount),
-                        notes: notes || 'Advance payment',
-                        payment_method: method,
-                      }
-
-                const res = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(bodyPayload),
-                })
-                if (!res.ok) {
-                    const errData = await res.json().catch(() => ({ message: 'Failed to record payment' }))
-                    throw new Error(errData.message || 'Failed to record payment')
-                }
-                return await res.json()
-            } finally {
-                setIsSubmitting(false)
-            }
-        },
-        onSuccess: () => {
-            toast.success(finalBill ? 'Invoice payment recorded successfully!' : 'Advance payment recorded successfully!')
-            setAddModalOpen(false)
-            setAmount('')
-            setMethod('cash')
-            setNotes('')
-            queryClient.invalidateQueries({ queryKey: ['admission-payments', admissionId] })
-            queryClient.invalidateQueries({ queryKey: ['admission', admissionId] })
-            queryClient.invalidateQueries({ queryKey: ['final-bill', admissionId] })
-        },
-        onError: (err: Error) => {
-            toast.error(err.message || 'Failed to record payment')
-        }
-    })
-
-    const handleAddPayment = () => {
-        addMutation.mutate()
-    }
 
     return (
         <>
@@ -169,14 +74,14 @@ export function PaymentHistoryView({ admissionId }: PaymentHistoryViewProps) {
                                 <CheckCircle className="w-3 h-3 mr-1" />
                                 {payments.length} Payment{payments.length !== 1 ? 's' : ''}
                             </Badge>
-                            <Button 
-                                size="sm" 
+                            <Button
+                                size="sm"
                                 className="bg-blue-600 hover:bg-blue-700 h-8"
-                                onClick={() => setAddModalOpen(true)}
-                                disabled={finalBill && finalBill.due_amount <= 0}
+                                onClick={onRecordPayment}
+                                disabled={recordPaymentDisabled}
                             >
                                 <Plus className="w-3.5 h-3.5 mr-1" />
-                                {finalBill ? 'Record Payment' : 'Record Advance'}
+                                {hasFinalBill ? 'Record Payment' : 'Record Advance'}
                             </Button>
                         </div>
                     </div>
@@ -262,97 +167,6 @@ export function PaymentHistoryView({ admissionId }: PaymentHistoryViewProps) {
                     )}
                 </CardContent>
             </Card>
-
-            {/* Record Payment/Advance Modal */}
-            <Dialog open={addModalOpen} onOpenChange={setAddModalOpen}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <DollarSign className="w-5 h-5 text-blue-600" />
-                            {finalBill ? 'Record Invoice Payment' : 'Record Advance Payment'}
-                        </DialogTitle>
-                        <DialogDescription>
-                            {finalBill 
-                                ? 'Add a new payment against the patient\'s finalized bill.' 
-                                : 'Record an advance payment from the patient before the final bill is created.'}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                        {finalBill && (
-                            <div className="grid grid-cols-2 gap-4 bg-muted/30 p-3 rounded-lg text-xs">
-                                <div><strong>Net Bill:</strong> {format(finalBill.total_discounted_amount)}</div>
-                                <div><strong>Paid:</strong> {format(finalBill.paid_amount)}</div>
-                                <div className="col-span-2 text-orange-600 font-semibold mt-1"><strong>Due Amount:</strong> {format(finalBill.due_amount)}</div>
-                            </div>
-                        )}
-                        <div className="space-y-2">
-                            <Label htmlFor="payAmount">Amount *</Label>
-                            <Input
-                                id="payAmount"
-                                type="number"
-                                value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
-                                placeholder="Enter payment amount"
-                                min="0.01"
-                                max={finalBill ? finalBill.due_amount : undefined}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="payMethod">Payment Method *</Label>
-                            <Select value={method} onValueChange={setMethod}>
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select payment method" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="cash">Cash</SelectItem>
-                                    <SelectItem value="card">Card</SelectItem>
-                                    <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                                    <SelectItem value="mobile_banking">Mobile Banking</SelectItem>
-                                    <SelectItem value="check">Check</SelectItem>
-                                    <SelectItem value="online">Online</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="payNotes">Notes (Optional)</Label>
-                            <Textarea
-                                id="payNotes"
-                                placeholder={finalBill ? "Notes for this payment..." : "Advance payment notes..."}
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                                rows={3}
-                            />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button
-                            variant="outline"
-                            onClick={() => {
-                                setAddModalOpen(false)
-                                setAmount('')
-                                setMethod('cash')
-                                setNotes('')
-                            }}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            onClick={handleAddPayment}
-                            disabled={!amount || Number(amount) <= 0 || isSubmitting}
-                            className="bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Recording...
-                                </>
-                            ) : (
-                                'Record'
-                            )}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </>
     )
 }

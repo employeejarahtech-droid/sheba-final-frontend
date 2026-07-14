@@ -43,6 +43,7 @@ type DoctorItem = {
     referred_patients_indoor?: number;
     experience?: number;
     created_at?: string;
+    is_active?: boolean;
 };
 
 type DoctorsProps = {
@@ -50,13 +51,15 @@ type DoctorsProps = {
     limit: number;
     search: string;
     doctorType: string;
+    isActive: string;
     setPage: (page: number) => void;
     setLimit: (limit: number) => void;
     setSearch: (search: string) => void;
     setDoctorType: (doctorType: string) => void;
+    setIsActive: (isActive: string) => void;
 };
 
-export default function Doctors({ page, limit, search, doctorType, setPage, setLimit, setSearch, setDoctorType }: DoctorsProps) {
+export default function Doctors({ page, limit, search, doctorType, isActive, setPage, setLimit, setSearch, setDoctorType, setIsActive }: DoctorsProps) {
     const can = useCan();
     const canEdit = can('outdoor.master.doctors.edit');
     const canDelete = can('outdoor.master.doctors.delete');
@@ -123,10 +126,10 @@ export default function Doctors({ page, limit, search, doctorType, setPage, setL
     });
 
     const { data, isFetching } = useQuery({
-        queryKey: ["doctor", page, limit, search, doctorType],
+        queryKey: ["doctor", page, limit, search, doctorType, isActive],
 
         queryFn: async () => {
-            const apiUrl = `${import.meta.env.VITE_API_URL}/api/doctor?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${doctorType ? `&doctor_type=${encodeURIComponent(doctorType)}` : ''}`;
+            const apiUrl = `${import.meta.env.VITE_API_URL}/api/doctor?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${doctorType ? `&doctor_type=${encodeURIComponent(doctorType)}` : ''}${isActive ? `&is_active=${isActive}` : ''}`;
             console.log('Fetching from:', apiUrl);
 
             const res = await fetch(apiUrl, {
@@ -370,7 +373,7 @@ export default function Doctors({ page, limit, search, doctorType, setPage, setL
             newRow.className = 'child-row-detail';
             const cell = document.createElement('td');
             cell.className = 'p-4 bg-muted/50';
-            cell.colSpan = 12;
+            cell.colSpan = 13;
             cell.appendChild(cardContainer);
             newRow.appendChild(cell);
 
@@ -494,6 +497,19 @@ export default function Doctors({ page, limit, search, doctorType, setPage, setL
             title: "Speciality",
             orderable: true,
             responsivePriority: 3,
+            defaultContent: "",
+        },
+        {
+            data: "is_active",
+            title: "Status",
+            orderable: true,
+            responsivePriority: 4,
+            render: (_data: any, _type: string, row: DoctorItem) => {
+                const isActiveVal = row.is_active !== false;
+                return isActiveVal
+                    ? '<span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Active</span>'
+                    : '<span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">Inactive</span>';
+            },
             defaultContent: "",
         },
         {
@@ -698,22 +714,38 @@ export default function Doctors({ page, limit, search, doctorType, setPage, setL
                 isLoading={isFetching}
                 hideExport
                 filterSlot={
-                    <Select
-                        value={doctorType || 'all'}
-                        onValueChange={(val) => setDoctorType(val === 'all' ? '' : val)}
-                    >
-                        <SelectTrigger size="sm" className="h-9 w-[180px]">
-                            <SelectValue placeholder="Filter by Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Types</SelectItem>
-                            {doctorTypes.map((t: any) => (
-                                <SelectItem key={t.id} value={String(t.id)}>
-                                    {t.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <>
+                        <Select
+                            value={doctorType || 'all'}
+                            onValueChange={(val) => setDoctorType(val === 'all' ? '' : val)}
+                        >
+                            <SelectTrigger size="sm" className="h-9 w-[180px]">
+                                <SelectValue placeholder="Filter by Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Types</SelectItem>
+                                {doctorTypes.map((t: any) => (
+                                    <SelectItem key={t.id} value={String(t.id)}>
+                                        {t.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        <Select
+                            value={isActive || 'all'}
+                            onValueChange={(val) => setIsActive(val === 'all' ? '' : val)}
+                        >
+                            <SelectTrigger size="sm" className="h-9 w-[160px]">
+                                <SelectValue placeholder="All Statuses" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Statuses</SelectItem>
+                                <SelectItem value="true">Active</SelectItem>
+                                <SelectItem value="false">Inactive</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </>
                 }
             />
 

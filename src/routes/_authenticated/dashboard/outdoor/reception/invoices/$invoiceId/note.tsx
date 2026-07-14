@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { PageHeader } from '@/components/layout/page-header'
 import { Main } from '@/components/layout/main'
 import { AppHeader } from '@/components/layout/app-header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { getCookie } from '@/lib/cookies'
+import { ArrowLeft, Receipt, StickyNote } from 'lucide-react'
 
 export const Route = createFileRoute(
   '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/note',
@@ -67,76 +67,118 @@ function AddNotePage() {
   return (
     <>
       <AppHeader fixed />
-      <Main>
-        <div className='mb-6 flex items-center justify-between'>
-          <PageHeader
-            title='Add Note'
-            description='Add or update a note for this invoice'
-          />
-        </div>
-
-        <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-          <Card>
-            <CardHeader>
-              <CardTitle>Invoice Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <p>Loading...</p>
-              ) : (
-                <div className='space-y-4'>
-                  <div>
-                    <p className='text-sm text-gray-500'>Patient Name</p>
-                    <p className='font-medium'>{invoiceData?.data?.patient_name}</p>
-                  </div>
-                  <div>
-                    <p className='text-sm text-gray-500'>Invoice ID</p>
-                    <p className='font-medium'>{invoiceData?.data?.invoice_prefix || invoiceData?.data?.id}</p>
-                  </div>
-                  <div>
-                    <p className='text-sm text-gray-500'>Phone</p>
-                    <p className='font-medium'>{invoiceData?.data?.phone || '-'}</p>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Note</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  mutation.mutate()
-                }}
+      <Main className="flex flex-1 flex-col gap-6">
+        <div className="w-full max-w-4xl mx-auto px-4 space-y-5">
+          {/* Header */}
+          <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
+            <div className="flex items-center gap-4">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => window.history.back()}
               >
-                <div className='mb-4'>
-                  <Textarea
-                    placeholder='Type your note here...'
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    rows={8}
-                    className='w-full'
-                  />
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  Add Note
+                </h1>
+                <p className="text-muted-foreground text-sm">
+                  Add or update a note for this invoice
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* Invoice Details */}
+            <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                    <Receipt className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-bold">Invoice Details</CardTitle>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Patient and invoice reference</p>
+                  </div>
                 </div>
-                <div className='flex justify-end gap-2'>
-                  <Button
-                    type='button'
-                    variant='outline'
-                    onClick={() => window.history.back()}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type='submit' disabled={mutation.isPending}>
-                    {mutation.isPending ? 'Saving...' : 'Save Note'}
-                  </Button>
+              </CardHeader>
+              <CardContent className="p-4">
+                {isLoading ? (
+                  <p className="text-sm text-muted-foreground">Loading...</p>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Patient Name</p>
+                      <p className="font-medium">{invoiceData?.data?.patient_name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Invoice ID</p>
+                      <p className="font-medium">{invoiceData?.data?.invoice_prefix || invoiceData?.data?.id}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Phone</p>
+                      <p className="font-medium">{invoiceData?.data?.phone || '-'}</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Note */}
+            <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                    <StickyNote className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-bold">Note</CardTitle>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Visible to staff reviewing this invoice</p>
+                  </div>
                 </div>
-              </form>
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent className="p-4">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    mutation.mutate()
+                  }}
+                >
+                  <div className="mb-4">
+                    <Textarea
+                      placeholder="Type your note here..."
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      rows={8}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="lg"
+                      onClick={() => window.history.back()}
+                      disabled={mutation.isPending}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      size="lg"
+                      disabled={mutation.isPending}
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white min-w-[150px]"
+                    >
+                      {mutation.isPending ? 'Saving...' : 'Save Note'}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </Main>
     </>

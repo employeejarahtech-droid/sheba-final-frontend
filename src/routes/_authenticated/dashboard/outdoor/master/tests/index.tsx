@@ -8,6 +8,7 @@ const testsSearchSchema = z.object({
     search: z.string().catch(''),
     category_id: z.coerce.number().optional().catch(undefined),
     match_table_name: z.string().optional().catch(undefined),
+    status: z.enum(['active', 'inactive']).optional().catch(undefined),
 })
 
 export const Route = createFileRoute('/_authenticated/dashboard/outdoor/master/tests/')({
@@ -24,6 +25,7 @@ function TestsPage() {
     const search = searchParams?.search || "";
     const categoryId = searchParams?.category_id || undefined;
     const matchTableName = searchParams?.match_table_name || undefined;
+    const status = searchParams?.status || undefined;
 
     const setPage = (newPage: number) => {
         navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
@@ -40,6 +42,9 @@ function TestsPage() {
     const setMatchTableName = (newMatchTableName: string | undefined) => {
         navigate({ to: '.', search: (prev: any) => ({ ...prev, match_table_name: newMatchTableName, page: 1 }) });
     };
+    const setStatus = (newStatus: string | undefined) => {
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, status: newStatus, page: 1 }) });
+    };
 
-    return <ListOfTests page={page} limit={limit} search={search} categoryId={categoryId} matchTableName={matchTableName} setPage={setPage} setLimit={setLimit} setSearch={setSearch} setCategoryId={setCategoryId} setMatchTableName={setMatchTableName} />
+    return <ListOfTests page={page} limit={limit} search={search} categoryId={categoryId} matchTableName={matchTableName} status={status} setPage={setPage} setLimit={setLimit} setSearch={setSearch} setCategoryId={setCategoryId} setMatchTableName={setMatchTableName} setStatus={setStatus} />
 }

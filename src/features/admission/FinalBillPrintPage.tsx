@@ -1,8 +1,12 @@
 import { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useCurrency } from '@/hooks/use-currency'
 import { amountToWords } from '@/lib/utils'
+import { getCookie } from '@/lib/cookies'
+
+const API_URL = import.meta.env.VITE_API_URL || ''
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -38,18 +42,23 @@ type FinalBill = {
         patient_name: string
         phone?: string
         age?: number
+        age_text?: string | null
         sex?: string
         patient_address?: string
         admission_date: string
         discharge_date?: string
-        bed_number?: string
-        cabin_number?: string
+        bedCabin?: { code: string; type: string; ward?: string } | null
         doctor_name?: string
         diagnosis?: string
+        bill_created_by_user?: { id: number; name: string } | null
+        created_by_user?: { id: number; name: string } | null
     }
     discountDoctor?: {
         doctor_name?: string
     }
+    created_by_user?: { id: number; name: string } | null
+    total_discounted_by_user?: { id: number; name: string } | null
+    discounted_by_user?: { id: number; name: string } | null
 }
 
 type Distribution = {
@@ -110,6 +119,28 @@ export function FinalBillPrintPage({
 }: FinalBillPrintPageProps) {
     const { currencySymbol, locale } = useCurrency()
     const admission = finalBill.admission || {} as FinalBill['admission']
+    const token = getCookie('accessToken')
+
+    // Fetch company settings for company name, address and logo
+    const { data: companySettings } = useQuery({
+        queryKey: ["company-settings"],
+        queryFn: async () => {
+            const res = await fetch(`${API_URL}/api/company-settings`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) throw new Error("Failed to fetch company settings");
+            const result = await res.json();
+            return result.data;
+        },
+        enabled: !!token,
+    })
+
+    const companyLogo = companySettings?.company_logo
+        ? (companySettings.company_logo.startsWith('http') || companySettings.company_logo.startsWith('data:'))
+            ? companySettings.company_logo
+            : `${API_URL}${companySettings.company_logo}`
+        : null
+    const companyName = companySettings?.company_name || 'Sheba Hospital'
 
     // Plain number formatter — no currency prefix; symbol stays in column headers only
     const fmtNum = (val: number | string | null | undefined) => {
@@ -193,60 +224,81 @@ export function FinalBillPrintPage({
                 </div>
             )}
 
-            {/* ── Title ──────────────────────────────────────────────────────── */}
-            <h1 className="text-2xl font-bold text-center underline mb-6 tracking-wide uppercase">
-                FINAL BILL INVOICE
-            </h1>
+            {/* ── Header: Logo/Company (left 50%) + Title (right 50%) ───────────── */}
+            <div className="mb-6 flex items-start justify-between gap-6">
+                <div className="w-1/2 flex items-center gap-4">
+                    {companyLogo ? (
+                        <img
+                            src={companyLogo}
+                            alt="Company Logo"
+                            className="w-24 h-24 object-contain"
+                        />
+                    ) : null}
+
+                    <div>
+                        <h1 className="text-2xl font-bold">{companyName}</h1>
+                        {companySettings?.address1 && (
+                            <p className="text-sm mt-1 leading-5">{companySettings.address1}</p>
+                        )}
+                        {companySettings?.address2 && (
+                            <p className="text-sm leading-5">{companySettings.address2}</p>
+                        )}
+                    </div>
+                </div>
+
+                <div className="w-1/2 text-right">
+                    <h2 className="text-xl font-bold tracking-widest uppercase">FINAL BILL INVOICE</h2>
+                    <p className="text-sm mt-1 leading-5">
+                        Admission Date: {admission?.admission_date ? formatDate(admission.admission_date) : '-'}
+                    </p>
+                    <p className="text-sm leading-5">
+                        Discharged Date: {admission?.discharge_date ? formatDate(admission.discharge_date) : '-'}
+                    </p>
+                </div>
+            </div>
 
             {/* ── Patient Info Table ──────────────────────────────────────────── */}
             <table className="w-full text-sm border">
                 <tbody>
                     <tr className="border">
                         <td className="border px-2 py-1 w-1/3">
-                            Bill ID: #{finalBill.id}
+                            Admission ID: #{finalBill.admission_id}
                         </td>
                         <td className="border px-2 py-1 w-1/3">
-                            Admission: {(admission as any)?.admission_prefix || `#${finalBill.admission_id}`}
+                            Generated Date: {formatDate(new Date().toISOString())}
                         </td>
                         <td className="border px-2 py-1 w-1/3">
-                            Date: {formatDate(finalBill.created_at)}
+                            Status: Final
                         </td>
                     </tr>
                     <tr className="border">
                         <td className="border px-2 py-1" colSpan={2}>
-                            Patient Name: <strong>{(admission as any)?.patient_name || 'Unknown'}</strong>
-                            {(admission as any)?.age && (admission as any)?.sex
-                                ? ` — ${(admission as any).age} yrs / ${(admission as any).sex}`
-                                : ''}
+                            Patient Name: <strong>{admission?.patient_name || 'Unknown'}</strong>
                         </td>
                         <td className="border px-2 py-1">
-                            Phone: {(admission as any)?.phone || 'N/A'}
+                            Phone: {admission?.phone || 'N/A'}
                         </td>
                     </tr>
                     <tr className="border">
                         <td className="border px-2 py-1">
-                            Admission Date: {formatDate((admission as any)?.admission_date || finalBill.created_at)}
+                            Bed/Cabin: {admission?.bedCabin ? `${admission.bedCabin.code} (${admission.bedCabin.type})` : 'N/A'}
                         </td>
                         <td className="border px-2 py-1">
-                            Discharge Date: {(admission as any)?.discharge_date
-                                ? formatDate((admission as any).discharge_date)
-                                : 'Active'}
+                            Age: {admission?.age_text
+                                ? admission.age_text.replace(/^(\d+)Y/, '$1 yrs')
+                                : admission?.age ? `${admission.age} yrs` : 'N/A'}
                         </td>
                         <td className="border px-2 py-1">
-                            {((admission as any)?.bed_number || (admission as any)?.cabin_number)
-                                ? `Room: ${(admission as any)?.bed_number || (admission as any)?.cabin_number}`
-                                : 'Room: N/A'}
+                            Sex: {admission?.sex || 'N/A'}
                         </td>
                     </tr>
-                    <tr className="border">
-                        <td className="border px-2 py-1" colSpan={2}>
-                            Attending Doctor:{' '}
-                            {(admission as any)?.doctor_name ? `Dr. ${(admission as any).doctor_name}` : 'N/A'}
-                        </td>
-                        <td className="border px-2 py-1">
-                            Diagnosis: {(admission as any)?.diagnosis || 'N/A'}
-                        </td>
-                    </tr>
+                    {admission?.diagnosis && (
+                        <tr className="border">
+                            <td className="border px-2 py-1" colSpan={3}>
+                                Diagnosis: {admission.diagnosis}
+                            </td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
 
@@ -333,11 +385,27 @@ export function FinalBillPrintPage({
 
             <p className="text-sm mt-6 italic">Total In Words: {amountToWords(totals.netAmount)}</p>
 
+            {totals.totalDiscount > 0 && (
+                <p className="text-sm mt-1">
+                    Discount Authorized By: {finalBill.discountDoctor?.doctor_name
+                        ? `Dr. ${finalBill.discountDoctor.doctor_name}`
+                        : finalBill.discounted_by_user?.name || '-'}
+                </p>
+            )}
+
 
             {/* ── Signature Row ───────────────────────────────────────────────── */}
             <div className="flex justify-between mt-32 text-sm w-full">
                 <div style={{ textAlign: 'left' }}>
                     <span className="inline-block border-t border-dashed pt-1">Prepared By:</span>
+                    <p className="font-medium">
+                        {finalBill.discounted_by_user?.name
+                            || finalBill.total_discounted_by_user?.name
+                            || finalBill.created_by_user?.name
+                            || admission?.bill_created_by_user?.name
+                            || admission?.created_by_user?.name
+                            || '-'}
+                    </p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                     <span className="inline-block border-t border-dashed pt-1">Authorized Signature:</span>

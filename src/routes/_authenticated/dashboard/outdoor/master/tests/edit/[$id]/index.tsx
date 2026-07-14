@@ -259,6 +259,7 @@ function EditTest() {
                         <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
                             <div className="flex items-center gap-4">
                                 <Button
+                                    type="button"
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => window.history.back()}

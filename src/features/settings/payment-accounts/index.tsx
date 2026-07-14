@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
 import { NestedAccountSelect } from '@/components/accounting/NestedAccountSelect'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Save, CheckCircle, ArrowDownRight, ArrowUpRight, Plus, Trash2, HelpCircle, Info } from 'lucide-react'
+import { Save, CheckCircle, ArrowDownRight, ArrowUpRight, Plus, Trash2, HelpCircle, Info, Wand2 } from 'lucide-react'
 import type { ChartOfAccount } from '@/types/accounting.types'
 
 const API_URL = import.meta.env.VITE_API_URL
@@ -190,6 +191,50 @@ const SCENARIO_META: Record<string, { color: string; description: string; isMone
     },
 }
 
+// The single fixed account (credit for money-in scenarios, debit for
+// money-out scenarios) recommended in each scenario's help text above.
+// These are standard chart-of-accounts codes seeded for every tenant
+// (see migration 056-seed-global-chart-of-accounts.js), so they're safe to
+// resolve to an account id and pre-fill automatically.
+const DEFAULT_ACCOUNT_CODE: Record<string, string> = {
+    outdoor_test_payment: '4110',
+    indoor_advance_payment: '2310',
+    indoor_final_bill_payment: '4300',
+    provider_payment_surgeon: '2210',
+    provider_payment_consultant: '2220',
+    provider_payment_anesthesiologist: '2230',
+    provider_payment_assistant: '2240',
+    provider_payment_referring_doctor: '2250',
+    provider_payment_staff: '2510',
+    outdoor_refund: '4110',
+    indoor_refund: '4300',
+    general_income: '4900',
+    general_expense: '6000',
+}
+
+const DEFAULT_NARRATION: Record<string, string> = {
+    outdoor_test_payment: 'Payment received for outdoor test/service',
+    indoor_advance_payment: 'Advance payment received for admission #{admission_id}',
+    indoor_final_bill_payment: 'Payment received against final bill for admission #{admission_id}',
+    provider_payment_surgeon: 'Payment to surgeon for admission #{admission_id}',
+    provider_payment_consultant: 'Payment to consultant/duty doctor for admission #{admission_id}',
+    provider_payment_anesthesiologist: 'Payment to anesthesiologist for admission #{admission_id}',
+    provider_payment_assistant: 'Payment to assistant for admission #{admission_id}',
+    provider_payment_referring_doctor: 'Referral commission payment to referring doctor',
+    provider_payment_staff: 'Staff salary/overtime/bonus payment',
+    outdoor_refund: 'Refund issued to outdoor patient',
+    indoor_refund: 'Refund issued to indoor patient for admission #{admission_id}',
+    general_income: 'General income received',
+    general_expense: 'General expense paid',
+}
+
+// Cash/Bank are the two payment methods common to every scenario's help
+// text and reliably present in the seeded chart of accounts.
+const DEFAULT_METHOD_CODES: Array<{ name: string; code: string }> = [
+    { name: 'Cash', code: '1110' },
+    { name: 'Bank', code: '1210' },
+]
+
 export function PaymentAccountSettings() {
     const { accessToken: token } = useAuthStore()
     const queryClient = useQueryClient()
@@ -256,6 +301,65 @@ export function PaymentAccountSettings() {
         saveMutation.mutate(mappings, {
             onSuccess: () => { setSaved('all'); setTimeout(() => setSaved(null), 2000) },
         })
+    }
+
+    // Lookup from standard chart-of-accounts code (e.g. "1110") to this
+    // tenant's actual account id, since ids are auto-increment and vary per
+    // tenant but the codes are seeded consistently.
+    const accountsByCode = useMemo(() => {
+        const map = new Map<string, number>()
+        ;(accountsData || []).forEach((acc: ChartOfAccount) => {
+            if (acc.code) map.set(acc.code, acc.id)
+        })
+        return map
+    }, [accountsData])
+
+    // Fill every scenario card with its recommended default account,
+    // narration, and Cash/Bank payment methods. Only fills in fields that
+    // resolve to a real account in this tenant's chart of accounts — it
+    // does not save, so the user can review before clicking "Save All".
+    const handleApplyDefaults = () => {
+        if (!accountsData || accountsData.length === 0) {
+            toast.error('Chart of accounts not loaded yet — try again in a moment')
+            return
+        }
+
+        let filled = 0
+        let skipped = 0
+
+        setMappings(prev => {
+            const next = { ...prev }
+
+            Object.entries(SCENARIO_META).forEach(([key, meta]) => {
+                const code = DEFAULT_ACCOUNT_CODE[key]
+                const accountId = code ? accountsByCode.get(code) : undefined
+                if (!accountId) {
+                    skipped++
+                    return
+                }
+
+                const methods = DEFAULT_METHOD_CODES
+                    .map(m => ({ name: m.name, account_id: accountsByCode.get(m.code) ?? null }))
+                    .filter(m => m.account_id !== null)
+
+                next[key] = {
+                    ...next[key],
+                    narration_template: next[key]?.narration_template || DEFAULT_NARRATION[key],
+                    ...(meta.isMoneyIn ? { credit_account_id: accountId } : { debit_account_id: accountId }),
+                    methods: methods.length > 0 ? methods : next[key]?.methods,
+                }
+                filled++
+            })
+
+            return next
+        })
+
+        if (filled > 0) {
+            toast.success(`Applied default settings to ${filled} card${filled === 1 ? '' : 's'}. Review and click "Save All" to persist.`)
+        }
+        if (skipped > 0) {
+            toast.warning(`${skipped} scenario${skipped === 1 ? '' : 's'} skipped — recommended account code not found in chart of accounts`)
+        }
     }
 
     const updateMapping = (key: string, field: string, value: any) => {
@@ -351,18 +455,28 @@ export function PaymentAccountSettings() {
                         Configure double-entry accounts for each payment scenario. Add custom payment methods with their own account mapping.
                     </p>
                 </div>
-                <button
-                    onClick={handleSaveAll}
-                    disabled={saveMutation.isPending}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow transition-colors disabled:opacity-50"
-                >
-                    {saveMutation.isPending ? (
-                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                        <Save className="w-4 h-4" />
-                    )}
-                    Save All
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={handleApplyDefaults}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium shadow-sm transition-colors"
+                        title="Fill every card with its recommended default account, narration, and Cash/Bank methods"
+                    >
+                        <Wand2 className="w-4 h-4" />
+                        Add Default Settings
+                    </button>
+                    <button
+                        onClick={handleSaveAll}
+                        disabled={saveMutation.isPending}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow transition-colors disabled:opacity-50"
+                    >
+                        {saveMutation.isPending ? (
+                            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                            <Save className="w-4 h-4" />
+                        )}
+                        Save All
+                    </button>
+                </div>
             </div>
 
             <div className="grid gap-5">

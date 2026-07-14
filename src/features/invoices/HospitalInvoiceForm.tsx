@@ -180,7 +180,8 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
     queryFn: async () => {
       const categoryParam = categoryFilter !== "all" ? `&category_id=${categoryFilter}` : "";
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/tests?page=${page}&limit=${limit}&search=${encodeURIComponent(debouncedSearch)}${categoryParam}`,
+        // status=active — inactive tests must never be selectable when creating an invoice.
+        `${import.meta.env.VITE_API_URL}/api/tests?page=${page}&limit=${limit}&search=${encodeURIComponent(debouncedSearch)}${categoryParam}&status=active`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

@@ -56,6 +56,7 @@ function PrintXRayReport() {
 
   const patientInfo = xrayData?.invoice_information
   const testResult = xrayData?.test_result
+  const imageUrls: { key: string | null; url: string }[] = xrayData?.image_urls || []
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
@@ -180,6 +181,20 @@ function PrintXRayReport() {
               </tr>
             </tbody>
           </table>
+
+          {/* X-Ray Images */}
+          {imageUrls.length > 0 && (
+            <div className="mt-6 grid grid-cols-2 gap-4 print:break-inside-avoid">
+              {imageUrls.map((img) => (
+                <img
+                  key={img.url}
+                  src={img.url}
+                  alt="X-ray scan"
+                  className="w-full max-h-[420px] object-contain border rounded"
+                />
+              ))}
+            </div>
+          )}
 
           {/* Footer Signatures */}
           <ReportFooter />

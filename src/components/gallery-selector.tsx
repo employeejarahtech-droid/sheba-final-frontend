@@ -19,6 +19,7 @@ import {
     ChevronRight,
     Link2,
     X,
+    Folder,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getCookie } from '@/lib/cookies';
@@ -32,6 +33,7 @@ interface GalleryImage {
     size: number;
     mimetype: string;
     created_at: string;
+    folder: string;
 }
 
 interface GallerySelectorProps {
@@ -42,6 +44,7 @@ interface GallerySelectorProps {
     accept?: string;
     maxSize?: number; // in bytes
     aspectRatio?: 'square' | 'landscape' | 'portrait' | 'any';
+    defaultFolder?: string; // pre-selects this folder (Library filter + Upload destination) when the modal opens
 }
 
 export function GallerySelector({
@@ -51,7 +54,8 @@ export function GallerySelector({
     triggerClassName = "",
     accept = "image/*",
     maxSize = 5 * 1024 * 1024, // 5MB default
-    aspectRatio = 'any'
+    aspectRatio = 'any',
+    defaultFolder
 }: GallerySelectorProps) {
     const token = getCookie('accessToken');
     const [open, setOpen] = useState(false);
@@ -63,14 +67,23 @@ export function GallerySelector({
     const [searchQuery, setSearchQuery] = useState('');
     const [urlValue, setUrlValue] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const imagesPerPage = 9;
+    const [folders, setFolders] = useState<string[]>(['General']);
+    const [selectedFolder, setSelectedFolder] = useState<string | null>(null); // null = All, in the Library tab
+    const [uploadFolder, setUploadFolder] = useState('General'); // destination folder for the Upload tab
+    const imagesPerPage = 12;
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Fetch gallery images when dialog opens
+    // Fetch gallery images + folders when dialog opens
     useEffect(() => {
         if (open) {
             fetchImages();
+            fetchFolders();
+            if (defaultFolder) {
+                setSelectedFolder(defaultFolder);
+                setUploadFolder(defaultFolder);
+            }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
     // Helper to ensure URLs are full API URLs
@@ -92,13 +105,21 @@ export function GallerySelector({
             setSearchQuery('');
             setUrlValue('');
             setCurrentPage(1);
+            setSelectedFolder(null);
+            setUploadFolder('General');
         }
     }, [open]);
 
-    // Reset to first page whenever the search filter changes
+    // Reset to first page whenever the search or folder filter changes
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchQuery]);
+    }, [searchQuery, selectedFolder]);
+
+    // Filtering the Library tab to a folder sets that as the Upload tab's
+    // destination too, so switching tabs stays in the same folder context.
+    useEffect(() => {
+        if (selectedFolder) setUploadFolder(selectedFolder);
+    }, [selectedFolder]);
 
     const fetchImages = async () => {
         setIsLoading(true);
@@ -126,6 +147,20 @@ export function GallerySelector({
         }
     };
 
+    const fetchFolders = async () => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/gallery/folders`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+                const json = await res.json();
+                setFolders(json.data && json.data.length > 0 ? json.data : ['General']);
+            }
+        } catch (error) {
+            console.error('Failed to fetch gallery folders:', error);
+        }
+    };
+
     const uploadFile = async (file: File) => {
         if (file.size > maxSize) {
             toast.error(`File size must be less than ${Math.round(maxSize / 1024 / 1024)}MB`);
@@ -142,6 +177,7 @@ export function GallerySelector({
         try {
             const formData = new FormData();
             formData.append('image', file);
+            formData.append('folder', uploadFolder || 'General');
 
             const res = await fetch(`${import.meta.env.VITE_API_URL}/api/gallery`, {
                 method: 'POST',
@@ -157,6 +193,7 @@ export function GallerySelector({
                 };
                 setImages(prev => [uploadedImage, ...prev]);
                 setSelectedImage(uploadedImage);
+                fetchFolders();
                 toast.success('Image uploaded successfully!');
             } else {
                 throw new Error('Failed to upload image');
@@ -227,8 +264,9 @@ export function GallerySelector({
     };
 
     const filteredImages = images.filter(img =>
-        (img.original_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-        (img.filename?.toLowerCase() || '').includes(searchQuery.toLowerCase())
+        (selectedFolder ? img.folder === selectedFolder : true) &&
+        ((img.original_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+        (img.filename?.toLowerCase() || '').includes(searchQuery.toLowerCase()))
     );
 
     // Pagination
@@ -260,7 +298,7 @@ export function GallerySelector({
                     {triggerLabel}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-[900px] h-[720px] gap-0 p-0 overflow-hidden flex flex-col shadow-2xl rounded-2xl">
+            <DialogContent className="w-[95vw] max-w-[1200px] sm:max-w-[1200px] h-[85vh] max-h-[900px] gap-0 p-0 overflow-hidden flex flex-col shadow-2xl rounded-2xl">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b px-6 py-4 sm:px-8 sm:py-5">
                     <DialogTitle className="text-center text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
@@ -312,6 +350,38 @@ export function GallerySelector({
                                     </button>
                                 )}
                             </div>
+
+                            {/* Folder filter chips */}
+                            <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1">
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedFolder(null)}
+                                    className={cn(
+                                        "shrink-0 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors",
+                                        selectedFolder === null
+                                            ? "bg-blue-600 border-blue-600 text-white"
+                                            : "border-gray-200 dark:border-gray-800 text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-900"
+                                    )}
+                                >
+                                    All
+                                </button>
+                                {folders.map((folder) => (
+                                    <button
+                                        type="button"
+                                        key={folder}
+                                        onClick={() => setSelectedFolder(folder)}
+                                        className={cn(
+                                            "shrink-0 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors",
+                                            selectedFolder === folder
+                                                ? "bg-blue-600 border-blue-600 text-white"
+                                                : "border-gray-200 dark:border-gray-800 text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-900"
+                                        )}
+                                    >
+                                        <Folder className="h-3 w-3" />
+                                        {folder}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Images Grid */}
@@ -332,12 +402,14 @@ export function GallerySelector({
                                     <p className="max-w-sm text-sm text-muted-foreground">
                                         {searchQuery
                                             ? `No results match "${searchQuery}". Try a different search term.`
-                                            : 'Your image library is empty. Upload an image to get started.'}
+                                            : selectedFolder
+                                                ? `No images in "${selectedFolder}" yet.`
+                                                : 'Your image library is empty. Upload an image to get started.'}
                                     </p>
                                 </div>
                             ) : (
                                 <div className="flex justify-center py-4 sm:py-6 px-2">
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 pb-4 w-full max-w-full">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-4 w-full max-w-full">
                                         {currentImages.map((image) => {
                                             const isSelected = selectedImage?.id === image.id;
                                             return (
@@ -401,44 +473,51 @@ export function GallerySelector({
                             )}
                         </ScrollArea>
 
-                        {/* Pagination */}
-                        {totalPages > 1 && (
-                            <div className="flex items-center justify-center gap-2 border-t px-4 sm:px-6 py-3 bg-white dark:bg-gray-950">
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8 sm:h-9 sm:w-9"
-                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                    disabled={currentPage === 1}
-                                    aria-label="Previous page"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                </Button>
-                                <div className="flex items-center gap-1">
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                        <Button
-                                            key={page}
-                                            variant={currentPage === page ? "default" : "outline"}
-                                            size="icon"
-                                            className={`h-8 w-8 sm:h-9 sm:w-9 ${currentPage === page ? 'bg-blue-600 text-white' : ''}`}
-                                            onClick={() => setCurrentPage(page)}
-                                            aria-label={`Go to page ${page}`}
-                                            aria-current={currentPage === page ? 'page' : undefined}
-                                        >
-                                            {page}
-                                        </Button>
-                                    ))}
+                        {/* Pagination footer — always visible once there's at least one image */}
+                        {filteredImages.length > 0 && (
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3 border-t px-4 sm:px-6 py-3 bg-white dark:bg-gray-950">
+                                <p className="text-xs sm:text-sm text-muted-foreground">
+                                    Page {currentPage} of {totalPages || 1} · {imagesPerPage} per page
+                                </p>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-8 w-8 sm:h-9 sm:w-9"
+                                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                        disabled={currentPage === 1}
+                                        aria-label="Previous page"
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    {totalPages > 1 && (
+                                        <div className="flex items-center gap-1">
+                                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                                <Button
+                                                    key={page}
+                                                    variant={currentPage === page ? "default" : "outline"}
+                                                    size="icon"
+                                                    className={`h-8 w-8 sm:h-9 sm:w-9 ${currentPage === page ? 'bg-blue-600 text-white' : ''}`}
+                                                    onClick={() => setCurrentPage(page)}
+                                                    aria-label={`Go to page ${page}`}
+                                                    aria-current={currentPage === page ? 'page' : undefined}
+                                                >
+                                                    {page}
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-8 w-8 sm:h-9 sm:w-9"
+                                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                        disabled={currentPage === totalPages || totalPages === 0}
+                                        aria-label="Next page"
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
                                 </div>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8 sm:h-9 sm:w-9"
-                                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                    disabled={currentPage === totalPages}
-                                    aria-label="Next page"
-                                >
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
                             </div>
                         )}
 
@@ -491,6 +570,30 @@ export function GallerySelector({
                     {/* Upload Tab */}
                     <TabsContent value="upload" className="m-0 flex-1 overflow-auto p-8 bg-white dark:bg-gray-950">
                         <div className="mx-auto max-w-2xl space-y-8">
+                            {/* Destination folder */}
+                            <div>
+                                <Label htmlFor="gallery-upload-folder" className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
+                                    <Folder className="h-4 w-4 text-blue-600" />
+                                    Upload to folder
+                                </Label>
+                                <Input
+                                    id="gallery-upload-folder"
+                                    list="gallery-folder-options"
+                                    value={uploadFolder}
+                                    onChange={(e) => setUploadFolder(e.target.value)}
+                                    placeholder="General"
+                                    className="h-11 border-gray-300 dark:border-gray-700"
+                                />
+                                <datalist id="gallery-folder-options">
+                                    {folders.map((folder) => (
+                                        <option key={folder} value={folder} />
+                                    ))}
+                                </datalist>
+                                <p className="mt-1.5 text-xs text-muted-foreground">
+                                    Pick an existing folder or type a new name — it's created the moment you upload into it.
+                                </p>
+                            </div>
+
                             {/* Dropzone */}
                             <div
                                 onClick={() => !isUploading && fileInputRef.current?.click()}

@@ -6,8 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCookie } from '@/lib/cookies';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Printer, User, FileText, PenLine } from 'lucide-react';
+import { ArrowLeft, Printer, User, FileText, PenLine, ImageIcon, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { GallerySelector } from '@/components/gallery-selector';
+
+type XrayImage = { key: string | null; url: string };
 
 export const Route = createFileRoute(
   '/_authenticated/dashboard/x-ray/all/edit/builder/$id',
@@ -192,6 +195,49 @@ function XRayBuilder() {
     }
   };
 
+  // Attaches an already-hosted URL (picked/uploaded via the shared Image
+  // Gallery modal) to this X-ray record — no re-upload, the Gallery module
+  // already stored the file in Spaces.
+  const attachImageMutation = useMutation({
+    mutationFn: async (url: string) => {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/xray-all/${id}/images`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      });
+      if (!res.ok) throw new Error('Failed to attach image');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["xray-record", id] });
+      toast.success('Image added');
+    },
+    onError: () => toast.error('Failed to add image'),
+  });
+
+  const deleteImageMutation = useMutation({
+    mutationFn: async (image: XrayImage) => {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/xray-all/${id}/images`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(image.key ? { key: image.key } : { url: image.url }),
+      });
+      if (!res.ok) throw new Error('Failed to delete image');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["xray-record", id] });
+      toast.success('Image removed');
+    },
+    onError: () => toast.error('Failed to remove image'),
+  });
+
   const handleBack = () => {
     router.history.back();
   };
@@ -329,6 +375,57 @@ function XRayBuilder() {
                   </div>
                 )}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* X-Ray Images Card */}
+          <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+            <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border-b py-1.5 px-4 gap-0">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-500 rounded-lg shadow-lg">
+                    <ImageIcon className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-bold">X-Ray Images</CardTitle>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Upload the scanned X-ray image(s) for this report</p>
+                  </div>
+                </div>
+                <GallerySelector
+                  onImageSelect={(url) => attachImageMutation.mutate(url)}
+                  triggerLabel={attachImageMutation.isPending ? 'Adding...' : 'Upload Image'}
+                  defaultFolder="X-Ray"
+                  aspectRatio="square"
+                />
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              {(xrayData?.image_urls || []).length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  No X-ray images uploaded yet.
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {(xrayData?.image_urls || []).map((img: XrayImage) => (
+                    <div key={img.url} className="relative aspect-square rounded-lg overflow-hidden border group">
+                      <img
+                        src={img.url}
+                        alt="X-ray scan"
+                        className="w-full h-full object-cover cursor-pointer"
+                        onClick={() => window.open(img.url, '_blank')}
+                      />
+                      <button
+                        onClick={() => deleteImageMutation.mutate(img)}
+                        disabled={deleteImageMutation.isPending}
+                        className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-white opacity-0 transition-opacity duration-300 hover:bg-red-600 group-hover:opacity-100 shadow-lg"
+                        title="Remove image"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 

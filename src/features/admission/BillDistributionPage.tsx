@@ -2608,7 +2608,7 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                                                                     value={currentDue <= 0.005 ? '0.00' : addAmt}
                                                                     onChange={(e) => {
                                                                         if (currentDue <= 0.005) return
-                                                                        const val = e.target.value === '' ? '' : Math.max(0, Number(e.target.value) || 0)
+                                                                        const val = e.target.value === '' ? '' : Math.min(currentDue, Math.max(0, Number(e.target.value) || 0))
                                                                         setCustomAllocations(prev => ({
                                                                             ...prev,
                                                                             providers: {
@@ -2619,6 +2619,7 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                                                                     }}
                                                                     placeholder="—"
                                                                     step="0.01"
+                                                                    max={currentDue}
                                                                     title={currentDue <= 0.005 ? "Already fully paid — no allocation needed" : undefined}
                                                                 />
                                                             </div>
@@ -2676,7 +2677,7 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                                                                     value={currentDue <= 0.005 ? '0.00' : addAmt}
                                                                     onChange={(e) => {
                                                                         if (currentDue <= 0.005) return
-                                                                        const val = e.target.value === '' ? '' : Math.max(0, Number(e.target.value) || 0)
+                                                                        const val = e.target.value === '' ? '' : Math.min(currentDue, Math.max(0, Number(e.target.value) || 0))
                                                                         setCustomAllocations(prev => ({
                                                                             ...prev,
                                                                             retention: val
@@ -2684,6 +2685,7 @@ export function BillDistributionPage({ admissionId }: BillDistributionPageProps)
                                                                     }}
                                                                     placeholder="—"
                                                                     step="0.01"
+                                                                    max={currentDue}
                                                                     title={currentDue <= 0.005 ? "Already fully paid — no allocation needed" : undefined}
                                                                 />
                                                             </div>

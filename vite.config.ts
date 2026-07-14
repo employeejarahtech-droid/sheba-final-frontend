@@ -27,8 +27,10 @@ export default defineConfig({
   },
   server: {
     host: true,
-    allowedHosts: ['.lvh.me', '.hms.me', 'localhost'],
-    // Proxy disabled - using direct API URL (api.lvh.me:5001)
+    port: 5174,
+    strictPort: true,
+    allowedHosts: ['.lvh.me', '.hms.me', '.hmsap.test', 'localhost'],
+    // Proxy disabled - using direct API URL (api.hmsap.test)
     fs: {
       strict: false,
     },

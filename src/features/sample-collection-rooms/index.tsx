@@ -345,8 +345,12 @@ export default function SampleCollectionRooms({ page, limit, search, setPage, se
             orderable: true,
             responsivePriority: 2,
             render: (_data: any, _type: string, row: SampleCollectionRoomItem) => {
-                const name = row.created_by_name || row.created_by || '-';
-                return `<span class="text-sm text-muted-foreground">${name}</span>`;
+                // Match the Due Collection "Created By" style: name emphasized, fallback muted.
+                if (row.created_by_name) {
+                    return `<span class="text-sm font-medium">${row.created_by_name}</span>`;
+                }
+                const value = row.created_by || '-';
+                return `<span class="text-sm text-muted-foreground">${value}</span>`;
             },
             defaultContent: "-",
         },

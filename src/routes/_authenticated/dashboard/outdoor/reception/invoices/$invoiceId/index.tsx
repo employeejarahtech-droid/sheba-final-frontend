@@ -1,20 +1,27 @@
 
-import { useState, type CSSProperties } from 'react'
+import { useState, useEffect, type CSSProperties } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
 import { amountToWords } from '@/lib/utils'
 import { getCookie } from '@/lib/cookies'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Separator } from '@/components/ui/separator'
 import { Settings2 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
+import { toast } from 'sonner'
 import { useDateFormat } from '@/hooks/use-date-format'
 import { useAuthStore } from '@/stores/auth-store'
+
+type InvoicePadding = { top: number; right: number; bottom: number; left: number }
+const DEFAULT_PADDING: InvoicePadding = { top: 48, right: 48, bottom: 48, left: 48 }
 
 // Paper sizes offered for printing this invoice. `cssSize` feeds the @page
 // size (browsers use this to pick/suggest the matching physical paper), and
@@ -54,6 +61,9 @@ function InvoiceDetails() {
     const { cssSize, margin } = PAPER_SIZES[paperSize]
     const [fontSize, setFontSize] = useState<keyof typeof FONT_SIZES>('base')
     const [showPayments, setShowPayments] = useState(false)
+    const [padding, setPadding] = useState<InvoicePadding>(DEFAULT_PADDING)
+    const [settingsOpen, setSettingsOpen] = useState(false)
+    const queryClient = useQueryClient()
 
     // Column visibility state
     const [visibleColumns, setVisibleColumns] = useState({
@@ -98,7 +108,7 @@ function InvoiceDetails() {
         if (!dateStr) return '-';
         const date = new Date(dateStr);
         if (Number.isNaN(date.getTime())) return '-';
-        return fmtDate(date);
+        return fmtDateTime(date);
     };
 
     // Fetch existing test data
@@ -131,6 +141,58 @@ function InvoiceDetails() {
         },
         enabled: !!token,
     });
+
+    // Seed every print-setting control from the saved company-wide default once it loads.
+    useEffect(() => {
+        if (!companySettings) return
+        setPadding({
+            top: companySettings.invoice_padding_top ?? DEFAULT_PADDING.top,
+            right: companySettings.invoice_padding_right ?? DEFAULT_PADDING.right,
+            bottom: companySettings.invoice_padding_bottom ?? DEFAULT_PADDING.bottom,
+            left: companySettings.invoice_padding_left ?? DEFAULT_PADDING.left,
+        })
+        setShowPayments(Boolean(companySettings.invoice_show_payments))
+        if (companySettings.invoice_visible_columns) {
+            setVisibleColumns((prev) => ({ ...prev, ...companySettings.invoice_visible_columns }))
+        }
+        if (companySettings.invoice_font_size && companySettings.invoice_font_size in FONT_SIZES) {
+            setFontSize(companySettings.invoice_font_size)
+        }
+        if (companySettings.invoice_paper_size && companySettings.invoice_paper_size in PAPER_SIZES) {
+            setPaperSize(companySettings.invoice_paper_size)
+        }
+    }, [companySettings])
+
+    // Persist every print setting as the company-wide default — every invoice
+    // print (this one and every other) picks it up via /api/company-settings.
+    const saveDefaultsMutation = useMutation({
+        mutationFn: async () => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/company-settings`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    invoice_padding_top: padding.top,
+                    invoice_padding_right: padding.right,
+                    invoice_padding_bottom: padding.bottom,
+                    invoice_padding_left: padding.left,
+                    invoice_show_payments: showPayments,
+                    invoice_visible_columns: visibleColumns,
+                    invoice_font_size: fontSize,
+                    invoice_paper_size: paperSize,
+                }),
+            })
+            if (!res.ok) throw new Error('Failed to save print settings')
+            return res.json()
+        },
+        onSuccess: () => {
+            toast.success('Default print settings saved — applies to every invoice print from now on')
+            queryClient.invalidateQueries({ queryKey: ['company-settings'] })
+        },
+        onError: () => toast.error('Failed to save default print settings'),
+    })
 
     // Get company logo URL
     const companyLogo = companySettings?.company_logo
@@ -192,7 +254,10 @@ function InvoiceDetails() {
                         max-width: 100% !important;
                         width: 100% !important;
                         margin: 0 !important;
-                        padding: 0 !important;
+                        padding-top: ${padding.top}px !important;
+                        padding-right: ${padding.right}px !important;
+                        padding-bottom: ${padding.bottom}px !important;
+                        padding-left: ${padding.left}px !important;
                         box-shadow: none !important;
                     }
                     .invoice-print-area table {
@@ -242,7 +307,7 @@ function InvoiceDetails() {
             {/* ===== Top Heading ===== */}
             <AppHeader fixed className="print:hidden" />
             <Main>
-                {/* Back Button + Paper Size */}
+                {/* Back Button + Print Settings */}
                 <div className="max-w-3xl mx-auto w-full px-8 pt-6 print:hidden flex items-center justify-between mb-4">
                     <Button
                         variant="outline"
@@ -252,89 +317,193 @@ function InvoiceDetails() {
                         Back
                     </Button>
 
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                            <Checkbox
-                                id="show-payments"
-                                checked={showPayments}
-                                onCheckedChange={(checked) => setShowPayments(checked === true)}
-                            />
-                            <label htmlFor="show-payments" className="text-sm font-medium cursor-pointer select-none">
-                                Show Payments
-                            </label>
-                        </div>
-
-                        {/* Column Visibility Dropdown */}
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-8 gap-2 print:hidden">
-                                    <Settings2 className="h-4 w-4" />
-                                    <span>Columns</span>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuLabel>Visible Columns</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuCheckboxItem
-                                    checked={visibleColumns.sl}
-                                    onCheckedChange={(checked) => setVisibleColumns(prev => ({ ...prev, sl: checked === true }))}
-                                >
-                                    SL
-                                </DropdownMenuCheckboxItem>
-                                <DropdownMenuCheckboxItem
-                                    checked={visibleColumns.testName}
-                                    onCheckedChange={(checked) => setVisibleColumns(prev => ({ ...prev, testName: checked === true }))}
-                                >
-                                    Test Name
-                                </DropdownMenuCheckboxItem>
-                                <DropdownMenuCheckboxItem
-                                    checked={visibleColumns.roomNo}
-                                    onCheckedChange={(checked) => setVisibleColumns(prev => ({ ...prev, roomNo: checked === true }))}
-                                >
-                                    Room No
-                                </DropdownMenuCheckboxItem>
-                                <DropdownMenuCheckboxItem
-                                    checked={visibleColumns.deliveryDate}
-                                    onCheckedChange={(checked) => setVisibleColumns(prev => ({ ...prev, deliveryDate: checked === true }))}
-                                >
-                                    Del. Date & Time
-                                </DropdownMenuCheckboxItem>
-                                <DropdownMenuCheckboxItem
-                                    checked={visibleColumns.charge}
-                                    onCheckedChange={(checked) => setVisibleColumns(prev => ({ ...prev, charge: checked === true }))}
-                                >
-                                    Charge
-                                </DropdownMenuCheckboxItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <Select value={fontSize} onValueChange={(v) => setFontSize(v as keyof typeof FONT_SIZES)}>
-                            <SelectTrigger className="w-[160px]">
-                                <SelectValue placeholder="Font size" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {Object.entries(FONT_SIZES).map(([key, { label }]) => (
-                                    <SelectItem key={key} value={key}>{label}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-
-                        <Select value={paperSize} onValueChange={(v) => setPaperSize(v as keyof typeof PAPER_SIZES)}>
-                            <SelectTrigger className="w-[160px]">
-                                <SelectValue placeholder="Paper size" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {Object.entries(PAPER_SIZES).map(([key, { label }]) => (
-                                    <SelectItem key={key} value={key}>{label}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    <Button variant="outline" size="sm" className="h-8 gap-2" onClick={() => setSettingsOpen(true)}>
+                        <Settings2 className="h-4 w-4" />
+                        <span>Print Settings</span>
+                    </Button>
                 </div>
 
+                <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
+                    <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
+                        <SheetHeader className="border-b px-4 py-3 gap-0">
+                            <SheetTitle className="flex items-center gap-3 pr-8">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Settings2 className="w-4 h-4 text-primary" />
+                                </div>
+                                <div>
+                                    <div className="text-base font-semibold text-left">Print Settings</div>
+                                    <p className="text-xs text-muted-foreground font-normal text-left">Adjust how this invoice looks and prints</p>
+                                </div>
+                            </SheetTitle>
+                        </SheetHeader>
+
+                        <div className="flex-1 overflow-y-auto p-4 space-y-5">
+                            <div className="flex items-center gap-2">
+                                <Checkbox
+                                    id="show-payments"
+                                    checked={showPayments}
+                                    onCheckedChange={(checked) => setShowPayments(checked === true)}
+                                />
+                                <label htmlFor="show-payments" className="text-sm font-medium cursor-pointer select-none">
+                                    Show Payments
+                                </label>
+                            </div>
+
+                            <Separator />
+
+                            <div className="space-y-2">
+                                <Label className="text-sm font-medium">Visible Columns</Label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <Checkbox
+                                            id="col-sl"
+                                            checked={visibleColumns.sl}
+                                            onCheckedChange={(checked) => setVisibleColumns(prev => ({ ...prev, sl: checked === true }))}
+                                        />
+                                        <label htmlFor="col-sl" className="text-sm cursor-pointer select-none">SL</label>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Checkbox
+                                            id="col-testName"
+                                            checked={visibleColumns.testName}
+                                            onCheckedChange={(checked) => setVisibleColumns(prev => ({ ...prev, testName: checked === true }))}
+                                        />
+                                        <label htmlFor="col-testName" className="text-sm cursor-pointer select-none">Test Name</label>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Checkbox
+                                            id="col-roomNo"
+                                            checked={visibleColumns.roomNo}
+                                            onCheckedChange={(checked) => setVisibleColumns(prev => ({ ...prev, roomNo: checked === true }))}
+                                        />
+                                        <label htmlFor="col-roomNo" className="text-sm cursor-pointer select-none">Room No</label>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Checkbox
+                                            id="col-deliveryDate"
+                                            checked={visibleColumns.deliveryDate}
+                                            onCheckedChange={(checked) => setVisibleColumns(prev => ({ ...prev, deliveryDate: checked === true }))}
+                                        />
+                                        <label htmlFor="col-deliveryDate" className="text-sm cursor-pointer select-none">Del. Date & Time</label>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Checkbox
+                                            id="col-charge"
+                                            checked={visibleColumns.charge}
+                                            onCheckedChange={(checked) => setVisibleColumns(prev => ({ ...prev, charge: checked === true }))}
+                                        />
+                                        <label htmlFor="col-charge" className="text-sm cursor-pointer select-none">Charge</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <Separator />
+
+                            <div className="space-y-2">
+                                <Label className="text-sm font-medium">Font Size</Label>
+                                <Select value={fontSize} onValueChange={(v) => setFontSize(v as keyof typeof FONT_SIZES)}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Font size" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.entries(FONT_SIZES).map(([key, { label }]) => (
+                                            <SelectItem key={key} value={key}>{label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-sm font-medium">Paper Size</Label>
+                                <Select value={paperSize} onValueChange={(v) => setPaperSize(v as keyof typeof PAPER_SIZES)}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Paper size" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.entries(PAPER_SIZES).map(([key, { label }]) => (
+                                            <SelectItem key={key} value={key}>{label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <Separator />
+
+                            <div className="space-y-2">
+                                <Label className="text-sm font-medium">Content Padding (px)</Label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-1">
+                                        <Label htmlFor="padding-top" className="text-xs text-muted-foreground">Top</Label>
+                                        <Input
+                                            id="padding-top"
+                                            type="number"
+                                            min={0}
+                                            value={padding.top}
+                                            onChange={(e) => setPadding((p) => ({ ...p, top: Number(e.target.value) || 0 }))}
+                                            className="h-8"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label htmlFor="padding-right" className="text-xs text-muted-foreground">Right</Label>
+                                        <Input
+                                            id="padding-right"
+                                            type="number"
+                                            min={0}
+                                            value={padding.right}
+                                            onChange={(e) => setPadding((p) => ({ ...p, right: Number(e.target.value) || 0 }))}
+                                            className="h-8"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label htmlFor="padding-bottom" className="text-xs text-muted-foreground">Bottom</Label>
+                                        <Input
+                                            id="padding-bottom"
+                                            type="number"
+                                            min={0}
+                                            value={padding.bottom}
+                                            onChange={(e) => setPadding((p) => ({ ...p, bottom: Number(e.target.value) || 0 }))}
+                                            className="h-8"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label htmlFor="padding-left" className="text-xs text-muted-foreground">Left</Label>
+                                        <Input
+                                            id="padding-left"
+                                            type="number"
+                                            min={0}
+                                            value={padding.left}
+                                            onChange={(e) => setPadding((p) => ({ ...p, left: Number(e.target.value) || 0 }))}
+                                            className="h-8"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="border-t p-4 space-y-2">
+                            <Button
+                                className="w-full"
+                                onClick={() => saveDefaultsMutation.mutate()}
+                                disabled={saveDefaultsMutation.isPending}
+                            >
+                                {saveDefaultsMutation.isPending ? 'Saving...' : 'Save as Default'}
+                            </Button>
+                            <p className="text-xs text-muted-foreground text-center">
+                                Saved defaults apply to every invoice print, not just this one.
+                            </p>
+                        </div>
+                    </SheetContent>
+                </Sheet>
+
                 <div
-                    className="invoice-print-area max-w-3xl mx-auto w-full p-8 bg-white mt-10 print:mt-0 shadow-sm print:shadow-none border border-slate-100 print:border-none rounded-lg print:rounded-none"
-                    style={{ zoom: FONT_SIZES[fontSize].zoom } as CSSProperties}
+                    className="invoice-print-area max-w-3xl mx-auto w-full bg-white mt-10 print:mt-0 shadow-sm print:shadow-none border border-slate-100 print:border-none rounded-lg print:rounded-none"
+                    style={{
+                        zoom: FONT_SIZES[fontSize].zoom,
+                        paddingTop: padding.top,
+                        paddingRight: padding.right,
+                        paddingBottom: padding.bottom,
+                        paddingLeft: padding.left,
+                    } as CSSProperties}
                 >
 
                     {/* Header */}
@@ -374,26 +543,26 @@ function InvoiceDetails() {
                     <table className="w-full text-sm border mt-1" data-table-ignore="true">
                         <tbody>
                             <tr className="border">
-                                <td className="border px-2 py-1 w-1/2">
+                                <td className="border px-2 py-1 w-3/5">
                                     Receipt ID : {invoice?.invoice_prefix || invoice?.id}
                                 </td>
-                                <td className="border px-2 py-1 w-1/2">
+                                <td className="border px-2 py-1 w-2/5">
                                     Age : {invoice?.age_text || (invoice?.age ? `${invoice.age}Y` : '-')}
                                 </td>
                             </tr>
                             <tr className="border">
-                                <td className="border px-2 py-1 w-1/2">
+                                <td className="border px-2 py-1 w-3/5">
                                     Patient's Name : {invoice?.patient_name}
                                 </td>
-                                <td className="border px-2 py-1 w-1/2">
+                                <td className="border px-2 py-1 w-2/5">
                                     Sex : {invoice?.sex ? invoice.sex.charAt(0).toUpperCase() + invoice.sex.slice(1).toLowerCase() : '-'}
                                 </td>
                             </tr>
                             <tr className="border">
-                                <td className="border px-2 py-1 w-1/2">
+                                <td className="border px-2 py-1 w-3/5">
                                     Ref. By : {invoice?.doctor?.doctor_name || '-'}{invoice?.doctor?.qualification ? ` (${invoice.doctor.qualification})` : ''}
                                 </td>
-                                <td className="border px-2 py-1 w-1/2">
+                                <td className="border px-2 py-1 w-2/5">
                                     Contact No : {invoice?.phone || '-'}
                                 </td>
                             </tr>
@@ -493,7 +662,7 @@ function InvoiceDetails() {
                             </div>
 
                             <div className="border-t border-slate-250 pt-1.5 flex justify-between text-slate-700 font-medium">
-                                <span>Discounted Amount</span>
+                                <span>Final Amount</span>
                                 <span className="font-bold text-slate-800">{Number(invoice?.net_amount || 0).toFixed(2)}</span>
                             </div>
 
@@ -512,7 +681,7 @@ function InvoiceDetails() {
                     </div>
 
                     {/* Paid Stamp */}
-                    <p className="text-sm mt-1 italic">In words: &nbsp; <span className="font-semibold capitalize text-slate-800">{amountToWords(Number(totalPayments || 0))}</span></p>
+                    <p className="text-sm mt-1 italic">In words: &nbsp; <span className="font-semibold capitalize text-slate-800">{amountToWords(Number(invoice?.net_amount || 0))}</span></p>
 
                     {/* ── Signature Row ───────────────────────────────────────────────── */}
                     <div className="flex justify-between mt-12 text-sm w-full">

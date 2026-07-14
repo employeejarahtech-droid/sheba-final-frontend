@@ -6,26 +6,24 @@ import { AppHeader } from '@/components/layout/app-header'
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from '@/components/DataTable'
-import { useMemo, useEffect } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { FlaskConical, CheckCircle, FolderTree, DollarSign } from 'lucide-react'
+import { FlaskConical, CheckCircle, FolderTree, DollarSign, ChevronDown, Check } from 'lucide-react'
 import { useCurrency } from '@/hooks/use-currency'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { cn } from '@/lib/utils'
 
 type TestItem = {
     id: number
     name: string
     category_id: number
     match_table_name: number
+    status?: 'active' | 'inactive'
     price: number
     sample_collection_room_id?: number;
     sample_normal_range?: string;
@@ -55,19 +53,24 @@ interface ListOfTestsProps {
     search: string;
     categoryId?: number;
     matchTableName?: string;
+    status?: string;
     setPage: (page: number) => void;
     setLimit: (limit: number) => void;
     setSearch: (search: string) => void;
     setCategoryId: (categoryId: number | undefined) => void;
     setMatchTableName: (matchTableName: string | undefined) => void;
+    setStatus: (status: string | undefined) => void;
 }
 
-export default function ListOfTests({ page, limit, search, categoryId, matchTableName, setPage, setLimit, setSearch, setCategoryId, setMatchTableName }: ListOfTestsProps) {
+export default function ListOfTests({ page, limit, search, categoryId, matchTableName, status, setPage, setLimit, setSearch, setCategoryId, setMatchTableName, setStatus }: ListOfTestsProps) {
     const { currencySymbol } = useCurrency();
 
     const token = getCookie('accessToken');
     const queryClient = useQueryClient();
     const navigate = useNavigate();
+
+    const [categoryOpen, setCategoryOpen] = useState(false);
+    const [templateOpen, setTemplateOpen] = useState(false);
 
     const deleteMutation = useMutation({
         mutationFn: async (id: string) => {
@@ -142,7 +145,7 @@ export default function ListOfTests({ page, limit, search, categoryId, matchTabl
 
     // Fetch tests — gated on testTables loaded so display names resolve on first render
     const { data, isFetching } = useQuery({
-        queryKey: ["tests", page, limit, search, categoryId, matchTableName],
+        queryKey: ["tests", page, limit, search, categoryId, matchTableName, status],
         queryFn: async () => {
             const params = new URLSearchParams({
                 page: String(page),
@@ -151,6 +154,7 @@ export default function ListOfTests({ page, limit, search, categoryId, matchTabl
             });
             if (categoryId) params.set('category_id', String(categoryId));
             if (matchTableName) params.set('match_table_name', matchTableName);
+            if (status) params.set('status', status);
 
             const res = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/tests?${params.toString()}`,
@@ -320,7 +324,7 @@ export default function ListOfTests({ page, limit, search, categoryId, matchTabl
             newRow.className = 'child-row-detail';
             const cell = document.createElement('td');
             cell.className = 'p-4 bg-muted/50';
-            cell.colSpan = 9;
+            cell.colSpan = 10;
             cell.appendChild(cardContainer);
             newRow.appendChild(cell);
 
@@ -449,6 +453,19 @@ export default function ListOfTests({ page, limit, search, categoryId, matchTabl
             defaultContent: "",
         },
         {
+            data: "status",
+            title: "Status",
+            orderable: true,
+            responsivePriority: 4,
+            render: (_data: any, _type: string, row: TestItem) => {
+                const isActive = (row.status || 'active') === 'active';
+                return isActive
+                    ? '<span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Active</span>'
+                    : '<span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">Inactive</span>';
+            },
+            defaultContent: "",
+        },
+        {
             data: "price",
             title: `Price (${currencySymbol})`,
             orderable: true,
@@ -549,36 +566,100 @@ export default function ListOfTests({ page, limit, search, categoryId, matchTabl
                 onSearchChange={setSearch}
                 filterSlot={
                     <>
+                    {/* Category — searchable */}
+                    <Popover open={categoryOpen} onOpenChange={setCategoryOpen}>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" role="combobox" className="w-[200px] h-9 justify-between font-normal">
+                                <span className="truncate">
+                                    {categoryId
+                                        ? (categoriesData?.find((c: any) => c.id === categoryId)?.name ?? 'All Categories')
+                                        : 'All Categories'}
+                                </span>
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0" align="start">
+                            <Command>
+                                <CommandInput placeholder="Search category..." />
+                                <CommandList>
+                                    <CommandEmpty>No category found.</CommandEmpty>
+                                    <CommandGroup>
+                                        <CommandItem
+                                            value="all categories"
+                                            onSelect={() => { setCategoryId(undefined); setCategoryOpen(false); }}
+                                        >
+                                            <Check className={cn("mr-2 h-4 w-4", !categoryId ? "opacity-100" : "opacity-0")} />
+                                            All Categories
+                                        </CommandItem>
+                                        {categoriesData?.map((cat: any) => (
+                                            <CommandItem
+                                                key={cat.id}
+                                                value={String(cat.name)}
+                                                onSelect={() => { setCategoryId(cat.id); setCategoryOpen(false); }}
+                                            >
+                                                <Check className={cn("mr-2 h-4 w-4", categoryId === cat.id ? "opacity-100" : "opacity-0")} />
+                                                {cat.name}
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
+
+                    {/* Report Template — searchable */}
+                    <Popover open={templateOpen} onOpenChange={setTemplateOpen}>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" role="combobox" className="w-[220px] h-9 justify-between font-normal">
+                                <span className="truncate">
+                                    {matchTableName
+                                        ? (testTables.find((tt: any) => String(tt.table_name) === matchTableName)?.display_name ?? matchTableName)
+                                        : 'All Report Templates'}
+                                </span>
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[220px] p-0" align="start">
+                            <Command>
+                                <CommandInput placeholder="Search template..." />
+                                <CommandList>
+                                    <CommandEmpty>No template found.</CommandEmpty>
+                                    <CommandGroup>
+                                        <CommandItem
+                                            value="all report templates"
+                                            onSelect={() => { setMatchTableName(undefined); setTemplateOpen(false); }}
+                                        >
+                                            <Check className={cn("mr-2 h-4 w-4", !matchTableName ? "opacity-100" : "opacity-0")} />
+                                            All Report Templates
+                                        </CommandItem>
+                                        {testTables.map((tt: any) => (
+                                            <CommandItem
+                                                key={tt.id ?? tt.table_name}
+                                                value={String(tt.display_name || tt.table_name)}
+                                                onSelect={() => { setMatchTableName(String(tt.table_name)); setTemplateOpen(false); }}
+                                            >
+                                                <Check className={cn("mr-2 h-4 w-4", matchTableName === String(tt.table_name) ? "opacity-100" : "opacity-0")} />
+                                                {tt.display_name || tt.table_name}
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
+
+                    {/* Status */}
                     <Select
-                        value={categoryId ? String(categoryId) : 'all'}
-                        onValueChange={(val) => setCategoryId(val === 'all' ? undefined : Number(val))}
+                        value={status ?? 'all'}
+                        onValueChange={(value) => setStatus(value === 'all' ? undefined : value)}
                     >
-                        <SelectTrigger className="w-[180px] h-9">
-                            <SelectValue placeholder="All Categories" />
+                        <SelectTrigger className="w-[160px] h-9">
+                            <SelectValue placeholder="All Statuses" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Categories</SelectItem>
-                            {categoriesData?.map((cat: any) => (
-                                <SelectItem key={cat.id} value={String(cat.id)}>
-                                    {cat.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <Select
-                        value={matchTableName || 'all'}
-                        onValueChange={(val) => setMatchTableName(val === 'all' ? undefined : val)}
-                    >
-                        <SelectTrigger className="w-[200px] h-9">
-                            <SelectValue placeholder="All Report Templates" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Report Templates</SelectItem>
-                            {testTables.map((tt: any) => (
-                                <SelectItem key={tt.id ?? tt.table_name} value={String(tt.table_name)}>
-                                    {tt.display_name || tt.table_name}
-                                </SelectItem>
-                            ))}
+                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="inactive">Inactive</SelectItem>
                         </SelectContent>
                     </Select>
                     </>

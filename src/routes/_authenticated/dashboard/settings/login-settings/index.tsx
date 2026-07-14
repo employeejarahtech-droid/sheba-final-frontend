@@ -132,18 +132,6 @@ function LoginSettingsPage() {
         <>
             <AppHeader fixed />
             <main className=''>
-                <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
-                    <div className="flex items-center gap-4">
-                        <div>
-                            <h1 className='text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent'>
-                                Login Page Settings
-                            </h1>
-                            <p className='text-muted-foreground text-sm mt-1'>
-                                Configure the login page appearance with logo, background image, and information text for subdomain logins
-                            </p>
-                        </div>
-                    </div>
-                </div>
 
                 {isLoading ? (
                     <div className="flex items-center justify-center h-64">
@@ -151,6 +139,21 @@ function LoginSettingsPage() {
                     </div>
                 ) : (
                     <div className="mx-auto px-4 space-y-5">
+
+                        <div className="flex flex-wrap justify-between items-start gap-4">
+                            <div className="flex items-center gap-4">
+                                <div>
+                                    <h1 className='text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent'>
+                                        Login Page Settings
+                                    </h1>
+                                    <p className='text-muted-foreground text-sm mt-1'>
+                                        Configure the login page appearance with logo, background image, and information text for subdomain logins
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+
                         {/* Logo Settings Card */}
                         <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
                             <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
