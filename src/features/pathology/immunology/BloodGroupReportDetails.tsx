@@ -17,12 +17,18 @@ interface BloodGroupReportDetailsProps {
         age: string;
         sex: string;
         invoice_date: string;
-        reference_doctor?: string;
+        doctor?: {
+            doctor_name?: string;
+            qualification?: string;
+            title?: string;
+        };
     };
     paddingTop?: number;
+    fontSize?: number;
+    showSignature?: boolean;
 }
 
-export default function BloodGroupReportDetails({ bloodGroupData, invoiceData, paddingTop = 40 }: BloodGroupReportDetailsProps) {
+export default function BloodGroupReportDetails({ bloodGroupData, invoiceData, paddingTop = 40, fontSize = 1, showSignature = true }: BloodGroupReportDetailsProps) {
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -35,7 +41,7 @@ export default function BloodGroupReportDetails({ bloodGroupData, invoiceData, p
 
     const borderWidth = 2;
     return (
-        <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
+        <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px`, zoom: fontSize }}>
             <style>
                 {`
           .bg-row-blue {
@@ -91,7 +97,7 @@ export default function BloodGroupReportDetails({ bloodGroupData, invoiceData, p
                     </tr>
                     <tr className="border">
             <td className="border px-3 py-2" colSpan={2}>
-              Ref. By: {invoiceData?.reference_doctor ? `Prof./Dr. ${invoiceData.reference_doctor}` : '-'}{invoiceData?.doctor?.qualification ? ` (${invoiceData.doctor.qualification})` : ''}
+              Ref. By: {invoiceData?.doctor?.doctor_name ? `Prof./Dr. ${invoiceData.doctor.doctor_name}` : '-'}{invoiceData?.doctor?.qualification ? ` (${invoiceData.doctor.qualification})` : ''}
             </td>
             <td className="border px-3 py-2">
               Phone: {invoiceData?.phone || '-'}
@@ -141,7 +147,7 @@ export default function BloodGroupReportDetails({ bloodGroupData, invoiceData, p
                 {bloodGroupData?.test_carried_out_by || 'Not specified'}
             </p>
 
-            <ReportFooter />
+            <ReportFooter showSignature={showSignature} />
 
             {/* Buttons */}
             <div className="flex justify-end gap-3 mt-10 print:hidden">

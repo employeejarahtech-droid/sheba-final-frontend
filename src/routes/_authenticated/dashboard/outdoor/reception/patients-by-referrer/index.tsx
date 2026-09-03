@@ -71,6 +71,7 @@ function PatientsByReferrerPage() {
             setDoctorId={setDoctorId}
             showReferrerFilter
             tableTitle="Patients by Referrer"
+            permissionBase="outdoor.reception.patients-by-referrer"
         />
     )
 }

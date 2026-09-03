@@ -11,7 +11,6 @@ import { Switch } from "@/components/ui/switch";
 import { Image as ImageIcon, Home, Save, Loader2, LayoutDashboard, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { getCookie } from '@/lib/cookies';
-import { AppHeader } from '@/components/layout/app-header'
 import { GallerySelector } from '@/components/gallery-selector'
 
 export const Route = createFileRoute('/_authenticated/dashboard/settings/home-page-settings/')({
@@ -113,8 +112,6 @@ function HomePageSettingsPage() {
 
     return (
         <>
-            <AppHeader fixed />
-            <main className=''>
                 <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
                     <div className="flex items-center gap-4">
                         <div>
@@ -379,7 +376,6 @@ function HomePageSettingsPage() {
                         </div>
                     </div>
                 )}
-            </main>
         </>
     );
 }

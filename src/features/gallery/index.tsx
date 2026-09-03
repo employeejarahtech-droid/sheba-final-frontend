@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  Upload,
   Trash2,
   Image as ImageIcon,
   Search,
@@ -20,6 +19,7 @@ import {
 import { toast } from 'sonner'
 import { getCookie } from '@/lib/cookies'
 import { useCan } from '@/hooks/use-can'
+import { GallerySelector } from '@/components/gallery-selector'
 
 interface GalleryImage {
   id: string
@@ -58,7 +58,6 @@ export function Gallery() {
   const [currentPage, setCurrentPage] = useState(1)
   const imagesPerPage = 12
   const [previewImage, setPreviewImage] = useState<GalleryImage | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const token = getCookie('accessToken')
   const can = useCan()
   const canUpload = can('gallery.upload')
@@ -106,36 +105,6 @@ export function Gallery() {
   useEffect(() => {
     setCurrentPage(1)
   }, [searchQuery, selectedFolder])
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
-    setLoading(true)
-    try {
-      // Uploads land in whichever folder is currently selected in the
-      // sidebar — "All Images" defaults new uploads to "General".
-      const targetFolder = selectedFolder ?? 'General'
-      for (const file of Array.from(files)) {
-        const formData = new FormData()
-        formData.append('image', file)
-        formData.append('folder', targetFolder)
-        await fetch(`${API_URL}/api/gallery`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        })
-      }
-      toast.success(`${files.length} image${files.length > 1 ? 's' : ''} uploaded`)
-      loadImages()
-      loadFolders()
-    } catch (error) {
-      console.error('Upload error:', error)
-      toast.error('Upload failed')
-    } finally {
-      setLoading(false)
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    }
-  }
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this image?')) return
@@ -248,6 +217,18 @@ export function Gallery() {
     }
   }
 
+  // Shared by the header + empty-state GallerySelector triggers: refresh the
+  // page grid after uploads made inside the modal, and open a picked image in
+  // the page's preview modal.
+  const handleUploaded = () => {
+    loadImages()
+    loadFolders()
+  }
+  const handleSelectFromGallery = (url: string) => {
+    const found = images.find((img) => resolveUrl(img.url) === url)
+    if (found) setPreviewImage(found)
+  }
+
   const folderImages = images.filter((img) => (selectedFolder ? img.folder === selectedFolder : true))
   const filteredImages = folderImages.filter(
     (img) =>
@@ -279,32 +260,14 @@ export function Gallery() {
           </h1>
           <p className="text-sm text-muted-foreground mt-1">Manage your image gallery</p>
         </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          className="hidden"
-          onChange={handleUpload}
-        />
         {canUpload && (
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={loading}
-            className="inline-flex items-center gap-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 disabled:opacity-50"
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <Upload className="h-4 w-4" />
-                Upload to {selectedFolder ?? 'General'}
-              </>
-            )}
-          </button>
+          <GallerySelector
+            onImageSelect={handleSelectFromGallery}
+            triggerLabel="Upload"
+            triggerClassName="bg-primary text-primary-foreground hover:bg-primary/90 border-primary h-9 px-4"
+            defaultFolder={selectedFolder ?? 'General'}
+            onUploaded={handleUploaded}
+          />
         )}
       </div>
 
@@ -624,13 +587,13 @@ export function Gallery() {
                     : 'Upload your first image to get started'}
               </p>
               {!searchQuery && canUpload && (
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload Image
-                </button>
+                <GallerySelector
+                  onImageSelect={handleSelectFromGallery}
+                  triggerLabel="Upload Image"
+                  triggerClassName="bg-blue-600 hover:bg-blue-700 border-blue-600"
+                  defaultFolder={selectedFolder ?? 'General'}
+                  onUploaded={handleUploaded}
+                />
               )}
             </div>
           )}

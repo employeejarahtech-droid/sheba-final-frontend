@@ -8,8 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Bed, CheckCircle, XCircle, Percent, Printer, FileText } from 'lucide-react'
 import { useDateFormat } from '@/hooks/use-date-format'
+import { z } from 'zod'
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
+
+const bedOccupancySearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+})
 
 interface BedItem {
   id: number
@@ -40,6 +47,7 @@ interface Meta {
 }
 
 export const Route = createFileRoute('/_authenticated/dashboard/reports/patient/bed-occupancy/')({
+  validateSearch: (search) => bedOccupancySearchSchema.parse(search),
   component: BedOccupancyPage,
 })
 
@@ -201,8 +209,9 @@ function BedOccupancyPage() {
       orderable: false,
       render: (_data: any, _type: string, row: BedItem) => {
         const id = row.id;
+        const printParams = new URLSearchParams(search ? { search } : {});
         return `<div class="flex gap-2">
-          <a href="/dashboard/reports/patient/bed-occupancy/print" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow transition-colors">
+          <a href="/dashboard/reports/patient/bed-occupancy/print?${printParams.toString()}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
             Print
           </a>
@@ -213,7 +222,7 @@ function BedOccupancyPage() {
         </div>`;
       },
     },
-  ], [meta]);
+  ], [meta, search]);
 
   return (
     <>

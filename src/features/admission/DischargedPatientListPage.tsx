@@ -155,7 +155,7 @@ interface DischargedPatientListPageProps {
 export function DischargedPatientListPage({ page, limit, search, setPage, setLimit, setSearch, paymentStatus, billsDistributed }: DischargedPatientListPageProps) {
     const navigate = useNavigate()
     const token = getCookie('accessToken')
-    const { format } = useCurrency()
+    const { format, currencySymbol } = useCurrency()
     const [statusFilter, setStatusFilter] = useState<string>('all')
     const [paymentFilter, setPaymentFilter] = useState<string>(paymentStatus ?? 'all')
 
@@ -330,43 +330,43 @@ export function DischargedPatientListPage({ page, limit, search, setPage, setLim
         },
         {
             data: "final_bill_amount",
-            title: "Final Bill Amount",
+            title: `Final Bill Amount (${currencySymbol})`,
             orderable: false,
             responsivePriority: 8,
             render: (_data: any, _type: string, row: AdmissionItem) => {
                 if (row.finalBill?.total_discounted_amount) {
-                    return format(parseFloat(row.finalBill.total_discounted_amount))
+                    return parseFloat(row.finalBill.total_discounted_amount).toLocaleString()
                 }
                 return '<span class="text-gray-400">-</span>'
             },
         },
         {
             data: "paid_amount",
-            title: "Paid Amount",
+            title: `Paid Amount (${currencySymbol})`,
             orderable: false,
             responsivePriority: 9,
             render: (_data: any, _type: string, row: AdmissionItem) => {
                 if (row.finalBill?.paid_amount) {
                     const paidAmount = parseFloat(row.finalBill.paid_amount)
-                    return `<span class="text-green-600 font-semibold">${format(paidAmount)}</span>`
+                    return `<span class="text-green-600 font-semibold">${paidAmount.toLocaleString()}</span>`
                 }
                 return '<span class="text-gray-400">-</span>'
             },
         },
         {
             data: "due_amount",
-            title: "Due Amount",
+            title: `Due Amount (${currencySymbol})`,
             orderable: false,
             responsivePriority: 10,
             render: (_data: any, _type: string, row: AdmissionItem) => {
                 if (row.finalBill?.due_amount) {
                     const dueAmount = parseFloat(row.finalBill.due_amount)
                     if (dueAmount > 0) {
-                        return `<span class="text-red-600 font-semibold">${format(dueAmount)}</span>`
+                        return `<span class="text-red-600 font-semibold">${dueAmount.toLocaleString()}</span>`
                     } else if (dueAmount < 0) {
-                        return `<span class="text-orange-600 font-semibold">${format(Math.abs(dueAmount))} (Overpaid)</span>`
+                        return `<span class="text-orange-600 font-semibold">${Math.abs(dueAmount).toLocaleString()} (Overpaid)</span>`
                     } else {
-                        return `<span class="text-green-600 font-semibold">${format(0)}</span>`
+                        return `<span class="text-green-600 font-semibold">${(0).toLocaleString()}</span>`
                     }
                 }
                 return '<span class="text-gray-400">-</span>'

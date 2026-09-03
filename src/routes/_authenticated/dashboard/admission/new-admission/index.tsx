@@ -56,6 +56,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { CountrySelect, LocationSelect, type LocationOption } from "@/components/location-select";
 
 export const Route = createFileRoute('/_authenticated/dashboard/admission/new-admission/')({
     component: IndoorNewAdmission,
@@ -71,6 +72,11 @@ const admissionSchema = z.object({
     mobile_number: z.string().min(11, "Phone number required"),
     idCardNumber: z.string().optional(),
     address: z.string().min(1, "Address required"),
+    // Structured global address — denormalized names, all optional
+    country: z.string().optional(),
+    division: z.string().optional(),
+    district: z.string().optional(),
+    village: z.string().optional(),
     underConsultant: z.string().optional(),
     referredBy: z.string().optional(),
     admissionDate: z.string().min(1, "Admission date required"),
@@ -624,6 +630,10 @@ function IndoorNewAdmission() {
             mobile_number: "",
             idCardNumber: "",
             address: "",
+            country: "Bangladesh",
+            division: "",
+            district: "",
+            village: "",
             underConsultant: "",
             referredBy: "",
             admissionDate: formatDate(new Date()),
@@ -633,6 +643,58 @@ function IndoorNewAdmission() {
             reason: "",
         },
     });
+
+    // ── Structured address cascade ──────────────────────────────────────
+    // The form stores denormalized NAME strings; these ids only drive the
+    // child LocationSelect queries. Country defaults to Bangladesh once the
+    // master list loads (shares the CountrySelect cache — no extra fetch).
+    const [countryId, setCountryId] = useState<string | null>(null);
+    const [divisionId, setDivisionId] = useState<string | null>(null);
+
+    const { data: countriesData } = useQuery({
+        queryKey: ['address-countries'],
+        queryFn: async () => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/address-location/countries?limit=500`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) throw new Error('Failed to fetch countries');
+            return res.json();
+        },
+        enabled: !!token,
+        staleTime: 24 * 60 * 60 * 1000,
+    });
+
+    useEffect(() => {
+        const items = countriesData?.data?.items || [];
+        if (!items.length || countryId) return;
+        const current = form.getValues('country');
+        const row = current
+            ? items.find((c: any) => c.name === current)
+            : items.find((c: any) => c.iso2 === 'BD');
+        if (row) {
+            setCountryId(String(row.id));
+            if (!current) form.setValue('country', row.name);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [countriesData]);
+
+    const handleCountryChange = (row: LocationOption | null) => {
+        setCountryId(row ? String(row.id) : null);
+        form.setValue('country', row?.name || '');
+        setDivisionId(null);
+        form.setValue('division', '');
+        form.setValue('district', '');
+    };
+
+    const handleDivisionChange = (row: LocationOption | null) => {
+        setDivisionId(row ? String(row.id) : null);
+        form.setValue('division', row?.name || '');
+        form.setValue('district', '');
+    };
+
+    const handleDistrictChange = (row: LocationOption | null) => {
+        form.setValue('district', row?.name || '');
+    };
 
     // Re-format admissionDate once settings are loaded
     useEffect(() => {
@@ -665,6 +727,10 @@ function IndoorNewAdmission() {
                     patient_type: patientTypes.find((t: any) => String(t.id) === values.patientType)?.name || null,
                     father_name: values.fatherName || null,
                     address: values.address || null,
+                    country: values.country || null,
+                    division: values.division || null,
+                    district: values.district || null,
+                    village: values.village || null,
                     age: Number(values.ageYears) || 0,
                     age_unit: 'Y',
                     age_text: `${values.ageYears || 0}Y ${values.ageMonths || 0}M`,
@@ -900,6 +966,78 @@ function IndoorNewAdmission() {
                                                     <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">ID Card Number (Optional)</FormLabel>
                                                     <FormControl>
                                                         <Input placeholder="NID, Passport or Birth Cert" className={FIELD_BASE} {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+
+                                    {/* Structured address (global master) */}
+                                    <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-5">
+                                        <FormField
+                                            control={form.control}
+                                            name="country"
+                                            render={({ field }) => (
+                                                <FormItem className="flex flex-col gap-2">
+                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Countries</FormLabel>
+                                                    <FormControl>
+                                                        <CountrySelect
+                                                            value={field.value || ""}
+                                                            onChange={handleCountryChange}
+                                                            placeholder="Select country"
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="division"
+                                            render={({ field }) => (
+                                                <FormItem className="flex flex-col gap-2">
+                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Division / State / Regions</FormLabel>
+                                                    <FormControl>
+                                                        <LocationSelect
+                                                            level="division"
+                                                            countryId={countryId}
+                                                            value={field.value || ""}
+                                                            onChange={handleDivisionChange}
+                                                            placeholder="Select division / state / region"
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="district"
+                                            render={({ field }) => (
+                                                <FormItem className="flex flex-col gap-2">
+                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">District / Cities / Area</FormLabel>
+                                                    <FormControl>
+                                                        <LocationSelect
+                                                            level="district"
+                                                            parentId={divisionId}
+                                                            value={field.value || ""}
+                                                            onChange={handleDistrictChange}
+                                                            placeholder="Select district / city / area"
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="village"
+                                            render={({ field }) => (
+                                                <FormItem className="flex flex-col gap-2">
+                                                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Village / House</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Village, house no, street..." className={FIELD_BASE} {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>

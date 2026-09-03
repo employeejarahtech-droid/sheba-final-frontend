@@ -14,6 +14,27 @@ export const Route = createFileRoute('/_authenticated/dashboard/outdoor/master/t
     component: TestTableDetails,
 })
 
+// One field definition inside test_tables.form_schema (form-designer tables).
+type FormField = {
+    key: string
+    label?: string
+    type?: string
+    unit?: string
+    normal_range?: string
+    required?: boolean
+    options?: string[]
+    sort_order?: number
+}
+
+// One physical column from information_schema (/columns/:tableName → columnDetails).
+type ColumnDetail = {
+    name: string
+    type: string
+    nullable: boolean
+    key?: string | null
+    comment?: string | null
+}
+
 function TestTableDetails() {
     const { id } = Route.useParams()
     const navigate = useNavigate()
@@ -33,7 +54,16 @@ function TestTableDetails() {
         enabled: !!token && !!id,
     })
 
-    // Fetch database columns once we have the table name
+    // Form-designer tables have no physical table — their "columns" are the
+    // form_schema field definitions, not information_schema rows.
+    const isCustomForm = Boolean(testTable?.is_custom_form_designer)
+    const formFields: FormField[] = isCustomForm && Array.isArray(testTable?.form_schema)
+        ? [...(testTable.form_schema as FormField[])].sort(
+            (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0),
+        )
+        : []
+
+    // Fetch database columns once we have the table name (physical tables only)
     const { data: columnsData, isLoading: isColumnsLoading } = useQuery({
         queryKey: ['test-table-columns', testTable?.table_name],
         queryFn: async () => {
@@ -44,8 +74,14 @@ function TestTableDetails() {
             const result = await res.json()
             return result.data
         },
-        enabled: !!token && !!testTable?.table_name,
+        enabled: !!token && !!testTable?.table_name && !isCustomForm,
     })
+
+    // Per-column metadata (information_schema) — undefined against an older
+    // API that only returns plain column names.
+    const columnDetails: ColumnDetail[] = Array.isArray(columnsData?.columnDetails)
+        ? columnsData.columnDetails
+        : []
 
     // Fetch record count
     const { data: recordCountData, isLoading: isCountLoading } = useQuery({
@@ -174,12 +210,70 @@ function TestTableDetails() {
 
                                 <Separator />
 
-                                {/* Database Columns */}
+                                {/* Columns — physical table columns, or Form Builder fields for custom forms */}
                                 <div className="space-y-2">
                                     <p className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                                        <Columns className="h-3 w-3" /> Columns ({columnsData?.columns?.length || 0})
+                                        <Columns className="h-3 w-3" />{' '}
+                                        Columns ({isCustomForm ? formFields.length : (columnsData?.columns?.length || 0)})
                                     </p>
-                                    {isColumnsLoading ? (
+                                    {isCustomForm ? (
+                                        formFields.length > 0 ? (
+                                            <>
+                                                <div className="overflow-x-auto rounded-lg border">
+                                                    <table className="w-full text-xs">
+                                                        <thead>
+                                                            <tr className="bg-muted/50 text-left text-muted-foreground">
+                                                                <th className="px-2 py-1.5 font-medium w-8">#</th>
+                                                                <th className="px-2 py-1.5 font-medium">Field</th>
+                                                                <th className="px-2 py-1.5 font-medium">Type</th>
+                                                                <th className="px-2 py-1.5 font-medium">Unit / Options</th>
+                                                                <th className="px-2 py-1.5 font-medium">Normal Range</th>
+                                                                <th className="px-2 py-1.5 font-medium text-center">Req</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {formFields.map((field, index) => (
+                                                                <tr key={field.key || index} className="border-t">
+                                                                    <td className="px-2 py-1.5 text-muted-foreground">{index + 1}</td>
+                                                                    <td className="px-2 py-1.5">
+                                                                        <div className="font-medium">{field.label || field.key}</div>
+                                                                        {field.key && field.key !== field.label && (
+                                                                            <code className="text-[10px] text-muted-foreground font-mono">{field.key}</code>
+                                                                        )}
+                                                                    </td>
+                                                                    <td className="px-2 py-1.5">
+                                                                        <Badge variant="outline" className="text-[10px] capitalize">
+                                                                            {field.type || 'text'}
+                                                                        </Badge>
+                                                                    </td>
+                                                                    <td className="px-2 py-1.5 text-muted-foreground">
+                                                                        {field.unit || (field.options?.length ? field.options.join(' / ') : '—')}
+                                                                    </td>
+                                                                    <td className="px-2 py-1.5 text-muted-foreground">{field.normal_range || '—'}</td>
+                                                                    <td className="px-2 py-1.5 text-center">{field.required ? '✓' : '—'}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20">
+                                                    <Info className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                                                    <p className="text-xs text-blue-700 dark:text-blue-300 leading-tight">
+                                                        Fields come from the Form Builder schema (<code className="font-mono text-[10px]">form_schema</code>) — no
+                                                        physical table exists. Results are stored in <code className="font-mono text-[10px]">custom_tests_results</code>{' '}
+                                                        when a test bound to this template is reported.
+                                                    </p>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="py-6 text-center">
+                                                <Layout className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
+                                                <p className="text-xs text-muted-foreground">
+                                                    No fields defined yet — open Form Builder on the list page to add them.
+                                                </p>
+                                            </div>
+                                        )
+                                    ) : isColumnsLoading ? (
                                         <div className="flex gap-2">
                                             {[1, 2, 3, 4].map(i => (
                                                 <div key={i} className="h-6 w-20 bg-muted animate-pulse rounded-full" />
@@ -187,13 +281,58 @@ function TestTableDetails() {
                                         </div>
                                     ) : columnsData?.columns?.length > 0 ? (
                                         <>
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {columnsData.columns.map((column: string) => (
-                                                    <Badge key={column} variant="outline" className="font-mono text-[10px] uppercase tracking-wider">
-                                                        {column}
-                                                    </Badge>
-                                                ))}
-                                            </div>
+                                            {columnDetails.length > 0 ? (
+                                                <div className="overflow-x-auto rounded-lg border">
+                                                    <table className="w-full text-xs">
+                                                        <thead>
+                                                            <tr className="bg-muted/50 text-left text-muted-foreground">
+                                                                <th className="px-2 py-1.5 font-medium w-8">#</th>
+                                                                <th className="px-2 py-1.5 font-medium">Field</th>
+                                                                <th className="px-2 py-1.5 font-medium">Data Type</th>
+                                                                <th className="px-2 py-1.5 font-medium text-center">Null</th>
+                                                                <th className="px-2 py-1.5 font-medium">Key</th>
+                                                                <th className="px-2 py-1.5 font-medium">Comment</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {columnDetails.map((col, index) => (
+                                                                <tr key={col.name || index} className="border-t">
+                                                                    <td className="px-2 py-1.5 text-muted-foreground">{index + 1}</td>
+                                                                    <td className="px-2 py-1.5">
+                                                                        <code className="font-mono text-[11px] font-medium">{col.name}</code>
+                                                                    </td>
+                                                                    <td className="px-2 py-1.5">
+                                                                        <Badge variant="outline" className="font-mono text-[10px]">
+                                                                            {col.type}
+                                                                        </Badge>
+                                                                    </td>
+                                                                    <td className="px-2 py-1.5 text-center text-muted-foreground">
+                                                                        {col.nullable ? '✓' : '—'}
+                                                                    </td>
+                                                                    <td className="px-2 py-1.5">
+                                                                        {col.key ? (
+                                                                            <Badge variant="outline" className="font-mono text-[10px] uppercase">
+                                                                                {col.key}
+                                                                            </Badge>
+                                                                        ) : (
+                                                                            <span className="text-muted-foreground">—</span>
+                                                                        )}
+                                                                    </td>
+                                                                    <td className="px-2 py-1.5 text-muted-foreground">{col.comment || '—'}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {columnsData.columns.map((column: string) => (
+                                                        <Badge key={column} variant="outline" className="font-mono text-[10px] uppercase tracking-wider">
+                                                            {column}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            )}
                                             <div className="flex items-start gap-2 p-2.5 rounded-lg bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20">
                                                 <Info className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
                                                 <p className="text-xs text-blue-700 dark:text-blue-300 leading-tight">

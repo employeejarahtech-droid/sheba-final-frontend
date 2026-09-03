@@ -10,6 +10,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { Sparkles, ShieldCheck } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { LandingPageWrapper } from '@/components/layout/landing-layout'
+import { usePageSeo } from '@/lib/seo'
 
 export const Route = createFileRoute('/(platform)/privacy')({
   component: PrivacyPage,
@@ -113,6 +114,13 @@ const sections = [
 ]
 
 function PrivacyPage() {
+  usePageSeo({
+    title: 'Privacy Policy | HMS Hospital Management Software',
+    description:
+      'Read how HMS, a hospital management software platform, collects, uses, and protects your data.',
+    path: '/privacy',
+  })
+
   return (
     <LandingPageWrapper>
       {/* Hero */}

@@ -5,7 +5,7 @@ import { getCookie } from '@/lib/cookies'
 import { AppHeader } from '@/components/layout/app-header'
 import { DataTable } from '@/components/DataTable'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { StatCards, type StatCardData } from '@/features/assets/components/StatCard'
+import { type StatCardData } from '@/features/assets/components/StatCard'
 import { Button } from '@/components/ui/button'
 import { Scale, Printer, FileText, Calendar, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
 import { DateField } from '@/components/date-field'
@@ -215,8 +215,36 @@ function BalanceSheetPage() {
       />
 
       <main className="">
-        {/* Stat cards — shared StatCards component */}
-        <StatCards cards={cards} />
+        <div className="flex justify-end mb-4">
+          <Link to="/dashboard/accounting/reports/balance-sheet/print" search={{ date: date || undefined }}>
+            <Button variant="outline" size="sm">
+              <Printer className="w-4 h-4 mr-2" />
+              Print
+            </Button>
+          </Link>
+        </div>
+
+        {/* Stat cards — single consolidated card */}
+        <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border mb-6">
+          <CardContent className="p-0">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-x divide-y sm:divide-y-0 divide-gray-200 dark:divide-gray-800">
+              {cards.map((card: StatCardData) => {
+                const Icon = card.icon
+                return (
+                  <div key={card.label} className="flex items-center gap-2.5 p-4">
+                    <div className="p-2 rounded-lg shadow-sm shrink-0" style={{ backgroundColor: card.headerBg }}>
+                      <Icon className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs text-muted-foreground truncate">{card.label}</p>
+                      <p className="text-lg font-bold truncate">{card.value ?? 0}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Main Balance Sheet Sections */}
         <div className="grid gap-6 lg:grid-cols-2 mb-6 p-0">
@@ -268,6 +296,7 @@ function BalanceSheetPage() {
                   columns={columns}
                   data={balanceSheetData.liabilities.map(item => ({ ...item, type: 'liability' as const }))}
                   isLoading={isLoading}
+                  hideExport
                   showSearch={false}
                   showPagination={false}
                 />
@@ -295,6 +324,7 @@ function BalanceSheetPage() {
                   columns={columns}
                   data={balanceSheetData.equity.map(item => ({ ...item, type: 'equity' as const }))}
                   isLoading={isLoading}
+                  hideExport
                   showSearch={false}
                   showPagination={false}
                 />
@@ -307,7 +337,7 @@ function BalanceSheetPage() {
 
             {/* Accounting Equation Verification */}
             <Card className="bg-primary/5 border-primary/20 border-2 p-0">
-              <CardContent className="py-6 space-y-4 p-0">
+              <CardContent className="p-6 space-y-4">
                 <div className="flex justify-between items-center text-sm font-medium text-muted-foreground uppercase tracking-widest">
                   <span>Accounting Equation</span>
                   <span className="text-xs lowercase text-muted-foreground/50 italic">(Assets = Liabilities + Equity)</span>
@@ -384,17 +414,6 @@ function BalanceSheetPage() {
                   Clear
                 </Button>
               )}
-              <Link
-                to="/dashboard/accounting/reports/balance-sheet/print"
-                search={{
-                  date: date || undefined
-                }}
-              >
-                <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
-                  <Printer className="w-4 h-4 mr-2" />
-                  Print Report
-                </Button>
-              </Link>
             </div>
           }
           emptyState={

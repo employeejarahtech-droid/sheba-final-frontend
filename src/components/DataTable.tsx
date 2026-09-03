@@ -44,8 +44,11 @@ interface DataTableProps<TData> {
   filterSlot?: React.ReactNode;
   tableTitle?: string;
   hideExport?: boolean;
+  searchPlaceholder?: string;
   createdRow?: (row: Node, data: TData[], dataIndex: number) => void;
   defaultOrder?: [number, 'asc' | 'desc'][];
+  /** Set false to drop the bordered/rounded "card" wrapper around the table. Defaults to true. */
+  bordered?: boolean;
 }
 
 export function DataTable<TData extends Record<string, any>>({
@@ -62,14 +65,17 @@ export function DataTable<TData extends Record<string, any>>({
   filterSlot,
   tableTitle,
   hideExport,
+  searchPlaceholder,
   createdRow,
   defaultOrder,
+  bordered = true,
 }: DataTableProps<TData>) {
   const tableRef = useRef<HTMLTableElement>(null);
   const dataTableRef = useRef<any>(null);
   const columnsRef = useRef(columns);
   const searchRef = useRef(search);
   const onSortRef = useRef(onSort);
+  const lastOrderKeyRef = useRef<string | null>(null);
   const scrollWrapperRef = useRef<HTMLDivElement>(null);
   const [localSearch, setLocalSearch] = useState(search || "");
   const debouncedSearch = useDebounce(localSearch, 500);
@@ -202,16 +208,27 @@ export function DataTable<TData extends Record<string, any>>({
 
     dataTableRef.current = table;
 
-    // Attached AFTER construction, so the initial programmatic `order` above
-    // doesn't itself trigger onSort — only subsequent user clicks on a
-    // sortable header do. When a parent passes `onSort`, it's expected to
-    // refetch server-side sorted data; DataTables then re-sorts that (already
-    // server-sorted) page client-side too, which is a harmless no-op as long
-    // as the two agree on ordering.
+    // Seed with the initial order so the programmatic `order` above doesn't
+    // itself trigger onSort — only an order that actually differs from this
+    // baseline does. `table.draw()` (called on every data refresh, e.g. a
+    // pagination click) re-applies the ordering pipeline and re-fires
+    // `order.dt` even when the order hasn't changed; without this guard that
+    // re-fire would call onSort with the *same* sort/dir on every page
+    // change, and a parent that resets to page 1 on sort change (a common,
+    // reasonable pattern) would silently snap back to page 1 after every
+    // pagination click.
+    const initialOrder = table.order();
+    lastOrderKeyRef.current = initialOrder && initialOrder.length
+      ? `${initialOrder[0][0]}:${initialOrder[0][1]}`
+      : null;
+
     table.on('order.dt', () => {
       const currentOrder = table.order();
       if (!currentOrder || currentOrder.length === 0) return;
       const [colIdx, dir] = currentOrder[0];
+      const key = `${colIdx}:${dir}`;
+      if (lastOrderKeyRef.current === key) return;
+      lastOrderKeyRef.current = key;
       const colData = columnsRef.current[colIdx]?.data ?? null;
       onSortRef.current?.(colData, dir === 'asc' ? 'ASC' : 'DESC');
     });
@@ -251,12 +268,15 @@ export function DataTable<TData extends Record<string, any>>({
 
   // Re-render the rows when column definitions change. Combined with the live
   // render lookups above, this keeps cell values (e.g. dates using the tenant
-  // date format, which loads after the table is first drawn) in sync — so a
-  // page reload shows the settings format, not the default.
+  // date format, which loads after the table is first drawn, or a checkbox's
+  // checked state after a "select all" click) in sync. Plain draw() only
+  // repositions already-rendered rows — DataTables reuses their cached DOM
+  // nodes and does NOT re-invoke render() for them unless the rows are
+  // explicitly invalidated first.
   useEffect(() => {
     const table = dataTableRef.current;
     if (!table) return;
-    table.draw(false);
+    table.rows().invalidate().draw(false);
   }, [columns]);
 
   // Update pageLength when limit changes
@@ -326,7 +346,7 @@ export function DataTable<TData extends Record<string, any>>({
               <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search..."
+                placeholder={searchPlaceholder || "Search..."}
                 value={localSearch}
                 onChange={(e) => setLocalSearch(e.target.value)}
                 className="pl-8"
@@ -353,7 +373,7 @@ export function DataTable<TData extends Record<string, any>>({
       {/* DataTable — scroll wrapper with drag support */}
       <div
         ref={scrollWrapperRef}
-        className="relative rounded-md border overflow-x-auto"
+        className={`relative overflow-x-auto${bordered ? ' rounded-md border' : ''}`}
       >
         {/* Loading state — per table-design-loader.md: 3 centered full-width
             skeleton bars while loading. Rendered as an overlay because jQuery

@@ -402,9 +402,9 @@ export default function Categories({ page, limit, search, departmentId, setPage,
         <AppHeader fixed />
 
         <main className="">
-            <div className="space-y-4">
+            <div className="space-y-3">
                 {/* Statistics Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-3">
                     {statCards.map((card, index) => {
                         const Icon = card.icon;
                         return (

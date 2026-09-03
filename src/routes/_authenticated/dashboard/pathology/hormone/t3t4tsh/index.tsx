@@ -24,6 +24,7 @@ const searchSchema = z.object({
   status: z.string().catch('all'),
   from: z.string().catch(''),
   to: z.string().catch(''),
+  orderBy: z.string().optional(),
 });
 
 export const Route = createFileRoute(
@@ -58,6 +59,15 @@ function T3T4TSH() {
   const statusFilter = searchParams?.status || "all";
   const from = searchParams?.from || "";
   const to = searchParams?.to || "";
+  const orderBy = searchParams?.orderBy || "DESC";
+
+  // Reflect the default sort (Report ID DESC) in the URL.
+  useEffect(() => {
+    if (!searchParams?.orderBy) {
+      navigate({ to: '.', search: (prev: any) => ({ ...prev, orderBy: 'DESC' }), replace: true });
+    }
+  }, []);
+
   const setPage = (newPage: number) => { navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) }); };
   const setSearch = (newSearch: string) => { navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) }); };
   const setLimit = (newLimit: number) => { navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) }); };
@@ -69,13 +79,13 @@ function T3T4TSH() {
   const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data: t3t4tshReports, isFetching } = useQuery({
-    queryKey: ["t3t4tsh", page, limit, search, statusFilter, from, to],
+    queryKey: ["t3t4tsh", page, limit, search, statusFilter, from, to, orderBy],
     queryFn: async () => {
       const statusParam = statusFilter !== "all" ? `&status=${encodeURIComponent(statusFilter)}` : "";
       const fromParam = from ? `&from=${encodeURIComponent(from)}` : "";
       const toParam = to ? `&to=${encodeURIComponent(to)}` : "";
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/t3t4tsh?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}`,
+        `${import.meta.env.VITE_API_URL}/api/t3t4tsh?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}&orderBy=${encodeURIComponent(orderBy)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -147,10 +157,11 @@ function T3T4TSH() {
   const columns = [
     {
       data: 'invoice_id',
-      title: 'Invoice ID',
+      title: 'Receipt No',
       orderable: true,
       defaultContent: '',
-      render: (data: any, _type: string, row: ReportsItem) => {
+      render: (data: any, type: string, row: ReportsItem) => {
+        if (type === 'sort' || type === 'type') return data;
         const invoiceId = row.invoice_id || '-';
         const patientName = row.patient_name || '-';
         const date = fmtDateTime(row.created_at);
@@ -162,7 +173,7 @@ function T3T4TSH() {
                     data-invoice-id="${invoiceId}"
                     data-patient-name="${patientName.replace(/"/g, "&quot;")}"
                     data-date="${date}">+</button>
-            <span>${data}</span>
+            <span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${data}</span>
           </div>
         `;
       },
@@ -453,7 +464,7 @@ function T3T4TSH() {
     <>
       <AppHeader fixed />
       <main>
-        <div className="p-4 space-y-3">
+        <div className="space-y-3">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             {stats.map((card, index) => {

@@ -25,6 +25,7 @@ const lipidProfileSearchSchema = z.object({
   status: z.string().catch('all'),
   from: z.string().catch(''),
   to: z.string().catch(''),
+  orderBy: z.string().optional(),
 })
 
 export const Route = createFileRoute(
@@ -59,6 +60,14 @@ function LipidProfile() {
   const statusFilter = searchParams?.status || "all";
   const from = searchParams?.from || "";
   const to = searchParams?.to || "";
+  const orderBy = searchParams?.orderBy || "DESC";
+
+  // Reflect the default sort (DESC) in the URL — mirrors the biochemical/immunology pages.
+  useEffect(() => {
+    if (!searchParams?.orderBy) {
+      navigate({ to: '.', search: (prev: any) => ({ ...prev, orderBy: 'DESC' }), replace: true });
+    }
+  }, []);
 
   const setPage = (newPage: number) => {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
@@ -85,14 +94,14 @@ function LipidProfile() {
   const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data, isFetching } = useQuery({
-    queryKey: ["lipid-profile", page, limit, search, statusFilter, from, to],
+    queryKey: ["lipid-profile", page, limit, search, statusFilter, from, to, orderBy],
 
     queryFn: async () => {
       const statusParam = statusFilter !== "all" ? `&status=${encodeURIComponent(statusFilter)}` : "";
       const fromParam = from ? `&from=${encodeURIComponent(from)}` : "";
       const toParam = to ? `&to=${encodeURIComponent(to)}` : "";
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/lipid-profile?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}`,
+        `${import.meta.env.VITE_API_URL}/api/lipid-profile?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}&orderBy=${encodeURIComponent(orderBy)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -380,10 +389,11 @@ function LipidProfile() {
   const columns = [
     {
       data: "invoice_id",
-      title: "Invoice ID",
+      title: "Receipt No",
       orderable: true,
       responsivePriority: 2,
-      render: (data: any, _type: string, row: LipidProfileItem) => {
+      render: (data: any, type: string, row: LipidProfileItem) => {
+        if (type === 'sort' || type === 'type') return data;
         const date = fmtDateTime(row.created_at);
         return `
           <div class="flex items-center gap-2">
@@ -394,7 +404,7 @@ function LipidProfile() {
                     data-date="${date}"
                     data-status="${row.status || "Pending"}"
                     data-report-id="${row.id}">+</button>
-            <span>${data}</span>
+            <span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${data}</span>
           </div>
         `;
       },

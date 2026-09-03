@@ -5,9 +5,11 @@ interface StoolForREReportDetailsProps {
   report?: any;
   invoice?: any;
   paddingTop?: number;
+  fontSize?: number;
+  showSignature?: boolean;
 }
 
-export default function StoolForREReportDetails({ report, invoice, paddingTop = 40 }: StoolForREReportDetailsProps) {
+export default function StoolForREReportDetails({ report, invoice, paddingTop = 40, fontSize = 1, showSignature = true }: StoolForREReportDetailsProps) {
   const borderWidth = 1;
 
   // Use report data if available, otherwise fall back to invoice
@@ -24,7 +26,7 @@ export default function StoolForREReportDetails({ report, invoice, paddingTop = 
   };
 
   return (
-    <div className="max-w-4xl w-full mx-auto pb-10 print:pb-0 bg-background px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
+    <div className="max-w-4xl w-full mx-auto pb-10 print:pb-0 bg-background px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px`, zoom: fontSize }}>
       <style>
         {`
           .bg-row-blue {
@@ -219,7 +221,7 @@ export default function StoolForREReportDetails({ report, invoice, paddingTop = 
         {data?.test_carried_out_by || 'N/A'}
       </p>
 
-      <ReportFooter />
+      <ReportFooter showSignature={showSignature} />
 
      
     </div>

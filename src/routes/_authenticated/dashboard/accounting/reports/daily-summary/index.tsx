@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, TrendingUp, TrendingDown, Scale, ArrowUpRight, ArrowDownLeft, Receipt } from "lucide-react";
+import { Calendar as CalendarIcon, TrendingUp, TrendingDown, Scale, ArrowUpRight, ArrowDownLeft, Receipt, Printer } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -77,22 +77,30 @@ function DailySummary() {
           description="Opening balance, today's transactions, and closing balance."
           showBackButton={false}
           actions={
-            <Popover>
-              <PopoverTrigger asChild>
+            <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <CalendarIcon className="h-4 w-4" />
+                    {format(new Date(selectedDate), "dd MMM yyyy")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={new Date(selectedDate)}
+                    onSelect={setReportDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <Link to="/dashboard/accounting/reports/daily-summary/print" search={{ date: selectedDate }}>
                 <Button variant="outline" className="gap-2">
-                  <CalendarIcon className="h-4 w-4" />
-                  {format(new Date(selectedDate), "dd MMM yyyy")}
+                  <Printer className="h-4 w-4" />
+                  Print
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="single"
-                  selected={new Date(selectedDate)}
-                  onSelect={setReportDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+              </Link>
+            </div>
           }
         />
 

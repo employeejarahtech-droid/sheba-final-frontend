@@ -1,13 +1,47 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState, useEffect, type CSSProperties } from 'react'
 import { getCookie } from '@/lib/cookies'
-import { Loader2, Building2, ArrowLeft, Printer } from 'lucide-react'
+import { Loader2, Building2, ArrowLeft, Printer, Settings2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
+import { Separator } from '@/components/ui/separator'
+import { toast } from 'sonner'
 import { AppHeader } from '@/components/layout/app-header'
 import { Main } from '@/components/layout/main'
 import { useCurrency } from '@/hooks/use-currency'
 
 const API_URL = import.meta.env.VITE_API_URL
+
+type StepPrintPadding = { top: number; right: number; bottom: number; left: number }
+const DEFAULT_PADDING: StepPrintPadding = { top: 32, right: 32, bottom: 32, left: 32 }
+
+// Paper sizes offered for printing this step report. `cssSize` feeds the
+// @page size (browsers use this to pick/suggest the matching physical
+// paper), and `margin` is tuned per size — the 80mm thermal option needs a
+// near-zero margin since receipt printers have almost no physical border.
+const PAPER_SIZES: Record<string, { label: string; cssSize: string; margin: string }> = {
+    a4: { label: 'A4', cssSize: 'A4 portrait', margin: '12mm' },
+    a5: { label: 'A5', cssSize: 'A5 portrait', margin: '8mm' },
+    letter: { label: 'Letter', cssSize: 'letter portrait', margin: '12mm' },
+    legal: { label: 'Legal', cssSize: 'legal portrait', margin: '12mm' },
+    thermal80: { label: '80mm (Thermal)', cssSize: '80mm auto', margin: '2mm' },
+}
+
+// Overall scale for the report content. Most cells/headings here use
+// Tailwind text-size utilities (text-sm, text-xs, ...), which set their own
+// explicit rem font-size and don't inherit a parent's font-size — so scaling
+// via `zoom` (which resizes everything: text, padding, borders) is used
+// instead of trying to override every element's own font size.
+const FONT_SIZES: Record<string, { label: string; zoom: number }> = {
+    sm: { label: 'Small', zoom: 0.85 },
+    base: { label: 'Medium', zoom: 1 },
+    lg: { label: 'Large', zoom: 1.15 },
+    xl: { label: 'Extra Large', zoom: 1.3 },
+}
 
 type AdmissionData = {
     id: number
@@ -99,6 +133,13 @@ function AdmissionStepPrintPage() {
     const { admissionId, step } = Route.useParams()
     const { format } = useCurrency()
     const token = getCookie('accessToken')
+    const queryClient = useQueryClient()
+
+    const [paperSize, setPaperSize] = useState<keyof typeof PAPER_SIZES>('a4')
+    const { cssSize, margin } = PAPER_SIZES[paperSize]
+    const [fontSize, setFontSize] = useState<keyof typeof FONT_SIZES>('base')
+    const [padding, setPadding] = useState<StepPrintPadding>(DEFAULT_PADDING)
+    const [settingsOpen, setSettingsOpen] = useState(false)
 
     const { data: admissionData, isLoading } = useQuery({
         queryKey: ['admission-detail', admissionId],
@@ -143,6 +184,52 @@ function AdmissionStepPrintPage() {
             return result.data;
         },
         enabled: !!token,
+    })
+
+    // Seed every print-setting control from the saved company-wide default once it loads.
+    useEffect(() => {
+        if (!companySettings) return
+        setPadding({
+            top: companySettings.admission_step_padding_top ?? DEFAULT_PADDING.top,
+            right: companySettings.admission_step_padding_right ?? DEFAULT_PADDING.right,
+            bottom: companySettings.admission_step_padding_bottom ?? DEFAULT_PADDING.bottom,
+            left: companySettings.admission_step_padding_left ?? DEFAULT_PADDING.left,
+        })
+        if (companySettings.admission_step_font_size && companySettings.admission_step_font_size in FONT_SIZES) {
+            setFontSize(companySettings.admission_step_font_size)
+        }
+        if (companySettings.admission_step_paper_size && companySettings.admission_step_paper_size in PAPER_SIZES) {
+            setPaperSize(companySettings.admission_step_paper_size)
+        }
+    }, [companySettings])
+
+    // Persist every print setting as the company-wide default — every
+    // admission step print (this one and every other) picks it up via /api/company-settings.
+    const saveDefaultsMutation = useMutation({
+        mutationFn: async () => {
+            const res = await fetch(`${API_URL}/api/company-settings`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    admission_step_padding_top: padding.top,
+                    admission_step_padding_right: padding.right,
+                    admission_step_padding_bottom: padding.bottom,
+                    admission_step_padding_left: padding.left,
+                    admission_step_font_size: fontSize,
+                    admission_step_paper_size: paperSize,
+                }),
+            })
+            if (!res.ok) throw new Error('Failed to save print settings')
+            return res.json()
+        },
+        onSuccess: () => {
+            toast.success('Default print settings saved — applies to every admission step print from now on')
+            queryClient.invalidateQueries({ queryKey: ['company-settings'] })
+        },
+        onError: () => toast.error('Failed to save default print settings'),
     })
 
     const admission = admissionData?.data
@@ -255,7 +342,16 @@ function AdmissionStepPrintPage() {
             <AppHeader fixed className="print:hidden" />
 
             <Main>
-                <div className="invoice-print-area max-w-3xl mx-auto w-full p-8 bg-white mt-10 print:mt-0 shadow-sm print:shadow-none border border-slate-100 print:border-none rounded-lg print:rounded-none">
+                <div
+                    className="invoice-print-area max-w-3xl mx-auto w-full bg-white mt-10 print:mt-0 rounded-lg print:rounded-none"
+                    style={{
+                        zoom: FONT_SIZES[fontSize].zoom,
+                        paddingTop: padding.top,
+                        paddingRight: padding.right,
+                        paddingBottom: padding.bottom,
+                        paddingLeft: padding.left,
+                    } as CSSProperties}
+                >
                     <style>{`
                         .bg-row-blue {
                             background-color: #cfd2d8ff !important;
@@ -283,7 +379,10 @@ function AdmissionStepPrintPage() {
                                 max-width: 100% !important;
                                 width: 100% !important;
                                 margin: 0 !important;
-                                padding: 0 !important;
+                                padding-top: ${padding.top}px !important;
+                                padding-right: ${padding.right}px !important;
+                                padding-bottom: ${padding.bottom}px !important;
+                                padding-left: ${padding.left}px !important;
                                 box-shadow: none !important;
                             }
                             .invoice-print-area table {
@@ -301,26 +400,143 @@ function AdmissionStepPrintPage() {
                             }
                         }
                         @page {
-                            margin: 12mm;
-                            size: A4 portrait;
+                            margin: ${margin};
+                            size: ${cssSize};
                         }
                     `}</style>
 
-                    {/* Back & Print Buttons */}
+                    {/* Back, Print Settings & Print Buttons */}
                     <div className="flex justify-between items-center mb-6 print:hidden">
                         <Button variant="outline" size="sm" onClick={() => window.history.back()}>
                             <ArrowLeft className="w-4 h-4 mr-2" />
                             Back
                         </Button>
-                        <Button size="sm" onClick={() => window.print()}>
-                            <Printer className="w-4 h-4 mr-2" />
-                            Print
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" className="h-8 gap-2" onClick={() => setSettingsOpen(true)}>
+                                <Settings2 className="h-4 w-4" />
+                                <span>Print Settings</span>
+                            </Button>
+                            <Button size="sm" onClick={() => window.print()}>
+                                <Printer className="w-4 h-4 mr-2" />
+                                Print
+                            </Button>
+                        </div>
                     </div>
 
-                    {/* Header */}
-                    <div className="mb-6">
-                        <div className='flex justify-center items-center gap-8'>
+                    <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
+                        <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
+                            <SheetHeader className="border-b px-4 py-3 gap-0">
+                                <SheetTitle className="flex items-center gap-3 pr-8">
+                                    <div className="p-2 bg-primary/10 rounded-lg">
+                                        <Settings2 className="w-4 h-4 text-primary" />
+                                    </div>
+                                    <div>
+                                        <div className="text-base font-semibold text-left">Print Settings</div>
+                                        <SheetDescription className="text-xs font-normal text-left">Adjust how this report looks and prints</SheetDescription>
+                                    </div>
+                                </SheetTitle>
+                            </SheetHeader>
+
+                            <div className="flex-1 overflow-y-auto p-4 space-y-5">
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Font Size</Label>
+                                    <Select value={fontSize} onValueChange={(v) => setFontSize(v as keyof typeof FONT_SIZES)}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Font size" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {Object.entries(FONT_SIZES).map(([key, { label }]) => (
+                                                <SelectItem key={key} value={key}>{label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Paper Size</Label>
+                                    <Select value={paperSize} onValueChange={(v) => setPaperSize(v as keyof typeof PAPER_SIZES)}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Paper size" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {Object.entries(PAPER_SIZES).map(([key, { label }]) => (
+                                                <SelectItem key={key} value={key}>{label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <Separator />
+
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Content Padding (px)</Label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="space-y-1">
+                                            <Label htmlFor="step-padding-top" className="text-xs text-muted-foreground">Top</Label>
+                                            <Input
+                                                id="step-padding-top"
+                                                type="number"
+                                                min={0}
+                                                value={padding.top}
+                                                onChange={(e) => setPadding((p) => ({ ...p, top: Number(e.target.value) || 0 }))}
+                                                className="h-8"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="step-padding-right" className="text-xs text-muted-foreground">Right</Label>
+                                            <Input
+                                                id="step-padding-right"
+                                                type="number"
+                                                min={0}
+                                                value={padding.right}
+                                                onChange={(e) => setPadding((p) => ({ ...p, right: Number(e.target.value) || 0 }))}
+                                                className="h-8"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="step-padding-bottom" className="text-xs text-muted-foreground">Bottom</Label>
+                                            <Input
+                                                id="step-padding-bottom"
+                                                type="number"
+                                                min={0}
+                                                value={padding.bottom}
+                                                onChange={(e) => setPadding((p) => ({ ...p, bottom: Number(e.target.value) || 0 }))}
+                                                className="h-8"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="step-padding-left" className="text-xs text-muted-foreground">Left</Label>
+                                            <Input
+                                                id="step-padding-left"
+                                                type="number"
+                                                min={0}
+                                                value={padding.left}
+                                                onChange={(e) => setPadding((p) => ({ ...p, left: Number(e.target.value) || 0 }))}
+                                                className="h-8"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="border-t p-4 space-y-2">
+                                <Button
+                                    className="w-full"
+                                    onClick={() => saveDefaultsMutation.mutate()}
+                                    disabled={saveDefaultsMutation.isPending}
+                                >
+                                    {saveDefaultsMutation.isPending ? 'Saving...' : 'Save as Default'}
+                                </Button>
+                                <p className="text-xs text-muted-foreground text-center">
+                                    Saved defaults apply to every admission step print, not just this one.
+                                </p>
+                            </div>
+                        </SheetContent>
+                    </Sheet>
+
+                    {/* Header: Logo/Company (left 50%) + Title (right 50%) */}
+                    <div className="mb-6 flex items-start justify-between gap-6">
+                        <div className="w-1/2 flex items-center gap-4">
                             {companyLogo ? (
                                 <img
                                     src={companyLogo}
@@ -329,55 +545,55 @@ function AdmissionStepPrintPage() {
                                 />
                             ) : null}
 
-                            <div className="text-center">
+                            <div>
                                 <h1 className="text-2xl font-bold text-slate-900">{companyName}</h1>
-                                <p className="text-sm mt-1 leading-5 text-slate-600">
-                                    {[companySettings?.address1, companySettings?.address2].filter(Boolean).join(', ')}
-                                </p>
+                                {companySettings?.address1 && (
+                                    <p className="text-sm mt-1 leading-5 text-slate-600">{companySettings.address1}</p>
+                                )}
+                                {companySettings?.address2 && (
+                                    <p className="text-sm leading-5 text-slate-600">{companySettings.address2}</p>
+                                )}
                             </div>
                         </div>
-                    </div>
 
-                    {/* Title */}
-                    <h2 className="text-xl font-bold text-center underline mb-1 tracking-wide uppercase text-slate-800">
-                        {currentStep.title}
-                    </h2>
-                    <p className="text-center text-slate-500 text-xs mb-6 uppercase tracking-wider font-semibold">
-                        {currentStep.description}
-                    </p>
+                        <div className="w-1/2 text-right">
+                            <h2 className="text-xl font-bold tracking-widest uppercase text-slate-800">{currentStep.title}</h2>
+                            <p className="text-slate-500 text-xs mt-1 uppercase tracking-wider font-semibold">
+                                {currentStep.description}
+                            </p>
+                        </div>
+                    </div>
 
                     {/* Verification Status */}
-                    <div className="border border-slate-200 rounded-lg p-4 bg-slate-50/50 mb-6 text-sm">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <span className="text-slate-500 block text-xs uppercase tracking-wider font-semibold">Verification Status</span>
-                                <span className="font-bold text-slate-800 text-sm flex items-center gap-1.5 mt-1">
+                    <table className="w-full text-sm border mb-6">
+                        <tbody>
+                            <tr className="border">
+                                <td className="border px-2 py-1 w-1/2">
+                                    Verification Status:{' '}
+                                    <strong className="inline-flex items-center gap-1.5">
+                                        {isCompleted ? (
+                                            <>
+                                                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                                                Completed
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
+                                                Pending
+                                            </>
+                                        )}
+                                    </strong>
+                                </td>
+                                <td className="border px-2 py-1 w-1/2">
                                     {isCompleted ? (
-                                        <>
-                                            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-                                            Completed
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span className="w-2 h-2 rounded-full bg-amber-500 inline-block animate-pulse"></span>
-                                            Pending
-                                        </>
-                                    )}
-                                </span>
-                            </div>
-                            {isCompleted && (
-                                <div>
-                                    <span className="text-slate-500 block text-xs uppercase tracking-wider font-semibold">Completion Details</span>
-                                    <span className="text-slate-700 block text-xs mt-1">
-                                        Date: <strong>{formattedDate}</strong> {stepUser && <>• By: <strong>{stepUser}</strong></>}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                                        <>Completion Date: <strong>{formattedDate}</strong>{stepUser && <> by <strong>{stepUser}</strong></>}</>
+                                    ) : '-'}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
 
                     {/* Patient Information Table */}
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Patient Details</h3>
                     <table className="w-full text-sm border mb-6">
                         <tbody>
                             <tr className="border">
@@ -411,6 +627,13 @@ function AdmissionStepPrintPage() {
                                     Attending Doctor: <strong>{doctorName}</strong>
                                 </td>
                             </tr>
+                            {admission.diagnosis && (
+                                <tr className="border">
+                                    <td className="border px-2 py-1" colSpan={3}>
+                                        Diagnosis: {admission.diagnosis}
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
 
@@ -440,12 +663,6 @@ function AdmissionStepPrintPage() {
                                 <td className="px-2 py-1 text-xs">Attending Doctor</td>
                                 <td className="px-2 py-1 text-xs font-semibold">{doctorName}</td>
                             </tr>
-                            {admission.diagnosis && (
-                                <tr className="border-b border-dashed">
-                                    <td className="px-2 py-1 text-xs">Diagnosis</td>
-                                    <td className="px-2 py-1 text-xs font-semibold">{admission.diagnosis}</td>
-                                </tr>
-                            )}
                             {/* Show bill amount if bill created */}
                             {step === 'bill-created' && admission.total_bill_amount && (
                                 <tr className="border-b-2 font-bold bg-slate-50">

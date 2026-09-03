@@ -8,6 +8,7 @@ const dueCollectionSearchSchema = z.object({
     search: z.string().catch(''),
     from: z.string().catch(''),
     to: z.string().catch(''),
+    orderBy: z.string().catch('DESC'),
 })
 
 export const Route = createFileRoute(
@@ -26,6 +27,7 @@ function DueCollectionPage() {
     const search = searchParams?.search || "";
     const from = searchParams?.from || "";
     const to = searchParams?.to || "";
+    const orderBy = searchParams?.orderBy || "DESC";
 
     const setPage = (newPage: number) => {
         navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
@@ -50,6 +52,7 @@ function DueCollectionPage() {
             search={search}
             from={from}
             to={to}
+            orderBy={orderBy}
             setPage={setPage}
             setLimit={setLimit}
             setSearch={setSearch}

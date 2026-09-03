@@ -13,6 +13,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { CreateTestTableForm } from '@/features/test-tables/CreateTestTableForm';
 import { EditTestTableForm } from '@/features/test-tables/EditTestTableForm';
+import { FormBuilderModal } from '@/features/test-tables/FormBuilderModal';
 import { useCan } from '@/hooks/use-can';
 
 const testTablesSearchSchema = z.object({
@@ -39,6 +40,8 @@ type TestItem = {
   created_by?: string;
   creator?: { id: number; name: string };
   total_test_count?: number;
+  is_custom_form_designer?: boolean;
+  form_schema?: { key: string; label: string }[] | null;
 };
 
 function TestTables() {
@@ -49,6 +52,8 @@ function TestTables() {
 
   const [tableId, setTableId] = useState<number>(1);
   const [open, setOpen] = useState<boolean>(false);
+  const [formBuilderId, setFormBuilderId] = useState<number>(1);
+  const [formBuilderOpen, setFormBuilderOpen] = useState<boolean>(false);
 
   const searchParams: any = Route.useSearch();
   const navigate = Route.useNavigate();
@@ -103,6 +108,14 @@ function TestTables() {
       }
     };
   }, [deleteMutation]);
+
+  // Expose Form Builder open function to window for onclick handlers
+  useEffect(() => {
+    (window as any).openFormBuilder = (id: number) => {
+      setFormBuilderId(id);
+      setFormBuilderOpen(true);
+    };
+  }, []);
 
   const { data, isFetching, refetch: refetchTestTables } = useQuery({
     queryKey: ["test-tables", page, limit, search],
@@ -325,6 +338,30 @@ function TestTables() {
       defaultContent: "N/A",
     },
     {
+      data: "is_custom_form_designer",
+      title: "Type",
+      orderable: false,
+      responsivePriority: 2,
+      render: (_data: any, _type: string, row: TestItem) => {
+        return row.is_custom_form_designer
+          ? `<span class="font-mono text-xs text-indigo-600 bg-indigo-50 dark:bg-indigo-950/30 dark:text-indigo-400 px-2 py-1 rounded">Custom Form</span>`
+          : `<span class="font-mono text-xs text-gray-600 bg-gray-50 dark:bg-gray-800 dark:text-gray-400 px-2 py-1 rounded">Table</span>`;
+      },
+      defaultContent: "",
+    },
+    {
+      data: "form_schema",
+      title: "Fields",
+      orderable: false,
+      responsivePriority: 3,
+      render: (_data: any, _type: string, row: TestItem) => {
+        if (!row.is_custom_form_designer) return `<span class="text-muted-foreground text-xs">—</span>`;
+        const count = Array.isArray(row.form_schema) ? row.form_schema.length : 0;
+        return `<span class="font-mono text-xs text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-400 px-2 py-1 rounded">${count} field${count === 1 ? '' : 's'}</span>`;
+      },
+      defaultContent: "",
+    },
+    {
       data: "total_test_count",
       title: "Total Test Count",
       orderable: true,
@@ -350,6 +387,10 @@ function TestTables() {
             ${canEdit ? `<button onclick="window.editTestTable(${row.id})" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
               Edit
+            </button>` : ''}
+            ${canEdit && row.is_custom_form_designer ? `<button onclick="window.openFormBuilder(${row.id})" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold shadow transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              Form Builder
             </button>` : ''}
             ${canDelete ? `<button onclick="window.deleteTestTable(${row.id})" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-semibold shadow transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -381,6 +422,7 @@ function TestTables() {
         isLoading={isFetching}
       />
       <EditTestTableForm id={tableId} open={open} setOpen={setOpen} />
+      <FormBuilderModal id={formBuilderId} open={formBuilderOpen} setOpen={setFormBuilderOpen} />
     </main>
   </>
 }

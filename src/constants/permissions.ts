@@ -59,13 +59,27 @@ const CUSTOM_PAGE_ACTIONS: Record<string, { label: string; action: string }[]> =
         { label: 'View', action: 'view' },
         { label: 'Collection', action: 'collection' },
     ],
-    'outdoor.reception.invoices.list': [{ label: 'View', action: 'view' }],
+    // "All Invoices" and "Patients by Referrer" share the same list component
+    // (features/invoices/index.tsx), whose Actions column has real Edit / Note
+    // / Pay-Now buttons beyond plain viewing — gate those separately instead
+    // of bundling them into "view".
+    'outdoor.reception.invoices.list': [
+        { label: 'View', action: 'view' },
+        { label: 'Edit', action: 'edit' },
+        { label: 'Note', action: 'note' },
+        { label: 'Collection', action: 'collection' },
+    ],
     'outdoor.reception.my-invoices': [{ label: 'View', action: 'view' }],
     'outdoor.reception.user-invoices': [{ label: 'View', action: 'view' }],
     'outdoor.reception.all-collections': [{ label: 'View', action: 'view' }],
     'outdoor.reception.my-collections': [{ label: 'View', action: 'view' }],
     'outdoor.reception.user-wise-collections': [{ label: 'View', action: 'view' }],
-    'outdoor.reception.patients-by-referrer': [{ label: 'View', action: 'view' }],
+    'outdoor.reception.patients-by-referrer': [
+        { label: 'View', action: 'view' },
+        { label: 'Edit', action: 'edit' },
+        { label: 'Note', action: 'note' },
+        { label: 'Collection', action: 'collection' },
+    ],
     // Indoor — Admission. Admission + billing/discharge workflow; most list
     // pages are view-only. "All Patients" exposes the workflow actions.
     // NOTE: sidebar URLs are /dashboard/admission/* (no "indoor/" segment),

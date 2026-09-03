@@ -69,6 +69,7 @@ import {
   PartyPopper,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getBaseDomain, getTenantDisplayDomain } from '@/lib/subdomain'
 import { checkSubdomain } from '@/services/platform-admin'
 import {
   useRegistrations,
@@ -556,7 +557,7 @@ function RegistrationsAdminPage() {
                     <div>
                       <p className="font-medium">{reg.company_name || '—'}</p>
                       <p className="text-xs text-muted-foreground font-mono">
-                        {reg.subdomain ? `${reg.subdomain}.sheba.app` : '—'}
+                        {reg.subdomain ? getTenantDisplayDomain(reg.subdomain) : '—'}
                       </p>
                     </div>
                   </td>
@@ -756,7 +757,7 @@ function RegistrationsAdminPage() {
                 <div>
                   <span className="text-muted-foreground">Subdomain</span>
                   <p className="font-medium font-mono">
-                    {viewReg.subdomain ? `${viewReg.subdomain}.sheba.app` : '—'}
+                    {viewReg.subdomain ? getTenantDisplayDomain(viewReg.subdomain) : '—'}
                   </p>
                 </div>
                 <div>
@@ -902,7 +903,7 @@ function RegistrationsAdminPage() {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subdomain</span>
                   <span className="font-mono font-medium text-blue-600">
-                    {approveReg?.subdomain}.sheba.app
+                    {getTenantDisplayDomain(approveReg?.subdomain)}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -1148,7 +1149,7 @@ function RegistrationsAdminPage() {
                   )}
                 </div>
                 <span className="inline-flex items-center rounded-r-md border border-l-0 border-input bg-muted px-3 h-9 text-sm text-muted-foreground">
-                  .sheba.app
+                  .{getBaseDomain()}
                 </span>
               </div>
               {subdomainAvailable === true && (

@@ -62,6 +62,14 @@ export const useGetIncomesQuery = (params?: { page?: number; limit?: number; sea
     });
 };
 
+export const useGetIncomeByIdQuery = (id: number | string | undefined) => {
+    return useQuery({
+        queryKey: [...ACCOUNTING_KEYS.incomes(), id],
+        queryFn: () => accountingService.getIncomeById(id!),
+        enabled: !!id,
+    });
+};
+
 export const useAddIncomeMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
@@ -78,6 +86,14 @@ export const useGetExpensesQuery = (params?: { page?: number; limit?: number; se
     return useQuery({
         queryKey: [...ACCOUNTING_KEYS.expenses(), params],
         queryFn: () => accountingService.getExpenses(params),
+    });
+};
+
+export const useGetExpenseByIdQuery = (id: number | string | undefined) => {
+    return useQuery({
+        queryKey: [...ACCOUNTING_KEYS.expenses(), id],
+        queryFn: () => accountingService.getExpenseById(id!),
+        enabled: !!id,
     });
 };
 
@@ -193,6 +209,10 @@ export const useGetProfitLossQuery = (params?: { from?: string; to?: string }) =
     return useQuery({
         queryKey: [...ACCOUNTING_KEYS.profitLoss(), params],
         queryFn: () => accountingService.getProfitLoss(params),
+        // A P&L statement is inherently period-based (unlike an "as of" report),
+        // so don't fetch — and silently fall back to an all-time total — until
+        // the user has actually picked both ends of a range.
+        enabled: !!(params?.from && params?.to),
     });
 };
 

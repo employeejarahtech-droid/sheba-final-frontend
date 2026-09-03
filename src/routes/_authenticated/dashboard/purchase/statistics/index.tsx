@@ -25,12 +25,12 @@ function PurchaseStatisticsPage() {
     <>
       <AppHeader fixed />
       <Main>
-        <div className="mb-6">
+        <div className="mb-3">
           <h1 className="text-2xl font-bold tracking-tight">Purchase Statistics</h1>
           <p className="text-muted-foreground text-sm">Procurement analytics by status and department</p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-3">
           <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
             <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
               <div className="flex items-center gap-2.5">

@@ -29,6 +29,7 @@ import {
   ChevronsUpDown,
 } from 'lucide-react'
 import { getBaseDomain, getSubdomain } from '@/lib/subdomain'
+import { usePageSeo } from '@/lib/seo'
 import { LandingPageWrapper } from '@/components/layout/landing-layout'
 import { useAuthStore } from '@/stores/auth-store'
 import api from '@/lib/axios'
@@ -66,7 +67,7 @@ const registerSchema = z
     currency: z.string().optional(),
     admin_password: z.string().min(6, 'Password must be at least 6 characters'),
     confirm_password: z.string(),
-    plan_id: z.string().optional(),
+    plan_id: z.string().min(1, 'Please select a plan'),
   })
   .refine((data) => data.admin_password === data.confirm_password, {
     message: 'Passwords do not match',
@@ -97,6 +98,13 @@ export const Route = createFileRoute('/(platform)/register')({
 })
 
 function RegisterPage() {
+  usePageSeo({
+    title: 'Get Started | HMS Hospital Management Software',
+    description:
+      "Create your hospital's HMS account and get started with a dedicated, encrypted hospital management software instance.",
+    path: '/register',
+  })
+
   const navigate = useNavigate()
   const { setAuth } = useAuthStore()
   const search = useSearch({ from: '/(platform)/register' })
@@ -128,6 +136,8 @@ function RegisterPage() {
     handleSubmit,
     watch,
     setValue,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
@@ -209,6 +219,14 @@ function RegisterPage() {
   }
 
   const onSubmit = async (data: FormValues) => {
+    if (!selectedPlan) {
+      // plan_id is a required field (every plan is paid — no plan means no
+      // checkout session), but it lives in the left-hand card rather than a
+      // form input, so it is validated here and surfaced on the card.
+      setError('plan_id', { message: 'Please select a plan to continue.' })
+      toast.error('Please select a plan to continue.')
+      return
+    }
     if (subdomainStatus === 'taken') {
       toast.error('Subdomain is not available')
       return
@@ -351,7 +369,7 @@ function RegisterPage() {
                       <button
                         key={p.id}
                         type="button"
-                        onClick={() => { setSelectedPlan(String(p.id)); updateUrl(String(p.id), billingCycle) }}
+                        onClick={() => { setSelectedPlan(String(p.id)); clearErrors('plan_id'); updateUrl(String(p.id), billingCycle) }}
                         className={`w-full text-left p-3 rounded-lg border-2 transition-colors ${
                           selectedPlan === String(p.id)
                             ? 'border-blue-600 bg-blue-50'
@@ -377,6 +395,9 @@ function RegisterPage() {
                       </button>
                     )
                   })}
+                  {errors.plan_id && (
+                    <p className="text-xs text-destructive">{errors.plan_id.message}</p>
+                  )}
                 </CardContent>
               </Card>
             )}

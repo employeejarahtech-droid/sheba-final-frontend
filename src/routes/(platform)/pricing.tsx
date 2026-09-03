@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/badge'
 import { LandingPageWrapper } from '@/components/layout/landing-layout'
 import { CtaSection } from '@/components/landing/cta-section'
 import { fetchPublicPlans } from '@/services/platform-public'
+import { usePageSeo } from '@/lib/seo'
 
 export const Route = createFileRoute('/(platform)/pricing')({
   component: PricingPage,
@@ -138,6 +139,13 @@ function calculateSavings(monthly: number, yearly: number): number {
 }
 
 function PricingPage() {
+  usePageSeo({
+    title: 'Pricing — Hospital Management Software Plans | HMS',
+    description:
+      'Simple, transparent pricing for HMS hospital management software. Start free and scale to Pro or Enterprise, each with a dedicated, encrypted database.',
+    path: '/pricing',
+  })
+
   const [annual, setAnnual] = useState(false)
 
   const { data: plansData, isLoading } = useQuery({

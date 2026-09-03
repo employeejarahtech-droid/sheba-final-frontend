@@ -112,7 +112,7 @@ const getStatusBadgeHtml = (status: string) => {
 }
 
 export function DoctorReferredPage({ page, limit, search, setPage, setLimit, setSearch }: DoctorReferredPageProps) {
-  const { format } = useCurrency()
+  const { format, currencySymbol } = useCurrency()
   const token = getCookie('accessToken')
   const queryClient = useQueryClient()
 
@@ -381,12 +381,12 @@ export function DoctorReferredPage({ page, limit, search, setPage, setLimit, set
     },
     {
       data: 'finalBill',
-      title: 'Bill Amount',
+      title: `Bill Amount (${currencySymbol})`,
       orderable: false,
       className: 'text-right',
       render: (_data: any, _type: string, row: DoctorReferred) =>
         row.finalBill
-          ? `<span class="font-semibold">${format(Number(row.finalBill.total_discounted_amount))}</span>`
+          ? `<span class="font-semibold">${Number(row.finalBill.total_discounted_amount).toLocaleString()}</span>`
           : '-',
     },
     {
@@ -412,7 +412,7 @@ export function DoctorReferredPage({ page, limit, search, setPage, setLimit, set
         </button>
       `,
     },
-  ], [format])
+  ], [format, currencySymbol])
 
   // Handle expand button clicks in the Admission ID column — toggles a
   // detail row with patient info, status timeline and payment summary,

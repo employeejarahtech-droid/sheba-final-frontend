@@ -331,7 +331,7 @@ export function EditProthrombinTimeForm({ open, setOpen, reportId, invoiceId }: 
                                 {form.formState.isSubmitting ? "Saving..." : "Save"}
                             </Button>
 
-                            <Link to={`/pathology/hematology/prothom-bin-time-full/report/$reportId`} params={{ reportId: reportId.toString() }}>
+                            <Link to="/dashboard/pathology/hematology/prothom-bin-time-full/report/$reportId" params={{ reportId: reportId.toString() }}>
                                 <Button type="button" variant="warning">
                                     Print Preview
                                 </Button>

@@ -4,13 +4,20 @@ import { Main } from '@/components/layout/main';
 import { AppHeader } from '@/components/layout/app-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCookie } from '@/lib/cookies';
+import { summernoteTableButtons } from '@/lib/summernote-table-tools';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Printer, User, FileText, PenLine, ImageIcon, Trash2 } from 'lucide-react';
+import { ArrowLeft, Printer, User, FileText, PenLine, ImageIcon, Trash2, ZoomIn, ZoomOut, RotateCcw, Download, ExternalLink, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { GallerySelector } from '@/components/gallery-selector';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 type XrayImage = { key: string | null; url: string };
+
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 5;
+const ZOOM_STEP = 0.25;
+const clampZoom = (z: number) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z));
 
 export const Route = createFileRoute(
   '/_authenticated/dashboard/x-ray/all/edit/builder/$id',
@@ -26,6 +33,48 @@ function XRayBuilder() {
 
   const editorRef = useRef<HTMLDivElement>(null);
   const [summernoteInitialized, setSummernoteInitialized] = useState(false);
+
+  // Zoomable X-ray image viewer
+  const [viewerImage, setViewerImage] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const panStartRef = useRef({ x: 0, y: 0 });
+
+  const openViewer = (url: string) => {
+    setViewerImage(url);
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  };
+  const closeViewer = () => setViewerImage(null);
+  const zoomIn = () => setZoom((z) => clampZoom(z + ZOOM_STEP));
+  const zoomOut = () => setZoom((z) => clampZoom(z - ZOOM_STEP));
+  const resetZoom = () => { setZoom(1); setPan({ x: 0, y: 0 }); };
+  const handleWheelZoom = (e: React.WheelEvent) => {
+    e.preventDefault();
+    setZoom((z) => clampZoom(z + (e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP)));
+  };
+  const handleImageDoubleClick = () => {
+    setZoom((z) => (z > 1 ? 1 : 2));
+    setPan({ x: 0, y: 0 });
+  };
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (zoom <= 1) return;
+    isDraggingRef.current = true;
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    panStartRef.current = pan;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDraggingRef.current) return;
+    const dx = e.clientX - dragStartRef.current.x;
+    const dy = e.clientY - dragStartRef.current.y;
+    setPan({ x: panStartRef.current.x + dx, y: panStartRef.current.y + dy });
+  };
+  const handlePointerUp = () => {
+    isDraggingRef.current = false;
+  };
   const [editorReady, setEditorReady] = useState(false);
 
   // Load jQuery and Summernote CSS and JS
@@ -101,6 +150,7 @@ function XRayBuilder() {
         try {
           $(editorRef.current).summernote({
             height: 500,
+            buttons: summernoteTableButtons($),
             toolbar: [
               ['style', ['style']],
               ['font', ['bold', 'italic', 'underline', 'clear']],
@@ -108,7 +158,8 @@ function XRayBuilder() {
               ['fontname', ['fontname']],
               ['color', ['color']],
               ['para', ['ul', 'ol', 'paragraph']],
-              ['insert', ['link', 'picture', 'hr']],
+              ['insert', ['link', 'hr', 'table']],
+              ['table-tools', ['tableWidth', 'tableAlign', 'tableHead']],
               ['view', ['fullscreen', 'codeview']],
               ['help', ['help']]
             ],
@@ -411,9 +462,14 @@ function XRayBuilder() {
                       <img
                         src={img.url}
                         alt="X-ray scan"
-                        className="w-full h-full object-cover cursor-pointer"
-                        onClick={() => window.open(img.url, '_blank')}
+                        className="w-full h-full object-cover cursor-zoom-in"
+                        onClick={() => openViewer(img.url)}
                       />
+                      <div
+                        className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors duration-300 pointer-events-none"
+                      >
+                        <Search className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow" />
+                      </div>
                       <button
                         onClick={() => deleteImageMutation.mutate(img)}
                         disabled={deleteImageMutation.isPending}
@@ -460,6 +516,77 @@ function XRayBuilder() {
         </Card>
         </div>
       </Main>
+
+      {/* Zoomable X-ray image viewer */}
+      <Dialog open={!!viewerImage} onOpenChange={(open) => { if (!open) closeViewer(); }}>
+        <DialogContent
+          showCloseButton={false}
+          className="max-w-[96vw] w-[96vw] h-[92vh] max-h-[92vh] p-0 gap-0 flex flex-col bg-black border-none sm:max-w-[96vw]"
+        >
+          <DialogTitle className="sr-only">X-Ray Image Viewer</DialogTitle>
+
+          {/* Toolbar */}
+          <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-neutral-900 text-white shrink-0">
+            <span className="text-sm font-medium text-neutral-300">X-Ray Image Viewer</span>
+            <div className="flex items-center gap-1.5">
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/10 hover:text-white" onClick={zoomOut} disabled={zoom <= ZOOM_MIN} title="Zoom out">
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+              <span className="text-xs font-mono text-neutral-300 w-12 text-center select-none">{Math.round(zoom * 100)}%</span>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/10 hover:text-white" onClick={zoomIn} disabled={zoom >= ZOOM_MAX} title="Zoom in">
+                <ZoomIn className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/10 hover:text-white" onClick={resetZoom} title="Reset zoom">
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+              <div className="w-px h-5 bg-white/20 mx-1" />
+              {viewerImage && (
+                <>
+                  <Button asChild variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/10 hover:text-white" title="Open in new tab">
+                    <a href={viewerImage} target="_blank" rel="noreferrer">
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </Button>
+                  <Button asChild variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/10 hover:text-white" title="Download">
+                    <a href={viewerImage} download>
+                      <Download className="h-4 w-4" />
+                    </a>
+                  </Button>
+                </>
+              )}
+              <div className="w-px h-5 bg-white/20 mx-1" />
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/10 hover:text-white" onClick={closeViewer} title="Close">
+                <span className="text-lg leading-none">&times;</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Image canvas — wheel to zoom, drag to pan when zoomed in, double-click to toggle 2x */}
+          <div
+            className="flex-1 overflow-hidden flex items-center justify-center select-none"
+            onWheel={handleWheelZoom}
+            style={{ cursor: zoom > 1 ? 'grab' : 'zoom-in' }}
+          >
+            {viewerImage && (
+              <img
+                src={viewerImage}
+                alt="X-ray scan (zoomed)"
+                draggable={false}
+                onDoubleClick={handleImageDoubleClick}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerLeave={handlePointerUp}
+                className="max-w-full max-h-full object-contain transition-transform duration-100 ease-out"
+                style={{
+                  transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                  cursor: zoom > 1 ? 'grab' : 'zoom-in',
+                }}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

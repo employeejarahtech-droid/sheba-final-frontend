@@ -54,6 +54,7 @@ interface ListOfTestsProps {
     categoryId?: number;
     matchTableName?: string;
     status?: string;
+    orderBy?: string;
     setPage: (page: number) => void;
     setLimit: (limit: number) => void;
     setSearch: (search: string) => void;
@@ -62,7 +63,7 @@ interface ListOfTestsProps {
     setStatus: (status: string | undefined) => void;
 }
 
-export default function ListOfTests({ page, limit, search, categoryId, matchTableName, status, setPage, setLimit, setSearch, setCategoryId, setMatchTableName, setStatus }: ListOfTestsProps) {
+export default function ListOfTests({ page, limit, search, categoryId, matchTableName, status, orderBy, setPage, setLimit, setSearch, setCategoryId, setMatchTableName, setStatus }: ListOfTestsProps) {
     const { currencySymbol } = useCurrency();
 
     const token = getCookie('accessToken');
@@ -145,7 +146,7 @@ export default function ListOfTests({ page, limit, search, categoryId, matchTabl
 
     // Fetch tests — gated on testTables loaded so display names resolve on first render
     const { data, isFetching } = useQuery({
-        queryKey: ["tests", page, limit, search, categoryId, matchTableName, status],
+        queryKey: ["tests", page, limit, search, categoryId, matchTableName, status, orderBy],
         queryFn: async () => {
             const params = new URLSearchParams({
                 page: String(page),
@@ -155,6 +156,7 @@ export default function ListOfTests({ page, limit, search, categoryId, matchTabl
             if (categoryId) params.set('category_id', String(categoryId));
             if (matchTableName) params.set('match_table_name', matchTableName);
             if (status) params.set('status', status);
+            if (orderBy) params.set('orderBy', orderBy);
 
             const res = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/tests?${params.toString()}`,
@@ -350,7 +352,10 @@ export default function ListOfTests({ page, limit, search, categoryId, matchTabl
             title: "ID",
             orderable: true,
             responsivePriority: 3,
-            render: (_data: any, _type: string, row: TestItem, meta: any) => {
+            render: (_data: any, type: string, row: TestItem, meta: any) => {
+                // Sort/detect as the raw numeric id — otherwise DataTables orders the
+                // rendered "T-<id>" badge lexicographically (T-9 > T-10).
+                if (type === 'sort' || type === 'type') return row.id;
                 const rawTableName = row.match_table_name ? String(row.match_table_name) : '';
                 const matchedTable = testTables.find(
                     (t: any) => t.table_name === rawTableName || t.display_name === rawTableName
@@ -564,6 +569,8 @@ export default function ListOfTests({ page, limit, search, categoryId, matchTabl
                 search={search}
                 isLoading={isFetching}
                 onSearchChange={setSearch}
+                searchPlaceholder="Search by ID or Test Name..."
+                hideExport
                 filterSlot={
                     <>
                     {/* Category — searchable */}

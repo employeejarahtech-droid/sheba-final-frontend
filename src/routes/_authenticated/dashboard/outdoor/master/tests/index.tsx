@@ -1,6 +1,7 @@
 import ListOfTests from '@/components/ListOfTests'
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
+import { useEffect } from 'react'
 
 const testsSearchSchema = z.object({
     page: z.coerce.number().catch(1),
@@ -9,6 +10,7 @@ const testsSearchSchema = z.object({
     category_id: z.coerce.number().optional().catch(undefined),
     match_table_name: z.string().optional().catch(undefined),
     status: z.enum(['active', 'inactive']).optional().catch(undefined),
+    orderBy: z.string().optional(),
 })
 
 export const Route = createFileRoute('/_authenticated/dashboard/outdoor/master/tests/')({
@@ -26,6 +28,14 @@ function TestsPage() {
     const categoryId = searchParams?.category_id || undefined;
     const matchTableName = searchParams?.match_table_name || undefined;
     const status = searchParams?.status || undefined;
+    const orderBy = searchParams?.orderBy || "DESC";
+
+    // Reflect the default sort (ID DESC) in the URL — mirrors the pathology list pages.
+    useEffect(() => {
+        if (!searchParams?.orderBy) {
+            navigate({ to: '.', search: (prev: any) => ({ ...prev, orderBy: 'DESC' }), replace: true });
+        }
+    }, []);
 
     const setPage = (newPage: number) => {
         navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
@@ -46,5 +56,5 @@ function TestsPage() {
         navigate({ to: '.', search: (prev: any) => ({ ...prev, status: newStatus, page: 1 }) });
     };
 
-    return <ListOfTests page={page} limit={limit} search={search} categoryId={categoryId} matchTableName={matchTableName} status={status} setPage={setPage} setLimit={setLimit} setSearch={setSearch} setCategoryId={setCategoryId} setMatchTableName={setMatchTableName} setStatus={setStatus} />
+    return <ListOfTests page={page} limit={limit} search={search} categoryId={categoryId} matchTableName={matchTableName} status={status} orderBy={orderBy} setPage={setPage} setLimit={setLimit} setSearch={setSearch} setCategoryId={setCategoryId} setMatchTableName={setMatchTableName} setStatus={setStatus} />
 }

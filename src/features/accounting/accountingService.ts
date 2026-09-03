@@ -23,7 +23,9 @@ import type {
     DebitHeadByIdResponse,
     DebitHeadResponse,
     ExpenseResponse,
+    ExpenseByIdResponse,
     IncomeResponse,
+    IncomeByIdResponse,
     JournalReportResponse,
     PayrollResponse,
     CashFlowResponse,
@@ -61,6 +63,12 @@ export const accountingService = {
         return response.data;
     },
 
+    // GET INCOME BY ID
+    getIncomeById: async (id: number | string) => {
+        const response = await api.get<IncomeByIdResponse>(`/accounting/incomes/${id}`);
+        return response.data;
+    },
+
     // ADD INCOME
     addIncome: async (body: Partial<Income>) => {
         const response = await api.post<IncomeResponse>('/accounting/incomes/head-wise', body);
@@ -70,6 +78,12 @@ export const accountingService = {
     // GET ALL EXPENSES
     getExpenses: async (params?: { page?: number; limit?: number; search?: string; date?: string; start_date?: string; end_date?: string }) => {
         const response = await api.get<ExpenseResponse>('/accounting/expenses', { params });
+        return response.data;
+    },
+
+    // GET EXPENSE BY ID
+    getExpenseById: async (id: number | string) => {
+        const response = await api.get<ExpenseByIdResponse>(`/accounting/expenses/${id}`);
         return response.data;
     },
 

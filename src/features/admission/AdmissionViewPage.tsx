@@ -316,8 +316,16 @@ export function AdmissionViewPage({ admissionId }: AdmissionViewPageProps) {
                                 <CardContent className="p-4 grid grid-cols-2 gap-4">
                                     <Info label="Patient Name" value={a.patient_name} />
                                     <Info label="Age / Sex" value={[a.age_text || a.age, a.sex].filter(Boolean).join(' / ')} />
+                                    <Info label="Father / Husband Name" value={a.father_name} />
                                     <Info label="Phone" value={<span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" />{a.phone}</span>} />
                                     <Info label="ID Card Number" value={a.id_card_number} />
+                                    <div />
+                                    <div className="col-span-2">
+                                        <Info label="Address" value={[a.village, a.thana, a.district, a.division, a.country].filter(Boolean).join(', ') || null} />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <Info label="Detailed Address" value={a.address} />
+                                    </div>
                                 </CardContent>
                             </Card>
 

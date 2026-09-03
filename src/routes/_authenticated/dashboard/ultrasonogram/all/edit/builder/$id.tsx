@@ -4,6 +4,7 @@ import { Main } from '@/components/layout/main';
 import { AppHeader } from '@/components/layout/app-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCookie } from '@/lib/cookies';
+import { summernoteTableButtons } from '@/lib/summernote-table-tools';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Printer, User, FileText, PenLine } from 'lucide-react';
@@ -102,6 +103,7 @@ function UltrasonogramBuilder() {
         try {
           $(editorRef.current).summernote({
             height: 500,
+            buttons: summernoteTableButtons($),
             toolbar: [
               ['style', ['style']],
               ['font', ['bold', 'italic', 'underline', 'clear']],
@@ -109,7 +111,8 @@ function UltrasonogramBuilder() {
               ['fontname', ['fontname']],
               ['color', ['color']],
               ['para', ['ul', 'ol', 'paragraph']],
-              ['insert', ['link', 'picture', 'hr']],
+              ['insert', ['link', 'hr', 'table']],
+              ['table-tools', ['tableWidth', 'tableAlign', 'tableHead']],
               ['view', ['fullscreen', 'codeview']],
               ['help', ['help']]
             ],

@@ -16,10 +16,11 @@ const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6'
 interface CustomerLedgerItem {
   id: number
   patient_name: string
-  patient_phone: string | null
+  phone: string | null
   department_name: string | null
-  bill_amount: number
-  collected_amount: number
+  total_amount: number
+  total_paid: number
+  due_amount: number
   created_at: string
 }
 
@@ -88,8 +89,8 @@ function CustomerLedgerReport() {
 
   // Calculate statistics
   const stats = useMemo(() => {
-    const totalBilled = items.reduce((s, i) => s + Number(i.bill_amount || 0), 0)
-    const totalCollected = items.reduce((s, i) => s + Number(i.collected_amount || 0), 0)
+    const totalBilled = items.reduce((s, i) => s + Number(i.total_amount || 0), 0)
+    const totalCollected = items.reduce((s, i) => s + Number(i.total_paid || 0), 0)
     const outstanding = totalBilled - totalCollected
 
     return [
@@ -158,7 +159,7 @@ function CustomerLedgerReport() {
       },
     },
     {
-      data: "patient_phone",
+      data: "phone",
       title: "Phone",
       render: (data: string | null) => data ? `<span class="font-mono text-xs">${data}</span>` : '-',
     },
@@ -170,23 +171,23 @@ function CustomerLedgerReport() {
       },
     },
     {
-      data: "bill_amount",
+      data: "total_amount",
       title: "Total Billed (৳)",
       orderable: true,
       render: (data: number) => `<span class="font-semibold">${Number(data || 0).toFixed(2)}</span>`,
     },
     {
-      data: "collected_amount",
+      data: "total_paid",
       title: "Paid (৳)",
       orderable: true,
       render: (data: number) => `<span class="text-emerald-600 font-bold">${Number(data || 0).toFixed(2)}</span>`,
     },
     {
-      data: null,
+      data: "due_amount",
       title: "Balance (৳)",
       orderable: false,
-      render: (_data: any, _type: string, row: CustomerLedgerItem) => {
-        const bal = Number(row.bill_amount || 0) - Number(row.collected_amount || 0)
+      render: (data: number) => {
+        const bal = Number(data || 0)
         return `<span class="${bal > 0 ? 'text-red-600 font-bold' : 'text-gray-500'}">${bal.toFixed(2)}</span>`
       },
     },

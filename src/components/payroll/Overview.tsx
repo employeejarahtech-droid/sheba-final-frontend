@@ -1,6 +1,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DateField } from "@/components/date-field";
 import {
     ArrowDownCircle,
     ArrowUpCircle,
@@ -8,6 +10,7 @@ import {
     Building2,
     CalendarX2,
     Clock,
+    LayoutDashboard,
     PieChart,
     PlusCircle,
     Users,
@@ -22,6 +25,13 @@ import { AppHeader } from "../layout/app-header";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "@/lib/cookies";
 import { useCurrency } from "@/hooks/use-currency";
+
+function toYMD(d: Date) {
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${day}`
+}
 
 // Dummy types
 type Department = {
@@ -191,6 +201,46 @@ const DUMMY_STAFF_DATA: Staff[] = [
     },
 ];
 
+// ===== Summary Card Component =====
+function SummaryCard({
+    title,
+    value,
+    subtitle,
+    subtitleClassName,
+    icon: Icon,
+    gradientClass,
+}: {
+    title: string;
+    value: string;
+    subtitle?: string;
+    subtitleClassName?: string;
+    icon: React.ElementType;
+    gradientClass: string;
+}) {
+    return (
+        <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                <div className="flex items-center gap-2.5">
+                    <div className={`p-2 bg-gradient-to-br ${gradientClass} rounded-lg shadow-lg`}>
+                        <Icon className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                        <CardTitle className="text-sm font-semibold">{title}</CardTitle>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent className="p-4">
+                <div className="text-2xl font-bold">{value}</div>
+                {subtitle ? (
+                    <div className="flex items-center gap-1 mt-1">
+                        <span className={`text-xs font-medium ${subtitleClassName ?? 'text-muted-foreground'}`}>{subtitle}</span>
+                    </div>
+                ) : null}
+            </CardContent>
+        </Card>
+    );
+}
+
 // Simple modal
 function ConfirmModal({
     open,
@@ -232,10 +282,62 @@ export default function HrPayrollOverview() {
     const queryClient = useQueryClient();
     const { currencySymbol } = useCurrency();
 
+    // Hire Date range filter — same preset-dropdown convention used across the
+    // other dashboard pages, filtering by this list's own date column.
+    const [from, setFrom] = useState('');
+    const [to, setTo] = useState('');
+    const [customSelected, setCustomSelected] = useState(false);
+    const [presetOpen, setPresetOpen] = useState(false);
+
+    const datePresets = useMemo(() => {
+        const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d }
+        const shift = (n: number) => { const d = today(); d.setDate(d.getDate() - n); return d }
+        return ({
+            today: { label: 'Today', from: toYMD(today()), to: toYMD(today()) },
+            yesterday: { label: 'Yesterday', from: toYMD(shift(1)), to: toYMD(shift(1)) },
+            last7: { label: 'Last 7 days', from: toYMD(shift(6)), to: toYMD(today()) },
+            last15: { label: 'Last 15 days', from: toYMD(shift(14)), to: toYMD(today()) },
+            last30: { label: 'Last 30 days', from: toYMD(shift(29)), to: toYMD(today()) },
+            last45: { label: 'Last 45 days', from: toYMD(shift(44)), to: toYMD(today()) },
+            last60: { label: 'Last 60 days', from: toYMD(shift(59)), to: toYMD(today()) },
+            last90: { label: 'Last 90 days', from: toYMD(shift(89)), to: toYMD(today()) },
+            last180: { label: 'Last 180 days', from: toYMD(shift(179)), to: toYMD(today()) },
+            last365: { label: 'Last 365 days', from: toYMD(shift(364)), to: toYMD(today()) },
+            thisMonth: { label: 'This Month', from: toYMD(new Date(new Date().getFullYear(), new Date().getMonth(), 1)), to: toYMD(today()) },
+        } as const)
+    }, [])
+
+    const activePreset = useMemo(() => {
+        if (!from || !to) return 'allTime'
+        const match = Object.entries(datePresets).find(([, v]) => v.from === from && v.to === to)
+        return match ? match[0] : 'custom'
+    }, [from, to, datePresets])
+
+    const showCustomFields = customSelected || activePreset === 'custom'
+
+    const applyPreset = (key: string) => {
+        if (key === 'custom') {
+            setCustomSelected(true)
+        } else {
+            setCustomSelected(false)
+            if (key === 'allTime') {
+                setFrom(''); setTo('')
+            } else {
+                const p = (datePresets as any)[key]
+                if (p) { setFrom(p.from); setTo(p.to) }
+            }
+            setPage(1)
+        }
+        setPresetOpen(false)
+    }
+
     const { data: usersResponse, isLoading } = useQuery({
-        queryKey: ["users-list", page, limit, search],
+        queryKey: ["users-list", page, limit, search, from, to],
         queryFn: async () => {
-            const url = `${import.meta.env.VITE_API_URL}/api/users/list?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`;
+            const params = new URLSearchParams({ page: String(page), limit: String(limit), search })
+            if (from) params.set('from', from)
+            if (to) params.set('to', to)
+            const url = `${import.meta.env.VITE_API_URL}/api/users/list?${params}`;
             const res = await fetch(url, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -531,37 +633,63 @@ export default function HrPayrollOverview() {
             <AppHeader fixed />
             <main className="">
                 <div className="w-full">
-                    <div className="flex flex-wrap items-center justify-between gap-5 mb-3">
-                        <h1 className="text-2xl font-bold tracking-tight">Employee & Payroll Overview</h1>
+                    <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                <LayoutDashboard className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Payroll Dashboard</h1>
+                                <p className="text-sm text-muted-foreground">Employee roster & payroll summary — filtered by Hire Date</p>
+                            </div>
+                        </div>
 
-                        <button onClick={() => toast.info('Add Employee functionality')} className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 px-4 py-2 has-[>svg]:px-3 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs">
-                            <Plus size={16} />
-                            Add Employee
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                            <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>
+                                <SelectTrigger className="w-[160px] h-9">
+                                    <SelectValue placeholder="Filter by" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="allTime">All Time</SelectItem>
+                                    <SelectItem value="today">Today</SelectItem>
+                                    <SelectItem value="yesterday">Yesterday</SelectItem>
+                                    <SelectItem value="last7">Last 7 days</SelectItem>
+                                    <SelectItem value="last15">Last 15 days</SelectItem>
+                                    <SelectItem value="last30">Last 30 days</SelectItem>
+                                    <SelectItem value="last45">Last 45 days</SelectItem>
+                                    <SelectItem value="last60">Last 60 days</SelectItem>
+                                    <SelectItem value="last90">Last 90 days</SelectItem>
+                                    <SelectItem value="last180">Last 180 days</SelectItem>
+                                    <SelectItem value="last365">Last 365 days</SelectItem>
+                                    <SelectItem value="thisMonth">This Month</SelectItem>
+                                    <SelectItem value="custom">Custom range</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {showCustomFields && (
+                                <>
+                                    <DateField value={from} onChange={(v: string) => { setFrom(v); setPage(1) }} placeholder="From" />
+                                    <span className="text-xs text-muted-foreground">to</span>
+                                    <DateField value={to} onChange={(v: string) => { setTo(v); setPage(1) }} placeholder="To" />
+                                </>
+                            )}
+                            <button onClick={() => toast.info('Add Employee functionality')} className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 px-4 py-2 has-[>svg]:px-3 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs">
+                                <Plus size={16} />
+                                Add Employee
+                            </button>
+                        </div>
                     </div>
 
                     {/* Stats */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                        {stats.map((item, idx) => {
-                            const Icon = item.icon;
-                            return (
-                                <Card key={idx} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][idx % 6] }}>
-                                        <div className="flex items-center gap-2.5">
-                                            <div className={`p-2 bg-gradient-to-br ${item.gradientClass} rounded-lg shadow-lg`}>
-                                                <Icon className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][idx % 6] }} />
-                                            </div>
-                                            <div>
-                                                <CardTitle className="text-sm font-semibold">{item.label}</CardTitle>
-                                            </div>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="p-4">
-                                        <div className="text-2xl font-bold">{item.value || 0}</div>
-                                    </CardContent>
-                                </Card>
-                            );
-                        })}
+                        {stats.map((item) => (
+                            <SummaryCard
+                                key={item.label}
+                                title={item.label}
+                                value={String(item.value || 0)}
+                                icon={item.icon}
+                                gradientClass={item.gradientClass}
+                            />
+                        ))}
                     </div>
 
                     <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
@@ -609,81 +737,38 @@ export default function HrPayrollOverview() {
 
                             {/* 4 Key Metrics */}
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }}>
-                                        <div className="flex items-center gap-2.5">
-                                            <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
-                                                <Building2 className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }} />
-                                            </div>
-                                            <div>
-                                                <CardTitle className="text-sm font-semibold text-white/90">Total Basic Salary</CardTitle>
-                                            </div>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="p-4">
-                                        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                                            {payrollAggregates?.basic.toLocaleString()}
-                                        </h3>
-                                        <p className="text-xs text-blue-500 mt-1 font-medium">Fixed Component</p>
-                                    </CardContent>
-                                </Card>
-
-                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }}>
-                                        <div className="flex items-center gap-2.5">
-                                            <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg shadow-lg">
-                                                <ArrowUpCircle className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }} />
-                                            </div>
-                                            <div>
-                                                <CardTitle className="text-sm font-semibold text-white/90">Total Allowances</CardTitle>
-                                            </div>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="p-4">
-                                        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                                            {payrollAggregates?.totalAllowances.toLocaleString()}
-                                        </h3>
-                                        <p className="text-xs text-emerald-500 mt-1 font-medium">+ Additions</p>
-                                    </CardContent>
-                                </Card>
-
-                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
-                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }}>
-                                        <div className="flex items-center gap-2.5">
-                                            <div className="p-2 bg-gradient-to-br from-rose-500 to-red-500 rounded-lg shadow-lg">
-                                                <ArrowDownCircle className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }} />
-                                            </div>
-                                            <div>
-                                                <CardTitle className="text-sm font-semibold text-white/90">Total Deductions</CardTitle>
-                                            </div>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="p-4">
-                                        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                                            {payrollAggregates?.totalDeductions.toLocaleString()}
-                                        </h3>
-                                        <p className="text-xs text-rose-500 mt-1 font-medium">- Subtractions</p>
-                                    </CardContent>
-                                </Card>
-
-                                <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border bg-gradient-to-br from-white to-purple-50/50 dark:from-gray-900 dark:to-purple-950/10">
-                                    <CardHeader className="border-b py-2 px-4 gap-0" style={{ backgroundColor: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }}>
-                                        <div className="flex items-center gap-2.5">
-                                            <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg shadow-lg">
-                                                <Banknote className="w-4 h-4" style={{ color: ['#10B981','#F97316','#EC4899','#14B8A6','#F59E0B','#3B82F6'][0] }} />
-                                            </div>
-                                            <div>
-                                                <CardTitle className="text-sm font-semibold text-white/90">Est. Net Payable</CardTitle>
-                                            </div>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="p-4">
-                                        <h3 className="text-2xl font-bold text-purple-700 dark:text-purple-400">
-                                            {payrollAggregates?.net.toLocaleString()}
-                                        </h3>
-                                        <p className="text-xs text-purple-500 mt-1 font-medium">= Final Payout</p>
-                                    </CardContent>
-                                </Card>
+                                <SummaryCard
+                                    title="Total Basic Salary"
+                                    value={(payrollAggregates?.basic ?? 0).toLocaleString()}
+                                    subtitle="Fixed Component"
+                                    subtitleClassName="text-blue-500"
+                                    icon={Building2}
+                                    gradientClass="from-blue-500 to-indigo-500 shadow-blue-500/20"
+                                />
+                                <SummaryCard
+                                    title="Total Allowances"
+                                    value={(payrollAggregates?.totalAllowances ?? 0).toLocaleString()}
+                                    subtitle="+ Additions"
+                                    subtitleClassName="text-emerald-500"
+                                    icon={ArrowUpCircle}
+                                    gradientClass="from-emerald-500 to-teal-500 shadow-emerald-500/20"
+                                />
+                                <SummaryCard
+                                    title="Total Deductions"
+                                    value={(payrollAggregates?.totalDeductions ?? 0).toLocaleString()}
+                                    subtitle="- Subtractions"
+                                    subtitleClassName="text-rose-500"
+                                    icon={ArrowDownCircle}
+                                    gradientClass="from-rose-500 to-red-500 shadow-rose-500/20"
+                                />
+                                <SummaryCard
+                                    title="Est. Net Payable"
+                                    value={(payrollAggregates?.net ?? 0).toLocaleString()}
+                                    subtitle="= Final Payout"
+                                    subtitleClassName="text-purple-500"
+                                    icon={Banknote}
+                                    gradientClass="from-purple-500 to-indigo-500 shadow-purple-500/20"
+                                />
                             </div>
 
                             {/* Breakdown Charts/Lists */}

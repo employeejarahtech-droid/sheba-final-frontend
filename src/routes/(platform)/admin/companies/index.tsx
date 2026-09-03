@@ -118,7 +118,7 @@ const createCompanySchema = z.object({
       /^[a-z0-9][a-z0-9-]*[a-z0-9]$/,
       'Subdomain must be lowercase alphanumeric with dashes (no leading/trailing dashes)'
     ),
-  db_type: z.enum(['shared', 'dedicated']).default('shared'),
+  db_type: z.enum(['shared', 'dedicated']).default('dedicated'),
   plan_id: z.string().optional(),
 })
 
@@ -573,7 +573,7 @@ function CreateCompanyDialog({ open, onOpenChange }: CreateCompanyDialogProps) {
       name: '',
       email: '',
       subdomain: '',
-      db_type: 'shared',
+      db_type: 'dedicated',
       plan_id: '',
     },
   })

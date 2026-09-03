@@ -27,40 +27,90 @@
       media="(prefers-color-scheme: dark)"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://hmsap.com/" />
 
     <!-- Primary Meta Tags -->
-    <title>Loading ...</title>
-    <meta name="title" content="Shadcn Admin" />
+    <title>HMS — Hospital Management Software | Admissions, Pathology &amp; Billing</title>
+    <meta name="title" content="HMS — Hospital Management Software | Admissions, Pathology &amp; Billing" />
     <meta
       name="description"
-      content="Admin Dashboard UI built with Shadcn and Vite."
+      content="HMS is an all-in-one hospital management software for admissions, pathology, and billing. Multi-tenant architecture gives every hospital its own dedicated, encrypted database."
+    />
+    <meta
+      name="keywords"
+      content="hospital management software, hospital management system, HMS, HMSAP, pathology management software, hospital billing software, multi-tenant hospital software"
     />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://shadcn-admin.netlify.app" />
-    <meta property="og:title" content="Shadcn Admin" />
+    <meta property="og:url" content="https://hmsap.com/" />
+    <meta property="og:site_name" content="HMS" />
+    <meta property="og:title" content="HMS — Hospital Management Software | Admissions, Pathology &amp; Billing" />
     <meta
       property="og:description"
-      content="Admin Dashboard UI built with Shadcn and Vite."
+      content="HMS is an all-in-one hospital management software for admissions, pathology, and billing. Multi-tenant architecture gives every hospital its own dedicated, encrypted database."
     />
     <meta
       property="og:image"
-      content="https://shadcn-admin.netlify.app/images/shadcn-admin.png"
+      content="https://hmsap.com/images/logo_png.png"
     />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://shadcn-admin.netlify.app" />
-    <meta property="twitter:title" content="Shadcn Admin" />
+    <meta property="twitter:url" content="https://hmsap.com/" />
+    <meta property="twitter:title" content="HMS — Hospital Management Software | Admissions, Pathology &amp; Billing" />
     <meta
       property="twitter:description"
-      content="Admin Dashboard UI built with Shadcn and Vite."
+      content="HMS is an all-in-one hospital management software for admissions, pathology, and billing. Multi-tenant architecture gives every hospital its own dedicated, encrypted database."
     />
     <meta
       property="twitter:image"
-      content="https://shadcn-admin.netlify.app/images/shadcn-admin.png"
+      content="https://hmsap.com/images/logo_png.png"
     />
+
+    <!-- Structured data: tells search engines / AI overviews that HMS (HMSAP)
+         is a hospital management software product, not an ambiguous acronym. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://hmsap.com/#organization",
+            "name": "HMS",
+            "alternateName": "HMSAP",
+            "url": "https://hmsap.com",
+            "logo": "https://hmsap.com/images/logo_png.png"
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://hmsap.com/#software",
+            "name": "HMS",
+            "alternateName": "HMSAP",
+            "url": "https://hmsap.com",
+            "applicationCategory": "Hospital Management Software",
+            "operatingSystem": "Web",
+            "description": "All-in-one hospital management software for admissions, pathology, billing, payroll and inventory, built on a multi-tenant architecture with a dedicated, encrypted database for every hospital.",
+            "publisher": { "@id": "https://hmsap.com/#organization" },
+            "offers": {
+              "@type": "AggregateOffer",
+              "priceCurrency": "USD",
+              "lowPrice": "0",
+              "highPrice": "199",
+              "offerCount": "3"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://hmsap.com/#website",
+            "url": "https://hmsap.com",
+            "name": "HMS",
+            "publisher": { "@id": "https://hmsap.com/#organization" }
+          }
+        ]
+      }
+    </script>
 
     <!-- font family -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

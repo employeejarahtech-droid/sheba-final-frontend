@@ -45,6 +45,7 @@ interface GallerySelectorProps {
     maxSize?: number; // in bytes
     aspectRatio?: 'square' | 'landscape' | 'portrait' | 'any';
     defaultFolder?: string; // pre-selects this folder (Library filter + Upload destination) when the modal opens
+    onUploaded?: () => void; // fires after a successful upload inside the modal, so hosts with their own gallery view can refresh
 }
 
 export function GallerySelector({
@@ -55,7 +56,8 @@ export function GallerySelector({
     accept = "image/*",
     maxSize = 5 * 1024 * 1024, // 5MB default
     aspectRatio = 'any',
-    defaultFolder
+    defaultFolder,
+    onUploaded
 }: GallerySelectorProps) {
     const token = getCookie('accessToken');
     const [open, setOpen] = useState(false);
@@ -128,20 +130,20 @@ export function GallerySelector({
                 headers: { Authorization: `Bearer ${token}` },
             });
 
+            const json = await res.json().catch(() => null);
             if (res.ok) {
-                const json = await res.json();
                 // Ensure all image URLs are full URLs
-                const imagesWithFullUrls = (json.data || []).map((img: GalleryImage) => ({
+                const imagesWithFullUrls = (json?.data || []).map((img: GalleryImage) => ({
                     ...img,
                     url: ensureFullUrl(img.url)
                 }));
                 setImages(imagesWithFullUrls);
             } else {
-                throw new Error('Failed to fetch gallery images');
+                throw new Error(json?.message || `Failed to fetch gallery images (HTTP ${res.status})`);
             }
         } catch (error) {
             console.error('Failed to fetch gallery images:', error);
-            toast.error('Failed to load gallery images');
+            toast.error(error instanceof Error ? error.message : 'Failed to load gallery images');
         } finally {
             setIsLoading(false);
         }
@@ -185,8 +187,8 @@ export function GallerySelector({
                 body: formData,
             });
 
+            const json = await res.json().catch(() => null);
             if (res.ok) {
-                const json = await res.json();
                 const uploadedImage = {
                     ...json.data,
                     url: ensureFullUrl(json.data.url)
@@ -194,13 +196,14 @@ export function GallerySelector({
                 setImages(prev => [uploadedImage, ...prev]);
                 setSelectedImage(uploadedImage);
                 fetchFolders();
+                onUploaded?.();
                 toast.success('Image uploaded successfully!');
             } else {
-                throw new Error('Failed to upload image');
+                throw new Error(json?.message || `Failed to upload image (HTTP ${res.status})`);
             }
         } catch (error) {
             console.error('Failed to upload image:', error);
-            toast.error('Failed to upload image');
+            toast.error(error instanceof Error ? error.message : 'Failed to upload image');
         } finally {
             setIsUploading(false);
         }
@@ -258,6 +261,10 @@ export function GallerySelector({
     const handleUrlConfirm = () => {
         const url = urlValue.trim();
         if (!url) return;
+        if (!/^https?:\/\//i.test(url)) {
+            toast.error('Enter a valid image URL starting with http:// or https:// — to use a file from your device, use the Upload tab instead.');
+            return;
+        }
         onImageSelect(url);
         setOpen(false);
         toast.success('Image URL selected');

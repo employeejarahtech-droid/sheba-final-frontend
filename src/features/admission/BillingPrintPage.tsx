@@ -1,14 +1,57 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from '@tanstack/react-router'
-import { useMemo } from 'react'
-import { Loader2, ArrowLeft, Printer } from 'lucide-react'
+import { useMemo, useState, useEffect, type CSSProperties } from 'react'
+import { Loader2, ArrowLeft, Printer, Settings2, ChevronDown } from 'lucide-react'
 import { getCookie } from '@/lib/cookies'
 import { useDateFormat } from '@/hooks/use-date-format'
 import { useCurrency } from '@/hooks/use-currency'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
+import { Separator } from '@/components/ui/separator'
+import {
+    DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel,
+    DropdownMenuSeparator, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { toast } from 'sonner'
 import { amountToWords } from '@/lib/utils'
 
 const API_URL = import.meta.env.VITE_API_URL || ''
+
+type BillingPadding = { top: number; right: number; bottom: number; left: number }
+const DEFAULT_PADDING: BillingPadding = { top: 32, right: 32, bottom: 32, left: 32 }
+
+type BillingColumns = { sl: boolean; category: boolean; description: boolean; qty: boolean; rate: boolean }
+const DEFAULT_COLUMNS: BillingColumns = { sl: true, category: true, description: true, qty: true, rate: true }
+const COLUMN_LABELS: Record<keyof BillingColumns, string> = {
+    sl: '#', category: 'Category', description: 'Description', qty: 'Qty/Days', rate: 'Rate',
+}
+
+// Paper sizes offered for printing this billing statement. `cssSize` feeds
+// the @page size (browsers use this to pick/suggest the matching physical
+// paper), and `margin` is tuned per size — the 80mm thermal option needs a
+// near-zero margin since receipt printers have almost no physical border.
+const PAPER_SIZES: Record<string, { label: string; cssSize: string; margin: string }> = {
+    a4: { label: 'A4', cssSize: 'A4 portrait', margin: '12mm' },
+    a5: { label: 'A5', cssSize: 'A5 portrait', margin: '8mm' },
+    letter: { label: 'Letter', cssSize: 'letter portrait', margin: '12mm' },
+    legal: { label: 'Legal', cssSize: 'legal portrait', margin: '12mm' },
+    thermal80: { label: '80mm (Thermal)', cssSize: '80mm auto', margin: '2mm' },
+}
+
+// Overall scale for the billing statement content. Most cells/headings here
+// use Tailwind text-size utilities (text-sm, text-xs, ...), which set their
+// own explicit rem font-size and don't inherit a parent's font-size — so
+// scaling via `zoom` (which resizes everything: text, padding, borders) is
+// used instead of trying to override every element's own font size.
+const FONT_SIZES: Record<string, { label: string; zoom: number }> = {
+    sm: { label: 'Small', zoom: 0.85 },
+    base: { label: 'Medium', zoom: 1 },
+    lg: { label: 'Large', zoom: 1.15 },
+    xl: { label: 'Extra Large', zoom: 1.3 },
+}
 
 type BillingData = {
     patient_name: string
@@ -83,7 +126,22 @@ export function BillingPrintPage() {
     const token = getCookie('accessToken')
     const { formatDate } = useDateFormat()
     const { format, currencySymbol, locale } = useCurrency()
-    
+    const queryClient = useQueryClient()
+
+    const [paperSize, setPaperSize] = useState<keyof typeof PAPER_SIZES>('a4')
+    const { cssSize, margin } = PAPER_SIZES[paperSize]
+    const [fontSize, setFontSize] = useState<keyof typeof FONT_SIZES>('base')
+    const [padding, setPadding] = useState<BillingPadding>(DEFAULT_PADDING)
+    const [settingsOpen, setSettingsOpen] = useState(false)
+    const [visibleColumns, setVisibleColumns] = useState<BillingColumns>(DEFAULT_COLUMNS)
+    const visibleColumnCount = Object.values(visibleColumns).filter(Boolean).length
+    const toggleColumn = (key: keyof BillingColumns, checked: boolean) => {
+        setVisibleColumns((prev) => {
+            if (!checked && visibleColumnCount <= 1) return prev // keep at least one column visible
+            return { ...prev, [key]: checked }
+        })
+    }
+
     const safeFormatDate = (dateVal: any) => {
         if (!dateVal) return '-'
         if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
@@ -125,6 +183,67 @@ export function BillingPrintPage() {
             return result.data;
         },
         enabled: !!token,
+    })
+
+    // Seed every print-setting control from the saved company-wide default once it loads.
+    useEffect(() => {
+        if (!companySettings) return
+        setPadding({
+            top: companySettings.billing_padding_top ?? DEFAULT_PADDING.top,
+            right: companySettings.billing_padding_right ?? DEFAULT_PADDING.right,
+            bottom: companySettings.billing_padding_bottom ?? DEFAULT_PADDING.bottom,
+            left: companySettings.billing_padding_left ?? DEFAULT_PADDING.left,
+        })
+        if (companySettings.billing_font_size && companySettings.billing_font_size in FONT_SIZES) {
+            setFontSize(companySettings.billing_font_size)
+        }
+        if (companySettings.billing_paper_size && companySettings.billing_paper_size in PAPER_SIZES) {
+            setPaperSize(companySettings.billing_paper_size)
+        }
+        // JSON columns sometimes come back as a raw string rather than a
+        // parsed object depending on the read path — handle both.
+        const incomingColumns = typeof companySettings.billing_visible_columns === 'string'
+            ? (() => { try { return JSON.parse(companySettings.billing_visible_columns) } catch { return null } })()
+            : companySettings.billing_visible_columns
+        if (incomingColumns && typeof incomingColumns === 'object' && !Array.isArray(incomingColumns)) {
+            setVisibleColumns((prev) => {
+                const next = { ...prev }
+                for (const key of Object.keys(prev) as (keyof BillingColumns)[]) {
+                    if (typeof incomingColumns[key] === 'boolean') next[key] = incomingColumns[key]
+                }
+                return next
+            })
+        }
+    }, [companySettings])
+
+    // Persist every print setting as the company-wide default — every billing
+    // statement print (this one and every other) picks it up via /api/company-settings.
+    const saveDefaultsMutation = useMutation({
+        mutationFn: async () => {
+            const res = await fetch(`${API_URL}/api/company-settings`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    billing_padding_top: padding.top,
+                    billing_padding_right: padding.right,
+                    billing_padding_bottom: padding.bottom,
+                    billing_padding_left: padding.left,
+                    billing_font_size: fontSize,
+                    billing_paper_size: paperSize,
+                    billing_visible_columns: visibleColumns,
+                }),
+            })
+            if (!res.ok) throw new Error('Failed to save print settings')
+            return res.json()
+        },
+        onSuccess: () => {
+            toast.success('Default print settings saved — applies to every billing statement print from now on')
+            queryClient.invalidateQueries({ queryKey: ['company-settings'] })
+        },
+        onError: () => toast.error('Failed to save default print settings'),
     })
 
     // Fetch operations
@@ -374,7 +493,10 @@ export function BillingPrintPage() {
                     serial_no: item.serial_no || item.item_order || 0,
                     category,
                     description,
-                    note: item.service_note || undefined,
+                    // Bed charges already use service_note as the description itself
+                    // (the "N day(s) - from to" text) — repeating it as a note below
+                    // would just show the same line twice.
+                    note: serviceType === 'bed_charges' ? undefined : (item.service_note || undefined),
                     qty: Number(item.quantity) || 1,
                     rate: Number(item.unit_price) || 0,
                     amount: Number(item.final_amount) || 0,
@@ -530,7 +652,16 @@ export function BillingPrintPage() {
     }
 
     return (
-        <div className="invoice-print-area max-w-3xl mx-auto w-full p-8 bg-white mt-10 print:mt-0 shadow-sm print:shadow-none border border-slate-100 print:border-none rounded-lg print:rounded-none">
+        <div
+            className="invoice-print-area max-w-3xl mx-auto w-full bg-white mt-0 print:mt-0 rounded-lg print:rounded-none"
+            style={{
+                zoom: FONT_SIZES[fontSize].zoom,
+                paddingTop: padding.top,
+                paddingRight: padding.right,
+                paddingBottom: padding.bottom,
+                paddingLeft: padding.left,
+            } as CSSProperties}
+        >
             <style>{`
               .bg-row-blue { background-color: #cfd2d8ff !important; }
               @media print {
@@ -541,8 +672,8 @@ export function BillingPrintPage() {
                   color-adjust: exact !important;
                 }
                 @page {
-                    size: A4 portrait;
-                    margin: 12mm;
+                    size: ${cssSize};
+                    margin: ${margin};
                 }
                 html, body {
                     margin: 0 !important;
@@ -558,7 +689,10 @@ export function BillingPrintPage() {
                     max-width: 100% !important;
                     width: 100% !important;
                     margin: 0 !important;
-                    padding: 0 !important;
+                    padding-top: ${padding.top}px !important;
+                    padding-right: ${padding.right}px !important;
+                    padding-bottom: ${padding.bottom}px !important;
+                    padding-left: ${padding.left}px !important;
                     box-shadow: none !important;
                 }
                 .invoice-print-area table {
@@ -573,17 +707,162 @@ export function BillingPrintPage() {
               }
             `}</style>
 
-            {/* Back & Print Buttons */}
+            {/* Back, Print Settings & Print Buttons */}
             <div className="flex justify-between items-center mb-6 print:hidden">
                 <Button variant="outline" size="sm" onClick={() => window.history.back()}>
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back
                 </Button>
-                <Button size="sm" onClick={() => window.print()}>
-                    <Printer className="w-4 h-4 mr-2" />
-                    Print
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" className="h-8 gap-2" onClick={() => setSettingsOpen(true)}>
+                        <Settings2 className="h-4 w-4" />
+                        <span>Print Settings</span>
+                    </Button>
+                    <Button size="sm" onClick={() => window.print()}>
+                        <Printer className="w-4 h-4 mr-2" />
+                        Print
+                    </Button>
+                </div>
             </div>
+
+            <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
+                <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
+                    <SheetHeader className="border-b px-4 py-3 gap-0">
+                        <SheetTitle className="flex items-center gap-3 pr-8">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                                <Settings2 className="w-4 h-4 text-primary" />
+                            </div>
+                            <div>
+                                <div className="text-base font-semibold text-left">Print Settings</div>
+                                <SheetDescription className="text-xs font-normal text-left">Adjust how this billing statement looks and prints</SheetDescription>
+                            </div>
+                        </SheetTitle>
+                    </SheetHeader>
+
+                    <div className="flex-1 overflow-y-auto p-4 space-y-5">
+                        <div className="space-y-2">
+                            <Label className="text-sm font-medium">Font Size</Label>
+                            <Select value={fontSize} onValueChange={(v) => setFontSize(v as keyof typeof FONT_SIZES)}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Font size" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Object.entries(FONT_SIZES).map(([key, { label }]) => (
+                                        <SelectItem key={key} value={key}>{label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-sm font-medium">Paper Size</Label>
+                            <Select value={paperSize} onValueChange={(v) => setPaperSize(v as keyof typeof PAPER_SIZES)}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Paper size" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Object.entries(PAPER_SIZES).map(([key, { label }]) => (
+                                        <SelectItem key={key} value={key}>{label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <Separator />
+
+                        <div className="space-y-2">
+                            <Label className="text-sm font-medium">Content Padding (px)</Label>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                    <Label htmlFor="padding-top" className="text-xs text-muted-foreground">Top</Label>
+                                    <Input
+                                        id="padding-top"
+                                        type="number"
+                                        min={0}
+                                        value={padding.top}
+                                        onChange={(e) => setPadding((p) => ({ ...p, top: Number(e.target.value) || 0 }))}
+                                        className="h-8"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label htmlFor="padding-right" className="text-xs text-muted-foreground">Right</Label>
+                                    <Input
+                                        id="padding-right"
+                                        type="number"
+                                        min={0}
+                                        value={padding.right}
+                                        onChange={(e) => setPadding((p) => ({ ...p, right: Number(e.target.value) || 0 }))}
+                                        className="h-8"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label htmlFor="padding-bottom" className="text-xs text-muted-foreground">Bottom</Label>
+                                    <Input
+                                        id="padding-bottom"
+                                        type="number"
+                                        min={0}
+                                        value={padding.bottom}
+                                        onChange={(e) => setPadding((p) => ({ ...p, bottom: Number(e.target.value) || 0 }))}
+                                        className="h-8"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label htmlFor="padding-left" className="text-xs text-muted-foreground">Left</Label>
+                                    <Input
+                                        id="padding-left"
+                                        type="number"
+                                        min={0}
+                                        value={padding.left}
+                                        onChange={(e) => setPadding((p) => ({ ...p, left: Number(e.target.value) || 0 }))}
+                                        className="h-8"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <Separator />
+
+                        <div className="space-y-2">
+                            <Label className="text-sm font-medium">Item Table Columns</Label>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm" className="w-full justify-between h-8">
+                                        <span>{visibleColumnCount} of {Object.keys(visibleColumns).length} columns shown</span>
+                                        <ChevronDown className="h-4 w-4 opacity-50" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="w-[220px]">
+                                    <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    {(Object.keys(visibleColumns) as (keyof BillingColumns)[]).map((key) => (
+                                        <DropdownMenuCheckboxItem
+                                            key={key}
+                                            checked={visibleColumns[key]}
+                                            onCheckedChange={(checked) => toggleColumn(key, checked === true)}
+                                            onSelect={(e) => e.preventDefault()}
+                                        >
+                                            {COLUMN_LABELS[key]}
+                                        </DropdownMenuCheckboxItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    </div>
+
+                    <div className="border-t p-4 space-y-2">
+                        <Button
+                            className="w-full"
+                            onClick={() => saveDefaultsMutation.mutate()}
+                            disabled={saveDefaultsMutation.isPending}
+                        >
+                            {saveDefaultsMutation.isPending ? 'Saving...' : 'Save as Default'}
+                        </Button>
+                        <p className="text-xs text-muted-foreground text-center">
+                            Saved defaults apply to every billing statement print, not just this one.
+                        </p>
+                    </div>
+                </SheetContent>
+            </Sheet>
 
             {/* Header: Logo/Company (left 50%) + Title (right 50%) */}
             <div className="mb-6 flex items-start justify-between gap-6">
@@ -667,27 +946,31 @@ export function BillingPrintPage() {
             <table className="w-full text-sm mt-6">
                 <thead>
                     <tr className="border-t border-b bg-row-blue">
-                        <th className="px-2 py-1 text-left text-xs w-[5%]">#</th>
-                        <th className="px-2 py-1 text-left text-xs w-[22%]">Category</th>
-                        <th className="px-2 py-1 text-left text-xs w-[45%]">Description</th>
-                        <th className="px-2 py-1 text-center text-xs w-[10%]">Qty/Days</th>
-                        <th className="px-2 py-1 text-right text-xs w-[18%]">Rate ({currencySymbol})</th>
+                        {visibleColumns.sl && <th className="px-2 py-1 text-left text-xs w-[5%]">#</th>}
+                        {visibleColumns.category && <th className="px-2 py-1 text-left text-xs w-[22%]">Category</th>}
+                        {visibleColumns.description && <th className="px-2 py-1 text-left text-xs w-[45%]">Description</th>}
+                        {visibleColumns.qty && <th className="px-2 py-1 text-center text-xs w-[10%]">Qty/Days</th>}
+                        {visibleColumns.rate && <th className="px-2 py-1 text-right text-xs w-[18%]">Rate ({currencySymbol})</th>}
                     </tr>
                 </thead>
                 <tbody>
                     {orderedItems.map((item, idx) => (
                         <tr key={idx} className="border-b border-dashed">
-                            <td className="px-2 py-1 text-xs text-gray-500">{idx + 1}</td>
-                            <td className="px-2 py-1 text-xs font-semibold text-gray-700 uppercase">
-                                {item.category}
-                            </td>
-                            <td className="px-2 py-1 text-xs">
-                                {item.description}
-                                {item.note && <span className="block text-gray-500 mt-0.5">{item.note}</span>}
-                                {item.date && <span className="block text-gray-400 text-[10px] mt-0.5">{item.date}</span>}
-                            </td>
-                            <td className="px-2 py-1 text-center text-xs">{item.qty}</td>
-                            <td className="px-2 py-1 text-right text-xs font-semibold">{fmtNum(item.rate)}</td>
+                            {visibleColumns.sl && <td className="px-2 py-1 text-xs text-gray-500">{idx + 1}</td>}
+                            {visibleColumns.category && (
+                                <td className="px-2 py-1 text-xs font-semibold text-gray-700 uppercase">
+                                    {item.category}
+                                </td>
+                            )}
+                            {visibleColumns.description && (
+                                <td className="px-2 py-1 text-xs">
+                                    {item.description}
+                                    {item.note && <span className="block text-gray-500 mt-0.5">{item.note}</span>}
+                                    {item.date && <span className="block text-gray-400 text-[10px] mt-0.5">{item.date}</span>}
+                                </td>
+                            )}
+                            {visibleColumns.qty && <td className="px-2 py-1 text-center text-xs">{item.qty}</td>}
+                            {visibleColumns.rate && <td className="px-2 py-1 text-right text-xs font-semibold">{fmtNum(item.rate)}</td>}
                         </tr>
                     ))}
                 </tbody>
@@ -697,7 +980,7 @@ export function BillingPrintPage() {
             <table className="w-full text-sm mt-3">
                 <tbody>
                     <tr className="border font-bold">
-                        <td className="border px-2 py-1 text-right" colSpan={4}>Grand Total Amount ({currencySymbol}):</td>
+                        <td className="border px-2 py-1 text-right" colSpan={Math.max(1, visibleColumnCount - 1)}>Grand Total Amount ({currencySymbol}):</td>
                         <td className="border px-2 py-1 text-right" colSpan={1}>{fmtNum(grandTotal)}</td>
                     </tr>
                 </tbody>
@@ -708,9 +991,8 @@ export function BillingPrintPage() {
             {/* ── Signature Row ───────────────────────────────────────────────── */}
             <div className="flex justify-between mt-32 text-sm w-full">
                 <div style={{ textAlign: 'left' }}>
-                    <span className="inline-block border-t border-dashed pt-1">Prepared By:</span>
-                    <p className="font-medium">
-                        {admission?.bill_created_by_user?.name || admission?.created_by_user?.name || '-'}
+                    <p className="border-t border-dashed pt-1">
+                        Prepared By: <span className="font-medium">{admission?.bill_created_by_user?.name || admission?.created_by_user?.name || '-'}</span>
                     </p>
                 </div>
                 <div style={{ textAlign: 'right' }}>

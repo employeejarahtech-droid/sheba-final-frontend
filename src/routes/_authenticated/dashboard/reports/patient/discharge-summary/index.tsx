@@ -141,7 +141,7 @@ function DischargeSummaryPage() {
     }).length
     const totalRevenue = items.reduce((sum, i) => {
       const bill = i.finalBill?.total_bill_amount ?? i.total_bill_amount ?? 0;
-      return sum + (bill || 0);
+      return sum + (Number(bill) || 0);
     }, 0)
 
     return [

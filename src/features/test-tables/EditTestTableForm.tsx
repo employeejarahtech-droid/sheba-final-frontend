@@ -1,26 +1,27 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Check, ChevronDown, Loader, Table } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Check, ChevronDown, Loader, Table, LayoutTemplate } from "lucide-react";
 import { getCookie } from "@/lib/cookies";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import z from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
-
 const testTableSchema = z.object({
     table_name: z.string().min(1, { message: "Required" }),
     display_name: z.string().min(1, { message: "Required" }),
     description: z.string().min(1, { message: "Required" }),
+    is_custom_form_designer: z.boolean(),
 });
 
 export function EditTestTableForm({
@@ -44,8 +45,11 @@ export function EditTestTableForm({
             table_name: "",
             display_name: "",
             description: "",
+            is_custom_form_designer: false,
         },
     });
+
+    const isCustomForm = useWatch({ control: form.control, name: "is_custom_form_designer" });
 
     // ------------------------------------------------------------
     // 2. FETCH SINGLE TEST TABLE
@@ -70,6 +74,7 @@ export function EditTestTableForm({
     const tableName = testTable?.data?.table_name ?? "";
     const displayName = testTable?.data?.display_name ?? "";
     const description = testTable?.data?.description ?? "";
+    const isCustomFormDesigner = !!testTable?.data?.is_custom_form_designer;
 
     // ------------------------------------------------------------
     // 3. SAFELY RESET FORM (NO INFINITE LOOP)
@@ -84,15 +89,18 @@ export function EditTestTableForm({
         if (
             current.table_name !== tableName ||
             current.display_name !== displayName ||
-            current.description !== description
+            current.description !== description ||
+            current.is_custom_form_designer !== isCustomFormDesigner
         ) {
             form.reset({
                 table_name: tableName,
                 display_name: displayName,
                 description: description,
+                is_custom_form_designer: isCustomFormDesigner,
             });
         }
-    }, [open, id, tableName, displayName, description]); // stable dependencies
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, id, tableName, displayName, description, isCustomFormDesigner]); // stable dependencies
 
     // ------------------------------------------------------------
     // 4. FETCH ALL DB TABLES
@@ -156,7 +164,15 @@ export function EditTestTableForm({
     });
 
     const handleSubmit = (values: z.infer<typeof testTableSchema>) => {
-        updateMutation.mutate(values);
+        // form_schema is intentionally omitted — it's managed separately by the
+        // Form Builder (opened from the list's Actions column), and the
+        // backend leaves it untouched when the key is absent from the payload.
+        updateMutation.mutate({
+            table_name: values.table_name,
+            display_name: values.display_name,
+            description: values.description,
+            is_custom_form_designer: values.is_custom_form_designer,
+        });
     };
 
     return (
@@ -182,58 +198,100 @@ export function EditTestTableForm({
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
 
-                            {/* table_name */}
+                            {/* is_custom_form_designer */}
                             <FormField
                                 control={form.control}
-                                name="table_name"
+                                name="is_custom_form_designer"
                                 render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Table Name</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <button
-                                                        type="button"
-                                                        className={cn(
-                                                            "w-full flex justify-between items-center px-3 py-1 border rounded-md h-9",
-                                                            !field.value && "text-muted-foreground"
-                                                        )}
-                                                    >
-                                                        {field.value || "Select table"}
-                                                        <ChevronDown className="h-4 w-4 opacity-50" />
-                                                    </button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-
-                                            <PopoverContent className="w-full p-0">
-                                                <Command>
-                                                    <CommandInput placeholder="Search table..." />
-                                                    <CommandList>
-                                                        <CommandEmpty>No table found.</CommandEmpty>
-                                                        <CommandGroup>
-                                                            {allDbTableNames.map((name: string) => (
-                                                                <CommandItem
-                                                                    key={name}
-                                                                    onSelect={() => field.onChange(name)}
-                                                                >
-                                                                    {name}
-                                                                    <Check
-                                                                        className={cn(
-                                                                            "h-4 w-4 ml-auto",
-                                                                            name === field.value ? "opacity-100" : "opacity-0"
-                                                                        )}
-                                                                    />
-                                                                </CommandItem>
-                                                            ))}
-                                                        </CommandGroup>
-                                                    </CommandList>
-                                                </Command>
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage />
+                                    <FormItem className="flex flex-row items-start gap-2.5 rounded-md border p-3 space-y-0 bg-muted/20">
+                                        <FormControl>
+                                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                                        </FormControl>
+                                        <div className="space-y-0.5 leading-tight">
+                                            <FormLabel className="flex items-center gap-1.5">
+                                                <LayoutTemplate className="h-3.5 w-3.5" /> Custom Form Designer
+                                            </FormLabel>
+                                            <p className="text-xs text-muted-foreground">
+                                                Design a custom result-entry form instead of mapping to an existing database table.
+                                                Use the Form Builder from the list to add/edit fields.
+                                            </p>
+                                        </div>
                                     </FormItem>
                                 )}
                             />
+
+                            {/* table_name */}
+                            {isCustomForm ? (
+                                <FormField
+                                    control={form.control}
+                                    name="table_name"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Table Name (virtual identifier)</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="e.g. liver_function_panel" />
+                                            </FormControl>
+                                            <p className="text-xs text-amber-600 dark:text-amber-400">
+                                                Changing the table name or a field's key after results have been recorded will
+                                                disconnect that data from this template.
+                                            </p>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            ) : (
+                                <FormField
+                                    control={form.control}
+                                    name="table_name"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Table Name</FormLabel>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <button
+                                                            type="button"
+                                                            className={cn(
+                                                                "w-full flex justify-between items-center px-3 py-1 border rounded-md h-9",
+                                                                !field.value && "text-muted-foreground"
+                                                            )}
+                                                        >
+                                                            {field.value || "Select table"}
+                                                            <ChevronDown className="h-4 w-4 opacity-50" />
+                                                        </button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+
+                                                <PopoverContent className="w-full p-0">
+                                                    <Command>
+                                                        <CommandInput placeholder="Search table..." />
+                                                        <CommandList>
+                                                            <CommandEmpty>No table found.</CommandEmpty>
+                                                            <CommandGroup>
+                                                                {allDbTableNames.map((name: string) => (
+                                                                    <CommandItem
+                                                                        key={name}
+                                                                        onSelect={() => field.onChange(name)}
+                                                                    >
+                                                                        {name}
+                                                                        <Check
+                                                                            className={cn(
+                                                                                "h-4 w-4 ml-auto",
+                                                                                name === field.value ? "opacity-100" : "opacity-0"
+                                                                            )}
+                                                                        />
+                                                                    </CommandItem>
+                                                                ))}
+                                                            </CommandGroup>
+                                                        </CommandList>
+                                                    </Command>
+                                                </PopoverContent>
+                                            </Popover>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
 
                             {/* display_name */}
                             <FormField

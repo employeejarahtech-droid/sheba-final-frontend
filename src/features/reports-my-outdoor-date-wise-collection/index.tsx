@@ -173,34 +173,30 @@ export default function ReportsMyOutdoorDateWiseCollection({
     return [
       {
         label: "Total Payments",
-        value: paymentCount,
-        gradient: "from-blue-600 to-blue-400",
-        shadow: "shadow-blue-500/30",
-        icon: <CreditCard className="w-6 h-6 text-white" />,
+        value: String(paymentCount),
+        gradientClass: "from-blue-500 to-indigo-500 shadow-blue-500/20",
+        icon: CreditCard,
       },
       {
         label: "Total Collected",
         value: `${currencySymbol} ${(serverStats.total_collected || 0).toLocaleString()}`,
-        gradient: "from-emerald-600 to-emerald-400",
-        shadow: "shadow-emerald-500/30",
-        icon: <DollarSign className="w-6 h-6 text-white" />,
+        gradientClass: "from-emerald-500 to-teal-500 shadow-emerald-500/20",
+        icon: DollarSign,
       },
       {
         label: "Total Discount",
         value: `${currencySymbol} ${(serverStats.total_discount || 0).toLocaleString()}`,
-        gradient: "from-orange-600 to-orange-400",
-        shadow: "shadow-orange-500/30",
-        icon: <TrendingUp className="w-6 h-6 text-white" />,
+        gradientClass: "from-amber-500 to-orange-500 shadow-amber-500/20",
+        icon: TrendingUp,
       },
       {
         label: "Gross Bill",
         value: `${currencySymbol} ${(serverStats.total_bill || 0).toLocaleString()}`,
-        gradient: "from-purple-600 to-purple-400",
-        shadow: "shadow-purple-500/30",
-        icon: <FileText className="w-6 h-6 text-white" />,
+        gradientClass: "from-violet-500 to-purple-500 shadow-violet-500/20",
+        icon: FileText,
       },
     ];
-  }, [data]);
+  }, [data, currencySymbol]);
 
   // Handle expand button clicks using event delegation
   useEffect(() => {
@@ -586,7 +582,7 @@ export default function ReportsMyOutdoorDateWiseCollection({
             <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
                     type="button"
                     data-id="${data}">+</button>
-            <span class="font-semibold text-purple-600">${data}</span>
+            <span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${data}</span>
           </div>
         `;
       },
@@ -594,7 +590,7 @@ export default function ReportsMyOutdoorDateWiseCollection({
     },
     {
       data: "invoice_prefix",
-      title: "Custom ID",
+      title: "Admission ID",
       orderable: true,
       responsivePriority: 1,
       render: (data: any) => {
@@ -765,33 +761,14 @@ export default function ReportsMyOutdoorDateWiseCollection({
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
-          {stats.map((item, idx) => (
-            <div
-              key={idx}
-              className={`relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br ${item.gradient} p-4 md:p-6 shadow-lg ${item.shadow} transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]`}
-            >
-              {/* Background Pattern */}
-              <div className="absolute -right-4 md:-right-6 -top-4 md:-top-6 h-16 w-16 md:h-24 md:w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-4 md:-bottom-6 -left-4 md:-left-6 h-16 w-16 md:h-24 md:w-24 rounded-full bg-black/10 blur-2xl" />
-
-              <div className="relative flex items-center justify-between gap-2 md:gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-[0.6rem] md:text-[0.65rem] lg:text-xs xl:text-sm font-medium text-white/90 leading-tight">{item.label}</p>
-                  <h3 className="mt-1 md:mt-2 text-[0.9rem] md:text-[1.1rem] lg:text-lg xl:text-2xl font-bold text-white leading-tight break-words">
-                    {item.value || 0}
-                  </h3>
-                </div>
-                {/* Icon - hidden on mobile/tablet/laptop, visible only on large desktop (xl+) */}
-                <div className="hidden xl:block rounded-xl bg-white/20 p-2.5 backdrop-blur-sm flex-shrink-0">
-                  {item.icon}
-                </div>
-              </div>
-
-              {/* Progress/Indicator line */}
-              <div className="mt-3 md:mt-4 h-1 w-full rounded-full bg-black/10">
-                <div className="h-full w-2/3 rounded-full bg-white/40" />
-              </div>
-            </div>
+          {stats.map((item) => (
+            <SummaryCard
+              key={item.label}
+              title={item.label}
+              value={item.value}
+              icon={item.icon}
+              gradientClass={item.gradientClass}
+            />
           ))}
         </div>
 
@@ -867,6 +844,12 @@ export default function ReportsMyOutdoorDateWiseCollection({
           search={search}
           onSearchChange={setSearch}
           isLoading={isLoading}
+          // Rows already arrive sorted by payment ID DESC from the server
+          // (outdoor-invoice.repository.js getDateWiseCollection). Without
+          // this, DataTable.tsx's default `order: [[0, 'desc']]` re-sorts
+          // client-side by column 0 (Invoice ID) — which also renders raw
+          // HTML for that cell, so it isn't even a clean numeric sort.
+          defaultOrder={[]}
           filterSlot={
             <div className="flex items-center gap-1.5">
               <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>
@@ -925,5 +908,38 @@ export default function ReportsMyOutdoorDateWiseCollection({
         />
       </main>
     </>
+  )
+}
+
+// ===== Summary Card Component =====
+function SummaryCard({
+  title,
+  value,
+  icon: Icon,
+  gradientClass,
+}: {
+  title: string
+  value: string
+  icon: React.ElementType
+  gradientClass: string
+}) {
+  return (
+    <Card className='overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border'>
+      <CardHeader className='bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0'>
+        <div className='flex items-center gap-2.5'>
+          <div
+            className={`p-2 bg-gradient-to-br ${gradientClass} rounded-lg shadow-lg`}
+          >
+            <Icon className='h-4 w-4 text-white' />
+          </div>
+          <div>
+            <CardTitle className='text-sm font-semibold'>{title}</CardTitle>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className='p-4'>
+        <div className='text-2xl font-bold'>{value}</div>
+      </CardContent>
+    </Card>
   )
 }

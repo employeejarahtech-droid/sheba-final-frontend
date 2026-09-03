@@ -35,6 +35,7 @@ const KEYS = {
   stripeOverview: ['platform-admin', 'billing', 'stripe', 'overview'] as const,
   stripeCustomers: ['platform-admin', 'billing', 'stripe', 'customers'] as const,
   stripeSubscriptions: ['platform-admin', 'billing', 'stripe', 'subscriptions'] as const,
+  migrations: ['platform-admin', 'migrations'] as const,
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -174,6 +175,15 @@ export function useRunServerCommand() {
     mutationFn: ({ id, confirm }: { id: string; confirm?: boolean }) =>
       adminService.runServerCommand(id, confirm),
     onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+// ── Database migration status (per-tenant migration version) ────────────
+
+export function useMigrationStatus() {
+  return useQuery({
+    queryKey: KEYS.migrations,
+    queryFn: () => adminService.fetchMigrationStatus().then((r) => r.data),
   })
 }
 

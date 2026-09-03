@@ -1,29 +1,58 @@
+import { useQuery } from '@tanstack/react-query'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useCurrency } from '@/hooks/use-currency'
+import { getCookie } from '@/lib/cookies'
 
-const data = [
-  { name: '1 May', indoor: 12400, outdoor: 8200, total: 20600 },
-  { name: '2 May', indoor: 9800, outdoor: 7600, total: 17400 },
-  { name: '3 May', indoor: 15200, outdoor: 11400, total: 26600 },
-  { name: '4 May', indoor: 11000, outdoor: 9800, total: 20800 },
-  { name: '5 May', indoor: 18600, outdoor: 14200, total: 32800 },
-  { name: '6 May', indoor: 16400, outdoor: 12800, total: 29200 },
-  { name: '7 May', indoor: 13800, outdoor: 10600, total: 24400 },
-  { name: '8 May', indoor: 20200, outdoor: 15600, total: 35800 },
-  { name: '9 May', indoor: 14600, outdoor: 11200, total: 25800 },
-  { name: '10 May', indoor: 17800, outdoor: 13400, total: 31200 },
-  { name: '11 May', indoor: 22400, outdoor: 16800, total: 39200 },
-  { name: '12 May', indoor: 19200, outdoor: 14600, total: 33800 },
-  { name: '13 May', indoor: 15600, outdoor: 12000, total: 27600 },
-  { name: '14 May', indoor: 24800, outdoor: 18200, total: 43000 },
-]
+interface TrendPoint {
+  date: string
+  name: string
+  indoor: number
+  outdoor: number
+  total: number
+}
 
-export function Overview() {
+/**
+ * Daily revenue area chart (total / indoor / outdoor) for the given date
+ * range, backed by /api/reports/revenue-trend.
+ */
+export function Overview({ from, to }: { from: string; to: string }) {
   const { currencySymbol } = useCurrency()
+  const token = getCookie('accessToken')
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['dashboard-revenue-trend', from, to],
+    queryFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/reports/revenue-trend?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      if (!res.ok) throw new Error('Failed to fetch revenue trend')
+      return res.json()
+    },
+    enabled: !!token,
+    placeholderData: (prev) => prev ?? { data: { trend: [] } },
+  })
+
+  const trend: TrendPoint[] = data?.data?.trend ?? []
+
+  if (isLoading && trend.length === 0) {
+    return (
+      <div className='flex h-[350px] items-center justify-center text-sm text-muted-foreground'>
+        Loading…
+      </div>
+    )
+  }
+  if (trend.length === 0) {
+    return (
+      <div className='flex h-[350px] items-center justify-center text-sm text-muted-foreground'>
+        No revenue in this period.
+      </div>
+    )
+  }
 
   return (
     <ResponsiveContainer width='100%' height={350}>
-      <AreaChart data={data}>
+      <AreaChart data={trend}>
         <defs>
           <linearGradient id='colorTotal' x1='0' y1='0' x2='0' y2='1'>
             <stop offset='5%' stopColor='hsl(var(--primary))' stopOpacity={0.3} />
@@ -33,6 +62,10 @@ export function Overview() {
             <stop offset='5%' stopColor='#8b5cf6' stopOpacity={0.2} />
             <stop offset='95%' stopColor='#8b5cf6' stopOpacity={0} />
           </linearGradient>
+          <linearGradient id='colorOutdoor' x1='0' y1='0' x2='0' y2='1'>
+            <stop offset='5%' stopColor='#10b981' stopOpacity={0.2} />
+            <stop offset='95%' stopColor='#10b981' stopOpacity={0} />
+          </linearGradient>
         </defs>
         <XAxis
           dataKey='name'
@@ -40,16 +73,18 @@ export function Overview() {
           fontSize={12}
           tickLine={false}
           axisLine={false}
+          interval='preserveStartEnd'
+          minTickGap={20}
         />
         <YAxis
           stroke='#888888'
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => `${currencySymbol}${(value / 1000).toFixed(0)}k`}
+          tickFormatter={(value) => `${currencySymbol} ${(value / 1000).toFixed(0)}k`}
         />
         <Tooltip
-          formatter={(value: number) => [`${currencySymbol}${value.toLocaleString()}`]}
+          formatter={(value: number) => [`${currencySymbol} ${value.toLocaleString()}`]}
           contentStyle={{
             backgroundColor: 'hsl(var(--card))',
             border: '1px solid hsl(var(--border))',
@@ -74,6 +109,15 @@ export function Overview() {
           fill='url(#colorIndoor)'
           strokeWidth={2}
           name='Indoor'
+        />
+        <Area
+          type='monotone'
+          dataKey='outdoor'
+          stroke='#10b981'
+          fillOpacity={1}
+          fill='url(#colorOutdoor)'
+          strokeWidth={2}
+          name='Outdoor'
         />
       </AreaChart>
     </ResponsiveContainer>

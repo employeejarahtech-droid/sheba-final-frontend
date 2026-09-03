@@ -131,9 +131,9 @@ export function ReportPrintLayout({
         </Button>
       </div>
 
-      {/* Header */}
-      <div className="mb-2">
-        <div className='flex justify-center items-center gap-6'>
+      {/* Header: Logo/Company (left) + Report Title (right) */}
+      <div className="mb-2 flex items-start justify-between gap-6">
+        <div className="w-1/2 flex items-center gap-4">
           {companyLogo ? (
             <img
               src={companyLogo}
@@ -142,20 +142,34 @@ export function ReportPrintLayout({
             />
           ) : null}
 
-          <div className="text-center">
+          <div>
             <h1 className="text-xl font-bold">{hospitalName}</h1>
             <p className="text-xs mt-1 leading-4">
               {hospitalAddress}
             </p>
           </div>
         </div>
+
+        <div className="w-1/2 text-right">
+          <h2 className="text-lg font-bold tracking-widest uppercase">{title}</h2>
+          {subtitle && <p className="text-xs text-gray-600 mt-1">{subtitle}</p>}
+          <p className="text-xs mt-1 leading-4">Generated: {now}</p>
+        </div>
       </div>
 
-      {/* ── Title ──────────────────────────────────────────────────────── */}
-      <h1 className="text-lg font-bold text-center underline mb-1 tracking-wide uppercase">
-        {title}
-      </h1>
-      {subtitle && <p className="text-center text-xs text-gray-600 mb-2">{subtitle}</p>}
+        {/* Active Filters (e.g. date range) */}
+        {activeFilters.length > 0 && (
+          <div className="mb-2 p-2 bg-gray-50 rounded border text-xs">
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              {activeFilters.map((f, i) => (
+                <span key={i}>
+                  <span className="text-gray-600">{f.label}:</span>{' '}
+                  <span className="font-semibold">{f.value}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Stats */}
         {stats.length > 0 && (

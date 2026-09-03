@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import React from "react";
-import { Plus, TrendingUp, TrendingDown, Scale, ChevronDown, ChevronRight, Folder, FolderOpen, FileText, Lock, Edit, Trash2, Search, Loader2 } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Scale, ChevronDown, ChevronRight, Folder, FolderOpen, FileText, Lock, Edit, Trash2, Search, Loader2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -27,7 +27,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 
 import CreateExpenseHeadForm from "@/components/accounting/CreateExpenseHead";
 import CreateIncomeHeadForm from "@/components/accounting/CreateIncomeHead";
@@ -38,13 +38,13 @@ import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
 
 import {
-    useGetAccountingAccountsQuery,
     useAddAccountingAccountMutation,
     useUpdateAccountingAccountMutation,
     useDeleteAccountingAccountMutation,
     useGetTrialBalanceQuery,
 } from "@/features/accounting/accountingQueries";
 import { accountingService } from "@/features/accounting/accountingService";
+import { useChartOfAccountsTree } from "@/features/accounting/useChartOfAccountsTree";
 import { ChartOfAccount } from "@/types/accounting.types";
 import { toast } from "sonner";
 import { useCurrency } from "@/hooks/use-currency";
@@ -104,90 +104,8 @@ function ChartOfAccounts() {
     };
 
     // Fetch all accounts to build visual hierarchy tree (limit: 1000)
-    const { data: accountsData, isFetching } = useGetAccountingAccountsQuery({ page: 1, limit: 1000 });
+    const { isFetching, treeData } = useChartOfAccountsTree();
     const { data: trialBalanceData } = useGetTrialBalanceQuery();
-
-    const balanceMap = React.useMemo(() => {
-        // Keyed by account id (NOT name) — several accounts share a name
-        // (e.g. "Surgical / OT Supplies"), so name-keying would overwrite and
-        // give the wrong debit/credit. id matches exactly one journal-derived row.
-        const map = new Map<number, { debit: number; credit: number; balance: number }>();
-        const items = trialBalanceData?.trial_balance;
-        if (Array.isArray(items)) {
-            items.forEach((item: any) => {
-                const debit = parseFloat(item.debit) || 0;
-                const credit = parseFloat(item.credit) || 0;
-                const isDebitNature = ['ASSET', 'EXPENSE'].includes(item.type);
-                const balance = isDebitNature ? (debit - credit) : (credit - debit);
-                map.set(item.id, { debit, credit, balance });
-            });
-        }
-        return map;
-    }, [trialBalanceData]);
-
-    const treeData = React.useMemo(() => {
-        const rawAccounts = accountsData?.data || [];
-        const nodeMap = new Map<number, any>();
-        
-        rawAccounts.forEach((acc) => {
-            const balanceInfo = balanceMap.get(acc.id) || { debit: 0, credit: 0, balance: 0 };
-            nodeMap.set(acc.id, {
-                id: acc.id,
-                name: acc.name,
-                code: acc.code,
-                type: acc.type,
-                parent_id: acc.parent_id,
-                is_active: acc.is_active !== false,
-                is_protected: !!acc.is_protected,
-                description: (acc as any).description || "",
-                debit: balanceInfo.debit,
-                credit: balanceInfo.credit,
-                balance: balanceInfo.balance,
-                children: [],
-                level: 0,
-            });
-        });
-
-        const roots: any[] = [];
-        nodeMap.forEach((node) => {
-            if (node.parent_id && nodeMap.has(node.parent_id)) {
-                nodeMap.get(node.parent_id)!.children.push(node);
-            } else {
-                roots.push(node);
-            }
-        });
-
-        const processNode = (node: any, level: number): { debit: number; credit: number; balance: number } => {
-            node.level = level;
-            let childrenDebit = 0;
-            let childrenCredit = 0;
-            let childrenBalance = 0;
-
-            node.children.forEach((child: any) => {
-                const childTotals = processNode(child, level + 1);
-                childrenDebit += childTotals.debit;
-                childrenCredit += childTotals.credit;
-                childrenBalance += childTotals.balance;
-            });
-
-            node.debit += childrenDebit;
-            node.credit += childrenCredit;
-            node.balance += childrenBalance;
-
-            node.children.sort((a: any, b: any) => a.code.localeCompare(b.code));
-
-            return {
-                debit: node.debit,
-                credit: node.credit,
-                balance: node.balance
-            };
-        };
-
-        roots.forEach((root) => processNode(root, 0));
-        roots.sort((a, b) => a.code.localeCompare(b.code));
-
-        return roots;
-    }, [accountsData, balanceMap]);
 
     const filteredTreeData = React.useMemo(() => {
         if (!search) return treeData;
@@ -831,6 +749,12 @@ function ChartOfAccounts() {
                         <Button variant="outline" size="sm" onClick={collapseAll} className="h-9">
                             Collapse All
                         </Button>
+                        <Link to="/dashboard/accounting/accounts/print">
+                            <Button variant="outline" size="sm" className="h-9">
+                                <Printer className="h-4 w-4 mr-2" />
+                                Print
+                            </Button>
+                        </Link>
                     </div>
                 </div>
 

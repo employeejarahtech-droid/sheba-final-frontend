@@ -5,9 +5,11 @@ interface UrineForSugarReportDetailsProps {
   report?: any;
   invoice?: any;
   paddingTop?: number;
+  fontSize?: number;
+  showSignature?: boolean;
 }
 
-export default function UrineForSugarFullReportDetails({ report, invoice, paddingTop = 40 }: UrineForSugarReportDetailsProps) {
+export default function UrineForSugarFullReportDetails({ report, invoice, paddingTop = 40, fontSize = 1, showSignature = true }: UrineForSugarReportDetailsProps) {
   // Format date for display
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
@@ -21,7 +23,7 @@ export default function UrineForSugarFullReportDetails({ report, invoice, paddin
 
   const borderWidth = 2;
   return (
-    <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
+    <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px`, zoom: fontSize }}>
       <style>
         {`
           .bg-row-blue {
@@ -77,7 +79,7 @@ export default function UrineForSugarFullReportDetails({ report, invoice, paddin
           </tr>
           <tr className="border">
             <td className="border px-3 py-2" colSpan={2}>
-              Ref. By: {invoice?.doctor?.name || invoice?.reference_doctor || '-'}{invoice?.doctor?.qualification ? ` (${invoice.doctor.qualification})` : ''}
+              Ref. By: {invoice?.doctor?.doctor_name ? `Prof./Dr. ${invoice.doctor.doctor_name}` : '-'}{invoice?.doctor?.qualification ? ` (${invoice.doctor.qualification})` : ''}
             </td>
             <td className="border px-3 py-2">
               Phone: {invoice?.phone || '-'}
@@ -115,10 +117,10 @@ export default function UrineForSugarFullReportDetails({ report, invoice, paddin
       {/* Tested By */}
       <p className="text-sm mt-4">
         <span className="font-semibold">Test Carried Out By:</span> &nbsp;
-        {report?.test_carried_out_by || invoice?.reference_doctor || 'N/A'}
+        {report?.test_carried_out_by || 'N/A'}
       </p>
 
-      <ReportFooter />
+      <ReportFooter showSignature={showSignature} />
 
       {/* Buttons */}
       <div className="flex justify-end gap-3 mt-10 print:hidden">

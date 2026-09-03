@@ -5,9 +5,11 @@ interface ReportDetailsProps {
   invoice?: any;
   testName?: string;
   paddingTop?: number;
+  fontSize?: number;
+  showSignature?: boolean;
 }
 
-export default function ReportDetails({ invoice: invoice, testName, paddingTop = 40 }: ReportDetailsProps) {
+export default function ReportDetails({ invoice: invoice, testName, paddingTop = 40, fontSize = 1, showSignature = true }: ReportDetailsProps) {
   // Extract patient info from nested outdoor_invoice object
   const patientInfo = invoice?.outdoor_invoice || {};
   const formatDate = (dateString: string | null) => {
@@ -21,7 +23,7 @@ export default function ReportDetails({ invoice: invoice, testName, paddingTop =
   };
 
   return (
-    <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
+    <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px`, zoom: fontSize }}>
       <style>
         {`
           .bg-row-blue {
@@ -135,7 +137,7 @@ export default function ReportDetails({ invoice: invoice, testName, paddingTop =
         {invoice.test_carried_out_by || 'Not specified'}
       </p>
 
-      <ReportFooter />
+      <ReportFooter showSignature={showSignature} />
 
       {/* Buttons */}
       <div className="flex justify-end gap-3 mt-10 print:hidden">

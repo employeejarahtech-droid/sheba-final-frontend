@@ -197,6 +197,14 @@ export type ExpenseResponse = {
     };
 };
 
+export type IncomeByIdResponse = {
+    data: Income;
+};
+
+export type ExpenseByIdResponse = {
+    data: Expense;
+};
+
 export type ListResponse<T> = {
     data: T[];
     pagination?: {

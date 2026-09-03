@@ -26,13 +26,29 @@ function normalizeItems(raw: unknown): FooterItem[] | null {
     return items.length > 0 ? items : null
 }
 
-export function ReportFooter() {
+interface ReportFooterProps {
+    // Controlled mode: pages with their own Print Settings panel own this
+    // state themselves and pass it in (+ a setter for a checkbox they render
+    // inside their own panel). When omitted, ReportFooter falls back to its
+    // legacy self-contained behavior below (own state + DOM-portal-injected
+    // checkbox next to a `#padding-select` element) for pages that haven't
+    // been migrated to a Print Settings panel yet.
+    showSignature?: boolean
+    onShowSignatureChange?: (value: boolean) => void
+}
+
+export function ReportFooter({ showSignature: controlledShowSignature, onShowSignatureChange }: ReportFooterProps = {}) {
+    const isControlled = controlledShowSignature !== undefined
+
     const [portalTarget, setPortalTarget] = useState<HTMLDivElement | null>(null)
-    const [showSignature, setShowSignature] = useState(() => {
+    const [uncontrolledShowSignature, setUncontrolledShowSignature] = useState(() => {
         // Pathology default is true (yes), others default to false (no)
         const isPathology = window.location.pathname.includes('/pathology/')
         return isPathology
     })
+
+    const showSignature = isControlled ? controlledShowSignature : uncontrolledShowSignature
+    const setShowSignature = isControlled ? (onShowSignatureChange ?? (() => {})) : setUncontrolledShowSignature
 
     const { data } = useQuery({
         queryKey: ['company-settings'],
@@ -46,6 +62,7 @@ export function ReportFooter() {
     const currentUserName = useAuthStore((s) => s.user?.name)
 
     useEffect(() => {
+        if (isControlled) return // the parent's own Print Settings panel owns the checkbox
         let container: HTMLDivElement | null = null
 
         const tryInject = () => {
@@ -61,7 +78,7 @@ export function ReportFooter() {
             // Create a wrapper container for the checkbox
             container = document.createElement('div')
             container.className = 'flex items-center gap-1.5 ml-4 print:hidden'
-            
+
             // Insert it as a sibling right after the padding-select container
             grandParent.insertBefore(container, parentDiv.nextSibling)
             setPortalTarget(container)
@@ -83,7 +100,7 @@ export function ReportFooter() {
         return () => {
             if (container) container.remove()
         }
-    }, [])
+    }, [isControlled])
 
     let items = DEFAULT_ITEMS
     if (data?.report_footer_items) {

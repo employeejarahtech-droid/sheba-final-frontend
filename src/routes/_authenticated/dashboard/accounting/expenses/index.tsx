@@ -1,8 +1,9 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod'
 import { Plus, DollarSign, TrendingDown, CreditCard } from "lucide-react";
 import { AddExpenseModal } from "@/components/accounting/AddExpenseModal";
 
@@ -27,17 +28,42 @@ import { AppHeader } from '@/components/layout/app-header'
 
 
 
+const expensesSearchSchema = z.object({
+    page: z.coerce.number().catch(1),
+    limit: z.coerce.number().catch(10),
+    search: z.string().catch(''),
+    from: z.string().catch(''),
+    to: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/dashboard/accounting/expenses/')({
+    validateSearch: (search) => expensesSearchSchema.parse(search),
     component: ExpensesPage,
 })
 
 function ExpensesPage() {
+    const searchParams: any = Route.useSearch();
+    const navigate = Route.useNavigate();
     const { currencySymbol } = useCurrency();
-    const [page, setPage] = useState(1);
-    const [search, setSearch] = useState("");
-    const [from, setFrom] = useState("");
-    const [to, setTo] = useState("");
-    const limit = 10;
+
+    const page = Number(searchParams?.page) || 1;
+    const limit = Number(searchParams?.limit) || 10;
+    const search = searchParams?.search || "";
+    const from = searchParams?.from || "";
+    const to = searchParams?.to || "";
+
+    const setPage = (newPage: number) => {
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
+    };
+    const setSearch = (newSearch: string) => {
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
+    };
+    const setFrom = (newFrom: string) => {
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, from: newFrom, page: 1 }) });
+    };
+    const setTo = (newTo: string) => {
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, to: newTo, page: 1 }) });
+    };
 
     // Date filter presets
     const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
@@ -67,7 +93,7 @@ function ExpensesPage() {
     const [presetOpen, setPresetOpen] = useState(false)
     const applyPreset = (key: string) => {
         const p = (datePresets as any)[key]
-        if (p) { setFrom(p.from); setTo(p.to); setPage(1) }
+        if (p) { setFrom(p.from); setTo(p.to) }
         setPresetOpen(false)
     }
 
@@ -125,6 +151,25 @@ function ExpensesPage() {
             title: "ID",
             orderable: true,
             responsivePriority: 1,
+            render: (data: any, _type: string, row: Expense) => {
+                const esc = (s: any) => String(s ?? '-').replace(/"/g, '&quot;');
+                return `
+                    <div class="flex items-center gap-2">
+                        <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
+                                type="button"
+                                data-id="${data}"
+                                data-title="${esc(row.title)}"
+                                data-description="${esc(row.description)}"
+                                data-category="${esc(row?.debitHead?.name)}"
+                                data-amount="${Number(row.amount || 0).toFixed(2)}"
+                                data-date="${esc(row.expense_date)}"
+                                data-payment-method="${esc(row.payment_method)}"
+                                data-reference="${esc(row.reference_number)}"
+                                data-status="${esc(row.status || 'pending')}">+</button>
+                        <span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${data}</span>
+                    </div>
+                `;
+            },
         },
         {
             data: "title",
@@ -191,7 +236,151 @@ function ExpensesPage() {
                 return `<span class="${className}">${status}</span>`;
             },
         },
+        {
+            data: null,
+            title: "Actions",
+            orderable: false,
+            responsivePriority: 1,
+            render: (_data: any, _type: string, row: Expense) => {
+                return `
+                    <div class="flex gap-2">
+                        <button
+                            onclick="window.printExpense(${row.id})"
+                            class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3"
+                            title="Print Voucher"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+                        </button>
+                    </div>
+                `;
+            },
+        },
     ];
+
+    // Handle expand button clicks using event delegation — mirrors the
+    // Income page's expand-row detail pattern.
+    useEffect(() => {
+        const handleExpandClick = (e: Event) => {
+            const button = (e.target as HTMLElement).closest('.expand-btn');
+            if (!button) return;
+
+            const btn = button as HTMLButtonElement;
+            const row = btn.closest('tr');
+            if (!row) return;
+
+            const isExpanded = row.classList.contains('expanded');
+            const nextRow = row.nextElementSibling;
+
+            // Toggle collapse
+            if (nextRow && nextRow.classList.contains('child-row-detail')) {
+                nextRow.remove();
+                row.classList.remove('expanded');
+                btn.textContent = '+';
+                btn.style.backgroundColor = '#10B981';
+                return;
+            }
+
+            if (isExpanded) return;
+
+            const id = btn.dataset.id || '';
+            const title = btn.dataset.title || '-';
+            const description = btn.dataset.description || '-';
+            const category = btn.dataset.category || '-';
+            const amount = btn.dataset.amount || '0.00';
+            const date = btn.dataset.date || '-';
+            const paymentMethod = btn.dataset.paymentMethod || '-';
+            const reference = btn.dataset.reference || '-';
+            const status = btn.dataset.status || 'pending';
+
+            const statusBadgeClass = status.toLowerCase() === 'paid'
+                ? 'bg-emerald-100 text-emerald-700'
+                : status.toLowerCase() === 'pending'
+                ? 'bg-amber-100 text-amber-700'
+                : 'bg-rose-100 text-rose-700';
+
+            const details = document.createElement('div');
+            details.className = 'max-w-3xl mx-auto my-4';
+            details.innerHTML = `
+                <div class="max-w-3xl mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden">
+                    <div class="bg-gradient-to-r from-red-600 to-orange-500 px-6 py-4">
+                        <h2 class="text-lg font-semibold text-white">Expense Details</h2>
+                        <p class="text-orange-100 text-sm">${title}</p>
+                    </div>
+                    <div class="p-6">
+                        <ul class="grid md:grid-cols-2 gap-6 text-sm">
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Expense ID</span>
+                                <span class="font-mono text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded w-fit">#${id}</span>
+                            </li>
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Title</span>
+                                <span class="font-semibold text-gray-800 dark:text-gray-100 text-base">${title}</span>
+                            </li>
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Category</span>
+                                <span class="px-3 py-1 w-fit text-xs font-semibold rounded-full bg-purple-100 text-purple-700">${category}</span>
+                            </li>
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Amount</span>
+                                <span class="font-bold text-lg text-red-600">${currencySymbol} ${amount}</span>
+                            </li>
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Date</span>
+                                <span class="font-medium text-gray-700 dark:text-gray-300">${date}</span>
+                            </li>
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Payment Method</span>
+                                <span class="font-medium text-gray-700 dark:text-gray-300">${paymentMethod}</span>
+                            </li>
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Reference</span>
+                                <span class="font-medium text-gray-700 dark:text-gray-300">${reference}</span>
+                            </li>
+                            <li class="flex flex-col">
+                                <span class="text-gray-500">Status</span>
+                                <span class="px-3 py-1 w-fit text-xs font-semibold rounded-full capitalize ${statusBadgeClass}">${status}</span>
+                            </li>
+                            <li class="flex flex-col md:col-span-2">
+                                <span class="text-gray-500">Description</span>
+                                <span class="font-medium text-gray-700 dark:text-gray-300 text-sm">${description || 'No description provided'}</span>
+                            </li>
+                        </ul>
+                        <div class="mt-8 flex justify-end gap-3 border-t pt-5">
+                            <button onclick="window.printExpense(${id})"
+                                class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 transition h-10 px-5">
+                                Print Voucher
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const newRow = document.createElement('tr');
+            newRow.className = 'child-row-detail';
+            const cell = document.createElement('td');
+            cell.className = 'p-4 bg-muted/50';
+            cell.colSpan = 10;
+            cell.appendChild(details);
+            newRow.appendChild(cell);
+
+            row.parentNode?.insertBefore(newRow, row.nextSibling);
+            row.classList.add('expanded');
+            btn.textContent = '−';
+            btn.style.backgroundColor = '#dc2626';
+        };
+
+        document.addEventListener('click', handleExpandClick);
+        return () => {
+            document.removeEventListener('click', handleExpandClick);
+        };
+    }, [currencySymbol]);
+
+    // Expose print handler for the Actions column's onclick (DataTable renders columns as HTML strings)
+    if (typeof window !== 'undefined') {
+        (window as any).printExpense = (id: number) => {
+            navigate({ to: '/dashboard/accounting/expenses/$expenseId/print', params: { expenseId: String(id) } });
+        };
+    }
 
     if (isError) return <div className="p-8 text-center text-red-500">Error loading expenses</div>;
 
@@ -203,9 +392,10 @@ function ExpensesPage() {
                     <h2 className="text-2xl font-bold">All Expenses</h2>
                     <div className="flex gap-2 items-center w-full sm:w-auto">
                         <AddExpenseModal>
-                            <button className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-2.5 font-medium text-white shadow-lg shadow-blue-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-blue-500/40 active:translate-y-0 active:shadow-none whitespace-nowrap">
-                                <Plus size={18} /> Add Expense
-                            </button>
+                            <Button>
+                                <Plus className="h-4 w-4" />
+                                Add Expense
+                            </Button>
                         </AddExpenseModal>
                     </div>
                 </div>
@@ -252,13 +442,9 @@ function ExpensesPage() {
                     onPageChange={(newPage) => setPage(newPage)}
                     onLimitChange={() => {
                         // Keep limit fixed at 10 for now
-                        setPage(1);
                     }}
                     search={search}
-                    onSearchChange={(value) => {
-                        setSearch(value);
-                        setPage(1);
-                    }}
+                    onSearchChange={(value) => setSearch(value)}
                     isLoading={isFetching}
                     filterSlot={
                         <div className="flex items-center gap-1.5">
@@ -280,11 +466,11 @@ function ExpensesPage() {
                                     <SelectItem value="custom">Custom range</SelectItem>
                                 </SelectContent>
                             </Select>
-                            <DateField value={from} onChange={(v: string) => { setFrom(v); setPresetOpen(false); setPage(1) }} placeholder="From" />
+                            <DateField value={from} onChange={(v: string) => { setFrom(v); setPresetOpen(false) }} placeholder="From" />
                             <span className="text-xs text-muted-foreground">to</span>
-                            <DateField value={to} onChange={(v: string) => { setTo(v); setPresetOpen(false); setPage(1) }} placeholder="To" />
+                            <DateField value={to} onChange={(v: string) => { setTo(v); setPresetOpen(false) }} placeholder="To" />
                             {(from || to) && (
-                                <Button variant="ghost" size="sm" onClick={() => { setFrom(''); setTo(''); setPage(1) }}>
+                                <Button variant="ghost" size="sm" onClick={() => { setFrom(''); setTo('') }}>
                                     Clear
                                 </Button>
                             )}

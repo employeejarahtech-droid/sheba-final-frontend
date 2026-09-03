@@ -63,7 +63,7 @@ export function BalanceDistributedListPage({
 }: BalanceDistributedListPageProps) {
     const navigate = useNavigate()
     const token = getCookie('accessToken')
-    const { format } = useCurrency()
+    const { format, currencySymbol } = useCurrency()
 
     // Support local state fallback or driven by props
     const [localPage, localSetPage] = useState(1);
@@ -144,9 +144,9 @@ export function BalanceDistributedListPage({
         },
         {
             data: "amount",
-            title: "Amount",
+            title: `Amount (${currencySymbol})`,
             render: (_: any, __: any, row: AdmissionItem) =>
-                row.finalBill ? format(parseFloat(row.finalBill.total_discounted_amount)) : '-'
+                row.finalBill ? parseFloat(row.finalBill.total_discounted_amount).toLocaleString() : '-'
         },
         {
             data: "actions",

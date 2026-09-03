@@ -362,7 +362,7 @@ export function EditPeripheralBloodFilmForm({ open, setOpen, reportId, invoiceId
                                 {form.formState.isSubmitting ? "Updating..." : "Update"}
                             </Button>
 
-                            <Link to={`/pathology/hematology/peripheral-blood-film/report/$reportId`} params={{ reportId: reportId.toString() }}>
+                            <Link to="/dashboard/pathology/hematology/peripheral-blood-film/report/$reportId" params={{ reportId: reportId.toString() }}>
                                 <Button type="button" variant="warning">
                                     Print Preview
                                 </Button>

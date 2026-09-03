@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
 import { Settings2 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
@@ -47,6 +47,15 @@ const FONT_SIZES: Record<string, { label: string; zoom: number }> = {
     xl: { label: 'Extra Large', zoom: 1.3 },
 }
 
+// Column width split for the Patient Information table (left cell / right cell).
+const PATIENT_INFO_COL_RATIOS: Record<string, { label: string; left: string; right: string }> = {
+    '50/50': { label: '50% / 50%', left: 'w-1/2', right: 'w-1/2' },
+    '60/40': { label: '60% / 40%', left: 'w-3/5', right: 'w-2/5' },
+    '65/35': { label: '65% / 35%', left: 'w-[65%]', right: 'w-[35%]' },
+    '70/30': { label: '70% / 30%', left: 'w-[70%]', right: 'w-[30%]' },
+    '75/25': { label: '75% / 25%', left: 'w-3/4', right: 'w-1/4' },
+}
+
 export const Route = createFileRoute(
     '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/',
 )({
@@ -60,7 +69,9 @@ function InvoiceDetails() {
     const [paperSize, setPaperSize] = useState<keyof typeof PAPER_SIZES>('a4')
     const { cssSize, margin } = PAPER_SIZES[paperSize]
     const [fontSize, setFontSize] = useState<keyof typeof FONT_SIZES>('base')
+    const [patientInfoColRatio, setPatientInfoColRatio] = useState<keyof typeof PATIENT_INFO_COL_RATIOS>('60/40')
     const [showPayments, setShowPayments] = useState(false)
+    const [showDepartmentDiscounts, setShowDepartmentDiscounts] = useState(false)
     const [padding, setPadding] = useState<InvoicePadding>(DEFAULT_PADDING)
     const [settingsOpen, setSettingsOpen] = useState(false)
     const queryClient = useQueryClient()
@@ -152,14 +163,23 @@ function InvoiceDetails() {
             left: companySettings.invoice_padding_left ?? DEFAULT_PADDING.left,
         })
         setShowPayments(Boolean(companySettings.invoice_show_payments))
-        if (companySettings.invoice_visible_columns) {
-            setVisibleColumns((prev) => ({ ...prev, ...companySettings.invoice_visible_columns }))
+        setShowDepartmentDiscounts(Boolean(companySettings.invoice_show_department_discounts))
+        const incomingColumns = companySettings.invoice_visible_columns
+        if (incomingColumns && typeof incomingColumns === 'object' && !Array.isArray(incomingColumns)) {
+            const sanitized: Partial<typeof visibleColumns> = {}
+            for (const key of ['sl', 'testName', 'roomNo', 'deliveryDate', 'charge'] as const) {
+                if (typeof incomingColumns[key] === 'boolean') sanitized[key] = incomingColumns[key]
+            }
+            setVisibleColumns((prev) => ({ ...prev, ...sanitized }))
         }
         if (companySettings.invoice_font_size && companySettings.invoice_font_size in FONT_SIZES) {
             setFontSize(companySettings.invoice_font_size)
         }
         if (companySettings.invoice_paper_size && companySettings.invoice_paper_size in PAPER_SIZES) {
             setPaperSize(companySettings.invoice_paper_size)
+        }
+        if (companySettings.invoice_patient_info_col_ratio && companySettings.invoice_patient_info_col_ratio in PATIENT_INFO_COL_RATIOS) {
+            setPatientInfoColRatio(companySettings.invoice_patient_info_col_ratio)
         }
     }, [companySettings])
 
@@ -179,9 +199,11 @@ function InvoiceDetails() {
                     invoice_padding_bottom: padding.bottom,
                     invoice_padding_left: padding.left,
                     invoice_show_payments: showPayments,
+                    invoice_show_department_discounts: showDepartmentDiscounts,
                     invoice_visible_columns: visibleColumns,
                     invoice_font_size: fontSize,
                     invoice_paper_size: paperSize,
+                    invoice_patient_info_col_ratio: patientInfoColRatio,
                 }),
             })
             if (!res.ok) throw new Error('Failed to save print settings')
@@ -332,7 +354,7 @@ function InvoiceDetails() {
                                 </div>
                                 <div>
                                     <div className="text-base font-semibold text-left">Print Settings</div>
-                                    <p className="text-xs text-muted-foreground font-normal text-left">Adjust how this invoice looks and prints</p>
+                                    <SheetDescription className="text-xs font-normal text-left">Adjust how this invoice looks and prints</SheetDescription>
                                 </div>
                             </SheetTitle>
                         </SheetHeader>
@@ -346,6 +368,17 @@ function InvoiceDetails() {
                                 />
                                 <label htmlFor="show-payments" className="text-sm font-medium cursor-pointer select-none">
                                     Show Payments
+                                </label>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <Checkbox
+                                    id="show-department-discounts"
+                                    checked={showDepartmentDiscounts}
+                                    onCheckedChange={(checked) => setShowDepartmentDiscounts(checked === true)}
+                                />
+                                <label htmlFor="show-department-discounts" className="text-sm font-medium cursor-pointer select-none">
+                                    Show Department Wise Discount
                                 </label>
                             </div>
 
@@ -421,6 +454,20 @@ function InvoiceDetails() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         {Object.entries(PAPER_SIZES).map(([key, { label }]) => (
+                                            <SelectItem key={key} value={key}>{label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-sm font-medium">Patient Info Column Widths</Label>
+                                <Select value={patientInfoColRatio} onValueChange={(v) => setPatientInfoColRatio(v as keyof typeof PATIENT_INFO_COL_RATIOS)}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Column widths" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.entries(PATIENT_INFO_COL_RATIOS).map(([key, { label }]) => (
                                             <SelectItem key={key} value={key}>{label}</SelectItem>
                                         ))}
                                     </SelectContent>
@@ -543,27 +590,27 @@ function InvoiceDetails() {
                     <table className="w-full text-sm border mt-1" data-table-ignore="true">
                         <tbody>
                             <tr className="border">
-                                <td className="border px-2 py-1 w-3/5">
+                                <td className={`border px-2 py-1 ${PATIENT_INFO_COL_RATIOS[patientInfoColRatio].left}`}>
                                     Receipt ID : {invoice?.invoice_prefix || invoice?.id}
                                 </td>
-                                <td className="border px-2 py-1 w-2/5">
+                                <td className={`border px-2 py-1 ${PATIENT_INFO_COL_RATIOS[patientInfoColRatio].right}`}>
                                     Age : {invoice?.age_text || (invoice?.age ? `${invoice.age}Y` : '-')}
                                 </td>
                             </tr>
                             <tr className="border">
-                                <td className="border px-2 py-1 w-3/5">
+                                <td className={`border px-2 py-1 ${PATIENT_INFO_COL_RATIOS[patientInfoColRatio].left}`}>
                                     Patient's Name : {invoice?.patient_name}
                                 </td>
-                                <td className="border px-2 py-1 w-2/5">
+                                <td className={`border px-2 py-1 ${PATIENT_INFO_COL_RATIOS[patientInfoColRatio].right}`}>
                                     Sex : {invoice?.sex ? invoice.sex.charAt(0).toUpperCase() + invoice.sex.slice(1).toLowerCase() : '-'}
                                 </td>
                             </tr>
                             <tr className="border">
-                                <td className="border px-2 py-1 w-3/5">
+                                <td className={`border px-2 py-1 ${PATIENT_INFO_COL_RATIOS[patientInfoColRatio].left}`}>
                                     Ref. By : {invoice?.doctor?.doctor_name || '-'}{invoice?.doctor?.qualification ? ` (${invoice.doctor.qualification})` : ''}
                                 </td>
-                                <td className="border px-2 py-1 w-2/5">
-                                    Contact No : {invoice?.phone || '-'}
+                                <td className={`border px-2 py-1 ${PATIENT_INFO_COL_RATIOS[patientInfoColRatio].right}`}>
+                                    Contact : {invoice?.phone || '-'}
                                 </td>
                             </tr>
                         </tbody>
@@ -606,6 +653,28 @@ function InvoiceDetails() {
                     <div className="invoice-totals-row flex items-center gap-4 mt-4">
                         {/* Column 1: Invoice meta — 35% */}
                         <div className="invoice-totals-col-1 w-[40%] min-w-0 text-sm">
+                            {showDepartmentDiscounts && invoice?.department_discounts?.length > 0 && (
+                                <div className="mb-2">
+                                    <p className="font-semibold text-slate-700 mb-1">Department Wise Discount</p>
+                                    <table className="w-full text-xs border" data-table-ignore="true">
+                                        <thead>
+                                            <tr className="border">
+                                                <th className="py-1 px-1 border text-left font-bold">Department</th>
+                                                <th className="py-1 px-1 border text-right font-bold">Discount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {invoice.department_discounts.map((d: any) => (
+                                                <tr key={d.id} className="border">
+                                                    <td className="py-1 px-2 border">{d.department?.name || '-'}</td>
+                                                    <td className="py-1 px-2 border text-right">{Number(d.discount || 0).toFixed(2)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+
                             {showPayments && invoice?.payments?.length > 0 && (
                                 <div className="mb-2">
                                     <p className="font-semibold text-slate-700 mb-1">Payments</p>
@@ -686,8 +755,7 @@ function InvoiceDetails() {
                     {/* ── Signature Row ───────────────────────────────────────────────── */}
                     <div className="flex justify-between mt-12 text-sm w-full">
                         <div style={{ textAlign: 'left' }}>
-                            <span className="inline-block border-t border-dashed pt-1">Prepared By:</span>
-                             <p className="font-medium">{currentUserName || '-'}</p>
+                            <p className="border-t border-dashed pt-1">Prepared By: <span className="font-medium">{currentUserName || '-'}</span></p>
                         </div>
                         <div style={{ textAlign: 'right' }}>
                             <span className="inline-block border-t border-dashed pt-1">Authorized Signature:</span>

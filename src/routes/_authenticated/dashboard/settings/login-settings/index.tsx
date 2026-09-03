@@ -10,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Upload, Image as ImageIcon, FileText, Save, Loader2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { getCookie } from '@/lib/cookies';
-import { AppHeader } from '@/components/layout/app-header'
 import { GallerySelector } from '@/components/gallery-selector'
 
 export const Route = createFileRoute('/_authenticated/dashboard/settings/login-settings/')({
@@ -130,15 +129,12 @@ function LoginSettingsPage() {
 
     return (
         <>
-            <AppHeader fixed />
-            <main className=''>
-
-                {isLoading ? (
-                    <div className="flex items-center justify-center h-64">
-                        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-                    </div>
-                ) : (
-                    <div className="mx-auto px-4 space-y-5">
+            {isLoading ? (
+                <div className="flex items-center justify-center h-64">
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                </div>
+            ) : (
+                <div className="mx-auto px-4 space-y-5">
 
                         <div className="flex flex-wrap justify-between items-start gap-4">
                             <div className="flex items-center gap-4">
@@ -397,7 +393,6 @@ function LoginSettingsPage() {
                         </div>
                     </div>
                 )}
-            </main>
         </>
     );
 }

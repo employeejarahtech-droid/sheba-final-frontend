@@ -1,6 +1,5 @@
-﻿import { useMemo, useEffect, useState } from 'react'
+﻿import { useMemo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
 import { Users, FileText } from 'lucide-react'
 
 import { AppHeader } from '@/components/layout/app-header'
@@ -45,12 +44,17 @@ type AdmissionItem = {
     }
 }
 
-export function BillNotCreatedListPage() {
-    const navigate = useNavigate()
+interface BillNotCreatedListPageProps {
+    page: number;
+    limit: number;
+    search: string;
+    setPage: (page: number) => void;
+    setLimit: (limit: number) => void;
+    setSearch: (search: string) => void;
+}
+
+export function BillNotCreatedListPage({ page, limit, search, setPage, setLimit, setSearch }: BillNotCreatedListPageProps) {
     const token = getCookie('accessToken')
-    const [page, setPage] = useState(1)
-    const [limit, setLimit] = useState(10)
-    const [search, setSearch] = useState('')
 
     const { data: admissionsData, isFetching } = useQuery({
         queryKey: ['admissions', 'bill-not-created', page, limit, search],
@@ -181,7 +185,7 @@ export function BillNotCreatedListPage() {
                 return `
                     <a href="/dashboard/admission/patients/${row.id}/billing"
                        class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 no-underline">
-                        Add Billing
+                        Create Bill
                     </a>
                 `;
             },
@@ -272,7 +276,7 @@ export function BillNotCreatedListPage() {
                         <div class="mt-8 flex justify-end gap-3 border-t pt-5">
                             <a href="/dashboard/admission/patients/${id}/billing"
                                class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-orange-600 text-white hover:bg-orange-700 transition h-10 px-5 shadow no-underline">
-                                Add Billing
+                                Create Bill
                             </a>
                         </div>
                     </div>
@@ -303,15 +307,15 @@ export function BillNotCreatedListPage() {
     return (
         <>
             <AppHeader fixed />
-            <Main fluid className="p-4 w-full flex-1 dark:bg-black/20">
+            <Main fluid className="w-full flex-1 dark:bg-black/20">
                 <div className="space-y-4 mx-auto">
                     <div className="flex flex-wrap justify-between items-start gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                            <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                                 Bill Not Created
                             </h1>
                             <p className="text-muted-foreground mt-1 text-sm font-medium">
-                                Discharged patients whose bills have not been created yet
+                                All admissions whose bills have not been created yet
                             </p>
                         </div>
                     </div>
@@ -320,10 +324,7 @@ export function BillNotCreatedListPage() {
                         data={admissions}
                         meta={meta}
                         onPageChange={setPage}
-                        onLimitChange={(newLimit) => {
-                            setLimit(newLimit)
-                            setPage(1)
-                        }}
+                        onLimitChange={setLimit}
                         search={search}
                         isLoading={isFetching}
                         onSearchChange={setSearch}

@@ -3,7 +3,8 @@ import { DataTable } from '@/components/DataTable'
 import { useMemo, useState, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
-import { DollarSign, CreditCard } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { DollarSign, CreditCard, Printer } from 'lucide-react'
 import { useCurrency } from '@/hooks/use-currency'
 import { useDateFormat } from '@/hooks/use-date-format'
 import { Button } from '@/components/ui/button'
@@ -242,12 +243,36 @@ export default function OutdoorAllCollections({
             render: (d: any) => { const v = Number(d || 0); return `<span class="font-semibold ${v > 0 ? 'text-red-600' : 'text-emerald-600'}">${fmtNum(v)}</span>` }, defaultContent: '0',
         },
         {
+            data: null, title: 'Payment Type', orderable: false, responsivePriority: 4,
+            // No prior payment on the invoice before this one = the regular
+            // payment made at billing time. Otherwise it's collecting an
+            // already-outstanding due.
+            render: (_d: any, _t: string, row: any) => {
+                const isDueCollection = Number(row.previous_paid || 0) > 0
+                return isDueCollection
+                    ? `<span class="px-2 py-1 rounded text-xs font-semibold bg-amber-100 text-amber-700">Due Collection</span>`
+                    : `<span class="px-2 py-1 rounded text-xs font-semibold bg-blue-100 text-blue-700">Regular</span>`
+            }, defaultContent: '-',
+        },
+        {
             data: 'payment_method', title: 'Method', orderable: true, responsivePriority: 3,
             render: (d: any) => `<span class="px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-700">${d || '-'}</span>`, defaultContent: '-',
         },
         {
             data: null, title: 'Collected By', orderable: false, responsivePriority: 3,
             render: (_d: any, _t: string, row: any) => `<span class="text-sm font-medium text-gray-700">${row.payment_created_by?.name || row.creator?.name || '-'}</span>`, defaultContent: '-',
+        },
+        {
+            data: null, title: 'Create Type', orderable: false, responsivePriority: 5,
+            render: (_d: any, _t: string, row: any) => {
+                if (!row.payment_created_by_type) return `<span class="text-sm text-muted-foreground">-</span>`;
+                const isAdmin = row.payment_created_by_type === 'company_admin';
+                const label = isAdmin ? 'Admin' : 'Staff';
+                const classes = isAdmin
+                    ? 'bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400'
+                    : 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400';
+                return `<span class="${classes} px-2 py-0.5 rounded text-xs font-semibold">${label}</span>`;
+            }, defaultContent: '-',
         },
         {
             data: 'payment_created_at', title: 'Collected Date & Time', orderable: true, responsivePriority: 3,
@@ -265,6 +290,11 @@ export default function OutdoorAllCollections({
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded text-xs font-semibold shadow transition-colors" type="button">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
                         Print
+                    </button>
+                    <button onclick="window.location.href = '/dashboard/outdoor/reception/invoices/${row.id}/payment-receipt/${row.payment_id}'"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded text-xs font-semibold shadow transition-colors whitespace-nowrap" type="button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="1" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        Receipt
                     </button>
                 </div>`,
             defaultContent: '',
@@ -376,7 +406,9 @@ export default function OutdoorAllCollections({
                                         <SelectContent>
                                             <SelectItem value="all">All Users</SelectItem>
                                             {users.map((u: any) => (
-                                                <SelectItem key={u.id} value={String(u.id)}>{u.name}</SelectItem>
+                                                <SelectItem key={u.id} value={String(u.id)}>
+                                                    {u.name} ({u.type === 'company_admin' ? 'Admin' : 'Staff'})
+                                                </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -407,6 +439,52 @@ export default function OutdoorAllCollections({
                                         <Button variant="ghost" size="sm" onClick={() => { setFrom(''); setTo('') }}>
                                             Clear
                                         </Button>
+                                    )}
+                                    {scope === 'my' && (
+                                        <Link
+                                            to="/dashboard/reports/my/outdoor/date-wise-collection/print"
+                                            search={{
+                                                search: search || undefined,
+                                                start_date: from || undefined,
+                                                end_date: to || undefined,
+                                            }}
+                                        >
+                                            <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
+                                                <Printer className="w-4 h-4 mr-2" />
+                                                Print
+                                            </Button>
+                                        </Link>
+                                    )}
+                                    {scope === 'all' && (
+                                        <Link
+                                            to="/dashboard/reports/outdoor/date-wise-collection/print"
+                                            search={{
+                                                search: search || undefined,
+                                                start_date: from || undefined,
+                                                end_date: to || undefined,
+                                            }}
+                                        >
+                                            <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
+                                                <Printer className="w-4 h-4 mr-2" />
+                                                Print
+                                            </Button>
+                                        </Link>
+                                    )}
+                                    {scope === 'user-wise' && (
+                                        <Link
+                                            to="/dashboard/reports/outdoor/date-wise-collection/print"
+                                            search={{
+                                                search: search || undefined,
+                                                start_date: from || undefined,
+                                                end_date: to || undefined,
+                                                user_id: user && user !== 'all' ? user : undefined,
+                                            }}
+                                        >
+                                            <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
+                                                <Printer className="w-4 h-4 mr-2" />
+                                                Print
+                                            </Button>
+                                        </Link>
                                     )}
                                 </div>
                             </>

@@ -3,6 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronDown, FileText, CreditCard, TrendingDown, CornerDownRight, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -31,9 +32,12 @@ import {
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { useAddExpenseHeadwiseMutation, useGetExpenseHeadsQuery, useGetAccountingAccountsQuery } from "@/features/accounting/accountingQueries";
+import { useAddExpenseHeadwiseMutation, useGetExpenseHeadsQuery } from "@/features/accounting/accountingQueries";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/hooks/use-currency";
+import { getCookie } from "@/lib/cookies";
+
+const DEFAULT_PAYMENT_METHODS = ["Cash", "Card", "Bank Transfer", "Mobile Banking", "Check"];
 
 const expenseSchema = z.object({
   title: z.string().min(1, "Required"),
@@ -73,8 +77,24 @@ export function AddExpenseModal({ children }: { children: React.ReactNode }) {
   const { data: expenseHeadsData } = useGetExpenseHeadsQuery({ search });
   const debitHeads = expenseHeadsData?.data || [];
 
-  const { data: accountsData } = useGetAccountingAccountsQuery({ limit: 1000 });
-  const assetAccounts = (accountsData?.data || []).filter((acc: any) => acc.type === "Asset");
+  const token = getCookie("accessToken");
+  const { data: paymentMappings } = useQuery({
+    queryKey: ["payment-mappings"],
+    queryFn: async () => {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/app-settings/payment-mappings`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch payment mappings");
+      const json = await res.json();
+      return json.data || {};
+    },
+    enabled: !!token,
+  });
+  // "Paid Via" options come from Settings → Payment Accounts (general_expense
+  // scenario), so admins configure which asset account each method maps to
+  // in one place instead of picking a raw COA account here.
+  const paymentMethods: string[] =
+    paymentMappings?.general_expense?.methods?.map((m: any) => m.name).filter(Boolean) || DEFAULT_PAYMENT_METHODS;
 
   const { currencySymbol } = useCurrency();
 
@@ -131,8 +151,8 @@ export function AddExpenseModal({ children }: { children: React.ReactNode }) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4">
           <div className="grid gap-6 md:grid-cols-2">
             {/* BASIC INFO */}
-            <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-red-200 hover:shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 dark:from-red-950/30 dark:via-orange-950/30 dark:to-red-950/30 border-b border-red-100 dark:border-red-900 py-3 gap-0">
+            <Card className="overflow-hidden border-1 transition-all duration-300 hover:border-red-200 hover:shadow-lg">
+              <CardHeader className="">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-gradient-to-br from-red-600 to-orange-500 rounded-xl shadow-lg shadow-red-500/30">
                     <FileText className="w-6 h-6 text-white" />
@@ -256,8 +276,8 @@ export function AddExpenseModal({ children }: { children: React.ReactNode }) {
             </Card>
 
             {/* PAYMENT INFO */}
-            <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-red-200 hover:shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 dark:from-red-950/30 dark:via-orange-950/30 dark:to-red-950/30 border-b border-red-100 dark:border-red-900 py-3 gap-0">
+            <Card className="overflow-hidden border-1 transition-all duration-300 hover:border-red-200 hover:shadow-lg">
+              <CardHeader className="">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-gradient-to-br from-red-600 to-orange-500 rounded-xl shadow-lg shadow-red-500/30">
                     <CreditCard className="w-6 h-6 text-white" />
@@ -294,9 +314,6 @@ export function AddExpenseModal({ children }: { children: React.ReactNode }) {
                     control={control}
                     name="paidVia"
                     render={({ field }) => {
-                      const selected = assetAccounts?.find(
-                        (item: any) => item.name === field.value || String(item.id) === field.value
-                      );
                       return (
                         <Popover open={openPaidVia} onOpenChange={setOpenPaidVia} modal={true}>
                           <PopoverTrigger asChild>
@@ -305,42 +322,30 @@ export function AddExpenseModal({ children }: { children: React.ReactNode }) {
                               role="combobox"
                               className={cn("w-full justify-between", !field.value && "text-muted-foreground")}
                             >
-                              {selected ? selected.name : "Select payment account..."}
+                              {field.value || "Select payment method..."}
                               <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-[350px] p-0" align="start">
                             <Command>
-                              <CommandInput placeholder="Search account..." />
+                              <CommandInput placeholder="Search payment method..." />
                               <CommandList>
-                                <CommandEmpty>No account found.</CommandEmpty>
+                                <CommandEmpty>No payment method found.</CommandEmpty>
                                 <CommandGroup>
-                                  {assetAccounts?.map((acc: any) => {
-                                    const level = acc.level || 0;
-                                    return (
-                                      <CommandItem
-                                        key={acc.id}
-                                        value={`${acc.name}-${acc.id}`}
-                                        onSelect={() => {
-                                          field.onChange(acc.name);
-                                          setOpenPaidVia(false);
-                                        }}
-                                        className="flex items-center gap-2"
-                                        style={{ paddingLeft: `${level === 0 ? 12 : (level * 20) + 12}px` }}
-                                      >
-                                        <div className="flex items-center flex-1 gap-2">
-                                          <div className="flex items-center gap-1">
-                                            {level > 0 && <CornerDownRight className="h-3 w-3 text-muted-foreground stroke-[1.5]" />}
-                                            <div className="flex flex-col">
-                                              <span className={cn(level === 0 ? "font-semibold text-foreground" : "text-muted-foreground")}>{acc.name}</span>
-                                              <span className="text-[10px] text-muted-foreground/70">{acc.code}</span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <Check className={cn("ml-auto h-4 w-4", field.value === acc.name ? "opacity-100" : "opacity-0")} />
-                                      </CommandItem>
-                                    )
-                                  })}
+                                  {paymentMethods.map((name: string) => (
+                                    <CommandItem
+                                      key={name}
+                                      value={name}
+                                      onSelect={() => {
+                                        field.onChange(name);
+                                        setOpenPaidVia(false);
+                                      }}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <span className="flex-1">{name}</span>
+                                      <Check className={cn("ml-auto h-4 w-4", field.value === name ? "opacity-100" : "opacity-0")} />
+                                    </CommandItem>
+                                  ))}
                                 </CommandGroup>
                               </CommandList>
                             </Command>

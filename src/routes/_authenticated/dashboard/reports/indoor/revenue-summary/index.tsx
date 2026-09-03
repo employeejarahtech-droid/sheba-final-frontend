@@ -11,6 +11,15 @@ import { DateField } from '@/components/date-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDateFormat } from '@/hooks/use-date-format'
 import { useCurrency } from '@/hooks/use-currency'
+import { z } from 'zod'
+
+const revenueSummarySearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+  from: z.string().catch(''),
+  to: z.string().catch(''),
+})
 
 const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6']
 
@@ -39,6 +48,7 @@ interface Meta {
 }
 
 export const Route = createFileRoute('/_authenticated/dashboard/reports/indoor/revenue-summary/')({
+  validateSearch: (search) => revenueSummarySearchSchema.parse(search),
   component: IndoorRevenueSummaryPage,
 })
 
@@ -250,9 +260,13 @@ function IndoorRevenueSummaryPage() {
       orderable: false,
       render: (_data: any, _type: string, row: AdmissionItem) => {
         const id = row.id;
+        const printParams = new URLSearchParams({
+          ...(search ? { search } : {}),
+          ...(from ? { start_date: from } : {}),
+          ...(to ? { end_date: to } : {}),
+        });
         return `<div class="flex gap-2">
-          <a href="/dashboard/reports/indoor/revenue-summary/print"
-             search="search=${search}&start_date=${from}&end_date=${to}"
+          <a href="/dashboard/reports/indoor/revenue-summary/print?${printParams.toString()}"
              class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
             Print

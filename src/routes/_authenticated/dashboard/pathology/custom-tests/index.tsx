@@ -17,13 +17,13 @@ import { DateField } from "@/components/date-field";
 import { useState } from 'react';
 import { useCan } from '@/hooks/use-can';
 import { Main } from "@/components/layout/main";
-import { EditCustomTestForm } from '@/features/pathology/custom-tests/components/EditCustomTestForm';
 
 const searchSchema = z.object({
   page: z.coerce.number().catch(1),
   limit: z.coerce.number().catch(10),
   search: z.string().catch(''),
   status: z.string().catch('all'),
+  template: z.string().catch('all'),
   from: z.string().catch(''),
   to: z.string().catch(''),
   orderBy: z.string().optional(),
@@ -40,6 +40,8 @@ type ReportsItem = {
   PatientId: number | null;
   PatientName: string | null;
   ref_doctor?: string | null;
+  TestName?: string | null;
+  ReportTemplate?: string | null;
   Date: string | null;
   Status: string;
 };
@@ -50,14 +52,11 @@ function CustomTestsReports() {
   const searchParams: any = Route.useSearch();
   const navigate: any = Route.useNavigate();
 
-  const [open, setOpen] = useState<boolean>(false);
-  const [reportId, setReportId] = useState<number | null>(null);
-  const [invoiceId, setInvoiceId] = useState<number | null>(null);
-
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 10;
   const search = searchParams?.search || "";
   const statusFilter = searchParams?.status || "all";
+  const templateFilter = searchParams?.template || "all";
   const from = searchParams?.from || "";
   const to = searchParams?.to || "";
   const orderBy = searchParams?.orderBy || "DESC";
@@ -81,6 +80,9 @@ function CustomTestsReports() {
   const setStatusFilter = (newStatus: string) => {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, status: newStatus, page: 1 }) });
   };
+  const setTemplateFilter = (newTemplate: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, template: newTemplate, page: 1 }) });
+  };
   const setFrom = (newFrom: string) => {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, from: newFrom, page: 1 }) });
   };
@@ -92,13 +94,14 @@ function CustomTestsReports() {
   const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data: customTestReports, isFetching, refetch } = useQuery({
-    queryKey: ["custom-tests", page, limit, search, statusFilter, from, to, orderBy],
+    queryKey: ["custom-tests", page, limit, search, statusFilter, templateFilter, from, to, orderBy],
     queryFn: async () => {
       const statusParam = statusFilter !== "all" ? `&status=${encodeURIComponent(statusFilter)}` : "";
+      const templateParam = templateFilter !== "all" ? `&template=${encodeURIComponent(templateFilter)}` : "";
       const fromParam = from ? `&from=${encodeURIComponent(from)}` : "";
       const toParam = to ? `&to=${encodeURIComponent(to)}` : "";
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/custom-tests-results?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}&orderBy=${encodeURIComponent(orderBy)}`,
+        `${import.meta.env.VITE_API_URL}/api/custom-tests-results?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${templateParam}${fromParam}${toParam}&orderBy=${encodeURIComponent(orderBy)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -118,14 +121,277 @@ function CustomTestsReports() {
         },
   });
 
-  // Expose edit function to window for onclick handlers
+  // Report Template dropdown options — custom-form-designer test tables only
+  // (these are the only ones that populate the "Report Template" column/data).
+  const { data: reportTemplatesData } = useQuery({
+    queryKey: ["custom-tests-report-templates"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/test-tables?limit=500`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error("Failed to fetch report templates");
+      return res.json();
+    },
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000,
+  });
+  const reportTemplateOptions = useMemo(() => {
+    const items = reportTemplatesData?.data?.items || [];
+    return items
+      .filter((t: any) => t.is_custom_form_designer)
+      .map((t: any) => ({ id: String(t.id), label: t.display_name }));
+  }, [reportTemplatesData]);
+  const activeTemplateLabel = useMemo(() => {
+    if (templateFilter === "all") return null;
+    return reportTemplateOptions.find((o: any) => o.id === templateFilter)?.label || null;
+  }, [templateFilter, reportTemplateOptions]);
+
+  // Handle expand button clicks — mirrors the hormone/all expand panel.
   useEffect(() => {
-    (window as any).editCustomTest = (id: number, invoiceId: number) => {
-      setOpen(true);
-      setReportId(id);
-      setInvoiceId(invoiceId);
+    const handleExpandClick = async (e: Event) => {
+      const button = (e.target as HTMLElement).closest('.expand-btn');
+      if (!button) return;
+
+      const btn = button as HTMLButtonElement;
+      const row = btn.closest('tr');
+      if (!row) return;
+
+      const isExpanded = row.classList.contains('expanded');
+      const nextRow = row.nextElementSibling;
+
+      // Toggle collapse
+      if (nextRow && nextRow.classList.contains('child-row-detail')) {
+        nextRow.remove();
+        row.classList.remove('expanded');
+        btn.textContent = '+';
+        btn.style.backgroundColor = '#10B981';
+        return;
+      }
+
+      // Don't expand if already expanded
+      if (isExpanded) return;
+
+      // Get data from attributes
+      const reportId = btn.dataset.reportId || '';
+      const reciptId = btn.dataset.reciptId || '-';
+      const patientName = btn.dataset.patientName || '-';
+      const refDoctor = btn.dataset.refDoctor || '-';
+      const testName = btn.dataset.testName || '-';
+      const reportTemplate = btn.dataset.reportTemplate || '-';
+      const date = btn.dataset.date || '-';
+      const status = btn.dataset.status || 'Pending';
+
+      // Create details HTML
+      const details = document.createElement('div');
+      details.className = 'max-w-4xl mx-auto bg-white dark:bg-gray-900 shadow-xl rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden';
+
+      const formattedDate = date !== '-' ? date : '-';
+
+      const statusBadge = status === 'Completed'
+        ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-50 ring-1 ring-inset ring-emerald-400/40"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Completed</span>`
+        : `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-400/20 text-amber-50 ring-1 ring-inset ring-amber-300/40"><span class="h-1.5 w-1.5 rounded-full bg-amber-300"></span>Pending</span>`;
+
+      const infoField = (label: string, value: string) => `
+        <div class="min-w-0">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">${label}</p>
+          <p class="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate" title="${value}">${value || '-'}</p>
+        </div>
+      `;
+
+      const htmlContent = `
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-slate-700 to-gray-700 text-white px-6 py-5">
+          <div class="flex justify-between items-start gap-4">
+            <div class="flex items-center gap-3">
+              <div class="p-2.5 bg-white/10 rounded-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold leading-tight">${testName !== '-' ? testName : 'Custom Test Report'}</h2>
+                <p class="text-sm text-white/70">Invoice #${reciptId} &bull; ${formattedDate}</p>
+              </div>
+            </div>
+            ${statusBadge}
+          </div>
+        </div>
+
+        <!-- Patient / Test Info -->
+        <div class="p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/60 dark:bg-white/[0.02]">
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4">
+            ${infoField('Invoice ID', reciptId)}
+            ${infoField('Patient Name', patientName)}
+            ${infoField('Ref. By', refDoctor)}
+            ${infoField('Test Name', testName)}
+            ${infoField('Report Template', reportTemplate)}
+            ${infoField('Date', formattedDate)}
+          </div>
+        </div>
+
+        <!-- Test Results Section -->
+        <div class="p-6">
+          <h3 class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-200 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Test Results
+          </h3>
+          <div id="tests-container-${reportId}" class="space-y-4">
+            <div class="flex items-center gap-2 text-gray-500 text-sm py-6 justify-center">
+              <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+              Loading report details...
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="px-6 py-4 bg-gray-50 dark:bg-white/[0.03] border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
+          <a href="/dashboard/pathology/custom-tests/report/${reportId}"
+             class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 dark:border-gray-700 bg-white dark:bg-transparent hover:bg-gray-100 dark:hover:bg-white/5 h-10 px-5 transition">
+            View Report
+          </a>
+          <a href="/dashboard/pathology/custom-tests/edit/${reportId}"
+             class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-slate-600 text-white hover:bg-slate-700 h-10 px-5 transition shadow-md">
+            Edit
+          </a>
+        </div>
+      `;
+
+      details.innerHTML = htmlContent;
+
+      // Fetch and render the actual results. result_text takes one of three
+      // shapes, same parsing as ReportDetails.tsx (the canonical print view):
+      //  - custom-form-designer template: form_template.form_schema (labeled
+      //    fields, sorted by sort_order) + result_text.values keyed by field
+      //  - legacy structured: a JSON array of items, or { items, custom_html }
+      //  - free text: anything that doesn't parse as the above
+      const testsContainer = details.querySelector(`#tests-container-${reportId}`);
+      if (testsContainer) {
+        const esc = (s: any) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const resultsTable = (rows: { name: string; result: string; range: string }[]) => `
+          <div class="border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-slate-50 dark:bg-white/5 border-b border-gray-100 dark:border-gray-800">
+                  <th class="px-3 py-2.5 text-left font-medium text-gray-600 dark:text-gray-300 w-[38%]">Test Name</th>
+                  <th class="px-3 py-2.5 text-left font-medium text-gray-600 dark:text-gray-300 w-[31%]">Result</th>
+                  <th class="px-3 py-2.5 text-left font-medium text-gray-600 dark:text-gray-300 w-[31%]">Normal Range</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows.map((r, i) => `
+                  <tr class="${i % 2 === 1 ? 'bg-gray-50/60 dark:bg-white/[0.02]' : ''} border-b border-gray-50 dark:border-gray-800/60 last:border-b-0">
+                    <td class="px-3 py-2.5 whitespace-pre-wrap text-gray-700 dark:text-gray-200">${esc(r.name) || '-'}</td>
+                    <td class="px-3 py-2.5 font-medium whitespace-pre-wrap text-gray-900 dark:text-gray-100">${esc(r.result) || '-'}</td>
+                    <td class="px-3 py-2.5 text-gray-500 dark:text-gray-400 whitespace-pre-wrap">${esc(r.range) || '-'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+        const emptyState = `<div class="border border-dashed border-gray-200 dark:border-gray-800 rounded-xl p-6 text-center text-sm text-gray-500">No test results provided</div>`;
+        const carriedOutBy = (name: string) => `
+          <div class="flex items-center gap-2 text-sm pt-1">
+            <span class="text-gray-500">Test Carried Out By:</span>
+            <span class="font-medium text-gray-800 dark:text-gray-100">${esc(name)}</span>
+          </div>
+        `;
+
+        try {
+          const res = await fetch(
+            `${import.meta.env.VITE_API_URL}/api/custom-tests-results/${reportId}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+
+          if (res.ok) {
+            const data = await res.json();
+            const reportData = data.data;
+            const formTemplate = reportData?.form_template;
+            const isTemplateDriven = !!(formTemplate?.is_custom_form_designer && formTemplate?.form_schema?.length);
+
+            let resultHTML = '';
+            let customHtml = '';
+
+            if (isTemplateDriven) {
+              let templateValues: Record<string, string> = {};
+              try {
+                const parsed = reportData.result_text ? JSON.parse(reportData.result_text) : null;
+                if (parsed && typeof parsed === 'object') {
+                  templateValues = parsed.values || {};
+                  customHtml = parsed.custom_html || '';
+                }
+              } catch {
+                // no structured data recorded yet for this row
+              }
+              const sortedSchema = [...formTemplate.form_schema].sort(
+                (a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
+              );
+              resultHTML = sortedSchema.length
+                ? resultsTable(sortedSchema.map((f: any) => ({ name: f.label, result: templateValues[f.key] || '', range: f.normal_range || '' })))
+                : emptyState;
+            } else if (reportData?.result_text) {
+              let items: any[] = [];
+              let isRawText = false;
+              try {
+                const parsed = JSON.parse(reportData.result_text);
+                if (Array.isArray(parsed)) {
+                  items = parsed;
+                } else if (parsed && typeof parsed === 'object') {
+                  items = Array.isArray(parsed.items) ? parsed.items : [];
+                  customHtml = parsed.custom_html || '';
+                  if (items.length === 0 && !customHtml) isRawText = true;
+                } else {
+                  isRawText = true;
+                }
+              } catch {
+                isRawText = true;
+              }
+
+              if (!isRawText && items.length > 0) {
+                resultHTML = resultsTable(items.map((item: any) => ({ name: item.test_name, result: item.test_result, range: item.normal_range })));
+              } else if (!isRawText && customHtml) {
+                resultHTML = '';
+              } else {
+                resultHTML = `<div class="border border-gray-100 dark:border-gray-800 rounded-xl p-4 bg-gray-50 dark:bg-white/5 whitespace-pre-wrap font-mono text-sm">${esc(reportData.result_text)}</div>`;
+              }
+            } else {
+              resultHTML = emptyState;
+            }
+
+            testsContainer.innerHTML = `
+              <div class="space-y-4">
+                ${resultHTML}
+                ${customHtml ? `<div class="text-sm border-t border-gray-100 dark:border-gray-800 pt-4">${customHtml}</div>` : ''}
+                ${reportData?.test_carried_out_by ? carriedOutBy(reportData.test_carried_out_by) : ''}
+              </div>
+            `;
+          } else {
+            testsContainer.innerHTML = `<div class="text-red-500 text-sm">Failed to load report details</div>`;
+          }
+        } catch (error) {
+          testsContainer.innerHTML = `<div class="text-red-500 text-sm">Failed to load report details</div>`;
+        }
+      }
+
+      // Create new row — table has 8 columns.
+      const newRow = document.createElement('tr');
+      newRow.className = 'child-row-detail';
+      const cell = document.createElement('td');
+      cell.className = 'p-4 bg-gray-50';
+      cell.colSpan = 8;
+      cell.appendChild(details);
+      newRow.appendChild(cell);
+
+      row.parentNode?.insertBefore(newRow, row.nextSibling);
+      row.classList.add('expanded');
+      btn.textContent = '-';
+      btn.style.backgroundColor = '#dc2626';
     };
-  }, [setOpen, setReportId, setInvoiceId]);
+
+    document.addEventListener('click', handleExpandClick);
+    return () => {
+      document.removeEventListener('click', handleExpandClick);
+    };
+  }, [token]);
 
   // ---- Date filter presets
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
@@ -156,6 +422,7 @@ function CustomTestsReports() {
   
   const [presetOpen, setPresetOpen] = useState(false);
   const [openStatus, setOpenStatus] = useState(false);
+  const [openTemplate, setOpenTemplate] = useState(false);
   
   const applyPreset = (key: string) => {
     const p = (datePresets as any)[key];
@@ -166,14 +433,27 @@ function CustomTestsReports() {
   const columns = useMemo(() => [
     {
       data: "ReciptID",
-      title: "Invoice ID",
+      title: "Receipt No",
       orderable: true,
       render: (data: any, type: string, row: ReportsItem) => {
         // Sort/type use the raw numeric Receipt ID so DataTables orders numerically.
         if (type === 'sort' || type === 'type') return row.ReciptID;
+        const date = fmtDateTime(row.Date);
+        const status = row.Status || 'Pending';
+        const esc = (s: any) => String(s ?? '').replace(/"/g, "&quot;");
         return `
           <div class="flex items-center gap-2">
-            <span>${data}</span>
+            <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
+                    type="button"
+                    data-report-id="${row.id}"
+                    data-recipt-id="${data}"
+                    data-patient-name="${esc(row.PatientName || '-')}"
+                    data-ref-doctor="${esc(row.ref_doctor || '-')}"
+                    data-test-name="${esc(row.TestName || '-')}"
+                    data-report-template="${esc(row.ReportTemplate || '-')}"
+                    data-date="${date}"
+                    data-status="${status}">+</button>
+            <span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${data}</span>
           </div>
         `;
       },
@@ -199,6 +479,20 @@ function CustomTestsReports() {
         }
         return data;
       }
+    },
+    {
+      data: "TestName",
+      title: "Test Name",
+      orderable: false,
+      defaultContent: "",
+      render: (data: any) => data || '-',
+    },
+    {
+      data: "ReportTemplate",
+      title: "Report Template",
+      orderable: false,
+      defaultContent: "",
+      render: (data: any) => data ? `<span class="text-sm font-medium text-blue-600">${data}</span>` : '-',
     },
     {
       data: "Date",
@@ -339,6 +633,66 @@ function CustomTestsReports() {
                   </Command>
                 </PopoverContent>
               </Popover>
+              <Popover open={openTemplate} onOpenChange={setOpenTemplate}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Filter className="mr-2 h-4 w-4" />
+                    {activeTemplateLabel ? `Template: ${activeTemplateLabel}` : "Filter by Report Template"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[240px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search template..." />
+                    <CommandList>
+                      <CommandEmpty>No report template found.</CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem
+                          value="all"
+                          onSelect={() => {
+                            setTemplateFilter("all");
+                            setOpenTemplate(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              templateFilter === "all" ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          All Templates
+                        </CommandItem>
+                        {reportTemplateOptions.map((opt: any) => (
+                          <CommandItem
+                            key={opt.id}
+                            value={opt.label}
+                            onSelect={() => {
+                              setTemplateFilter(templateFilter === opt.id ? "all" : opt.id);
+                              setOpenTemplate(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                templateFilter === opt.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {opt.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {templateFilter !== "all" && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setTemplateFilter("all")}
+                >
+                  Clear
+                </Button>
+              )}
               <div className="flex items-center gap-1.5">
                 <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>
                   <SelectTrigger className="w-[140px] h-9 rounded-md border-gray-200 dark:border-gray-700 bg-transparent text-sm">

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { ArrowLeft, Printer } from 'lucide-react';
 
@@ -9,6 +10,9 @@ import { Main } from '@/components/layout/main';
 import { Button } from '@/components/ui/button';
 import { useLedgerReport } from '@/features/accounting/api/queries';
 import { useCurrency } from '@/hooks/use-currency';
+import { getCookie } from '@/lib/cookies';
+
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const printSearchSchema = z.object({
     account_id: z.coerce.number(),
@@ -35,6 +39,32 @@ function LedgerPrintPage() {
         to: search.to,
     });
     const { currencySymbol } = useCurrency();
+    const token = getCookie('accessToken');
+
+    // Fetch company settings for company name, address and logo
+    const { data: companySettings } = useQuery({
+        queryKey: ["company-settings"],
+        queryFn: async () => {
+            const res = await fetch(`${API_URL}/api/company-settings`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) throw new Error("Failed to fetch company settings");
+            const result = await res.json();
+            return result.data;
+        },
+        enabled: !!token,
+    })
+
+    const companyLogo = companySettings?.company_logo
+        ? (companySettings.company_logo.startsWith('http') || companySettings.company_logo.startsWith('data:'))
+            ? companySettings.company_logo
+            : `${API_URL}${companySettings.company_logo}`
+        : null;
+    const companyName = companySettings?.company_name || 'Sheba Hospital';
+    const companyAddress = [companySettings?.address1, companySettings?.address2].filter(Boolean).join(', ') || 'Dhaka, Bangladesh'
+    const now = new Date().toLocaleString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
+    })
 
     const transactions = ledgerResponse?.transactions || [];
     const accountName = ledgerResponse?.account?.name || search.account_name || `#${search.account_id}`;
@@ -82,33 +112,83 @@ function LedgerPrintPage() {
                         className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report"
                         style={{ paddingTop: `${paddingTop}px` }}
                     >
-                        <style>
-                            {`
-                                @media print {
-                                    * {
-                                        -webkit-print-color-adjust: exact !important;
-                                        print-color-adjust: exact !important;
-                                        color-adjust: exact !important;
-                                    }
-                                    .bg-background { background-color: #fff; }
-                                    body { color: #000; background-color: #fff; }
-                                    .border { border-color: #333 !important; }
-                                    .border-dashed { border-color: #999 !important; }
-                                    .bg-row-blue { background-color: #cfd2d8ff !important; }
+                        <style>{`
+                            .bg-row-blue { background-color: #cfd2d8ff !important; }
+                            @media print {
+                                @page {
+                                    size: A4 landscape;
+                                    margin: 10mm;
                                 }
-                            `}
-                        </style>
+                                * {
+                                    -webkit-print-color-adjust: exact !important;
+                                    print-color-adjust: exact !important;
+                                    color-adjust: exact !important;
+                                }
+                                body {
+                                    margin: 0 !important;
+                                    padding: 0 !important;
+                                    background: #fff !important;
+                                    color: #000 !important;
+                                }
+                                .print\\:hidden {
+                                    display: none !important;
+                                }
+                                table {
+                                    width: 100% !important;
+                                    border-collapse: collapse !important;
+                                    color: #000 !important;
+                                    margin-top: 0.5rem !important;
+                                }
+                                th, td {
+                                    padding: 4px 6px !important;
+                                    border: 1px solid #ddd !important;
+                                    color: #000 !important;
+                                    font-size: 10px !important;
+                                }
+                                th {
+                                    background-color: #f0f9ff !important;
+                                    color: #000 !important;
+                                    font-weight: 600 !important;
+                                }
+                                .bg-row-blue {
+                                    background-color: #cfd2d8ff !important;
+                                }
+                                h1, h2, h3, h4, h5, h6, p, span, div {
+                                    color: #000 !important;
+                                }
+                                .text-2xl { font-size: 16px !important; }
+                                .text-xl { font-size: 14px !important; }
+                                .text-lg { font-size: 12px !important; }
+                                .text-sm { font-size: 10px !important; }
+                                .text-xs { font-size: 9px !important; }
+                            }
+                        `}</style>
 
-                        {/* Title */}
-                        <h1 className="text-2xl font-bold text-center underline mb-2 tracking-wide">
-                            LEDGER REPORT
-                        </h1>
-                        <h2 className="text-center text-lg font-semibold mb-6">
-                            {accountName}
-                        </h2>
+                        {/* Header: Logo/Company (left) + Report Title (right) */}
+                        <div className="mb-2 flex items-start justify-between gap-6">
+                            <div className="w-1/2 flex items-center gap-4">
+                                {companyLogo ? (
+                                    <img
+                                        src={companyLogo}
+                                        alt="Company Logo"
+                                        className="w-20 h-20 object-contain"
+                                    />
+                                ) : null}
+                                <div>
+                                    <h1 className="text-xl font-bold">{companyName}</h1>
+                                    <p className="text-xs mt-1 leading-4">{companyAddress}</p>
+                                </div>
+                            </div>
+
+                            <div className="w-1/2 text-right">
+                                <h2 className="text-lg font-bold tracking-widest uppercase">Ledger Report</h2>
+                                <p className="text-xs text-gray-600 mt-1">{accountName}</p>
+                                <p className="text-xs mt-1 leading-4">Generated: {now}</p>
+                            </div>
+                        </div>
 
                         {/* Header Info */}
-                        <table className="w-full text-sm">
+                        <table className="w-full text-xs">
                             <tbody>
                                 <tr className="border-b">
                                     <td className="border px-3 py-2 w-1/2">
@@ -125,7 +205,7 @@ function LedgerPrintPage() {
                         </table>
 
                         {/* Transactions Table */}
-                        <table className="w-full text-sm mt-4">
+                        <table className="w-full text-xs mt-4">
                             <thead>
                                 <tr className="bg-row-blue">
                                     <th className="border px-3 py-2 text-left w-[100px]">Date</th>
@@ -172,7 +252,7 @@ function LedgerPrintPage() {
                         </table>
 
                         {/* Closing Balance Summary */}
-                        <div className="w-full text-sm mt-4 ml-auto" style={{ maxWidth: "350px" }}>
+                        <div className="w-full text-xs mt-4 ml-auto" style={{ maxWidth: "350px" }}>
                             <table className="w-full">
                                 <tbody>
                                     <tr>
@@ -188,15 +268,15 @@ function LedgerPrintPage() {
                                         <td className="px-3 py-1.5 border-b text-right font-semibold">{currencySymbol} {totalCredit.toFixed(2)}</td>
                                     </tr>
                                     <tr className="font-bold bg-row-blue">
-                                        <td className="px-3 py-2 border-b-2 border-black">Closing Balance</td>
-                                        <td className="px-3 py-2 border-b-2 border-black text-right">{currencySymbol} {closingBalance.toFixed(2)}</td>
+                                        <td className="px-3 py-2 border-b border-black">Closing Balance</td>
+                                        <td className="px-3 py-2 border-b border-black text-right">{currencySymbol} {closingBalance.toFixed(2)}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
 
                         {/* Footer */}
-                        <div className="grid grid-cols-2 mt-20 text-sm">
+                        <div className="grid grid-cols-2 mt-20 text-xs">
                             <div>
                                 <p className="border-t border-dashed w-40 pt-1 text-center">Prepared By:</p>
                             </div>

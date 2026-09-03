@@ -1,19 +1,16 @@
 ﻿"use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { createFileRoute } from '@tanstack/react-router';
-import { Plus, DollarSign, TrendingUp, CreditCard } from "lucide-react";
+import { z } from 'zod'
+import { Plus, DollarSign, TrendingUp, CreditCard, Printer } from "lucide-react";
 
 import { useGetIncomesQuery } from "@/features/accounting/accountingQueries";
 import { Income } from "@/types/accounting.types";
 import { DataTable } from "@/components/DataTable";
 import { AddIncomeModal } from "@/components/accounting/AddIncomeModal";
 import { Button } from "@/components/ui/button";
-import { getCookie } from "@/lib/cookies";
-import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import api from "@/lib/axios";
 import { useCurrency } from '@/hooks/use-currency'
 import { DateField } from '@/components/date-field'
 import {
@@ -27,27 +24,49 @@ import {
 // Layout
 
 import { AppHeader } from '@/components/layout/app-header'
-import { useCan } from "@/hooks/use-can";
 
 
 
+
+const incomeSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().catch(''),
+  from: z.string().catch(''),
+  to: z.string().catch(''),
+})
 
 export const Route = createFileRoute('/_authenticated/dashboard/accounting/income/')({
+  validateSearch: (search) => incomeSearchSchema.parse(search),
   component: IncomesPage,
 })
 
 function IncomesPage() {
-    const can = useCan();
-    const canEdit = can('accounting.income.edit');
-    const canDelete = can('accounting.income.delete');
+  const searchParams: any = Route.useSearch();
+  const navigate = Route.useNavigate();
   const { currencySymbol } = useCurrency();
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [search, setSearch] = useState("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const token = getCookie('accessToken');
-  const queryClient = useQueryClient();
+
+  const page = Number(searchParams?.page) || 1;
+  const limit = Number(searchParams?.limit) || 10;
+  const search = searchParams?.search || "";
+  const from = searchParams?.from || "";
+  const to = searchParams?.to || "";
+
+  const setPage = (newPage: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
+  };
+  const setLimit = (newLimit: number) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, limit: newLimit, page: 1 }) });
+  };
+  const setSearch = (newSearch: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, search: newSearch, page: 1 }) });
+  };
+  const setFrom = (newFrom: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, from: newFrom, page: 1 }) });
+  };
+  const setTo = (newTo: string) => {
+    navigate({ to: '.', search: (prev: any) => ({ ...prev, to: newTo, page: 1 }) });
+  };
 
   // Date filter presets
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
@@ -77,7 +96,7 @@ function IncomesPage() {
   const [presetOpen, setPresetOpen] = useState(false)
   const applyPreset = (key: string) => {
     const p = (datePresets as any)[key]
-    if (p) { setFrom(p.from); setTo(p.to); setPage(1) }
+    if (p) { setFrom(p.from); setTo(p.to) }
     setPresetOpen(false)
   }
 
@@ -107,38 +126,31 @@ function IncomesPage() {
     { label: "Avg. Transaction", value: `${currencySymbol} ${avgTransaction.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, icon: CreditCard, grad: "from-violet-500 to-violet-600" },
   ];
 
-  // Delete income handler
-  const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this income record?")) return;
-
-    try {
-      await api.delete(`/accounting/incomes/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      toast.success("Income deleted successfully");
-      queryClient.invalidateQueries({ queryKey: [['accounting'], 'incomes'] });
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || "Failed to delete income");
-    }
-  };
-
   const columns = useMemo(() => [
-    {
-      data: null,
-      title: "SL",
-      orderable: false,
-      responsivePriority: 3,
-      render: (_data: any, _type: string, _row: Income, meta: any) => {
-        return meta.row + 1;
-      },
-      defaultContent: "",
-    },
     {
       data: "id",
       title: "ID",
       orderable: true,
       responsivePriority: 5,
+      render: (data: any, _type: string, row: Income) => {
+        const esc = (s: any) => String(s ?? '-').replace(/"/g, '&quot;');
+        return `
+          <div class="flex items-center gap-2">
+            <button class="expand-btn inline-flex items-center justify-center w-7 h-7 rounded text-white transition-colors font-bold text-xs" style="background-color:#10B981;"
+                    type="button"
+                    data-id="${data}"
+                    data-title="${esc(row.title)}"
+                    data-description="${esc(row.description)}"
+                    data-category="${esc(row?.creditHead?.name)}"
+                    data-amount="${Number(row.amount || 0).toFixed(2)}"
+                    data-date="${esc(row.income_date)}"
+                    data-payment-method="${esc(row.payment_method)}"
+                    data-reference="${esc(row.reference_number)}"
+                    data-status="${esc(row.status || 'pending')}">+</button>
+            <span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${data}</span>
+          </div>
+        `;
+      },
       defaultContent: "",
     },
     {
@@ -228,26 +240,12 @@ function IncomesPage() {
         return `
           <div class="flex gap-2">
             <button
-              onclick="window.viewIncome(${row.id})"
+              onclick="window.printIncome(${row.id})"
               class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3"
-              title="View"
+              title="Print Voucher"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
             </button>
-            ${canEdit ? `<button
-              onclick="window.editIncome(${row.id})"
-              class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3"
-              title="Edit"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-            </button>` : ''}
-            ${canDelete ? `<button
-              onclick="window.deleteIncome(${row.id})"
-              class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-8 px-3"
-              title="Delete"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-            </button>` : ''}
           </div>
         `;
       },
@@ -255,17 +253,129 @@ function IncomesPage() {
     },
   ], []);
 
-  // Expose functions to window for onclick handlers
+  // Handle expand button clicks using event delegation — mirrors the
+  // pathology/services list pages' expand-row detail pattern.
+  useEffect(() => {
+    const handleExpandClick = (e: Event) => {
+      const button = (e.target as HTMLElement).closest('.expand-btn');
+      if (!button) return;
+
+      const btn = button as HTMLButtonElement;
+      const row = btn.closest('tr');
+      if (!row) return;
+
+      const isExpanded = row.classList.contains('expanded');
+      const nextRow = row.nextElementSibling;
+
+      // Toggle collapse
+      if (nextRow && nextRow.classList.contains('child-row-detail')) {
+        nextRow.remove();
+        row.classList.remove('expanded');
+        btn.textContent = '+';
+        btn.style.backgroundColor = '#10B981';
+        return;
+      }
+
+      if (isExpanded) return;
+
+      const id = btn.dataset.id || '';
+      const title = btn.dataset.title || '-';
+      const description = btn.dataset.description || '-';
+      const category = btn.dataset.category || '-';
+      const amount = btn.dataset.amount || '0.00';
+      const date = btn.dataset.date || '-';
+      const paymentMethod = btn.dataset.paymentMethod || '-';
+      const reference = btn.dataset.reference || '-';
+      const status = btn.dataset.status || 'pending';
+
+      const statusBadgeClass = status.toLowerCase() === 'paid' || status.toLowerCase() === 'received'
+        ? 'bg-emerald-100 text-emerald-700'
+        : status.toLowerCase() === 'pending'
+        ? 'bg-amber-100 text-amber-700'
+        : 'bg-rose-100 text-rose-700';
+
+      const details = document.createElement('div');
+      details.className = 'max-w-3xl mx-auto my-4';
+      details.innerHTML = `
+        <div class="max-w-3xl mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden">
+          <div class="bg-gradient-to-r from-green-600 to-emerald-500 px-6 py-4">
+            <h2 class="text-lg font-semibold text-white">Income Details</h2>
+            <p class="text-emerald-100 text-sm">${title}</p>
+          </div>
+          <div class="p-6">
+            <ul class="grid md:grid-cols-2 gap-6 text-sm">
+              <li class="flex flex-col">
+                <span class="text-gray-500">Income ID</span>
+                <span class="font-mono text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded w-fit">#${id}</span>
+              </li>
+              <li class="flex flex-col">
+                <span class="text-gray-500">Title</span>
+                <span class="font-semibold text-gray-800 dark:text-gray-100 text-base">${title}</span>
+              </li>
+              <li class="flex flex-col">
+                <span class="text-gray-500">Category</span>
+                <span class="px-3 py-1 w-fit text-xs font-semibold rounded-full bg-purple-100 text-purple-700">${category}</span>
+              </li>
+              <li class="flex flex-col">
+                <span class="text-gray-500">Amount</span>
+                <span class="font-bold text-lg text-emerald-600">${currencySymbol} ${amount}</span>
+              </li>
+              <li class="flex flex-col">
+                <span class="text-gray-500">Date</span>
+                <span class="font-medium text-gray-700 dark:text-gray-300">${date}</span>
+              </li>
+              <li class="flex flex-col">
+                <span class="text-gray-500">Payment Method</span>
+                <span class="font-medium text-gray-700 dark:text-gray-300">${paymentMethod}</span>
+              </li>
+              <li class="flex flex-col">
+                <span class="text-gray-500">Reference</span>
+                <span class="font-medium text-gray-700 dark:text-gray-300">${reference}</span>
+              </li>
+              <li class="flex flex-col">
+                <span class="text-gray-500">Status</span>
+                <span class="px-3 py-1 w-fit text-xs font-semibold rounded-full capitalize ${statusBadgeClass}">${status}</span>
+              </li>
+              <li class="flex flex-col md:col-span-2">
+                <span class="text-gray-500">Description</span>
+                <span class="font-medium text-gray-700 dark:text-gray-300 text-sm">${description || 'No description provided'}</span>
+              </li>
+            </ul>
+            <div class="mt-8 flex justify-end gap-3 border-t pt-5">
+              <button onclick="window.printIncome(${id})"
+                class="inline-flex items-center justify-center rounded-lg text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100 transition h-10 px-5">
+                Print Voucher
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const newRow = document.createElement('tr');
+      newRow.className = 'child-row-detail';
+      const cell = document.createElement('td');
+      cell.className = 'p-4 bg-muted/50';
+      cell.colSpan = 10;
+      cell.appendChild(details);
+      newRow.appendChild(cell);
+
+      row.parentNode?.insertBefore(newRow, row.nextSibling);
+      row.classList.add('expanded');
+      btn.textContent = '−';
+      btn.style.backgroundColor = '#dc2626';
+    };
+
+    document.addEventListener('click', handleExpandClick);
+    return () => {
+      document.removeEventListener('click', handleExpandClick);
+    };
+  }, [currencySymbol]);
+
+  // Expose print handler for the Actions column's onclick (DataTable renders columns as HTML strings)
   if (typeof window !== 'undefined') {
-    (window as any).viewIncome = (id: number) => {
-      // TODO: Implement view modal
-      console.log("View income:", id);
+    (window as any).printIncome = (id: number) => {
+      navigate({ to: '/dashboard/accounting/income/$incomeId/print', params: { incomeId: String(id) } });
     };
-    (window as any).editIncome = (id: number) => {
-      // TODO: Implement edit modal
-      console.log("Edit income:", id);
-    };
-    (window as any).deleteIncome = handleDelete;
   }
 
   if (isError) {
@@ -336,15 +446,9 @@ function IncomesPage() {
             total: fetchedData?.pagination?.total || 0,
           }}
           onPageChange={(newPage) => setPage(newPage)}
-          onLimitChange={(newLimit) => {
-            setLimit(newLimit);
-            setPage(1);
-          }}
+          onLimitChange={(newLimit) => setLimit(newLimit)}
           search={search}
-          onSearchChange={(value) => {
-            setSearch(value);
-            setPage(1);
-          }}
+          onSearchChange={(value) => setSearch(value)}
           isLoading={isFetching}
           filterSlot={
             <div className="flex items-center gap-1.5">
@@ -366,14 +470,22 @@ function IncomesPage() {
                   <SelectItem value="custom">Custom range</SelectItem>
                 </SelectContent>
               </Select>
-              <DateField value={from} onChange={(v: string) => { setFrom(v); setPresetOpen(false); setPage(1) }} placeholder="From" />
+              <DateField value={from} onChange={(v: string) => { setFrom(v); setPresetOpen(false) }} placeholder="From" />
               <span className="text-xs text-muted-foreground">to</span>
-              <DateField value={to} onChange={(v: string) => { setTo(v); setPresetOpen(false); setPage(1) }} placeholder="To" />
+              <DateField value={to} onChange={(v: string) => { setTo(v); setPresetOpen(false) }} placeholder="To" />
               {(from || to) && (
-                <Button variant="ghost" size="sm" onClick={() => { setFrom(''); setTo(''); setPage(1) }}>
+                <Button variant="ghost" size="sm" onClick={() => { setFrom(''); setTo('') }}>
                   Clear
                 </Button>
               )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 gap-1.5"
+                onClick={() => navigate({ to: '/dashboard/accounting/income/print', search: { search, from, to } })}
+              >
+                <Printer size={16} /> Print
+              </Button>
             </div>
           }
         />

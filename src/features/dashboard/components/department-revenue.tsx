@@ -30,7 +30,7 @@ export function DepartmentRevenue() {
           ))}
         </Pie>
         <Tooltip
-          formatter={(value: number) => [`${currencySymbol}${value.toLocaleString()}`]}
+          formatter={(value: number) => [`${currencySymbol} ${value.toLocaleString()}`]}
           contentStyle={{
             backgroundColor: 'hsl(var(--card))',
             border: '1px solid hsl(var(--border))',

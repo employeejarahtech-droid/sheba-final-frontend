@@ -14,6 +14,7 @@ import { DateField } from "@/components/date-field"
 import { useDateFormat } from "@/hooks/use-date-format"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useCan } from '@/hooks/use-can'
 
 
 type InvoicesProps = {
@@ -40,6 +41,11 @@ type InvoicesProps = {
     sort?: string;
     order?: string;
     setSort?: (newSort: string, newOrder: string) => void;
+    // Permission prefix for this page's Edit/Note/Collection action buttons —
+    // this component is shared by "All Invoices" (outdoor.reception.invoices.list)
+    // and "Patients by Referrer" (outdoor.reception.patients-by-referrer), which
+    // are gated separately, so each caller must say which one it is.
+    permissionBase?: string;
 };
 
 type InvoiceItem = {
@@ -71,6 +77,14 @@ type InvoiceItem = {
     created_by?: string | number | null;
     created_by_type?: "staff" | "company_admin" | null;
     status: string | null;
+    payments?: {
+        id: number;
+        amount: number;
+        method?: string | null;
+        payment_date?: string | null;
+        created_at?: string | null;
+        creator?: { id: number; name: string } | null;
+    }[] | null;
     sample_collection_rooms?: Array<{
         id: number;
         invoice_id: number;
@@ -85,9 +99,14 @@ type InvoiceItem = {
     }>;
 };
 
-export default function Invoices({ page, limit, search, statusFilter, from, to, setPage, setLimit, setSearch, setStatusFilter, setFrom, setTo, doctorId, setDoctorId, showReferrerFilter, tableTitle, sort = 'invoice_prefix', order = 'DESC', setSort }: InvoicesProps) {
+export default function Invoices({ page, limit, search, statusFilter, from, to, setPage, setLimit, setSearch, setStatusFilter, setFrom, setTo, doctorId, setDoctorId, showReferrerFilter, tableTitle, sort = 'invoice_prefix', order = 'DESC', setSort, permissionBase = 'outdoor.reception.invoices.list' }: InvoicesProps) {
     const [openFilter, setOpenFilter] = useState(false);
     const [openReferrer, setOpenReferrer] = useState(false);
+
+    const can = useCan();
+    const canEdit = can(`${permissionBase}.edit`);
+    const canNote = can(`${permissionBase}.note`);
+    const canCollect = can(`${permissionBase}.collection`);
 
     const token = getCookie('accessToken');
     const { currency, currencySymbol, format } = useCurrency();
@@ -839,6 +858,45 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
         },
         {
             data: null,
+            title: "Paid History",
+            orderable: false, // computed from payments, not a real sortable DB column
+            responsivePriority: 5,
+            render: (_data: any, _type: string, row: InvoiceItem) => {
+                const payments = [...(row.payments || [])].sort((a, b) => {
+                    const da = a.payment_date || a.created_at || '';
+                    const db = b.payment_date || b.created_at || '';
+                    return new Date(db).getTime() - new Date(da).getTime();
+                });
+                if (payments.length === 0) {
+                    return `<span class="text-xs text-muted-foreground italic">No payments</span>`;
+                }
+                const rows = payments.map((p) => {
+                    const dt = p.created_at ? new Date(p.created_at) : (p.payment_date ? new Date(p.payment_date) : null);
+                    const dateStr = dt ? fmtDate(dt) : '-';
+                    const timeStr = dt && p.created_at
+                        ? dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+                        : "";
+                    const when = timeStr ? `${dateStr} ${timeStr}` : dateStr;
+                    const method = p.method ? ` · ${p.method}` : '';
+                    const collectedBy = p.creator?.name
+                        ? `<div class="text-muted-foreground/80">Collected by: ${p.creator.name.replace(/</g, '&lt;')}</div>`
+                        : '';
+                    return `
+                        <li class="whitespace-nowrap">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-muted-foreground">${when}${method}</span>
+                                <span class="text-emerald-600 font-medium">${fmtNum(p.amount)}</span>
+                            </div>
+                            ${collectedBy}
+                        </li>
+                    `;
+                }).join('');
+                return `<ul class="text-[11px] space-y-1 max-h-32 overflow-y-auto pr-1 border-l-2 border-emerald-200 dark:border-emerald-900 pl-2">${rows}</ul>`;
+            },
+            defaultContent: "-",
+        },
+        {
+            data: null,
             title: "Created By",
             orderable: false, // resolved creator name, not a real sortable DB column
             responsivePriority: 4,
@@ -892,7 +950,7 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
                 const dueAmount = Number(row.due_amount || 0);
                 const isPaid = dueAmount === 0;
                 let payNowButton = "";
-                if (!isPaid) {
+                if (!isPaid && canCollect) {
                     payNowButton = `
                         <a href="/dashboard/outdoor/reception/due-collection/${row.id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded text-xs font-semibold shadow transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
@@ -900,6 +958,20 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
                         </a>
                     `;
                 }
+
+                const editButton = canEdit ? `
+                        <a href="/dashboard/outdoor/reception/invoices/edit/${row.id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-semibold shadow transition-colors" title="Edit patient info and sample collection rooms">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                            Edit
+                        </a>
+                    ` : "";
+
+                const noteButton = canNote ? `
+                        <a href="/dashboard/outdoor/reception/invoices/${row.id}/note" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded text-xs font-semibold shadow transition-colors" title="Add or Edit Note">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                            Note
+                        </a>
+                    ` : "";
 
                 return `
                     <div class="flex gap-2">
@@ -911,14 +983,8 @@ export default function Invoices({ page, limit, search, statusFilter, from, to, 
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
                             Print
                         </a>
-                        <a href="/dashboard/outdoor/reception/invoices/edit/${row.id}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-semibold shadow transition-colors" title="Edit patient info and sample collection rooms">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                            Edit
-                        </a>
-                        <a href="/dashboard/outdoor/reception/invoices/${row.id}/note" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded text-xs font-semibold shadow transition-colors" title="Add or Edit Note">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
-                            Note
-                        </a>
+                        ${editButton}
+                        ${noteButton}
                         ${payNowButton}
                     </div>
                 `;

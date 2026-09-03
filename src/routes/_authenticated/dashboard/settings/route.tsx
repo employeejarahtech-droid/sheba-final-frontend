@@ -10,7 +10,7 @@ function SettingsLayout() {
   return (
     <>
       <AppHeader fixed />
-      <Main className="p-6 lg:p-10 w-full flex-1 dark:bg-black/20">
+      <Main className=" w-full flex-1 dark:bg-black/20">
         <div className="max-w-4xl mx-auto">
           <Outlet />
         </div>

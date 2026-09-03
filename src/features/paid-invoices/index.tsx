@@ -45,9 +45,18 @@ type InvoiceItem = {
   invoice_date: string | null;
   created_at: string;
   created_by?: string | number | null;
+  created_by_type?: "staff" | "company_admin" | null;
   delivery_date: string | null;
   delivery_time: string | null;
   is_indoor_patient: boolean | null;
+  payments?: {
+    id: number;
+    amount: number;
+    method?: string | null;
+    payment_date?: string | null;
+    created_at?: string | null;
+    creator?: { id: number; name: string } | null;
+  }[] | null;
 };
 
 export default function PaidInvoices({ page, limit, search, from, to, setPage, setLimit, setSearch, setFrom, setTo }: PaidInvoicesProps) {
@@ -600,11 +609,50 @@ export default function PaidInvoices({ page, limit, search, from, to, setPage, s
       defaultContent: "-",
     },
     {
+      data: null,
+      title: `Discount (${currencySymbol})`,
+      orderable: false,
+      responsivePriority: 5,
+      render: (_data: any, _type: string, row: InvoiceItem) => {
+        const total = Number(row.total_amount || 0);
+        const net = Number(row.net_amount || 0);
+        const discount = total - net;
+        return discount > 0 ? discount.toFixed(2) : "-";
+      },
+      defaultContent: "-",
+    },
+    {
       data: "total_paid",
       title: `Paid (${currencySymbol})`,
       orderable: true,
       responsivePriority: 2,
-      render: (data: any) => `<span class="text-emerald-600 font-medium">${data ?? 0}</span>`,
+      render: (data: any, _type: string, row: InvoiceItem) => {
+        const total = `<span class="text-emerald-600 font-medium">${data ?? 0}</span>`;
+        const payments = row.payments || [];
+        // Only break the total down when there's more than one payment —
+        // a single payment already equals the total, so listing it again
+        // underneath would just be noise.
+        if (payments.length <= 1) return total;
+        const breakdown = payments.map((p) => {
+          const dt = p.created_at ? new Date(p.created_at) : (p.payment_date ? new Date(p.payment_date) : null);
+          if (!dt) return `<div class="text-[11px] text-muted-foreground">${fmtNum(p.amount)}</div>`;
+          const dateStr = fmtDate(dt);
+          const timeStr = p.created_at
+            ? dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+            : '';
+          const when = timeStr ? `${dateStr} ${timeStr}` : dateStr;
+          return `<div class="text-[11px] text-muted-foreground whitespace-nowrap">${when} (${fmtNum(p.amount)})</div>`;
+        }).join('');
+        return `<div class="space-y-0.5">${total}${breakdown}</div>`;
+      },
+      defaultContent: "0",
+    },
+    {
+      data: "due_amount",
+      title: `Due (${currencySymbol})`,
+      orderable: true,
+      responsivePriority: 2,
+      render: (data: any) => `<span class="text-red-600 font-bold">${data ?? 0}</span>`,
       defaultContent: "0",
     },
     {
@@ -626,13 +674,73 @@ export default function PaidInvoices({ page, limit, search, from, to, setPage, s
     },
     {
       data: "delivery_date",
-      title: "Delivery Date",
+      title: "Delivery Date & Time",
       orderable: true,
       responsivePriority: 3,
-      render: (data: any) => {
+      render: (data: any, _type: string, row: InvoiceItem) => {
         if (!data) return "-";
         const date = new Date(data);
-        return fmtDate(date);
+        if (Number.isNaN(date.getTime())) return "-";
+        const dateStr = fmtDate(date);
+        let timeStr = "";
+        if (row.delivery_time) {
+          const cleanTime = row.delivery_time.trim();
+          if (/am|pm/i.test(cleanTime)) {
+            timeStr = cleanTime;
+          } else {
+            const match = cleanTime.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+            if (match) {
+              let hours = parseInt(match[1], 10);
+              const minutes = match[2];
+              const ampm = hours >= 12 ? 'PM' : 'AM';
+              hours = hours % 12;
+              hours = hours ? hours : 12; // the hour '0' should be '12'
+              timeStr = `${hours}:${minutes} ${ampm}`;
+            } else {
+              timeStr = cleanTime;
+            }
+          }
+        }
+        return timeStr ? `${dateStr} ${timeStr}` : dateStr;
+      },
+      defaultContent: "-",
+    },
+    {
+      data: null,
+      title: "Paid History",
+      orderable: false, // computed from payments, not a real sortable DB column
+      responsivePriority: 5,
+      render: (_data: any, _type: string, row: InvoiceItem) => {
+        const payments = [...(row.payments || [])].sort((a, b) => {
+          const da = a.payment_date || a.created_at || '';
+          const db = b.payment_date || b.created_at || '';
+          return new Date(db).getTime() - new Date(da).getTime();
+        });
+        if (payments.length === 0) {
+          return `<span class="text-xs text-muted-foreground italic">No payments</span>`;
+        }
+        const rows = payments.map((p) => {
+          const dt = p.created_at ? new Date(p.created_at) : (p.payment_date ? new Date(p.payment_date) : null);
+          const dateStr = dt ? fmtDate(dt) : '-';
+          const timeStr = dt && p.created_at
+            ? dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+            : "";
+          const when = timeStr ? `${dateStr} ${timeStr}` : dateStr;
+          const method = p.method ? ` · ${p.method}` : '';
+          const collectedBy = p.creator?.name
+            ? `<div class="text-muted-foreground/80">Collected by: ${p.creator.name.replace(/</g, '&lt;')}</div>`
+            : '';
+          return `
+            <li class="whitespace-nowrap">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-muted-foreground">${when}${method}</span>
+                <span class="text-emerald-600 font-medium">${fmtNum(p.amount)}</span>
+              </div>
+              ${collectedBy}
+            </li>
+          `;
+        }).join('');
+        return `<ul class="text-[11px] space-y-1 max-h-32 overflow-y-auto pr-1 border-l-2 border-emerald-200 dark:border-emerald-900 pl-2">${rows}</ul>`;
       },
       defaultContent: "-",
     },
@@ -649,6 +757,22 @@ export default function PaidInvoices({ page, limit, search, from, to, setPage, s
         // Fallback to showing created_by ID or dash
         const value = row.created_by || '-';
         return `<span class="text-sm text-muted-foreground">${value}</span>`;
+      },
+      defaultContent: "-",
+    },
+    {
+      data: null,
+      title: "Create Type",
+      orderable: false, // computed, not a real sortable DB column
+      responsivePriority: 5,
+      render: (_data: any, _type: string, row: InvoiceItem) => {
+        if (!row.created_by_type) return `<span class="text-sm text-muted-foreground">-</span>`;
+        const isAdmin = row.created_by_type === 'company_admin';
+        const label = isAdmin ? 'Admin' : 'Staff';
+        const classes = isAdmin
+          ? 'bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400'
+          : 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400';
+        return `<span class="${classes} px-2 py-0.5 rounded text-xs font-semibold">${label}</span>`;
       },
       defaultContent: "-",
     },

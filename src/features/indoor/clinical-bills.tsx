@@ -1,15 +1,11 @@
 ﻿import { useMemo } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { toast } from 'sonner'
 import {
   BriefcaseMedical,
   DollarSign,
   CheckCircle2,
   Clock,
-  BadgeCheck,
-  Banknote,
-  CalendarCheck,
   Check,
   ChevronDown,
 } from 'lucide-react'
@@ -18,8 +14,6 @@ import { AppHeader } from '@/components/layout/app-header'
 import { DataTable } from '@/components/DataTable'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -27,13 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { DateField } from '@/components/date-field'
@@ -140,12 +127,6 @@ export function ClinicalBillsPage({
 }: ClinicalBillsPageProps) {
   const { currencySymbol } = useCurrency()
   const token = getCookie('accessToken')
-  const queryClient = useQueryClient()
-
-  // Mark-as-paid dialog
-  const [selectedRecord, setSelectedRecord] = useState<FinalDistribution | null>(null)
-  const [paidDate, setPaidDate] = useState(new Date().toISOString().slice(0, 10))
-  const [paidStatus, setPaidStatus] = useState<'paid' | 'partial'>('paid')
 
   // Clinic-service combobox open state
   const [doctorOpen, setDoctorOpen] = useState(false)
@@ -222,31 +203,6 @@ export function ClinicalBillsPage({
     },
   ], [meta, summary, currencySymbol])
 
-  // ── Mark paid mutation ───────────────────────────────────────────────────────
-  const markPaidMutation = useMutation({
-    mutationFn: async ({ id, paid_now, payment_status }: { id: number; paid_now: string; payment_status: string }) => {
-      const res = await fetch(`${API_URL}/api/bill-distribution/final/${id}/paid`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ paid_now, payment_status }),
-      })
-      if (!res.ok) throw new Error('Failed to update')
-      return res.json()
-    },
-    onSuccess: () => {
-      toast.success('Payment date saved successfully')
-      queryClient.invalidateQueries({ queryKey: ['clinical-bills'] })
-      setSelectedRecord(null)
-    },
-    onError: (err: Error) => toast.error(err.message),
-  })
-
-  const openPaidDialog = (rec: FinalDistribution) => {
-    setSelectedRecord(rec)
-    setPaidDate(new Date().toISOString().slice(0, 10))
-    setPaidStatus('paid')
-  }
-
   // ── DataTable columns ────────────────────────────────────────────────────────
   const columns = useMemo(() => [
     {
@@ -299,7 +255,7 @@ export function ClinicalBillsPage({
       title: `Final Bill (${currencySymbol})`,
       orderable: true,
       responsivePriority: 2,
-      render: (d: any) => `<span class="font-medium text-blue-600 dark:text-blue-400">${fmtAmt(d, currencySymbol)}</span>`,
+      render: (d: any) => `<span class="font-medium text-blue-600 dark:text-blue-400">${Number(d || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`,
       defaultContent: '0.00',
     },
     {
@@ -307,7 +263,7 @@ export function ClinicalBillsPage({
       title: `Payable Now (${currencySymbol})`,
       orderable: true,
       responsivePriority: 1,
-      render: (d: any) => `<span class="font-bold text-violet-600 dark:text-violet-400">${fmtAmt(d, currencySymbol)}</span>`,
+      render: (d: any) => `<span class="font-bold text-violet-600 dark:text-violet-400">${Number(d || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`,
       defaultContent: '0.00',
     },
     {
@@ -318,7 +274,7 @@ export function ClinicalBillsPage({
       render: (d: any) => {
         const n = Number(d || 0)
         const cls = n > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600'
-        return `<span class="font-medium ${cls}">${fmtAmt(d, currencySymbol)}</span>`
+        return `<span class="font-medium ${cls}">${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`
       },
       defaultContent: '0.00',
     },
@@ -353,37 +309,7 @@ export function ClinicalBillsPage({
       },
       defaultContent: '',
     },
-    {
-      data: null,
-      title: 'Action',
-      orderable: false,
-      responsivePriority: 1,
-      render: (_: any, __: string, row: FinalDistribution) => {
-        const label = row.paid_now ? 'Update' : 'Mark Paid'
-        const cls = row.paid_now
-          ? 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
-          : 'bg-violet-600 text-white hover:bg-violet-700'
-        return `
-          <button
-            class="mark-paid-btn inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors h-8 px-3 ${cls}"
-            data-id="${row.id}"
-          >
-            ${label}
-          </button>
-        `
-      },
-      defaultContent: '',
-    },
   ], [currencySymbol, page, limit])
-
-  // ── Event delegation for Mark Paid buttons ───────────────────────────────────
-  const handleTableClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const btn = (e.target as HTMLElement).closest('.mark-paid-btn') as HTMLButtonElement | null
-    if (!btn) return
-    const id = Number(btn.dataset.id)
-    const rec = records.find(r => r.id === id)
-    if (rec) openPaidDialog(rec)
-  }
 
   // ── Date filter presets (Filter By) ──────────────────────────────────────────
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d }
@@ -559,112 +485,19 @@ export function ClinicalBillsPage({
         </div>
 
         {/* DataTable with server-side pagination */}
-        <div onClick={handleTableClick}>
-          <DataTable
-            columns={columns}
-            data={records}
-            meta={meta}
-            onPageChange={setPage}
-            onLimitChange={setLimit}
-            search={search}
-            isLoading={isFetching}
-            onSearchChange={setSearch}
-            tableTitle="Clinical Bills"
-            filterSlot={filterSlot}
-          />
-        </div>
+        <DataTable
+          columns={columns}
+          data={records}
+          meta={meta}
+          onPageChange={setPage}
+          onLimitChange={setLimit}
+          search={search}
+          isLoading={isFetching}
+          onSearchChange={setSearch}
+          tableTitle="Clinical Bills"
+          filterSlot={filterSlot}
+        />
       </main>
-
-      {/* Mark as Paid Dialog */}
-      <Dialog open={!!selectedRecord} onOpenChange={v => !v && setSelectedRecord(null)}>
-        <DialogContent className="sm:max-w-[420px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CalendarCheck className="h-5 w-5 text-emerald-500" />
-              Mark Payment Date
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedRecord && (
-            <div className="space-y-4 py-2">
-              {/* Summary card */}
-              <div className="rounded-xl bg-gradient-to-br from-violet-50 to-blue-50 dark:from-violet-950/30 dark:to-blue-950/30 border p-4 text-sm space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Clinical Service</span>
-                  <span className="font-medium">
-                    {selectedRecord.service_name || selectedRecord.doctor?.doctor_name}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Admission</span>
-                  <span className="font-mono">#{selectedRecord.admission_id}</span>
-                </div>
-                <div className="flex justify-between border-t pt-2">
-                  <span className="text-muted-foreground">Payable Amount</span>
-                  <span className="font-bold text-violet-600 text-base">
-                    {fmtAmt(selectedRecord.payable_now, currencySymbol)}
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="paid-date-input" className="text-xs mb-1.5 block">
-                  Paid Date <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="paid-date-input"
-                  type="date"
-                  value={paidDate}
-                  onChange={e => setPaidDate(e.target.value)}
-                  className="h-9"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="paid-status-select" className="text-xs mb-1.5 block">
-                  Payment Status
-                </Label>
-                <Select value={paidStatus} onValueChange={v => setPaidStatus(v as 'paid' | 'partial')}>
-                  <SelectTrigger id="paid-status-select" className="h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="paid">
-                      <span className="flex items-center gap-2">
-                        <BadgeCheck className="h-4 w-4 text-emerald-500" /> Fully Paid
-                      </span>
-                    </SelectItem>
-                    <SelectItem value="partial">
-                      <span className="flex items-center gap-2">
-                        <Banknote className="h-4 w-4 text-amber-500" /> Partial Payment
-                      </span>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setSelectedRecord(null)}>Cancel</Button>
-            <Button
-              id="confirm-mark-paid"
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
-              disabled={!paidDate || markPaidMutation.isPending}
-              onClick={() => {
-                if (!selectedRecord) return
-                markPaidMutation.mutate({
-                  id: selectedRecord.id,
-                  paid_now: paidDate,
-                  payment_status: paidStatus,
-                })
-              }}
-            >
-              {markPaidMutation.isPending ? 'Saving…' : 'Confirm Payment'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   )
 }

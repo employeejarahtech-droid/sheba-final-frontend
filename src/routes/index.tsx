@@ -7,6 +7,7 @@ import { StatsSection } from '@/components/landing/stats-section'
 import { CtaSection } from '@/components/landing/cta-section'
 import { TenantHome } from '@/features/tenant/tenant-home'
 import { getSubdomainInfo } from '@/lib/subdomain'
+import { usePageSeo } from '@/lib/seo'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -24,6 +25,17 @@ function HomePage() {
   }
 
   // Platform base domain (e.g. lvh.me) → marketing landing page.
+  return <MarketingHomePage />
+}
+
+function MarketingHomePage() {
+  usePageSeo({
+    title: 'HMS — Hospital Management Software | Admissions, Pathology & Billing',
+    description:
+      'HMS is an all-in-one hospital management software for admissions, pathology, and billing. Multi-tenant architecture gives every hospital its own dedicated, encrypted database.',
+    path: '/',
+  })
+
   return (
     <LandingPageWrapper>
       <HeroSection />

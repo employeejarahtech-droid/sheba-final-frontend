@@ -17,6 +17,7 @@ import {
   TrendingDown,
   FlaskConical,
   Stethoscope,
+  UserCheck,
   Recycle,
   UserPlus,
   Building2,
@@ -36,15 +37,18 @@ import {
   Syringe,
   CreditCard,
   Receipt,
+  BookOpenText,
   ClipboardList,
   DollarSign,
   BarChart3,
   UserCog,
   Wrench,
   Database,
+  ListChecks,
   Landmark,
   Images,
   FilePlus,
+  FileX,
   Globe,
   LogOut,
   CheckCircle2,
@@ -61,6 +65,16 @@ import {
   RotateCcw,
   AlertTriangle,
   Trash2,
+  XCircle,
+  Pill,
+  PackageCheck,
+  ClipboardEdit,
+  Undo2,
+  Boxes,
+  FileBarChart,
+  Timer,
+  UserRound,
+  RefreshCcwDot,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -124,11 +138,14 @@ export const sidebarData: SidebarData = {
     {
       title: 'Outdoor',
       items: [
+        { title: 'Dashboard', url: '/dashboard/outdoor/dashboard', icon: LayoutDashboard },
         {
           title: 'Master',
           icon: FlaskConical,
           items: [
             { title: 'Tests', url: '/dashboard/outdoor/master/tests', icon: TestTube2 },
+            { title: 'Tests (Active)', url: '/dashboard/outdoor/master/tests', search: { status: 'active' }, icon: CheckCircle2 },
+            { title: 'Tests (Inactive)', url: '/dashboard/outdoor/master/tests', search: { status: 'inactive' }, icon: XCircle },
             { title: 'Test Tables', url: '/dashboard/outdoor/master/test-tables', icon: ClipboardList },
             { title: 'Departments', url: '/dashboard/outdoor/master/departments', icon: Building2 },
             { title: 'Categories', url: '/dashboard/outdoor/master/categories', icon: ListFilter },
@@ -141,7 +158,6 @@ export const sidebarData: SidebarData = {
           title: 'Reception',
           icon: Stethoscope,
           items: [
-            { title: 'Dashboard', url: '/dashboard/outdoor/dashboard', icon: LayoutDashboard },
             { title: 'Create Invoice', url: '/dashboard/outdoor/reception/invoices/create', icon: FilePlus },
             { title: 'Due Invoices', url: '/dashboard/outdoor/reception/due-collection', icon: AlertCircle },
             { title: 'Paid Invoices', url: '/dashboard/outdoor/reception/paid-invoices', icon: CheckCircle2 },
@@ -157,10 +173,46 @@ export const sidebarData: SidebarData = {
       ],
     },
 
+    // ── Prescription ─────────────────────────────────────────────────
+    {
+      title: 'Prescription',
+      items: [
+        { title: 'Dashboard', url: '/dashboard/prescriptions/dashboard', icon: LayoutDashboard },
+        { title: 'All Prescriptions', url: '/dashboard/prescriptions', icon: FileText },
+        { title: 'My Prescriptions', url: '/dashboard/prescriptions/my-prescriptions', icon: User },
+        { title: 'Patients', url: '/dashboard/prescriptions/patients', icon: Users },
+        {
+          title: 'Medicine List',
+          icon: Pill,
+          items: [
+            { title: 'Medicines', url: '/dashboard/prescriptions/medicines', icon: Pill },
+            { title: 'Medicine Groups', url: '/dashboard/prescriptions/medicine-groups', icon: Boxes },
+          ],
+        },
+        {
+          title: 'Reports',
+          icon: FileBarChart,
+          items: [
+            { title: 'Doctor-wise', url: '/dashboard/prescriptions/reports/doctor-wise', icon: UserCog },
+            { title: 'Medicine-wise', url: '/dashboard/prescriptions/reports/medicine-wise', icon: Pill },
+            { title: 'Patient-wise', url: '/dashboard/prescriptions/reports/patient-wise', icon: Users },
+          ],
+        },
+        {
+          title: 'Masters',
+          icon: Database,
+          items: [
+            { title: 'Quick Phrases', url: '/dashboard/prescriptions/quick-phrases', icon: ListChecks },
+          ],
+        },
+      ],
+    },
+
     // ── Indoor ───────────────────────────────────────────────────────
     {
       title: 'Indoor',
       items: [
+        { title: 'Dashboard', url: '/dashboard/indoor/dashboard', icon: LayoutDashboard },
         {
           title: 'Master',
           icon: Recycle,
@@ -184,8 +236,12 @@ export const sidebarData: SidebarData = {
           items: [
             { title: 'New Admission', url: '/dashboard/admission/new-admission', icon: FilePlus },
             { title: 'All Patients', url: '/dashboard/admission/patients', icon: ListFilter },
+            { title: 'Due Patients', url: '/dashboard/admission/patients/due', icon: AlertCircle },
+            { title: 'Paid Patients', url: '/dashboard/admission/patients/paid', icon: CheckCircle2 },
+            { title: 'Over Paid Patients', url: '/dashboard/admission/patients/overpaid', icon: TrendingUp },
             { title: 'Active Patients', url: '/dashboard/admission/patients/active', icon: Activity },
             { title: 'Bill Created', url: '/dashboard/admission/patients/bill-created-list', icon: FilePlus },
+            { title: 'Bill Not Created', url: '/dashboard/admission/discharged-patients/bill-does-not-created', icon: FileX },
             { title: 'Final Bill Created', url: '/dashboard/admission/patients/final-bill-created-list', icon: Receipt },
             { title: 'Discharged List', url: '/dashboard/admission/patients/discharged-list', icon: LogOut },
             { title: 'Discharged & Paid', url: '/dashboard/admission/patients/discharged-paid-list', icon: CheckCircle2 },
@@ -204,6 +260,7 @@ export const sidebarData: SidebarData = {
             { title: 'Pay. Dist. Completed', url: '/dashboard/admission/patients/bill-distributed-list', icon: CheckCircle2 },
             { title: 'Bills Distributed (Completed)', url: '/dashboard/admission/patients/balance-distributed-list', icon: Scale },
             { title: 'Doctor Referred', url: '/dashboard/indoor/management/doctor-referred', icon: UserCog },
+            { title: 'Consultant Bill', url: '/dashboard/indoor/management/consultant-bill', icon: UserCheck },
             { title: 'Anesthesia Bill', url: '/dashboard/indoor/management/anesthesia-bill', icon: DollarSign },
             { title: 'Assistant Bill', url: '/dashboard/indoor/management/assistant-bill', icon: DollarSign },
             { title: 'Surgeon Bill', url: '/dashboard/indoor/management/surgeon-bill', icon: DollarSign },
@@ -247,6 +304,7 @@ export const sidebarData: SidebarData = {
             { title: 'All Reports', url: '/dashboard/pathology/immunology/all', icon: FileText },
             { title: 'Widal Test', url: '/dashboard/pathology/immunology/widal-test', icon: Shield },
             { title: 'Blood Group', url: '/dashboard/pathology/immunology/blood-group', icon: Droplets },
+            { title: 'Cross Matching & Screening', url: '/dashboard/pathology/immunology/cross-matching-screening', icon: TestTube2 },
             { title: 'MT', url: '/dashboard/pathology/immunology/mt', icon: Shield },
             { title: 'Beta HCG', url: '/dashboard/pathology/immunology/beta-hcg', icon: Baby },
           ],
@@ -295,6 +353,7 @@ export const sidebarData: SidebarData = {
     {
       title: 'Diagnostics',
       items: [
+        { title: 'Dashboard', url: '/dashboard/diagnostics/dashboard', icon: LayoutDashboard },
         {
           title: 'X-Ray',
           icon: Bone,
@@ -354,20 +413,42 @@ export const sidebarData: SidebarData = {
           title: 'Payroll',
           icon: Wallet,
           items: [
-            { title: 'Overview', url: '/dashboard/payroll/overview', icon: Wallet },
+            { title: 'Dashboard', url: '/dashboard/payroll/overview', icon: LayoutDashboard },
             { title: 'Employees', url: '/dashboard/payroll/employees', icon: Users },
             { title: 'Attendance', url: '/dashboard/payroll/attendance-list', icon: Calendar },
             { title: 'Salary Structure', url: '/dashboard/payroll/salary-structure', icon: DollarSign },
             { title: 'All Payrolls', url: '/dashboard/payroll/all-payrolls', icon: FileText },
-          ],
-        },
-        {
-          title: 'Payments',
-          icon: CreditCard,
-          items: [
             { title: 'Process Payments', url: '/dashboard/finance/payments', icon: CreditCard },
             { title: 'Payment History', url: '/dashboard/finance/payment-history', icon: Receipt },
             { title: 'Reconciliation', url: '/dashboard/finance/reconciliation', icon: CheckCircle2 },
+          ],
+        },
+        {
+          title: 'Doctor Bills',
+          icon: Stethoscope,
+          items: [
+            { title: 'Dashboard', url: '/dashboard/finance/doctor-bills/dashboard', icon: LayoutDashboard },
+            { title: 'Doctor Payment Invoices', url: '/dashboard/finance/doctor-bills/invoices', icon: Receipt },
+            { title: 'Anesthesia Bill (Unpaid)', url: '/dashboard/finance/doctor-bills/anesthesia-bill', icon: Syringe },
+            { title: 'Assistant Bill (Unpaid)', url: '/dashboard/finance/doctor-bills/assistant-bill', icon: Users },
+            { title: 'Surgeon Bill (Unpaid)', url: '/dashboard/finance/doctor-bills/surgeon-bill', icon: Stethoscope },
+            { title: 'Consultant Bill (Unpaid)', url: '/dashboard/finance/doctor-bills/consultant-bill', icon: UserCheck },
+            { title: 'Anesthesia Bill (Paid)', url: '/dashboard/finance/doctor-bills/anesthesia-bill/paid', icon: Syringe },
+            { title: 'Assistant Bill (Paid)', url: '/dashboard/finance/doctor-bills/assistant-bill/paid', icon: Users },
+            { title: 'Surgeon Bill (Paid)', url: '/dashboard/finance/doctor-bills/surgeon-bill/paid', icon: Stethoscope },
+            { title: 'Consultant Bill (Paid)', url: '/dashboard/finance/doctor-bills/consultant-bill/paid', icon: UserCheck },
+          ],
+        },
+        {
+          title: 'Payment Invoices',
+          icon: Receipt,
+          items: [
+            { title: 'Dashboard', url: '/dashboard/finance/doctor-bills/invoices/dashboard', icon: LayoutDashboard },
+            { title: 'Doctor Payment Invoices', url: '/dashboard/finance/doctor-bills/invoices', icon: Receipt },
+            { title: 'Anes. Payment Invoices', url: '/dashboard/finance/doctor-bills/invoices', search: { type: 'Anesthetist' }, icon: Syringe },
+            { title: 'Assistant Payment Invoices', url: '/dashboard/finance/doctor-bills/invoices', search: { type: 'Assistant' }, icon: Users },
+            { title: 'Surgeon Payment Invoices', url: '/dashboard/finance/doctor-bills/invoices', search: { type: 'Surgeon' }, icon: Stethoscope },
+            { title: 'Consultant Payment Invoice', url: '/dashboard/finance/doctor-bills/invoices', search: { type: 'Consultant' }, icon: UserCheck },
           ],
         },
       ],
@@ -381,7 +462,7 @@ export const sidebarData: SidebarData = {
           title: 'Asset Management',
           icon: Package,
           items: [
-            { title: 'Assets Dashboard', url: '/dashboard/assets', icon: LayoutDashboard },
+            { title: 'Dashboard', url: '/dashboard/assets', icon: LayoutDashboard },
             { title: 'All Assets', url: '/dashboard/assets/list', icon: List },
             { title: 'Categories', url: '/dashboard/assets/categories', icon: ListFilter },
             { title: 'Locations', url: '/dashboard/assets/locations', icon: Building2 },
@@ -394,13 +475,62 @@ export const sidebarData: SidebarData = {
           title: 'Purchase Management',
           icon: ShoppingCart,
           items: [
-            { title: 'Purchase Dashboard', url: '/dashboard/purchase', icon: LayoutDashboard },
+            { title: 'Dashboard', url: '/dashboard/purchase', icon: LayoutDashboard },
             { title: 'Purchase Requests', url: '/dashboard/purchase/requests', icon: FileText },
             { title: 'Pending Requests', url: '/dashboard/purchase/requests/pending', icon: Bell },
             { title: 'Goods Receipt Notes', url: '/dashboard/purchase/goods-receipt', icon: Truck },
             { title: 'Suppliers', url: '/dashboard/purchase/suppliers', icon: Users },
             { title: 'Supplier Performance', url: '/dashboard/purchase/supplier-performance', icon: BarChart3 },
             { title: 'Purchase Statistics', url: '/dashboard/purchase/statistics', icon: PieChart },
+          ],
+        },
+      ],
+    },
+
+    // ── Pharmacy ─────────────────────────────────────────────────────
+    {
+      title: 'Pharmacy',
+      items: [
+        { title: 'Dashboard', url: '/dashboard/pharmacy', icon: LayoutDashboard },
+        {
+          title: 'Catalog',
+          icon: Pill,
+          items: [
+            { title: 'Categories', url: '/dashboard/pharmacy/categories', icon: ListFilter },
+            { title: 'Medicines', url: '/dashboard/pharmacy/medicines', icon: Pill },
+          ],
+        },
+        {
+          title: 'Purchasing',
+          icon: Truck,
+          items: [
+            { title: 'Suppliers', url: '/dashboard/pharmacy/suppliers', icon: Users },
+            { title: 'Supplier Dues', url: '/dashboard/pharmacy/supplier-dues', icon: HandCoins },
+            { title: 'Stock In', url: '/dashboard/pharmacy/stock-in', icon: PackageCheck },
+            { title: 'Purchase Orders', url: '/dashboard/pharmacy/purchase-orders', icon: ClipboardList },
+            { title: 'Reorder Suggestions', url: '/dashboard/pharmacy/reorder', icon: RefreshCcwDot },
+            { title: 'Purchase Returns', url: '/dashboard/pharmacy/purchase-returns', icon: Undo2 },
+          ],
+        },
+        {
+          title: 'Sales',
+          icon: ShoppingCart,
+          items: [
+            { title: 'Sales', url: '/dashboard/pharmacy/sales', icon: Receipt },
+            { title: 'Customers', url: '/dashboard/pharmacy/customers', icon: UserRound },
+            { title: 'Shifts', url: '/dashboard/pharmacy/shifts', icon: Timer },
+            { title: 'Sales Returns', url: '/dashboard/pharmacy/sales-returns', icon: Undo2 },
+          ],
+        },
+        {
+          title: 'Stock',
+          icon: Boxes,
+          items: [
+            { title: 'Low Stock', url: '/dashboard/pharmacy/low-stock', icon: AlertTriangle },
+            { title: 'Stock Report', url: '/dashboard/pharmacy/stock-report', icon: BarChart3 },
+            { title: 'Stock Ledger', url: '/dashboard/pharmacy/stock-ledger', icon: BookOpenText },
+            { title: 'Expiry Report', url: '/dashboard/pharmacy/expiry-report', icon: Clock },
+            { title: 'Stock Adjustments', url: '/dashboard/pharmacy/stock-adjustments', icon: ClipboardEdit },
           ],
         },
       ],
@@ -520,6 +650,7 @@ export const sidebarData: SidebarData = {
           icon: Settings,
           items: [
             { title: 'App Configuration', url: '/dashboard/settings', icon: Settings },
+            { title: 'Default Data', url: '/dashboard/settings/default-data', icon: Database },
             { title: 'Login Settings', url: '/dashboard/settings/login-settings', icon: UserCog },
             { title: 'Home Page Settings', url: '/dashboard/settings/home-page-settings', icon: Home },
             { title: 'Report Settings', url: '/dashboard/settings/report-settings', icon: FileText },

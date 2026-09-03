@@ -431,12 +431,16 @@ function EditRolePermissions() {
                                                                 </div>
                                                             </CardHeader>
                                                             <CardContent className="px-4 py-2">
+                                                                <div className="hidden sm:flex items-center justify-between px-0 pt-1 pb-2">
+                                                                    <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Page</span>
+                                                                    <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Actions</span>
+                                                                </div>
                                                                 <div className="divide-y">
                                                                     {pages.map((page) => (
                                                                         <div key={page.label} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
                                                                             <span className="text-sm font-medium text-foreground">{page.label}</span>
                                                                             <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                                                                                {page.actions.map((action) => (
+                                                                                {page.actions.length > 0 ? page.actions.map((action) => (
                                                                                     <label key={action.value} className="flex items-center gap-1.5 text-xs cursor-pointer text-muted-foreground hover:text-foreground transition-colors">
                                                                                         <Checkbox
                                                                                             checked={selectedPermissions.includes(action.value)}
@@ -444,7 +448,9 @@ function EditRolePermissions() {
                                                                                         />
                                                                                         {action.label}
                                                                                     </label>
-                                                                                ))}
+                                                                                )) : (
+                                                                                    <span className="text-xs text-muted-foreground italic">No actions defined</span>
+                                                                                )}
                                                                             </div>
                                                                         </div>
                                                                     ))}

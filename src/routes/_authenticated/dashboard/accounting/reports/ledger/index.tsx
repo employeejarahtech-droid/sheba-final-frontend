@@ -224,7 +224,7 @@ function LedgerReport() {
                   {
                     data: "date",
                     title: "Date",
-                    render: (data: any) => format(new Date(data), "dd/MM/yyyy")
+                    render: (data: any) => `<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${format(new Date(data), "dd/MM/yyyy")}</span>`
                   },
                   { data: "narration", title: "Particulars" },
                   {

@@ -5,9 +5,11 @@ interface UrineForReFullReportDetailsProps {
   report?: any;
   invoice?: any;
   paddingTop?: number;
+  fontSize?: number;
+  showSignature?: boolean;
 }
 
-export default function UrineForReFullReportDetails({ report, invoice, paddingTop = 32 }: UrineForReFullReportDetailsProps) {
+export default function UrineForReFullReportDetails({ report, invoice, paddingTop = 32, fontSize = 1, showSignature = true }: UrineForReFullReportDetailsProps) {
   // Format date for display
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
@@ -20,7 +22,7 @@ export default function UrineForReFullReportDetails({ report, invoice, paddingTo
   };
 
   return (
-    <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
+    <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px`, zoom: fontSize }}>
       <style>
         {`
           .bg-row-blue {
@@ -276,7 +278,7 @@ export default function UrineForReFullReportDetails({ report, invoice, paddingTo
         {report?.test_carried_out_by || 'N/A'}
       </p>
 
-      <ReportFooter />
+      <ReportFooter showSignature={showSignature} />
 
     
     </div>

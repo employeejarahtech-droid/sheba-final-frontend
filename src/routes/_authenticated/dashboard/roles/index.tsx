@@ -92,6 +92,20 @@ function ListOfRoles() {
       },
     },
     {
+      data: 'created_by_type',
+      title: 'Create Type',
+      orderable: false,
+      render: (data: any) => {
+        if (!data) return `<span class="text-sm text-muted-foreground">-</span>`
+        const isAdmin = data === 'company_admin'
+        const label = isAdmin ? 'Admin' : 'Staff'
+        const classes = isAdmin
+          ? 'bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400'
+          : 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400'
+        return `<span class="${classes} px-2 py-0.5 rounded text-xs font-semibold">${label}</span>`
+      },
+    },
+    {
       data: 'status',
       title: 'Status',
       render: (data: any) => {
@@ -119,7 +133,7 @@ function ListOfRoles() {
     <>
       <AppHeader fixed />
 
-      <main className="p-4 space-y-6">
+      <main className=" space-y-3">
         <PageHeader
           title="System Roles"
           description="Manage user roles and their associated permissions."
@@ -152,7 +166,7 @@ function ListOfRoles() {
         </div>
 
           
-          <div className="pt-6">
+          <div className="pt-3">
             <DataTable
               columns={columns}
               data={roles}

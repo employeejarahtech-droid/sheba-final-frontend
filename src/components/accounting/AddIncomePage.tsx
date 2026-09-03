@@ -123,8 +123,8 @@ export default function AddIncomePage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* BASIC INFO */}
-        <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-green-200 hover:shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 dark:from-green-950/30 dark:via-emerald-950/30 dark:to-green-950/30 border-b-1 border-green-100 dark:border-green-900 py-3 gap-0">
+        <Card className="overflow-hidden border-1 transition-all duration-300 hover:border-green-200 hover:shadow-lg">
+          <CardHeader className="">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-gradient-to-br from-green-600 to-green-500 rounded-xl shadow-lg shadow-green-500/30">
                 <FileText className="w-6 h-6 text-white" />
@@ -307,7 +307,7 @@ export default function AddIncomePage() {
 
         {/* PAYMENT INFO */}
         <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-green-200 hover:shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 dark:from-green-950/30 dark:via-emerald-950/30 dark:to-green-950/30 border-b-1 border-green-100 dark:border-green-900 py-3 gap-0">
+          <CardHeader className="">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-gradient-to-br from-green-600 to-green-500 rounded-xl shadow-lg shadow-green-500/30">
                 <CreditCard className="w-6 h-6 text-white" />

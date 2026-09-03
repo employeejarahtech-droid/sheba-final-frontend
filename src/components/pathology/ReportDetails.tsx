@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ReportFooter } from '@/components/pathology/ReportFooter'
+import { COLUMN_LAYOUT_OPTIONS, DEFAULT_COLUMN_LAYOUT, type ColumnLayoutKey } from '@/lib/print-column-layout';
 
 interface BiochemistryReportProps {
   invoice: {
@@ -11,6 +12,7 @@ interface BiochemistryReportProps {
       invoice_date: string;
       phone: string;
       ref_doctor?: string | null;
+      ref_doctor_qualification?: string | null;
     } | null;
     biochemical_all_info: Array<{
       id: number;
@@ -18,6 +20,7 @@ interface BiochemistryReportProps {
       test_id: number | null;
       test_name: string | null;
       test_result: string | null;
+      sample_normal_range?: string | null;
       test_carried_out_by?: string | null;
       created_at: string | null;
       updated_at: string | null;
@@ -25,11 +28,21 @@ interface BiochemistryReportProps {
   };
   testName?: string;
   paddingTop?: number;
+  fontSize?: number;
+  showSignature?: boolean;
+  columnLayout?: ColumnLayoutKey;
 }
 
-export default function BiochemistryReport({ invoice, testName = "BIOCHEMISTRY REPORT", paddingTop = 40 }: BiochemistryReportProps) {
+export default function BiochemistryReport({ invoice, testName = "BIOCHEMISTRY REPORT", paddingTop = 40, fontSize = 1, showSignature = true, columnLayout = DEFAULT_COLUMN_LAYOUT }: BiochemistryReportProps) {
   const patientInfo = invoice?.invoice_information || null;
   const tests = invoice?.biochemical_all_info || [];
+
+  // Effective table geometry: the 'two' preset hides Normal Range outright.
+  const widths = (COLUMN_LAYOUT_OPTIONS[columnLayout] ?? COLUMN_LAYOUT_OPTIONS.default).widths;
+  const showRange = widths.range !== null;
+  const nameWidth = `${widths.name}%`;
+  const resultWidth = showRange ? `${widths.result}%` : `${100 - widths.name}%`;
+  const rangeWidth = widths.range === null ? '0%' : `${widths.range}%`;
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
@@ -42,7 +55,7 @@ export default function BiochemistryReport({ invoice, testName = "BIOCHEMISTRY R
   };
 
   return (
-    <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
+    <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px`, zoom: fontSize }}>
       <style>
         {`
           .bg-row-blue {
@@ -98,7 +111,7 @@ export default function BiochemistryReport({ invoice, testName = "BIOCHEMISTRY R
           </tr>
           <tr className="border">
             <td className="border px-3 py-2" colSpan={2}>
-              Ref. By: {patientInfo?.ref_doctor || '-'}
+              Ref. By: {patientInfo?.ref_doctor || '-'}{patientInfo?.ref_doctor_qualification ? ` (${patientInfo.ref_doctor_qualification})` : ''}
             </td>
             <td className="border px-3 py-2">
               Phone: {patientInfo?.phone || '-'}
@@ -108,19 +121,21 @@ export default function BiochemistryReport({ invoice, testName = "BIOCHEMISTRY R
       </table>
 
       {/* Test Table */}
-      <table className="w-full text-sm mt-6">
+      <table className="w-full table-fixed text-sm mt-6" style={{ tableLayout: 'fixed' }} data-column-layout={columnLayout}>
         <thead>
           <tr className="border-t border-b bg-row-blue">
-            <th className="px-3 py-2 text-left w-[60%]">Test Name</th>
-            <th className="px-3 py-2 text-left w-[40%]">Test Result</th>
+            <th className="px-3 py-2 text-left border-r border-dashed" style={{ width: nameWidth }}>Test Name</th>
+            <th className="px-3 py-2 text-left border-r border-dashed" style={{ width: resultWidth }}>Test Result</th>
+            {showRange && <th className="px-3 py-2 text-left" style={{ width: rangeWidth }}>Normal Range</th>}
           </tr>
         </thead>
 
         <tbody>
           {tests.map((test) => (
             <tr key={test.id} className="border-b border-dashed">
-              <td className="px-3 py-2">{test.test_name || '-'}</td>
-              <td className="px-3 py-2 whitespace-pre-wrap">{test.test_result || '-'}</td>
+              <td className="px-3 py-2 border-r border-dashed">{test.test_name || '-'}</td>
+              <td className="px-3 py-2 whitespace-pre-wrap border-r border-dashed">{test.test_result || '-'}</td>
+              {showRange && <td className="px-3 py-2 whitespace-pre-wrap">{test.sample_normal_range || '-'}</td>}
             </tr>
           ))}
         </tbody>
@@ -132,7 +147,7 @@ export default function BiochemistryReport({ invoice, testName = "BIOCHEMISTRY R
         {tests[0]?.test_carried_out_by || '-'}
       </p>
 
-      <ReportFooter />
+      <ReportFooter showSignature={showSignature} />
 
       {/* Buttons */}
       <div className="flex justify-end gap-3 mt-10 print:hidden">

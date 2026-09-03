@@ -590,3 +590,30 @@ export async function deleteRegistration(id: number): Promise<ApiResponse<void>>
 export async function checkSubdomain(subdomain: string): Promise<ApiResponse<{ available: boolean }>> {
   return platformFetchJson(`/api/public/check-subdomain/${encodeURIComponent(subdomain)}`)
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+//  DATABASE MIGRATION STATUS (per-tenant migration version)
+// ═══════════════════════════════════════════════════════════════════════
+
+export interface PlatformTenantMigration {
+  id: number
+  name: string
+  subdomain: string
+  db_name: string
+  is_active: boolean
+  total: number
+  appliedCount: number
+  pendingCount: number
+  latestApplied: string | null
+  pending: string[]
+  error?: string | null
+}
+
+export interface PlatformMigrationStatus {
+  totalMigrations: number
+  tenants: PlatformTenantMigration[]
+}
+
+export async function fetchMigrationStatus(): Promise<ApiResponse<PlatformMigrationStatus>> {
+  return platformFetchJson('/api/admin/migrations/status')
+}

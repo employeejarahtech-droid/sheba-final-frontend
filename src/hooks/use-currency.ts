@@ -70,19 +70,12 @@ export function useCurrency() {
   const currencySymbol = CURRENCY_SYMBOLS[currencyCode] || currencyCode
   const locale = CURRENCY_LOCALES[currencyCode] || 'en-US'
 
-  // Format function using Intl.NumberFormat
+  // Manual format (not Intl's style:'currency') — Intl's spacing between the
+  // currency code and the number is locale-dependent and collapses to "BDT150"
+  // for locales like en-BD, so we build the "CODE amount" string ourselves.
   const format = (amount: number | string) => {
     const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
-    try {
-      return numAmount.toLocaleString(locale, {
-        style: 'currency',
-        currency: currencyCode || 'USD',
-        currencyDisplay: 'code',
-      })
-    } catch {
-      // Fallback: manual format if Intl doesn't recognise the code
-      return `${currencySymbol} ${numAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-    }
+    return `${currencySymbol} ${numAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   }
 
   return {

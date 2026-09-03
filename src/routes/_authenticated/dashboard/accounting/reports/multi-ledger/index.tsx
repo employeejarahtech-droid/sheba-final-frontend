@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
-import { BookOpen, Printer, CheckSquare, Square, X, Search } from "lucide-react";
+import { BookOpen, Printer, CheckSquare, Square, X, Search, Filter, Wallet, TrendingUp, TrendingDown, PiggyBank } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from "zod";
@@ -10,7 +10,7 @@ import { z } from "zod";
 // UI Components
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/DataTable";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateField } from "@/components/date-field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -193,7 +193,18 @@ function MultiLedgerReport() {
         />
 
         {/* Filter Card */}
-        <Card className="border-t-4 border-emerald-500 shadow-md py-0">
+        <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+          <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border-b py-1.5 px-4 gap-0">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg shadow-lg">
+                <Filter className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-lg font-bold">Report Filters</CardTitle>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Select accounts and a date range</p>
+              </div>
+            </div>
+          </CardHeader>
           <CardContent className="p-3">
             <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-start">
               {/* Account Checkbox List (full chart of accounts) */}
@@ -301,31 +312,58 @@ function MultiLedgerReport() {
 
         {/* Grand Summary */}
         {grandSummary && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="shadow-sm hover:shadow-md transition-shadow">
-              <CardHeader className="pb-2">
-                <CardDescription>Total Opening Balance</CardDescription>
-                <CardTitle className="text-2xl">{currencySymbol} {(grandSummary.total_opening ?? 0).toFixed(2)}</CardTitle>
-              </CardHeader>
-            </Card>
-            <Card className="shadow-sm hover:shadow-md transition-shadow">
-              <CardHeader className="pb-2">
-                <CardDescription>Total Debit</CardDescription>
-                <CardTitle className="text-2xl text-emerald-600">{currencySymbol} {(grandSummary.total_debit ?? 0).toFixed(2)}</CardTitle>
-              </CardHeader>
-            </Card>
-            <Card className="shadow-sm hover:shadow-md transition-shadow">
-              <CardHeader className="pb-2">
-                <CardDescription>Total Credit</CardDescription>
-                <CardTitle className="text-2xl text-red-600">{currencySymbol} {(grandSummary.total_credit ?? 0).toFixed(2)}</CardTitle>
-              </CardHeader>
-            </Card>
-            <Card className="bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 shadow-sm hover:shadow-md transition-shadow">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-emerald-700 dark:text-emerald-400">Total Closing Balance</CardDescription>
-                <CardTitle className="text-2xl text-emerald-700 dark:text-emerald-400">{currencySymbol} {(grandSummary.total_closing ?? 0).toFixed(2)}</CardTitle>
-              </CardHeader>
-            </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                label: "Total Opening Balance",
+                value: grandSummary.total_opening ?? 0,
+                gradient: "from-blue-600 to-blue-400",
+                shadow: "shadow-blue-500/30",
+                icon: <Wallet className="w-6 h-6 text-white" />,
+              },
+              {
+                label: "Total Debit",
+                value: grandSummary.total_debit ?? 0,
+                gradient: "from-emerald-600 to-emerald-400",
+                shadow: "shadow-emerald-500/30",
+                icon: <TrendingUp className="w-6 h-6 text-white" />,
+              },
+              {
+                label: "Total Credit",
+                value: grandSummary.total_credit ?? 0,
+                gradient: "from-rose-600 to-rose-400",
+                shadow: "shadow-rose-500/30",
+                icon: <TrendingDown className="w-6 h-6 text-white" />,
+              },
+              {
+                label: "Total Closing Balance",
+                value: grandSummary.total_closing ?? 0,
+                gradient: "from-violet-600 to-violet-400",
+                shadow: "shadow-violet-500/30",
+                icon: <PiggyBank className="w-6 h-6 text-white" />,
+              },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-6 shadow-lg ${stat.shadow} transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]`}
+              >
+                {/* Background Pattern */}
+                <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+                <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
+
+                <div className="relative flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-white/90 uppercase tracking-widest">{stat.label}</p>
+                    <h3 className="mt-2 text-2xl font-bold text-white">
+                      {currencySymbol} {stat.value.toFixed(2)}
+                    </h3>
+                  </div>
+                  <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                    {stat.icon}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -342,9 +380,9 @@ function MultiLedgerReport() {
           const totalCr = txns.reduce((s: number, t: any) => s + (t.credit || 0), 0);
 
           return (
-            <Card key={accountLedger.account.id} className="overflow-hidden">
+            <Card key={accountLedger.account.id} className="overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               <div className={cn(
-                "px-4 py-2 flex items-center justify-between",
+                "px-4 py-2.5 flex items-center justify-between gap-3",
                 "bg-gradient-to-r",
                 ['ASSET'].includes(accountLedger.account.type) ? 'from-blue-600 to-cyan-500' :
                 ['LIABILITY'].includes(accountLedger.account.type) ? 'from-orange-600 to-amber-500' :
@@ -352,10 +390,15 @@ function MultiLedgerReport() {
                 ['INCOME'].includes(accountLedger.account.type) ? 'from-green-600 to-emerald-500' :
                 "from-red-600 to-rose-500"
               )}>
-                <h3 className="text-sm font-semibold text-white">
-                  {accountLedger.account.code} — {accountLedger.account.name}
-                </h3>
-                <span className="text-xs text-white/80">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <div className="shrink-0 rounded-lg bg-white/20 p-1.5 backdrop-blur-sm">
+                    <BookOpen className="h-4 w-4 text-white" />
+                  </div>
+                  <h3 className="truncate text-sm font-semibold text-white">
+                    {accountLedger.account.code} — {accountLedger.account.name}
+                  </h3>
+                </div>
+                <span className="shrink-0 text-xs text-white/80">
                   Opening: {currencySymbol} {(accountLedger.opening_balance ?? 0).toFixed(2)}
                 </span>
               </div>

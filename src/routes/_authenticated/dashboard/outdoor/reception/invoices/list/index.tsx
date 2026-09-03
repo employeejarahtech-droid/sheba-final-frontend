@@ -72,6 +72,7 @@ function InvoicesPage() {
             setFrom={setFrom}
             setTo={setTo}
             setSort={setSort}
+            permissionBase="outdoor.reception.invoices.list"
         />
     )
 }

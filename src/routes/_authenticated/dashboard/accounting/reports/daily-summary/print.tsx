@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { ArrowLeft, Printer, Receipt, Scale, TrendingUp, TrendingDown } from 'lucide-react';
 
@@ -9,6 +10,9 @@ import { Main } from '@/components/layout/main';
 import { Button } from '@/components/ui/button';
 import { useGetDailySummaryQuery } from '@/features/accounting/accountingQueries';
 import { useCurrency } from '@/hooks/use-currency';
+import { getCookie } from '@/lib/cookies';
+
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const printSearchSchema = z.object({
     date: z.string().optional(),
@@ -28,10 +32,36 @@ function DailySummaryPrintPage() {
 
     const selectedDate = search.date || format(new Date(), "yyyy-MM-dd");
     const { currencySymbol } = useCurrency();
+    const token = getCookie('accessToken');
 
     const { data: summaryData, isLoading } = useGetDailySummaryQuery({
         date: selectedDate,
     });
+
+    // Fetch company settings for company name, address and logo
+    const { data: companySettings } = useQuery({
+        queryKey: ["company-settings"],
+        queryFn: async () => {
+            const res = await fetch(`${API_URL}/api/company-settings`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) throw new Error("Failed to fetch company settings");
+            const result = await res.json();
+            return result.data;
+        },
+        enabled: !!token,
+    })
+
+    const companyLogo = companySettings?.company_logo
+        ? (companySettings.company_logo.startsWith('http') || companySettings.company_logo.startsWith('data:'))
+            ? companySettings.company_logo
+            : `${API_URL}${companySettings.company_logo}`
+        : null;
+    const companyName = companySettings?.company_name || 'Sheba Hospital';
+    const companyAddress = [companySettings?.address1, companySettings?.address2].filter(Boolean).join(', ') || 'Dhaka, Bangladesh'
+    const now = new Date().toLocaleString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
+    })
 
     const report = summaryData?.data;
 
@@ -88,48 +118,113 @@ function DailySummaryPrintPage() {
                         className="max-w-5xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report"
                         style={{ paddingTop: `${paddingTop}px` }}
                     >
-                        <style>
-                            {`
-                                @media print {
-                                    * {
-                                        -webkit-print-color-adjust: exact !important;
-                                        print-color-adjust: exact !important;
-                                        color-adjust: exact !important;
-                                    }
-                                    .bg-background { background-color: #fff; }
-                                    body { color: #000; background-color: #fff; }
-                                    .border { border-color: #333 !important; }
-                                    .border-dashed { border-color: #999 !important; }
-                                    .bg-row-blue { background-color: #cfd2d8ff !important; }
+                        <style>{`
+                            .bg-row-blue { background-color: #cfd2d8ff !important; }
+                            @media print {
+                                @page {
+                                    size: A4 landscape;
+                                    margin: 10mm;
                                 }
-                            `}
-                        </style>
+                                * {
+                                    -webkit-print-color-adjust: exact !important;
+                                    print-color-adjust: exact !important;
+                                    color-adjust: exact !important;
+                                }
+                                body {
+                                    margin: 0 !important;
+                                    padding: 0 !important;
+                                    background: #fff !important;
+                                    color: #000 !important;
+                                }
+                                .print\\:hidden {
+                                    display: none !important;
+                                }
+                                table {
+                                    width: 100% !important;
+                                    border-collapse: collapse !important;
+                                    color: #000 !important;
+                                    margin-top: 0.5rem !important;
+                                }
+                                th, td {
+                                    padding: 4px 6px !important;
+                                    border: 1px solid #ddd !important;
+                                    color: #000 !important;
+                                    font-size: 10px !important;
+                                }
+                                th {
+                                    background-color: #f0f9ff !important;
+                                    color: #000 !important;
+                                    font-weight: 600 !important;
+                                }
+                                .bg-row-blue {
+                                    background-color: #cfd2d8ff !important;
+                                }
+                                /* Nested "Head / Debit / Credit" mini-table inside the Accounts
+                                   cell stays compact and borderless — it isn't a second report
+                                   table, just a breakdown within one outer cell. */
+                                .inner-accounts-table th,
+                                .inner-accounts-table td {
+                                    border: none !important;
+                                    padding: 1px 4px 1px 0 !important;
+                                    background: transparent !important;
+                                    font-size: 9px !important;
+                                    font-weight: normal !important;
+                                }
+                                .inner-accounts-table th {
+                                    font-weight: 600 !important;
+                                }
+                                h1, h2, h3, h4, h5, h6, p, span, div {
+                                    color: #000 !important;
+                                }
+                                .text-2xl { font-size: 16px !important; }
+                                .text-xl { font-size: 14px !important; }
+                                .text-lg { font-size: 12px !important; }
+                                .text-sm { font-size: 10px !important; }
+                                .text-xs { font-size: 9px !important; }
+                            }
+                        `}</style>
 
-                        {/* Title */}
-                        <h1 className="text-2xl font-bold text-center underline mb-2 tracking-wide">
-                            DAILY SUMMARY
-                        </h1>
-                        <div className="text-center text-sm text-gray-600 mb-6">
-                            Date: {format(new Date(selectedDate), "dd/MM/yyyy")}
+                        {/* Header: Logo/Company (left) + Report Title (right) */}
+                        <div className="mb-2 flex items-start justify-between gap-6">
+                            <div className="w-1/2 flex items-center gap-4">
+                                {companyLogo ? (
+                                    <img
+                                        src={companyLogo}
+                                        alt="Company Logo"
+                                        className="w-20 h-20 object-contain"
+                                    />
+                                ) : null}
+                                <div>
+                                    <h1 className="text-xl font-bold">{companyName}</h1>
+                                    <p className="text-xs mt-1 leading-4">{companyAddress}</p>
+                                </div>
+                            </div>
+
+                            <div className="w-1/2 text-right">
+                                <h2 className="text-lg font-bold tracking-widest uppercase">Daily Summary Report</h2>
+                                <p className="text-xs text-gray-600 mt-1">Opening balance, today's transactions, and closing balance</p>
+                                <p className="text-xs mt-1 leading-4">Date: {format(new Date(selectedDate), "dd/MM/yyyy")}</p>
+                                <p className="text-xs leading-4">Generated: {now}</p>
+                            </div>
                         </div>
 
                         {/* Summary Cards */}
                         <div className="grid grid-cols-4 gap-4 mb-6">
-                            <div className="border-2 border-blue-300 bg-blue-50 p-3 text-center">
+                            <div className="border border-blue-300 bg-blue-50 p-3 text-center">
                                 <div className="text-xs text-gray-600 uppercase flex items-center justify-center gap-1">
                                     <Scale className="w-3 h-3" /> Opening Balance
                                 </div>
                                 <div className="text-xl font-bold text-blue-700 mt-1">{openingBalance.toFixed(2)}</div>
                             </div>
-                            <div className="border-2 border-emerald-300 bg-emerald-50 p-3 text-center">
+                            <div className="border border-emerald-300 bg-emerald-50 p-3 text-center">
                                 <div className="text-xs text-gray-600 uppercase">Today's Debit</div>
                                 <div className="text-xl font-bold text-emerald-700 mt-1">{todayDebit.toFixed(2)}</div>
                             </div>
-                            <div className="border-2 border-red-300 bg-red-50 p-3 text-center">
+                            <div className="border border-red-300 bg-red-50 p-3 text-center">
                                 <div className="text-xs text-gray-600 uppercase">Today's Credit</div>
                                 <div className="text-xl font-bold text-red-700 mt-1">{todayCredit.toFixed(2)}</div>
                             </div>
-                            <div className={`border-2 p-3 text-center ${closingBalance >= 0 ? 'border-violet-300 bg-violet-50' : 'border-red-300 bg-red-50'}`}>
+                            <div className={`border p-3 text-center ${closingBalance >= 0 ? 'border-violet-300 bg-violet-50' : 'border-red-300 bg-red-50'}`}>
                                 <div className="text-xs text-gray-600 uppercase flex items-center justify-center gap-1">
                                     {closingBalance >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                                     Closing Balance
@@ -141,7 +236,7 @@ function DailySummaryPrintPage() {
                         </div>
 
                         {/* Calculation */}
-                        <div className="border-2 border-gray-300 bg-gray-50 mb-6 p-4">
+                        <div className="border border-gray-300 bg-gray-50 mb-6 p-4">
                             <div className="flex items-center justify-center gap-4 text-sm font-mono">
                                 <span className="font-semibold">Closing Balance =</span>
                                 <span className="text-blue-600 font-semibold">{currencySymbol} {openingBalance.toFixed(2)}</span>
@@ -157,8 +252,8 @@ function DailySummaryPrintPage() {
                         </div>
 
                         {/* Today's Transactions */}
-                        <div className="border-2 border-gray-300">
-                            <div className="bg-blue-50 px-4 py-2 border-b-2 border-blue-200">
+                        <div className="border border-gray-300">
+                            <div className="bg-blue-50 px-4 py-2 border-b border-blue-200">
                                 <h2 className="font-bold text-blue-700 flex items-center gap-2">
                                     <Receipt className="w-4 h-4" /> Today's Transactions
                                 </h2>
@@ -167,11 +262,8 @@ function DailySummaryPrintPage() {
                                 <thead>
                                     <tr className="bg-row-blue">
                                         <th className="border px-3 py-2 text-left w-[60px]">ID</th>
-                                        <th className="border px-3 py-2 text-left">Narration</th>
-                                        <th className="border px-3 py-2 text-left w-[100px]">Type</th>
-                                        <th className="border px-3 py-2 text-left">Accounts</th>
-                                        <th className="border px-3 py-2 text-right w-[120px]">Debit ({currencySymbol})</th>
-                                        <th className="border px-3 py-2 text-right w-[120px]">Credit ({currencySymbol})</th>
+                                        <th className="border px-3 py-2 text-left">Narration / Type</th>
+                                        <th className="border px-3 py-2 text-left">Accounts ({currencySymbol})</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -180,35 +272,45 @@ function DailySummaryPrintPage() {
                                         return (
                                             <tr key={tx.journal_id} className="bg-gray-50">
                                                 <td className="border px-3 py-1.5 font-mono text-xs">#{tx.journal_id}</td>
-                                                <td className="border px-3 py-1.5 font-medium">{tx.narration || "-"}</td>
                                                 <td className="border px-3 py-1.5">
-                                                    <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-700">
+                                                    <div className="font-medium">{tx.narration || "-"}</div>
+                                                    <span className="inline-flex mt-1 px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-700">
                                                         {badge.label}
                                                     </span>
                                                 </td>
                                                 <td className="border px-3 py-1.5 text-xs">
-                                                    {tx.entries.map((e: any, i: number) => (
-                                                        <div key={i} className="flex items-center gap-2 mb-1">
-                                                            <span className="font-mono text-gray-500">{e.account_code}</span>
-                                                            <span>{e.account_name}</span>
-                                                            {e.debit > 0 && <span className="text-emerald-600 text-xs">Dr {e.debit.toFixed(2)}</span>}
-                                                            {e.credit > 0 && <span className="text-red-600 text-xs">Cr {e.credit.toFixed(2)}</span>}
-                                                        </div>
-                                                    ))}
-                                                </td>
-                                                <td className="border px-3 py-1.5 text-right font-mono text-emerald-600">
-                                                    {tx.total_debit > 0 ? tx.total_debit.toFixed(2) : '-'}
-                                                </td>
-                                                <td className="border px-3 py-1.5 text-right font-mono text-red-600">
-                                                    {tx.total_credit > 0 ? tx.total_credit.toFixed(2) : '-'}
+                                                    <table className="inner-accounts-table w-full text-[10px] border-collapse">
+                                                        <thead>
+                                                            <tr className="text-gray-500">
+                                                                <th className="text-left font-medium pb-0.5">Head</th>
+                                                                <th className="text-right font-medium pb-0.5 w-16">Debit</th>
+                                                                <th className="text-right font-medium pb-0.5 w-16">Credit</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {tx.entries.map((e: any, i: number) => (
+                                                                <tr key={i}>
+                                                                    <td className="pr-2 py-0.5">
+                                                                        <span className="font-mono text-gray-500">{e.account_code}</span>{' '}
+                                                                        <span>{e.account_name}</span>
+                                                                    </td>
+                                                                    <td className="text-right py-0.5 text-emerald-600">{e.debit > 0 ? e.debit.toFixed(2) : '-'}</td>
+                                                                    <td className="text-right py-0.5 text-red-600">{e.credit > 0 ? e.credit.toFixed(2) : '-'}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
                                                 </td>
                                             </tr>
                                         );
                                     })}
                                     <tr className="bg-gray-100 font-bold">
-                                        <td className="border px-3 py-2 text-right" colSpan={4}>Total</td>
-                                        <td className="border px-3 py-2 text-right font-mono text-emerald-600">{todayDebit.toFixed(2)}</td>
-                                        <td className="border px-3 py-2 text-right font-mono text-red-600">{todayCredit.toFixed(2)}</td>
+                                        <td className="border px-3 py-2 text-right" colSpan={2}>Total</td>
+                                        <td className="border px-3 py-2 text-right font-mono">
+                                            <span className="text-emerald-600">Dr {todayDebit.toFixed(2)}</span>
+                                            {' / '}
+                                            <span className="text-red-600">Cr {todayCredit.toFixed(2)}</span>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>

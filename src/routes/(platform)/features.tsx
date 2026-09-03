@@ -33,6 +33,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { LandingPageWrapper } from '@/components/layout/landing-layout'
 import { CtaSection } from '@/components/landing/cta-section'
+import { usePageSeo } from '@/lib/seo'
 
 export const Route = createFileRoute('/(platform)/features')({
   component: FeaturesPage,
@@ -216,6 +217,13 @@ const facilities = [
 ]
 
 function FeaturesPage() {
+  usePageSeo({
+    title: 'Features — Hospital Management Software Modules | HMS',
+    description:
+      'Explore every HMS module: admissions & indoor care, pathology & laboratory, diagnostics, accounting, payroll, inventory, reporting and role-based security — all in one hospital management software.',
+    path: '/features',
+  })
+
   return (
     <LandingPageWrapper>
       {/* Hero */}

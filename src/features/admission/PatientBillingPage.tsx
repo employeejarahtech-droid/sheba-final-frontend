@@ -4777,12 +4777,19 @@ export function PatientBillingPage() {
                         <DialogContent className="sm:max-w-md">
                             <DialogHeader>
                                 <DialogTitle className="flex items-center gap-2">
-                                    {txnDialogMode === 'advance'
-                                        ? <Plus className="h-5 w-5 text-emerald-600" />
-                                        : txnDialogMode === 'refund'
-                                            ? <Repeat className="h-5 w-5 text-rose-600" />
-                                            : <DollarSign className="h-5 w-5 text-green-600" />}
-                                    {txnDialogMode === 'advance' ? 'Add Advance' : txnDialogMode === 'refund' ? 'Refund Overpayment' : 'Add Payment'}
+                                    <div className={cn(
+                                        'p-2 rounded-lg',
+                                        txnDialogMode === 'advance' ? 'bg-emerald-100 dark:bg-emerald-900/30'
+                                            : txnDialogMode === 'refund' ? 'bg-rose-100 dark:bg-rose-900/30'
+                                                : 'bg-green-100 dark:bg-green-900/30'
+                                    )}>
+                                        {txnDialogMode === 'advance'
+                                            ? <Plus className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                            : txnDialogMode === 'refund'
+                                                ? <Repeat className="h-5 w-5 text-rose-600 dark:text-rose-400" />
+                                                : <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />}
+                                    </div>
+                                    {txnDialogMode === 'advance' ? 'Record Advance Payment' : txnDialogMode === 'refund' ? 'Refund Overpayment' : 'Record Payment'}
                                 </DialogTitle>
                                 <DialogDescription>
                                     {txnDialogMode === 'advance'
@@ -4796,26 +4803,28 @@ export function PatientBillingPage() {
                                 <div className="space-y-1">
                                     <div className="flex items-center justify-between">
                                         <Label>Amount ({currencySymbol}) *</Label>
-                                        {txnDialogMode === 'payment' && <span className="text-[10px] text-muted-foreground">Max {formatNumber(maxPayment)}</span>}
-                                        {txnDialogMode === 'refund' && <span className="text-[10px] text-muted-foreground">Max {formatNumber(maxRefund)}</span>}
+                                        {txnDialogMode === 'payment' && <span className="text-xs text-muted-foreground">Due: {format(maxPayment)}</span>}
+                                        {txnDialogMode === 'refund' && <span className="text-xs text-muted-foreground">Max {formatNumber(maxRefund)}</span>}
                                     </div>
                                     <Input
                                         type="number"
                                         min={0}
                                         max={txnDialogMode === 'payment' ? maxPayment : txnDialogMode === 'refund' ? maxRefund : undefined}
+                                        step="0.01"
                                         value={txnAmount || ''}
                                         onChange={(e) => setTxnAmount(Number(e.target.value) || 0)}
                                         disabled={recordTxnMutation.isPending}
+                                        placeholder="Enter amount"
                                     />
                                     {txnDialogMode === 'payment' && txnAmount > maxPayment && (
-                                        <p className="text-[10px] text-rose-600">Amount cannot exceed the due ({formatNumber(maxPayment)}).</p>
+                                        <p className="text-xs text-rose-600">Amount cannot exceed the due ({format(maxPayment)}).</p>
                                     )}
                                     {txnDialogMode === 'refund' && txnAmount > maxRefund && (
                                         <p className="text-[10px] text-rose-600">Amount cannot exceed the refundable ({formatNumber(maxRefund)}).</p>
                                     )}
                                 </div>
                                 <div className="space-y-1">
-                                    <Label>Method</Label>
+                                    <Label>Payment Method</Label>
                                     <Select value={txnMethod} onValueChange={setTxnMethod}>
                                         <SelectTrigger><SelectValue placeholder="Method" /></SelectTrigger>
                                         <SelectContent>
@@ -4840,13 +4849,19 @@ export function PatientBillingPage() {
                                             className="w-full h-10"
                                         />
                                         {!txnDateChangeable && (
-                                            <p className="text-[10px] text-muted-foreground">Locked to today by settings.</p>
+                                            <p className="text-xs text-muted-foreground">Locked to today by settings.</p>
                                         )}
                                     </div>
                                 )}
                                 <div className="space-y-1">
                                     <Label>Notes</Label>
-                                    <Input value={txnNotes} onChange={(e) => setTxnNotes(e.target.value)} placeholder="Optional" disabled={recordTxnMutation.isPending} />
+                                    <Textarea
+                                        value={txnNotes}
+                                        onChange={(e) => setTxnNotes(e.target.value)}
+                                        placeholder="Add notes (optional)"
+                                        rows={2}
+                                        disabled={recordTxnMutation.isPending}
+                                    />
                                 </div>
                             </div>
                             <DialogFooter>
@@ -4861,8 +4876,18 @@ export function PatientBillingPage() {
                                                 : 'bg-green-600 hover:bg-green-700'
                                     )}
                                 >
-                                    {recordTxnMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-                                    {txnDialogMode === 'advance' ? 'Save Advance' : txnDialogMode === 'refund' ? 'Save Refund' : 'Save Payment'}
+                                    {recordTxnMutation.isPending ? (
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    ) : txnDialogMode === 'advance' ? (
+                                        <Plus className="h-4 w-4 mr-2" />
+                                    ) : txnDialogMode === 'refund' ? (
+                                        <Repeat className="h-4 w-4 mr-2" />
+                                    ) : (
+                                        <DollarSign className="h-4 w-4 mr-2" />
+                                    )}
+                                    {recordTxnMutation.isPending
+                                        ? (txnDialogMode === 'advance' ? 'Saving…' : txnDialogMode === 'refund' ? 'Refunding…' : 'Recording…')
+                                        : (txnDialogMode === 'advance' ? 'Record Advance' : txnDialogMode === 'refund' ? 'Save Refund' : 'Record Payment')}
                                 </Button>
                             </DialogFooter>
                         </DialogContent>

@@ -1,4 +1,4 @@
-﻿import { useMemo } from 'react'
+﻿import { useMemo, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -7,11 +7,12 @@ import {
   DollarSign,
   CheckCircle2,
   Clock,
-  BadgeCheck,
-  Banknote,
-  CalendarCheck,
   Check,
   ChevronDown,
+  History,
+  FileText,
+  Info,
+  X,
 } from 'lucide-react'
 
 import { AppHeader } from '@/components/layout/app-header'
@@ -65,6 +66,18 @@ type FinalDistribution = {
   created_by: number | null
   created_at: string
   doctor?: { id: number; doctor_name: string; speciality: string } | null
+  admission?: {
+    id: number
+    admission_prefix: string | null
+    patient_name: string
+    age: number
+    sex: string
+    phone: string
+    diagnosis: string | null
+    admission_date: string
+    discharge_date: string | null
+    status: string
+  } | null
 }
 
 type Meta = {
@@ -106,6 +119,11 @@ interface AssistantBillPageProps {
   setTo: (t: string) => void
   setStatus: (s: string) => void
   setDoctor: (d: number) => void
+  /** When true, the table shows only the Payable Now amount — no Final Bill / Due columns. */
+  payableOnly?: boolean
+  /** Paid tab: same flat Finance layout, but nothing is selectable — hides
+   *  the checkbox column, the how-to banner and the bulk action bar. */
+  selectable?: boolean
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -117,6 +135,37 @@ function fmtAmt(val: string | number | null | undefined, sym: string) {
 function fmtDate(d: string | null | undefined) {
   if (!d) return '—'
   return new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+function fmtDateTime(d: string | null | undefined) {
+  if (!d) return '—'
+  const date = new Date(d)
+  return `${date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`
+}
+
+type PaymentLog = {
+  id: number
+  final_distribution_id: number
+  previous_status: 'pending' | 'partial' | 'paid' | null
+  new_status: 'pending' | 'partial' | 'paid' | null
+  paid_now: string | null
+  changed_by: number | null
+  created_at: string
+  changedBy?: { id: number; name: string } | null
+}
+
+// One row per (admission, distribution) — every progressive-payment row for
+// the same distribution_id is grouped together. A patient can have more than
+// one assistant on the same admission (each gets its own bill_distribute_set_payable
+// row and therefore its own distribution_id), so grouping by admission_id
+// alone would incorrectly merge two different assistants' numbers into one
+// row. Falls back to grouping by the record's own id when distribution_id is
+// null (a one-off record with no progressive-payment chain).
+type AdmissionGroup = {
+  key: number
+  admission_id: number
+  doctor?: FinalDistribution['doctor']
+  items: FinalDistribution[]
 }
 
 // ─── Page ────────────────────────────────────────────────────────────────────
@@ -136,24 +185,45 @@ export function AssistantBillPage({
   setTo,
   setStatus,
   setDoctor,
+  payableOnly = false,
+  selectable = true,
 }: AssistantBillPageProps) {
-  const { currencySymbol } = useCurrency()
+  const { currencySymbol, format } = useCurrency()
   const token = getCookie('accessToken')
   const queryClient = useQueryClient()
 
-  // Mark-as-paid dialog
-  const [selectedRecord, setSelectedRecord] = useState<FinalDistribution | null>(null)
-  const [paidDate, setPaidDate] = useState(new Date().toISOString().slice(0, 10))
-  const [paidStatus, setPaidStatus] = useState<'paid' | 'partial'>('paid')
+  // Multi-select for bulk "Create Payment Invoice" (Finance flat view only) —
+  // an invoice can only bundle items from a single provider, so picking an
+  // item from a different doctor than what's already selected starts a new
+  // selection instead of mixing providers into one voucher.
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const [createInvoiceOpen, setCreateInvoiceOpen] = useState(false)
+  const [invoicePaymentDate, setInvoicePaymentDate] = useState(new Date().toISOString().slice(0, 10))
+  const [invoicePaymentMethod, setInvoicePaymentMethod] = useState('cash')
 
   // Doctor combobox open state
   const [doctorOpen, setDoctorOpen] = useState(false)
 
-  // ── Fetch doctors list (for Assistant filter) ────────────────────────────────
-  const { data: doctorsData } = useQuery({
-    queryKey: ['doctors-list'],
+  // Payment history dialog
+  const [historyId, setHistoryId] = useState<number | null>(null)
+  const { data: historyData, isFetching: historyLoading } = useQuery({
+    queryKey: ['final-distribution-history', historyId],
     queryFn: async () => {
-      const res = await fetch(`${API_URL}/api/doctor?limit=1000`, {
+      const res = await fetch(`${API_URL}/api/bill-distribution/final/${historyId}/history`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) throw new Error('Failed to fetch payment history')
+      return res.json()
+    },
+    enabled: !!token && historyId !== null,
+  })
+  const historyLogs: PaymentLog[] = historyData?.data ?? []
+
+  // ── Fetch doctors list (for Assistant filter) — only doctors with actual records here ──
+  const { data: doctorsData } = useQuery({
+    queryKey: ['doctors-list', 'assistant'],
+    queryFn: async () => {
+      const res = await fetch(`${API_URL}/api/bill-distribution/final/assistant/providers`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (!res.ok) throw new Error('Failed to fetch doctors')
@@ -161,7 +231,7 @@ export function AssistantBillPage({
     },
     enabled: !!token,
   })
-  const doctors: any[] = doctorsData?.data?.rows || doctorsData?.data?.items || []
+  const doctors: any[] = doctorsData?.data || []
   const selectedDoctor = doctors.find(d => d.id === doctor)
 
   // ── Fetch ────────────────────────────────────────────────────────────────────
@@ -191,6 +261,111 @@ export function AssistantBillPage({
   const meta: Meta | undefined = data?.data?.meta
   const summary = data?.summary ?? { totalPayable: 0, totalDue: 0, totalFinalBill: 0, paidCount: 0, unpaidCount: 0 }
 
+  // Group the current page's distribution rows by distribution_id — every
+  // progressive payment toward the same assistant-distribution is combined
+  // into one row, but two different assistants on the same admission (each
+  // with their own distribution_id) stay as separate rows.
+  const groupedRows: AdmissionGroup[] = useMemo(() => {
+    const map = new Map<number, AdmissionGroup>()
+    for (const r of records) {
+      const key = r.distribution_id ?? r.id
+      if (!map.has(key)) {
+        map.set(key, { key, admission_id: r.admission_id, doctor: r.doctor, items: [] })
+      }
+      map.get(key)!.items.push(r)
+    }
+    return Array.from(map.values())
+  }, [records])
+
+  // Selection resets whenever the underlying query result changes (new page,
+  // new filters, or a refetch after creating an invoice) — a selection tied
+  // to rows that may no longer be on screen would be confusing to carry over.
+  useEffect(() => {
+    setSelectedIds(new Set())
+  }, [data])
+
+  const selectedRecords = records.filter(r => selectedIds.has(r.id))
+  const selectedTotal = selectedRecords.reduce((sum, r) => sum + Number(r.payable_now || 0), 0)
+
+  // "Mark All" toggles every unpaid row on the current page — the doctor filter
+  // already scopes `records` to a single provider, so no cross-provider check is needed.
+  const eligibleIds = useMemo(
+    () => records.filter(r => r.payment_status !== 'paid').map(r => r.id),
+    [records]
+  )
+  const allEligibleSelected = eligibleIds.length > 0 && eligibleIds.every(id => selectedIds.has(id))
+  const toggleSelectAll = () => {
+    setSelectedIds(allEligibleSelected ? new Set() : new Set(eligibleIds))
+  }
+
+  // ── Row-checkbox change handler (Finance flat view only) ──────────────────────
+  useEffect(() => {
+    const handleCheckboxChange = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      if (!target.classList?.contains('row-select-checkbox')) return
+      const id = Number(target.dataset.id)
+      if (!id) return
+      const providerId = target.dataset.providerId ? Number(target.dataset.providerId) : null
+
+      setSelectedIds(prev => {
+        const next = new Set(prev)
+        if (target.checked) {
+          if (next.size > 0) {
+            const firstSelected = records.find(r => r.id === Array.from(next)[0])
+            if (firstSelected && (firstSelected.provider_id ?? null) !== providerId) {
+              toast.warning("Selection cleared — an invoice can only include one doctor's bills at a time.")
+              next.clear()
+            }
+          }
+          next.add(id)
+        } else {
+          next.delete(id)
+        }
+        return next
+      })
+    }
+    document.addEventListener('change', handleCheckboxChange)
+    return () => document.removeEventListener('change', handleCheckboxChange)
+  }, [records])
+
+  // ── Create Payment Invoice ─────────────────────────────────────────────────────
+  const createInvoiceMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`${API_URL}/api/bill-distribution/final/invoices`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          final_distribution_ids: Array.from(selectedIds),
+          payment_date: invoicePaymentDate,
+          payment_method: invoicePaymentMethod,
+        }),
+      })
+      const result = await res.json()
+      if (!res.ok || !result.status) throw new Error(result.message || 'Failed to create invoice')
+      return result.data
+    },
+    onSuccess: (invoice) => {
+      toast.success(`Invoice ${invoice.invoice_no} created and marked paid`)
+      setCreateInvoiceOpen(false)
+      setSelectedIds(new Set())
+      queryClient.invalidateQueries({ queryKey: ['assistant-bills'] })
+      window.open(`/dashboard/finance/doctor-bills/invoices/${invoice.id}/print`, '_blank')
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+
+  // ── History button click handler ──────────────────────────────────────────────
+  useEffect(() => {
+    const handleHistoryClick = (e: Event) => {
+      const btn = (e.target as HTMLElement).closest('.history-btn') as HTMLButtonElement | null
+      if (!btn) return
+      const id = Number(btn.dataset.id)
+      if (id) setHistoryId(id)
+    }
+    document.addEventListener('click', handleHistoryClick)
+    return () => document.removeEventListener('click', handleHistoryClick)
+  }, [])
+
   // ── Stats ────────────────────────────────────────────────────────────────────
   const stats = useMemo(() => [
     {
@@ -219,33 +394,29 @@ export function AssistantBillPage({
     },
   ], [meta, summary, currencySymbol])
 
-  // ── Mark paid mutation ───────────────────────────────────────────────────────
-  const markPaidMutation = useMutation({
-    mutationFn: async ({ id, paid_now, payment_status }: { id: number; paid_now: string; payment_status: string }) => {
-      const res = await fetch(`${API_URL}/api/bill-distribution/final/${id}/paid`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ paid_now, payment_status }),
-      })
-      if (!res.ok) throw new Error('Failed to update')
-      return res.json()
-    },
-    onSuccess: () => {
-      toast.success('Payment date saved successfully')
-      queryClient.invalidateQueries({ queryKey: ['assistant-bills'] })
-      setSelectedRecord(null)
-    },
-    onError: (err: Error) => toast.error(err.message),
-  })
-
-  const openPaidDialog = (rec: FinalDistribution) => {
-    setSelectedRecord(rec)
-    setPaidDate(new Date().toISOString().slice(0, 10))
-    setPaidStatus('paid')
-  }
-
   // ── DataTable columns ────────────────────────────────────────────────────────
-  const columns = useMemo(() => [
+  // Finance view (payableOnly): every payment/allocation is its own flat row
+  // — a single admission naturally spans multiple rows when it has more than
+  // one allocation or more than one assistant. Indoor Management view keeps
+  // the grouped-by-distribution "Payment History" card layout.
+  const flatColumns = useMemo(() => [
+    // Selection checkbox only where selecting makes sense (unpaid tab) — the
+    // Paid tab renders the same flat layout without it.
+    ...(selectable ? [{
+      data: null,
+      title: '',
+      orderable: false,
+      responsivePriority: 1,
+      className: 'text-center',
+      render: (_: any, __: string, row: FinalDistribution) => {
+        const alreadyPaid = row.payment_status === 'paid'
+        const disabled = !doctor || alreadyPaid
+        const title = alreadyPaid ? 'Already paid' : !doctor ? 'Filter by a specific assistant to select items' : ''
+        const checked = selectedIds.has(row.id)
+        return `<input type="checkbox" class="row-select-checkbox h-4 w-4 rounded border-gray-300 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40" data-id="${row.id}" data-provider-id="${row.provider_id ?? ''}" ${checked ? 'checked' : ''} ${disabled ? `disabled title="${title}"` : ''} />`
+      },
+      defaultContent: '',
+    }] : []),
     {
       data: 'id',
       title: '#',
@@ -258,11 +429,109 @@ export function AssistantBillPage({
     {
       data: null,
       title: 'Assistant',
-      orderable: true,
+      orderable: false,
       responsivePriority: 1,
       render: (_: any, __: string, row: FinalDistribution) => {
         const name = row.doctor?.doctor_name || row.service_name || '—'
         const spec = row.doctor?.speciality || ''
+        return `
+          <div class="flex flex-col">
+            <span class="font-medium">${name}</span>
+            ${spec ? `<span class="text-xs text-muted-foreground">${spec}</span>` : ''}
+          </div>
+        `
+      },
+      defaultContent: '',
+    },
+    {
+      data: 'admission_id',
+      title: 'Admission',
+      orderable: true,
+      responsivePriority: 2,
+      render: (d: any, __: string, row: FinalDistribution) => {
+        const adm = row.admission
+        const prefix = adm?.admission_prefix || `#${d}`
+        const statusCls = adm?.status === 'active'
+          ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+          : adm?.status === 'discharged'
+            ? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+            : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+        return `
+          <div class="flex flex-col gap-0.5">
+            <div class="flex items-center gap-1.5">
+              <span class="font-mono text-xs bg-muted px-2 py-0.5 rounded w-fit">${prefix}</span>
+              ${adm?.status ? `<span class="px-1.5 py-0.5 rounded-full text-[10px] font-medium capitalize ${statusCls}">${adm.status}</span>` : ''}
+            </div>
+            <span class="font-medium text-sm">${adm?.patient_name || '—'}</span>
+            <span class="text-xs text-muted-foreground">${adm ? `${adm.age}Y / ${adm.sex?.charAt(0)?.toUpperCase() ?? ''}` : ''}${adm?.phone ? ` · ${adm.phone}` : ''}</span>
+          </div>
+        `
+      },
+      defaultContent: '',
+    },
+    {
+      data: 'payable_now',
+      title: `Payable Amount (${currencySymbol})`,
+      orderable: true,
+      responsivePriority: 1,
+      render: (d: any) => `<span class="font-bold text-violet-600 dark:text-violet-400">${Number(d || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`,
+      defaultContent: '0.00',
+    },
+    {
+      data: 'payment_status',
+      title: 'Status',
+      orderable: true,
+      responsivePriority: 2,
+      render: (d: any, __: string, row: FinalDistribution) => {
+        const badge = !d
+          ? `<span class="px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">⏱ Pending</span>`
+          : d === 'paid'
+            ? `<span class="px-2 py-0.5 rounded-full text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">✓ Paid</span>`
+            : d === 'partial'
+              ? `<span class="px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">≈ Partial</span>`
+              : `<span class="px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600">${d}</span>`
+        return `
+          <div class="flex items-center gap-1.5">
+            ${badge}
+            <button class="history-btn inline-flex items-center justify-center rounded h-5 w-5 border border-input bg-background hover:bg-accent hover:text-accent-foreground" data-id="${row.id}" type="button" title="Status change history">
+              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><path d="M3.05 11a9 9 0 1 1 .5 4"></path><path d="M3 4v5h5"></path></svg>
+            </button>
+          </div>
+        `
+      },
+      defaultContent: '',
+    },
+    {
+      data: 'paid_now',
+      title: 'Paid Date',
+      orderable: true,
+      responsivePriority: 3,
+      render: (d: any) => d
+        ? `<span class="text-emerald-600 font-medium text-xs">✓ ${fmtDate(d)}</span>`
+        : `<span class="text-muted-foreground italic text-xs">Not paid</span>`,
+      defaultContent: '—',
+    },
+  ], [currencySymbol, page, limit, doctor, selectedIds, selectable])
+
+  const groupedColumns = useMemo(() => [
+    {
+      data: 'admission_id',
+      title: '#',
+      orderable: true,
+      responsivePriority: 3,
+      render: (_: any, __: string, _group: AdmissionGroup, meta: any) =>
+        `<span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${meta.row + 1 + (page - 1) * limit}</span>`,
+      defaultContent: '',
+    },
+    {
+      data: null,
+      title: 'Assistant',
+      orderable: false,
+      responsivePriority: 1,
+      render: (_: any, __: string, group: AdmissionGroup) => {
+        const first = group.items[0]
+        const name = group.doctor?.doctor_name || first?.service_name || '—'
+        const spec = group.doctor?.speciality || ''
         return `
           <div class="flex flex-col">
             <span class="font-medium">${name}</span>
@@ -281,106 +550,86 @@ export function AssistantBillPage({
       defaultContent: '',
     },
     {
-      data: 'service_name',
-      title: 'Service',
-      orderable: true,
-      responsivePriority: 4,
-      render: (_: any, __: string, row: FinalDistribution) => {
-        const note = row.notes ? `<div class="text-xs text-muted-foreground truncate max-w-[160px]">${row.notes}</div>` : ''
-        return `<div class="flex flex-col"><span>${row.service_name || '—'}</span>${note}</div>`
-      },
-      defaultContent: '',
-    },
-    {
-      data: 'final_bill',
-      title: `Final Bill (${currencySymbol})`,
-      orderable: true,
-      responsivePriority: 2,
-      render: (d: any) => `<span class="font-medium text-blue-600 dark:text-blue-400">${fmtAmt(d, currencySymbol)}</span>`,
-      defaultContent: '0.00',
-    },
-    {
-      data: 'payable_now',
-      title: `Payable Now (${currencySymbol})`,
-      orderable: true,
-      responsivePriority: 1,
-      render: (d: any) => `<span class="font-bold text-violet-600 dark:text-violet-400">${fmtAmt(d, currencySymbol)}</span>`,
-      defaultContent: '0.00',
-    },
-    {
-      data: 'due_amount',
-      title: `Due (${currencySymbol})`,
-      orderable: true,
-      responsivePriority: 3,
-      render: (d: any) => {
-        const n = Number(d || 0)
-        const cls = n > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600'
-        return `<span class="font-medium ${cls}">${fmtAmt(d, currencySymbol)}</span>`
-      },
-      defaultContent: '0.00',
-    },
-    {
-      data: 'payable_created_date',
-      title: 'Created Date',
-      orderable: true,
-      responsivePriority: 4,
-      render: (d: any) => `<span class="text-muted-foreground text-xs">${fmtDate(d)}</span>`,
-      defaultContent: '—',
-    },
-    {
-      data: 'paid_now',
-      title: 'Paid Date',
-      orderable: true,
-      responsivePriority: 3,
-      render: (d: any) => d
-        ? `<span class="text-emerald-600 font-medium text-xs">✓ ${fmtDate(d)}</span>`
-        : `<span class="text-muted-foreground italic text-xs">Not paid</span>`,
-      defaultContent: '—',
-    },
-    {
-      data: 'payment_status',
-      title: 'Status',
-      orderable: true,
-      responsivePriority: 2,
-      render: (d: any) => {
-        if (!d) return `<span class="px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">⏱ Pending</span>`
-        if (d === 'paid') return `<span class="px-2 py-0.5 rounded-full text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">✓ Paid</span>`
-        if (d === 'partial') return `<span class="px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">≈ Partial</span>`
-        return `<span class="px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600">${d}</span>`
-      },
-      defaultContent: '',
-    },
-    {
       data: null,
-      title: 'Action',
+      title: `Payable Distribution (${currencySymbol})`,
       orderable: false,
       responsivePriority: 1,
-      render: (_: any, __: string, row: FinalDistribution) => {
-        const label = row.paid_now ? 'Update' : 'Mark Paid'
-        const cls = row.paid_now
-          ? 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
-          : 'bg-violet-600 text-white hover:bg-violet-700'
+      render: (_: any, __: string, group: AdmissionGroup) => {
+        const fmt = (n: any) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+        // Each allocation to this admission's assistant distribution is its
+        // own final_distribution row with payable_now = the incremental
+        // amount for that payment (not a running total) — see
+        // bill-distribution.repository.js `update()`, which inserts a fresh
+        // row with `payable_now: addAmount` every time pay_now increases.
+        // Bill/Clinic Part/Final Bill are copied onto every such row, so the
+        // breakdown is read from just the first one.
+        const sortedItems = [...group.items].sort((a, b) => {
+          const da = a.payable_created_date ? new Date(a.payable_created_date).getTime() : 0
+          const db = b.payable_created_date ? new Date(b.payable_created_date).getTime() : 0
+          return da - db
+        })
+        const first = sortedItems[0]
+        const billAmount = Number(first?.bill_amount || 0)
+        const lessAmount = Number(first?.less_amount || 0)
+        const finalBill = Number(first?.final_bill || 0)
+        const totalPayable = sortedItems.reduce((sum, it) => sum + Number(it.payable_now || 0), 0)
+        const dueAmount = Math.max(0, finalBill - totalPayable)
+
+        const ordinals = ['First', 'Second', 'Third', 'Fourth', 'Fifth']
+        const statusBadge = (s: string | null) => {
+          if (!s) return `<span class="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">⏱ Pending</span>`
+          if (s === 'paid') return `<span class="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">✓ Paid</span>`
+          if (s === 'partial') return `<span class="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">≈ Partial</span>`
+          return `<span class="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-slate-100 text-slate-600">${s}</span>`
+        }
+
+        const historyRows = sortedItems.map((it, idx) => `
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-muted-foreground">${ordinals[idx] || `#${idx + 1}`} — ${fmtDate(it.payable_created_date)}</span>
+              ${statusBadge(it.payment_status)}
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="font-medium">${fmt(it.payable_now)}</span>
+              <button class="history-btn inline-flex items-center justify-center rounded h-5 w-5 border border-input bg-background hover:bg-accent hover:text-accent-foreground" data-id="${it.id}" type="button" title="Status change history">
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><path d="M3.05 11a9 9 0 1 1 .5 4"></path><path d="M3 4v5h5"></path></svg>
+              </button>
+            </div>
+          </div>
+        `).join('')
+
+        const breakdownRows = `
+            <div class="flex items-center justify-between"><span class="text-muted-foreground">Bill Amount</span><span class="font-medium">${fmt(billAmount)}</span></div>
+            ${lessAmount > 0 ? `<div class="flex items-center justify-between"><span class="text-muted-foreground">Clinic Part (Profit)</span><span class="font-medium text-orange-600 dark:text-orange-400">-${fmt(lessAmount)}</span></div>` : ''}
+            <div class="flex items-center justify-between"><span class="text-muted-foreground">Final Bill</span><span class="font-medium">${fmt(finalBill)}</span></div>
+            <div class="flex items-center justify-between"><span class="text-muted-foreground">Payable</span><span class="font-bold text-violet-600 dark:text-violet-400">${fmt(totalPayable)}</span></div>
+            <div class="flex items-center justify-between"><span class="text-muted-foreground">Due</span><span class="font-medium ${dueAmount > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600'}">${fmt(dueAmount)}</span></div>
+          `
+
         return `
-          <button
-            class="mark-paid-btn inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors h-8 px-3 ${cls}"
-            data-id="${row.id}"
-          >
-            ${label}
-          </button>
+          <div class="flex flex-col gap-2 min-w-[260px]">
+            <div>
+              <div class="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Payment History</div>
+              <div class="border-l-2 border-violet-200 dark:border-violet-900 pl-2 space-y-1 text-[11px] max-h-28 overflow-y-auto">
+                ${historyRows}
+                <div class="flex items-center justify-between gap-2 pt-1 border-t font-semibold">
+                  <span>Total</span>
+                  <span class="text-violet-600 dark:text-violet-400">${fmt(totalPayable)}</span>
+                </div>
+              </div>
+            </div>
+            <div class="border rounded-md p-2 bg-muted/30 space-y-1 text-[11px]">
+              ${breakdownRows}
+            </div>
+          </div>
         `
       },
       defaultContent: '',
     },
-  ], [currencySymbol, page, limit])
+  ], [currencySymbol, page, limit, payableOnly])
 
-  // ── Event delegation for Mark Paid buttons ───────────────────────────────────
-  const handleTableClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const btn = (e.target as HTMLElement).closest('.mark-paid-btn') as HTMLButtonElement | null
-    if (!btn) return
-    const id = Number(btn.dataset.id)
-    const rec = records.find(r => r.id === id)
-    if (rec) openPaidDialog(rec)
-  }
+  const columns = payableOnly ? flatColumns : groupedColumns
 
   // ── Date filter presets (Filter By) ──────────────────────────────────────────
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d }
@@ -505,6 +754,7 @@ export function AssistantBillPage({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Status</SelectItem>
+          <SelectItem value="unpaid">Unpaid</SelectItem>
           <SelectItem value="null">Not Set</SelectItem>
           <SelectItem value="pending">Pending</SelectItem>
           <SelectItem value="partial">Partial</SelectItem>
@@ -559,109 +809,183 @@ export function AssistantBillPage({
           })}
         </div>
 
+        {/* How-to hint (Finance flat view) — shown while no assistant is chosen;
+            once one is, it is replaced by the bulk-selection action bar below.
+            Checkboxes stay disabled without a doctor selection because an
+            invoice can only bundle a single provider's bills. */}
+        {payableOnly && selectable && !doctor && (
+          <div className="flex items-start gap-2.5 mb-3 p-3 rounded-lg border bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
+            <Info className="h-4 w-4 mt-0.5 shrink-0 text-blue-600 dark:text-blue-400" />
+            <p className="text-sm leading-relaxed text-blue-700 dark:text-blue-300">
+              To generate a payment invoice, first select an assistant from the{' '}
+              <strong>Assistant</strong> dropdown above the table — the row checkboxes stay
+              disabled until a specific assistant is chosen, since one invoice can only contain
+              a single assistant&rsquo;s bills. Once selected, check the boxes beside the bills
+              you want to pay (or use <strong>Mark All</strong> to select every unpaid bill on
+              the page — already-paid rows cannot be selected), verify the selected count and
+              total, then click <strong>Create Payment Invoice</strong> to generate and print
+              the voucher.
+            </p>
+          </div>
+        )}
+
+        {/* Bulk selection action bar (Finance flat view only) */}
+        {payableOnly && selectable && doctor > 0 && eligibleIds.length > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-3 p-3 rounded-lg border bg-violet-50 dark:bg-violet-950/20 border-violet-200 dark:border-violet-900">
+            <div className="flex items-center gap-3 text-sm">
+              <Button variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={toggleSelectAll}>
+                {allEligibleSelected ? 'Unmark All' : 'Mark All'}
+              </Button>
+              {selectedIds.size > 0 && (
+                <>
+                  <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => setSelectedIds(new Set())}>
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                  <span>
+                    <span className="font-semibold">{selectedIds.size}</span> selected · Total{' '}
+                    <span className="font-bold text-violet-600 dark:text-violet-400">{format(selectedTotal)}</span>
+                  </span>
+                </>
+              )}
+            </div>
+            {selectedIds.size > 0 && (
+              <Button size="sm" className="bg-violet-600 hover:bg-violet-700 text-white" onClick={() => setCreateInvoiceOpen(true)}>
+                <FileText className="mr-2 h-4 w-4" />
+                Create Payment Invoice
+              </Button>
+            )}
+          </div>
+        )}
+
         {/* DataTable with server-side pagination */}
-        <div onClick={handleTableClick}>
-          <DataTable
-            columns={columns}
-            data={records}
-            meta={meta}
-            onPageChange={setPage}
-            onLimitChange={setLimit}
-            search={search}
-            isLoading={isFetching}
-            onSearchChange={setSearch}
-            tableTitle="Assistant Bills"
-            filterSlot={filterSlot}
-          />
-        </div>
+        <DataTable
+          columns={columns}
+          data={payableOnly ? records : groupedRows}
+          meta={meta}
+          onPageChange={setPage}
+          onLimitChange={setLimit}
+          search={search}
+          isLoading={isFetching}
+          onSearchChange={setSearch}
+          tableTitle="Assistant Bills"
+          filterSlot={filterSlot}
+        />
       </main>
 
-      {/* Mark as Paid Dialog */}
-      <Dialog open={!!selectedRecord} onOpenChange={v => !v && setSelectedRecord(null)}>
+      {/* Payment History Dialog */}
+      <Dialog open={historyId !== null} onOpenChange={v => !v && setHistoryId(null)}>
         <DialogContent className="sm:max-w-[420px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <CalendarCheck className="h-5 w-5 text-emerald-500" />
-              Mark Payment Date
+              <History className="h-5 w-5 text-violet-500" />
+              Payment History
             </DialogTitle>
           </DialogHeader>
 
-          {selectedRecord && (
-            <div className="space-y-4 py-2">
-              {/* Summary card */}
-              <div className="rounded-xl bg-gradient-to-br from-violet-50 to-blue-50 dark:from-violet-950/30 dark:to-blue-950/30 border p-4 text-sm space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Assistant</span>
-                  <span className="font-medium">
-                    {selectedRecord.doctor?.doctor_name || selectedRecord.service_name}
-                  </span>
+          {historyLoading ? (
+            <div className="py-6 text-center text-sm text-muted-foreground">Loading…</div>
+          ) : historyLogs.length === 0 ? (
+            <div className="py-6 text-center text-sm text-muted-foreground">No payment changes recorded yet.</div>
+          ) : (
+            <div className="space-y-3 py-2 max-h-80 overflow-y-auto">
+              {historyLogs.map((log) => (
+                <div key={log.id} className="border rounded-lg p-3 text-sm space-y-1">
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="font-medium capitalize">
+                      {log.previous_status || 'none'} → {log.new_status || 'none'}
+                    </span>
+                    <span className="text-xs text-muted-foreground shrink-0">{fmtDateTime(log.created_at)}</span>
+                  </div>
+                  {log.paid_now && (
+                    <p className="text-xs text-muted-foreground">Paid date: {fmtDate(log.paid_now)}</p>
+                  )}
+                  {log.changedBy?.name && (
+                    <p className="text-xs text-muted-foreground">By: {log.changedBy.name}</p>
+                  )}
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Admission</span>
-                  <span className="font-mono">#{selectedRecord.admission_id}</span>
-                </div>
-                <div className="flex justify-between border-t pt-2">
-                  <span className="text-muted-foreground">Payable Amount</span>
-                  <span className="font-bold text-violet-600 text-base">
-                    {fmtAmt(selectedRecord.payable_now, currencySymbol)}
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="paid-date-input" className="text-xs mb-1.5 block">
-                  Paid Date <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="paid-date-input"
-                  type="date"
-                  value={paidDate}
-                  onChange={e => setPaidDate(e.target.value)}
-                  className="h-9"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="paid-status-select" className="text-xs mb-1.5 block">
-                  Payment Status
-                </Label>
-                <Select value={paidStatus} onValueChange={v => setPaidStatus(v as 'paid' | 'partial')}>
-                  <SelectTrigger id="paid-status-select" className="h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="paid">
-                      <span className="flex items-center gap-2">
-                        <BadgeCheck className="h-4 w-4 text-emerald-500" /> Fully Paid
-                      </span>
-                    </SelectItem>
-                    <SelectItem value="partial">
-                      <span className="flex items-center gap-2">
-                        <Banknote className="h-4 w-4 text-amber-500" /> Partial Payment
-                      </span>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              ))}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Payment Invoice Dialog */}
+      <Dialog open={createInvoiceOpen} onOpenChange={setCreateInvoiceOpen}>
+        <DialogContent className="sm:max-w-[440px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-violet-500" />
+              Create Payment Invoice
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="rounded-xl bg-gradient-to-br from-violet-50 to-blue-50 dark:from-violet-950/30 dark:to-blue-950/30 border p-4 text-sm space-y-2">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Assistant</span>
+                <span className="font-medium">
+                  {selectedRecords[0]?.doctor?.doctor_name || selectedRecords[0]?.service_name || '—'}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Items</span>
+                <span className="font-mono">{selectedIds.size}</span>
+              </div>
+              <div className="flex justify-between border-t pt-2">
+                <span className="text-muted-foreground">Total Amount</span>
+                <span className="font-bold text-violet-600 text-base">{format(selectedTotal)}</span>
+              </div>
+            </div>
+
+            <div className="space-y-3 max-h-32 overflow-y-auto border rounded-md p-2 text-xs">
+              {selectedRecords.map(r => (
+                <div key={r.id} className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground truncate">
+                    {r.admission?.admission_prefix || `#${r.admission_id}`} — {r.admission?.patient_name || 'Unknown patient'}
+                  </span>
+                  <span className="font-medium shrink-0">{format(Number(r.payable_now || 0))}</span>
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <Label htmlFor="invoice-payment-date" className="text-xs mb-1.5 block">
+                Payment Date <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="invoice-payment-date"
+                type="date"
+                value={invoicePaymentDate}
+                onChange={e => setInvoicePaymentDate(e.target.value)}
+                className="h-9"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="invoice-payment-method" className="text-xs mb-1.5 block">
+                Payment Method
+              </Label>
+              <Select value={invoicePaymentMethod} onValueChange={setInvoicePaymentMethod}>
+                <SelectTrigger id="invoice-payment-method" className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cash">Cash</SelectItem>
+                  <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                  <SelectItem value="cheque">Cheque</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setSelectedRecord(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setCreateInvoiceOpen(false)}>Cancel</Button>
             <Button
-              id="confirm-mark-paid"
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
-              disabled={!paidDate || markPaidMutation.isPending}
-              onClick={() => {
-                if (!selectedRecord) return
-                markPaidMutation.mutate({
-                  id: selectedRecord.id,
-                  paid_now: paidDate,
-                  payment_status: paidStatus,
-                })
-              }}
+              className="bg-violet-600 hover:bg-violet-700 text-white"
+              disabled={!invoicePaymentDate || createInvoiceMutation.isPending}
+              onClick={() => createInvoiceMutation.mutate()}
             >
-              {markPaidMutation.isPending ? 'Saving…' : 'Confirm Payment'}
+              {createInvoiceMutation.isPending ? 'Creating…' : 'Create & Mark Paid'}
             </Button>
           </DialogFooter>
         </DialogContent>

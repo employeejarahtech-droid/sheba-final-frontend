@@ -3,10 +3,16 @@ import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
 import { Main } from "@/components/layout/main"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Printer } from "lucide-react"
+import { ArrowLeft, Printer, Settings2 } from "lucide-react"
 import { useState } from 'react'
 import { AppHeader } from '@/components/layout/app-header'
 import { ReportFooter } from '@/components/pathology/ReportFooter'
+import { FONT_SIZE_OPTIONS, DEFAULT_FONT_SIZE, type FontSizeKey } from '@/lib/print-font-size'
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 
 export const Route = createFileRoute('/_authenticated/dashboard/x-ray/all/print/$id')({
   component: PrintXRayReport,
@@ -16,9 +22,9 @@ function PrintXRayReport() {
   const { id } = Route.useParams()
   const token = getCookie('accessToken')
   const [paddingTop, setPaddingTop] = useState(100)
-
-  // Generate padding options from 10 to 200 in increments of 5
-  const paddingOptions = Array.from({ length: 39 }, (_, i) => (i + 2) * 5); // [10, 15, 20, ..., 200]
+  const [fontSize, setFontSize] = useState<FontSizeKey>(DEFAULT_FONT_SIZE)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [showSignature, setShowSignature] = useState(true)
 
   const { data: xrayData, isLoading } = useQuery({
     queryKey: ["xray-record", id],
@@ -56,7 +62,6 @@ function PrintXRayReport() {
 
   const patientInfo = xrayData?.invoice_information
   const testResult = xrayData?.test_result
-  const imageUrls: { key: string | null; url: string }[] = xrayData?.image_urls || []
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
@@ -80,21 +85,10 @@ function PrintXRayReport() {
             </Button>
           </Link>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <label htmlFor="padding-select" className="text-sm font-medium">Margin Top:</label>
-              <select
-                id="padding-select"
-                value={paddingTop}
-                onChange={(e) => setPaddingTop(Number(e.target.value))}
-                className="h-8 px-2 text-sm border rounded-md bg-background"
-              >
-                {paddingOptions.map((value) => (
-                  <option key={value} value={value}>
-                    {value}px
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Button variant="outline" size="sm" className="h-8 gap-2" onClick={() => setSettingsOpen(true)}>
+              <Settings2 className="h-4 w-4" />
+              <span>Print Settings</span>
+            </Button>
             <Button variant="outline" size="sm" onClick={() => window.print()}>
               <Printer className="h-4 w-4" />
               Print
@@ -102,12 +96,79 @@ function PrintXRayReport() {
           </div>
         </div>
 
-        <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
+        <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
+          <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
+            <SheetHeader className="border-b px-4 py-3 gap-0">
+              <SheetTitle className="flex items-center gap-3 pr-8">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Settings2 className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <div className="text-base font-semibold text-left">Print Settings</div>
+                  <SheetDescription className="text-xs font-normal text-left">Adjust how this report looks and prints</SheetDescription>
+                </div>
+              </SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 overflow-y-auto p-4 space-y-5">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Font Size</Label>
+                <Select value={fontSize} onValueChange={(v) => setFontSize(v as FontSizeKey)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Font size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(FONT_SIZE_OPTIONS).map(([key, opt]) => (
+                      <SelectItem key={key} value={key}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="padding-top" className="text-sm font-medium">Margin Top (px)</Label>
+                <Input
+                  id="padding-top"
+                  type="number"
+                  min={0}
+                  value={paddingTop}
+                  onChange={(e) => setPaddingTop(Number(e.target.value) || 0)}
+                  className="h-9"
+                />
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                <Checkbox
+                  id="show-signature"
+                  checked={showSignature}
+                  onCheckedChange={(checked) => setShowSignature(checked === true)}
+                />
+                <Label htmlFor="show-signature" className="text-sm font-medium cursor-pointer select-none">
+                  Signature
+                </Label>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px`, zoom: FONT_SIZE_OPTIONS[fontSize].zoom }}>
           <style>
             {`
               .bg-row-blue {
                 background-color: #cfd2d8ff !important;
               }
+
+              /* Tables inserted via the Content Editor carry no styling of their
+                 own (the grid only shows inside Summernote), so paint them here
+                 for both screen and print. */
+              .custom-html-content table {
+                border-collapse: collapse !important;
+                width: 100%;
+                margin: 8px 0;
+              }
+              .custom-html-content th,
+              .custom-html-content td {
+                border: 1px solid rgb(0 0 0 / 0.15) !important;
+                padding: 4px 8px;
+              }
+
              @media print {
               .bg-row-blue {
                 background-color: #cfd2d8ff !important;
@@ -172,7 +233,7 @@ function PrintXRayReport() {
               <tr className="">
                 <td className="px-3 py-2">
                   <div
-                    className="text-gray-700 whitespace-pre-wrap"
+                    className="custom-html-content text-gray-700"
                     dangerouslySetInnerHTML={{
                       __html: testResult || '<em>Pending...</em>'
                     }}
@@ -182,22 +243,8 @@ function PrintXRayReport() {
             </tbody>
           </table>
 
-          {/* X-Ray Images */}
-          {imageUrls.length > 0 && (
-            <div className="mt-6 grid grid-cols-2 gap-4 print:break-inside-avoid">
-              {imageUrls.map((img) => (
-                <img
-                  key={img.url}
-                  src={img.url}
-                  alt="X-ray scan"
-                  className="w-full max-h-[420px] object-contain border rounded"
-                />
-              ))}
-            </div>
-          )}
-
           {/* Footer Signatures */}
-          <ReportFooter />
+          <ReportFooter showSignature={showSignature} onShowSignatureChange={setShowSignature} />
 
           {/* Buttons */}
 

@@ -3,11 +3,10 @@ import { useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
 import { Main } from '@/components/layout/main'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Printer } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { AppHeader } from '@/components/layout/app-header'
 import { FinalBillPrintPage } from '@/features/admission/FinalBillPrintPage'
 import { Loader2 } from 'lucide-react'
-import { useState } from 'react'
 
 export const Route = createFileRoute(
     '/_authenticated/dashboard/admission/patients/$admissionId/final-bill-print/',
@@ -18,10 +17,6 @@ export const Route = createFileRoute(
 function FinalBillPrintRoute() {
     const { admissionId } = Route.useParams()
     const token = getCookie('accessToken')
-    const [paddingTop, setPaddingTop] = useState(100)
-
-    // Generate padding options from 10 to 200 in increments of 5
-    const paddingOptions = Array.from({ length: 39 }, (_, i) => (i + 2) * 5)
 
     // Fetch final bill
     const { data: finalBillData, isLoading, error } = useQuery({
@@ -101,39 +96,11 @@ function FinalBillPrintRoute() {
 
     return (
         <>
-            <AppHeader fixed />
+            <AppHeader fixed className="print:hidden" />
             <Main>
-                <div className="print:hidden flex items-center justify-between gap-4 mb-6">
-                    <Button variant="outline" size="sm" onClick={() => window.history.back()}>
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Final Bill
-                    </Button>
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2">
-                            <label htmlFor="padding-select" className="text-sm font-medium">Padding Top:</label>
-                            <select
-                                id="padding-select"
-                                value={paddingTop}
-                                onChange={(e) => setPaddingTop(Number(e.target.value))}
-                                className="h-8 px-2 text-sm border rounded-md bg-background"
-                            >
-                                {paddingOptions.map((value) => (
-                                    <option key={value} value={value}>
-                                        {value}px
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <Button variant="outline" size="sm" onClick={() => window.print()}>
-                            <Printer className="w-4 h-4 mr-2" />
-                            Print
-                        </Button>
-                    </div>
-                </div>
                 <FinalBillPrintPage
                     finalBill={finalBill}
                     distributions={distributions}
-                    paddingTop={paddingTop}
                 />
             </Main>
         </>

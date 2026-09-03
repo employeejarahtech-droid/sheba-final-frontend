@@ -24,6 +24,7 @@ const biochemicalSearchSchema = z.object({
   status: z.string().catch('all'),
   from: z.string().catch(''),
   to: z.string().catch(''),
+  orderBy: z.string().optional(),
 })
 
 export const Route = createFileRoute('/_authenticated/dashboard/pathology/biochemical/all/')({
@@ -36,6 +37,7 @@ type ReportsItem = {
   ReciptID: number;
   PatientId: number | null;
   PatientName: string | null;
+  Age: string | null;
   Date: string | null;
   Tests: string;
   TestNames: string;
@@ -56,6 +58,14 @@ function AllReportsBiochemical() {
   const statusFilter = searchParams?.status || "all";
   const from = searchParams?.from || "";
   const to = searchParams?.to || "";
+  const orderBy = searchParams?.orderBy || "DESC";
+
+  // Reflect the default sort (Receipt ID DESC) in the URL.
+  useEffect(() => {
+    if (!searchParams?.orderBy) {
+      navigate({ to: '.', search: (prev: any) => ({ ...prev, orderBy: 'DESC' }), replace: true });
+    }
+  }, []);
 
   const setPage = (newPage: number) => {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
@@ -82,13 +92,13 @@ function AllReportsBiochemical() {
   const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data: biochemicalAllReports, isFetching } = useQuery({
-    queryKey: ["biochemical-all", page, limit, search, statusFilter, from, to],
+    queryKey: ["biochemical-all", page, limit, search, statusFilter, from, to, orderBy],
     queryFn: async () => {
       const statusParam = statusFilter !== "all" ? `&status=${encodeURIComponent(statusFilter)}` : "";
       const fromParam = from ? `&from=${encodeURIComponent(from)}` : "";
       const toParam = to ? `&to=${encodeURIComponent(to)}` : "";
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/biochemical-all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}&orderBy=DESC`,
+        `${import.meta.env.VITE_API_URL}/api/biochemical-all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}&orderBy=${encodeURIComponent(orderBy)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -345,9 +355,13 @@ function AllReportsBiochemical() {
   const columns = [
     {
       data: "ReciptID",
-      title: "Receipt ID",
+      title: "Receipt No",
       orderable: true,
-      render: (data: any, _type: string, row: ReportsItem) => {
+      render: (data: any, type: string, row: ReportsItem) => {
+        // Sort/detect as the raw numeric Receipt ID — otherwise DataTables sorts
+        // the rendered HTML string lexicographically ("99" > "100"). Mirrors the
+        // immunology page.
+        if (type === 'sort' || type === 'type') return row.ReciptID;
         const date = fmtDateTime(row.Date);
         return `
           <div class="flex items-center gap-2">
@@ -359,7 +373,7 @@ function AllReportsBiochemical() {
                     data-date="${date}"
                     data-tests="${(row.Tests || '-').replace(/"/g, '&quot;')}"
                     data-status="${row.Status || '-'}">+</button>
-            <span>${data}</span>
+            <span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${data}</span>
           </div>
         `;
       },
@@ -369,6 +383,14 @@ function AllReportsBiochemical() {
       data: "PatientName",
       title: "Patient Name",
       orderable: true,
+      responsivePriority: 1,
+      defaultContent: "",
+      render: (data: any) => data || '-'
+    },
+    {
+      data: "Age",
+      title: "Age",
+      orderable: false,
       responsivePriority: 1,
       defaultContent: "",
       render: (data: any) => data || '-'

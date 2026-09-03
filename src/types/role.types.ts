@@ -12,6 +12,7 @@ export interface Role {
         custom?: Record<string, any>;
     };
     created_by?: string;
+    created_by_type?: 'staff' | 'company_admin' | null;
 }
 
 export interface AddRoleRequest {

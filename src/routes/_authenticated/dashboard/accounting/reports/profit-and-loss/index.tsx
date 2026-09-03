@@ -141,13 +141,15 @@ function ProfitAndLoss() {
     const setTo   = (v: string) => navigate({ to: '.', search: (prev: any) => ({ ...prev, to: v }) });
     const clearDates = () => navigate({ to: '.', search: (prev: any) => ({ ...prev, from: '', to: '' }) });
 
-    // When the URL has no range, default to the current month (matches the print page).
-    const effectiveFrom = from || DATE_PRESETS.thisMonth.from;
-    const effectiveTo   = to   || DATE_PRESETS.thisMonth.to;
+    // No silent "this month" default — a P&L statement only means something
+    // once a period is chosen, so an empty range should show a blank report
+    // rather than quietly guessing which month the user meant.
+    const effectiveFrom = from;
+    const effectiveTo   = to;
+    const hasPeriod = !!(from && to);
 
     // Active preset detection
     const activePreset = useMemo(() => {
-        if (!from && !to) return 'thisMonth';
         if (!from || !to) return 'custom';
         const match = Object.entries(DATE_PRESETS).find(([, v]) => v.from === from && v.to === to);
         return match ? match[0] : 'custom';
@@ -228,10 +230,16 @@ function ProfitAndLoss() {
                 {/* Period label */}
                 <div className="mt-2 mb-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
                     <CalendarRange className="h-4 w-4" />
-                    <span>Period:</span>
-                    <span className="font-medium text-foreground">{format(parseLocal(effectiveFrom), 'dd MMM yyyy')}</span>
-                    <span>–</span>
-                    <span className="font-medium text-foreground">{format(parseLocal(effectiveTo), 'dd MMM yyyy')}</span>
+                    {hasPeriod ? (
+                        <>
+                            <span>Period:</span>
+                            <span className="font-medium text-foreground">{format(parseLocal(effectiveFrom), 'dd MMM yyyy')}</span>
+                            <span>–</span>
+                            <span className="font-medium text-foreground">{format(parseLocal(effectiveTo), 'dd MMM yyyy')}</span>
+                        </>
+                    ) : (
+                        <span>No period selected — choose a date range above</span>
+                    )}
                 </div>
 
                 {invalidRange ? (
@@ -257,7 +265,7 @@ function ProfitAndLoss() {
                             <Button variant="outline" size="sm" onClick={() => refetch()}>Retry</Button>
                         </CardContent>
                     </Card>
-                ) : !isLoading && !hasData ? (
+                ) : hasPeriod && !isLoading && !hasData ? (
                     <Card>
                         <CardContent className="flex flex-col items-center gap-3 p-12 text-center">
                             <FileText className="h-10 w-10 text-muted-foreground opacity-40" />

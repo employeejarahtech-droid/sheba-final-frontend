@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { ArrowLeft, Printer, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +11,9 @@ import { Main } from '@/components/layout/main';
 import { Button } from '@/components/ui/button';
 import { useGetTrialBalanceQuery } from '@/features/accounting/accountingQueries';
 import { useCurrency } from '@/hooks/use-currency';
+import { getCookie } from '@/lib/cookies';
+
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const printSearchSchema = z.object({
     date: z.string().optional(),
@@ -29,12 +33,43 @@ function TrialBalancePrintPage() {
 
     const dateStr = search.date || format(new Date(), "yyyy-MM-dd");
     const { currencySymbol } = useCurrency();
+    const token = getCookie('accessToken');
 
     const { data: reportData, isLoading } = useGetTrialBalanceQuery({
         date: dateStr
     });
 
-    const trialBalanceData = reportData?.trial_balance || [];
+    // Fetch company settings for company name, address and logo
+    const { data: companySettings } = useQuery({
+        queryKey: ["company-settings"],
+        queryFn: async () => {
+            const res = await fetch(`${API_URL}/api/company-settings`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) throw new Error("Failed to fetch company settings");
+            const result = await res.json();
+            return result.data;
+        },
+        enabled: !!token,
+    })
+
+    const companyLogo = companySettings?.company_logo
+        ? (companySettings.company_logo.startsWith('http') || companySettings.company_logo.startsWith('data:'))
+            ? companySettings.company_logo
+            : `${API_URL}${companySettings.company_logo}`
+        : null;
+    const companyName = companySettings?.company_name || 'Sheba Hospital';
+    const companyAddress = [companySettings?.address1, companySettings?.address2].filter(Boolean).join(', ') || 'Dhaka, Bangladesh'
+    const now = new Date().toLocaleString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
+    })
+
+    // Only print accounts with an actual (non-zero) debit or credit amount —
+    // zero-balance heads add noise without adding information. Totals still
+    // come from the API's full-set sums, so they stay correct either way.
+    const trialBalanceData = (reportData?.trial_balance || []).filter(
+        (a: any) => Number(a.debit) > 0 || Number(a.credit) > 0
+    );
     const totalDebit = reportData?.total_debit || 0;
     const totalCredit = reportData?.total_credit || 0;
     const status = reportData?.status || "UNBALANCED";
@@ -76,33 +111,95 @@ function TrialBalancePrintPage() {
                     </div>
                 ) : (
                     <div
-                        className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report"
+                        className="max-w-6xl w-full mx-auto bg-background pb-10 px-5 mt-6 print-report"
                         style={{ paddingTop: `${paddingTop}px` }}
                     >
-                        <style>
-                            {`
-                                @media print {
-                                    * {
-                                        -webkit-print-color-adjust: exact !important;
-                                        print-color-adjust: exact !important;
-                                        color-adjust: exact !important;
-                                    }
-                                    .bg-background { background-color: #fff; }
-                                    body { color: #000; background-color: #fff; }
-                                    .border { border-color: #333 !important; }
-                                    .border-dashed { border-color: #999 !important; }
-                                    .bg-row-blue { background-color: #cfd2d8ff !important; }
+                        <style>{`
+                            .bg-row-blue { background-color: #cfd2d8ff !important; }
+                            @media print {
+                                /* Portrait, not landscape: this report is only 5 narrow
+                                   columns (Code/Account/Type/Debit/Credit) but can have many
+                                   rows — portrait's taller page fits more rows per sheet,
+                                   where landscape would just waste width and force more
+                                   page breaks. */
+                                @page {
+                                    size: A4 portrait;
+                                    margin: 12mm;
                                 }
-                            `}
-                        </style>
+                                * {
+                                    -webkit-print-color-adjust: exact !important;
+                                    print-color-adjust: exact !important;
+                                    color-adjust: exact !important;
+                                }
+                                body {
+                                    margin: 0 !important;
+                                    padding: 0 !important;
+                                    background: #fff !important;
+                                    color: #000 !important;
+                                }
+                                .print\\:hidden {
+                                    display: none !important;
+                                }
+                                .max-w-6xl {
+                                    max-width: 100% !important;
+                                    padding: 1rem !important;
+                                }
+                                table {
+                                    width: 100% !important;
+                                    border-collapse: collapse !important;
+                                    color: #000 !important;
+                                    margin-top: 0.5rem !important;
+                                }
+                                th, td {
+                                    padding: 4px 6px !important;
+                                    border: 1px solid #ddd !important;
+                                    color: #000 !important;
+                                    font-size: 10px !important;
+                                }
+                                th {
+                                    background-color: #f0f9ff !important;
+                                    color: #000 !important;
+                                    font-weight: 600 !important;
+                                }
+                                .bg-row-blue {
+                                    background-color: #cfd2d8ff !important;
+                                }
+                                h1, h2, h3, h4, h5, h6, p, span, div {
+                                    color: #000 !important;
+                                }
+                                .text-2xl { font-size: 16px !important; }
+                                .text-xl { font-size: 14px !important; }
+                                .text-lg { font-size: 12px !important; }
+                                .text-sm { font-size: 10px !important; }
+                                .text-xs { font-size: 9px !important; }
+                            }
+                        `}</style>
 
-                        {/* Title */}
-                        <h1 className="text-2xl font-bold text-center underline mb-6 tracking-wide">
-                            TRIAL BALANCE
-                        </h1>
+                        {/* Header: Logo/Company (left) + Report Title (right) */}
+                        <div className="mb-2 flex items-start justify-between gap-6">
+                            <div className="w-1/2 flex items-center gap-4">
+                                {companyLogo ? (
+                                    <img
+                                        src={companyLogo}
+                                        alt="Company Logo"
+                                        className="w-20 h-20 object-contain"
+                                    />
+                                ) : null}
+                                <div>
+                                    <h1 className="text-xl font-bold">{companyName}</h1>
+                                    <p className="text-xs mt-1 leading-4">{companyAddress}</p>
+                                </div>
+                            </div>
+
+                            <div className="w-1/2 text-right">
+                                <h2 className="text-lg font-bold tracking-widest uppercase">Trial Balance Report</h2>
+                                <p className="text-xs text-gray-600 mt-1">As of {search.date ? format(new Date(search.date), "dd/MM/yyyy") : format(new Date(), "dd/MM/yyyy")}</p>
+                                <p className="text-xs mt-1 leading-4">Generated: {now}</p>
+                            </div>
+                        </div>
 
                         {/* Header Info */}
-                        <div className="flex items-center justify-between mb-6 text-sm">
+                        <div className="flex items-center justify-between mb-6 text-xs">
                             <div className="flex items-center gap-2">
                                 <span className="font-semibold">As of:</span>
                                 <span className="font-medium">{search.date ? format(new Date(search.date), "dd/MM/yyyy") : format(new Date(), "dd/MM/yyyy")}</span>
@@ -121,7 +218,7 @@ function TrialBalancePrintPage() {
                         </div>
 
                         {/* Trial Balance Table */}
-                        <table className="w-full text-sm">
+                        <table className="w-full text-xs">
                             <thead>
                                 <tr className="bg-row-blue">
                                     <th className="border px-3 py-2 text-left w-[80px]">Code</th>
@@ -145,10 +242,10 @@ function TrialBalancePrintPage() {
                                                 <td className="border px-3 py-1.5 text-xs text-gray-600">
                                                     {account.type || '-'}
                                                 </td>
-                                                <td className="border px-3 py-1.5 text-right font-mono text-sm">
+                                                <td className="border px-3 py-1.5 text-right font-mono text-xs">
                                                     {account.debit > 0 ? Number(account.debit).toFixed(2) : '-'}
                                                 </td>
-                                                <td className="border px-3 py-1.5 text-right font-mono text-sm">
+                                                <td className="border px-3 py-1.5 text-right font-mono text-xs">
                                                     {account.credit > 0 ? Number(account.credit).toFixed(2) : '-'}
                                                 </td>
                                             </tr>
@@ -170,7 +267,7 @@ function TrialBalancePrintPage() {
 
                         {/* Summary */}
                         {trialBalanceData.length > 0 && (
-                            <div className="w-full text-sm mt-6 ml-auto" style={{ maxWidth: "400px" }}>
+                            <div className="w-full text-xs mt-6 ml-auto" style={{ maxWidth: "400px" }}>
                                 <table className="w-full">
                                     <tbody>
                                         <tr className={isBalanced ? "bg-emerald-50" : "bg-red-50"}>
@@ -198,13 +295,13 @@ function TrialBalancePrintPage() {
                             </div>
                         )}
 
-                        {/* Footer */}
-                        <div className="grid grid-cols-2 mt-20 text-sm">
-                            <div>
-                                <p className="border-t border-dashed w-40 pt-1 text-center">Prepared By:</p>
+                        {/* Signature Row */}
+                        <div className="flex justify-between items-end mt-6 text-xs">
+                            <div className="text-left">
+                                <p className="border-t border-dashed w-40 pt-1">Prepared By:</p>
                             </div>
                             <div className="text-right">
-                                <p className="border-t border-dashed w-56 ml-auto pt-1">Authorized Signature:</p>
+                                <p className="border-t border-dashed w-48 pt-1">Authorized Signature:</p>
                             </div>
                         </div>
                     </div>

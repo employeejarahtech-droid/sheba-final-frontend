@@ -18,6 +18,7 @@ type DueCollectionProps = {
   search: string;
   from: string;
   to: string;
+  orderBy?: string;
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
   setSearch: (search: string) => void;
@@ -47,10 +48,19 @@ type InvoiceItem = {
   delivery_date: string | null;
   created_at: string;
   created_by?: string | number | null;
+  created_by_type?: "staff" | "company_admin" | null;
   status: string;
+  payments?: {
+    id: number;
+    amount: number;
+    method?: string | null;
+    payment_date?: string | null;
+    created_at?: string | null;
+    creator?: { id: number; name: string } | null;
+  }[] | null;
 };
 
-export default function DueCollection({ page, limit, search, from, to, setPage, setLimit, setSearch, setFrom, setTo }: DueCollectionProps) {
+export default function DueCollection({ page, limit, search, from, to, orderBy, setPage, setLimit, setSearch, setFrom, setTo }: DueCollectionProps) {
   const token = getCookie('accessToken');
   const can = useCan();
   const canCollect = can('outdoor.reception.due-collection.collection');
@@ -58,13 +68,15 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
   const fmtNum = (v: any) => Number(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const { dateFormat, formatDate: fmtDate } = useDateFormat();
 
+  // Sort by invoice id; orderBy drives the direction (default DESC = newest first)
+  const orderDir = String(orderBy).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
   const { data, isFetching } = useQuery({
-    queryKey: ["due-invoices", page, limit, search, from, to],
+    queryKey: ["due-invoices", page, limit, search, from, to, orderDir],
     queryFn: async () => {
       const fromParam = from ? `&from=${encodeURIComponent(from)}` : "";
       const toParam = to ? `&to=${encodeURIComponent(to)}` : "";
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/outdoor-invoice?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&due_only=true${fromParam}${toParam}`,
+        `${import.meta.env.VITE_API_URL}/api/outdoor-invoice?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&due_only=true&sort=id&order=${orderDir}${fromParam}${toParam}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -642,6 +654,43 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
       },
     },
     {
+      data: null,
+      title: "Paid History",
+      orderable: false, // computed from payments, not a real sortable DB column
+      render: (_data: any, _type: string, row: InvoiceItem) => {
+        const payments = [...(row.payments || [])].sort((a, b) => {
+          const da = a.payment_date || a.created_at || '';
+          const db = b.payment_date || b.created_at || '';
+          return new Date(db).getTime() - new Date(da).getTime();
+        });
+        if (payments.length === 0) {
+          return `<span class="text-xs text-muted-foreground italic">No payments</span>`;
+        }
+        const rows = payments.map((p) => {
+          const dt = p.created_at ? new Date(p.created_at) : (p.payment_date ? new Date(p.payment_date) : null);
+          const dateStr = dt ? fmtDate(dt) : '-';
+          const timeStr = dt && p.created_at
+            ? dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+            : "";
+          const when = timeStr ? `${dateStr} ${timeStr}` : dateStr;
+          const method = p.method ? ` · ${p.method}` : '';
+          const collectedBy = p.creator?.name
+            ? `<div class="text-muted-foreground/80">Collected by: ${p.creator.name.replace(/</g, '&lt;')}</div>`
+            : '';
+          return `
+            <li class="whitespace-nowrap">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-muted-foreground">${when}${method}</span>
+                <span class="text-emerald-600 font-medium">${fmtNum(p.amount)}</span>
+              </div>
+              ${collectedBy}
+            </li>
+          `;
+        }).join('');
+        return `<ul class="text-[11px] space-y-1 max-h-32 overflow-y-auto pr-1 border-l-2 border-emerald-200 dark:border-emerald-900 pl-2">${rows}</ul>`;
+      },
+    },
+    {
       data: "due_amount",
       title: `Due (${currencySymbol})`,
       render: (data: any) => {
@@ -684,6 +733,21 @@ export default function DueCollection({ page, limit, search, from, to, setPage, 
         // Fallback to showing created_by ID or dash
         const value = row.created_by || '-';
         return `<span class="text-sm text-muted-foreground">${value}</span>`;
+      },
+      defaultContent: "-",
+    },
+    {
+      data: null,
+      title: "Create Type",
+      orderable: false, // computed, not a real sortable DB column
+      render: (_data: any, _type: string, row: InvoiceItem) => {
+        if (!row.created_by_type) return `<span class="text-sm text-muted-foreground">-</span>`;
+        const isAdmin = row.created_by_type === 'company_admin';
+        const label = isAdmin ? 'Admin' : 'Staff';
+        const classes = isAdmin
+          ? 'bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400'
+          : 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400';
+        return `<span class="${classes} px-2 py-0.5 rounded text-xs font-semibold">${label}</span>`;
       },
       defaultContent: "-",
     },

@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DateField } from '@/components/date-field'
 import { getCookie } from '@/lib/cookies'
 import { useQuery } from '@tanstack/react-query'
-import { FlaskConical, FileText, Users, Layers, Activity, Beaker } from 'lucide-react'
+import { FlaskConical, FileText, Users, Layers, Activity, Beaker, ArrowUpRight, ArrowDownRight, LayoutDashboard } from 'lucide-react'
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts'
 
 function toYMD(d: Date) {
@@ -34,18 +34,37 @@ function prettyTemplate(t?: string | null) {
 
 type Kpis = { total_tests: number; invoices: number; patients: number; templates: number }
 
-export function PathologyDashboardPage() {
+type Props = {
+  /** Selected range from the URL (?from=&to=). Empty until the default is written back. */
+  from: string
+  to: string
+  onRangeChange: (from: string, to: string, replace?: boolean) => void
+}
+
+const ALL_TIME_FROM = '2000-01-01'
+
+export function PathologyDashboardPage({ from, to, onRangeChange }: Props) {
   const todayStr = useMemo(() => toYMD(new Date()), [])
+
   // Default to "All Time" so the By Test table shows every test with its
   // complete/incomplete status (matching the individual lab pages), not just today's.
-  const [from, setFrom] = useState('2000-01-01')
-  const [to, setTo] = useState(todayStr)
+  useEffect(() => {
+    if (!from || !to) onRangeChange(ALL_TIME_FROM, todayStr, true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const effFrom = from || ALL_TIME_FROM
+  const effTo = to || todayStr
+
+  // Selecting "Custom" reveals the date pickers even while the current
+  // from/to still matches a preset — same convention as the other dashboards.
+  const [customSelected, setCustomSelected] = useState(false)
   const [presetOpen, setPresetOpen] = useState(false)
   const [testPage, setTestPage] = useState(1)
   const [testLimit, setTestLimit] = useState(10)
 
   // Reset to the first page whenever the date range changes.
-  useEffect(() => { setTestPage(1) }, [from, to])
+  useEffect(() => { setTestPage(1) }, [effFrom, effTo])
 
   const token = getCookie('accessToken')
 
@@ -58,27 +77,39 @@ export function PathologyDashboardPage() {
       last7: { label: 'Last 7 days', from: toYMD(shift(6)), to: toYMD(today()) },
       last15: { label: 'Last 15 days', from: toYMD(shift(14)), to: toYMD(today()) },
       last30: { label: 'Last 30 days', from: toYMD(shift(29)), to: toYMD(today()) },
+      last45: { label: 'Last 45 days', from: toYMD(shift(44)), to: toYMD(today()) },
+      last60: { label: 'Last 60 days', from: toYMD(shift(59)), to: toYMD(today()) },
+      last90: { label: 'Last 90 days', from: toYMD(shift(89)), to: toYMD(today()) },
+      last180: { label: 'Last 180 days', from: toYMD(shift(179)), to: toYMD(today()) },
+      last365: { label: 'Last 365 days', from: toYMD(shift(364)), to: toYMD(today()) },
       thisMonth: { label: 'This Month', from: toYMD(new Date(new Date().getFullYear(), new Date().getMonth(), 1)), to: toYMD(today()) },
-      allTime: { label: 'All Time', from: '2000-01-01', to: toYMD(today()) },
+      allTime: { label: 'All Time', from: ALL_TIME_FROM, to: toYMD(today()) },
     } as const)
   }, [])
 
   const activePreset = useMemo(() => {
-    const match = Object.entries(datePresets).find(([, v]) => v.from === from && v.to === to)
+    const match = Object.entries(datePresets).find(([, v]) => v.from === effFrom && v.to === effTo)
     return match ? match[0] : 'custom'
-  }, [from, to, datePresets])
+  }, [effFrom, effTo, datePresets])
+
+  const showCustomFields = customSelected || activePreset === 'custom'
 
   const applyPreset = (key: string) => {
-    const p = (datePresets as any)[key]
-    if (p) { setFrom(p.from); setTo(p.to) }
+    if (key === 'custom') {
+      setCustomSelected(true)
+    } else {
+      setCustomSelected(false)
+      const p = (datePresets as any)[key]
+      if (p) onRangeChange(p.from, p.to)
+    }
     setPresetOpen(false)
   }
 
   const { data, isFetching } = useQuery({
-    queryKey: ['pathology-dashboard-stats', from, to],
+    queryKey: ['pathology-dashboard-stats', effFrom, effTo],
     queryFn: async () => {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/reports/pathology-dashboard-stats?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+        `${import.meta.env.VITE_API_URL}/api/reports/pathology-dashboard-stats?from=${encodeURIComponent(effFrom)}&to=${encodeURIComponent(effTo)}`,
         { headers: { Authorization: `Bearer ${token}` } },
       )
       if (!res.ok) throw new Error('Failed to fetch pathology dashboard stats')
@@ -105,10 +136,10 @@ export function PathologyDashboardPage() {
   // "By Test" paginated table — separate endpoint so it can paginate and carry
   // completion status (completed / incompleted) read from the lab tables.
   const { data: byTestData, isFetching: byTestFetching } = useQuery({
-    queryKey: ['pathology-by-test', from, to, testPage, testLimit],
+    queryKey: ['pathology-by-test', effFrom, effTo, testPage, testLimit],
     queryFn: async () => {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/reports/pathology-by-test?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&page=${testPage}&limit=${testLimit}`,
+        `${import.meta.env.VITE_API_URL}/api/reports/pathology-by-test?from=${encodeURIComponent(effFrom)}&to=${encodeURIComponent(effTo)}&page=${testPage}&limit=${testLimit}`,
         { headers: { Authorization: `Bearer ${token}` } },
       )
       if (!res.ok) throw new Error('Failed to fetch pathology by-test')
@@ -122,27 +153,31 @@ export function PathologyDashboardPage() {
   const byTestTotalPages = Math.max(1, Math.ceil((byTestMeta.total || 0) / (byTestMeta.limit || testLimit)))
 
   const cards = [
-    { label: 'Total Tests', value: num(kpis.total_tests), icon: FlaskConical, grad: 'from-blue-600 to-blue-400 shadow-blue-500/30' },
-    { label: 'Invoices', value: num(kpis.invoices), icon: FileText, grad: 'from-indigo-600 to-indigo-400 shadow-indigo-500/30' },
-    { label: 'Patients', value: num(kpis.patients), icon: Users, grad: 'from-violet-600 to-violet-400 shadow-violet-500/30' },
-    { label: 'Report Templates', value: num(kpis.templates), icon: Layers, grad: 'from-teal-600 to-teal-400 shadow-teal-500/30' },
-    { label: 'Top Template', value: byTemplate[0]?.name || '—', icon: Beaker, grad: 'from-amber-600 to-amber-400 shadow-amber-500/30' },
-    { label: 'Avg / Invoice', value: avgPerInvoice, icon: Activity, grad: 'from-rose-600 to-rose-400 shadow-rose-500/30' },
+    { label: 'Total Tests', value: num(kpis.total_tests), icon: FlaskConical, gradientClass: 'from-blue-500 to-indigo-500 shadow-blue-500/20' },
+    { label: 'Invoices', value: num(kpis.invoices), icon: FileText, gradientClass: 'from-indigo-500 to-blue-500 shadow-indigo-500/20' },
+    { label: 'Patients', value: num(kpis.patients), icon: Users, gradientClass: 'from-violet-500 to-purple-500 shadow-violet-500/20' },
+    { label: 'Report Templates', value: num(kpis.templates), icon: Layers, gradientClass: 'from-teal-500 to-emerald-500 shadow-teal-500/20' },
+    { label: 'Top Template', value: byTemplate[0]?.name || '—', icon: Beaker, gradientClass: 'from-amber-500 to-orange-500 shadow-amber-500/20' },
+    { label: 'Avg / Invoice', value: avgPerInvoice, icon: Activity, gradientClass: 'from-rose-500 to-red-500 shadow-rose-500/20' },
   ]
 
   return (
     <>
       <AppHeader fixed />
       <Main>
-        {/* Title + date range */}
-        <div className='mb-4 flex flex-col gap-4'>
-          <div className='flex items-center justify-between gap-4'>
+        {/* Title (left) + date range filter (right) */}
+        <div className='mb-6 flex flex-wrap items-center justify-between gap-3'>
+          <div className='flex items-center gap-3'>
+            <div className='p-2.5 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg'>
+              <LayoutDashboard className='w-5 h-5 text-white' />
+            </div>
             <div>
-              <h1 className='text-2xl font-bold tracking-tight'>Pathology Dashboard</h1>
+              <h1 className='text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent'>Pathology Dashboard</h1>
               <p className='text-sm text-muted-foreground'>Lab test volume by report template & test for the selected period</p>
             </div>
           </div>
-          <div className='flex flex-wrap items-center gap-2'>
+
+          <div className='flex items-center gap-1.5'>
             <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>
               <SelectTrigger className='w-[160px] h-9'>
                 <SelectValue placeholder='Filter by' />
@@ -153,50 +188,51 @@ export function PathologyDashboardPage() {
                 <SelectItem value='last7'>Last 7 days</SelectItem>
                 <SelectItem value='last15'>Last 15 days</SelectItem>
                 <SelectItem value='last30'>Last 30 days</SelectItem>
+                <SelectItem value='last45'>Last 45 days</SelectItem>
+                <SelectItem value='last60'>Last 60 days</SelectItem>
+                <SelectItem value='last90'>Last 90 days</SelectItem>
+                <SelectItem value='last180'>Last 180 days</SelectItem>
+                <SelectItem value='last365'>Last 365 days</SelectItem>
                 <SelectItem value='thisMonth'>This Month</SelectItem>
                 <SelectItem value='allTime'>All Time</SelectItem>
                 <SelectItem value='custom'>Custom range</SelectItem>
               </SelectContent>
             </Select>
-            <DateField value={from} onChange={(v: string) => { setFrom(v); setPresetOpen(false) }} placeholder='From' />
-            <span className='text-xs text-muted-foreground'>to</span>
-            <DateField value={to} onChange={(v: string) => { setTo(v); setPresetOpen(false) }} placeholder='To' />
-            <Button variant='ghost' size='sm' onClick={() => { setFrom('2000-01-01'); setTo(todayStr) }}>Reset</Button>
+            {showCustomFields && (
+              <>
+                <DateField value={effFrom} onChange={(v: string) => onRangeChange(v, effTo)} placeholder='From' />
+                <span className='text-xs text-muted-foreground'>to</span>
+                <DateField value={effTo} onChange={(v: string) => onRangeChange(effFrom, v)} placeholder='To' />
+              </>
+            )}
           </div>
         </div>
 
         {/* KPI cards (counts only) */}
         <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4'>
-          {cards.map((c) => {
-            const Icon = c.icon
-            return (
-              <div key={c.label} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${c.grad} p-5 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5`}>
-                <div className='absolute -right-4 -top-4 h-16 w-16 rounded-full bg-white/10 blur-2xl' />
-                <div className='absolute -bottom-4 -left-4 h-16 w-16 rounded-full bg-black/10 blur-2xl' />
-                <div className='relative'>
-                  <div className='rounded-xl bg-white/20 p-2 inline-block backdrop-blur-sm'>
-                    <Icon className='h-5 w-5 text-white' />
-                  </div>
-                  <p className='mt-3 text-[11px] font-medium text-white/80 uppercase tracking-wider'>{c.label}</p>
-                  <h3 className='text-lg font-bold text-white truncate' title={c.value}>{c.value}</h3>
-                </div>
-              </div>
-            )
-          })}
+          {cards.map((c) => (
+            <SummaryCard
+              key={c.label}
+              title={c.label}
+              value={c.value}
+              icon={c.icon}
+              gradientClass={c.gradientClass}
+            />
+          ))}
         </div>
 
         {/* Charts row: trend + invoices by template */}
         <div className='grid gap-6 md:grid-cols-2 mb-4'>
           {/* Tests per day (30-day trend) */}
-          <Card className='overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0'>
-            <CardHeader className='bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 border-b py-3 gap-0'>
-              <div className='flex items-center gap-3'>
-                <div className='p-2.5 bg-gradient-to-br from-blue-600 to-indigo-500 rounded-xl shadow-lg shadow-blue-500/30'>
-                  <Activity className='h-5 w-5 text-white' />
+          <Card className='overflow-hidden transition-all duration-300 gap-0 shadow-none p-0'>
+            <CardHeader className='bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0'>
+              <div className='flex items-center gap-2.5'>
+                <div className='p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg'>
+                  <Activity className='w-4 h-4 text-white' />
                 </div>
                 <div>
-                  <CardTitle>Tests Per Day</CardTitle>
-                  <p className='text-xs text-muted-foreground'>Pathology tests ordered · last 30 days</p>
+                  <CardTitle className='text-lg font-bold'>Tests Per Day</CardTitle>
+                  <p className='text-xs text-gray-600 dark:text-gray-400'>Pathology tests ordered · last 30 days</p>
                 </div>
               </div>
             </CardHeader>
@@ -216,15 +252,15 @@ export function PathologyDashboardPage() {
           </Card>
 
           {/* Invoices by Test Report Template */}
-          <Card className='overflow-hidden border-2 transition-all duration-300 hover:border-violet-200 hover:shadow-lg py-0'>
-            <CardHeader className='bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 dark:from-violet-950/30 dark:via-purple-950/30 dark:to-violet-950/30 border-b py-3 gap-0'>
-              <div className='flex items-center gap-3'>
-                <div className='p-2.5 bg-gradient-to-br from-violet-600 to-purple-500 rounded-xl shadow-lg shadow-violet-500/30'>
-                  <Layers className='h-5 w-5 text-white' />
+          <Card className='overflow-hidden transition-all duration-300 gap-0 shadow-none p-0'>
+            <CardHeader className='bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border-b py-1.5 px-4 gap-0'>
+              <div className='flex items-center gap-2.5'>
+                <div className='p-2 bg-gradient-to-br from-violet-500 to-purple-500 rounded-lg shadow-lg'>
+                  <Layers className='w-4 h-4 text-white' />
                 </div>
                 <div>
-                  <CardTitle>Invoices by Test Report Template</CardTitle>
-                  <p className='text-xs text-muted-foreground'>Distinct invoices per report template</p>
+                  <CardTitle className='text-lg font-bold'>Invoices by Test Report Template</CardTitle>
+                  <p className='text-xs text-gray-600 dark:text-gray-400'>Distinct invoices per report template</p>
                 </div>
               </div>
             </CardHeader>
@@ -249,15 +285,15 @@ export function PathologyDashboardPage() {
         </div>
 
         {/* By Test */}
-        <Card className='overflow-hidden border-2 transition-all duration-300 hover:border-emerald-200 hover:shadow-lg py-0'>
-          <CardHeader className='bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 dark:from-emerald-950/30 dark:via-teal-950/30 dark:to-emerald-950/30 border-b py-3 gap-0'>
-            <div className='flex items-center gap-3'>
-              <div className='p-2.5 bg-gradient-to-br from-emerald-600 to-teal-500 rounded-xl shadow-lg shadow-emerald-500/30'>
-                <FlaskConical className='h-5 w-5 text-white' />
+        <Card className='overflow-hidden transition-all duration-300 gap-0 shadow-none p-0'>
+          <CardHeader className='bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border-b py-1.5 px-4 gap-0'>
+            <div className='flex items-center gap-2.5'>
+              <div className='p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg shadow-lg'>
+                <FlaskConical className='w-4 h-4 text-white' />
               </div>
               <div>
-                <CardTitle>By Test</CardTitle>
-                <p className='text-xs text-muted-foreground'>Test orders with completion status</p>
+                <CardTitle className='text-lg font-bold'>By Test</CardTitle>
+                <p className='text-xs text-gray-600 dark:text-gray-400'>Test orders with completion status</p>
               </div>
             </div>
           </CardHeader>
@@ -318,5 +354,62 @@ export function PathologyDashboardPage() {
         </Card>
       </Main>
     </>
+  )
+}
+
+// ===== Summary Card Component =====
+function SummaryCard({
+  title,
+  value,
+  subtitle,
+  change,
+  icon: Icon,
+  gradientClass,
+}: {
+  title: string
+  value: string
+  subtitle?: string
+  change?: number
+  icon: React.ElementType
+  gradientClass: string
+}) {
+  const isPositive = change !== undefined && change >= 0
+  return (
+    <Card className='overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border'>
+      <CardHeader className='bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0'>
+        <div className='flex items-center gap-2.5'>
+          <div
+            className={`p-2 bg-gradient-to-br ${gradientClass} rounded-lg shadow-lg`}
+          >
+            <Icon className='h-4 w-4 text-white' />
+          </div>
+          <div>
+            <CardTitle className='text-sm font-semibold'>{title}</CardTitle>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className='p-4'>
+        <div className='text-2xl font-bold'>{value}</div>
+        <div className='flex items-center gap-1 mt-1'>
+          {change !== undefined ? (
+            <>
+              {isPositive ? (
+                <ArrowUpRight className='text-emerald-600 h-3 w-3' />
+              ) : (
+                <ArrowDownRight className='text-red-600 h-3 w-3' />
+              )}
+              <span
+                className={`text-xs ${isPositive ? 'text-emerald-600' : 'text-red-600'}`}
+              >
+                {Math.abs(change)}%
+              </span>
+              <span className='text-muted-foreground text-xs'>vs yesterday</span>
+            </>
+          ) : subtitle ? (
+            <span className='text-muted-foreground text-xs'>{subtitle}</span>
+          ) : null}
+        </div>
+      </CardContent>
+    </Card>
   )
 }

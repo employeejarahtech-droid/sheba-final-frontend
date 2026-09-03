@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/form'
 import { LandingPageWrapper } from '@/components/layout/landing-layout'
 import { submitContactForm } from '@/services/platform-public'
+import { usePageSeo } from '@/lib/seo'
 
 export const Route = createFileRoute('/(platform)/contact')({
   component: ContactPage,
@@ -73,6 +74,13 @@ const contactDetails = [
 ]
 
 function ContactPage() {
+  usePageSeo({
+    title: 'Contact Us | HMS Hospital Management Software',
+    description:
+      'Get in touch with the HMS team for questions about our hospital management software, demos, or support.',
+    path: '/contact',
+  })
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {

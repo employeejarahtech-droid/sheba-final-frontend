@@ -172,7 +172,7 @@ function ConsultantWisePatientsPage() {
       title: `Total Bill (${currencySymbol})`,
       className: "text-right",
       render: (data: number) => {
-        return `<span class="font-mono">${currencySymbol} ${(data || 0).toLocaleString()}</span>`
+        return `<span class="font-mono">${(data || 0).toLocaleString()}</span>`
       },
     },
     {
@@ -180,7 +180,7 @@ function ConsultantWisePatientsPage() {
       title: `Total Collected (${currencySymbol})`,
       className: "text-right",
       render: (data: number) => {
-        return `<span class="font-mono text-green-600">${currencySymbol} ${(data || 0).toLocaleString()}</span>`
+        return `<span class="font-mono text-green-600">${(data || 0).toLocaleString()}</span>`
       },
     },
     {
@@ -188,7 +188,7 @@ function ConsultantWisePatientsPage() {
       title: `Total Discount (${currencySymbol})`,
       className: "text-right",
       render: (data: number) => {
-        return `<span class="font-mono text-red-600">${currencySymbol} ${(data || 0).toLocaleString()}</span>`
+        return `<span class="font-mono text-red-600">${(data || 0).toLocaleString()}</span>`
       },
     },
     {

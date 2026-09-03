@@ -22,6 +22,8 @@ type LabTest = {
   test_id: number | null
   test_name: string | null
   test_result: string | null
+  sample_result: string | null
+  sample_normal_range: string | null
   machine_id: number | null
   test_carried_out_by: string | null
   status: 'complete' | 'incomplete' | null
@@ -96,7 +98,7 @@ function EditBiochemicalReport() {
       const initialResults: Record<number, string> = {};
       invoiceData.biochemical_all_info.forEach(test => {
         if (test.id) {
-          initialResults[test.id] = test.test_result || '';
+          initialResults[test.id] = test.test_result || test.sample_result || '';
         }
       });
       setTestResults(initialResults);
@@ -305,9 +307,9 @@ function EditBiochemicalReport() {
                   <table className="min-w-full">
                     <thead className="bg-gray-100">
                       <tr>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Biochemical Record ID</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Test Information</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Test Result</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[30%]">Test Information</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[30%]">Reference Range</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[40%]">Test Result</th>
                       </tr>
                     </thead>
 
@@ -317,7 +319,6 @@ function EditBiochemicalReport() {
                           key={test.id}
                           className={`${index % 2 === 0 ? `bg-white` : `bg-gray-50`} hover:bg-gray-100/80 transition-colors`}
                         >
-                          <td className="px-4 py-3 text-sm text-gray-700 border-b">{test.id}</td>
                           <td className="px-4 py-3 text-sm text-gray-700 border-b">
                             {test.test_name ? (
                               <div>
@@ -326,6 +327,11 @@ function EditBiochemicalReport() {
                               </div>
                             ) : (
                               <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600 border-b whitespace-pre-line">
+                            {test.sample_normal_range || (
+                              <span className="text-gray-400 text-xs italic">No range configured</span>
                             )}
                           </td>
 

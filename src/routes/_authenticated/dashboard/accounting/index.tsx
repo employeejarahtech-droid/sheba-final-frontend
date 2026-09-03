@@ -254,15 +254,15 @@ function AccountingOverview() {
                 {/* Charts Row */}
                 <div className='mt-8 grid gap-6 md:grid-cols-2'>
                     {/* Trend Chart (Bar/Line) */}
-                    <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-lg py-0">
-                        <CardHeader className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 border-b-1 border-blue-100 dark:border-blue-900 py-3 gap-0">
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
-                                    <Calendar className="w-6 h-6 text-white" />
+                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-1.5 px-4 gap-0">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                    <Calendar className="w-4 h-4 text-white" />
                                 </div>
                                 <div>
-                                    <CardTitle>Income vs Expense Trend</CardTitle>
-                                    <p className="text-xs text-muted-foreground">Daily totals · last 30 days</p>
+                                    <CardTitle className="text-lg font-bold">Income vs Expense Trend</CardTitle>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">Daily totals · last 30 days</p>
                                 </div>
                             </div>
                         </CardHeader>
@@ -288,15 +288,15 @@ function AccountingOverview() {
                     </Card>
 
                     {/* Expense Breakdown Pie Chart */}
-                    <Card className="overflow-hidden border-2 transition-all duration-300 hover:border-orange-200 hover:shadow-lg py-0">
-                        <CardHeader className="bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 dark:from-orange-950/30 dark:via-amber-950/30 dark:to-orange-950/30 border-b-1 border-orange-100 dark:border-orange-900 py-3 gap-0">
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl shadow-lg shadow-orange-500/30">
-                                    <CalendarRange className="w-6 h-6 text-white" />
+                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                        <CardHeader className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border-b py-1.5 px-4 gap-0">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg shadow-lg">
+                                    <CalendarRange className="w-4 h-4 text-white" />
                                 </div>
                                 <div>
-                                    <CardTitle>Expense Breakdown</CardTitle>
-                                    <p className="text-xs text-muted-foreground">Distribution by expense account</p>
+                                    <CardTitle className="text-lg font-bold">Expense Breakdown</CardTitle>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">Distribution by expense account</p>
                                 </div>
                             </div>
                         </CardHeader>
@@ -334,15 +334,15 @@ function AccountingOverview() {
                 </div>
 
                 {/* Recent Activity */}
-                <Card className="mt-8 overflow-hidden border-2 transition-all duration-300 hover:border-violet-200 hover:shadow-lg py-0">
-                    <CardHeader className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 dark:from-violet-950/30 dark:via-purple-950/30 dark:to-violet-950/30 border-b-1 border-violet-100 dark:border-violet-900 py-3 gap-0">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-gradient-to-br from-violet-600 to-purple-500 rounded-xl shadow-lg shadow-violet-500/30">
-                                <History className="w-6 h-6 text-white" />
+                <Card className="mt-8 overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
+                    <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border-b py-1.5 px-4 gap-0">
+                        <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-500 rounded-lg shadow-lg">
+                                <History className="w-4 h-4 text-white" />
                             </div>
                             <div>
-                                <CardTitle>Recent Activity</CardTitle>
-                                <p className="text-xs text-muted-foreground">Latest journal postings</p>
+                                <CardTitle className="text-lg font-bold">Recent Activity</CardTitle>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">Latest journal postings</p>
                             </div>
                         </div>
                     </CardHeader>

@@ -19,6 +19,7 @@ import {
   Mail,
   Settings,
   UserCircle,
+  Database,
   Server,
   Terminal,
   SquareTerminal,
@@ -60,6 +61,7 @@ export const adminSidebarData: SidebarData = {
     {
       title: 'System',
       items: [
+        { title: 'Database Migration', url: '/admin/database-migration', icon: Database },
         { title: 'Nginx Domains', url: '/admin/nginx-domain-list', icon: Server },
         { title: 'Common Commands', url: '/admin/common-commands', icon: Terminal },
         { title: 'Terminal', url: '/admin/terminal', icon: SquareTerminal },

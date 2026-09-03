@@ -69,9 +69,9 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
             <AppSidebar />
             <SidebarInset className="overflow-y-auto overflow-x-hidden flex flex-col h-svh rounded-none m-0 shadow-none print:h-auto print:overflow-visible">
               <LayoutHeader />
-              <main className="anim-zoom-in p-4 lg:p-4 w-full flex-1">
+              <div className="anim-zoom-in p-4 lg:p-4 w-full flex-1">
                 <PermissionGuard>{children ?? <Outlet />}</PermissionGuard>
-              </main>
+              </div>
               <footer className="print:hidden">
                 <div className="p-4 text-center text-sm text-muted-foreground flex flex-wrap items-center justify-center gap-3">
                   &copy; {new Date().getFullYear()}  HMS. All rights reserved.

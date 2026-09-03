@@ -193,70 +193,58 @@ function CashFlow() {
                 {/* Report Sections */}
                 <div className="grid gap-6 lg:grid-cols-2">
                     {/* Operating Activities */}
-                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
-                        <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border-b py-1.5 px-4 gap-0">
-                            <div className="flex items-center gap-2.5">
-                                <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg shadow-lg">
-                                    <TrendingUp className="w-4 h-4 text-white" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-lg font-bold">Operating Activities</CardTitle>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400">Cash from core business operations</p>
-                                </div>
+                    <div>
+                        <div className="flex items-center gap-2.5 mb-3">
+                            <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg shadow-lg">
+                                <TrendingUp className="w-4 h-4 text-white" />
                             </div>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <DataTable columns={columns} data={operating.items} isLoading={isLoading} hideExport />
-                            <div className="p-4 bg-muted/30 border-t flex justify-between font-bold text-base">
-                                <span>Net Cash from Operations</span>
-                                <span className={operating.total >= 0 ? "text-emerald-700" : "text-red-700"}>{fmt(operating.total)}</span>
+                            <div>
+                                <h3 className="text-lg font-bold">Operating Activities</h3>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">Cash from core business operations</p>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                        <DataTable columns={columns} data={operating.items} isLoading={isLoading} hideExport />
+                        <div className="p-4 bg-muted/30 border rounded-md mt-2 flex justify-between font-bold text-base">
+                            <span>Net Cash from Operations</span>
+                            <span className={operating.total >= 0 ? "text-emerald-700" : "text-red-700"}>{fmt(operating.total)}</span>
+                        </div>
+                    </div>
 
                     {/* Investing Activities */}
-                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
-                        <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border-b py-1.5 px-4 gap-0">
-                            <div className="flex items-center gap-2.5">
-                                <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg shadow-lg">
-                                    <Wallet className="w-4 h-4 text-white" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-lg font-bold">Investing Activities</CardTitle>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400">Cash from buying or selling assets</p>
-                                </div>
+                    <div>
+                        <div className="flex items-center gap-2.5 mb-3">
+                            <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg shadow-lg">
+                                <Wallet className="w-4 h-4 text-white" />
                             </div>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <DataTable columns={columns} data={investing.items} isLoading={isLoading} hideExport />
-                            <div className="p-4 bg-muted/30 border-t flex justify-between font-bold text-base">
-                                <span>Net Cash from Investing</span>
-                                <span className={investing.total >= 0 ? "text-emerald-700" : "text-red-700"}>{fmt(investing.total)}</span>
+                            <div>
+                                <h3 className="text-lg font-bold">Investing Activities</h3>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">Cash from buying or selling assets</p>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                        <DataTable columns={columns} data={investing.items} isLoading={isLoading} hideExport />
+                        <div className="p-4 bg-muted/30 border rounded-md mt-2 flex justify-between font-bold text-base">
+                            <span>Net Cash from Investing</span>
+                            <span className={investing.total >= 0 ? "text-emerald-700" : "text-red-700"}>{fmt(investing.total)}</span>
+                        </div>
+                    </div>
 
                     {/* Financing Activities */}
-                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0">
-                        <CardHeader className="bg-gradient-to-r from-purple-50 to-fuchsia-50 dark:from-purple-950/30 dark:to-fuchsia-950/30 border-b py-1.5 px-4 gap-0">
-                            <div className="flex items-center gap-2.5">
-                                <div className="p-2 bg-gradient-to-br from-purple-500 to-fuchsia-500 rounded-lg shadow-lg">
-                                    <ArrowRightLeft className="w-4 h-4 text-white" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-lg font-bold">Financing Activities</CardTitle>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400">Cash from loans, capital, and owners</p>
-                                </div>
+                    <div>
+                        <div className="flex items-center gap-2.5 mb-3">
+                            <div className="p-2 bg-gradient-to-br from-purple-500 to-fuchsia-500 rounded-lg shadow-lg">
+                                <ArrowRightLeft className="w-4 h-4 text-white" />
                             </div>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <DataTable columns={columns} data={financing.items} isLoading={isLoading} hideExport />
-                            <div className="p-4 bg-muted/30 border-t flex justify-between font-bold text-base">
-                                <span>Net Cash from Financing</span>
-                                <span className={financing.total >= 0 ? "text-emerald-700" : "text-red-700"}>{fmt(financing.total)}</span>
+                            <div>
+                                <h3 className="text-lg font-bold">Financing Activities</h3>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">Cash from loans, capital, and owners</p>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                        <DataTable columns={columns} data={financing.items} isLoading={isLoading} hideExport />
+                        <div className="p-4 bg-muted/30 border rounded-md mt-2 flex justify-between font-bold text-base">
+                            <span>Net Cash from Financing</span>
+                            <span className={financing.total >= 0 ? "text-emerald-700" : "text-red-700"}>{fmt(financing.total)}</span>
+                        </div>
+                    </div>
 
                     {/* Net Cash Summary */}
                     <Card className="bg-primary/5 border-primary/20 border-2">
@@ -292,26 +280,22 @@ function CashFlow() {
                     </Card>
 
                     {/* Cash & Bank Movement — the accounts that make up the net change */}
-                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 lg:col-span-2">
-                        <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border-b py-1.5 px-4 gap-0">
-                            <div className="flex items-center gap-2.5">
-                                <div className="p-2 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-lg shadow-lg">
-                                    <Wallet className="w-4 h-4 text-white" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-lg font-bold">Cash & Bank Movement</CardTitle>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400">How the net cash change breaks down by cash &amp; bank account</p>
-                                </div>
+                    <div className="lg:col-span-2">
+                        <div className="flex items-center gap-2.5 mb-3">
+                            <div className="p-2 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-lg shadow-lg">
+                                <Wallet className="w-4 h-4 text-white" />
                             </div>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <DataTable columns={columns} data={cashItems} isLoading={isLoading} hideExport />
-                            <div className="p-4 bg-muted/30 border-t flex justify-between font-bold text-base">
-                                <span>Net Change in Cash</span>
-                                <span className={netCashChange >= 0 ? "text-emerald-700" : "text-red-700"}>{fmt(netCashChange)}</span>
+                            <div>
+                                <h3 className="text-lg font-bold">Cash & Bank Movement</h3>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">How the net cash change breaks down by cash &amp; bank account</p>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                        <DataTable columns={columns} data={cashItems} isLoading={isLoading} hideExport />
+                        <div className="p-4 bg-muted/30 border rounded-md mt-2 flex justify-between font-bold text-base">
+                            <span>Net Change in Cash</span>
+                            <span className={netCashChange >= 0 ? "text-emerald-700" : "text-red-700"}>{fmt(netCashChange)}</span>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>

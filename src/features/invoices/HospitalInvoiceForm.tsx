@@ -30,6 +30,19 @@ type TestItem = {
   sample_collection_room_id?: number | null
   delivery_date?: string // Tenant date-format display string (e.g. DD/MM/YYYY) — same as the invoice-level deliveryDate field; converted to ISO at submission
   delivery_time?: string // 24h HH:MM, per-test expected delivery time
+  match_table_name?: string | null // report template slug — resolved to a display name via the test-tables lookup
+}
+
+type TestTableItem = {
+  id: number
+  table_name: string
+  display_name: string
+}
+
+type TestTablesResponse = {
+  data: {
+    items: TestTableItem[]
+  }
 }
 
 type TestsResponse = {
@@ -205,6 +218,22 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
         },
       },
   });
+
+  const { data: testTablesData } = useQuery<TestTablesResponse>({
+    queryKey: ["test-tables-list"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/test-tables?limit=1000`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch test tables");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+  const testTables = testTablesData?.data?.items || [];
 
   const { data: categoriesData } = useQuery<CategoryResponse>({
     queryKey: ["test-categories"],
@@ -1590,6 +1619,9 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                           const category = categoriesData?.data?.items?.find(c => c.id === test.category_id);
                           const department = category?.department_name || 'N/A';
                           const isChecked = selectedTests.some((t) => t.id === test.id);
+                          const reportTemplate = test.match_table_name
+                            ? (testTables.find((tt) => tt.table_name === test.match_table_name)?.display_name ?? test.match_table_name)
+                            : null;
 
                           return (
                             <div
@@ -1609,6 +1641,12 @@ export default function HospitalInvoiceForm({ onSubmittingChange }: { onSubmitti
                                   <span className="font-mono">{currencySymbol} {Number(test.price).toLocaleString()}</span>
                                   <span>•</span>
                                   <span className="truncate">{department}</span>
+                                  {reportTemplate && (
+                                    <>
+                                      <span>•</span>
+                                      <span className="truncate">{reportTemplate}</span>
+                                    </>
+                                  )}
                                 </div>
                               </div>
                               {isChecked && <Check className="ml-auto h-4 w-4 text-primary shrink-0" />}

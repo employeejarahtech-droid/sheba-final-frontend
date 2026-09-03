@@ -129,7 +129,7 @@ function SidebarMenuSimpleLink({
         isActive={checkIsActive(href, item)}
         tooltip={item.title}
       >
-        <Link to={item.url!} onClick={() => { refreshIfSamePage(queryClient, item.url, href); setOpenMobile(false); }}>
+        <Link to={item.url!} search={item.search as any} onClick={() => { refreshIfSamePage(queryClient, item.url, href); setOpenMobile(false); }}>
           {item.icon && <item.icon />}
           <span>{item.title}</span>
           {item.badge && <NavBadge>{item.badge}</NavBadge>}
@@ -207,7 +207,7 @@ function NavItemRecursiveRenderer({
   if (!item.items) {
     return (
       <SidebarMenuSubButton asChild isActive={checkIsActive(href, item)}>
-        <Link to={item.url!} onClick={() => refreshIfSamePage(queryClient, item.url, href)}>
+        <Link to={item.url!} search={item.search as any} onClick={() => refreshIfSamePage(queryClient, item.url, href)}>
           {item.icon && <item.icon />}
           <span>{item.title}</span>
         </Link>
@@ -255,7 +255,7 @@ function SidebarMenuCollapsedDropdown({
               asChild
               className={`${checkIsActive(href, sub) ? "bg-secondary" : ""}`}
             >
-              <Link to={sub.url!} onClick={() => refreshIfSamePage(queryClient, sub.url, href)}>
+              <Link to={sub.url!} search={sub.search as any} onClick={() => refreshIfSamePage(queryClient, sub.url, href)}>
                 {sub.icon && <sub.icon />}
                 <span>{sub.title}</span>
               </Link>
@@ -271,6 +271,16 @@ function SidebarMenuCollapsedDropdown({
   ACTIVE STATE CHECK
 -------------------------------------------- */
 function checkIsActive(href: string, item: NavItem, mainNav = false) {
+  // Items that pin specific search params (e.g. Tests (Active) -> ?status=active)
+  // must also match those params, or every status variant of the same page
+  // would highlight together.
+  if (item.search && Object.keys(item.search).length > 0) {
+    const [hrefPath, hrefQuery] = href.split("?");
+    if (hrefPath !== item.url) return false;
+    const params = new URLSearchParams(hrefQuery || "");
+    return Object.entries(item.search).every(([k, v]) => params.get(k) === String(v));
+  }
+
   return (
     href === item.url ||
     href.split("?")[0] === item.url ||

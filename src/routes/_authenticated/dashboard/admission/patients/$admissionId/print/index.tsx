@@ -27,8 +27,19 @@ type AdmissionData = {
     sex: string
     phone: string
     admission_date: string
+    admission_time?: string | null
     discharge_date: string | null
     status: 'active' | 'discharged' | 'critical'
+    address?: string | null
+    village?: string | null
+    district?: string | null
+    division?: string | null
+    country?: string | null
+    referredByDoctor?: {
+        id: number
+        doctor_name: string
+        speciality: string
+    } | null
     bedCabin?: {
         id: number
         code: string
@@ -136,25 +147,34 @@ function AdmissionPrintPage() {
         )
     }
 
-    const formattedAdmissionDate = admission.admission_date 
-        ? new Date(admission.admission_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) 
+    const formattedAdmissionDate = admission.admission_date
+        ? new Date(admission.admission_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
         : 'N/A'
-    const formattedAdmissionTime = admission.created_at
-        ? new Date(admission.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
-        : ''
-    const admissionDateAndTime = formattedAdmissionTime 
-        ? `${formattedAdmissionDate} ${formattedAdmissionTime}` 
+    // Prefer the recorded admission time; older rows may only have created_at.
+    const admissionTime = admission.admission_time
+        || (admission.created_at
+            ? new Date(admission.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+            : '')
+    const admissionDateAndTime = admissionTime
+        ? `${formattedAdmissionDate} ${admissionTime}`
         : formattedAdmissionDate
     const dischargeDate = admission.discharge_date ? new Date(admission.discharge_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A'
-    const bedCabinInfo = admission.bedCabin ? `${admission.bedCabin.code} (${admission.bedCabin.type})` : 'N/A'
+    const bedCabinInfo = admission.bedCabin
+        ? `${admission.bedCabin.code} (${admission.bedCabin.type})${admission.bedCabin.ward ? `, Ward: ${admission.bedCabin.ward}` : ''}`
+        : 'N/A'
     const doctorName = admission.doctor?.doctor_name || 'N/A'
-
-    const statusColors = {
-        active: { bg: '#dcfce7', color: '#166534' },
-        discharged: { bg: '#f3f4f6', color: '#374151' },
-        critical: { bg: '#fee2e2', color: '#991b1b' },
-    }
-    const statusStyle = statusColors[admission.status] || statusColors.active
+    const refByDoctorName = admission.referredByDoctor?.doctor_name || 'N/A'
+    // Composite address: village/area parts first, then the detailed address line.
+    const addressParts = [
+        admission.village,
+        admission.district,
+        admission.division,
+        admission.country,
+    ].filter(Boolean)
+    const patientDetails = [
+        addressParts.length ? addressParts.join(', ') : '',
+        admission.address || '',
+    ].filter(Boolean).join(' — ') || 'N/A'
 
     return (
         <>
@@ -211,108 +231,104 @@ function AdmissionPrintPage() {
                         </Button>
                     </div>
 
-                    {/* Header */}
-                    <div className="text-center pb-6 mb-6">
-                        <div className="flex items-center justify-center gap-3 mb-3">
+                    {/* Header: Logo/Company (left 50%) + Title (right 50%) */}
+                    <div className="mb-6 flex items-start justify-between gap-6">
+                        <div className="w-1/2 flex items-center gap-4">
                             {companySettings?.company_logo ? (
                                 <img
                                     src={companySettings.company_logo.startsWith('http') ? companySettings.company_logo : `${API_URL}${companySettings.company_logo}`}
                                     alt="Company Logo"
-                                    className="h-16 w-16 object-contain rounded-lg"
+                                    className="w-24 h-24 object-contain"
                                 />
                             ) : (
                                 <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-full shadow-lg">
                                     <Building2 className="h-8 w-8 text-white" />
                                 </div>
                             )}
-                            <div className="text-left">
-                                <h1 className="text-3xl font-bold text-gray-800 leading-tight">{companySettings?.company_name || 'Hospital'}</h1>
-                                <div className="text-gray-600 text-sm space-y-0.5 mt-1">
-                                    {companySettings?.address1 && (
-                                        <p className="font-medium">{companySettings.address1}</p>
-                                    )}
-                                    {companySettings?.address2 && (
-                                        <p className="font-medium">{companySettings.address2}</p>
-                                    )}
-                                    {companySettings?.phone && <p className="text-xs">Phone: {companySettings.phone}</p>}
-                                    {companySettings?.email && <p className="text-xs">Email: {companySettings.email}</p>}
-                                </div>
+                            <div>
+                                <h1 className="text-2xl font-bold">{companySettings?.company_name || 'Hospital'}</h1>
+                                {companySettings?.address1 && (
+                                    <p className="text-sm mt-1 leading-5">{companySettings.address1}</p>
+                                )}
+                                {companySettings?.address2 && (
+                                    <p className="text-sm leading-5">{companySettings.address2}</p>
+                                )}
                             </div>
+                        </div>
+
+                        <div className="w-1/2 text-right">
+                            <h2 className="text-xl font-bold tracking-widest uppercase">Admission Form</h2>
+                            <p className="text-sm mt-1 leading-5">Admission Date: {formattedAdmissionDate}</p>
+                            <p className="text-sm leading-5">Discharge Date: {dischargeDate}</p>
                         </div>
                     </div>
 
-                    {/* Title */}
-                    <h1 className="text-xl font-bold text-center underline mb-6 tracking-wide uppercase">
-                        Admission Form
-                    </h1>
-
-                    {/* Patient Information Table */}
-                    <table className="w-full text-sm border mb-6">
+                    {/* Patient Information Table — fixed 4-column grid so every
+                        row's cells align: 50/50, 50/25/25, then full-width. */}
+                    <table className="w-full table-fixed text-sm border mb-6">
+                        <colgroup>
+                            <col style={{ width: '25%' }} />
+                            <col style={{ width: '25%' }} />
+                            <col style={{ width: '25%' }} />
+                            <col style={{ width: '25%' }} />
+                        </colgroup>
                         <tbody>
                             <tr className="border">
-                                <td className="border px-3 py-2 w-1/4">Admission ID : {admission.admission_prefix || `ADM-${admission.id}`}</td>
-                                <td className="border px-3 py-2 w-1/4">Date: {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
-                                <td className="border px-3 py-2 w-1/4">Age: {admission.age_text || admission.age || 'N/A'}</td>
+                                <td className="border px-3 py-2" colSpan={2}>Admission ID : {admission.admission_prefix || `ADM-${admission.id}`}</td>
+                                <td className="border px-3 py-2" colSpan={2}>Date &amp; Time : {admissionDateAndTime}</td>
                             </tr>
                             <tr className="border">
                                 <td className="border px-3 py-2" colSpan={2}>Patient Name: {admission.patient_name || 'N/A'}</td>
+                                <td className="border px-3 py-2">Age: {admission.age_text || admission.age || 'N/A'}</td>
                                 <td className="border px-3 py-2">Sex: {admission.sex?.toUpperCase() || 'N/A'}</td>
                             </tr>
                             <tr className="border">
-                                <td className="border px-3 py-2">Phone: {admission.phone || 'N/A'}</td>
-                                <td className="border px-3 py-2">Status: <span style={{ background: statusStyle.bg, color: statusStyle.color, padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 'bold' }}>{admission.status.charAt(0).toUpperCase() + admission.status.slice(1)}</span></td>
-                                <td className="border px-3 py-2">Ward: {admission.bedCabin?.ward || 'N/A'}</td>
+                                <td className="border px-3 py-2" colSpan={4}>Ref By: {refByDoctorName}</td>
+                            </tr>
+                            <tr className="border">
+                                <td className="border px-3 py-2" colSpan={4}>Surgeon / Consultant: {doctorName}</td>
+                            </tr>
+                            <tr className="border">
+                                <td className="border px-3 py-2" colSpan={4}>Bed / Cabin No: {bedCabinInfo}</td>
+                            </tr>
+                            <tr className="border">
+                                <td className="border px-3 py-2" colSpan={4}>Contact No: {admission.phone || 'N/A'}</td>
+                            </tr>
+                            <tr className="border">
+                                <td className="border px-3 py-2" colSpan={4}>Patient Details: {patientDetails}</td>
                             </tr>
                         </tbody>
                     </table>
 
-                    {/* Admission Details Table */}
-                    <table className="w-full text-sm border mb-6">
-                        <thead>
-                            <tr className="border-t border-b bg-row-blue">
-                                <th className="px-3 py-2 text-left w-[50%]">Detail</th>
-                                <th className="px-3 py-2 text-left w-[50%]">Information</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr className="border-b border-dashed">
-                                <td className="px-3 py-2">Admission Date and Time</td>
-                                <td className="px-3 py-2">{admissionDateAndTime}</td>
-                            </tr>
-                            <tr className="border-b border-dashed">
-                                <td className="px-3 py-2">Bed/Cabin</td>
-                                <td className="px-3 py-2">{bedCabinInfo}</td>
-                            </tr>
-                            <tr className="border-b border-dashed">
-                                <td className="px-3 py-2">Attending Doctor</td>
-                                <td className="px-3 py-2">{doctorName}</td>
-                            </tr>
-                            {admission.diagnosis && (
+                    {/* Admission Details Table — clinical extras not covered above */}
+                    {admission.diagnosis && (
+                        <table className="w-full text-sm border mb-6">
+                            <thead>
+                                <tr className="border-t border-b bg-row-blue">
+                                    <th className="px-3 py-2 text-left w-[50%]">Detail</th>
+                                    <th className="px-3 py-2 text-left w-[50%]">Information</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                                 <tr className="border-b border-dashed">
                                     <td className="px-3 py-2">Diagnosis</td>
                                     <td className="px-3 py-2">{admission.diagnosis}</td>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    )}
 
 
 
-                    {/* Record Information */}
-                    <p className="text-sm mb-20">
-                        <span className="font-semibold">Created By:</span> &nbsp;
-                        {admission.created_by_user?.name || 'N/A'}
-                    </p>
-
-                    {/* Footer Signatures */}
-                    <div className="grid grid-cols-2 text-sm">
-                        <div>
-                            <p className="border-t border-dashed w-40 pt-1 text-center">Admission Officer:</p>
-                        </div>
-                        <div className="text-right">
-                            <p className="border-t border-dashed w-56 ml-auto pt-1">
-                                Medical Officer:
+                    {/* Signature Row */}
+                    <div className="flex justify-between mt-32 text-sm w-full">
+                        <div style={{ textAlign: 'left' }}>
+                            <p className="border-t border-dashed pt-1">
+                                Prepared By: <span className="font-medium">{admission.created_by_user?.name || '-'}</span>
                             </p>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <span className="inline-block border-t border-dashed pt-1">Authorized Signature:</span>
                         </div>
                     </div>
                 </div>

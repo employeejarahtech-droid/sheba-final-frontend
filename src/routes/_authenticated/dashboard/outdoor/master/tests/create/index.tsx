@@ -43,6 +43,7 @@ const testSchema = z.object({
       message: "Price must be a valid number",
     }),
   sample_normal_range: z.string().optional(),
+  sample_result: z.string().optional(),
   sample_collection_room_id: z.number().optional().nullable(),
 })
 
@@ -53,6 +54,7 @@ type TestValues = {
   status: string
   price: number
   sample_normal_range?: string
+  sample_result?: string
   sample_collection_room_id?: number | null
 }
 
@@ -146,6 +148,7 @@ function CreateTest() {
       status: "active",
       price: 0,
       sample_normal_range: "",
+      sample_result: "",
       sample_collection_room_id: undefined,
     },
   })
@@ -165,6 +168,7 @@ function CreateTest() {
           status: payload.status,
           price: payload.price,
           sample_normal_range: payload.sample_normal_range,
+          sample_result: payload.sample_result,
           sample_collection_room_id: payload.sample_collection_room_id || null,
         }),
       });
@@ -208,6 +212,7 @@ function CreateTest() {
       match_table_name: selectedTable.table_name || selectedTable.display_name,
       status: data.status,
       sample_normal_range: data.sample_normal_range || "",
+      sample_result: data.sample_result || "",
       sample_collection_room_id: data.sample_collection_room_id || null,
     };
 
@@ -527,6 +532,28 @@ function CreateTest() {
                         </FormControl>
                         <FormDescription className="text-xs">
                           Enter the reference or normal range for this test (optional)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Sample Result */}
+                  <FormField
+                    control={form.control}
+                    name="sample_result"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sample Result</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="e.g. Negative, Reactive, 5.5 mmol/L"
+                            className="min-h-[80px] resize-y"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          Enter the sample result for this test (optional)
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

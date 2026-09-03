@@ -28,9 +28,11 @@ interface WidalTestData {
 interface WidalTestReportDetailsProps {
   data: WidalTestData | null;
   paddingTop?: number;
+  fontSize?: number;
+  showSignature?: boolean;
 }
 
-export default function WidalTestReportDetails({ data, paddingTop = 40 }: WidalTestReportDetailsProps) {
+export default function WidalTestReportDetails({ data, paddingTop = 40, fontSize = 1, showSignature = true }: WidalTestReportDetailsProps) {
   const borderWidth = 2;
 
   if (!data) {
@@ -43,7 +45,7 @@ export default function WidalTestReportDetails({ data, paddingTop = 40 }: WidalT
   };
 
   return (
-    <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
+    <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px`, zoom: fontSize }}>
       <style>
         {`
           .bg-row-blue {
@@ -107,7 +109,7 @@ export default function WidalTestReportDetails({ data, paddingTop = 40 }: WidalT
           </tr>
           <tr className="border">
             <td className="border px-3 py-2" colSpan={2}>
-              Ref. By: {data?.ref_doctor || (data?.outdoor_invoice?.doctor_id ? `Dr. ID: ${data.outdoor_invoice.doctor_id}` : '-')}{data?.outdoor_invoice?.doctor?.qualification ? ` (${data.outdoor_invoice.doctor.qualification})` : ''}
+              Ref. By: {data?.ref_doctor || (data?.outdoor_invoice?.doctor_id ? `Dr. ID: ${data.outdoor_invoice.doctor_id}` : '-')}
             </td>
             <td className="border px-3 py-2">
               Phone: {data?.outdoor_invoice?.phone || '-'}
@@ -168,7 +170,7 @@ export default function WidalTestReportDetails({ data, paddingTop = 40 }: WidalT
         {data.test_carried_out_by || 'N/A'}
       </p>
 
-      <ReportFooter />
+      <ReportFooter showSignature={showSignature} />
     </div>
   );
 }

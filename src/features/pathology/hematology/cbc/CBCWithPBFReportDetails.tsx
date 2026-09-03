@@ -4,9 +4,11 @@ import { ReportFooter } from '@/components/pathology/ReportFooter'
 interface CBCWithPBFReportDetailsProps {
   report?: any;
   paddingTop?: number;
+  fontSize?: number;
+  showSignature?: boolean;
 }
 
-export default function CBCWithPBFReportDetails({ report: invoice, paddingTop = 40 }: CBCWithPBFReportDetailsProps) {
+export default function CBCWithPBFReportDetails({ report: invoice, paddingTop = 40, fontSize = 1, showSignature = true }: CBCWithPBFReportDetailsProps) {
     // Extract patient info from nested outdoor_invoice object
     const patientInfo = invoice?.outdoor_invoice || {};
     const invoiceDate = patientInfo.invoice_date
@@ -14,7 +16,7 @@ export default function CBCWithPBFReportDetails({ report: invoice, paddingTop = 
         : "N/A";
 
     return (
-        <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px` }}>
+        <div className="max-w-4xl w-full mx-auto bg-background pb-10 px-5 mt-6 print:w-[850px] print-report" style={{ paddingTop: `${paddingTop}px`, zoom: fontSize }}>
             <style>
                 {`
           .bg-row-blue {
@@ -70,7 +72,7 @@ export default function CBCWithPBFReportDetails({ report: invoice, paddingTop = 
                     </tr>
                     <tr className="border">
             <td className="border px-3 py-2" colSpan={2}>
-              Ref. By: {invoice.ref_doctor || (patientInfo.doctor_id ? `Dr. ID: ${patientInfo.doctor_id}` : '-')}{patientInfo?.doctor?.qualification ? ` (${patientInfo.doctor.qualification})` : ''}
+              Ref. By: {invoice.ref_doctor || (patientInfo.doctor_id ? `Dr. ID: ${patientInfo.doctor_id}` : '-')}
             </td>
             <td className="border px-3 py-2">
               Phone: {patientInfo.phone || invoice.phone || '-'}
@@ -205,7 +207,7 @@ export default function CBCWithPBFReportDetails({ report: invoice, paddingTop = 
                 {invoice.test_carried_out_by || 'N/A'}
             </p>
 
-            <ReportFooter />
+            <ReportFooter showSignature={showSignature} />
 
             {/* Buttons */}
             <div className="flex justify-end gap-3 mt-10 print:hidden">

@@ -20,15 +20,27 @@ export const Route = createFileRoute('/_authenticated/dashboard/reports/indoor/r
 
 interface AdmissionItem {
   id: number
-  admission_no: string
+  admission_prefix?: string | null
   patient_name: string
   admission_date: string | null
   discharge_date: string | null
-  total_bill: number
-  advance_payment: number
-  due_amount: number
   status: string
+  total_bill_amount?: number
+  finalBill?: {
+    total_bill_amount?: number
+    paid_amount?: number
+    due_amount?: number
+  } | null
+  advancePayments?: { total_amount?: number } | null
 }
+
+// Billing fields are nested (finalBill/advancePayments) on the admission
+// payload, not flat total_bill/advance_payment/due_amount fields — mirrors
+// the same helpers in the list page (index.tsx).
+const billOf = (i: AdmissionItem) => Number(i.total_bill_amount || i.finalBill?.total_bill_amount || 0)
+const paidOf = (i: AdmissionItem) => Number(i.finalBill?.paid_amount ?? i.advancePayments?.total_amount ?? 0)
+const dueOf = (i: AdmissionItem) =>
+  i.finalBill?.due_amount != null ? Number(i.finalBill.due_amount) : Math.max(0, billOf(i) - paidOf(i))
 
 function IndoorRevenueSummaryPrint() {
   const { search, start_date, end_date } = Route.useSearch()
@@ -80,9 +92,9 @@ function IndoorRevenueSummaryPrint() {
   const flatItems = items.length > 0 && Array.isArray(items[0]) ? items[0] : items
 
   const stats = useMemo(() => {
-    const totalRevenue = flatItems.reduce((s: number, r: any) => s + Number(r.total_bill || 0), 0)
-    const totalCollected = flatItems.reduce((s: number, r: any) => s + Number(r.advance_payment || 0), 0)
-    const outstanding = flatItems.reduce((s: number, r: any) => s + Number(r.due_amount || 0), 0)
+    const totalRevenue = flatItems.reduce((s: number, r: AdmissionItem) => s + billOf(r), 0)
+    const totalCollected = flatItems.reduce((s: number, r: AdmissionItem) => s + paidOf(r), 0)
+    const outstanding = flatItems.reduce((s: number, r: AdmissionItem) => s + dueOf(r), 0)
     const activeCount = flatItems.filter((r: any) => r.status === 'active').length
     const dischargedCount = flatItems.filter((r: any) => r.status === 'discharged').length
     const totalFromMeta = data?.data?.meta?.total ?? flatItems.length
@@ -225,9 +237,9 @@ function IndoorRevenueSummaryPrint() {
         </Button>
       </div>
 
-      {/* Header */}
-      <div className="mb-2">
-        <div className='flex justify-center items-center gap-6'>
+      {/* Header: Logo/Company (left) + Report Title (right) */}
+      <div className="mb-2 flex items-start justify-between gap-6">
+        <div className="w-1/2 flex items-center gap-4">
           {companyLogo ? (
             <img
               src={companyLogo}
@@ -240,20 +252,23 @@ function IndoorRevenueSummaryPrint() {
             </div>
           )}
 
-          <div className="text-center">
+          <div>
             <h1 className="text-xl font-bold">{companyName}</h1>
-            <p className="text-xs mt-1 leading-4">
-              {[companySettings?.address1, companySettings?.address2].filter(Boolean).join(', ')}
-            </p>
+            {companySettings?.address1 && (
+              <p className="text-xs mt-1 leading-4">{companySettings.address1}</p>
+            )}
+            {companySettings?.address2 && (
+              <p className="text-xs leading-4">{companySettings.address2}</p>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* ── Title ──────────────────────────────────────────────────────── */}
-      <h1 className="text-lg font-bold text-center underline mb-1 tracking-wide uppercase">
-        INDOOR REVENUE SUMMARY
-      </h1>
-      <p className="text-center text-xs text-gray-600 mb-2">Inpatient admission revenue overview</p>
+        <div className="w-1/2 text-right">
+          <h2 className="text-lg font-bold tracking-widest uppercase">Indoor Revenue Summary</h2>
+          <p className="text-xs text-gray-600 mt-1">Inpatient admission revenue overview</p>
+          <p className="text-xs mt-1 leading-4">Generated: {safeFormatDate(new Date())}</p>
+        </div>
+      </div>
 
       {/* ── Filter Period ───────────────────────────────────────────────── */}
       {(start_date || end_date || search) && (
@@ -304,13 +319,13 @@ function IndoorRevenueSummaryPrint() {
           {flatItems.map((item: AdmissionItem, idx: number) => (
             <tr key={item.id || idx} className="border-b border-dashed">
               <td className="px-1.5 py-1 text-[10px] text-gray-500">{idx + 1}</td>
-              <td className="px-1.5 py-1 text-[10px] font-mono">{item.admission_no || '-'}</td>
+              <td className="px-1.5 py-1 text-[10px] font-mono">{item.admission_prefix || `ADM-${String(item.id).padStart(4, '0')}`}</td>
               <td className="px-1.5 py-1 text-[10px] font-medium">{item.patient_name || '-'}</td>
               <td className="px-1.5 py-1 text-[10px]">{item.admission_date ? safeFormatDate(item.admission_date) : '-'}</td>
               <td className="px-1.5 py-1 text-[10px]">{item.discharge_date ? safeFormatDate(item.discharge_date) : <span className="text-gray-400 italic text-[9px]">Active</span>}</td>
-              <td className="px-1.5 py-1 text-[10px] text-right font-medium">{Number(item.total_bill || 0).toFixed(2)}</td>
-              <td className="px-1.5 py-1 text-[10px] text-right font-semibold" style={{ color: '#10b981' }}>{Number(item.advance_payment || 0).toFixed(2)}</td>
-              <td className="px-1.5 py-1 text-[10px] text-right font-semibold" style={{ color: '#dc2626' }}>{Number(item.due_amount || 0).toFixed(2)}</td>
+              <td className="px-1.5 py-1 text-[10px] text-right font-medium">{billOf(item).toFixed(2)}</td>
+              <td className="px-1.5 py-1 text-[10px] text-right font-semibold" style={{ color: '#10b981' }}>{paidOf(item).toFixed(2)}</td>
+              <td className="px-1.5 py-1 text-[10px] text-right font-semibold" style={{ color: '#dc2626' }}>{dueOf(item).toFixed(2)}</td>
               <td className="px-1.5 py-1 text-[10px] text-center capitalize">{item.status || '-'}</td>
             </tr>
           ))}

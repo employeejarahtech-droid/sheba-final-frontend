@@ -391,14 +391,6 @@ function AllUltrasonogramReports() {
               ${testCards || '<div class="text-gray-500 text-sm">No Ultrasonogram tests found</div>'}
             </div>
           </div>
-
-          <!-- Footer Actions -->
-          <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-            ${canEdit ? `<a href="/dashboard/ultrasonogram/all/edit/${reciptId}"
-               class="inline-flex items-center justify-center rounded-lg text-sm font-medium bg-teal-600 text-white hover:bg-teal-700 h-10 px-5 transition shadow-md">
-              Edit All
-            </a>` : ''}
-          </div>
         `;
 
         details.innerHTML = htmlContent;
@@ -450,7 +442,7 @@ function AllUltrasonogramReports() {
     <>
       <AppHeader fixed />
       <main>
-        <div className="p-4 space-y-3">
+        <div className="space-y-3">
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">

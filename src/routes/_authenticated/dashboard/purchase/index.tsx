@@ -30,7 +30,7 @@ function PurchaseDashboard() {
     <>
       <AppHeader fixed />
       <Main>
-        <div className="mb-6 flex items-center justify-between gap-4">
+        <div className="mb-3 flex items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Purchase Dashboard</h1>
             <p className="text-muted-foreground text-sm">Overview of procurement activity</p>

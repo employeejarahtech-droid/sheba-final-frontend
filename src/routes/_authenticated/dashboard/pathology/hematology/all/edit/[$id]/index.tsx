@@ -8,7 +8,7 @@ import { getCookie } from '@/lib/cookies';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { AppHeader } from '@/components/layout/app-header';
-import { ArrowLeft, FlaskConical, Sparkles, User, Activity } from 'lucide-react';
+import { ArrowLeft, FlaskConical, User, Activity } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const Route = createFileRoute(
@@ -23,6 +23,7 @@ type LabTest = {
   test_id: number | null
   test_name: string | null
   test_result: string | null
+  sample_result: string | null
   machine_id: number | null
   test_carried_out_by: string | null
   status: 'complete' | 'incomplete' | null
@@ -196,7 +197,7 @@ function EditReportHematology() {
       const initialResults: Record<number, string> = {};
       invoiceData.hematology_all_info.forEach(test => {
         if (test.id) {
-          initialResults[test.id] = test.test_result || '';
+          initialResults[test.id] = test.test_result || test.sample_result || '';
         }
       });
       setTestResults(initialResults);
@@ -265,26 +266,6 @@ function EditReportHematology() {
       toast.success(`Filled normal value for "${testName}"`);
     } else {
       toast.error(`No default normal value configured for "${testName || 'this test'}"`);
-    }
-  };
-
-  const handleFillAllEmpty = () => {
-    let filledCount = 0;
-    const updatedResults = { ...testResults };
-    tests.forEach(test => {
-      if (test.id && (!updatedResults[test.id] || updatedResults[test.id].trim() === '')) {
-        const defaultInfo = getNormalValue(test.test_name);
-        if (defaultInfo) {
-          updatedResults[test.id] = defaultInfo.val;
-          filledCount++;
-        }
-      }
-    });
-    if (filledCount > 0) {
-      setTestResults(updatedResults);
-      toast.success(`Successfully filled normal values for ${filledCount} empty field(s).`);
-    } else {
-      toast.info("No empty fields were eligible for auto-filling.");
     }
   };
 
@@ -440,31 +421,13 @@ function EditReportHematology() {
             </CardHeader>
             <CardContent className="p-4">
               <form onSubmit={(e) => { e.preventDefault(); handleSaveAll(); }}>
-              
-              {/* Auto-fill Action Bar */}
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 bg-rose-50/50 border border-rose-100 p-4 rounded-xl">
-                <div className="text-sm text-gray-600">
-                  <span className="font-medium text-rose-800">Quick Tools:</span> Fill in the laboratory test findings below. Use the button to automatically populate normal default values for all empty fields.
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleFillAllEmpty}
-                  className="bg-rose-50 text-rose-700 hover:bg-rose-100 hover:text-rose-800 border-rose-200 gap-1.5 flex items-center shadow-sm self-stretch sm:self-auto justify-center"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  Auto-fill Normal Values
-                </Button>
-              </div>
 
               <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                 <thead className="bg-gray-100">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[15%]">Record ID</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[25%]">Test Name</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[25%]">Reference Range</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[35%]">Test Result</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[30%]">Test Name</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[30%]">Reference Range</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[40%]">Test Result</th>
                   </tr>
                 </thead>
 
@@ -476,7 +439,6 @@ function EditReportHematology() {
                         key={test.id}
                         className={`${index % 2 === 0 ? `bg-white` : `bg-gray-50`} hover:bg-gray-100/80 transition-colors`}
                       >
-                        <td className="px-4 py-3 text-sm text-gray-700 border-b">{test.id}</td>
                         <td className="px-4 py-3 text-sm text-gray-700 border-b">
                           {test.test_name ? (
                             <div>

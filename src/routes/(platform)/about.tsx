@@ -25,6 +25,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { LandingPageWrapper } from '@/components/layout/landing-layout'
 import { StatsSection } from '@/components/landing/stats-section'
 import { CtaSection } from '@/components/landing/cta-section'
+import { usePageSeo } from '@/lib/seo'
 
 export const Route = createFileRoute('/(platform)/about')({
   component: AboutPage,
@@ -67,6 +68,13 @@ const differentiators = [
 ]
 
 function AboutPage() {
+  usePageSeo({
+    title: 'About Us — HMS Hospital Management Software',
+    description:
+      'HMS is an all-in-one hospital management software helping healthcare facilities run admissions, pathology, billing and operations on a secure, multi-tenant platform.',
+    path: '/about',
+  })
+
   return (
     <LandingPageWrapper>
       {/* Hero */}

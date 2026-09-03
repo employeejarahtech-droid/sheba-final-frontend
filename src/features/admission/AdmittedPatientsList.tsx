@@ -15,6 +15,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Check } from 'lucide-react'
 import { cn } from "@/lib/utils"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DateField } from "@/components/date-field"
+import { useDateControls } from "@/hooks/use-date-controls"
+import { Input } from "@/components/ui/input"
+import { useDebounce } from "@/hooks/useDebounce"
+import { LocationSelect } from "@/components/location-select"
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -140,19 +146,39 @@ type AdmissionItem = {
             }
         }>
     }
+    // Every payment (advance + final-bill) recorded against this admission, newest first.
+    payments?: Array<{
+        id: number
+        final_bill_id?: number | null
+        amount: number
+        payment_date: string
+        notes?: string
+        payment_method?: string
+        created_by_user?: {
+            id: number
+            name: string
+            email?: string
+        }
+    }>
 }
 
 interface AdmittedPatientsListProps {
     page: number;
     limit: number;
     search: string;
+    orderBy?: string;
+    from?: string;
+    to?: string;
     setPage: (page: number) => void;
     setLimit: (limit: number) => void;
     setSearch: (search: string) => void;
+    setFrom?: (from: string) => void;
+    setTo?: (to: string) => void;
 }
 
-export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, setSearch }: AdmittedPatientsListProps) {
+export function AdmittedPatientsList({ page, limit, search, orderBy, from = "", to = "", setPage, setLimit, setSearch, setFrom, setTo }: AdmittedPatientsListProps) {
     const { currencySymbol, format } = useCurrency()
+    const { isChangeable } = useDateControls()
     const navigate = useNavigate()
     const location = useLocation()
 
@@ -166,10 +192,77 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
     const [statusFilter, setStatusFilter] = useState<string>(urlStatus && validStatuses.includes(urlStatus) ? urlStatus : "all")
     const [openFilter, setOpenFilter] = useState(false)
 
-    // Detect payment filter from URL path (/paid or /due)
+    // Admission-date range filter (Custom range) — mirrors the biochemical/all list page.
+    const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+    // Format as LOCAL YYYY-MM-DD. Do NOT use toISOString() — it converts to UTC and
+    // shifts the date back one day in timezones east of UTC (e.g. UTC+6 → off-by-one).
+    const toYMD = (d: Date) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    };
+    const datePresets = useMemo(() => ({
+        today: { label: 'Today', from: toYMD(today()), to: toYMD(today()) },
+        yesterday: (() => { const d = today(); d.setDate(d.getDate() - 1); return { label: 'Yesterday', from: toYMD(d), to: toYMD(d) }; })(),
+        last7: { label: 'Last 7 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 6); return d; })()), to: toYMD(today()) },
+        last15: { label: 'Last 15 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 14); return d; })()), to: toYMD(today()) },
+        last30: { label: 'Last 30 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 29); return d; })()), to: toYMD(today()) },
+        last45: { label: 'Last 45 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 44); return d; })()), to: toYMD(today()) },
+        last60: { label: 'Last 60 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 59); return d; })()), to: toYMD(today()) },
+        last90: { label: 'Last 90 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 89); return d; })()), to: toYMD(today()) },
+        last180: { label: 'Last 180 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 179); return d; })()), to: toYMD(today()) },
+        last365: { label: 'Last 365 days', from: toYMD((() => { const d = today(); d.setDate(d.getDate() - 364); return d; })()), to: toYMD(today()) },
+    }), []);
+    // Detect which preset (if any) currently matches the from/to in the URL
+    const activePreset = useMemo(() => {
+        if (!from || !to) return 'custom';
+        const match = Object.entries(datePresets).find(([, v]) => v.from === from && v.to === to);
+        return match ? match[0] : 'custom';
+    }, [from, to, datePresets]);
+    const [presetOpen, setPresetOpen] = useState(false);
+    const applyPreset = (key: string) => {
+        const p = (datePresets as any)[key];
+        if (p) { setFrom?.(p.from); setTo?.(p.to); }
+    };
+
+    // Detect payment filter from URL path (/paid, /due or /overpaid)
     const pathPaymentFilter = cleanPathname.endsWith('/paid') ? 'paid'
         : cleanPathname.endsWith('/due') ? 'due'
+        : cleanPathname.endsWith('/overpaid') ? 'overpaid'
         : ''
+
+    // Structured-address filters — division → district → thana cascade + village search.
+    // Values are denormalized names stored on admissions; ids only drive child queries.
+    const [divisionFilter, setDivisionFilter] = useState("")
+    const [districtFilter, setDistrictFilter] = useState("")
+    const [thanaFilter, setThanaFilter] = useState("")
+    const [villageInput, setVillageInput] = useState("")
+    const villageFilter = useDebounce(villageInput, 300)
+    const [divisionId, setDivisionId] = useState<string | null>(null)
+    const [districtId, setDistrictId] = useState<string | null>(null)
+    const hasAddressFilter = !!(divisionFilter || districtFilter || thanaFilter || villageFilter.trim())
+
+    const filterByDivision = (row: any) => {
+        setDivisionFilter(row?.name || "")
+        setDivisionId(row ? String(row.id) : null)
+        setDistrictFilter("")
+        setDistrictId(null)
+        setThanaFilter("")
+        setPage(1)
+    }
+    const filterByDistrict = (row: any) => {
+        setDistrictFilter(row?.name || "")
+        setDistrictId(row ? String(row.id) : null)
+        setThanaFilter("")
+        setPage(1)
+    }
+    const clearAddressFilters = () => {
+        setDivisionFilter(""); setDivisionId(null)
+        setDistrictFilter(""); setDistrictId(null)
+        setThanaFilter(""); setVillageInput("")
+        setPage(1)
+    }
 
     // Sync status filter with URL changes
     useEffect(() => {
@@ -185,12 +278,14 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
         : cleanPathname.endsWith('/discharged') ? 'Discharged Patients'
         : cleanPathname.endsWith('/paid') ? 'Paid Patients'
         : cleanPathname.endsWith('/due') ? 'Due Patients'
+        : cleanPathname.endsWith('/overpaid') ? 'Over Paid Patients'
         : 'Admitted Patients'
 
     const viewDescription = cleanPathname.endsWith('/active') ? 'Patient notyet discharged list'
         : cleanPathname.endsWith('/discharged') ? 'Monitor all discharged patients'
         : cleanPathname.endsWith('/paid') ? 'List of patients with completed payments'
         : cleanPathname.endsWith('/due') ? 'List of patients with outstanding final bills'
+        : cleanPathname.endsWith('/overpaid') ? 'List of patients who paid more than their final bill amount'
         : 'Manage and monitor all admitted patients'
 
     // Advance payment modal state
@@ -212,6 +307,25 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
         debitAccountId: '',
         creditAccountId: '',
         narration: '',
+    })
+
+    // Final bill payment modal state (Due Patients "Payment" action)
+    const [paymentModal, setPaymentModal] = useState<{
+        open: boolean
+        admissionId: string | null
+        amount: string
+        maxAmount: number
+        paymentMethod: string
+        date: string
+        notes: string
+    }>({
+        open: false,
+        admissionId: null,
+        amount: '',
+        maxAmount: 0,
+        paymentMethod: 'Cash',
+        date: '',
+        notes: '',
     })
 
 
@@ -319,6 +433,43 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
         },
     })
 
+    // Final bill payment mutation (Due Patients "Payment" action)
+    const recordPaymentMutation = useMutation({
+        mutationFn: async ({ admissionId, amount, notes, paymentMethod, date }: {
+            admissionId: string
+            amount: string
+            notes: string
+            paymentMethod: string
+            date: string
+        }) => {
+            const response = await fetch(`${API_URL}/api/admission/${admissionId}/final-bill/payment`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    amount: parseFloat(amount),
+                    notes: notes || undefined,
+                    payment_method: paymentMethod,
+                    ...(date ? { payment_date: date } : {}),
+                }),
+            })
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null)
+                throw new Error(errorData?.message || 'Failed to record payment')
+            }
+            return response.json()
+        },
+        onSuccess: () => {
+            setPaymentModal({ open: false, admissionId: null, amount: '', maxAmount: 0, paymentMethod: 'Cash', date: '', notes: '' })
+            window.location.reload()
+        },
+        onError: (error: Error) => {
+            alert(error.message || 'Failed to record payment')
+        },
+    })
+
 
 
     // Fetch statistics
@@ -339,17 +490,25 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
     })
 
     // Fetch admissions list
+    // Receipt id = admission id; orderBy drives the direction (default DESC = newest first)
+    const orderDir = String(orderBy).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
     const { data: admissionsData, isFetching } = useQuery({
-        queryKey: ['admissions', page, limit, search, statusFilter, pathPaymentFilter],
+        queryKey: ['admissions', page, limit, search, orderDir, statusFilter, pathPaymentFilter, from, to, divisionFilter, districtFilter, thanaFilter, villageFilter],
         queryFn: async () => {
             const params = new URLSearchParams({
                 page: page.toString(),
                 limit: limit.toString(),
                 sort: 'id',
-                order: 'DESC',
+                order: orderDir,
                 ...(search && { search }),
                 ...(statusFilter !== "all" && { status: statusFilter }),
                 ...(pathPaymentFilter && { payment_filter: pathPaymentFilter }),
+                ...(from && { start_date: from }),
+                ...(to && { end_date: to }),
+                ...(divisionFilter && { division: divisionFilter }),
+                ...(districtFilter && { district: districtFilter }),
+                ...(thanaFilter && { thana: thanaFilter }),
+                ...(villageFilter.trim() && { village: villageFilter.trim() }),
             })
             const response = await fetch(`${API_URL}/api/admission?${params}`, {
                 headers: {
@@ -627,6 +786,24 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
         },
         {
             data: null,
+            title: "Total Staying (Days)",
+            // Derived from admission_date/discharge_date (or "now" while still
+            // admitted) — there's no matching backend sort column for this.
+            orderable: false,
+            render: (_data: any, _type: string, row: AdmissionItem) => {
+                if (!row.admission_date) return '-'
+                const start = new Date(row.admission_date).getTime()
+                const end = row.discharge_date ? new Date(row.discharge_date).getTime() : Date.now()
+                if (Number.isNaN(start) || Number.isNaN(end) || end < start) return '-'
+                // LOS convention: any part of a day counts as a full day, minimum 1.
+                const days = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)))
+                const stillAdmitted = !row.discharge_date
+                return `<span class="text-sm font-medium">${days} ${days === 1 ? 'day' : 'days'}</span>${stillAdmitted ? '<span class="text-xs text-muted-foreground"> (ongoing)</span>' : ''}`
+            },
+            defaultContent: "",
+        },
+        {
+            data: null,
             title: "Consultant",
             orderable: true,
             responsivePriority: 4,
@@ -816,7 +993,46 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                 const raw = row.finalBill?.paid_amount ?? row.advancePayments?.total_amount ?? null
                 const paid = raw !== null && raw !== undefined ? parseFloat(String(raw)) : null
                 if (!paid) return '<span class="text-muted-foreground text-xs">—</span>'
-                return `<span class="font-medium text-emerald-700 dark:text-emerald-400">${format(paid)}</span>`
+
+                const history = [...(row.payments || [])].sort(
+                    (a, b) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime()
+                )
+                if (history.length === 0) {
+                    return `<span class="font-medium text-emerald-700 dark:text-emerald-400">${format(paid)}</span>`
+                }
+
+                const rows = history.map((p) => {
+                    const label = !p.final_bill_id ? 'Advance' : Number(p.amount) < 0 ? 'Refund' : 'Payment'
+                    const badgeColor = !p.final_bill_id
+                        ? 'text-blue-600 dark:text-blue-400'
+                        : Number(p.amount) < 0
+                            ? 'text-orange-600 dark:text-orange-400'
+                            : 'text-emerald-600 dark:text-emerald-400'
+                    const dateStr = p.payment_date ? new Date(p.payment_date).toLocaleDateString() : '-'
+                    const method = p.payment_method ? ` · ${p.payment_method}` : ''
+                    const collectedBy = p.created_by_user?.name
+                        ? `<div class="text-muted-foreground/80">Collected by: ${p.created_by_user.name.replace(/</g, '&lt;')}</div>`
+                        : ''
+                    return `
+                        <li class="whitespace-nowrap">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="${badgeColor} font-medium">${label}</span>
+                                <span class="text-muted-foreground">${dateStr}${method}</span>
+                                <span class="font-medium">${format(Math.abs(Number(p.amount)))}</span>
+                            </div>
+                            ${collectedBy}
+                        </li>
+                    `
+                }).join('')
+
+                return `
+                    <div class="flex flex-col gap-1 min-w-[210px]">
+                        <span class="font-medium text-emerald-700 dark:text-emerald-400 text-sm">${format(paid)}</span>
+                        <ul class="text-[11px] space-y-1 max-h-32 overflow-y-auto pr-1 border-l-2 border-emerald-200 dark:border-emerald-900 pl-2">
+                            ${rows}
+                        </ul>
+                    </div>
+                `
             },
             defaultContent: '<span class="text-muted-foreground text-xs">—</span>',
         },
@@ -827,13 +1043,26 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             responsivePriority: 6,
             render: (_data: any, _type: string, row: AdmissionItem) => {
                 // Show dash if no finalBill at all
-                if (!row.finalBill || row.finalBill.due_amount === undefined || row.finalBill.due_amount === null) {
+                if (!row.finalBill) {
                     return '<span class="text-muted-foreground text-xs">—</span>'
                 }
-                const due = parseFloat(String(row.finalBill.due_amount))
+                // final_bills.due_amount is clamped to >= 0 at write time, so it can never
+                // reflect an overpayment. Recompute the true signed due directly from
+                // total_discounted_amount - paid_amount (negative => overpaid) when available.
+                const totalDiscounted = row.finalBill.total_discounted_amount !== undefined && row.finalBill.total_discounted_amount !== null
+                    ? parseFloat(String(row.finalBill.total_discounted_amount)) : null
+                const paidAmt = row.finalBill.paid_amount !== undefined && row.finalBill.paid_amount !== null
+                    ? parseFloat(String(row.finalBill.paid_amount)) : null
+                const trueDue = totalDiscounted !== null && paidAmt !== null
+                    ? totalDiscounted - paidAmt
+                    : (row.finalBill.due_amount !== undefined && row.finalBill.due_amount !== null ? parseFloat(String(row.finalBill.due_amount)) : null)
+                if (trueDue === null) return '<span class="text-muted-foreground text-xs">—</span>'
                 // 0 due = fully paid → green dash
-                if (due === 0) return '<span class="text-muted-foreground text-xs text-emerald-600">—</span>'
-                return `<span class="font-medium text-red-700 dark:text-red-400">${format(due)}</span>`
+                if (trueDue === 0) return '<span class="text-muted-foreground text-xs text-emerald-600">—</span>'
+                if (trueDue < 0) {
+                    return `<span class="font-medium text-blue-700 dark:text-blue-400">Overpaid ${format(Math.abs(trueDue))}</span>`
+                }
+                return `<span class="font-medium text-red-700 dark:text-red-400">${format(trueDue)}</span>`
             },
             defaultContent: '<span class="text-muted-foreground text-xs">—</span>',
         },
@@ -867,8 +1096,18 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             orderable: false,
             responsivePriority: 1,
             render: (_data: any, _type: string, row: AdmissionItem) => {
-                const dueAmount = row.finalBill?.due_amount ? parseFloat(String(row.finalBill.due_amount)) : 0;
-                const hasOverpayment = dueAmount < 0;
+                // final_bills.due_amount is clamped to >= 0 at write time, so it can never
+                // reflect an overpayment. Recompute the true signed due directly from
+                // total_discounted_amount - paid_amount (negative => overpaid) when available.
+                const totalDiscounted = row.finalBill?.total_discounted_amount !== undefined && row.finalBill?.total_discounted_amount !== null
+                    ? parseFloat(String(row.finalBill.total_discounted_amount)) : null;
+                const paidAmt = row.finalBill?.paid_amount !== undefined && row.finalBill?.paid_amount !== null
+                    ? parseFloat(String(row.finalBill.paid_amount)) : null;
+                const trueDue = totalDiscounted !== null && paidAmt !== null
+                    ? totalDiscounted - paidAmt
+                    : (row.finalBill?.due_amount ? parseFloat(String(row.finalBill.due_amount)) : 0);
+                const dueAmount = trueDue > 0 ? trueDue : 0;
+                const hasOverpayment = trueDue < 0;
 
                 const escQuote = (str: string | null | undefined) => (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
@@ -889,6 +1128,16 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                         Billing
                     </button>
                 `;
+
+                if (row.final_bill_created == 1 && dueAmount > 0) {
+                    buttons += `
+                        <button onclick="handleRecordFinalBillPayment('${row.id}', ${dueAmount})"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-semibold shadow transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="1" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            Payment
+                        </button>
+                    `;
+                }
 
                 if (row.discharged == 1 && row.bills_distributed != 1) {
                     buttons += `
@@ -1648,11 +1897,30 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
             }
         }
 
+        const handleRecordFinalBillPayment = (admissionId: string, dueAmount: number) => {
+            const mappings = (paymentMappingsData as any)?.data || {}
+            const finalBillMapping = mappings.indoor_final_bill_payment || {}
+            const methods: { name: string }[] = finalBillMapping.methods || []
+            const firstMethod = methods[0]?.name || 'Cash'
+
+            setPaymentModal({
+                open: true,
+                admissionId,
+                amount: dueAmount > 0 ? String(dueAmount) : '',
+                maxAmount: dueAmount,
+                paymentMethod: firstMethod,
+                date: toYMD(new Date()),
+                notes: '',
+            })
+        }
+
         ;(window as any).handleAdvancePayment = handleAdvancePayment
         ;(window as any).printAdmissionForm = printAdmissionForm
+        ;(window as any).handleRecordFinalBillPayment = handleRecordFinalBillPayment
         return () => {
             delete (window as any).handleAdvancePayment
             delete (window as any).printAdmissionForm
+            delete (window as any).handleRecordFinalBillPayment
         }
     }, [paymentMappingsData])
 
@@ -1901,6 +2169,129 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                 </div>
             )}
 
+            {paymentModal.open && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-md p-6 m-4 max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                                    <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                </div>
+                                <h2 className="text-xl font-bold">Record Payment</h2>
+                            </div>
+                            <button
+                                onClick={() => setPaymentModal({ ...paymentModal, open: false })}
+                                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <div className="flex items-center justify-between mb-1">
+                                    <label className="block text-sm font-medium">Amount ({currencySymbol})</label>
+                                    <span className="text-xs text-muted-foreground">Due: {format(paymentModal.maxAmount)}</span>
+                                </div>
+                                <input
+                                    type="number"
+                                    value={paymentModal.amount}
+                                    onChange={(e) => setPaymentModal({ ...paymentModal, amount: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-800"
+                                    placeholder="Enter amount"
+                                    min="0"
+                                    max={paymentModal.maxAmount || undefined}
+                                    step="0.01"
+                                />
+                                {Number(paymentModal.amount) > paymentModal.maxAmount && (
+                                    <p className="text-xs text-rose-600 mt-1">Amount cannot exceed the due ({format(paymentModal.maxAmount)}).</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Payment Method</label>
+                                <select
+                                    value={paymentModal.paymentMethod}
+                                    onChange={(e) => setPaymentModal({ ...paymentModal, paymentMethod: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-800"
+                                >
+                                    {(((paymentMappingsData as any)?.data?.indoor_final_bill_payment?.methods || []) as { name: string }[]).length > 0
+                                        ? ((paymentMappingsData as any).data.indoor_final_bill_payment.methods as { name: string }[]).map((m, i) => (
+                                            <option key={i} value={m.name}>{m.name}</option>
+                                        ))
+                                        : ['Cash', 'Card', 'Bank Transfer', 'Mobile Banking'].map((name) => (
+                                            <option key={name} value={name}>{name}</option>
+                                        ))
+                                    }
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Payment Date</label>
+                                <DateField
+                                    value={paymentModal.date}
+                                    onChange={(v: string) => setPaymentModal({ ...paymentModal, date: v })}
+                                    disabled={!isChangeable('indoor_payment_date_changeable') || recordPaymentMutation.isPending}
+                                    className="w-full h-10"
+                                />
+                                {!isChangeable('indoor_payment_date_changeable') && (
+                                    <p className="text-xs text-muted-foreground mt-1">Locked to today by settings.</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Notes</label>
+                                <textarea
+                                    value={paymentModal.notes}
+                                    onChange={(e) => setPaymentModal({ ...paymentModal, notes: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-800"
+                                    placeholder="Add notes (optional)"
+                                    rows={2}
+                                />
+                            </div>
+
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    onClick={() => setPaymentModal({ ...paymentModal, open: false })}
+                                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (!paymentModal.admissionId || !paymentModal.amount || Number(paymentModal.amount) <= 0) {
+                                            alert('Please enter a valid amount')
+                                            return
+                                        }
+                                        recordPaymentMutation.mutate({
+                                            admissionId: paymentModal.admissionId,
+                                            amount: paymentModal.amount,
+                                            notes: paymentModal.notes,
+                                            paymentMethod: paymentModal.paymentMethod,
+                                            date: isChangeable('indoor_payment_date_changeable') ? paymentModal.date : '',
+                                        })
+                                    }}
+                                    disabled={recordPaymentMutation.isPending || !paymentModal.amount || Number(paymentModal.amount) <= 0 || Number(paymentModal.amount) > paymentModal.maxAmount}
+                                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                    {recordPaymentMutation.isPending ? (
+                                        <>
+                                            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            Recording...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <DollarSign className="w-4 h-4" />
+                                            Record Payment
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <AppHeader fixed />
 
             <Main fluid className=" w-full flex-1 dark:bg-black/20">
@@ -1963,42 +2354,127 @@ export function AdmittedPatientsList({ page, limit, search, setPage, setLimit, s
                         onSearchChange={setSearch}
                         createdRow={createdRow}
                         filterSlot={
-                            <Popover open={openFilter} onOpenChange={setOpenFilter}>
-                                <PopoverTrigger asChild>
-                                    <Button variant="outline" size="sm">
-                                        <Filter className="mr-2 h-4 w-4" />
-                                        {statusFilter !== "all" ? `Status: ${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}` : "Filter Status"}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[200px] p-0">
-                                    <Command>
-                                        <CommandInput placeholder="Search status..." />
-                                        <CommandList>
-                                            <CommandEmpty>No status found.</CommandEmpty>
-                                            <CommandGroup>
-                                                {["all", "active", "discharged", "critical"].map((status) => (
-                                                    <CommandItem
-                                                        key={status}
-                                                        value={status}
-                                                        onSelect={(currentValue) => {
-                                                            setStatusFilter(currentValue === statusFilter ? "all" : currentValue)
-                                                            setOpenFilter(false)
-                                                        }}
-                                                    >
-                                                        <Check
-                                                            className={cn(
-                                                                "mr-2 h-4 w-4",
-                                                                statusFilter === status ? "opacity-100" : "opacity-0"
-                                                            )}
-                                                        />
-                                                        {status === "all" ? "All Status" : status.charAt(0).toUpperCase() + status.slice(1)}
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
+                            <>
+                                <Popover open={openFilter} onOpenChange={setOpenFilter}>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="outline" size="sm">
+                                            <Filter className="mr-2 h-4 w-4" />
+                                            {statusFilter !== "all" ? `Status: ${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}` : "Filter Status"}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[200px] p-0">
+                                        <Command>
+                                            <CommandInput placeholder="Search status..." />
+                                            <CommandList>
+                                                <CommandEmpty>No status found.</CommandEmpty>
+                                                <CommandGroup>
+                                                    {["all", "active", "discharged", "critical"].map((status) => (
+                                                        <CommandItem
+                                                            key={status}
+                                                            value={status}
+                                                            onSelect={(currentValue) => {
+                                                                setStatusFilter(currentValue === statusFilter ? "all" : currentValue)
+                                                                setOpenFilter(false)
+                                                            }}
+                                                        >
+                                                            <Check
+                                                                className={cn(
+                                                                    "mr-2 h-4 w-4",
+                                                                    statusFilter === status ? "opacity-100" : "opacity-0"
+                                                                )}
+                                                            />
+                                                            {status === "all" ? "All Status" : status.charAt(0).toUpperCase() + status.slice(1)}
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
+                                {/* Address filters — division → district → thana cascade + village search */}
+                                <div className="flex items-center gap-1.5">
+                                    <LocationSelect
+                                        level="division"
+                                        value={divisionFilter}
+                                        onChange={filterByDivision}
+                                        placeholder="Division"
+                                        className="h-9 w-[140px]"
+                                    />
+                                    <LocationSelect
+                                        level="district"
+                                        parentId={divisionId}
+                                        value={districtFilter}
+                                        onChange={filterByDistrict}
+                                        placeholder="District"
+                                        className="h-9 w-[140px]"
+                                    />
+                                    <LocationSelect
+                                        level="thana"
+                                        parentId={districtId}
+                                        value={thanaFilter}
+                                        onChange={(row) => { setThanaFilter(row?.name || ""); setPage(1); }}
+                                        placeholder="Thana"
+                                        className="h-9 w-[130px]"
+                                    />
+                                    <Input
+                                        value={villageInput}
+                                        onChange={(e) => { setVillageInput(e.target.value); setPage(1); }}
+                                        placeholder="Village"
+                                        className="h-9 w-[130px]"
+                                    />
+                                    {hasAddressFilter && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={clearAddressFilters}
+                                        >
+                                            <X className="mr-1 h-3.5 w-3.5" /> Clear
+                                        </Button>
+                                    )}
+                                </div>
+                                {setFrom && setTo && (
+                                    <div className="flex items-center gap-1.5">
+                                        <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>
+                                            <SelectTrigger className="w-[140px] h-9 rounded-md border-gray-200 dark:border-gray-700 bg-transparent text-sm">
+                                                <SelectValue placeholder="Filter by admission" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="today">Today</SelectItem>
+                                                <SelectItem value="yesterday">Yesterday</SelectItem>
+                                                <SelectItem value="last7">Last 7 days</SelectItem>
+                                                <SelectItem value="last15">Last 15 days</SelectItem>
+                                                <SelectItem value="last30">Last 30 days</SelectItem>
+                                                <SelectItem value="last45">Last 45 days</SelectItem>
+                                                <SelectItem value="last60">Last 60 days</SelectItem>
+                                                <SelectItem value="last90">Last 90 days</SelectItem>
+                                                <SelectItem value="last180">Last 180 days</SelectItem>
+                                                <SelectItem value="last365">Last 365 days</SelectItem>
+                                                <SelectItem value="custom">Custom range</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <DateField
+                                            value={from}
+                                            onChange={(v: string) => { setFrom(v); setPresetOpen(false); }}
+                                            placeholder="From"
+                                        />
+                                        <span className="text-xs text-muted-foreground">to</span>
+                                        <DateField
+                                            value={to}
+                                            onChange={(v: string) => { setTo(v); setPresetOpen(false); }}
+                                            placeholder="To"
+                                        />
+                                        {(from || to) && (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => { setFrom(""); setTo(""); }}
+                                            >
+                                                Clear
+                                            </Button>
+                                        )}
+                                    </div>
+                                )}
+                            </>
                         }
                     />
                 </div>

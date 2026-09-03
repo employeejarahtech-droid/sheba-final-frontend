@@ -23,6 +23,8 @@ type LabTest = {
   test_id: number | null
   test_name: string | null
   test_result: string | null
+  sample_result: string | null
+  sample_normal_range: string | null
   machine_id: number | null
   test_carried_out_by: string | null
   status: 'complete' | 'incomplete' | null
@@ -97,7 +99,7 @@ function EditReportHormone() {
       const initialResults: Record<number, string> = {};
       invoiceData.hormon_all_info.forEach(test => {
         if (test.id) {
-          initialResults[test.id] = test.test_result || '';
+          initialResults[test.id] = test.test_result || test.sample_result || '';
         }
       });
       setTestResults(initialResults);
@@ -174,7 +176,7 @@ function EditReportHormone() {
 
       {/* Main */}
       <Main>
-        <div className="p-4 space-y-5 w-full min-w-[650px] max-w-[950px] mx-auto px-4">
+        <div className="p-4 space-y-5 w-full min-w-[650px] max-w-[1100px] mx-auto px-4">
           <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
             <div className="flex items-center gap-4">
               <Button
@@ -306,9 +308,9 @@ function EditReportHormone() {
                   <table className="min-w-full">
                     <thead className="bg-gray-100">
                       <tr>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Hormone Record ID</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Test Information</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Test Result</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[30%]">Test Information</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[30%]">Reference Range</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b w-[40%]">Test Result</th>
                       </tr>
                     </thead>
 
@@ -318,7 +320,6 @@ function EditReportHormone() {
                           key={test.id}
                           className={`${index % 2 === 0 ? `bg-white` : `bg-gray-50`} hover:bg-gray-100`}
                         >
-                          <td className="px-4 py-3 text-sm text-gray-700 border-b font-medium">{test.id}</td>
                           <td className="px-4 py-3 text-sm text-gray-700 border-b">
                             {test.test_name ? (
                               <div>
@@ -327,6 +328,11 @@ function EditReportHormone() {
                               </div>
                             ) : (
                               <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600 border-b whitespace-pre-line">
+                            {test.sample_normal_range || (
+                              <span className="text-gray-400 text-xs italic">No range configured</span>
                             )}
                           </td>
 

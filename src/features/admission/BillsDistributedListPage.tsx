@@ -108,7 +108,7 @@ export function BillsDistributedListPage({
 }: BillsDistributedListPageProps) {
     const navigate = useNavigate()
     const token = getCookie('accessToken')
-    const { format } = useCurrency()
+    const { format, currencySymbol } = useCurrency()
 
     // Support local state fallback or driven by props
     const [localPage, localSetPage] = useState(1);
@@ -241,31 +241,31 @@ export function BillsDistributedListPage({
         },
         {
             data: "bill_amount",
-            title: "Bill",
+            title: `Bill (${currencySymbol})`,
             render: (_: any, __: any, row: AdmissionItem) =>
-                row.finalBill ? format(Number(row.finalBill.total_bill_amount)) : '-'
+                row.finalBill ? Number(row.finalBill.total_bill_amount).toLocaleString() : '-'
         },
         {
             data: "discount",
-            title: "Discount",
+            title: `Discount (${currencySymbol})`,
             render: (_: any, __: any, row: AdmissionItem) =>
-                row.finalBill ? format(Number(row.finalBill.total_discount)) : '-'
+                row.finalBill ? Number(row.finalBill.total_discount).toLocaleString() : '-'
         },
         {
             data: "final_bill",
-            title: "Final Bill",
+            title: `Final Bill (${currencySymbol})`,
             render: (_: any, __: any, row: AdmissionItem) =>
-                row.finalBill ? format(Number(row.finalBill.total_discounted_amount)) : '-'
+                row.finalBill ? Number(row.finalBill.total_discounted_amount).toLocaleString() : '-'
         },
         {
             data: "distributed_amount",
-            title: "Distributed Amount",
+            title: `Distributed Amount (${currencySymbol})`,
             render: (_: any, __: any, row: AdmissionItem) =>
-                row.total_distributed !== undefined ? format(Number(row.total_distributed)) : '-'
+                row.total_distributed !== undefined ? Number(row.total_distributed).toLocaleString() : '-'
         },
         {
             data: "payments",
-            title: "Payments",
+            title: `Payments (${currencySymbol})`,
             orderable: false,
             render: (_: any, __: any, row: AdmissionItem) => {
                 const payments = row.payments || []
@@ -284,7 +284,7 @@ export function BillsDistributedListPage({
                             <span class="text-muted-foreground">${date}</span>
                             <span class="text-muted-foreground">·</span>
                             <span>${method}</span>
-                            <span class="font-semibold ${isRefund ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}">${format(amountNum)}</span>
+                            <span class="font-semibold ${isRefund ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}">${amountNum.toLocaleString()}</span>
                         </div>
                     `
                 }).join('')

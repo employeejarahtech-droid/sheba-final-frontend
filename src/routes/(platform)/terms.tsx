@@ -10,6 +10,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { Sparkles, FileText } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { LandingPageWrapper } from '@/components/layout/landing-layout'
+import { usePageSeo } from '@/lib/seo'
 
 export const Route = createFileRoute('/(platform)/terms')({
   component: TermsPage,
@@ -114,6 +115,13 @@ const sections = [
 ]
 
 function TermsPage() {
+  usePageSeo({
+    title: 'Terms of Service | HMS Hospital Management Software',
+    description:
+      'Terms of Service governing access to and use of the HMS hospital management software platform.',
+    path: '/terms',
+  })
+
   return (
     <LandingPageWrapper>
       {/* Hero */}

@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowDownCircle, ArrowUpCircle, Calendar, DollarSign } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Calendar, DollarSign, Landmark } from 'lucide-react';
 import { useState } from 'react';
+import { useCurrency } from '@/hooks/use-currency';
 
 export const Route = createFileRoute('/_authenticated/dashboard/banks/bank-transactions/')({
     component: BankTransactionsPage,
@@ -29,6 +30,7 @@ type BankTransaction = {
 };
 
 function BankTransactionsPage() {
+    const { format } = useCurrency();
     const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
     const [filterAccount, setFilterAccount] = useState('all');
     const [filterType, setFilterType] = useState('all');
@@ -117,57 +119,44 @@ function BankTransactionsPage() {
                         <p className='text-muted-foreground'>View all bank transactions and account activity</p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
-                                <Calendar className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{filteredTransactions.length}</div>
-                                <p className="text-xs text-muted-foreground">for selected date</p>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Total Deposits</CardTitle>
-                                <ArrowDownCircle className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-green-600 dark:text-green-400">৳{totalDeposits.toLocaleString()}</div>
-                                <p className="text-xs text-muted-foreground">incoming funds</p>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Total Withdrawals</CardTitle>
-                                <ArrowUpCircle className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-red-600 dark:text-red-400">৳{totalWithdrawals.toLocaleString()}</div>
-                                <p className="text-xs text-muted-foreground">outgoing funds</p>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Net Change</CardTitle>
-                                <DollarSign className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className={`text-2xl font-bold ${netChange >= 0 ? `text-green-600 dark:text-green-400` : `text-red-600 dark:text-red-400`}`}>
-                                    {netChange >= 0 ? '+' : ''}৳{netChange.toLocaleString()}
-                                </div>
-                                <p className="text-xs text-muted-foreground">today's change</p>
-                            </CardContent>
-                        </Card>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                        {[
+                            { label: 'Total Transactions', value: String(filteredTransactions.length), sub: 'for selected date', icon: Calendar, grad: 'from-blue-500 to-indigo-500' },
+                            { label: 'Total Deposits', value: format(totalDeposits), sub: 'incoming funds', icon: ArrowDownCircle, grad: 'from-emerald-500 to-teal-500' },
+                            { label: 'Total Withdrawals', value: format(totalWithdrawals), sub: 'outgoing funds', icon: ArrowUpCircle, grad: 'from-rose-500 to-red-500' },
+                            { label: 'Net Change', value: `${netChange >= 0 ? '+' : ''}${format(netChange)}`, sub: "today's change", icon: DollarSign, grad: netChange >= 0 ? 'from-emerald-500 to-teal-500' : 'from-rose-500 to-red-500' },
+                        ].map((card) => {
+                            const Icon = card.icon;
+                            return (
+                                <Card key={card.label} className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2 px-4 gap-0">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className={`p-2 bg-gradient-to-br ${card.grad} rounded-lg shadow-lg`}>
+                                                <Icon className="w-4 h-4 text-white" />
+                                            </div>
+                                            <CardTitle className="text-sm font-semibold text-gray-500 dark:text-gray-400">{card.label}</CardTitle>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="p-4">
+                                        <h3 className="text-2xl font-bold">{card.value}</h3>
+                                        <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
+                                    </CardContent>
+                                </Card>
+                            );
+                        })}
                     </div>
 
-                    <Card>
-                        <CardHeader>
+                    <Card className="overflow-hidden transition-all duration-300 gap-0 shadow-none p-0 border">
+                        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b py-2.5 px-4 gap-0">
                             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div>
-                                    <CardTitle>Transaction History</CardTitle>
-                                    <CardDescription>View and filter bank transactions</CardDescription>
+                                <div className="flex items-center gap-2.5">
+                                    <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
+                                        <Landmark className="w-4 h-4 text-white" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-lg font-bold">Transaction History</CardTitle>
+                                        <CardDescription className="text-xs text-gray-600 dark:text-gray-400">View and filter bank transactions</CardDescription>
+                                    </div>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2">
                                     <div className="flex items-center gap-2">
@@ -204,7 +193,7 @@ function BankTransactionsPage() {
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="p-4">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -243,12 +232,12 @@ function BankTransactionsPage() {
                                                     <TableCell className="font-mono text-sm">{transaction.reference}</TableCell>
                                                     <TableCell className="max-w-xs truncate">{transaction.description}</TableCell>
                                                     <TableCell className="text-right font-semibold text-red-600 dark:text-red-400">
-                                                        {transaction.type === 'withdrawal' ? '৳${transaction.amount.toLocaleString()}' : '-'}
+                                                        {transaction.type === 'withdrawal' ? format(transaction.amount) : '-'}
                                                     </TableCell>
                                                     <TableCell className="text-right font-semibold text-green-600 dark:text-green-400">
-                                                        {transaction.type === 'deposit' ? '৳${transaction.amount.toLocaleString()}' : '-'}
+                                                        {transaction.type === 'deposit' ? format(transaction.amount) : '-'}
                                                     </TableCell>
-                                                    <TableCell className="text-right font-semibold">৳{transaction.balance.toLocaleString()}</TableCell>
+                                                    <TableCell className="text-right font-semibold">{format(transaction.balance)}</TableCell>
                                                     <TableCell className="text-right">
                                                         <Button size="sm" variant="outline">View</Button>
                                                     </TableCell>
@@ -256,10 +245,10 @@ function BankTransactionsPage() {
                                             ))}
                                             <TableRow className="font-bold bg-muted/50">
                                                 <TableCell colSpan={6} className="text-right">Totals</TableCell>
-                                                <TableCell className="text-right text-red-600 dark:text-red-400">৳{totalWithdrawals.toLocaleString()}</TableCell>
-                                                <TableCell className="text-right text-green-600 dark:text-green-400">৳{totalDeposits.toLocaleString()}</TableCell>
+                                                <TableCell className="text-right text-red-600 dark:text-red-400">{format(totalWithdrawals)}</TableCell>
+                                                <TableCell className="text-right text-green-600 dark:text-green-400">{format(totalDeposits)}</TableCell>
                                                 <TableCell className={`text-right ${netChange >= 0 ? `text-green-600 dark:text-green-400` : `text-red-600 dark:text-red-400`}`}>
-                                                    {netChange >= 0 ? '+' : ''}৳{netChange.toLocaleString()}
+                                                    {netChange >= 0 ? '+' : ''}{format(netChange)}
                                                 </TableCell>
                                                 <TableCell></TableCell>
                                             </TableRow>

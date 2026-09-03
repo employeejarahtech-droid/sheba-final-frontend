@@ -59,15 +59,19 @@ function timeAgo(iso: string | null): string {
   return `${day} day${day > 1 ? 's' : ''} ago`
 }
 
-export function RecentActivity() {
+export function RecentActivity({ from, to }: { from?: string; to?: string }) {
   const { currencySymbol } = useCurrency()
   const token = getCookie('accessToken')
 
   const { data, isLoading } = useQuery({
-    queryKey: ['dashboard-recent-activity'],
+    queryKey: ['dashboard-recent-activity', from, to],
     queryFn: async () => {
+      const rangeParam =
+        from && to
+          ? `&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+          : ''
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/reports/recent-activity?limit=8`,
+        `${import.meta.env.VITE_API_URL}/api/reports/recent-activity?limit=8${rangeParam}`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
       if (!res.ok) throw new Error('Failed to fetch recent activity')
@@ -121,8 +125,7 @@ export function RecentActivity() {
             </div>
             {item.amount !== undefined && item.amount !== null && (
               <p className='mt-0.5 text-sm font-semibold text-emerald-600'>
-                {currencySymbol}
-                {item.amount.toLocaleString()}
+                {currencySymbol} {item.amount.toLocaleString()}
               </p>
             )}
           </div>

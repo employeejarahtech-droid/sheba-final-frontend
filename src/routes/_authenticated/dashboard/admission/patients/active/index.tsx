@@ -6,6 +6,7 @@ const activeSearchSchema = z.object({
     page: z.coerce.number().catch(1),
     limit: z.coerce.number().catch(10),
     search: z.string().catch(''),
+    orderBy: z.string().catch('DESC'),
 })
 
 export const Route = createFileRoute('/_authenticated/dashboard/admission/patients/active/')({
@@ -20,6 +21,7 @@ function ActivePatientsPage() {
     const page = Number(searchParams?.page) || 1;
     const limit = Number(searchParams?.limit) || 10;
     const search = searchParams?.search || "";
+    const orderBy = searchParams?.orderBy || "DESC";
 
     const setPage = (newPage: number) => {
         navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
@@ -36,6 +38,7 @@ function ActivePatientsPage() {
             page={page}
             limit={limit}
             search={search}
+            orderBy={orderBy}
             setPage={setPage}
             setLimit={setLimit}
             setSearch={setSearch}

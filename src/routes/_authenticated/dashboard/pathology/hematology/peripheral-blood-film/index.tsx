@@ -24,6 +24,7 @@ const pbfSearchSchema = z.object({
   status: z.string().catch('all'),
   from: z.string().catch(''),
   to: z.string().catch(''),
+  orderBy: z.string().optional(),
 })
 
 export const Route = createFileRoute(
@@ -63,6 +64,14 @@ function PeripheralBloodFilm() {
   const statusFilter = searchParams?.status || "all";
   const from = searchParams?.from || "";
   const to = searchParams?.to || "";
+  const orderBy = searchParams?.orderBy || "DESC";
+
+  // Reflect the default sort (Receipt ID DESC) in the URL.
+  useEffect(() => {
+    if (!searchParams?.orderBy) {
+      navigate({ to: '.', search: (prev: any) => ({ ...prev, orderBy: 'DESC' }), replace: true });
+    }
+  }, []);
 
   const setPage = (newPage: number) => {
     navigate({ to: '.', search: (prev: any) => ({ ...prev, page: newPage }) });
@@ -89,14 +98,14 @@ function PeripheralBloodFilm() {
   const { formatDateTime: fmtDateTime } = useDateFormat();
 
   const { data, isFetching } = useQuery({
-    queryKey: ["peripheral-blood", page, limit, search, statusFilter, from, to],
+    queryKey: ["peripheral-blood", page, limit, search, statusFilter, from, to, orderBy],
 
     queryFn: async () => {
       const statusParam = statusFilter !== "all" ? `&status=${encodeURIComponent(statusFilter)}` : "";
       const fromParam = from ? `&from=${encodeURIComponent(from)}` : "";
       const toParam = to ? `&to=${encodeURIComponent(to)}` : "";
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/peripheral-blood?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}`,
+        `${import.meta.env.VITE_API_URL}/api/peripheral-blood?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${statusParam}${fromParam}${toParam}&orderBy=${encodeURIComponent(orderBy)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -371,10 +380,11 @@ function PeripheralBloodFilm() {
   const columns = [
     {
       data: "invoice_id",
-      title: "Invoice ID",
+      title: "Receipt No",
       orderable: true,
       responsivePriority: 2,
-      render: (data: any, _type: string, row: ReportsItem) => {
+      render: (data: any, type: string, row: ReportsItem) => {
+        if (type === 'sort' || type === 'type') return data;
         const date = fmtDateTime(row.created_at);
         const status = row.status || 'Pending';
         return `
@@ -386,7 +396,7 @@ function PeripheralBloodFilm() {
                     data-date="${date}"
                     data-status="${status}"
                     data-report-id="${row.id}">+</button>
-            <span>${data}</span>
+            <span class="font-mono text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-1 rounded">${data}</span>
           </div>
         `;
       },
@@ -464,7 +474,7 @@ function PeripheralBloodFilm() {
     <>
       <AppHeader fixed />
       <main>
-        <div className="p-4 space-y-3">
+        <div className="space-y-3">
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

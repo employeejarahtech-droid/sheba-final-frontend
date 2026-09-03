@@ -23,10 +23,11 @@ const COLORS = ['#10B981', '#F97316', '#EC4899', '#14B8A6', '#F59E0B', '#3B82F6'
 interface CustomerLedgerItem {
   id: number
   patient_name: string
-  patient_phone: string | null
+  phone: string | null
   department_name: string | null
-  bill_amount: number
-  collected_amount: number
+  total_amount: number
+  total_paid: number
+  due_amount: number
   created_at: string
 }
 
@@ -80,8 +81,8 @@ function CustomerLedgerPrint() {
   const flatItems = items.length > 0 && Array.isArray(items[0]) ? items[0] : items
 
   const stats = useMemo(() => {
-    const totalBilled = flatItems.reduce((s: number, i: any) => s + Number(i.bill_amount || 0), 0)
-    const totalCollected = flatItems.reduce((s: number, i: any) => s + Number(i.collected_amount || 0), 0)
+    const totalBilled = flatItems.reduce((s: number, i: any) => s + Number(i.total_amount || 0), 0)
+    const totalCollected = flatItems.reduce((s: number, i: any) => s + Number(i.total_paid || 0), 0)
     const outstanding = totalBilled - totalCollected
     const totalFromMeta = data?.data?.meta?.total ?? flatItems.length
 
@@ -238,16 +239,16 @@ function CustomerLedgerPrint() {
         </thead>
         <tbody>
           {flatItems.map((item: CustomerLedgerItem, idx: number) => {
-            const balance = Number(item.bill_amount || 0) - Number(item.collected_amount || 0)
+            const balance = Number(item.due_amount || 0)
             return (
               <tr key={item.id || idx} className="border-b border-dashed">
                 <td className="px-2 py-1 text-xs text-gray-500">{idx + 1}</td>
                 <td className="px-2 py-1 text-xs font-mono font-semibold">{item.id || '-'}</td>
                 <td className="px-2 py-1 text-xs font-medium">{item.patient_name || '-'}</td>
-                <td className="px-2 py-1 text-xs font-mono">{item.patient_phone || '-'}</td>
+                <td className="px-2 py-1 text-xs font-mono">{item.phone || '-'}</td>
                 <td className="px-2 py-1 text-xs">{item.department_name || '-'}</td>
-                <td className="px-2 py-1 text-xs text-right">{Number(item.bill_amount || 0).toFixed(2)}</td>
-                <td className="px-2 py-1 text-xs text-right text-emerald-600 font-bold">{Number(item.collected_amount || 0).toFixed(2)}</td>
+                <td className="px-2 py-1 text-xs text-right">{Number(item.total_amount || 0).toFixed(2)}</td>
+                <td className="px-2 py-1 text-xs text-right text-emerald-600 font-bold">{Number(item.total_paid || 0).toFixed(2)}</td>
                 <td className="px-2 py-1 text-xs text-right font-bold">{balance > 0 ? `${balance.toFixed(2)}` : '0.00'}</td>
                 <td className="px-2 py-1 text-xs">{item.created_at ? safeFormatDate(item.created_at) : '-'}</td>
               </tr>

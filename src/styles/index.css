@@ -152,6 +152,19 @@ table.dataTable thead th {
   border-bottom: 2px solid hsl(var(--border));
 }
 
+/* `table.dataTable thead th` above is more specific than a bare Tailwind
+   `.text-right`/`.text-center` utility class, so columns configured with
+   className: "text-right" (or "text-center") in DataTable.tsx render their
+   header left-aligned while the body cells align correctly — these two
+   rules restore the intended header alignment. */
+table.dataTable thead th.text-right {
+  text-align: right;
+}
+
+table.dataTable thead th.text-center {
+  text-align: center;
+}
+
 table.dataTable tbody td {
   padding: 0.75rem 1rem;
   font-size: 0.875rem; /* Match body font size */

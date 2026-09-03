@@ -221,9 +221,9 @@ function DailyTransactionsPrint() {
         </Button>
       </div>
 
-      {/* Header */}
-      <div className="mb-2">
-        <div className='flex justify-center items-center gap-6'>
+      {/* Header: Logo/Company (left) + Report Title (right) */}
+      <div className="mb-2 flex items-start justify-between gap-6">
+        <div className="w-1/2 flex items-center gap-4">
           {companyLogo ? (
             <img
               src={companyLogo}
@@ -232,20 +232,23 @@ function DailyTransactionsPrint() {
             />
           ) : null}
 
-          <div className="text-center">
+          <div>
             <h1 className="text-xl font-bold">{companyName}</h1>
-            <p className="text-xs mt-1 leading-4">
-              {[companySettings?.address1, companySettings?.address2].filter(Boolean).join(', ')}
-            </p>
+            {companySettings?.address1 && (
+              <p className="text-xs mt-1 leading-4">{companySettings.address1}</p>
+            )}
+            {companySettings?.address2 && (
+              <p className="text-xs leading-4">{companySettings.address2}</p>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* ── Title ──────────────────────────────────────────────────────── */}
-      <h1 className="text-lg font-bold text-center underline mb-1 tracking-wide uppercase">
-        DAILY TRANSACTIONS REPORT
-      </h1>
-      <p className="text-center text-xs text-gray-600 mb-2">Complete record of daily financial transactions</p>
+        <div className="w-1/2 text-right">
+          <h2 className="text-lg font-bold tracking-widest uppercase">Daily Transactions Report</h2>
+          <p className="text-xs text-gray-600 mt-1">Complete record of daily financial transactions</p>
+          <p className="text-xs mt-1 leading-4">Generated: {safeFormatDate(new Date())}</p>
+        </div>
+      </div>
 
       {/* ── Filter Period ───────────────────────────────────────────────── */}
       {(start_date || end_date || search) && (

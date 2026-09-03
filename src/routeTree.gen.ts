@@ -49,6 +49,7 @@ import { Route as platformAdminProfileRouteImport } from './routes/(platform)/ad
 import { Route as platformAdminNginxDomainListRouteImport } from './routes/(platform)/admin/nginx-domain-list'
 import { Route as platformAdminModulesRouteImport } from './routes/(platform)/admin/modules'
 import { Route as platformAdminLoginRouteImport } from './routes/(platform)/admin/login'
+import { Route as platformAdminDatabaseMigrationRouteImport } from './routes/(platform)/admin/database-migration'
 import { Route as platformAdminContactsRouteImport } from './routes/(platform)/admin/contacts'
 import { Route as platformAdminCommonCommandsRouteImport } from './routes/(platform)/admin/common-commands'
 import { Route as platformAdminAdminsRouteImport } from './routes/(platform)/admin/admins'
@@ -60,6 +61,8 @@ import { Route as AuthenticatedDashboardSettingsIndexRouteImport } from './route
 import { Route as AuthenticatedDashboardRolesIndexRouteImport } from './routes/_authenticated/dashboard/roles/index'
 import { Route as AuthenticatedDashboardResetDatabaseIndexRouteImport } from './routes/_authenticated/dashboard/reset-database/index'
 import { Route as AuthenticatedDashboardPurchaseIndexRouteImport } from './routes/_authenticated/dashboard/purchase/index'
+import { Route as AuthenticatedDashboardPrescriptionsIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/index'
+import { Route as AuthenticatedDashboardPharmacyIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/index'
 import { Route as AuthenticatedDashboardNotificationsIndexRouteImport } from './routes/_authenticated/dashboard/notifications/index'
 import { Route as AuthenticatedDashboardMyAccountIndexRouteImport } from './routes/_authenticated/dashboard/my-account/index'
 import { Route as AuthenticatedDashboardHelpIndexRouteImport } from './routes/_authenticated/dashboard/help/index'
@@ -84,6 +87,7 @@ import { Route as AuthenticatedDashboardSettingsNotificationsRouteImport } from 
 import { Route as AuthenticatedDashboardSettingsInventoryAccountsRouteImport } from './routes/_authenticated/dashboard/settings/inventory-accounts'
 import { Route as AuthenticatedDashboardSettingsDomainConfigurationRouteImport } from './routes/_authenticated/dashboard/settings/domain-configuration'
 import { Route as AuthenticatedDashboardSettingsDisplayRouteImport } from './routes/_authenticated/dashboard/settings/display'
+import { Route as AuthenticatedDashboardSettingsDefaultDataRouteImport } from './routes/_authenticated/dashboard/settings/default-data'
 import { Route as AuthenticatedDashboardSettingsDateControlsRouteImport } from './routes/_authenticated/dashboard/settings/date-controls'
 import { Route as AuthenticatedDashboardSettingsAppearanceRouteImport } from './routes/_authenticated/dashboard/settings/appearance'
 import { Route as AuthenticatedDashboardSettingsAppInventoryRouteImport } from './routes/_authenticated/dashboard/settings/app-inventory'
@@ -105,6 +109,30 @@ import { Route as AuthenticatedDashboardPurchaseSupplierPerformanceIndexRouteImp
 import { Route as AuthenticatedDashboardPurchaseStatisticsIndexRouteImport } from './routes/_authenticated/dashboard/purchase/statistics/index'
 import { Route as AuthenticatedDashboardPurchaseRequestsIndexRouteImport } from './routes/_authenticated/dashboard/purchase/requests/index'
 import { Route as AuthenticatedDashboardPurchaseGoodsReceiptIndexRouteImport } from './routes/_authenticated/dashboard/purchase/goods-receipt/index'
+import { Route as AuthenticatedDashboardPrescriptionsQuickPhrasesIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/quick-phrases/index'
+import { Route as AuthenticatedDashboardPrescriptionsPatientsIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/patients/index'
+import { Route as AuthenticatedDashboardPrescriptionsMyPrescriptionsIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/my-prescriptions/index'
+import { Route as AuthenticatedDashboardPrescriptionsMedicinesIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/medicines/index'
+import { Route as AuthenticatedDashboardPrescriptionsMedicineGroupsIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/medicine-groups/index'
+import { Route as AuthenticatedDashboardPrescriptionsDashboardIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/dashboard/index'
+import { Route as AuthenticatedDashboardPrescriptionsCreateIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/create/index'
+import { Route as AuthenticatedDashboardPharmacySuppliersIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/suppliers/index'
+import { Route as AuthenticatedDashboardPharmacySupplierDuesIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/supplier-dues/index'
+import { Route as AuthenticatedDashboardPharmacyStockReportIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/stock-report/index'
+import { Route as AuthenticatedDashboardPharmacyStockLedgerIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/stock-ledger/index'
+import { Route as AuthenticatedDashboardPharmacyStockInIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/stock-in/index'
+import { Route as AuthenticatedDashboardPharmacyStockAdjustmentsIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/stock-adjustments/index'
+import { Route as AuthenticatedDashboardPharmacyShiftsIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/shifts/index'
+import { Route as AuthenticatedDashboardPharmacySalesIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/sales/index'
+import { Route as AuthenticatedDashboardPharmacySalesReturnsIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/sales-returns/index'
+import { Route as AuthenticatedDashboardPharmacyReorderIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/reorder/index'
+import { Route as AuthenticatedDashboardPharmacyPurchaseReturnsIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/purchase-returns/index'
+import { Route as AuthenticatedDashboardPharmacyPurchaseOrdersIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/purchase-orders/index'
+import { Route as AuthenticatedDashboardPharmacyMedicinesIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/medicines/index'
+import { Route as AuthenticatedDashboardPharmacyLowStockIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/low-stock/index'
+import { Route as AuthenticatedDashboardPharmacyExpiryReportIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/expiry-report/index'
+import { Route as AuthenticatedDashboardPharmacyCustomersIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/customers/index'
+import { Route as AuthenticatedDashboardPharmacyCategoriesIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/categories/index'
 import { Route as AuthenticatedDashboardPayrollSalaryStructureIndexRouteImport } from './routes/_authenticated/dashboard/payroll/salary-structure/index'
 import { Route as AuthenticatedDashboardPayrollOverviewIndexRouteImport } from './routes/_authenticated/dashboard/payroll/overview/index'
 import { Route as AuthenticatedDashboardPayrollEmployeesIndexRouteImport } from './routes/_authenticated/dashboard/payroll/employees/index'
@@ -113,8 +141,12 @@ import { Route as AuthenticatedDashboardPayrollAllPayrollsIndexRouteImport } fro
 import { Route as AuthenticatedDashboardPathologyDashboardIndexRouteImport } from './routes/_authenticated/dashboard/pathology/dashboard/index'
 import { Route as AuthenticatedDashboardPathologyCustomTestsIndexRouteImport } from './routes/_authenticated/dashboard/pathology/custom-tests/index'
 import { Route as AuthenticatedDashboardOutdoorDashboardIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/dashboard/index'
+import { Route as AuthenticatedDashboardIndoorDashboardIndexRouteImport } from './routes/_authenticated/dashboard/indoor/dashboard/index'
+import { Route as AuthenticatedDashboardFinanceReconciliationIndexRouteImport } from './routes/_authenticated/dashboard/finance/reconciliation/index'
 import { Route as AuthenticatedDashboardFinancePaymentsIndexRouteImport } from './routes/_authenticated/dashboard/finance/payments/index'
+import { Route as AuthenticatedDashboardFinancePaymentHistoryIndexRouteImport } from './routes/_authenticated/dashboard/finance/payment-history/index'
 import { Route as AuthenticatedDashboardEcgAllIndexRouteImport } from './routes/_authenticated/dashboard/ecg/all/index'
+import { Route as AuthenticatedDashboardDiagnosticsDashboardIndexRouteImport } from './routes/_authenticated/dashboard/diagnostics/dashboard/index'
 import { Route as AuthenticatedDashboardBanksBankWithdrawalsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-withdrawals/index'
 import { Route as AuthenticatedDashboardBanksBankTransactionsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-transactions/index'
 import { Route as AuthenticatedDashboardBanksBankDepositsIndexRouteImport } from './routes/_authenticated/dashboard/banks/bank-deposits/index'
@@ -152,6 +184,9 @@ import { Route as AuthenticatedDashboardAccountingExpensesIndexRouteImport } fro
 import { Route as AuthenticatedDashboardAccountingExpenseIndexRouteImport } from './routes/_authenticated/dashboard/accounting/expense/index'
 import { Route as AuthenticatedDashboardAccountingAccountsIndexRouteImport } from './routes/_authenticated/dashboard/accounting/accounts/index'
 import { Route as AuthenticatedDashboardRolesEditIdRouteImport } from './routes/_authenticated/dashboard/roles/edit/$id'
+import { Route as AuthenticatedDashboardPrescriptionsIdPrintRouteImport } from './routes/_authenticated/dashboard/prescriptions/$id/print'
+import { Route as AuthenticatedDashboardAccountingIncomePrintRouteImport } from './routes/_authenticated/dashboard/accounting/income/print'
+import { Route as AuthenticatedDashboardAccountingAccountsPrintRouteImport } from './routes/_authenticated/dashboard/accounting/accounts/print'
 import { Route as platformAdminPlansEditPlanIdRouteImport } from './routes/(platform)/admin/plans/edit.$planId'
 import { Route as AuthenticatedDashboardAdmissionNewAdmissionIndexBakRouteImport } from './routes/_authenticated/dashboard/admission/new-admission/index.bak'
 import { Route as AuthenticatedDashboardReportsPayrollSalarySheetIndexRouteImport } from './routes/_authenticated/dashboard/reports/payroll/salary-sheet/index'
@@ -204,6 +239,26 @@ import { Route as AuthenticatedDashboardPurchaseSuppliersCreateIndexRouteImport 
 import { Route as AuthenticatedDashboardPurchaseRequestsPendingIndexRouteImport } from './routes/_authenticated/dashboard/purchase/requests/pending/index'
 import { Route as AuthenticatedDashboardPurchaseRequestsCreateIndexRouteImport } from './routes/_authenticated/dashboard/purchase/requests/create/index'
 import { Route as AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRouteImport } from './routes/_authenticated/dashboard/purchase/goods-receipt/create/index'
+import { Route as AuthenticatedDashboardPrescriptionsReportsPatientWiseIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/reports/patient-wise/index'
+import { Route as AuthenticatedDashboardPrescriptionsReportsMedicineWiseIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/reports/medicine-wise/index'
+import { Route as AuthenticatedDashboardPrescriptionsReportsDoctorWiseIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/reports/doctor-wise/index'
+import { Route as AuthenticatedDashboardPrescriptionsPatientsCreateIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/patients/create/index'
+import { Route as AuthenticatedDashboardPrescriptionsPatientsIdIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/patients/$id/index'
+import { Route as AuthenticatedDashboardPrescriptionsMedicinesCreateIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/medicines/create/index'
+import { Route as AuthenticatedDashboardPrescriptionsMedicineGroupsCreateIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/medicine-groups/create/index'
+import { Route as AuthenticatedDashboardPrescriptionsEditIdIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/edit/$id/index'
+import { Route as AuthenticatedDashboardPharmacySuppliersCreateIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/suppliers/create/index'
+import { Route as AuthenticatedDashboardPharmacySupplierDuesIdIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/supplier-dues/$id/index'
+import { Route as AuthenticatedDashboardPharmacyStockInCreateIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/stock-in/create/index'
+import { Route as AuthenticatedDashboardPharmacyStockAdjustmentsCreateIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/stock-adjustments/create/index'
+import { Route as AuthenticatedDashboardPharmacySalesCreateIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/sales/create/index'
+import { Route as AuthenticatedDashboardPharmacySalesReturnsCreateIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/sales-returns/create/index'
+import { Route as AuthenticatedDashboardPharmacyPurchaseReturnsCreateIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/purchase-returns/create/index'
+import { Route as AuthenticatedDashboardPharmacyPurchaseOrdersCreateIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/purchase-orders/create/index'
+import { Route as AuthenticatedDashboardPharmacyPurchaseOrdersIdIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/purchase-orders/$id/index'
+import { Route as AuthenticatedDashboardPharmacyMedicinesCreateIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/medicines/create/index'
+import { Route as AuthenticatedDashboardPharmacyCustomersIdIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/customers/$id/index'
+import { Route as AuthenticatedDashboardPharmacyCategoriesCreateIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/categories/create/index'
 import { Route as AuthenticatedDashboardPayrollSalaryStaffIdIndexRouteImport } from './routes/_authenticated/dashboard/payroll/salary/$staffId/index'
 import { Route as AuthenticatedDashboardPayrollAttendanceStaffIdIndexRouteImport } from './routes/_authenticated/dashboard/payroll/attendance/$staffId/index'
 import { Route as AuthenticatedDashboardPathologyUrineUrineForSugarIndexRouteImport } from './routes/_authenticated/dashboard/pathology/urine/urine-for-sugar/index'
@@ -214,6 +269,7 @@ import { Route as AuthenticatedDashboardPathologyStoolReducingSubstanceIndexRout
 import { Route as AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRouteImport } from './routes/_authenticated/dashboard/pathology/stool/ocult-blood-test/index'
 import { Route as AuthenticatedDashboardPathologyImmunologyWidalTestIndexRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/widal-test/index'
 import { Route as AuthenticatedDashboardPathologyImmunologyMtIndexRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/mt/index'
+import { Route as AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningIndexRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/cross-matching-screening/index'
 import { Route as AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/blood-group/index'
 import { Route as AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/beta-hcg/index'
 import { Route as AuthenticatedDashboardPathologyImmunologyAllIndexRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/all/index'
@@ -260,17 +316,27 @@ import { Route as AuthenticatedDashboardIndoorMasterBedCabinTypesIndexRouteImpor
 import { Route as AuthenticatedDashboardIndoorMasterBedCabinListIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/bed-cabin-list/index'
 import { Route as AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/anasthesia-types/index'
 import { Route as AuthenticatedDashboardIndoorManagementSurgeonBillIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/surgeon-bill/index'
+import { Route as AuthenticatedDashboardIndoorManagementOtherBillsIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/other-bills/index'
 import { Route as AuthenticatedDashboardIndoorManagementDoctorReferredIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/doctor-referred/index'
 import { Route as AuthenticatedDashboardIndoorManagementDistributionsIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/distributions/index'
+import { Route as AuthenticatedDashboardIndoorManagementConsultantBillIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/consultant-bill/index'
 import { Route as AuthenticatedDashboardIndoorManagementClinicalBillsIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/clinical-bills/index'
 import { Route as AuthenticatedDashboardIndoorManagementAssistantBillIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/assistant-bill/index'
 import { Route as AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRouteImport } from './routes/_authenticated/dashboard/indoor/management/anesthesia-bill/index'
+import { Route as AuthenticatedDashboardFinanceDoctorBillsSurgeonBillIndexRouteImport } from './routes/_authenticated/dashboard/finance/doctor-bills/surgeon-bill/index'
+import { Route as AuthenticatedDashboardFinanceDoctorBillsInvoicesIndexRouteImport } from './routes/_authenticated/dashboard/finance/doctor-bills/invoices/index'
+import { Route as AuthenticatedDashboardFinanceDoctorBillsDashboardIndexRouteImport } from './routes/_authenticated/dashboard/finance/doctor-bills/dashboard/index'
+import { Route as AuthenticatedDashboardFinanceDoctorBillsConsultantBillIndexRouteImport } from './routes/_authenticated/dashboard/finance/doctor-bills/consultant-bill/index'
+import { Route as AuthenticatedDashboardFinanceDoctorBillsClinicalBillsIndexRouteImport } from './routes/_authenticated/dashboard/finance/doctor-bills/clinical-bills/index'
+import { Route as AuthenticatedDashboardFinanceDoctorBillsAssistantBillIndexRouteImport } from './routes/_authenticated/dashboard/finance/doctor-bills/assistant-bill/index'
+import { Route as AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillIndexRouteImport } from './routes/_authenticated/dashboard/finance/doctor-bills/anesthesia-bill/index'
 import { Route as AuthenticatedDashboardAssetsMaintenanceCreateIndexRouteImport } from './routes/_authenticated/dashboard/assets/maintenance/create/index'
 import { Route as AuthenticatedDashboardAssetsLocationsCreateIndexRouteImport } from './routes/_authenticated/dashboard/assets/locations/create/index'
 import { Route as AuthenticatedDashboardAssetsListCreateIndexRouteImport } from './routes/_authenticated/dashboard/assets/list/create/index'
 import { Route as AuthenticatedDashboardAssetsCategoriesCreateIndexRouteImport } from './routes/_authenticated/dashboard/assets/categories/create/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/payment-completed-list/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsPaidIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/paid/index'
+import { Route as AuthenticatedDashboardAdmissionPatientsOverpaidIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/overpaid/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/final-bill-created-list/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsDueIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/due/index'
 import { Route as AuthenticatedDashboardAdmissionPatientsDischargedIndexRouteImport } from './routes/_authenticated/dashboard/admission/patients/discharged/index'
@@ -346,6 +412,7 @@ import { Route as AuthenticatedDashboardReportsAccountingIncomeVsExpensePrintRou
 import { Route as AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRouteImport } from './routes/_authenticated/dashboard/reports/accounting/daily-transactions/print'
 import { Route as AuthenticatedDashboardReportsAccountingCashFlowPrintRouteImport } from './routes/_authenticated/dashboard/reports/accounting/cash-flow/print'
 import { Route as AuthenticatedDashboardReportsAccountingBankBookPrintRouteImport } from './routes/_authenticated/dashboard/reports/accounting/bank-book/print'
+import { Route as AuthenticatedDashboardPharmacySalesIdPrintRouteImport } from './routes/_authenticated/dashboard/pharmacy/sales/$id/print'
 import { Route as AuthenticatedDashboardPathologyCustomTestsReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/custom-tests/report/$reportId'
 import { Route as AuthenticatedDashboardPathologyCustomTestsEditIdRouteImport } from './routes/_authenticated/dashboard/pathology/custom-tests/edit/$id'
 import { Route as AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId'
@@ -354,6 +421,7 @@ import { Route as AuthenticatedDashboardOutdoorMasterTestTablesIdRouteImport } f
 import { Route as AuthenticatedDashboardOutdoorMasterDoctorsCreateRouteImport } from './routes/_authenticated/dashboard/outdoor/master/doctors/create'
 import { Route as AuthenticatedDashboardOutdoorMasterDepartmentsIdRouteImport } from './routes/_authenticated/dashboard/outdoor/master/departments/$id'
 import { Route as AuthenticatedDashboardOutdoorMasterCategoriesIdRouteImport } from './routes/_authenticated/dashboard/outdoor/master/categories/$id'
+import { Route as AuthenticatedDashboardIndoorMasterTreatmentOutcomesIdRouteImport } from './routes/_authenticated/dashboard/indoor/master/treatment-outcomes/$id'
 import { Route as AuthenticatedDashboardIndoorMasterServicesIdRouteImport } from './routes/_authenticated/dashboard/indoor/master/services/$id'
 import { Route as AuthenticatedDashboardIndoorMasterBedCabinListIdRouteImport } from './routes/_authenticated/dashboard/indoor/master/bed-cabin-list/$id'
 import { Route as AuthenticatedDashboardEcgAllPrintIdRouteImport } from './routes/_authenticated/dashboard/ecg/all/print/$id'
@@ -367,11 +435,22 @@ import { Route as AuthenticatedDashboardAccountingReportsJournalPrintRouteImport
 import { Route as AuthenticatedDashboardAccountingReportsDailySummaryPrintRouteImport } from './routes/_authenticated/dashboard/accounting/reports/daily-summary/print'
 import { Route as AuthenticatedDashboardAccountingReportsCashFlowPrintRouteImport } from './routes/_authenticated/dashboard/accounting/reports/cash-flow/print'
 import { Route as AuthenticatedDashboardAccountingReportsBalanceSheetPrintRouteImport } from './routes/_authenticated/dashboard/accounting/reports/balance-sheet/print'
+import { Route as AuthenticatedDashboardAccountingIncomeIncomeIdPrintRouteImport } from './routes/_authenticated/dashboard/accounting/income/$incomeId/print'
+import { Route as AuthenticatedDashboardAccountingExpensesExpenseIdPrintRouteImport } from './routes/_authenticated/dashboard/accounting/expenses/$expenseId/print'
 import { Route as AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRouteImport } from './routes/_authenticated/dashboard/reports/my/outdoor/today-collection/index'
 import { Route as AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRouteImport } from './routes/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/index'
 import { Route as AuthenticatedDashboardPurchaseSuppliersEditIdIndexRouteImport } from './routes/_authenticated/dashboard/purchase/suppliers/edit/$id/index'
 import { Route as AuthenticatedDashboardPurchaseRequestsEditIdIndexRouteImport } from './routes/_authenticated/dashboard/purchase/requests/edit/$id/index'
 import { Route as AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRouteImport } from './routes/_authenticated/dashboard/purchase/goods-receipt/edit/$id/index'
+import { Route as AuthenticatedDashboardPrescriptionsPatientsEditIdIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/patients/edit/$id/index'
+import { Route as AuthenticatedDashboardPrescriptionsMedicinesEditIdIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/medicines/edit/$id/index'
+import { Route as AuthenticatedDashboardPrescriptionsMedicineGroupsEditIdIndexRouteImport } from './routes/_authenticated/dashboard/prescriptions/medicine-groups/edit/$id/index'
+import { Route as AuthenticatedDashboardPharmacySuppliersEditIdIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/suppliers/edit/$id/index'
+import { Route as AuthenticatedDashboardPharmacySalesIdReturnIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/sales/$id/return/index'
+import { Route as AuthenticatedDashboardPharmacySalesIdEditIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/sales/$id/edit/index'
+import { Route as AuthenticatedDashboardPharmacyMedicinesEditIdIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/medicines/edit/$id/index'
+import { Route as AuthenticatedDashboardPharmacyMedicinesIdBatchesIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/medicines/$id/batches/index'
+import { Route as AuthenticatedDashboardPharmacyCategoriesEditIdIndexRouteImport } from './routes/_authenticated/dashboard/pharmacy/categories/edit/$id/index'
 import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/list/index'
 import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/create/index'
 import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/index'
@@ -379,6 +458,11 @@ import { Route as AuthenticatedDashboardOutdoorMasterTestsCreateIndexRouteImport
 import { Route as AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/doctors/$doctorId/index'
 import { Route as AuthenticatedDashboardIndoorMasterServicesCreateIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/services/create/index'
 import { Route as AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRouteImport } from './routes/_authenticated/dashboard/indoor/master/bed-cabin-list/create/index'
+import { Route as AuthenticatedDashboardFinanceDoctorBillsSurgeonBillPaidIndexRouteImport } from './routes/_authenticated/dashboard/finance/doctor-bills/surgeon-bill/paid/index'
+import { Route as AuthenticatedDashboardFinanceDoctorBillsInvoicesDashboardIndexRouteImport } from './routes/_authenticated/dashboard/finance/doctor-bills/invoices/dashboard/index'
+import { Route as AuthenticatedDashboardFinanceDoctorBillsConsultantBillPaidIndexRouteImport } from './routes/_authenticated/dashboard/finance/doctor-bills/consultant-bill/paid/index'
+import { Route as AuthenticatedDashboardFinanceDoctorBillsAssistantBillPaidIndexRouteImport } from './routes/_authenticated/dashboard/finance/doctor-bills/assistant-bill/paid/index'
+import { Route as AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillPaidIndexRouteImport } from './routes/_authenticated/dashboard/finance/doctor-bills/anesthesia-bill/paid/index'
 import { Route as AuthenticatedDashboardAssetsMaintenanceEditIdIndexRouteImport } from './routes/_authenticated/dashboard/assets/maintenance/edit/$id/index'
 import { Route as AuthenticatedDashboardAssetsLocationsEditIdIndexRouteImport } from './routes/_authenticated/dashboard/assets/locations/edit/$id/index'
 import { Route as AuthenticatedDashboardAssetsListEditIdIndexRouteImport } from './routes/_authenticated/dashboard/assets/list/edit/$id/index'
@@ -406,6 +490,7 @@ import { Route as AuthenticatedDashboardPathologyStoolReducingSubstanceReportRep
 import { Route as AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/stool/ocult-blood-test/report/$reportId'
 import { Route as AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/widal-test/report/$reportId'
 import { Route as AuthenticatedDashboardPathologyImmunologyMtReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/mt/report/$reportId'
+import { Route as AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/cross-matching-screening/report/$reportId'
 import { Route as AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/blood-group/report/$reportId'
 import { Route as AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/beta-hcg/report/$reportId'
 import { Route as AuthenticatedDashboardPathologyImmunologyAllReportReportIdRouteImport } from './routes/_authenticated/dashboard/pathology/immunology/all/report/$reportId'
@@ -431,6 +516,7 @@ import { Route as AuthenticatedDashboardPathologyBiochemicalAllEditReportIdRoute
 import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/note'
 import { Route as AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRouteImport } from './routes/_authenticated/dashboard/outdoor/master/doctors/$doctorId/edit'
 import { Route as AuthenticatedDashboardIndoorMasterServicesEditIdRouteImport } from './routes/_authenticated/dashboard/indoor/master/services/edit/$id'
+import { Route as AuthenticatedDashboardFinanceDoctorBillsInvoicesInvoiceIdPrintRouteImport } from './routes/_authenticated/dashboard/finance/doctor-bills/invoices/$invoiceId/print'
 import { Route as AuthenticatedDashboardEcgAllEditBuilderIdRouteImport } from './routes/_authenticated/dashboard/ecg/all/edit/builder/$id'
 import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/print/$step'
 import { Route as AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRouteImport } from './routes/_authenticated/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId'
@@ -439,6 +525,7 @@ import { Route as AuthenticatedDashboardPathologyHormoneAllEditIdIndexRouteImpor
 import { Route as AuthenticatedDashboardPathologyHematologyAllEditIdIndexRouteImport } from './routes/_authenticated/dashboard/pathology/hematology/all/edit/[$id]/index'
 import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/edit/$invoiceId/index'
 import { Route as AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRouteImport } from './routes/_authenticated/dashboard/outdoor/master/tests/edit/[$id]/index'
+import { Route as AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdPaymentReceiptPaymentIdRouteImport } from './routes/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/payment-receipt/$paymentId'
 
 const ClerkRouteRoute = ClerkRouteRouteImport.update({
   id: '/clerk',
@@ -641,6 +728,12 @@ const platformAdminLoginRoute = platformAdminLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => platformAdminRouteRoute,
 } as any)
+const platformAdminDatabaseMigrationRoute =
+  platformAdminDatabaseMigrationRouteImport.update({
+    id: '/database-migration',
+    path: '/database-migration',
+    getParentRoute: () => platformAdminRouteRoute,
+  } as any)
 const platformAdminContactsRoute = platformAdminContactsRouteImport.update({
   id: '/contacts',
   path: '/contacts',
@@ -703,6 +796,18 @@ const AuthenticatedDashboardPurchaseIndexRoute =
   AuthenticatedDashboardPurchaseIndexRouteImport.update({
     id: '/dashboard/purchase/',
     path: '/dashboard/purchase/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsIndexRoute =
+  AuthenticatedDashboardPrescriptionsIndexRouteImport.update({
+    id: '/dashboard/prescriptions/',
+    path: '/dashboard/prescriptions/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyIndexRoute =
+  AuthenticatedDashboardPharmacyIndexRouteImport.update({
+    id: '/dashboard/pharmacy/',
+    path: '/dashboard/pharmacy/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardNotificationsIndexRoute =
@@ -848,6 +953,12 @@ const AuthenticatedDashboardSettingsDisplayRoute =
     path: '/display',
     getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
   } as any)
+const AuthenticatedDashboardSettingsDefaultDataRoute =
+  AuthenticatedDashboardSettingsDefaultDataRouteImport.update({
+    id: '/default-data',
+    path: '/default-data',
+    getParentRoute: () => AuthenticatedDashboardSettingsRouteRoute,
+  } as any)
 const AuthenticatedDashboardSettingsDateControlsRoute =
   AuthenticatedDashboardSettingsDateControlsRouteImport.update({
     id: '/date-controls',
@@ -973,6 +1084,150 @@ const AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute =
     path: '/dashboard/purchase/goods-receipt/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardPrescriptionsQuickPhrasesIndexRoute =
+  AuthenticatedDashboardPrescriptionsQuickPhrasesIndexRouteImport.update({
+    id: '/dashboard/prescriptions/quick-phrases/',
+    path: '/dashboard/prescriptions/quick-phrases/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsPatientsIndexRoute =
+  AuthenticatedDashboardPrescriptionsPatientsIndexRouteImport.update({
+    id: '/dashboard/prescriptions/patients/',
+    path: '/dashboard/prescriptions/patients/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsMyPrescriptionsIndexRoute =
+  AuthenticatedDashboardPrescriptionsMyPrescriptionsIndexRouteImport.update({
+    id: '/dashboard/prescriptions/my-prescriptions/',
+    path: '/dashboard/prescriptions/my-prescriptions/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsMedicinesIndexRoute =
+  AuthenticatedDashboardPrescriptionsMedicinesIndexRouteImport.update({
+    id: '/dashboard/prescriptions/medicines/',
+    path: '/dashboard/prescriptions/medicines/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsMedicineGroupsIndexRoute =
+  AuthenticatedDashboardPrescriptionsMedicineGroupsIndexRouteImport.update({
+    id: '/dashboard/prescriptions/medicine-groups/',
+    path: '/dashboard/prescriptions/medicine-groups/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsDashboardIndexRoute =
+  AuthenticatedDashboardPrescriptionsDashboardIndexRouteImport.update({
+    id: '/dashboard/prescriptions/dashboard/',
+    path: '/dashboard/prescriptions/dashboard/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsCreateIndexRoute =
+  AuthenticatedDashboardPrescriptionsCreateIndexRouteImport.update({
+    id: '/dashboard/prescriptions/create/',
+    path: '/dashboard/prescriptions/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacySuppliersIndexRoute =
+  AuthenticatedDashboardPharmacySuppliersIndexRouteImport.update({
+    id: '/dashboard/pharmacy/suppliers/',
+    path: '/dashboard/pharmacy/suppliers/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacySupplierDuesIndexRoute =
+  AuthenticatedDashboardPharmacySupplierDuesIndexRouteImport.update({
+    id: '/dashboard/pharmacy/supplier-dues/',
+    path: '/dashboard/pharmacy/supplier-dues/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyStockReportIndexRoute =
+  AuthenticatedDashboardPharmacyStockReportIndexRouteImport.update({
+    id: '/dashboard/pharmacy/stock-report/',
+    path: '/dashboard/pharmacy/stock-report/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyStockLedgerIndexRoute =
+  AuthenticatedDashboardPharmacyStockLedgerIndexRouteImport.update({
+    id: '/dashboard/pharmacy/stock-ledger/',
+    path: '/dashboard/pharmacy/stock-ledger/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyStockInIndexRoute =
+  AuthenticatedDashboardPharmacyStockInIndexRouteImport.update({
+    id: '/dashboard/pharmacy/stock-in/',
+    path: '/dashboard/pharmacy/stock-in/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyStockAdjustmentsIndexRoute =
+  AuthenticatedDashboardPharmacyStockAdjustmentsIndexRouteImport.update({
+    id: '/dashboard/pharmacy/stock-adjustments/',
+    path: '/dashboard/pharmacy/stock-adjustments/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyShiftsIndexRoute =
+  AuthenticatedDashboardPharmacyShiftsIndexRouteImport.update({
+    id: '/dashboard/pharmacy/shifts/',
+    path: '/dashboard/pharmacy/shifts/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacySalesIndexRoute =
+  AuthenticatedDashboardPharmacySalesIndexRouteImport.update({
+    id: '/dashboard/pharmacy/sales/',
+    path: '/dashboard/pharmacy/sales/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacySalesReturnsIndexRoute =
+  AuthenticatedDashboardPharmacySalesReturnsIndexRouteImport.update({
+    id: '/dashboard/pharmacy/sales-returns/',
+    path: '/dashboard/pharmacy/sales-returns/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyReorderIndexRoute =
+  AuthenticatedDashboardPharmacyReorderIndexRouteImport.update({
+    id: '/dashboard/pharmacy/reorder/',
+    path: '/dashboard/pharmacy/reorder/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyPurchaseReturnsIndexRoute =
+  AuthenticatedDashboardPharmacyPurchaseReturnsIndexRouteImport.update({
+    id: '/dashboard/pharmacy/purchase-returns/',
+    path: '/dashboard/pharmacy/purchase-returns/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyPurchaseOrdersIndexRoute =
+  AuthenticatedDashboardPharmacyPurchaseOrdersIndexRouteImport.update({
+    id: '/dashboard/pharmacy/purchase-orders/',
+    path: '/dashboard/pharmacy/purchase-orders/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyMedicinesIndexRoute =
+  AuthenticatedDashboardPharmacyMedicinesIndexRouteImport.update({
+    id: '/dashboard/pharmacy/medicines/',
+    path: '/dashboard/pharmacy/medicines/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyLowStockIndexRoute =
+  AuthenticatedDashboardPharmacyLowStockIndexRouteImport.update({
+    id: '/dashboard/pharmacy/low-stock/',
+    path: '/dashboard/pharmacy/low-stock/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyExpiryReportIndexRoute =
+  AuthenticatedDashboardPharmacyExpiryReportIndexRouteImport.update({
+    id: '/dashboard/pharmacy/expiry-report/',
+    path: '/dashboard/pharmacy/expiry-report/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyCustomersIndexRoute =
+  AuthenticatedDashboardPharmacyCustomersIndexRouteImport.update({
+    id: '/dashboard/pharmacy/customers/',
+    path: '/dashboard/pharmacy/customers/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyCategoriesIndexRoute =
+  AuthenticatedDashboardPharmacyCategoriesIndexRouteImport.update({
+    id: '/dashboard/pharmacy/categories/',
+    path: '/dashboard/pharmacy/categories/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardPayrollSalaryStructureIndexRoute =
   AuthenticatedDashboardPayrollSalaryStructureIndexRouteImport.update({
     id: '/dashboard/payroll/salary-structure/',
@@ -1021,16 +1276,40 @@ const AuthenticatedDashboardOutdoorDashboardIndexRoute =
     path: '/dashboard/outdoor/dashboard/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardIndoorDashboardIndexRoute =
+  AuthenticatedDashboardIndoorDashboardIndexRouteImport.update({
+    id: '/dashboard/indoor/dashboard/',
+    path: '/dashboard/indoor/dashboard/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardFinanceReconciliationIndexRoute =
+  AuthenticatedDashboardFinanceReconciliationIndexRouteImport.update({
+    id: '/dashboard/finance/reconciliation/',
+    path: '/dashboard/finance/reconciliation/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardFinancePaymentsIndexRoute =
   AuthenticatedDashboardFinancePaymentsIndexRouteImport.update({
     id: '/dashboard/finance/payments/',
     path: '/dashboard/finance/payments/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardFinancePaymentHistoryIndexRoute =
+  AuthenticatedDashboardFinancePaymentHistoryIndexRouteImport.update({
+    id: '/dashboard/finance/payment-history/',
+    path: '/dashboard/finance/payment-history/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardEcgAllIndexRoute =
   AuthenticatedDashboardEcgAllIndexRouteImport.update({
     id: '/dashboard/ecg/all/',
     path: '/dashboard/ecg/all/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardDiagnosticsDashboardIndexRoute =
+  AuthenticatedDashboardDiagnosticsDashboardIndexRouteImport.update({
+    id: '/dashboard/diagnostics/dashboard/',
+    path: '/dashboard/diagnostics/dashboard/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardBanksBankWithdrawalsIndexRoute =
@@ -1253,6 +1532,24 @@ const AuthenticatedDashboardRolesEditIdRoute =
   AuthenticatedDashboardRolesEditIdRouteImport.update({
     id: '/dashboard/roles/edit/$id',
     path: '/dashboard/roles/edit/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsIdPrintRoute =
+  AuthenticatedDashboardPrescriptionsIdPrintRouteImport.update({
+    id: '/dashboard/prescriptions/$id/print',
+    path: '/dashboard/prescriptions/$id/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAccountingIncomePrintRoute =
+  AuthenticatedDashboardAccountingIncomePrintRouteImport.update({
+    id: '/dashboard/accounting/income/print',
+    path: '/dashboard/accounting/income/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAccountingAccountsPrintRoute =
+  AuthenticatedDashboardAccountingAccountsPrintRouteImport.update({
+    id: '/dashboard/accounting/accounts/print',
+    path: '/dashboard/accounting/accounts/print',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const platformAdminPlansEditPlanIdRoute =
@@ -1593,6 +1890,130 @@ const AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute =
     path: '/dashboard/purchase/goods-receipt/create/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardPrescriptionsReportsPatientWiseIndexRoute =
+  AuthenticatedDashboardPrescriptionsReportsPatientWiseIndexRouteImport.update({
+    id: '/dashboard/prescriptions/reports/patient-wise/',
+    path: '/dashboard/prescriptions/reports/patient-wise/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsReportsMedicineWiseIndexRoute =
+  AuthenticatedDashboardPrescriptionsReportsMedicineWiseIndexRouteImport.update(
+    {
+      id: '/dashboard/prescriptions/reports/medicine-wise/',
+      path: '/dashboard/prescriptions/reports/medicine-wise/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPrescriptionsReportsDoctorWiseIndexRoute =
+  AuthenticatedDashboardPrescriptionsReportsDoctorWiseIndexRouteImport.update({
+    id: '/dashboard/prescriptions/reports/doctor-wise/',
+    path: '/dashboard/prescriptions/reports/doctor-wise/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsPatientsCreateIndexRoute =
+  AuthenticatedDashboardPrescriptionsPatientsCreateIndexRouteImport.update({
+    id: '/dashboard/prescriptions/patients/create/',
+    path: '/dashboard/prescriptions/patients/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsPatientsIdIndexRoute =
+  AuthenticatedDashboardPrescriptionsPatientsIdIndexRouteImport.update({
+    id: '/dashboard/prescriptions/patients/$id/',
+    path: '/dashboard/prescriptions/patients/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsMedicinesCreateIndexRoute =
+  AuthenticatedDashboardPrescriptionsMedicinesCreateIndexRouteImport.update({
+    id: '/dashboard/prescriptions/medicines/create/',
+    path: '/dashboard/prescriptions/medicines/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsMedicineGroupsCreateIndexRoute =
+  AuthenticatedDashboardPrescriptionsMedicineGroupsCreateIndexRouteImport.update(
+    {
+      id: '/dashboard/prescriptions/medicine-groups/create/',
+      path: '/dashboard/prescriptions/medicine-groups/create/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPrescriptionsEditIdIndexRoute =
+  AuthenticatedDashboardPrescriptionsEditIdIndexRouteImport.update({
+    id: '/dashboard/prescriptions/edit/$id/',
+    path: '/dashboard/prescriptions/edit/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacySuppliersCreateIndexRoute =
+  AuthenticatedDashboardPharmacySuppliersCreateIndexRouteImport.update({
+    id: '/dashboard/pharmacy/suppliers/create/',
+    path: '/dashboard/pharmacy/suppliers/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacySupplierDuesIdIndexRoute =
+  AuthenticatedDashboardPharmacySupplierDuesIdIndexRouteImport.update({
+    id: '/dashboard/pharmacy/supplier-dues/$id/',
+    path: '/dashboard/pharmacy/supplier-dues/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyStockInCreateIndexRoute =
+  AuthenticatedDashboardPharmacyStockInCreateIndexRouteImport.update({
+    id: '/dashboard/pharmacy/stock-in/create/',
+    path: '/dashboard/pharmacy/stock-in/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyStockAdjustmentsCreateIndexRoute =
+  AuthenticatedDashboardPharmacyStockAdjustmentsCreateIndexRouteImport.update({
+    id: '/dashboard/pharmacy/stock-adjustments/create/',
+    path: '/dashboard/pharmacy/stock-adjustments/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacySalesCreateIndexRoute =
+  AuthenticatedDashboardPharmacySalesCreateIndexRouteImport.update({
+    id: '/dashboard/pharmacy/sales/create/',
+    path: '/dashboard/pharmacy/sales/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacySalesReturnsCreateIndexRoute =
+  AuthenticatedDashboardPharmacySalesReturnsCreateIndexRouteImport.update({
+    id: '/dashboard/pharmacy/sales-returns/create/',
+    path: '/dashboard/pharmacy/sales-returns/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyPurchaseReturnsCreateIndexRoute =
+  AuthenticatedDashboardPharmacyPurchaseReturnsCreateIndexRouteImport.update({
+    id: '/dashboard/pharmacy/purchase-returns/create/',
+    path: '/dashboard/pharmacy/purchase-returns/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyPurchaseOrdersCreateIndexRoute =
+  AuthenticatedDashboardPharmacyPurchaseOrdersCreateIndexRouteImport.update({
+    id: '/dashboard/pharmacy/purchase-orders/create/',
+    path: '/dashboard/pharmacy/purchase-orders/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyPurchaseOrdersIdIndexRoute =
+  AuthenticatedDashboardPharmacyPurchaseOrdersIdIndexRouteImport.update({
+    id: '/dashboard/pharmacy/purchase-orders/$id/',
+    path: '/dashboard/pharmacy/purchase-orders/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyMedicinesCreateIndexRoute =
+  AuthenticatedDashboardPharmacyMedicinesCreateIndexRouteImport.update({
+    id: '/dashboard/pharmacy/medicines/create/',
+    path: '/dashboard/pharmacy/medicines/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyCustomersIdIndexRoute =
+  AuthenticatedDashboardPharmacyCustomersIdIndexRouteImport.update({
+    id: '/dashboard/pharmacy/customers/$id/',
+    path: '/dashboard/pharmacy/customers/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyCategoriesCreateIndexRoute =
+  AuthenticatedDashboardPharmacyCategoriesCreateIndexRouteImport.update({
+    id: '/dashboard/pharmacy/categories/create/',
+    path: '/dashboard/pharmacy/categories/create/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute =
   AuthenticatedDashboardPayrollSalaryStaffIdIndexRouteImport.update({
     id: '/dashboard/payroll/salary/$staffId/',
@@ -1653,6 +2074,14 @@ const AuthenticatedDashboardPathologyImmunologyMtIndexRoute =
     path: '/dashboard/pathology/immunology/mt/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningIndexRoute =
+  AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningIndexRouteImport.update(
+    {
+      id: '/dashboard/pathology/immunology/cross-matching-screening/',
+      path: '/dashboard/pathology/immunology/cross-matching-screening/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute =
   AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRouteImport.update({
     id: '/dashboard/pathology/immunology/blood-group/',
@@ -1943,6 +2372,12 @@ const AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute =
     path: '/dashboard/indoor/management/surgeon-bill/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardIndoorManagementOtherBillsIndexRoute =
+  AuthenticatedDashboardIndoorManagementOtherBillsIndexRouteImport.update({
+    id: '/dashboard/indoor/management/other-bills/',
+    path: '/dashboard/indoor/management/other-bills/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute =
   AuthenticatedDashboardIndoorManagementDoctorReferredIndexRouteImport.update({
     id: '/dashboard/indoor/management/doctor-referred/',
@@ -1953,6 +2388,12 @@ const AuthenticatedDashboardIndoorManagementDistributionsIndexRoute =
   AuthenticatedDashboardIndoorManagementDistributionsIndexRouteImport.update({
     id: '/dashboard/indoor/management/distributions/',
     path: '/dashboard/indoor/management/distributions/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorManagementConsultantBillIndexRoute =
+  AuthenticatedDashboardIndoorManagementConsultantBillIndexRouteImport.update({
+    id: '/dashboard/indoor/management/consultant-bill/',
+    path: '/dashboard/indoor/management/consultant-bill/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute =
@@ -1973,6 +2414,52 @@ const AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute =
     path: '/dashboard/indoor/management/anesthesia-bill/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardFinanceDoctorBillsSurgeonBillIndexRoute =
+  AuthenticatedDashboardFinanceDoctorBillsSurgeonBillIndexRouteImport.update({
+    id: '/dashboard/finance/doctor-bills/surgeon-bill/',
+    path: '/dashboard/finance/doctor-bills/surgeon-bill/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardFinanceDoctorBillsInvoicesIndexRoute =
+  AuthenticatedDashboardFinanceDoctorBillsInvoicesIndexRouteImport.update({
+    id: '/dashboard/finance/doctor-bills/invoices/',
+    path: '/dashboard/finance/doctor-bills/invoices/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardFinanceDoctorBillsDashboardIndexRoute =
+  AuthenticatedDashboardFinanceDoctorBillsDashboardIndexRouteImport.update({
+    id: '/dashboard/finance/doctor-bills/dashboard/',
+    path: '/dashboard/finance/doctor-bills/dashboard/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardFinanceDoctorBillsConsultantBillIndexRoute =
+  AuthenticatedDashboardFinanceDoctorBillsConsultantBillIndexRouteImport.update(
+    {
+      id: '/dashboard/finance/doctor-bills/consultant-bill/',
+      path: '/dashboard/finance/doctor-bills/consultant-bill/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardFinanceDoctorBillsClinicalBillsIndexRoute =
+  AuthenticatedDashboardFinanceDoctorBillsClinicalBillsIndexRouteImport.update({
+    id: '/dashboard/finance/doctor-bills/clinical-bills/',
+    path: '/dashboard/finance/doctor-bills/clinical-bills/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardFinanceDoctorBillsAssistantBillIndexRoute =
+  AuthenticatedDashboardFinanceDoctorBillsAssistantBillIndexRouteImport.update({
+    id: '/dashboard/finance/doctor-bills/assistant-bill/',
+    path: '/dashboard/finance/doctor-bills/assistant-bill/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillIndexRoute =
+  AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillIndexRouteImport.update(
+    {
+      id: '/dashboard/finance/doctor-bills/anesthesia-bill/',
+      path: '/dashboard/finance/doctor-bills/anesthesia-bill/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute =
   AuthenticatedDashboardAssetsMaintenanceCreateIndexRouteImport.update({
     id: '/dashboard/assets/maintenance/create/',
@@ -2009,6 +2496,12 @@ const AuthenticatedDashboardAdmissionPatientsPaidIndexRoute =
   AuthenticatedDashboardAdmissionPatientsPaidIndexRouteImport.update({
     id: '/dashboard/admission/patients/paid/',
     path: '/dashboard/admission/patients/paid/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAdmissionPatientsOverpaidIndexRoute =
+  AuthenticatedDashboardAdmissionPatientsOverpaidIndexRouteImport.update({
+    id: '/dashboard/admission/patients/overpaid/',
+    path: '/dashboard/admission/patients/overpaid/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute =
@@ -2503,6 +2996,12 @@ const AuthenticatedDashboardReportsAccountingBankBookPrintRoute =
     path: '/dashboard/reports/accounting/bank-book/print',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardPharmacySalesIdPrintRoute =
+  AuthenticatedDashboardPharmacySalesIdPrintRouteImport.update({
+    id: '/dashboard/pharmacy/sales/$id/print',
+    path: '/dashboard/pharmacy/sales/$id/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardPathologyCustomTestsReportReportIdRoute =
   AuthenticatedDashboardPathologyCustomTestsReportReportIdRouteImport.update({
     id: '/dashboard/pathology/custom-tests/report/$reportId',
@@ -2551,6 +3050,12 @@ const AuthenticatedDashboardOutdoorMasterCategoriesIdRoute =
   AuthenticatedDashboardOutdoorMasterCategoriesIdRouteImport.update({
     id: '/dashboard/outdoor/master/categories/$id',
     path: '/dashboard/outdoor/master/categories/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndoorMasterTreatmentOutcomesIdRoute =
+  AuthenticatedDashboardIndoorMasterTreatmentOutcomesIdRouteImport.update({
+    id: '/dashboard/indoor/master/treatment-outcomes/$id',
+    path: '/dashboard/indoor/master/treatment-outcomes/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardIndoorMasterServicesIdRoute =
@@ -2631,6 +3136,18 @@ const AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute =
     path: '/dashboard/accounting/reports/balance-sheet/print',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardAccountingIncomeIncomeIdPrintRoute =
+  AuthenticatedDashboardAccountingIncomeIncomeIdPrintRouteImport.update({
+    id: '/dashboard/accounting/income/$incomeId/print',
+    path: '/dashboard/accounting/income/$incomeId/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardAccountingExpensesExpenseIdPrintRoute =
+  AuthenticatedDashboardAccountingExpensesExpenseIdPrintRouteImport.update({
+    id: '/dashboard/accounting/expenses/$expenseId/print',
+    path: '/dashboard/accounting/expenses/$expenseId/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute =
   AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRouteImport.update({
     id: '/dashboard/reports/my/outdoor/today-collection/',
@@ -2661,6 +3178,62 @@ const AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute =
   AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRouteImport.update({
     id: '/dashboard/purchase/goods-receipt/edit/$id/',
     path: '/dashboard/purchase/goods-receipt/edit/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsPatientsEditIdIndexRoute =
+  AuthenticatedDashboardPrescriptionsPatientsEditIdIndexRouteImport.update({
+    id: '/dashboard/prescriptions/patients/edit/$id/',
+    path: '/dashboard/prescriptions/patients/edit/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsMedicinesEditIdIndexRoute =
+  AuthenticatedDashboardPrescriptionsMedicinesEditIdIndexRouteImport.update({
+    id: '/dashboard/prescriptions/medicines/edit/$id/',
+    path: '/dashboard/prescriptions/medicines/edit/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPrescriptionsMedicineGroupsEditIdIndexRoute =
+  AuthenticatedDashboardPrescriptionsMedicineGroupsEditIdIndexRouteImport.update(
+    {
+      id: '/dashboard/prescriptions/medicine-groups/edit/$id/',
+      path: '/dashboard/prescriptions/medicine-groups/edit/$id/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardPharmacySuppliersEditIdIndexRoute =
+  AuthenticatedDashboardPharmacySuppliersEditIdIndexRouteImport.update({
+    id: '/dashboard/pharmacy/suppliers/edit/$id/',
+    path: '/dashboard/pharmacy/suppliers/edit/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacySalesIdReturnIndexRoute =
+  AuthenticatedDashboardPharmacySalesIdReturnIndexRouteImport.update({
+    id: '/dashboard/pharmacy/sales/$id/return/',
+    path: '/dashboard/pharmacy/sales/$id/return/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacySalesIdEditIndexRoute =
+  AuthenticatedDashboardPharmacySalesIdEditIndexRouteImport.update({
+    id: '/dashboard/pharmacy/sales/$id/edit/',
+    path: '/dashboard/pharmacy/sales/$id/edit/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyMedicinesEditIdIndexRoute =
+  AuthenticatedDashboardPharmacyMedicinesEditIdIndexRouteImport.update({
+    id: '/dashboard/pharmacy/medicines/edit/$id/',
+    path: '/dashboard/pharmacy/medicines/edit/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyMedicinesIdBatchesIndexRoute =
+  AuthenticatedDashboardPharmacyMedicinesIdBatchesIndexRouteImport.update({
+    id: '/dashboard/pharmacy/medicines/$id/batches/',
+    path: '/dashboard/pharmacy/medicines/$id/batches/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardPharmacyCategoriesEditIdIndexRoute =
+  AuthenticatedDashboardPharmacyCategoriesEditIdIndexRouteImport.update({
+    id: '/dashboard/pharmacy/categories/edit/$id/',
+    path: '/dashboard/pharmacy/categories/edit/$id/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute =
@@ -2707,6 +3280,46 @@ const AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute =
     path: '/dashboard/indoor/master/bed-cabin-list/create/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardFinanceDoctorBillsSurgeonBillPaidIndexRoute =
+  AuthenticatedDashboardFinanceDoctorBillsSurgeonBillPaidIndexRouteImport.update(
+    {
+      id: '/dashboard/finance/doctor-bills/surgeon-bill/paid/',
+      path: '/dashboard/finance/doctor-bills/surgeon-bill/paid/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardFinanceDoctorBillsInvoicesDashboardIndexRoute =
+  AuthenticatedDashboardFinanceDoctorBillsInvoicesDashboardIndexRouteImport.update(
+    {
+      id: '/dashboard/finance/doctor-bills/invoices/dashboard/',
+      path: '/dashboard/finance/doctor-bills/invoices/dashboard/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardFinanceDoctorBillsConsultantBillPaidIndexRoute =
+  AuthenticatedDashboardFinanceDoctorBillsConsultantBillPaidIndexRouteImport.update(
+    {
+      id: '/dashboard/finance/doctor-bills/consultant-bill/paid/',
+      path: '/dashboard/finance/doctor-bills/consultant-bill/paid/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardFinanceDoctorBillsAssistantBillPaidIndexRoute =
+  AuthenticatedDashboardFinanceDoctorBillsAssistantBillPaidIndexRouteImport.update(
+    {
+      id: '/dashboard/finance/doctor-bills/assistant-bill/paid/',
+      path: '/dashboard/finance/doctor-bills/assistant-bill/paid/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
+const AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillPaidIndexRoute =
+  AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillPaidIndexRouteImport.update(
+    {
+      id: '/dashboard/finance/doctor-bills/anesthesia-bill/paid/',
+      path: '/dashboard/finance/doctor-bills/anesthesia-bill/paid/',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute =
   AuthenticatedDashboardAssetsMaintenanceEditIdIndexRouteImport.update({
     id: '/dashboard/assets/maintenance/edit/$id/',
@@ -2901,6 +3514,14 @@ const AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute =
     path: '/dashboard/pathology/immunology/mt/report/$reportId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningReportReportIdRoute =
+  AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningReportReportIdRouteImport.update(
+    {
+      id: '/dashboard/pathology/immunology/cross-matching-screening/report/$reportId',
+      path: '/dashboard/pathology/immunology/cross-matching-screening/report/$reportId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute =
   AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRouteImport.update(
     {
@@ -3079,6 +3700,14 @@ const AuthenticatedDashboardIndoorMasterServicesEditIdRoute =
     path: '/dashboard/indoor/master/services/edit/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardFinanceDoctorBillsInvoicesInvoiceIdPrintRoute =
+  AuthenticatedDashboardFinanceDoctorBillsInvoicesInvoiceIdPrintRouteImport.update(
+    {
+      id: '/dashboard/finance/doctor-bills/invoices/$invoiceId/print',
+      path: '/dashboard/finance/doctor-bills/invoices/$invoiceId/print',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 const AuthenticatedDashboardEcgAllEditBuilderIdRoute =
   AuthenticatedDashboardEcgAllEditBuilderIdRouteImport.update({
     id: '/dashboard/ecg/all/edit/builder/$id',
@@ -3133,6 +3762,14 @@ const AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute =
     path: '/dashboard/outdoor/master/tests/edit/$id/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdPaymentReceiptPaymentIdRoute =
+  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdPaymentReceiptPaymentIdRouteImport.update(
+    {
+      id: '/dashboard/outdoor/reception/invoices/$invoiceId/payment-receipt/$paymentId',
+      path: '/dashboard/outdoor/reception/invoices/$invoiceId/payment-receipt/$paymentId',
+      getParentRoute: () => AuthenticatedRouteRoute,
+    } as any,
+  )
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -3162,6 +3799,7 @@ export interface FileRoutesByFullPath {
   '/admin/admins': typeof platformAdminAdminsRoute
   '/admin/common-commands': typeof platformAdminCommonCommandsRoute
   '/admin/contacts': typeof platformAdminContactsRoute
+  '/admin/database-migration': typeof platformAdminDatabaseMigrationRoute
   '/admin/login': typeof platformAdminLoginRoute
   '/admin/modules': typeof platformAdminModulesRoute
   '/admin/nginx-domain-list': typeof platformAdminNginxDomainListRoute
@@ -3185,6 +3823,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/app-inventory': typeof AuthenticatedDashboardSettingsAppInventoryRoute
   '/dashboard/settings/appearance': typeof AuthenticatedDashboardSettingsAppearanceRoute
   '/dashboard/settings/date-controls': typeof AuthenticatedDashboardSettingsDateControlsRoute
+  '/dashboard/settings/default-data': typeof AuthenticatedDashboardSettingsDefaultDataRoute
   '/dashboard/settings/display': typeof AuthenticatedDashboardSettingsDisplayRoute
   '/dashboard/settings/domain-configuration': typeof AuthenticatedDashboardSettingsDomainConfigurationRoute
   '/dashboard/settings/inventory-accounts': typeof AuthenticatedDashboardSettingsInventoryAccountsRoute
@@ -3209,6 +3848,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/help': typeof AuthenticatedDashboardHelpIndexRoute
   '/dashboard/my-account': typeof AuthenticatedDashboardMyAccountIndexRoute
   '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsIndexRoute
+  '/dashboard/pharmacy': typeof AuthenticatedDashboardPharmacyIndexRoute
+  '/dashboard/prescriptions': typeof AuthenticatedDashboardPrescriptionsIndexRoute
   '/dashboard/purchase': typeof AuthenticatedDashboardPurchaseIndexRoute
   '/dashboard/reset-database': typeof AuthenticatedDashboardResetDatabaseIndexRoute
   '/dashboard/roles': typeof AuthenticatedDashboardRolesIndexRoute
@@ -3217,6 +3858,9 @@ export interface FileRoutesByFullPath {
   '/dashboard/tasks': typeof AuthenticatedDashboardTasksIndexRoute
   '/dashboard/users': typeof AuthenticatedDashboardUsersIndexRoute
   '/admin/plans/edit/$planId': typeof platformAdminPlansEditPlanIdRoute
+  '/dashboard/accounting/accounts/print': typeof AuthenticatedDashboardAccountingAccountsPrintRoute
+  '/dashboard/accounting/income/print': typeof AuthenticatedDashboardAccountingIncomePrintRoute
+  '/dashboard/prescriptions/$id/print': typeof AuthenticatedDashboardPrescriptionsIdPrintRoute
   '/dashboard/roles/edit/$id': typeof AuthenticatedDashboardRolesEditIdRoute
   '/dashboard/accounting/accounts': typeof AuthenticatedDashboardAccountingAccountsIndexRoute
   '/dashboard/accounting/expense': typeof AuthenticatedDashboardAccountingExpenseIndexRoute
@@ -3254,8 +3898,12 @@ export interface FileRoutesByFullPath {
   '/dashboard/banks/bank-deposits': typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
   '/dashboard/banks/bank-transactions': typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
   '/dashboard/banks/bank-withdrawals': typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
+  '/dashboard/diagnostics/dashboard': typeof AuthenticatedDashboardDiagnosticsDashboardIndexRoute
   '/dashboard/ecg/all': typeof AuthenticatedDashboardEcgAllIndexRoute
+  '/dashboard/finance/payment-history': typeof AuthenticatedDashboardFinancePaymentHistoryIndexRoute
   '/dashboard/finance/payments': typeof AuthenticatedDashboardFinancePaymentsIndexRoute
+  '/dashboard/finance/reconciliation': typeof AuthenticatedDashboardFinanceReconciliationIndexRoute
+  '/dashboard/indoor/dashboard': typeof AuthenticatedDashboardIndoorDashboardIndexRoute
   '/dashboard/outdoor/dashboard': typeof AuthenticatedDashboardOutdoorDashboardIndexRoute
   '/dashboard/pathology/custom-tests': typeof AuthenticatedDashboardPathologyCustomTestsIndexRoute
   '/dashboard/pathology/dashboard': typeof AuthenticatedDashboardPathologyDashboardIndexRoute
@@ -3264,6 +3912,30 @@ export interface FileRoutesByFullPath {
   '/dashboard/payroll/employees': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
   '/dashboard/payroll/overview': typeof AuthenticatedDashboardPayrollOverviewIndexRoute
   '/dashboard/payroll/salary-structure': typeof AuthenticatedDashboardPayrollSalaryStructureIndexRoute
+  '/dashboard/pharmacy/categories': typeof AuthenticatedDashboardPharmacyCategoriesIndexRoute
+  '/dashboard/pharmacy/customers': typeof AuthenticatedDashboardPharmacyCustomersIndexRoute
+  '/dashboard/pharmacy/expiry-report': typeof AuthenticatedDashboardPharmacyExpiryReportIndexRoute
+  '/dashboard/pharmacy/low-stock': typeof AuthenticatedDashboardPharmacyLowStockIndexRoute
+  '/dashboard/pharmacy/medicines': typeof AuthenticatedDashboardPharmacyMedicinesIndexRoute
+  '/dashboard/pharmacy/purchase-orders': typeof AuthenticatedDashboardPharmacyPurchaseOrdersIndexRoute
+  '/dashboard/pharmacy/purchase-returns': typeof AuthenticatedDashboardPharmacyPurchaseReturnsIndexRoute
+  '/dashboard/pharmacy/reorder': typeof AuthenticatedDashboardPharmacyReorderIndexRoute
+  '/dashboard/pharmacy/sales-returns': typeof AuthenticatedDashboardPharmacySalesReturnsIndexRoute
+  '/dashboard/pharmacy/sales': typeof AuthenticatedDashboardPharmacySalesIndexRoute
+  '/dashboard/pharmacy/shifts': typeof AuthenticatedDashboardPharmacyShiftsIndexRoute
+  '/dashboard/pharmacy/stock-adjustments': typeof AuthenticatedDashboardPharmacyStockAdjustmentsIndexRoute
+  '/dashboard/pharmacy/stock-in': typeof AuthenticatedDashboardPharmacyStockInIndexRoute
+  '/dashboard/pharmacy/stock-ledger': typeof AuthenticatedDashboardPharmacyStockLedgerIndexRoute
+  '/dashboard/pharmacy/stock-report': typeof AuthenticatedDashboardPharmacyStockReportIndexRoute
+  '/dashboard/pharmacy/supplier-dues': typeof AuthenticatedDashboardPharmacySupplierDuesIndexRoute
+  '/dashboard/pharmacy/suppliers': typeof AuthenticatedDashboardPharmacySuppliersIndexRoute
+  '/dashboard/prescriptions/create': typeof AuthenticatedDashboardPrescriptionsCreateIndexRoute
+  '/dashboard/prescriptions/dashboard': typeof AuthenticatedDashboardPrescriptionsDashboardIndexRoute
+  '/dashboard/prescriptions/medicine-groups': typeof AuthenticatedDashboardPrescriptionsMedicineGroupsIndexRoute
+  '/dashboard/prescriptions/medicines': typeof AuthenticatedDashboardPrescriptionsMedicinesIndexRoute
+  '/dashboard/prescriptions/my-prescriptions': typeof AuthenticatedDashboardPrescriptionsMyPrescriptionsIndexRoute
+  '/dashboard/prescriptions/patients': typeof AuthenticatedDashboardPrescriptionsPatientsIndexRoute
+  '/dashboard/prescriptions/quick-phrases': typeof AuthenticatedDashboardPrescriptionsQuickPhrasesIndexRoute
   '/dashboard/purchase/goods-receipt': typeof AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute
   '/dashboard/purchase/requests': typeof AuthenticatedDashboardPurchaseRequestsIndexRoute
   '/dashboard/purchase/statistics': typeof AuthenticatedDashboardPurchaseStatisticsIndexRoute
@@ -3275,6 +3947,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/report-settings': typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
   '/dashboard/ultrasonogram/all': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   '/dashboard/x-ray/all': typeof AuthenticatedDashboardXRayAllIndexRoute
+  '/dashboard/accounting/expenses/$expenseId/print': typeof AuthenticatedDashboardAccountingExpensesExpenseIdPrintRoute
+  '/dashboard/accounting/income/$incomeId/print': typeof AuthenticatedDashboardAccountingIncomeIncomeIdPrintRoute
   '/dashboard/accounting/reports/balance-sheet/print': typeof AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute
   '/dashboard/accounting/reports/cash-flow/print': typeof AuthenticatedDashboardAccountingReportsCashFlowPrintRoute
   '/dashboard/accounting/reports/daily-summary/print': typeof AuthenticatedDashboardAccountingReportsDailySummaryPrintRoute
@@ -3288,6 +3962,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/ecg/all/print/$id': typeof AuthenticatedDashboardEcgAllPrintIdRoute
   '/dashboard/indoor/master/bed-cabin-list/$id': typeof AuthenticatedDashboardIndoorMasterBedCabinListIdRoute
   '/dashboard/indoor/master/services/$id': typeof AuthenticatedDashboardIndoorMasterServicesIdRoute
+  '/dashboard/indoor/master/treatment-outcomes/$id': typeof AuthenticatedDashboardIndoorMasterTreatmentOutcomesIdRoute
   '/dashboard/outdoor/master/categories/$id': typeof AuthenticatedDashboardOutdoorMasterCategoriesIdRoute
   '/dashboard/outdoor/master/departments/$id': typeof AuthenticatedDashboardOutdoorMasterDepartmentsIdRoute
   '/dashboard/outdoor/master/doctors/create': typeof AuthenticatedDashboardOutdoorMasterDoctorsCreateRoute
@@ -3296,6 +3971,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
   '/dashboard/pathology/custom-tests/edit/$id': typeof AuthenticatedDashboardPathologyCustomTestsEditIdRoute
   '/dashboard/pathology/custom-tests/report/$reportId': typeof AuthenticatedDashboardPathologyCustomTestsReportReportIdRoute
+  '/dashboard/pharmacy/sales/$id/print': typeof AuthenticatedDashboardPharmacySalesIdPrintRoute
   '/dashboard/reports/accounting/bank-book/print': typeof AuthenticatedDashboardReportsAccountingBankBookPrintRoute
   '/dashboard/reports/accounting/cash-flow/print': typeof AuthenticatedDashboardReportsAccountingCashFlowPrintRoute
   '/dashboard/reports/accounting/daily-transactions/print': typeof AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRoute
@@ -3371,17 +4047,27 @@ export interface FileRoutesByFullPath {
   '/dashboard/admission/patients/discharged': typeof AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute
   '/dashboard/admission/patients/due': typeof AuthenticatedDashboardAdmissionPatientsDueIndexRoute
   '/dashboard/admission/patients/final-bill-created-list': typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
+  '/dashboard/admission/patients/overpaid': typeof AuthenticatedDashboardAdmissionPatientsOverpaidIndexRoute
   '/dashboard/admission/patients/paid': typeof AuthenticatedDashboardAdmissionPatientsPaidIndexRoute
   '/dashboard/admission/patients/payment-completed-list': typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
   '/dashboard/assets/categories/create': typeof AuthenticatedDashboardAssetsCategoriesCreateIndexRoute
   '/dashboard/assets/list/create': typeof AuthenticatedDashboardAssetsListCreateIndexRoute
   '/dashboard/assets/locations/create': typeof AuthenticatedDashboardAssetsLocationsCreateIndexRoute
   '/dashboard/assets/maintenance/create': typeof AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute
+  '/dashboard/finance/doctor-bills/anesthesia-bill': typeof AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillIndexRoute
+  '/dashboard/finance/doctor-bills/assistant-bill': typeof AuthenticatedDashboardFinanceDoctorBillsAssistantBillIndexRoute
+  '/dashboard/finance/doctor-bills/clinical-bills': typeof AuthenticatedDashboardFinanceDoctorBillsClinicalBillsIndexRoute
+  '/dashboard/finance/doctor-bills/consultant-bill': typeof AuthenticatedDashboardFinanceDoctorBillsConsultantBillIndexRoute
+  '/dashboard/finance/doctor-bills/dashboard': typeof AuthenticatedDashboardFinanceDoctorBillsDashboardIndexRoute
+  '/dashboard/finance/doctor-bills/invoices': typeof AuthenticatedDashboardFinanceDoctorBillsInvoicesIndexRoute
+  '/dashboard/finance/doctor-bills/surgeon-bill': typeof AuthenticatedDashboardFinanceDoctorBillsSurgeonBillIndexRoute
   '/dashboard/indoor/management/anesthesia-bill': typeof AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute
   '/dashboard/indoor/management/assistant-bill': typeof AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute
   '/dashboard/indoor/management/clinical-bills': typeof AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute
+  '/dashboard/indoor/management/consultant-bill': typeof AuthenticatedDashboardIndoorManagementConsultantBillIndexRoute
   '/dashboard/indoor/management/distributions': typeof AuthenticatedDashboardIndoorManagementDistributionsIndexRoute
   '/dashboard/indoor/management/doctor-referred': typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
+  '/dashboard/indoor/management/other-bills': typeof AuthenticatedDashboardIndoorManagementOtherBillsIndexRoute
   '/dashboard/indoor/management/surgeon-bill': typeof AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute
   '/dashboard/indoor/master/anasthesia-types': typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   '/dashboard/indoor/master/bed-cabin-list': typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
@@ -3428,6 +4114,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/pathology/immunology/all': typeof AuthenticatedDashboardPathologyImmunologyAllIndexRoute
   '/dashboard/pathology/immunology/beta-hcg': typeof AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRoute
   '/dashboard/pathology/immunology/blood-group': typeof AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute
+  '/dashboard/pathology/immunology/cross-matching-screening': typeof AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningIndexRoute
   '/dashboard/pathology/immunology/mt': typeof AuthenticatedDashboardPathologyImmunologyMtIndexRoute
   '/dashboard/pathology/immunology/widal-test': typeof AuthenticatedDashboardPathologyImmunologyWidalTestIndexRoute
   '/dashboard/pathology/stool/ocult-blood-test': typeof AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRoute
@@ -3438,6 +4125,26 @@ export interface FileRoutesByFullPath {
   '/dashboard/pathology/urine/urine-for-sugar': typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
   '/dashboard/payroll/attendance/$staffId': typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   '/dashboard/payroll/salary/$staffId': typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  '/dashboard/pharmacy/categories/create': typeof AuthenticatedDashboardPharmacyCategoriesCreateIndexRoute
+  '/dashboard/pharmacy/customers/$id': typeof AuthenticatedDashboardPharmacyCustomersIdIndexRoute
+  '/dashboard/pharmacy/medicines/create': typeof AuthenticatedDashboardPharmacyMedicinesCreateIndexRoute
+  '/dashboard/pharmacy/purchase-orders/$id': typeof AuthenticatedDashboardPharmacyPurchaseOrdersIdIndexRoute
+  '/dashboard/pharmacy/purchase-orders/create': typeof AuthenticatedDashboardPharmacyPurchaseOrdersCreateIndexRoute
+  '/dashboard/pharmacy/purchase-returns/create': typeof AuthenticatedDashboardPharmacyPurchaseReturnsCreateIndexRoute
+  '/dashboard/pharmacy/sales-returns/create': typeof AuthenticatedDashboardPharmacySalesReturnsCreateIndexRoute
+  '/dashboard/pharmacy/sales/create': typeof AuthenticatedDashboardPharmacySalesCreateIndexRoute
+  '/dashboard/pharmacy/stock-adjustments/create': typeof AuthenticatedDashboardPharmacyStockAdjustmentsCreateIndexRoute
+  '/dashboard/pharmacy/stock-in/create': typeof AuthenticatedDashboardPharmacyStockInCreateIndexRoute
+  '/dashboard/pharmacy/supplier-dues/$id': typeof AuthenticatedDashboardPharmacySupplierDuesIdIndexRoute
+  '/dashboard/pharmacy/suppliers/create': typeof AuthenticatedDashboardPharmacySuppliersCreateIndexRoute
+  '/dashboard/prescriptions/edit/$id': typeof AuthenticatedDashboardPrescriptionsEditIdIndexRoute
+  '/dashboard/prescriptions/medicine-groups/create': typeof AuthenticatedDashboardPrescriptionsMedicineGroupsCreateIndexRoute
+  '/dashboard/prescriptions/medicines/create': typeof AuthenticatedDashboardPrescriptionsMedicinesCreateIndexRoute
+  '/dashboard/prescriptions/patients/$id': typeof AuthenticatedDashboardPrescriptionsPatientsIdIndexRoute
+  '/dashboard/prescriptions/patients/create': typeof AuthenticatedDashboardPrescriptionsPatientsCreateIndexRoute
+  '/dashboard/prescriptions/reports/doctor-wise': typeof AuthenticatedDashboardPrescriptionsReportsDoctorWiseIndexRoute
+  '/dashboard/prescriptions/reports/medicine-wise': typeof AuthenticatedDashboardPrescriptionsReportsMedicineWiseIndexRoute
+  '/dashboard/prescriptions/reports/patient-wise': typeof AuthenticatedDashboardPrescriptionsReportsPatientWiseIndexRoute
   '/dashboard/purchase/goods-receipt/create': typeof AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute
   '/dashboard/purchase/requests/create': typeof AuthenticatedDashboardPurchaseRequestsCreateIndexRoute
   '/dashboard/purchase/requests/pending': typeof AuthenticatedDashboardPurchaseRequestsPendingIndexRoute
@@ -3492,6 +4199,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute
   '/dashboard/admission/patients/$admissionId/print/$step': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
   '/dashboard/ecg/all/edit/builder/$id': typeof AuthenticatedDashboardEcgAllEditBuilderIdRoute
+  '/dashboard/finance/doctor-bills/invoices/$invoiceId/print': typeof AuthenticatedDashboardFinanceDoctorBillsInvoicesInvoiceIdPrintRoute
   '/dashboard/indoor/master/services/edit/$id': typeof AuthenticatedDashboardIndoorMasterServicesEditIdRoute
   '/dashboard/outdoor/master/doctors/$doctorId/edit': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute
   '/dashboard/outdoor/reception/invoices/$invoiceId/note': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRoute
@@ -3517,6 +4225,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/pathology/immunology/all/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyAllReportReportIdRoute
   '/dashboard/pathology/immunology/beta-hcg/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRoute
   '/dashboard/pathology/immunology/blood-group/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute
+  '/dashboard/pathology/immunology/cross-matching-screening/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningReportReportIdRoute
   '/dashboard/pathology/immunology/mt/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute
   '/dashboard/pathology/immunology/widal-test/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRoute
   '/dashboard/pathology/stool/ocult-blood-test/report/$reportId': typeof AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRoute
@@ -3544,6 +4253,11 @@ export interface FileRoutesByFullPath {
   '/dashboard/assets/list/edit/$id': typeof AuthenticatedDashboardAssetsListEditIdIndexRoute
   '/dashboard/assets/locations/edit/$id': typeof AuthenticatedDashboardAssetsLocationsEditIdIndexRoute
   '/dashboard/assets/maintenance/edit/$id': typeof AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute
+  '/dashboard/finance/doctor-bills/anesthesia-bill/paid': typeof AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillPaidIndexRoute
+  '/dashboard/finance/doctor-bills/assistant-bill/paid': typeof AuthenticatedDashboardFinanceDoctorBillsAssistantBillPaidIndexRoute
+  '/dashboard/finance/doctor-bills/consultant-bill/paid': typeof AuthenticatedDashboardFinanceDoctorBillsConsultantBillPaidIndexRoute
+  '/dashboard/finance/doctor-bills/invoices/dashboard': typeof AuthenticatedDashboardFinanceDoctorBillsInvoicesDashboardIndexRoute
+  '/dashboard/finance/doctor-bills/surgeon-bill/paid': typeof AuthenticatedDashboardFinanceDoctorBillsSurgeonBillPaidIndexRoute
   '/dashboard/indoor/master/bed-cabin-list/create': typeof AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute
   '/dashboard/indoor/master/services/create': typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
   '/dashboard/outdoor/master/doctors/$doctorId': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
@@ -3551,11 +4265,21 @@ export interface FileRoutesByFullPath {
   '/dashboard/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRoute
   '/dashboard/outdoor/reception/invoices/create': typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
   '/dashboard/outdoor/reception/invoices/list': typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
+  '/dashboard/pharmacy/categories/edit/$id': typeof AuthenticatedDashboardPharmacyCategoriesEditIdIndexRoute
+  '/dashboard/pharmacy/medicines/$id/batches': typeof AuthenticatedDashboardPharmacyMedicinesIdBatchesIndexRoute
+  '/dashboard/pharmacy/medicines/edit/$id': typeof AuthenticatedDashboardPharmacyMedicinesEditIdIndexRoute
+  '/dashboard/pharmacy/sales/$id/edit': typeof AuthenticatedDashboardPharmacySalesIdEditIndexRoute
+  '/dashboard/pharmacy/sales/$id/return': typeof AuthenticatedDashboardPharmacySalesIdReturnIndexRoute
+  '/dashboard/pharmacy/suppliers/edit/$id': typeof AuthenticatedDashboardPharmacySuppliersEditIdIndexRoute
+  '/dashboard/prescriptions/medicine-groups/edit/$id': typeof AuthenticatedDashboardPrescriptionsMedicineGroupsEditIdIndexRoute
+  '/dashboard/prescriptions/medicines/edit/$id': typeof AuthenticatedDashboardPrescriptionsMedicinesEditIdIndexRoute
+  '/dashboard/prescriptions/patients/edit/$id': typeof AuthenticatedDashboardPrescriptionsPatientsEditIdIndexRoute
   '/dashboard/purchase/goods-receipt/edit/$id': typeof AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute
   '/dashboard/purchase/requests/edit/$id': typeof AuthenticatedDashboardPurchaseRequestsEditIdIndexRoute
   '/dashboard/purchase/suppliers/edit/$id': typeof AuthenticatedDashboardPurchaseSuppliersEditIdIndexRoute
   '/dashboard/reports/my/outdoor/date-wise-collection': typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute
   '/dashboard/reports/my/outdoor/today-collection': typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute
+  '/dashboard/outdoor/reception/invoices/$invoiceId/payment-receipt/$paymentId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdPaymentReceiptPaymentIdRoute
   '/dashboard/outdoor/master/tests/edit/$id': typeof AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute
   '/dashboard/outdoor/reception/invoices/edit/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
   '/dashboard/pathology/hematology/all/edit/$id': typeof AuthenticatedDashboardPathologyHematologyAllEditIdIndexRoute
@@ -3588,6 +4312,7 @@ export interface FileRoutesByTo {
   '/admin/admins': typeof platformAdminAdminsRoute
   '/admin/common-commands': typeof platformAdminCommonCommandsRoute
   '/admin/contacts': typeof platformAdminContactsRoute
+  '/admin/database-migration': typeof platformAdminDatabaseMigrationRoute
   '/admin/login': typeof platformAdminLoginRoute
   '/admin/modules': typeof platformAdminModulesRoute
   '/admin/nginx-domain-list': typeof platformAdminNginxDomainListRoute
@@ -3611,6 +4336,7 @@ export interface FileRoutesByTo {
   '/dashboard/settings/app-inventory': typeof AuthenticatedDashboardSettingsAppInventoryRoute
   '/dashboard/settings/appearance': typeof AuthenticatedDashboardSettingsAppearanceRoute
   '/dashboard/settings/date-controls': typeof AuthenticatedDashboardSettingsDateControlsRoute
+  '/dashboard/settings/default-data': typeof AuthenticatedDashboardSettingsDefaultDataRoute
   '/dashboard/settings/display': typeof AuthenticatedDashboardSettingsDisplayRoute
   '/dashboard/settings/domain-configuration': typeof AuthenticatedDashboardSettingsDomainConfigurationRoute
   '/dashboard/settings/inventory-accounts': typeof AuthenticatedDashboardSettingsInventoryAccountsRoute
@@ -3635,6 +4361,8 @@ export interface FileRoutesByTo {
   '/dashboard/help': typeof AuthenticatedDashboardHelpIndexRoute
   '/dashboard/my-account': typeof AuthenticatedDashboardMyAccountIndexRoute
   '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsIndexRoute
+  '/dashboard/pharmacy': typeof AuthenticatedDashboardPharmacyIndexRoute
+  '/dashboard/prescriptions': typeof AuthenticatedDashboardPrescriptionsIndexRoute
   '/dashboard/purchase': typeof AuthenticatedDashboardPurchaseIndexRoute
   '/dashboard/reset-database': typeof AuthenticatedDashboardResetDatabaseIndexRoute
   '/dashboard/roles': typeof AuthenticatedDashboardRolesIndexRoute
@@ -3643,6 +4371,9 @@ export interface FileRoutesByTo {
   '/dashboard/tasks': typeof AuthenticatedDashboardTasksIndexRoute
   '/dashboard/users': typeof AuthenticatedDashboardUsersIndexRoute
   '/admin/plans/edit/$planId': typeof platformAdminPlansEditPlanIdRoute
+  '/dashboard/accounting/accounts/print': typeof AuthenticatedDashboardAccountingAccountsPrintRoute
+  '/dashboard/accounting/income/print': typeof AuthenticatedDashboardAccountingIncomePrintRoute
+  '/dashboard/prescriptions/$id/print': typeof AuthenticatedDashboardPrescriptionsIdPrintRoute
   '/dashboard/roles/edit/$id': typeof AuthenticatedDashboardRolesEditIdRoute
   '/dashboard/accounting/accounts': typeof AuthenticatedDashboardAccountingAccountsIndexRoute
   '/dashboard/accounting/expense': typeof AuthenticatedDashboardAccountingExpenseIndexRoute
@@ -3680,8 +4411,12 @@ export interface FileRoutesByTo {
   '/dashboard/banks/bank-deposits': typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
   '/dashboard/banks/bank-transactions': typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
   '/dashboard/banks/bank-withdrawals': typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
+  '/dashboard/diagnostics/dashboard': typeof AuthenticatedDashboardDiagnosticsDashboardIndexRoute
   '/dashboard/ecg/all': typeof AuthenticatedDashboardEcgAllIndexRoute
+  '/dashboard/finance/payment-history': typeof AuthenticatedDashboardFinancePaymentHistoryIndexRoute
   '/dashboard/finance/payments': typeof AuthenticatedDashboardFinancePaymentsIndexRoute
+  '/dashboard/finance/reconciliation': typeof AuthenticatedDashboardFinanceReconciliationIndexRoute
+  '/dashboard/indoor/dashboard': typeof AuthenticatedDashboardIndoorDashboardIndexRoute
   '/dashboard/outdoor/dashboard': typeof AuthenticatedDashboardOutdoorDashboardIndexRoute
   '/dashboard/pathology/custom-tests': typeof AuthenticatedDashboardPathologyCustomTestsIndexRoute
   '/dashboard/pathology/dashboard': typeof AuthenticatedDashboardPathologyDashboardIndexRoute
@@ -3690,6 +4425,30 @@ export interface FileRoutesByTo {
   '/dashboard/payroll/employees': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
   '/dashboard/payroll/overview': typeof AuthenticatedDashboardPayrollOverviewIndexRoute
   '/dashboard/payroll/salary-structure': typeof AuthenticatedDashboardPayrollSalaryStructureIndexRoute
+  '/dashboard/pharmacy/categories': typeof AuthenticatedDashboardPharmacyCategoriesIndexRoute
+  '/dashboard/pharmacy/customers': typeof AuthenticatedDashboardPharmacyCustomersIndexRoute
+  '/dashboard/pharmacy/expiry-report': typeof AuthenticatedDashboardPharmacyExpiryReportIndexRoute
+  '/dashboard/pharmacy/low-stock': typeof AuthenticatedDashboardPharmacyLowStockIndexRoute
+  '/dashboard/pharmacy/medicines': typeof AuthenticatedDashboardPharmacyMedicinesIndexRoute
+  '/dashboard/pharmacy/purchase-orders': typeof AuthenticatedDashboardPharmacyPurchaseOrdersIndexRoute
+  '/dashboard/pharmacy/purchase-returns': typeof AuthenticatedDashboardPharmacyPurchaseReturnsIndexRoute
+  '/dashboard/pharmacy/reorder': typeof AuthenticatedDashboardPharmacyReorderIndexRoute
+  '/dashboard/pharmacy/sales-returns': typeof AuthenticatedDashboardPharmacySalesReturnsIndexRoute
+  '/dashboard/pharmacy/sales': typeof AuthenticatedDashboardPharmacySalesIndexRoute
+  '/dashboard/pharmacy/shifts': typeof AuthenticatedDashboardPharmacyShiftsIndexRoute
+  '/dashboard/pharmacy/stock-adjustments': typeof AuthenticatedDashboardPharmacyStockAdjustmentsIndexRoute
+  '/dashboard/pharmacy/stock-in': typeof AuthenticatedDashboardPharmacyStockInIndexRoute
+  '/dashboard/pharmacy/stock-ledger': typeof AuthenticatedDashboardPharmacyStockLedgerIndexRoute
+  '/dashboard/pharmacy/stock-report': typeof AuthenticatedDashboardPharmacyStockReportIndexRoute
+  '/dashboard/pharmacy/supplier-dues': typeof AuthenticatedDashboardPharmacySupplierDuesIndexRoute
+  '/dashboard/pharmacy/suppliers': typeof AuthenticatedDashboardPharmacySuppliersIndexRoute
+  '/dashboard/prescriptions/create': typeof AuthenticatedDashboardPrescriptionsCreateIndexRoute
+  '/dashboard/prescriptions/dashboard': typeof AuthenticatedDashboardPrescriptionsDashboardIndexRoute
+  '/dashboard/prescriptions/medicine-groups': typeof AuthenticatedDashboardPrescriptionsMedicineGroupsIndexRoute
+  '/dashboard/prescriptions/medicines': typeof AuthenticatedDashboardPrescriptionsMedicinesIndexRoute
+  '/dashboard/prescriptions/my-prescriptions': typeof AuthenticatedDashboardPrescriptionsMyPrescriptionsIndexRoute
+  '/dashboard/prescriptions/patients': typeof AuthenticatedDashboardPrescriptionsPatientsIndexRoute
+  '/dashboard/prescriptions/quick-phrases': typeof AuthenticatedDashboardPrescriptionsQuickPhrasesIndexRoute
   '/dashboard/purchase/goods-receipt': typeof AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute
   '/dashboard/purchase/requests': typeof AuthenticatedDashboardPurchaseRequestsIndexRoute
   '/dashboard/purchase/statistics': typeof AuthenticatedDashboardPurchaseStatisticsIndexRoute
@@ -3701,6 +4460,8 @@ export interface FileRoutesByTo {
   '/dashboard/settings/report-settings': typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
   '/dashboard/ultrasonogram/all': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   '/dashboard/x-ray/all': typeof AuthenticatedDashboardXRayAllIndexRoute
+  '/dashboard/accounting/expenses/$expenseId/print': typeof AuthenticatedDashboardAccountingExpensesExpenseIdPrintRoute
+  '/dashboard/accounting/income/$incomeId/print': typeof AuthenticatedDashboardAccountingIncomeIncomeIdPrintRoute
   '/dashboard/accounting/reports/balance-sheet/print': typeof AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute
   '/dashboard/accounting/reports/cash-flow/print': typeof AuthenticatedDashboardAccountingReportsCashFlowPrintRoute
   '/dashboard/accounting/reports/daily-summary/print': typeof AuthenticatedDashboardAccountingReportsDailySummaryPrintRoute
@@ -3714,6 +4475,7 @@ export interface FileRoutesByTo {
   '/dashboard/ecg/all/print/$id': typeof AuthenticatedDashboardEcgAllPrintIdRoute
   '/dashboard/indoor/master/bed-cabin-list/$id': typeof AuthenticatedDashboardIndoorMasterBedCabinListIdRoute
   '/dashboard/indoor/master/services/$id': typeof AuthenticatedDashboardIndoorMasterServicesIdRoute
+  '/dashboard/indoor/master/treatment-outcomes/$id': typeof AuthenticatedDashboardIndoorMasterTreatmentOutcomesIdRoute
   '/dashboard/outdoor/master/categories/$id': typeof AuthenticatedDashboardOutdoorMasterCategoriesIdRoute
   '/dashboard/outdoor/master/departments/$id': typeof AuthenticatedDashboardOutdoorMasterDepartmentsIdRoute
   '/dashboard/outdoor/master/doctors/create': typeof AuthenticatedDashboardOutdoorMasterDoctorsCreateRoute
@@ -3722,6 +4484,7 @@ export interface FileRoutesByTo {
   '/dashboard/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
   '/dashboard/pathology/custom-tests/edit/$id': typeof AuthenticatedDashboardPathologyCustomTestsEditIdRoute
   '/dashboard/pathology/custom-tests/report/$reportId': typeof AuthenticatedDashboardPathologyCustomTestsReportReportIdRoute
+  '/dashboard/pharmacy/sales/$id/print': typeof AuthenticatedDashboardPharmacySalesIdPrintRoute
   '/dashboard/reports/accounting/bank-book/print': typeof AuthenticatedDashboardReportsAccountingBankBookPrintRoute
   '/dashboard/reports/accounting/cash-flow/print': typeof AuthenticatedDashboardReportsAccountingCashFlowPrintRoute
   '/dashboard/reports/accounting/daily-transactions/print': typeof AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRoute
@@ -3797,17 +4560,27 @@ export interface FileRoutesByTo {
   '/dashboard/admission/patients/discharged': typeof AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute
   '/dashboard/admission/patients/due': typeof AuthenticatedDashboardAdmissionPatientsDueIndexRoute
   '/dashboard/admission/patients/final-bill-created-list': typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
+  '/dashboard/admission/patients/overpaid': typeof AuthenticatedDashboardAdmissionPatientsOverpaidIndexRoute
   '/dashboard/admission/patients/paid': typeof AuthenticatedDashboardAdmissionPatientsPaidIndexRoute
   '/dashboard/admission/patients/payment-completed-list': typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
   '/dashboard/assets/categories/create': typeof AuthenticatedDashboardAssetsCategoriesCreateIndexRoute
   '/dashboard/assets/list/create': typeof AuthenticatedDashboardAssetsListCreateIndexRoute
   '/dashboard/assets/locations/create': typeof AuthenticatedDashboardAssetsLocationsCreateIndexRoute
   '/dashboard/assets/maintenance/create': typeof AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute
+  '/dashboard/finance/doctor-bills/anesthesia-bill': typeof AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillIndexRoute
+  '/dashboard/finance/doctor-bills/assistant-bill': typeof AuthenticatedDashboardFinanceDoctorBillsAssistantBillIndexRoute
+  '/dashboard/finance/doctor-bills/clinical-bills': typeof AuthenticatedDashboardFinanceDoctorBillsClinicalBillsIndexRoute
+  '/dashboard/finance/doctor-bills/consultant-bill': typeof AuthenticatedDashboardFinanceDoctorBillsConsultantBillIndexRoute
+  '/dashboard/finance/doctor-bills/dashboard': typeof AuthenticatedDashboardFinanceDoctorBillsDashboardIndexRoute
+  '/dashboard/finance/doctor-bills/invoices': typeof AuthenticatedDashboardFinanceDoctorBillsInvoicesIndexRoute
+  '/dashboard/finance/doctor-bills/surgeon-bill': typeof AuthenticatedDashboardFinanceDoctorBillsSurgeonBillIndexRoute
   '/dashboard/indoor/management/anesthesia-bill': typeof AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute
   '/dashboard/indoor/management/assistant-bill': typeof AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute
   '/dashboard/indoor/management/clinical-bills': typeof AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute
+  '/dashboard/indoor/management/consultant-bill': typeof AuthenticatedDashboardIndoorManagementConsultantBillIndexRoute
   '/dashboard/indoor/management/distributions': typeof AuthenticatedDashboardIndoorManagementDistributionsIndexRoute
   '/dashboard/indoor/management/doctor-referred': typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
+  '/dashboard/indoor/management/other-bills': typeof AuthenticatedDashboardIndoorManagementOtherBillsIndexRoute
   '/dashboard/indoor/management/surgeon-bill': typeof AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute
   '/dashboard/indoor/master/anasthesia-types': typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   '/dashboard/indoor/master/bed-cabin-list': typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
@@ -3854,6 +4627,7 @@ export interface FileRoutesByTo {
   '/dashboard/pathology/immunology/all': typeof AuthenticatedDashboardPathologyImmunologyAllIndexRoute
   '/dashboard/pathology/immunology/beta-hcg': typeof AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRoute
   '/dashboard/pathology/immunology/blood-group': typeof AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute
+  '/dashboard/pathology/immunology/cross-matching-screening': typeof AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningIndexRoute
   '/dashboard/pathology/immunology/mt': typeof AuthenticatedDashboardPathologyImmunologyMtIndexRoute
   '/dashboard/pathology/immunology/widal-test': typeof AuthenticatedDashboardPathologyImmunologyWidalTestIndexRoute
   '/dashboard/pathology/stool/ocult-blood-test': typeof AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRoute
@@ -3864,6 +4638,26 @@ export interface FileRoutesByTo {
   '/dashboard/pathology/urine/urine-for-sugar': typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
   '/dashboard/payroll/attendance/$staffId': typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   '/dashboard/payroll/salary/$staffId': typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  '/dashboard/pharmacy/categories/create': typeof AuthenticatedDashboardPharmacyCategoriesCreateIndexRoute
+  '/dashboard/pharmacy/customers/$id': typeof AuthenticatedDashboardPharmacyCustomersIdIndexRoute
+  '/dashboard/pharmacy/medicines/create': typeof AuthenticatedDashboardPharmacyMedicinesCreateIndexRoute
+  '/dashboard/pharmacy/purchase-orders/$id': typeof AuthenticatedDashboardPharmacyPurchaseOrdersIdIndexRoute
+  '/dashboard/pharmacy/purchase-orders/create': typeof AuthenticatedDashboardPharmacyPurchaseOrdersCreateIndexRoute
+  '/dashboard/pharmacy/purchase-returns/create': typeof AuthenticatedDashboardPharmacyPurchaseReturnsCreateIndexRoute
+  '/dashboard/pharmacy/sales-returns/create': typeof AuthenticatedDashboardPharmacySalesReturnsCreateIndexRoute
+  '/dashboard/pharmacy/sales/create': typeof AuthenticatedDashboardPharmacySalesCreateIndexRoute
+  '/dashboard/pharmacy/stock-adjustments/create': typeof AuthenticatedDashboardPharmacyStockAdjustmentsCreateIndexRoute
+  '/dashboard/pharmacy/stock-in/create': typeof AuthenticatedDashboardPharmacyStockInCreateIndexRoute
+  '/dashboard/pharmacy/supplier-dues/$id': typeof AuthenticatedDashboardPharmacySupplierDuesIdIndexRoute
+  '/dashboard/pharmacy/suppliers/create': typeof AuthenticatedDashboardPharmacySuppliersCreateIndexRoute
+  '/dashboard/prescriptions/edit/$id': typeof AuthenticatedDashboardPrescriptionsEditIdIndexRoute
+  '/dashboard/prescriptions/medicine-groups/create': typeof AuthenticatedDashboardPrescriptionsMedicineGroupsCreateIndexRoute
+  '/dashboard/prescriptions/medicines/create': typeof AuthenticatedDashboardPrescriptionsMedicinesCreateIndexRoute
+  '/dashboard/prescriptions/patients/$id': typeof AuthenticatedDashboardPrescriptionsPatientsIdIndexRoute
+  '/dashboard/prescriptions/patients/create': typeof AuthenticatedDashboardPrescriptionsPatientsCreateIndexRoute
+  '/dashboard/prescriptions/reports/doctor-wise': typeof AuthenticatedDashboardPrescriptionsReportsDoctorWiseIndexRoute
+  '/dashboard/prescriptions/reports/medicine-wise': typeof AuthenticatedDashboardPrescriptionsReportsMedicineWiseIndexRoute
+  '/dashboard/prescriptions/reports/patient-wise': typeof AuthenticatedDashboardPrescriptionsReportsPatientWiseIndexRoute
   '/dashboard/purchase/goods-receipt/create': typeof AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute
   '/dashboard/purchase/requests/create': typeof AuthenticatedDashboardPurchaseRequestsCreateIndexRoute
   '/dashboard/purchase/requests/pending': typeof AuthenticatedDashboardPurchaseRequestsPendingIndexRoute
@@ -3918,6 +4712,7 @@ export interface FileRoutesByTo {
   '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute
   '/dashboard/admission/patients/$admissionId/print/$step': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
   '/dashboard/ecg/all/edit/builder/$id': typeof AuthenticatedDashboardEcgAllEditBuilderIdRoute
+  '/dashboard/finance/doctor-bills/invoices/$invoiceId/print': typeof AuthenticatedDashboardFinanceDoctorBillsInvoicesInvoiceIdPrintRoute
   '/dashboard/indoor/master/services/edit/$id': typeof AuthenticatedDashboardIndoorMasterServicesEditIdRoute
   '/dashboard/outdoor/master/doctors/$doctorId/edit': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute
   '/dashboard/outdoor/reception/invoices/$invoiceId/note': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRoute
@@ -3943,6 +4738,7 @@ export interface FileRoutesByTo {
   '/dashboard/pathology/immunology/all/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyAllReportReportIdRoute
   '/dashboard/pathology/immunology/beta-hcg/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRoute
   '/dashboard/pathology/immunology/blood-group/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute
+  '/dashboard/pathology/immunology/cross-matching-screening/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningReportReportIdRoute
   '/dashboard/pathology/immunology/mt/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute
   '/dashboard/pathology/immunology/widal-test/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRoute
   '/dashboard/pathology/stool/ocult-blood-test/report/$reportId': typeof AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRoute
@@ -3970,6 +4766,11 @@ export interface FileRoutesByTo {
   '/dashboard/assets/list/edit/$id': typeof AuthenticatedDashboardAssetsListEditIdIndexRoute
   '/dashboard/assets/locations/edit/$id': typeof AuthenticatedDashboardAssetsLocationsEditIdIndexRoute
   '/dashboard/assets/maintenance/edit/$id': typeof AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute
+  '/dashboard/finance/doctor-bills/anesthesia-bill/paid': typeof AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillPaidIndexRoute
+  '/dashboard/finance/doctor-bills/assistant-bill/paid': typeof AuthenticatedDashboardFinanceDoctorBillsAssistantBillPaidIndexRoute
+  '/dashboard/finance/doctor-bills/consultant-bill/paid': typeof AuthenticatedDashboardFinanceDoctorBillsConsultantBillPaidIndexRoute
+  '/dashboard/finance/doctor-bills/invoices/dashboard': typeof AuthenticatedDashboardFinanceDoctorBillsInvoicesDashboardIndexRoute
+  '/dashboard/finance/doctor-bills/surgeon-bill/paid': typeof AuthenticatedDashboardFinanceDoctorBillsSurgeonBillPaidIndexRoute
   '/dashboard/indoor/master/bed-cabin-list/create': typeof AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute
   '/dashboard/indoor/master/services/create': typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
   '/dashboard/outdoor/master/doctors/$doctorId': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
@@ -3977,11 +4778,21 @@ export interface FileRoutesByTo {
   '/dashboard/outdoor/reception/invoices/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRoute
   '/dashboard/outdoor/reception/invoices/create': typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
   '/dashboard/outdoor/reception/invoices/list': typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
+  '/dashboard/pharmacy/categories/edit/$id': typeof AuthenticatedDashboardPharmacyCategoriesEditIdIndexRoute
+  '/dashboard/pharmacy/medicines/$id/batches': typeof AuthenticatedDashboardPharmacyMedicinesIdBatchesIndexRoute
+  '/dashboard/pharmacy/medicines/edit/$id': typeof AuthenticatedDashboardPharmacyMedicinesEditIdIndexRoute
+  '/dashboard/pharmacy/sales/$id/edit': typeof AuthenticatedDashboardPharmacySalesIdEditIndexRoute
+  '/dashboard/pharmacy/sales/$id/return': typeof AuthenticatedDashboardPharmacySalesIdReturnIndexRoute
+  '/dashboard/pharmacy/suppliers/edit/$id': typeof AuthenticatedDashboardPharmacySuppliersEditIdIndexRoute
+  '/dashboard/prescriptions/medicine-groups/edit/$id': typeof AuthenticatedDashboardPrescriptionsMedicineGroupsEditIdIndexRoute
+  '/dashboard/prescriptions/medicines/edit/$id': typeof AuthenticatedDashboardPrescriptionsMedicinesEditIdIndexRoute
+  '/dashboard/prescriptions/patients/edit/$id': typeof AuthenticatedDashboardPrescriptionsPatientsEditIdIndexRoute
   '/dashboard/purchase/goods-receipt/edit/$id': typeof AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute
   '/dashboard/purchase/requests/edit/$id': typeof AuthenticatedDashboardPurchaseRequestsEditIdIndexRoute
   '/dashboard/purchase/suppliers/edit/$id': typeof AuthenticatedDashboardPurchaseSuppliersEditIdIndexRoute
   '/dashboard/reports/my/outdoor/date-wise-collection': typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute
   '/dashboard/reports/my/outdoor/today-collection': typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute
+  '/dashboard/outdoor/reception/invoices/$invoiceId/payment-receipt/$paymentId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdPaymentReceiptPaymentIdRoute
   '/dashboard/outdoor/master/tests/edit/$id': typeof AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute
   '/dashboard/outdoor/reception/invoices/edit/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
   '/dashboard/pathology/hematology/all/edit/$id': typeof AuthenticatedDashboardPathologyHematologyAllEditIdIndexRoute
@@ -4021,6 +4832,7 @@ export interface FileRoutesById {
   '/(platform)/admin/admins': typeof platformAdminAdminsRoute
   '/(platform)/admin/common-commands': typeof platformAdminCommonCommandsRoute
   '/(platform)/admin/contacts': typeof platformAdminContactsRoute
+  '/(platform)/admin/database-migration': typeof platformAdminDatabaseMigrationRoute
   '/(platform)/admin/login': typeof platformAdminLoginRoute
   '/(platform)/admin/modules': typeof platformAdminModulesRoute
   '/(platform)/admin/nginx-domain-list': typeof platformAdminNginxDomainListRoute
@@ -4044,6 +4856,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/settings/app-inventory': typeof AuthenticatedDashboardSettingsAppInventoryRoute
   '/_authenticated/dashboard/settings/appearance': typeof AuthenticatedDashboardSettingsAppearanceRoute
   '/_authenticated/dashboard/settings/date-controls': typeof AuthenticatedDashboardSettingsDateControlsRoute
+  '/_authenticated/dashboard/settings/default-data': typeof AuthenticatedDashboardSettingsDefaultDataRoute
   '/_authenticated/dashboard/settings/display': typeof AuthenticatedDashboardSettingsDisplayRoute
   '/_authenticated/dashboard/settings/domain-configuration': typeof AuthenticatedDashboardSettingsDomainConfigurationRoute
   '/_authenticated/dashboard/settings/inventory-accounts': typeof AuthenticatedDashboardSettingsInventoryAccountsRoute
@@ -4068,6 +4881,8 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/help/': typeof AuthenticatedDashboardHelpIndexRoute
   '/_authenticated/dashboard/my-account/': typeof AuthenticatedDashboardMyAccountIndexRoute
   '/_authenticated/dashboard/notifications/': typeof AuthenticatedDashboardNotificationsIndexRoute
+  '/_authenticated/dashboard/pharmacy/': typeof AuthenticatedDashboardPharmacyIndexRoute
+  '/_authenticated/dashboard/prescriptions/': typeof AuthenticatedDashboardPrescriptionsIndexRoute
   '/_authenticated/dashboard/purchase/': typeof AuthenticatedDashboardPurchaseIndexRoute
   '/_authenticated/dashboard/reset-database/': typeof AuthenticatedDashboardResetDatabaseIndexRoute
   '/_authenticated/dashboard/roles/': typeof AuthenticatedDashboardRolesIndexRoute
@@ -4076,6 +4891,9 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/tasks/': typeof AuthenticatedDashboardTasksIndexRoute
   '/_authenticated/dashboard/users/': typeof AuthenticatedDashboardUsersIndexRoute
   '/(platform)/admin/plans/edit/$planId': typeof platformAdminPlansEditPlanIdRoute
+  '/_authenticated/dashboard/accounting/accounts/print': typeof AuthenticatedDashboardAccountingAccountsPrintRoute
+  '/_authenticated/dashboard/accounting/income/print': typeof AuthenticatedDashboardAccountingIncomePrintRoute
+  '/_authenticated/dashboard/prescriptions/$id/print': typeof AuthenticatedDashboardPrescriptionsIdPrintRoute
   '/_authenticated/dashboard/roles/edit/$id': typeof AuthenticatedDashboardRolesEditIdRoute
   '/_authenticated/dashboard/accounting/accounts/': typeof AuthenticatedDashboardAccountingAccountsIndexRoute
   '/_authenticated/dashboard/accounting/expense/': typeof AuthenticatedDashboardAccountingExpenseIndexRoute
@@ -4113,8 +4931,12 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/banks/bank-deposits/': typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
   '/_authenticated/dashboard/banks/bank-transactions/': typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
   '/_authenticated/dashboard/banks/bank-withdrawals/': typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
+  '/_authenticated/dashboard/diagnostics/dashboard/': typeof AuthenticatedDashboardDiagnosticsDashboardIndexRoute
   '/_authenticated/dashboard/ecg/all/': typeof AuthenticatedDashboardEcgAllIndexRoute
+  '/_authenticated/dashboard/finance/payment-history/': typeof AuthenticatedDashboardFinancePaymentHistoryIndexRoute
   '/_authenticated/dashboard/finance/payments/': typeof AuthenticatedDashboardFinancePaymentsIndexRoute
+  '/_authenticated/dashboard/finance/reconciliation/': typeof AuthenticatedDashboardFinanceReconciliationIndexRoute
+  '/_authenticated/dashboard/indoor/dashboard/': typeof AuthenticatedDashboardIndoorDashboardIndexRoute
   '/_authenticated/dashboard/outdoor/dashboard/': typeof AuthenticatedDashboardOutdoorDashboardIndexRoute
   '/_authenticated/dashboard/pathology/custom-tests/': typeof AuthenticatedDashboardPathologyCustomTestsIndexRoute
   '/_authenticated/dashboard/pathology/dashboard/': typeof AuthenticatedDashboardPathologyDashboardIndexRoute
@@ -4123,6 +4945,30 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/payroll/employees/': typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
   '/_authenticated/dashboard/payroll/overview/': typeof AuthenticatedDashboardPayrollOverviewIndexRoute
   '/_authenticated/dashboard/payroll/salary-structure/': typeof AuthenticatedDashboardPayrollSalaryStructureIndexRoute
+  '/_authenticated/dashboard/pharmacy/categories/': typeof AuthenticatedDashboardPharmacyCategoriesIndexRoute
+  '/_authenticated/dashboard/pharmacy/customers/': typeof AuthenticatedDashboardPharmacyCustomersIndexRoute
+  '/_authenticated/dashboard/pharmacy/expiry-report/': typeof AuthenticatedDashboardPharmacyExpiryReportIndexRoute
+  '/_authenticated/dashboard/pharmacy/low-stock/': typeof AuthenticatedDashboardPharmacyLowStockIndexRoute
+  '/_authenticated/dashboard/pharmacy/medicines/': typeof AuthenticatedDashboardPharmacyMedicinesIndexRoute
+  '/_authenticated/dashboard/pharmacy/purchase-orders/': typeof AuthenticatedDashboardPharmacyPurchaseOrdersIndexRoute
+  '/_authenticated/dashboard/pharmacy/purchase-returns/': typeof AuthenticatedDashboardPharmacyPurchaseReturnsIndexRoute
+  '/_authenticated/dashboard/pharmacy/reorder/': typeof AuthenticatedDashboardPharmacyReorderIndexRoute
+  '/_authenticated/dashboard/pharmacy/sales-returns/': typeof AuthenticatedDashboardPharmacySalesReturnsIndexRoute
+  '/_authenticated/dashboard/pharmacy/sales/': typeof AuthenticatedDashboardPharmacySalesIndexRoute
+  '/_authenticated/dashboard/pharmacy/shifts/': typeof AuthenticatedDashboardPharmacyShiftsIndexRoute
+  '/_authenticated/dashboard/pharmacy/stock-adjustments/': typeof AuthenticatedDashboardPharmacyStockAdjustmentsIndexRoute
+  '/_authenticated/dashboard/pharmacy/stock-in/': typeof AuthenticatedDashboardPharmacyStockInIndexRoute
+  '/_authenticated/dashboard/pharmacy/stock-ledger/': typeof AuthenticatedDashboardPharmacyStockLedgerIndexRoute
+  '/_authenticated/dashboard/pharmacy/stock-report/': typeof AuthenticatedDashboardPharmacyStockReportIndexRoute
+  '/_authenticated/dashboard/pharmacy/supplier-dues/': typeof AuthenticatedDashboardPharmacySupplierDuesIndexRoute
+  '/_authenticated/dashboard/pharmacy/suppliers/': typeof AuthenticatedDashboardPharmacySuppliersIndexRoute
+  '/_authenticated/dashboard/prescriptions/create/': typeof AuthenticatedDashboardPrescriptionsCreateIndexRoute
+  '/_authenticated/dashboard/prescriptions/dashboard/': typeof AuthenticatedDashboardPrescriptionsDashboardIndexRoute
+  '/_authenticated/dashboard/prescriptions/medicine-groups/': typeof AuthenticatedDashboardPrescriptionsMedicineGroupsIndexRoute
+  '/_authenticated/dashboard/prescriptions/medicines/': typeof AuthenticatedDashboardPrescriptionsMedicinesIndexRoute
+  '/_authenticated/dashboard/prescriptions/my-prescriptions/': typeof AuthenticatedDashboardPrescriptionsMyPrescriptionsIndexRoute
+  '/_authenticated/dashboard/prescriptions/patients/': typeof AuthenticatedDashboardPrescriptionsPatientsIndexRoute
+  '/_authenticated/dashboard/prescriptions/quick-phrases/': typeof AuthenticatedDashboardPrescriptionsQuickPhrasesIndexRoute
   '/_authenticated/dashboard/purchase/goods-receipt/': typeof AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute
   '/_authenticated/dashboard/purchase/requests/': typeof AuthenticatedDashboardPurchaseRequestsIndexRoute
   '/_authenticated/dashboard/purchase/statistics/': typeof AuthenticatedDashboardPurchaseStatisticsIndexRoute
@@ -4134,6 +4980,8 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/settings/report-settings/': typeof AuthenticatedDashboardSettingsReportSettingsIndexRoute
   '/_authenticated/dashboard/ultrasonogram/all/': typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   '/_authenticated/dashboard/x-ray/all/': typeof AuthenticatedDashboardXRayAllIndexRoute
+  '/_authenticated/dashboard/accounting/expenses/$expenseId/print': typeof AuthenticatedDashboardAccountingExpensesExpenseIdPrintRoute
+  '/_authenticated/dashboard/accounting/income/$incomeId/print': typeof AuthenticatedDashboardAccountingIncomeIncomeIdPrintRoute
   '/_authenticated/dashboard/accounting/reports/balance-sheet/print': typeof AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute
   '/_authenticated/dashboard/accounting/reports/cash-flow/print': typeof AuthenticatedDashboardAccountingReportsCashFlowPrintRoute
   '/_authenticated/dashboard/accounting/reports/daily-summary/print': typeof AuthenticatedDashboardAccountingReportsDailySummaryPrintRoute
@@ -4147,6 +4995,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/ecg/all/print/$id': typeof AuthenticatedDashboardEcgAllPrintIdRoute
   '/_authenticated/dashboard/indoor/master/bed-cabin-list/$id': typeof AuthenticatedDashboardIndoorMasterBedCabinListIdRoute
   '/_authenticated/dashboard/indoor/master/services/$id': typeof AuthenticatedDashboardIndoorMasterServicesIdRoute
+  '/_authenticated/dashboard/indoor/master/treatment-outcomes/$id': typeof AuthenticatedDashboardIndoorMasterTreatmentOutcomesIdRoute
   '/_authenticated/dashboard/outdoor/master/categories/$id': typeof AuthenticatedDashboardOutdoorMasterCategoriesIdRoute
   '/_authenticated/dashboard/outdoor/master/departments/$id': typeof AuthenticatedDashboardOutdoorMasterDepartmentsIdRoute
   '/_authenticated/dashboard/outdoor/master/doctors/create': typeof AuthenticatedDashboardOutdoorMasterDoctorsCreateRoute
@@ -4155,6 +5004,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId': typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
   '/_authenticated/dashboard/pathology/custom-tests/edit/$id': typeof AuthenticatedDashboardPathologyCustomTestsEditIdRoute
   '/_authenticated/dashboard/pathology/custom-tests/report/$reportId': typeof AuthenticatedDashboardPathologyCustomTestsReportReportIdRoute
+  '/_authenticated/dashboard/pharmacy/sales/$id/print': typeof AuthenticatedDashboardPharmacySalesIdPrintRoute
   '/_authenticated/dashboard/reports/accounting/bank-book/print': typeof AuthenticatedDashboardReportsAccountingBankBookPrintRoute
   '/_authenticated/dashboard/reports/accounting/cash-flow/print': typeof AuthenticatedDashboardReportsAccountingCashFlowPrintRoute
   '/_authenticated/dashboard/reports/accounting/daily-transactions/print': typeof AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRoute
@@ -4230,17 +5080,27 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/admission/patients/discharged/': typeof AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute
   '/_authenticated/dashboard/admission/patients/due/': typeof AuthenticatedDashboardAdmissionPatientsDueIndexRoute
   '/_authenticated/dashboard/admission/patients/final-bill-created-list/': typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
+  '/_authenticated/dashboard/admission/patients/overpaid/': typeof AuthenticatedDashboardAdmissionPatientsOverpaidIndexRoute
   '/_authenticated/dashboard/admission/patients/paid/': typeof AuthenticatedDashboardAdmissionPatientsPaidIndexRoute
   '/_authenticated/dashboard/admission/patients/payment-completed-list/': typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
   '/_authenticated/dashboard/assets/categories/create/': typeof AuthenticatedDashboardAssetsCategoriesCreateIndexRoute
   '/_authenticated/dashboard/assets/list/create/': typeof AuthenticatedDashboardAssetsListCreateIndexRoute
   '/_authenticated/dashboard/assets/locations/create/': typeof AuthenticatedDashboardAssetsLocationsCreateIndexRoute
   '/_authenticated/dashboard/assets/maintenance/create/': typeof AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute
+  '/_authenticated/dashboard/finance/doctor-bills/anesthesia-bill/': typeof AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillIndexRoute
+  '/_authenticated/dashboard/finance/doctor-bills/assistant-bill/': typeof AuthenticatedDashboardFinanceDoctorBillsAssistantBillIndexRoute
+  '/_authenticated/dashboard/finance/doctor-bills/clinical-bills/': typeof AuthenticatedDashboardFinanceDoctorBillsClinicalBillsIndexRoute
+  '/_authenticated/dashboard/finance/doctor-bills/consultant-bill/': typeof AuthenticatedDashboardFinanceDoctorBillsConsultantBillIndexRoute
+  '/_authenticated/dashboard/finance/doctor-bills/dashboard/': typeof AuthenticatedDashboardFinanceDoctorBillsDashboardIndexRoute
+  '/_authenticated/dashboard/finance/doctor-bills/invoices/': typeof AuthenticatedDashboardFinanceDoctorBillsInvoicesIndexRoute
+  '/_authenticated/dashboard/finance/doctor-bills/surgeon-bill/': typeof AuthenticatedDashboardFinanceDoctorBillsSurgeonBillIndexRoute
   '/_authenticated/dashboard/indoor/management/anesthesia-bill/': typeof AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute
   '/_authenticated/dashboard/indoor/management/assistant-bill/': typeof AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute
   '/_authenticated/dashboard/indoor/management/clinical-bills/': typeof AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute
+  '/_authenticated/dashboard/indoor/management/consultant-bill/': typeof AuthenticatedDashboardIndoorManagementConsultantBillIndexRoute
   '/_authenticated/dashboard/indoor/management/distributions/': typeof AuthenticatedDashboardIndoorManagementDistributionsIndexRoute
   '/_authenticated/dashboard/indoor/management/doctor-referred/': typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
+  '/_authenticated/dashboard/indoor/management/other-bills/': typeof AuthenticatedDashboardIndoorManagementOtherBillsIndexRoute
   '/_authenticated/dashboard/indoor/management/surgeon-bill/': typeof AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute
   '/_authenticated/dashboard/indoor/master/anasthesia-types/': typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   '/_authenticated/dashboard/indoor/master/bed-cabin-list/': typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
@@ -4287,6 +5147,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/pathology/immunology/all/': typeof AuthenticatedDashboardPathologyImmunologyAllIndexRoute
   '/_authenticated/dashboard/pathology/immunology/beta-hcg/': typeof AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRoute
   '/_authenticated/dashboard/pathology/immunology/blood-group/': typeof AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute
+  '/_authenticated/dashboard/pathology/immunology/cross-matching-screening/': typeof AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningIndexRoute
   '/_authenticated/dashboard/pathology/immunology/mt/': typeof AuthenticatedDashboardPathologyImmunologyMtIndexRoute
   '/_authenticated/dashboard/pathology/immunology/widal-test/': typeof AuthenticatedDashboardPathologyImmunologyWidalTestIndexRoute
   '/_authenticated/dashboard/pathology/stool/ocult-blood-test/': typeof AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRoute
@@ -4297,6 +5158,26 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/pathology/urine/urine-for-sugar/': typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
   '/_authenticated/dashboard/payroll/attendance/$staffId/': typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   '/_authenticated/dashboard/payroll/salary/$staffId/': typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  '/_authenticated/dashboard/pharmacy/categories/create/': typeof AuthenticatedDashboardPharmacyCategoriesCreateIndexRoute
+  '/_authenticated/dashboard/pharmacy/customers/$id/': typeof AuthenticatedDashboardPharmacyCustomersIdIndexRoute
+  '/_authenticated/dashboard/pharmacy/medicines/create/': typeof AuthenticatedDashboardPharmacyMedicinesCreateIndexRoute
+  '/_authenticated/dashboard/pharmacy/purchase-orders/$id/': typeof AuthenticatedDashboardPharmacyPurchaseOrdersIdIndexRoute
+  '/_authenticated/dashboard/pharmacy/purchase-orders/create/': typeof AuthenticatedDashboardPharmacyPurchaseOrdersCreateIndexRoute
+  '/_authenticated/dashboard/pharmacy/purchase-returns/create/': typeof AuthenticatedDashboardPharmacyPurchaseReturnsCreateIndexRoute
+  '/_authenticated/dashboard/pharmacy/sales-returns/create/': typeof AuthenticatedDashboardPharmacySalesReturnsCreateIndexRoute
+  '/_authenticated/dashboard/pharmacy/sales/create/': typeof AuthenticatedDashboardPharmacySalesCreateIndexRoute
+  '/_authenticated/dashboard/pharmacy/stock-adjustments/create/': typeof AuthenticatedDashboardPharmacyStockAdjustmentsCreateIndexRoute
+  '/_authenticated/dashboard/pharmacy/stock-in/create/': typeof AuthenticatedDashboardPharmacyStockInCreateIndexRoute
+  '/_authenticated/dashboard/pharmacy/supplier-dues/$id/': typeof AuthenticatedDashboardPharmacySupplierDuesIdIndexRoute
+  '/_authenticated/dashboard/pharmacy/suppliers/create/': typeof AuthenticatedDashboardPharmacySuppliersCreateIndexRoute
+  '/_authenticated/dashboard/prescriptions/edit/$id/': typeof AuthenticatedDashboardPrescriptionsEditIdIndexRoute
+  '/_authenticated/dashboard/prescriptions/medicine-groups/create/': typeof AuthenticatedDashboardPrescriptionsMedicineGroupsCreateIndexRoute
+  '/_authenticated/dashboard/prescriptions/medicines/create/': typeof AuthenticatedDashboardPrescriptionsMedicinesCreateIndexRoute
+  '/_authenticated/dashboard/prescriptions/patients/$id/': typeof AuthenticatedDashboardPrescriptionsPatientsIdIndexRoute
+  '/_authenticated/dashboard/prescriptions/patients/create/': typeof AuthenticatedDashboardPrescriptionsPatientsCreateIndexRoute
+  '/_authenticated/dashboard/prescriptions/reports/doctor-wise/': typeof AuthenticatedDashboardPrescriptionsReportsDoctorWiseIndexRoute
+  '/_authenticated/dashboard/prescriptions/reports/medicine-wise/': typeof AuthenticatedDashboardPrescriptionsReportsMedicineWiseIndexRoute
+  '/_authenticated/dashboard/prescriptions/reports/patient-wise/': typeof AuthenticatedDashboardPrescriptionsReportsPatientWiseIndexRoute
   '/_authenticated/dashboard/purchase/goods-receipt/create/': typeof AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute
   '/_authenticated/dashboard/purchase/requests/create/': typeof AuthenticatedDashboardPurchaseRequestsCreateIndexRoute
   '/_authenticated/dashboard/purchase/requests/pending/': typeof AuthenticatedDashboardPurchaseRequestsPendingIndexRoute
@@ -4351,6 +5232,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute
   '/_authenticated/dashboard/admission/patients/$admissionId/print/$step': typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
   '/_authenticated/dashboard/ecg/all/edit/builder/$id': typeof AuthenticatedDashboardEcgAllEditBuilderIdRoute
+  '/_authenticated/dashboard/finance/doctor-bills/invoices/$invoiceId/print': typeof AuthenticatedDashboardFinanceDoctorBillsInvoicesInvoiceIdPrintRoute
   '/_authenticated/dashboard/indoor/master/services/edit/$id': typeof AuthenticatedDashboardIndoorMasterServicesEditIdRoute
   '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/edit': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute
   '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/note': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRoute
@@ -4376,6 +5258,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/pathology/immunology/all/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyAllReportReportIdRoute
   '/_authenticated/dashboard/pathology/immunology/beta-hcg/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRoute
   '/_authenticated/dashboard/pathology/immunology/blood-group/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute
+  '/_authenticated/dashboard/pathology/immunology/cross-matching-screening/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningReportReportIdRoute
   '/_authenticated/dashboard/pathology/immunology/mt/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute
   '/_authenticated/dashboard/pathology/immunology/widal-test/report/$reportId': typeof AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRoute
   '/_authenticated/dashboard/pathology/stool/ocult-blood-test/report/$reportId': typeof AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRoute
@@ -4403,6 +5286,11 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/assets/list/edit/$id/': typeof AuthenticatedDashboardAssetsListEditIdIndexRoute
   '/_authenticated/dashboard/assets/locations/edit/$id/': typeof AuthenticatedDashboardAssetsLocationsEditIdIndexRoute
   '/_authenticated/dashboard/assets/maintenance/edit/$id/': typeof AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute
+  '/_authenticated/dashboard/finance/doctor-bills/anesthesia-bill/paid/': typeof AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillPaidIndexRoute
+  '/_authenticated/dashboard/finance/doctor-bills/assistant-bill/paid/': typeof AuthenticatedDashboardFinanceDoctorBillsAssistantBillPaidIndexRoute
+  '/_authenticated/dashboard/finance/doctor-bills/consultant-bill/paid/': typeof AuthenticatedDashboardFinanceDoctorBillsConsultantBillPaidIndexRoute
+  '/_authenticated/dashboard/finance/doctor-bills/invoices/dashboard/': typeof AuthenticatedDashboardFinanceDoctorBillsInvoicesDashboardIndexRoute
+  '/_authenticated/dashboard/finance/doctor-bills/surgeon-bill/paid/': typeof AuthenticatedDashboardFinanceDoctorBillsSurgeonBillPaidIndexRoute
   '/_authenticated/dashboard/indoor/master/bed-cabin-list/create/': typeof AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute
   '/_authenticated/dashboard/indoor/master/services/create/': typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
   '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/': typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
@@ -4410,11 +5298,21 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRoute
   '/_authenticated/dashboard/outdoor/reception/invoices/create/': typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
   '/_authenticated/dashboard/outdoor/reception/invoices/list/': typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
+  '/_authenticated/dashboard/pharmacy/categories/edit/$id/': typeof AuthenticatedDashboardPharmacyCategoriesEditIdIndexRoute
+  '/_authenticated/dashboard/pharmacy/medicines/$id/batches/': typeof AuthenticatedDashboardPharmacyMedicinesIdBatchesIndexRoute
+  '/_authenticated/dashboard/pharmacy/medicines/edit/$id/': typeof AuthenticatedDashboardPharmacyMedicinesEditIdIndexRoute
+  '/_authenticated/dashboard/pharmacy/sales/$id/edit/': typeof AuthenticatedDashboardPharmacySalesIdEditIndexRoute
+  '/_authenticated/dashboard/pharmacy/sales/$id/return/': typeof AuthenticatedDashboardPharmacySalesIdReturnIndexRoute
+  '/_authenticated/dashboard/pharmacy/suppliers/edit/$id/': typeof AuthenticatedDashboardPharmacySuppliersEditIdIndexRoute
+  '/_authenticated/dashboard/prescriptions/medicine-groups/edit/$id/': typeof AuthenticatedDashboardPrescriptionsMedicineGroupsEditIdIndexRoute
+  '/_authenticated/dashboard/prescriptions/medicines/edit/$id/': typeof AuthenticatedDashboardPrescriptionsMedicinesEditIdIndexRoute
+  '/_authenticated/dashboard/prescriptions/patients/edit/$id/': typeof AuthenticatedDashboardPrescriptionsPatientsEditIdIndexRoute
   '/_authenticated/dashboard/purchase/goods-receipt/edit/$id/': typeof AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute
   '/_authenticated/dashboard/purchase/requests/edit/$id/': typeof AuthenticatedDashboardPurchaseRequestsEditIdIndexRoute
   '/_authenticated/dashboard/purchase/suppliers/edit/$id/': typeof AuthenticatedDashboardPurchaseSuppliersEditIdIndexRoute
   '/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/': typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute
   '/_authenticated/dashboard/reports/my/outdoor/today-collection/': typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute
+  '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/payment-receipt/$paymentId': typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdPaymentReceiptPaymentIdRoute
   '/_authenticated/dashboard/outdoor/master/tests/edit/$id/': typeof AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute
   '/_authenticated/dashboard/outdoor/reception/invoices/edit/$invoiceId/': typeof AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
   '/_authenticated/dashboard/pathology/hematology/all/edit/$id/': typeof AuthenticatedDashboardPathologyHematologyAllEditIdIndexRoute
@@ -4451,6 +5349,7 @@ export interface FileRouteTypes {
     | '/admin/admins'
     | '/admin/common-commands'
     | '/admin/contacts'
+    | '/admin/database-migration'
     | '/admin/login'
     | '/admin/modules'
     | '/admin/nginx-domain-list'
@@ -4474,6 +5373,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/app-inventory'
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/date-controls'
+    | '/dashboard/settings/default-data'
     | '/dashboard/settings/display'
     | '/dashboard/settings/domain-configuration'
     | '/dashboard/settings/inventory-accounts'
@@ -4498,6 +5398,8 @@ export interface FileRouteTypes {
     | '/dashboard/help'
     | '/dashboard/my-account'
     | '/dashboard/notifications'
+    | '/dashboard/pharmacy'
+    | '/dashboard/prescriptions'
     | '/dashboard/purchase'
     | '/dashboard/reset-database'
     | '/dashboard/roles'
@@ -4506,6 +5408,9 @@ export interface FileRouteTypes {
     | '/dashboard/tasks'
     | '/dashboard/users'
     | '/admin/plans/edit/$planId'
+    | '/dashboard/accounting/accounts/print'
+    | '/dashboard/accounting/income/print'
+    | '/dashboard/prescriptions/$id/print'
     | '/dashboard/roles/edit/$id'
     | '/dashboard/accounting/accounts'
     | '/dashboard/accounting/expense'
@@ -4543,8 +5448,12 @@ export interface FileRouteTypes {
     | '/dashboard/banks/bank-deposits'
     | '/dashboard/banks/bank-transactions'
     | '/dashboard/banks/bank-withdrawals'
+    | '/dashboard/diagnostics/dashboard'
     | '/dashboard/ecg/all'
+    | '/dashboard/finance/payment-history'
     | '/dashboard/finance/payments'
+    | '/dashboard/finance/reconciliation'
+    | '/dashboard/indoor/dashboard'
     | '/dashboard/outdoor/dashboard'
     | '/dashboard/pathology/custom-tests'
     | '/dashboard/pathology/dashboard'
@@ -4553,6 +5462,30 @@ export interface FileRouteTypes {
     | '/dashboard/payroll/employees'
     | '/dashboard/payroll/overview'
     | '/dashboard/payroll/salary-structure'
+    | '/dashboard/pharmacy/categories'
+    | '/dashboard/pharmacy/customers'
+    | '/dashboard/pharmacy/expiry-report'
+    | '/dashboard/pharmacy/low-stock'
+    | '/dashboard/pharmacy/medicines'
+    | '/dashboard/pharmacy/purchase-orders'
+    | '/dashboard/pharmacy/purchase-returns'
+    | '/dashboard/pharmacy/reorder'
+    | '/dashboard/pharmacy/sales-returns'
+    | '/dashboard/pharmacy/sales'
+    | '/dashboard/pharmacy/shifts'
+    | '/dashboard/pharmacy/stock-adjustments'
+    | '/dashboard/pharmacy/stock-in'
+    | '/dashboard/pharmacy/stock-ledger'
+    | '/dashboard/pharmacy/stock-report'
+    | '/dashboard/pharmacy/supplier-dues'
+    | '/dashboard/pharmacy/suppliers'
+    | '/dashboard/prescriptions/create'
+    | '/dashboard/prescriptions/dashboard'
+    | '/dashboard/prescriptions/medicine-groups'
+    | '/dashboard/prescriptions/medicines'
+    | '/dashboard/prescriptions/my-prescriptions'
+    | '/dashboard/prescriptions/patients'
+    | '/dashboard/prescriptions/quick-phrases'
     | '/dashboard/purchase/goods-receipt'
     | '/dashboard/purchase/requests'
     | '/dashboard/purchase/statistics'
@@ -4564,6 +5497,8 @@ export interface FileRouteTypes {
     | '/dashboard/settings/report-settings'
     | '/dashboard/ultrasonogram/all'
     | '/dashboard/x-ray/all'
+    | '/dashboard/accounting/expenses/$expenseId/print'
+    | '/dashboard/accounting/income/$incomeId/print'
     | '/dashboard/accounting/reports/balance-sheet/print'
     | '/dashboard/accounting/reports/cash-flow/print'
     | '/dashboard/accounting/reports/daily-summary/print'
@@ -4577,6 +5512,7 @@ export interface FileRouteTypes {
     | '/dashboard/ecg/all/print/$id'
     | '/dashboard/indoor/master/bed-cabin-list/$id'
     | '/dashboard/indoor/master/services/$id'
+    | '/dashboard/indoor/master/treatment-outcomes/$id'
     | '/dashboard/outdoor/master/categories/$id'
     | '/dashboard/outdoor/master/departments/$id'
     | '/dashboard/outdoor/master/doctors/create'
@@ -4585,6 +5521,7 @@ export interface FileRouteTypes {
     | '/dashboard/outdoor/reception/due-collection/$invoiceId'
     | '/dashboard/pathology/custom-tests/edit/$id'
     | '/dashboard/pathology/custom-tests/report/$reportId'
+    | '/dashboard/pharmacy/sales/$id/print'
     | '/dashboard/reports/accounting/bank-book/print'
     | '/dashboard/reports/accounting/cash-flow/print'
     | '/dashboard/reports/accounting/daily-transactions/print'
@@ -4660,17 +5597,27 @@ export interface FileRouteTypes {
     | '/dashboard/admission/patients/discharged'
     | '/dashboard/admission/patients/due'
     | '/dashboard/admission/patients/final-bill-created-list'
+    | '/dashboard/admission/patients/overpaid'
     | '/dashboard/admission/patients/paid'
     | '/dashboard/admission/patients/payment-completed-list'
     | '/dashboard/assets/categories/create'
     | '/dashboard/assets/list/create'
     | '/dashboard/assets/locations/create'
     | '/dashboard/assets/maintenance/create'
+    | '/dashboard/finance/doctor-bills/anesthesia-bill'
+    | '/dashboard/finance/doctor-bills/assistant-bill'
+    | '/dashboard/finance/doctor-bills/clinical-bills'
+    | '/dashboard/finance/doctor-bills/consultant-bill'
+    | '/dashboard/finance/doctor-bills/dashboard'
+    | '/dashboard/finance/doctor-bills/invoices'
+    | '/dashboard/finance/doctor-bills/surgeon-bill'
     | '/dashboard/indoor/management/anesthesia-bill'
     | '/dashboard/indoor/management/assistant-bill'
     | '/dashboard/indoor/management/clinical-bills'
+    | '/dashboard/indoor/management/consultant-bill'
     | '/dashboard/indoor/management/distributions'
     | '/dashboard/indoor/management/doctor-referred'
+    | '/dashboard/indoor/management/other-bills'
     | '/dashboard/indoor/management/surgeon-bill'
     | '/dashboard/indoor/master/anasthesia-types'
     | '/dashboard/indoor/master/bed-cabin-list'
@@ -4717,6 +5664,7 @@ export interface FileRouteTypes {
     | '/dashboard/pathology/immunology/all'
     | '/dashboard/pathology/immunology/beta-hcg'
     | '/dashboard/pathology/immunology/blood-group'
+    | '/dashboard/pathology/immunology/cross-matching-screening'
     | '/dashboard/pathology/immunology/mt'
     | '/dashboard/pathology/immunology/widal-test'
     | '/dashboard/pathology/stool/ocult-blood-test'
@@ -4727,6 +5675,26 @@ export interface FileRouteTypes {
     | '/dashboard/pathology/urine/urine-for-sugar'
     | '/dashboard/payroll/attendance/$staffId'
     | '/dashboard/payroll/salary/$staffId'
+    | '/dashboard/pharmacy/categories/create'
+    | '/dashboard/pharmacy/customers/$id'
+    | '/dashboard/pharmacy/medicines/create'
+    | '/dashboard/pharmacy/purchase-orders/$id'
+    | '/dashboard/pharmacy/purchase-orders/create'
+    | '/dashboard/pharmacy/purchase-returns/create'
+    | '/dashboard/pharmacy/sales-returns/create'
+    | '/dashboard/pharmacy/sales/create'
+    | '/dashboard/pharmacy/stock-adjustments/create'
+    | '/dashboard/pharmacy/stock-in/create'
+    | '/dashboard/pharmacy/supplier-dues/$id'
+    | '/dashboard/pharmacy/suppliers/create'
+    | '/dashboard/prescriptions/edit/$id'
+    | '/dashboard/prescriptions/medicine-groups/create'
+    | '/dashboard/prescriptions/medicines/create'
+    | '/dashboard/prescriptions/patients/$id'
+    | '/dashboard/prescriptions/patients/create'
+    | '/dashboard/prescriptions/reports/doctor-wise'
+    | '/dashboard/prescriptions/reports/medicine-wise'
+    | '/dashboard/prescriptions/reports/patient-wise'
     | '/dashboard/purchase/goods-receipt/create'
     | '/dashboard/purchase/requests/create'
     | '/dashboard/purchase/requests/pending'
@@ -4781,6 +5749,7 @@ export interface FileRouteTypes {
     | '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId'
     | '/dashboard/admission/patients/$admissionId/print/$step'
     | '/dashboard/ecg/all/edit/builder/$id'
+    | '/dashboard/finance/doctor-bills/invoices/$invoiceId/print'
     | '/dashboard/indoor/master/services/edit/$id'
     | '/dashboard/outdoor/master/doctors/$doctorId/edit'
     | '/dashboard/outdoor/reception/invoices/$invoiceId/note'
@@ -4806,6 +5775,7 @@ export interface FileRouteTypes {
     | '/dashboard/pathology/immunology/all/report/$reportId'
     | '/dashboard/pathology/immunology/beta-hcg/report/$reportId'
     | '/dashboard/pathology/immunology/blood-group/report/$reportId'
+    | '/dashboard/pathology/immunology/cross-matching-screening/report/$reportId'
     | '/dashboard/pathology/immunology/mt/report/$reportId'
     | '/dashboard/pathology/immunology/widal-test/report/$reportId'
     | '/dashboard/pathology/stool/ocult-blood-test/report/$reportId'
@@ -4833,6 +5803,11 @@ export interface FileRouteTypes {
     | '/dashboard/assets/list/edit/$id'
     | '/dashboard/assets/locations/edit/$id'
     | '/dashboard/assets/maintenance/edit/$id'
+    | '/dashboard/finance/doctor-bills/anesthesia-bill/paid'
+    | '/dashboard/finance/doctor-bills/assistant-bill/paid'
+    | '/dashboard/finance/doctor-bills/consultant-bill/paid'
+    | '/dashboard/finance/doctor-bills/invoices/dashboard'
+    | '/dashboard/finance/doctor-bills/surgeon-bill/paid'
     | '/dashboard/indoor/master/bed-cabin-list/create'
     | '/dashboard/indoor/master/services/create'
     | '/dashboard/outdoor/master/doctors/$doctorId'
@@ -4840,11 +5815,21 @@ export interface FileRouteTypes {
     | '/dashboard/outdoor/reception/invoices/$invoiceId'
     | '/dashboard/outdoor/reception/invoices/create'
     | '/dashboard/outdoor/reception/invoices/list'
+    | '/dashboard/pharmacy/categories/edit/$id'
+    | '/dashboard/pharmacy/medicines/$id/batches'
+    | '/dashboard/pharmacy/medicines/edit/$id'
+    | '/dashboard/pharmacy/sales/$id/edit'
+    | '/dashboard/pharmacy/sales/$id/return'
+    | '/dashboard/pharmacy/suppliers/edit/$id'
+    | '/dashboard/prescriptions/medicine-groups/edit/$id'
+    | '/dashboard/prescriptions/medicines/edit/$id'
+    | '/dashboard/prescriptions/patients/edit/$id'
     | '/dashboard/purchase/goods-receipt/edit/$id'
     | '/dashboard/purchase/requests/edit/$id'
     | '/dashboard/purchase/suppliers/edit/$id'
     | '/dashboard/reports/my/outdoor/date-wise-collection'
     | '/dashboard/reports/my/outdoor/today-collection'
+    | '/dashboard/outdoor/reception/invoices/$invoiceId/payment-receipt/$paymentId'
     | '/dashboard/outdoor/master/tests/edit/$id'
     | '/dashboard/outdoor/reception/invoices/edit/$invoiceId'
     | '/dashboard/pathology/hematology/all/edit/$id'
@@ -4877,6 +5862,7 @@ export interface FileRouteTypes {
     | '/admin/admins'
     | '/admin/common-commands'
     | '/admin/contacts'
+    | '/admin/database-migration'
     | '/admin/login'
     | '/admin/modules'
     | '/admin/nginx-domain-list'
@@ -4900,6 +5886,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/app-inventory'
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/date-controls'
+    | '/dashboard/settings/default-data'
     | '/dashboard/settings/display'
     | '/dashboard/settings/domain-configuration'
     | '/dashboard/settings/inventory-accounts'
@@ -4924,6 +5911,8 @@ export interface FileRouteTypes {
     | '/dashboard/help'
     | '/dashboard/my-account'
     | '/dashboard/notifications'
+    | '/dashboard/pharmacy'
+    | '/dashboard/prescriptions'
     | '/dashboard/purchase'
     | '/dashboard/reset-database'
     | '/dashboard/roles'
@@ -4932,6 +5921,9 @@ export interface FileRouteTypes {
     | '/dashboard/tasks'
     | '/dashboard/users'
     | '/admin/plans/edit/$planId'
+    | '/dashboard/accounting/accounts/print'
+    | '/dashboard/accounting/income/print'
+    | '/dashboard/prescriptions/$id/print'
     | '/dashboard/roles/edit/$id'
     | '/dashboard/accounting/accounts'
     | '/dashboard/accounting/expense'
@@ -4969,8 +5961,12 @@ export interface FileRouteTypes {
     | '/dashboard/banks/bank-deposits'
     | '/dashboard/banks/bank-transactions'
     | '/dashboard/banks/bank-withdrawals'
+    | '/dashboard/diagnostics/dashboard'
     | '/dashboard/ecg/all'
+    | '/dashboard/finance/payment-history'
     | '/dashboard/finance/payments'
+    | '/dashboard/finance/reconciliation'
+    | '/dashboard/indoor/dashboard'
     | '/dashboard/outdoor/dashboard'
     | '/dashboard/pathology/custom-tests'
     | '/dashboard/pathology/dashboard'
@@ -4979,6 +5975,30 @@ export interface FileRouteTypes {
     | '/dashboard/payroll/employees'
     | '/dashboard/payroll/overview'
     | '/dashboard/payroll/salary-structure'
+    | '/dashboard/pharmacy/categories'
+    | '/dashboard/pharmacy/customers'
+    | '/dashboard/pharmacy/expiry-report'
+    | '/dashboard/pharmacy/low-stock'
+    | '/dashboard/pharmacy/medicines'
+    | '/dashboard/pharmacy/purchase-orders'
+    | '/dashboard/pharmacy/purchase-returns'
+    | '/dashboard/pharmacy/reorder'
+    | '/dashboard/pharmacy/sales-returns'
+    | '/dashboard/pharmacy/sales'
+    | '/dashboard/pharmacy/shifts'
+    | '/dashboard/pharmacy/stock-adjustments'
+    | '/dashboard/pharmacy/stock-in'
+    | '/dashboard/pharmacy/stock-ledger'
+    | '/dashboard/pharmacy/stock-report'
+    | '/dashboard/pharmacy/supplier-dues'
+    | '/dashboard/pharmacy/suppliers'
+    | '/dashboard/prescriptions/create'
+    | '/dashboard/prescriptions/dashboard'
+    | '/dashboard/prescriptions/medicine-groups'
+    | '/dashboard/prescriptions/medicines'
+    | '/dashboard/prescriptions/my-prescriptions'
+    | '/dashboard/prescriptions/patients'
+    | '/dashboard/prescriptions/quick-phrases'
     | '/dashboard/purchase/goods-receipt'
     | '/dashboard/purchase/requests'
     | '/dashboard/purchase/statistics'
@@ -4990,6 +6010,8 @@ export interface FileRouteTypes {
     | '/dashboard/settings/report-settings'
     | '/dashboard/ultrasonogram/all'
     | '/dashboard/x-ray/all'
+    | '/dashboard/accounting/expenses/$expenseId/print'
+    | '/dashboard/accounting/income/$incomeId/print'
     | '/dashboard/accounting/reports/balance-sheet/print'
     | '/dashboard/accounting/reports/cash-flow/print'
     | '/dashboard/accounting/reports/daily-summary/print'
@@ -5003,6 +6025,7 @@ export interface FileRouteTypes {
     | '/dashboard/ecg/all/print/$id'
     | '/dashboard/indoor/master/bed-cabin-list/$id'
     | '/dashboard/indoor/master/services/$id'
+    | '/dashboard/indoor/master/treatment-outcomes/$id'
     | '/dashboard/outdoor/master/categories/$id'
     | '/dashboard/outdoor/master/departments/$id'
     | '/dashboard/outdoor/master/doctors/create'
@@ -5011,6 +6034,7 @@ export interface FileRouteTypes {
     | '/dashboard/outdoor/reception/due-collection/$invoiceId'
     | '/dashboard/pathology/custom-tests/edit/$id'
     | '/dashboard/pathology/custom-tests/report/$reportId'
+    | '/dashboard/pharmacy/sales/$id/print'
     | '/dashboard/reports/accounting/bank-book/print'
     | '/dashboard/reports/accounting/cash-flow/print'
     | '/dashboard/reports/accounting/daily-transactions/print'
@@ -5086,17 +6110,27 @@ export interface FileRouteTypes {
     | '/dashboard/admission/patients/discharged'
     | '/dashboard/admission/patients/due'
     | '/dashboard/admission/patients/final-bill-created-list'
+    | '/dashboard/admission/patients/overpaid'
     | '/dashboard/admission/patients/paid'
     | '/dashboard/admission/patients/payment-completed-list'
     | '/dashboard/assets/categories/create'
     | '/dashboard/assets/list/create'
     | '/dashboard/assets/locations/create'
     | '/dashboard/assets/maintenance/create'
+    | '/dashboard/finance/doctor-bills/anesthesia-bill'
+    | '/dashboard/finance/doctor-bills/assistant-bill'
+    | '/dashboard/finance/doctor-bills/clinical-bills'
+    | '/dashboard/finance/doctor-bills/consultant-bill'
+    | '/dashboard/finance/doctor-bills/dashboard'
+    | '/dashboard/finance/doctor-bills/invoices'
+    | '/dashboard/finance/doctor-bills/surgeon-bill'
     | '/dashboard/indoor/management/anesthesia-bill'
     | '/dashboard/indoor/management/assistant-bill'
     | '/dashboard/indoor/management/clinical-bills'
+    | '/dashboard/indoor/management/consultant-bill'
     | '/dashboard/indoor/management/distributions'
     | '/dashboard/indoor/management/doctor-referred'
+    | '/dashboard/indoor/management/other-bills'
     | '/dashboard/indoor/management/surgeon-bill'
     | '/dashboard/indoor/master/anasthesia-types'
     | '/dashboard/indoor/master/bed-cabin-list'
@@ -5143,6 +6177,7 @@ export interface FileRouteTypes {
     | '/dashboard/pathology/immunology/all'
     | '/dashboard/pathology/immunology/beta-hcg'
     | '/dashboard/pathology/immunology/blood-group'
+    | '/dashboard/pathology/immunology/cross-matching-screening'
     | '/dashboard/pathology/immunology/mt'
     | '/dashboard/pathology/immunology/widal-test'
     | '/dashboard/pathology/stool/ocult-blood-test'
@@ -5153,6 +6188,26 @@ export interface FileRouteTypes {
     | '/dashboard/pathology/urine/urine-for-sugar'
     | '/dashboard/payroll/attendance/$staffId'
     | '/dashboard/payroll/salary/$staffId'
+    | '/dashboard/pharmacy/categories/create'
+    | '/dashboard/pharmacy/customers/$id'
+    | '/dashboard/pharmacy/medicines/create'
+    | '/dashboard/pharmacy/purchase-orders/$id'
+    | '/dashboard/pharmacy/purchase-orders/create'
+    | '/dashboard/pharmacy/purchase-returns/create'
+    | '/dashboard/pharmacy/sales-returns/create'
+    | '/dashboard/pharmacy/sales/create'
+    | '/dashboard/pharmacy/stock-adjustments/create'
+    | '/dashboard/pharmacy/stock-in/create'
+    | '/dashboard/pharmacy/supplier-dues/$id'
+    | '/dashboard/pharmacy/suppliers/create'
+    | '/dashboard/prescriptions/edit/$id'
+    | '/dashboard/prescriptions/medicine-groups/create'
+    | '/dashboard/prescriptions/medicines/create'
+    | '/dashboard/prescriptions/patients/$id'
+    | '/dashboard/prescriptions/patients/create'
+    | '/dashboard/prescriptions/reports/doctor-wise'
+    | '/dashboard/prescriptions/reports/medicine-wise'
+    | '/dashboard/prescriptions/reports/patient-wise'
     | '/dashboard/purchase/goods-receipt/create'
     | '/dashboard/purchase/requests/create'
     | '/dashboard/purchase/requests/pending'
@@ -5207,6 +6262,7 @@ export interface FileRouteTypes {
     | '/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId'
     | '/dashboard/admission/patients/$admissionId/print/$step'
     | '/dashboard/ecg/all/edit/builder/$id'
+    | '/dashboard/finance/doctor-bills/invoices/$invoiceId/print'
     | '/dashboard/indoor/master/services/edit/$id'
     | '/dashboard/outdoor/master/doctors/$doctorId/edit'
     | '/dashboard/outdoor/reception/invoices/$invoiceId/note'
@@ -5232,6 +6288,7 @@ export interface FileRouteTypes {
     | '/dashboard/pathology/immunology/all/report/$reportId'
     | '/dashboard/pathology/immunology/beta-hcg/report/$reportId'
     | '/dashboard/pathology/immunology/blood-group/report/$reportId'
+    | '/dashboard/pathology/immunology/cross-matching-screening/report/$reportId'
     | '/dashboard/pathology/immunology/mt/report/$reportId'
     | '/dashboard/pathology/immunology/widal-test/report/$reportId'
     | '/dashboard/pathology/stool/ocult-blood-test/report/$reportId'
@@ -5259,6 +6316,11 @@ export interface FileRouteTypes {
     | '/dashboard/assets/list/edit/$id'
     | '/dashboard/assets/locations/edit/$id'
     | '/dashboard/assets/maintenance/edit/$id'
+    | '/dashboard/finance/doctor-bills/anesthesia-bill/paid'
+    | '/dashboard/finance/doctor-bills/assistant-bill/paid'
+    | '/dashboard/finance/doctor-bills/consultant-bill/paid'
+    | '/dashboard/finance/doctor-bills/invoices/dashboard'
+    | '/dashboard/finance/doctor-bills/surgeon-bill/paid'
     | '/dashboard/indoor/master/bed-cabin-list/create'
     | '/dashboard/indoor/master/services/create'
     | '/dashboard/outdoor/master/doctors/$doctorId'
@@ -5266,11 +6328,21 @@ export interface FileRouteTypes {
     | '/dashboard/outdoor/reception/invoices/$invoiceId'
     | '/dashboard/outdoor/reception/invoices/create'
     | '/dashboard/outdoor/reception/invoices/list'
+    | '/dashboard/pharmacy/categories/edit/$id'
+    | '/dashboard/pharmacy/medicines/$id/batches'
+    | '/dashboard/pharmacy/medicines/edit/$id'
+    | '/dashboard/pharmacy/sales/$id/edit'
+    | '/dashboard/pharmacy/sales/$id/return'
+    | '/dashboard/pharmacy/suppliers/edit/$id'
+    | '/dashboard/prescriptions/medicine-groups/edit/$id'
+    | '/dashboard/prescriptions/medicines/edit/$id'
+    | '/dashboard/prescriptions/patients/edit/$id'
     | '/dashboard/purchase/goods-receipt/edit/$id'
     | '/dashboard/purchase/requests/edit/$id'
     | '/dashboard/purchase/suppliers/edit/$id'
     | '/dashboard/reports/my/outdoor/date-wise-collection'
     | '/dashboard/reports/my/outdoor/today-collection'
+    | '/dashboard/outdoor/reception/invoices/$invoiceId/payment-receipt/$paymentId'
     | '/dashboard/outdoor/master/tests/edit/$id'
     | '/dashboard/outdoor/reception/invoices/edit/$invoiceId'
     | '/dashboard/pathology/hematology/all/edit/$id'
@@ -5309,6 +6381,7 @@ export interface FileRouteTypes {
     | '/(platform)/admin/admins'
     | '/(platform)/admin/common-commands'
     | '/(platform)/admin/contacts'
+    | '/(platform)/admin/database-migration'
     | '/(platform)/admin/login'
     | '/(platform)/admin/modules'
     | '/(platform)/admin/nginx-domain-list'
@@ -5332,6 +6405,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/settings/app-inventory'
     | '/_authenticated/dashboard/settings/appearance'
     | '/_authenticated/dashboard/settings/date-controls'
+    | '/_authenticated/dashboard/settings/default-data'
     | '/_authenticated/dashboard/settings/display'
     | '/_authenticated/dashboard/settings/domain-configuration'
     | '/_authenticated/dashboard/settings/inventory-accounts'
@@ -5356,6 +6430,8 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/help/'
     | '/_authenticated/dashboard/my-account/'
     | '/_authenticated/dashboard/notifications/'
+    | '/_authenticated/dashboard/pharmacy/'
+    | '/_authenticated/dashboard/prescriptions/'
     | '/_authenticated/dashboard/purchase/'
     | '/_authenticated/dashboard/reset-database/'
     | '/_authenticated/dashboard/roles/'
@@ -5364,6 +6440,9 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/tasks/'
     | '/_authenticated/dashboard/users/'
     | '/(platform)/admin/plans/edit/$planId'
+    | '/_authenticated/dashboard/accounting/accounts/print'
+    | '/_authenticated/dashboard/accounting/income/print'
+    | '/_authenticated/dashboard/prescriptions/$id/print'
     | '/_authenticated/dashboard/roles/edit/$id'
     | '/_authenticated/dashboard/accounting/accounts/'
     | '/_authenticated/dashboard/accounting/expense/'
@@ -5401,8 +6480,12 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/banks/bank-deposits/'
     | '/_authenticated/dashboard/banks/bank-transactions/'
     | '/_authenticated/dashboard/banks/bank-withdrawals/'
+    | '/_authenticated/dashboard/diagnostics/dashboard/'
     | '/_authenticated/dashboard/ecg/all/'
+    | '/_authenticated/dashboard/finance/payment-history/'
     | '/_authenticated/dashboard/finance/payments/'
+    | '/_authenticated/dashboard/finance/reconciliation/'
+    | '/_authenticated/dashboard/indoor/dashboard/'
     | '/_authenticated/dashboard/outdoor/dashboard/'
     | '/_authenticated/dashboard/pathology/custom-tests/'
     | '/_authenticated/dashboard/pathology/dashboard/'
@@ -5411,6 +6494,30 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/payroll/employees/'
     | '/_authenticated/dashboard/payroll/overview/'
     | '/_authenticated/dashboard/payroll/salary-structure/'
+    | '/_authenticated/dashboard/pharmacy/categories/'
+    | '/_authenticated/dashboard/pharmacy/customers/'
+    | '/_authenticated/dashboard/pharmacy/expiry-report/'
+    | '/_authenticated/dashboard/pharmacy/low-stock/'
+    | '/_authenticated/dashboard/pharmacy/medicines/'
+    | '/_authenticated/dashboard/pharmacy/purchase-orders/'
+    | '/_authenticated/dashboard/pharmacy/purchase-returns/'
+    | '/_authenticated/dashboard/pharmacy/reorder/'
+    | '/_authenticated/dashboard/pharmacy/sales-returns/'
+    | '/_authenticated/dashboard/pharmacy/sales/'
+    | '/_authenticated/dashboard/pharmacy/shifts/'
+    | '/_authenticated/dashboard/pharmacy/stock-adjustments/'
+    | '/_authenticated/dashboard/pharmacy/stock-in/'
+    | '/_authenticated/dashboard/pharmacy/stock-ledger/'
+    | '/_authenticated/dashboard/pharmacy/stock-report/'
+    | '/_authenticated/dashboard/pharmacy/supplier-dues/'
+    | '/_authenticated/dashboard/pharmacy/suppliers/'
+    | '/_authenticated/dashboard/prescriptions/create/'
+    | '/_authenticated/dashboard/prescriptions/dashboard/'
+    | '/_authenticated/dashboard/prescriptions/medicine-groups/'
+    | '/_authenticated/dashboard/prescriptions/medicines/'
+    | '/_authenticated/dashboard/prescriptions/my-prescriptions/'
+    | '/_authenticated/dashboard/prescriptions/patients/'
+    | '/_authenticated/dashboard/prescriptions/quick-phrases/'
     | '/_authenticated/dashboard/purchase/goods-receipt/'
     | '/_authenticated/dashboard/purchase/requests/'
     | '/_authenticated/dashboard/purchase/statistics/'
@@ -5422,6 +6529,8 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/settings/report-settings/'
     | '/_authenticated/dashboard/ultrasonogram/all/'
     | '/_authenticated/dashboard/x-ray/all/'
+    | '/_authenticated/dashboard/accounting/expenses/$expenseId/print'
+    | '/_authenticated/dashboard/accounting/income/$incomeId/print'
     | '/_authenticated/dashboard/accounting/reports/balance-sheet/print'
     | '/_authenticated/dashboard/accounting/reports/cash-flow/print'
     | '/_authenticated/dashboard/accounting/reports/daily-summary/print'
@@ -5435,6 +6544,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/ecg/all/print/$id'
     | '/_authenticated/dashboard/indoor/master/bed-cabin-list/$id'
     | '/_authenticated/dashboard/indoor/master/services/$id'
+    | '/_authenticated/dashboard/indoor/master/treatment-outcomes/$id'
     | '/_authenticated/dashboard/outdoor/master/categories/$id'
     | '/_authenticated/dashboard/outdoor/master/departments/$id'
     | '/_authenticated/dashboard/outdoor/master/doctors/create'
@@ -5443,6 +6553,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/outdoor/reception/due-collection/$invoiceId'
     | '/_authenticated/dashboard/pathology/custom-tests/edit/$id'
     | '/_authenticated/dashboard/pathology/custom-tests/report/$reportId'
+    | '/_authenticated/dashboard/pharmacy/sales/$id/print'
     | '/_authenticated/dashboard/reports/accounting/bank-book/print'
     | '/_authenticated/dashboard/reports/accounting/cash-flow/print'
     | '/_authenticated/dashboard/reports/accounting/daily-transactions/print'
@@ -5518,17 +6629,27 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/admission/patients/discharged/'
     | '/_authenticated/dashboard/admission/patients/due/'
     | '/_authenticated/dashboard/admission/patients/final-bill-created-list/'
+    | '/_authenticated/dashboard/admission/patients/overpaid/'
     | '/_authenticated/dashboard/admission/patients/paid/'
     | '/_authenticated/dashboard/admission/patients/payment-completed-list/'
     | '/_authenticated/dashboard/assets/categories/create/'
     | '/_authenticated/dashboard/assets/list/create/'
     | '/_authenticated/dashboard/assets/locations/create/'
     | '/_authenticated/dashboard/assets/maintenance/create/'
+    | '/_authenticated/dashboard/finance/doctor-bills/anesthesia-bill/'
+    | '/_authenticated/dashboard/finance/doctor-bills/assistant-bill/'
+    | '/_authenticated/dashboard/finance/doctor-bills/clinical-bills/'
+    | '/_authenticated/dashboard/finance/doctor-bills/consultant-bill/'
+    | '/_authenticated/dashboard/finance/doctor-bills/dashboard/'
+    | '/_authenticated/dashboard/finance/doctor-bills/invoices/'
+    | '/_authenticated/dashboard/finance/doctor-bills/surgeon-bill/'
     | '/_authenticated/dashboard/indoor/management/anesthesia-bill/'
     | '/_authenticated/dashboard/indoor/management/assistant-bill/'
     | '/_authenticated/dashboard/indoor/management/clinical-bills/'
+    | '/_authenticated/dashboard/indoor/management/consultant-bill/'
     | '/_authenticated/dashboard/indoor/management/distributions/'
     | '/_authenticated/dashboard/indoor/management/doctor-referred/'
+    | '/_authenticated/dashboard/indoor/management/other-bills/'
     | '/_authenticated/dashboard/indoor/management/surgeon-bill/'
     | '/_authenticated/dashboard/indoor/master/anasthesia-types/'
     | '/_authenticated/dashboard/indoor/master/bed-cabin-list/'
@@ -5575,6 +6696,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/pathology/immunology/all/'
     | '/_authenticated/dashboard/pathology/immunology/beta-hcg/'
     | '/_authenticated/dashboard/pathology/immunology/blood-group/'
+    | '/_authenticated/dashboard/pathology/immunology/cross-matching-screening/'
     | '/_authenticated/dashboard/pathology/immunology/mt/'
     | '/_authenticated/dashboard/pathology/immunology/widal-test/'
     | '/_authenticated/dashboard/pathology/stool/ocult-blood-test/'
@@ -5585,6 +6707,26 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/pathology/urine/urine-for-sugar/'
     | '/_authenticated/dashboard/payroll/attendance/$staffId/'
     | '/_authenticated/dashboard/payroll/salary/$staffId/'
+    | '/_authenticated/dashboard/pharmacy/categories/create/'
+    | '/_authenticated/dashboard/pharmacy/customers/$id/'
+    | '/_authenticated/dashboard/pharmacy/medicines/create/'
+    | '/_authenticated/dashboard/pharmacy/purchase-orders/$id/'
+    | '/_authenticated/dashboard/pharmacy/purchase-orders/create/'
+    | '/_authenticated/dashboard/pharmacy/purchase-returns/create/'
+    | '/_authenticated/dashboard/pharmacy/sales-returns/create/'
+    | '/_authenticated/dashboard/pharmacy/sales/create/'
+    | '/_authenticated/dashboard/pharmacy/stock-adjustments/create/'
+    | '/_authenticated/dashboard/pharmacy/stock-in/create/'
+    | '/_authenticated/dashboard/pharmacy/supplier-dues/$id/'
+    | '/_authenticated/dashboard/pharmacy/suppliers/create/'
+    | '/_authenticated/dashboard/prescriptions/edit/$id/'
+    | '/_authenticated/dashboard/prescriptions/medicine-groups/create/'
+    | '/_authenticated/dashboard/prescriptions/medicines/create/'
+    | '/_authenticated/dashboard/prescriptions/patients/$id/'
+    | '/_authenticated/dashboard/prescriptions/patients/create/'
+    | '/_authenticated/dashboard/prescriptions/reports/doctor-wise/'
+    | '/_authenticated/dashboard/prescriptions/reports/medicine-wise/'
+    | '/_authenticated/dashboard/prescriptions/reports/patient-wise/'
     | '/_authenticated/dashboard/purchase/goods-receipt/create/'
     | '/_authenticated/dashboard/purchase/requests/create/'
     | '/_authenticated/dashboard/purchase/requests/pending/'
@@ -5639,6 +6781,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/admission/patients/$admissionId/payment-receipt/$paymentId'
     | '/_authenticated/dashboard/admission/patients/$admissionId/print/$step'
     | '/_authenticated/dashboard/ecg/all/edit/builder/$id'
+    | '/_authenticated/dashboard/finance/doctor-bills/invoices/$invoiceId/print'
     | '/_authenticated/dashboard/indoor/master/services/edit/$id'
     | '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/edit'
     | '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/note'
@@ -5664,6 +6807,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/pathology/immunology/all/report/$reportId'
     | '/_authenticated/dashboard/pathology/immunology/beta-hcg/report/$reportId'
     | '/_authenticated/dashboard/pathology/immunology/blood-group/report/$reportId'
+    | '/_authenticated/dashboard/pathology/immunology/cross-matching-screening/report/$reportId'
     | '/_authenticated/dashboard/pathology/immunology/mt/report/$reportId'
     | '/_authenticated/dashboard/pathology/immunology/widal-test/report/$reportId'
     | '/_authenticated/dashboard/pathology/stool/ocult-blood-test/report/$reportId'
@@ -5691,6 +6835,11 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/assets/list/edit/$id/'
     | '/_authenticated/dashboard/assets/locations/edit/$id/'
     | '/_authenticated/dashboard/assets/maintenance/edit/$id/'
+    | '/_authenticated/dashboard/finance/doctor-bills/anesthesia-bill/paid/'
+    | '/_authenticated/dashboard/finance/doctor-bills/assistant-bill/paid/'
+    | '/_authenticated/dashboard/finance/doctor-bills/consultant-bill/paid/'
+    | '/_authenticated/dashboard/finance/doctor-bills/invoices/dashboard/'
+    | '/_authenticated/dashboard/finance/doctor-bills/surgeon-bill/paid/'
     | '/_authenticated/dashboard/indoor/master/bed-cabin-list/create/'
     | '/_authenticated/dashboard/indoor/master/services/create/'
     | '/_authenticated/dashboard/outdoor/master/doctors/$doctorId/'
@@ -5698,11 +6847,21 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/'
     | '/_authenticated/dashboard/outdoor/reception/invoices/create/'
     | '/_authenticated/dashboard/outdoor/reception/invoices/list/'
+    | '/_authenticated/dashboard/pharmacy/categories/edit/$id/'
+    | '/_authenticated/dashboard/pharmacy/medicines/$id/batches/'
+    | '/_authenticated/dashboard/pharmacy/medicines/edit/$id/'
+    | '/_authenticated/dashboard/pharmacy/sales/$id/edit/'
+    | '/_authenticated/dashboard/pharmacy/sales/$id/return/'
+    | '/_authenticated/dashboard/pharmacy/suppliers/edit/$id/'
+    | '/_authenticated/dashboard/prescriptions/medicine-groups/edit/$id/'
+    | '/_authenticated/dashboard/prescriptions/medicines/edit/$id/'
+    | '/_authenticated/dashboard/prescriptions/patients/edit/$id/'
     | '/_authenticated/dashboard/purchase/goods-receipt/edit/$id/'
     | '/_authenticated/dashboard/purchase/requests/edit/$id/'
     | '/_authenticated/dashboard/purchase/suppliers/edit/$id/'
     | '/_authenticated/dashboard/reports/my/outdoor/date-wise-collection/'
     | '/_authenticated/dashboard/reports/my/outdoor/today-collection/'
+    | '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/payment-receipt/$paymentId'
     | '/_authenticated/dashboard/outdoor/master/tests/edit/$id/'
     | '/_authenticated/dashboard/outdoor/reception/invoices/edit/$invoiceId/'
     | '/_authenticated/dashboard/pathology/hematology/all/edit/$id/'
@@ -6021,6 +7180,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof platformAdminLoginRouteImport
       parentRoute: typeof platformAdminRouteRoute
     }
+    '/(platform)/admin/database-migration': {
+      id: '/(platform)/admin/database-migration'
+      path: '/database-migration'
+      fullPath: '/admin/database-migration'
+      preLoaderRoute: typeof platformAdminDatabaseMigrationRouteImport
+      parentRoute: typeof platformAdminRouteRoute
+    }
     '/(platform)/admin/contacts': {
       id: '/(platform)/admin/contacts'
       path: '/contacts'
@@ -6096,6 +7262,20 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/purchase'
       fullPath: '/dashboard/purchase'
       preLoaderRoute: typeof AuthenticatedDashboardPurchaseIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/': {
+      id: '/_authenticated/dashboard/prescriptions/'
+      path: '/dashboard/prescriptions'
+      fullPath: '/dashboard/prescriptions'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/': {
+      id: '/_authenticated/dashboard/pharmacy/'
+      path: '/dashboard/pharmacy'
+      fullPath: '/dashboard/pharmacy'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/notifications/': {
@@ -6266,6 +7446,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardSettingsDisplayRouteImport
       parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
     }
+    '/_authenticated/dashboard/settings/default-data': {
+      id: '/_authenticated/dashboard/settings/default-data'
+      path: '/default-data'
+      fullPath: '/dashboard/settings/default-data'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsDefaultDataRouteImport
+      parentRoute: typeof AuthenticatedDashboardSettingsRouteRoute
+    }
     '/_authenticated/dashboard/settings/date-controls': {
       id: '/_authenticated/dashboard/settings/date-controls'
       path: '/date-controls'
@@ -6413,6 +7600,174 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardPurchaseGoodsReceiptIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/prescriptions/quick-phrases/': {
+      id: '/_authenticated/dashboard/prescriptions/quick-phrases/'
+      path: '/dashboard/prescriptions/quick-phrases'
+      fullPath: '/dashboard/prescriptions/quick-phrases'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsQuickPhrasesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/patients/': {
+      id: '/_authenticated/dashboard/prescriptions/patients/'
+      path: '/dashboard/prescriptions/patients'
+      fullPath: '/dashboard/prescriptions/patients'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsPatientsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/my-prescriptions/': {
+      id: '/_authenticated/dashboard/prescriptions/my-prescriptions/'
+      path: '/dashboard/prescriptions/my-prescriptions'
+      fullPath: '/dashboard/prescriptions/my-prescriptions'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsMyPrescriptionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/medicines/': {
+      id: '/_authenticated/dashboard/prescriptions/medicines/'
+      path: '/dashboard/prescriptions/medicines'
+      fullPath: '/dashboard/prescriptions/medicines'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsMedicinesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/medicine-groups/': {
+      id: '/_authenticated/dashboard/prescriptions/medicine-groups/'
+      path: '/dashboard/prescriptions/medicine-groups'
+      fullPath: '/dashboard/prescriptions/medicine-groups'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsMedicineGroupsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/dashboard/': {
+      id: '/_authenticated/dashboard/prescriptions/dashboard/'
+      path: '/dashboard/prescriptions/dashboard'
+      fullPath: '/dashboard/prescriptions/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsDashboardIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/create/': {
+      id: '/_authenticated/dashboard/prescriptions/create/'
+      path: '/dashboard/prescriptions/create'
+      fullPath: '/dashboard/prescriptions/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/suppliers/': {
+      id: '/_authenticated/dashboard/pharmacy/suppliers/'
+      path: '/dashboard/pharmacy/suppliers'
+      fullPath: '/dashboard/pharmacy/suppliers'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacySuppliersIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/supplier-dues/': {
+      id: '/_authenticated/dashboard/pharmacy/supplier-dues/'
+      path: '/dashboard/pharmacy/supplier-dues'
+      fullPath: '/dashboard/pharmacy/supplier-dues'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacySupplierDuesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/stock-report/': {
+      id: '/_authenticated/dashboard/pharmacy/stock-report/'
+      path: '/dashboard/pharmacy/stock-report'
+      fullPath: '/dashboard/pharmacy/stock-report'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyStockReportIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/stock-ledger/': {
+      id: '/_authenticated/dashboard/pharmacy/stock-ledger/'
+      path: '/dashboard/pharmacy/stock-ledger'
+      fullPath: '/dashboard/pharmacy/stock-ledger'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyStockLedgerIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/stock-in/': {
+      id: '/_authenticated/dashboard/pharmacy/stock-in/'
+      path: '/dashboard/pharmacy/stock-in'
+      fullPath: '/dashboard/pharmacy/stock-in'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyStockInIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/stock-adjustments/': {
+      id: '/_authenticated/dashboard/pharmacy/stock-adjustments/'
+      path: '/dashboard/pharmacy/stock-adjustments'
+      fullPath: '/dashboard/pharmacy/stock-adjustments'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyStockAdjustmentsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/shifts/': {
+      id: '/_authenticated/dashboard/pharmacy/shifts/'
+      path: '/dashboard/pharmacy/shifts'
+      fullPath: '/dashboard/pharmacy/shifts'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyShiftsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/sales/': {
+      id: '/_authenticated/dashboard/pharmacy/sales/'
+      path: '/dashboard/pharmacy/sales'
+      fullPath: '/dashboard/pharmacy/sales'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacySalesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/sales-returns/': {
+      id: '/_authenticated/dashboard/pharmacy/sales-returns/'
+      path: '/dashboard/pharmacy/sales-returns'
+      fullPath: '/dashboard/pharmacy/sales-returns'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacySalesReturnsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/reorder/': {
+      id: '/_authenticated/dashboard/pharmacy/reorder/'
+      path: '/dashboard/pharmacy/reorder'
+      fullPath: '/dashboard/pharmacy/reorder'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyReorderIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/purchase-returns/': {
+      id: '/_authenticated/dashboard/pharmacy/purchase-returns/'
+      path: '/dashboard/pharmacy/purchase-returns'
+      fullPath: '/dashboard/pharmacy/purchase-returns'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyPurchaseReturnsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/purchase-orders/': {
+      id: '/_authenticated/dashboard/pharmacy/purchase-orders/'
+      path: '/dashboard/pharmacy/purchase-orders'
+      fullPath: '/dashboard/pharmacy/purchase-orders'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyPurchaseOrdersIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/medicines/': {
+      id: '/_authenticated/dashboard/pharmacy/medicines/'
+      path: '/dashboard/pharmacy/medicines'
+      fullPath: '/dashboard/pharmacy/medicines'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyMedicinesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/low-stock/': {
+      id: '/_authenticated/dashboard/pharmacy/low-stock/'
+      path: '/dashboard/pharmacy/low-stock'
+      fullPath: '/dashboard/pharmacy/low-stock'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyLowStockIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/expiry-report/': {
+      id: '/_authenticated/dashboard/pharmacy/expiry-report/'
+      path: '/dashboard/pharmacy/expiry-report'
+      fullPath: '/dashboard/pharmacy/expiry-report'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyExpiryReportIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/customers/': {
+      id: '/_authenticated/dashboard/pharmacy/customers/'
+      path: '/dashboard/pharmacy/customers'
+      fullPath: '/dashboard/pharmacy/customers'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyCustomersIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/categories/': {
+      id: '/_authenticated/dashboard/pharmacy/categories/'
+      path: '/dashboard/pharmacy/categories'
+      fullPath: '/dashboard/pharmacy/categories'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyCategoriesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/payroll/salary-structure/': {
       id: '/_authenticated/dashboard/payroll/salary-structure/'
       path: '/dashboard/payroll/salary-structure'
@@ -6469,6 +7824,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardOutdoorDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/indoor/dashboard/': {
+      id: '/_authenticated/dashboard/indoor/dashboard/'
+      path: '/dashboard/indoor/dashboard'
+      fullPath: '/dashboard/indoor/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorDashboardIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/finance/reconciliation/': {
+      id: '/_authenticated/dashboard/finance/reconciliation/'
+      path: '/dashboard/finance/reconciliation'
+      fullPath: '/dashboard/finance/reconciliation'
+      preLoaderRoute: typeof AuthenticatedDashboardFinanceReconciliationIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/finance/payments/': {
       id: '/_authenticated/dashboard/finance/payments/'
       path: '/dashboard/finance/payments'
@@ -6476,11 +7845,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardFinancePaymentsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/finance/payment-history/': {
+      id: '/_authenticated/dashboard/finance/payment-history/'
+      path: '/dashboard/finance/payment-history'
+      fullPath: '/dashboard/finance/payment-history'
+      preLoaderRoute: typeof AuthenticatedDashboardFinancePaymentHistoryIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/ecg/all/': {
       id: '/_authenticated/dashboard/ecg/all/'
       path: '/dashboard/ecg/all'
       fullPath: '/dashboard/ecg/all'
       preLoaderRoute: typeof AuthenticatedDashboardEcgAllIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/diagnostics/dashboard/': {
+      id: '/_authenticated/dashboard/diagnostics/dashboard/'
+      path: '/dashboard/diagnostics/dashboard'
+      fullPath: '/dashboard/diagnostics/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardDiagnosticsDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/banks/bank-withdrawals/': {
@@ -6740,6 +8123,27 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/roles/edit/$id'
       fullPath: '/dashboard/roles/edit/$id'
       preLoaderRoute: typeof AuthenticatedDashboardRolesEditIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/$id/print': {
+      id: '/_authenticated/dashboard/prescriptions/$id/print'
+      path: '/dashboard/prescriptions/$id/print'
+      fullPath: '/dashboard/prescriptions/$id/print'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsIdPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/accounting/income/print': {
+      id: '/_authenticated/dashboard/accounting/income/print'
+      path: '/dashboard/accounting/income/print'
+      fullPath: '/dashboard/accounting/income/print'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingIncomePrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/accounting/accounts/print': {
+      id: '/_authenticated/dashboard/accounting/accounts/print'
+      path: '/dashboard/accounting/accounts/print'
+      fullPath: '/dashboard/accounting/accounts/print'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingAccountsPrintRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/(platform)/admin/plans/edit/$planId': {
@@ -7106,6 +8510,146 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/prescriptions/reports/patient-wise/': {
+      id: '/_authenticated/dashboard/prescriptions/reports/patient-wise/'
+      path: '/dashboard/prescriptions/reports/patient-wise'
+      fullPath: '/dashboard/prescriptions/reports/patient-wise'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsReportsPatientWiseIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/reports/medicine-wise/': {
+      id: '/_authenticated/dashboard/prescriptions/reports/medicine-wise/'
+      path: '/dashboard/prescriptions/reports/medicine-wise'
+      fullPath: '/dashboard/prescriptions/reports/medicine-wise'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsReportsMedicineWiseIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/reports/doctor-wise/': {
+      id: '/_authenticated/dashboard/prescriptions/reports/doctor-wise/'
+      path: '/dashboard/prescriptions/reports/doctor-wise'
+      fullPath: '/dashboard/prescriptions/reports/doctor-wise'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsReportsDoctorWiseIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/patients/create/': {
+      id: '/_authenticated/dashboard/prescriptions/patients/create/'
+      path: '/dashboard/prescriptions/patients/create'
+      fullPath: '/dashboard/prescriptions/patients/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsPatientsCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/patients/$id/': {
+      id: '/_authenticated/dashboard/prescriptions/patients/$id/'
+      path: '/dashboard/prescriptions/patients/$id'
+      fullPath: '/dashboard/prescriptions/patients/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsPatientsIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/medicines/create/': {
+      id: '/_authenticated/dashboard/prescriptions/medicines/create/'
+      path: '/dashboard/prescriptions/medicines/create'
+      fullPath: '/dashboard/prescriptions/medicines/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsMedicinesCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/medicine-groups/create/': {
+      id: '/_authenticated/dashboard/prescriptions/medicine-groups/create/'
+      path: '/dashboard/prescriptions/medicine-groups/create'
+      fullPath: '/dashboard/prescriptions/medicine-groups/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsMedicineGroupsCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/edit/$id/': {
+      id: '/_authenticated/dashboard/prescriptions/edit/$id/'
+      path: '/dashboard/prescriptions/edit/$id'
+      fullPath: '/dashboard/prescriptions/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsEditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/suppliers/create/': {
+      id: '/_authenticated/dashboard/pharmacy/suppliers/create/'
+      path: '/dashboard/pharmacy/suppliers/create'
+      fullPath: '/dashboard/pharmacy/suppliers/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacySuppliersCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/supplier-dues/$id/': {
+      id: '/_authenticated/dashboard/pharmacy/supplier-dues/$id/'
+      path: '/dashboard/pharmacy/supplier-dues/$id'
+      fullPath: '/dashboard/pharmacy/supplier-dues/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacySupplierDuesIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/stock-in/create/': {
+      id: '/_authenticated/dashboard/pharmacy/stock-in/create/'
+      path: '/dashboard/pharmacy/stock-in/create'
+      fullPath: '/dashboard/pharmacy/stock-in/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyStockInCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/stock-adjustments/create/': {
+      id: '/_authenticated/dashboard/pharmacy/stock-adjustments/create/'
+      path: '/dashboard/pharmacy/stock-adjustments/create'
+      fullPath: '/dashboard/pharmacy/stock-adjustments/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyStockAdjustmentsCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/sales/create/': {
+      id: '/_authenticated/dashboard/pharmacy/sales/create/'
+      path: '/dashboard/pharmacy/sales/create'
+      fullPath: '/dashboard/pharmacy/sales/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacySalesCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/sales-returns/create/': {
+      id: '/_authenticated/dashboard/pharmacy/sales-returns/create/'
+      path: '/dashboard/pharmacy/sales-returns/create'
+      fullPath: '/dashboard/pharmacy/sales-returns/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacySalesReturnsCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/purchase-returns/create/': {
+      id: '/_authenticated/dashboard/pharmacy/purchase-returns/create/'
+      path: '/dashboard/pharmacy/purchase-returns/create'
+      fullPath: '/dashboard/pharmacy/purchase-returns/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyPurchaseReturnsCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/purchase-orders/create/': {
+      id: '/_authenticated/dashboard/pharmacy/purchase-orders/create/'
+      path: '/dashboard/pharmacy/purchase-orders/create'
+      fullPath: '/dashboard/pharmacy/purchase-orders/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyPurchaseOrdersCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/purchase-orders/$id/': {
+      id: '/_authenticated/dashboard/pharmacy/purchase-orders/$id/'
+      path: '/dashboard/pharmacy/purchase-orders/$id'
+      fullPath: '/dashboard/pharmacy/purchase-orders/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyPurchaseOrdersIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/medicines/create/': {
+      id: '/_authenticated/dashboard/pharmacy/medicines/create/'
+      path: '/dashboard/pharmacy/medicines/create'
+      fullPath: '/dashboard/pharmacy/medicines/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyMedicinesCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/customers/$id/': {
+      id: '/_authenticated/dashboard/pharmacy/customers/$id/'
+      path: '/dashboard/pharmacy/customers/$id'
+      fullPath: '/dashboard/pharmacy/customers/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyCustomersIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/categories/create/': {
+      id: '/_authenticated/dashboard/pharmacy/categories/create/'
+      path: '/dashboard/pharmacy/categories/create'
+      fullPath: '/dashboard/pharmacy/categories/create'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyCategoriesCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/payroll/salary/$staffId/': {
       id: '/_authenticated/dashboard/payroll/salary/$staffId/'
       path: '/dashboard/payroll/salary/$staffId'
@@ -7174,6 +8718,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/pathology/immunology/mt'
       fullPath: '/dashboard/pathology/immunology/mt'
       preLoaderRoute: typeof AuthenticatedDashboardPathologyImmunologyMtIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pathology/immunology/cross-matching-screening/': {
+      id: '/_authenticated/dashboard/pathology/immunology/cross-matching-screening/'
+      path: '/dashboard/pathology/immunology/cross-matching-screening'
+      fullPath: '/dashboard/pathology/immunology/cross-matching-screening'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/pathology/immunology/blood-group/': {
@@ -7498,6 +9049,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardIndoorManagementSurgeonBillIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/indoor/management/other-bills/': {
+      id: '/_authenticated/dashboard/indoor/management/other-bills/'
+      path: '/dashboard/indoor/management/other-bills'
+      fullPath: '/dashboard/indoor/management/other-bills'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorManagementOtherBillsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/indoor/management/doctor-referred/': {
       id: '/_authenticated/dashboard/indoor/management/doctor-referred/'
       path: '/dashboard/indoor/management/doctor-referred'
@@ -7510,6 +9068,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/indoor/management/distributions'
       fullPath: '/dashboard/indoor/management/distributions'
       preLoaderRoute: typeof AuthenticatedDashboardIndoorManagementDistributionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/indoor/management/consultant-bill/': {
+      id: '/_authenticated/dashboard/indoor/management/consultant-bill/'
+      path: '/dashboard/indoor/management/consultant-bill'
+      fullPath: '/dashboard/indoor/management/consultant-bill'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorManagementConsultantBillIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/indoor/management/clinical-bills/': {
@@ -7531,6 +9096,55 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/indoor/management/anesthesia-bill'
       fullPath: '/dashboard/indoor/management/anesthesia-bill'
       preLoaderRoute: typeof AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/finance/doctor-bills/surgeon-bill/': {
+      id: '/_authenticated/dashboard/finance/doctor-bills/surgeon-bill/'
+      path: '/dashboard/finance/doctor-bills/surgeon-bill'
+      fullPath: '/dashboard/finance/doctor-bills/surgeon-bill'
+      preLoaderRoute: typeof AuthenticatedDashboardFinanceDoctorBillsSurgeonBillIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/finance/doctor-bills/invoices/': {
+      id: '/_authenticated/dashboard/finance/doctor-bills/invoices/'
+      path: '/dashboard/finance/doctor-bills/invoices'
+      fullPath: '/dashboard/finance/doctor-bills/invoices'
+      preLoaderRoute: typeof AuthenticatedDashboardFinanceDoctorBillsInvoicesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/finance/doctor-bills/dashboard/': {
+      id: '/_authenticated/dashboard/finance/doctor-bills/dashboard/'
+      path: '/dashboard/finance/doctor-bills/dashboard'
+      fullPath: '/dashboard/finance/doctor-bills/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardFinanceDoctorBillsDashboardIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/finance/doctor-bills/consultant-bill/': {
+      id: '/_authenticated/dashboard/finance/doctor-bills/consultant-bill/'
+      path: '/dashboard/finance/doctor-bills/consultant-bill'
+      fullPath: '/dashboard/finance/doctor-bills/consultant-bill'
+      preLoaderRoute: typeof AuthenticatedDashboardFinanceDoctorBillsConsultantBillIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/finance/doctor-bills/clinical-bills/': {
+      id: '/_authenticated/dashboard/finance/doctor-bills/clinical-bills/'
+      path: '/dashboard/finance/doctor-bills/clinical-bills'
+      fullPath: '/dashboard/finance/doctor-bills/clinical-bills'
+      preLoaderRoute: typeof AuthenticatedDashboardFinanceDoctorBillsClinicalBillsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/finance/doctor-bills/assistant-bill/': {
+      id: '/_authenticated/dashboard/finance/doctor-bills/assistant-bill/'
+      path: '/dashboard/finance/doctor-bills/assistant-bill'
+      fullPath: '/dashboard/finance/doctor-bills/assistant-bill'
+      preLoaderRoute: typeof AuthenticatedDashboardFinanceDoctorBillsAssistantBillIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/finance/doctor-bills/anesthesia-bill/': {
+      id: '/_authenticated/dashboard/finance/doctor-bills/anesthesia-bill/'
+      path: '/dashboard/finance/doctor-bills/anesthesia-bill'
+      fullPath: '/dashboard/finance/doctor-bills/anesthesia-bill'
+      preLoaderRoute: typeof AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/assets/maintenance/create/': {
@@ -7573,6 +9187,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/admission/patients/paid'
       fullPath: '/dashboard/admission/patients/paid'
       preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsPaidIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/admission/patients/overpaid/': {
+      id: '/_authenticated/dashboard/admission/patients/overpaid/'
+      path: '/dashboard/admission/patients/overpaid'
+      fullPath: '/dashboard/admission/patients/overpaid'
+      preLoaderRoute: typeof AuthenticatedDashboardAdmissionPatientsOverpaidIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/admission/patients/final-bill-created-list/': {
@@ -8100,6 +9721,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardReportsAccountingBankBookPrintRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/pharmacy/sales/$id/print': {
+      id: '/_authenticated/dashboard/pharmacy/sales/$id/print'
+      path: '/dashboard/pharmacy/sales/$id/print'
+      fullPath: '/dashboard/pharmacy/sales/$id/print'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacySalesIdPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/pathology/custom-tests/report/$reportId': {
       id: '/_authenticated/dashboard/pathology/custom-tests/report/$reportId'
       path: '/dashboard/pathology/custom-tests/report/$reportId'
@@ -8154,6 +9782,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/outdoor/master/categories/$id'
       fullPath: '/dashboard/outdoor/master/categories/$id'
       preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterCategoriesIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/indoor/master/treatment-outcomes/$id': {
+      id: '/_authenticated/dashboard/indoor/master/treatment-outcomes/$id'
+      path: '/dashboard/indoor/master/treatment-outcomes/$id'
+      fullPath: '/dashboard/indoor/master/treatment-outcomes/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterTreatmentOutcomesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/indoor/master/services/$id': {
@@ -8247,6 +9882,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardAccountingReportsBalanceSheetPrintRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/accounting/income/$incomeId/print': {
+      id: '/_authenticated/dashboard/accounting/income/$incomeId/print'
+      path: '/dashboard/accounting/income/$incomeId/print'
+      fullPath: '/dashboard/accounting/income/$incomeId/print'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingIncomeIncomeIdPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/accounting/expenses/$expenseId/print': {
+      id: '/_authenticated/dashboard/accounting/expenses/$expenseId/print'
+      path: '/dashboard/accounting/expenses/$expenseId/print'
+      fullPath: '/dashboard/accounting/expenses/$expenseId/print'
+      preLoaderRoute: typeof AuthenticatedDashboardAccountingExpensesExpenseIdPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/reports/my/outdoor/today-collection/': {
       id: '/_authenticated/dashboard/reports/my/outdoor/today-collection/'
       path: '/dashboard/reports/my/outdoor/today-collection'
@@ -8280,6 +9929,69 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/purchase/goods-receipt/edit/$id'
       fullPath: '/dashboard/purchase/goods-receipt/edit/$id'
       preLoaderRoute: typeof AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/patients/edit/$id/': {
+      id: '/_authenticated/dashboard/prescriptions/patients/edit/$id/'
+      path: '/dashboard/prescriptions/patients/edit/$id'
+      fullPath: '/dashboard/prescriptions/patients/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsPatientsEditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/medicines/edit/$id/': {
+      id: '/_authenticated/dashboard/prescriptions/medicines/edit/$id/'
+      path: '/dashboard/prescriptions/medicines/edit/$id'
+      fullPath: '/dashboard/prescriptions/medicines/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsMedicinesEditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/prescriptions/medicine-groups/edit/$id/': {
+      id: '/_authenticated/dashboard/prescriptions/medicine-groups/edit/$id/'
+      path: '/dashboard/prescriptions/medicine-groups/edit/$id'
+      fullPath: '/dashboard/prescriptions/medicine-groups/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPrescriptionsMedicineGroupsEditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/suppliers/edit/$id/': {
+      id: '/_authenticated/dashboard/pharmacy/suppliers/edit/$id/'
+      path: '/dashboard/pharmacy/suppliers/edit/$id'
+      fullPath: '/dashboard/pharmacy/suppliers/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacySuppliersEditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/sales/$id/return/': {
+      id: '/_authenticated/dashboard/pharmacy/sales/$id/return/'
+      path: '/dashboard/pharmacy/sales/$id/return'
+      fullPath: '/dashboard/pharmacy/sales/$id/return'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacySalesIdReturnIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/sales/$id/edit/': {
+      id: '/_authenticated/dashboard/pharmacy/sales/$id/edit/'
+      path: '/dashboard/pharmacy/sales/$id/edit'
+      fullPath: '/dashboard/pharmacy/sales/$id/edit'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacySalesIdEditIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/medicines/edit/$id/': {
+      id: '/_authenticated/dashboard/pharmacy/medicines/edit/$id/'
+      path: '/dashboard/pharmacy/medicines/edit/$id'
+      fullPath: '/dashboard/pharmacy/medicines/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyMedicinesEditIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/medicines/$id/batches/': {
+      id: '/_authenticated/dashboard/pharmacy/medicines/$id/batches/'
+      path: '/dashboard/pharmacy/medicines/$id/batches'
+      fullPath: '/dashboard/pharmacy/medicines/$id/batches'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyMedicinesIdBatchesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/pharmacy/categories/edit/$id/': {
+      id: '/_authenticated/dashboard/pharmacy/categories/edit/$id/'
+      path: '/dashboard/pharmacy/categories/edit/$id'
+      fullPath: '/dashboard/pharmacy/categories/edit/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardPharmacyCategoriesEditIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/outdoor/reception/invoices/list/': {
@@ -8329,6 +10041,41 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/indoor/master/bed-cabin-list/create'
       fullPath: '/dashboard/indoor/master/bed-cabin-list/create'
       preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/finance/doctor-bills/surgeon-bill/paid/': {
+      id: '/_authenticated/dashboard/finance/doctor-bills/surgeon-bill/paid/'
+      path: '/dashboard/finance/doctor-bills/surgeon-bill/paid'
+      fullPath: '/dashboard/finance/doctor-bills/surgeon-bill/paid'
+      preLoaderRoute: typeof AuthenticatedDashboardFinanceDoctorBillsSurgeonBillPaidIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/finance/doctor-bills/invoices/dashboard/': {
+      id: '/_authenticated/dashboard/finance/doctor-bills/invoices/dashboard/'
+      path: '/dashboard/finance/doctor-bills/invoices/dashboard'
+      fullPath: '/dashboard/finance/doctor-bills/invoices/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardFinanceDoctorBillsInvoicesDashboardIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/finance/doctor-bills/consultant-bill/paid/': {
+      id: '/_authenticated/dashboard/finance/doctor-bills/consultant-bill/paid/'
+      path: '/dashboard/finance/doctor-bills/consultant-bill/paid'
+      fullPath: '/dashboard/finance/doctor-bills/consultant-bill/paid'
+      preLoaderRoute: typeof AuthenticatedDashboardFinanceDoctorBillsConsultantBillPaidIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/finance/doctor-bills/assistant-bill/paid/': {
+      id: '/_authenticated/dashboard/finance/doctor-bills/assistant-bill/paid/'
+      path: '/dashboard/finance/doctor-bills/assistant-bill/paid'
+      fullPath: '/dashboard/finance/doctor-bills/assistant-bill/paid'
+      preLoaderRoute: typeof AuthenticatedDashboardFinanceDoctorBillsAssistantBillPaidIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/finance/doctor-bills/anesthesia-bill/paid/': {
+      id: '/_authenticated/dashboard/finance/doctor-bills/anesthesia-bill/paid/'
+      path: '/dashboard/finance/doctor-bills/anesthesia-bill/paid'
+      fullPath: '/dashboard/finance/doctor-bills/anesthesia-bill/paid'
+      preLoaderRoute: typeof AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillPaidIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard/assets/maintenance/edit/$id/': {
@@ -8520,6 +10267,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardPathologyImmunologyMtReportReportIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/pathology/immunology/cross-matching-screening/report/$reportId': {
+      id: '/_authenticated/dashboard/pathology/immunology/cross-matching-screening/report/$reportId'
+      path: '/dashboard/pathology/immunology/cross-matching-screening/report/$reportId'
+      fullPath: '/dashboard/pathology/immunology/cross-matching-screening/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningReportReportIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/pathology/immunology/blood-group/report/$reportId': {
       id: '/_authenticated/dashboard/pathology/immunology/blood-group/report/$reportId'
       path: '/dashboard/pathology/immunology/blood-group/report/$reportId'
@@ -8695,6 +10449,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardIndoorMasterServicesEditIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/finance/doctor-bills/invoices/$invoiceId/print': {
+      id: '/_authenticated/dashboard/finance/doctor-bills/invoices/$invoiceId/print'
+      path: '/dashboard/finance/doctor-bills/invoices/$invoiceId/print'
+      fullPath: '/dashboard/finance/doctor-bills/invoices/$invoiceId/print'
+      preLoaderRoute: typeof AuthenticatedDashboardFinanceDoctorBillsInvoicesInvoiceIdPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/ecg/all/edit/builder/$id': {
       id: '/_authenticated/dashboard/ecg/all/edit/builder/$id'
       path: '/dashboard/ecg/all/edit/builder/$id'
@@ -8751,6 +10512,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/payment-receipt/$paymentId': {
+      id: '/_authenticated/dashboard/outdoor/reception/invoices/$invoiceId/payment-receipt/$paymentId'
+      path: '/dashboard/outdoor/reception/invoices/$invoiceId/payment-receipt/$paymentId'
+      fullPath: '/dashboard/outdoor/reception/invoices/$invoiceId/payment-receipt/$paymentId'
+      preLoaderRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdPaymentReceiptPaymentIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -8759,6 +10527,7 @@ interface AuthenticatedDashboardSettingsRouteRouteChildren {
   AuthenticatedDashboardSettingsAppInventoryRoute: typeof AuthenticatedDashboardSettingsAppInventoryRoute
   AuthenticatedDashboardSettingsAppearanceRoute: typeof AuthenticatedDashboardSettingsAppearanceRoute
   AuthenticatedDashboardSettingsDateControlsRoute: typeof AuthenticatedDashboardSettingsDateControlsRoute
+  AuthenticatedDashboardSettingsDefaultDataRoute: typeof AuthenticatedDashboardSettingsDefaultDataRoute
   AuthenticatedDashboardSettingsDisplayRoute: typeof AuthenticatedDashboardSettingsDisplayRoute
   AuthenticatedDashboardSettingsDomainConfigurationRoute: typeof AuthenticatedDashboardSettingsDomainConfigurationRoute
   AuthenticatedDashboardSettingsInventoryAccountsRoute: typeof AuthenticatedDashboardSettingsInventoryAccountsRoute
@@ -8782,6 +10551,8 @@ const AuthenticatedDashboardSettingsRouteRouteChildren: AuthenticatedDashboardSe
       AuthenticatedDashboardSettingsAppearanceRoute,
     AuthenticatedDashboardSettingsDateControlsRoute:
       AuthenticatedDashboardSettingsDateControlsRoute,
+    AuthenticatedDashboardSettingsDefaultDataRoute:
+      AuthenticatedDashboardSettingsDefaultDataRoute,
     AuthenticatedDashboardSettingsDisplayRoute:
       AuthenticatedDashboardSettingsDisplayRoute,
     AuthenticatedDashboardSettingsDomainConfigurationRoute:
@@ -8830,12 +10601,17 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardHelpIndexRoute: typeof AuthenticatedDashboardHelpIndexRoute
   AuthenticatedDashboardMyAccountIndexRoute: typeof AuthenticatedDashboardMyAccountIndexRoute
   AuthenticatedDashboardNotificationsIndexRoute: typeof AuthenticatedDashboardNotificationsIndexRoute
+  AuthenticatedDashboardPharmacyIndexRoute: typeof AuthenticatedDashboardPharmacyIndexRoute
+  AuthenticatedDashboardPrescriptionsIndexRoute: typeof AuthenticatedDashboardPrescriptionsIndexRoute
   AuthenticatedDashboardPurchaseIndexRoute: typeof AuthenticatedDashboardPurchaseIndexRoute
   AuthenticatedDashboardResetDatabaseIndexRoute: typeof AuthenticatedDashboardResetDatabaseIndexRoute
   AuthenticatedDashboardRolesIndexRoute: typeof AuthenticatedDashboardRolesIndexRoute
   AuthenticatedDashboardSubscriptionIndexRoute: typeof AuthenticatedDashboardSubscriptionIndexRoute
   AuthenticatedDashboardTasksIndexRoute: typeof AuthenticatedDashboardTasksIndexRoute
   AuthenticatedDashboardUsersIndexRoute: typeof AuthenticatedDashboardUsersIndexRoute
+  AuthenticatedDashboardAccountingAccountsPrintRoute: typeof AuthenticatedDashboardAccountingAccountsPrintRoute
+  AuthenticatedDashboardAccountingIncomePrintRoute: typeof AuthenticatedDashboardAccountingIncomePrintRoute
+  AuthenticatedDashboardPrescriptionsIdPrintRoute: typeof AuthenticatedDashboardPrescriptionsIdPrintRoute
   AuthenticatedDashboardRolesEditIdRoute: typeof AuthenticatedDashboardRolesEditIdRoute
   AuthenticatedDashboardAccountingAccountsIndexRoute: typeof AuthenticatedDashboardAccountingAccountsIndexRoute
   AuthenticatedDashboardAccountingExpenseIndexRoute: typeof AuthenticatedDashboardAccountingExpenseIndexRoute
@@ -8873,8 +10649,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardBanksBankDepositsIndexRoute: typeof AuthenticatedDashboardBanksBankDepositsIndexRoute
   AuthenticatedDashboardBanksBankTransactionsIndexRoute: typeof AuthenticatedDashboardBanksBankTransactionsIndexRoute
   AuthenticatedDashboardBanksBankWithdrawalsIndexRoute: typeof AuthenticatedDashboardBanksBankWithdrawalsIndexRoute
+  AuthenticatedDashboardDiagnosticsDashboardIndexRoute: typeof AuthenticatedDashboardDiagnosticsDashboardIndexRoute
   AuthenticatedDashboardEcgAllIndexRoute: typeof AuthenticatedDashboardEcgAllIndexRoute
+  AuthenticatedDashboardFinancePaymentHistoryIndexRoute: typeof AuthenticatedDashboardFinancePaymentHistoryIndexRoute
   AuthenticatedDashboardFinancePaymentsIndexRoute: typeof AuthenticatedDashboardFinancePaymentsIndexRoute
+  AuthenticatedDashboardFinanceReconciliationIndexRoute: typeof AuthenticatedDashboardFinanceReconciliationIndexRoute
+  AuthenticatedDashboardIndoorDashboardIndexRoute: typeof AuthenticatedDashboardIndoorDashboardIndexRoute
   AuthenticatedDashboardOutdoorDashboardIndexRoute: typeof AuthenticatedDashboardOutdoorDashboardIndexRoute
   AuthenticatedDashboardPathologyCustomTestsIndexRoute: typeof AuthenticatedDashboardPathologyCustomTestsIndexRoute
   AuthenticatedDashboardPathologyDashboardIndexRoute: typeof AuthenticatedDashboardPathologyDashboardIndexRoute
@@ -8883,6 +10663,30 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardPayrollEmployeesIndexRoute: typeof AuthenticatedDashboardPayrollEmployeesIndexRoute
   AuthenticatedDashboardPayrollOverviewIndexRoute: typeof AuthenticatedDashboardPayrollOverviewIndexRoute
   AuthenticatedDashboardPayrollSalaryStructureIndexRoute: typeof AuthenticatedDashboardPayrollSalaryStructureIndexRoute
+  AuthenticatedDashboardPharmacyCategoriesIndexRoute: typeof AuthenticatedDashboardPharmacyCategoriesIndexRoute
+  AuthenticatedDashboardPharmacyCustomersIndexRoute: typeof AuthenticatedDashboardPharmacyCustomersIndexRoute
+  AuthenticatedDashboardPharmacyExpiryReportIndexRoute: typeof AuthenticatedDashboardPharmacyExpiryReportIndexRoute
+  AuthenticatedDashboardPharmacyLowStockIndexRoute: typeof AuthenticatedDashboardPharmacyLowStockIndexRoute
+  AuthenticatedDashboardPharmacyMedicinesIndexRoute: typeof AuthenticatedDashboardPharmacyMedicinesIndexRoute
+  AuthenticatedDashboardPharmacyPurchaseOrdersIndexRoute: typeof AuthenticatedDashboardPharmacyPurchaseOrdersIndexRoute
+  AuthenticatedDashboardPharmacyPurchaseReturnsIndexRoute: typeof AuthenticatedDashboardPharmacyPurchaseReturnsIndexRoute
+  AuthenticatedDashboardPharmacyReorderIndexRoute: typeof AuthenticatedDashboardPharmacyReorderIndexRoute
+  AuthenticatedDashboardPharmacySalesReturnsIndexRoute: typeof AuthenticatedDashboardPharmacySalesReturnsIndexRoute
+  AuthenticatedDashboardPharmacySalesIndexRoute: typeof AuthenticatedDashboardPharmacySalesIndexRoute
+  AuthenticatedDashboardPharmacyShiftsIndexRoute: typeof AuthenticatedDashboardPharmacyShiftsIndexRoute
+  AuthenticatedDashboardPharmacyStockAdjustmentsIndexRoute: typeof AuthenticatedDashboardPharmacyStockAdjustmentsIndexRoute
+  AuthenticatedDashboardPharmacyStockInIndexRoute: typeof AuthenticatedDashboardPharmacyStockInIndexRoute
+  AuthenticatedDashboardPharmacyStockLedgerIndexRoute: typeof AuthenticatedDashboardPharmacyStockLedgerIndexRoute
+  AuthenticatedDashboardPharmacyStockReportIndexRoute: typeof AuthenticatedDashboardPharmacyStockReportIndexRoute
+  AuthenticatedDashboardPharmacySupplierDuesIndexRoute: typeof AuthenticatedDashboardPharmacySupplierDuesIndexRoute
+  AuthenticatedDashboardPharmacySuppliersIndexRoute: typeof AuthenticatedDashboardPharmacySuppliersIndexRoute
+  AuthenticatedDashboardPrescriptionsCreateIndexRoute: typeof AuthenticatedDashboardPrescriptionsCreateIndexRoute
+  AuthenticatedDashboardPrescriptionsDashboardIndexRoute: typeof AuthenticatedDashboardPrescriptionsDashboardIndexRoute
+  AuthenticatedDashboardPrescriptionsMedicineGroupsIndexRoute: typeof AuthenticatedDashboardPrescriptionsMedicineGroupsIndexRoute
+  AuthenticatedDashboardPrescriptionsMedicinesIndexRoute: typeof AuthenticatedDashboardPrescriptionsMedicinesIndexRoute
+  AuthenticatedDashboardPrescriptionsMyPrescriptionsIndexRoute: typeof AuthenticatedDashboardPrescriptionsMyPrescriptionsIndexRoute
+  AuthenticatedDashboardPrescriptionsPatientsIndexRoute: typeof AuthenticatedDashboardPrescriptionsPatientsIndexRoute
+  AuthenticatedDashboardPrescriptionsQuickPhrasesIndexRoute: typeof AuthenticatedDashboardPrescriptionsQuickPhrasesIndexRoute
   AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute: typeof AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute
   AuthenticatedDashboardPurchaseRequestsIndexRoute: typeof AuthenticatedDashboardPurchaseRequestsIndexRoute
   AuthenticatedDashboardPurchaseStatisticsIndexRoute: typeof AuthenticatedDashboardPurchaseStatisticsIndexRoute
@@ -8891,6 +10695,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRolesCreateIndexRoute: typeof AuthenticatedDashboardRolesCreateIndexRoute
   AuthenticatedDashboardUltrasonogramAllIndexRoute: typeof AuthenticatedDashboardUltrasonogramAllIndexRoute
   AuthenticatedDashboardXRayAllIndexRoute: typeof AuthenticatedDashboardXRayAllIndexRoute
+  AuthenticatedDashboardAccountingExpensesExpenseIdPrintRoute: typeof AuthenticatedDashboardAccountingExpensesExpenseIdPrintRoute
+  AuthenticatedDashboardAccountingIncomeIncomeIdPrintRoute: typeof AuthenticatedDashboardAccountingIncomeIncomeIdPrintRoute
   AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute: typeof AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute
   AuthenticatedDashboardAccountingReportsCashFlowPrintRoute: typeof AuthenticatedDashboardAccountingReportsCashFlowPrintRoute
   AuthenticatedDashboardAccountingReportsDailySummaryPrintRoute: typeof AuthenticatedDashboardAccountingReportsDailySummaryPrintRoute
@@ -8904,6 +10710,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardEcgAllPrintIdRoute: typeof AuthenticatedDashboardEcgAllPrintIdRoute
   AuthenticatedDashboardIndoorMasterBedCabinListIdRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListIdRoute
   AuthenticatedDashboardIndoorMasterServicesIdRoute: typeof AuthenticatedDashboardIndoorMasterServicesIdRoute
+  AuthenticatedDashboardIndoorMasterTreatmentOutcomesIdRoute: typeof AuthenticatedDashboardIndoorMasterTreatmentOutcomesIdRoute
   AuthenticatedDashboardOutdoorMasterCategoriesIdRoute: typeof AuthenticatedDashboardOutdoorMasterCategoriesIdRoute
   AuthenticatedDashboardOutdoorMasterDepartmentsIdRoute: typeof AuthenticatedDashboardOutdoorMasterDepartmentsIdRoute
   AuthenticatedDashboardOutdoorMasterDoctorsCreateRoute: typeof AuthenticatedDashboardOutdoorMasterDoctorsCreateRoute
@@ -8912,6 +10719,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute: typeof AuthenticatedDashboardOutdoorReceptionDueCollectionInvoiceIdRoute
   AuthenticatedDashboardPathologyCustomTestsEditIdRoute: typeof AuthenticatedDashboardPathologyCustomTestsEditIdRoute
   AuthenticatedDashboardPathologyCustomTestsReportReportIdRoute: typeof AuthenticatedDashboardPathologyCustomTestsReportReportIdRoute
+  AuthenticatedDashboardPharmacySalesIdPrintRoute: typeof AuthenticatedDashboardPharmacySalesIdPrintRoute
   AuthenticatedDashboardReportsAccountingBankBookPrintRoute: typeof AuthenticatedDashboardReportsAccountingBankBookPrintRoute
   AuthenticatedDashboardReportsAccountingCashFlowPrintRoute: typeof AuthenticatedDashboardReportsAccountingCashFlowPrintRoute
   AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRoute: typeof AuthenticatedDashboardReportsAccountingDailyTransactionsPrintRoute
@@ -8987,17 +10795,27 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsDischargedIndexRoute
   AuthenticatedDashboardAdmissionPatientsDueIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsDueIndexRoute
   AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute
+  AuthenticatedDashboardAdmissionPatientsOverpaidIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsOverpaidIndexRoute
   AuthenticatedDashboardAdmissionPatientsPaidIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsPaidIndexRoute
   AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute: typeof AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute
   AuthenticatedDashboardAssetsCategoriesCreateIndexRoute: typeof AuthenticatedDashboardAssetsCategoriesCreateIndexRoute
   AuthenticatedDashboardAssetsListCreateIndexRoute: typeof AuthenticatedDashboardAssetsListCreateIndexRoute
   AuthenticatedDashboardAssetsLocationsCreateIndexRoute: typeof AuthenticatedDashboardAssetsLocationsCreateIndexRoute
   AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute: typeof AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute
+  AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillIndexRoute: typeof AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillIndexRoute
+  AuthenticatedDashboardFinanceDoctorBillsAssistantBillIndexRoute: typeof AuthenticatedDashboardFinanceDoctorBillsAssistantBillIndexRoute
+  AuthenticatedDashboardFinanceDoctorBillsClinicalBillsIndexRoute: typeof AuthenticatedDashboardFinanceDoctorBillsClinicalBillsIndexRoute
+  AuthenticatedDashboardFinanceDoctorBillsConsultantBillIndexRoute: typeof AuthenticatedDashboardFinanceDoctorBillsConsultantBillIndexRoute
+  AuthenticatedDashboardFinanceDoctorBillsDashboardIndexRoute: typeof AuthenticatedDashboardFinanceDoctorBillsDashboardIndexRoute
+  AuthenticatedDashboardFinanceDoctorBillsInvoicesIndexRoute: typeof AuthenticatedDashboardFinanceDoctorBillsInvoicesIndexRoute
+  AuthenticatedDashboardFinanceDoctorBillsSurgeonBillIndexRoute: typeof AuthenticatedDashboardFinanceDoctorBillsSurgeonBillIndexRoute
   AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute: typeof AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute
   AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute: typeof AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute
   AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute: typeof AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute
+  AuthenticatedDashboardIndoorManagementConsultantBillIndexRoute: typeof AuthenticatedDashboardIndoorManagementConsultantBillIndexRoute
   AuthenticatedDashboardIndoorManagementDistributionsIndexRoute: typeof AuthenticatedDashboardIndoorManagementDistributionsIndexRoute
   AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute: typeof AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute
+  AuthenticatedDashboardIndoorManagementOtherBillsIndexRoute: typeof AuthenticatedDashboardIndoorManagementOtherBillsIndexRoute
   AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute: typeof AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute
   AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute: typeof AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute
   AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListIndexRoute
@@ -9044,6 +10862,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardPathologyImmunologyAllIndexRoute: typeof AuthenticatedDashboardPathologyImmunologyAllIndexRoute
   AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRoute: typeof AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRoute
   AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute: typeof AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute
+  AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningIndexRoute: typeof AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningIndexRoute
   AuthenticatedDashboardPathologyImmunologyMtIndexRoute: typeof AuthenticatedDashboardPathologyImmunologyMtIndexRoute
   AuthenticatedDashboardPathologyImmunologyWidalTestIndexRoute: typeof AuthenticatedDashboardPathologyImmunologyWidalTestIndexRoute
   AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRoute: typeof AuthenticatedDashboardPathologyStoolOcultBloodTestIndexRoute
@@ -9054,6 +10873,26 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute: typeof AuthenticatedDashboardPathologyUrineUrineForSugarIndexRoute
   AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute: typeof AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute
   AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute: typeof AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute
+  AuthenticatedDashboardPharmacyCategoriesCreateIndexRoute: typeof AuthenticatedDashboardPharmacyCategoriesCreateIndexRoute
+  AuthenticatedDashboardPharmacyCustomersIdIndexRoute: typeof AuthenticatedDashboardPharmacyCustomersIdIndexRoute
+  AuthenticatedDashboardPharmacyMedicinesCreateIndexRoute: typeof AuthenticatedDashboardPharmacyMedicinesCreateIndexRoute
+  AuthenticatedDashboardPharmacyPurchaseOrdersIdIndexRoute: typeof AuthenticatedDashboardPharmacyPurchaseOrdersIdIndexRoute
+  AuthenticatedDashboardPharmacyPurchaseOrdersCreateIndexRoute: typeof AuthenticatedDashboardPharmacyPurchaseOrdersCreateIndexRoute
+  AuthenticatedDashboardPharmacyPurchaseReturnsCreateIndexRoute: typeof AuthenticatedDashboardPharmacyPurchaseReturnsCreateIndexRoute
+  AuthenticatedDashboardPharmacySalesReturnsCreateIndexRoute: typeof AuthenticatedDashboardPharmacySalesReturnsCreateIndexRoute
+  AuthenticatedDashboardPharmacySalesCreateIndexRoute: typeof AuthenticatedDashboardPharmacySalesCreateIndexRoute
+  AuthenticatedDashboardPharmacyStockAdjustmentsCreateIndexRoute: typeof AuthenticatedDashboardPharmacyStockAdjustmentsCreateIndexRoute
+  AuthenticatedDashboardPharmacyStockInCreateIndexRoute: typeof AuthenticatedDashboardPharmacyStockInCreateIndexRoute
+  AuthenticatedDashboardPharmacySupplierDuesIdIndexRoute: typeof AuthenticatedDashboardPharmacySupplierDuesIdIndexRoute
+  AuthenticatedDashboardPharmacySuppliersCreateIndexRoute: typeof AuthenticatedDashboardPharmacySuppliersCreateIndexRoute
+  AuthenticatedDashboardPrescriptionsEditIdIndexRoute: typeof AuthenticatedDashboardPrescriptionsEditIdIndexRoute
+  AuthenticatedDashboardPrescriptionsMedicineGroupsCreateIndexRoute: typeof AuthenticatedDashboardPrescriptionsMedicineGroupsCreateIndexRoute
+  AuthenticatedDashboardPrescriptionsMedicinesCreateIndexRoute: typeof AuthenticatedDashboardPrescriptionsMedicinesCreateIndexRoute
+  AuthenticatedDashboardPrescriptionsPatientsIdIndexRoute: typeof AuthenticatedDashboardPrescriptionsPatientsIdIndexRoute
+  AuthenticatedDashboardPrescriptionsPatientsCreateIndexRoute: typeof AuthenticatedDashboardPrescriptionsPatientsCreateIndexRoute
+  AuthenticatedDashboardPrescriptionsReportsDoctorWiseIndexRoute: typeof AuthenticatedDashboardPrescriptionsReportsDoctorWiseIndexRoute
+  AuthenticatedDashboardPrescriptionsReportsMedicineWiseIndexRoute: typeof AuthenticatedDashboardPrescriptionsReportsMedicineWiseIndexRoute
+  AuthenticatedDashboardPrescriptionsReportsPatientWiseIndexRoute: typeof AuthenticatedDashboardPrescriptionsReportsPatientWiseIndexRoute
   AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute: typeof AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute
   AuthenticatedDashboardPurchaseRequestsCreateIndexRoute: typeof AuthenticatedDashboardPurchaseRequestsCreateIndexRoute
   AuthenticatedDashboardPurchaseRequestsPendingIndexRoute: typeof AuthenticatedDashboardPurchaseRequestsPendingIndexRoute
@@ -9108,6 +10947,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPaymentReceiptPaymentIdRoute
   AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute: typeof AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute
   AuthenticatedDashboardEcgAllEditBuilderIdRoute: typeof AuthenticatedDashboardEcgAllEditBuilderIdRoute
+  AuthenticatedDashboardFinanceDoctorBillsInvoicesInvoiceIdPrintRoute: typeof AuthenticatedDashboardFinanceDoctorBillsInvoicesInvoiceIdPrintRoute
   AuthenticatedDashboardIndoorMasterServicesEditIdRoute: typeof AuthenticatedDashboardIndoorMasterServicesEditIdRoute
   AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute: typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute
   AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdNoteRoute
@@ -9133,6 +10973,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardPathologyImmunologyAllReportReportIdRoute: typeof AuthenticatedDashboardPathologyImmunologyAllReportReportIdRoute
   AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRoute: typeof AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRoute
   AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute: typeof AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute
+  AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningReportReportIdRoute: typeof AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningReportReportIdRoute
   AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute: typeof AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute
   AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRoute: typeof AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRoute
   AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRoute: typeof AuthenticatedDashboardPathologyStoolOcultBloodTestReportReportIdRoute
@@ -9160,6 +11001,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardAssetsListEditIdIndexRoute: typeof AuthenticatedDashboardAssetsListEditIdIndexRoute
   AuthenticatedDashboardAssetsLocationsEditIdIndexRoute: typeof AuthenticatedDashboardAssetsLocationsEditIdIndexRoute
   AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute: typeof AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute
+  AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillPaidIndexRoute: typeof AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillPaidIndexRoute
+  AuthenticatedDashboardFinanceDoctorBillsAssistantBillPaidIndexRoute: typeof AuthenticatedDashboardFinanceDoctorBillsAssistantBillPaidIndexRoute
+  AuthenticatedDashboardFinanceDoctorBillsConsultantBillPaidIndexRoute: typeof AuthenticatedDashboardFinanceDoctorBillsConsultantBillPaidIndexRoute
+  AuthenticatedDashboardFinanceDoctorBillsInvoicesDashboardIndexRoute: typeof AuthenticatedDashboardFinanceDoctorBillsInvoicesDashboardIndexRoute
+  AuthenticatedDashboardFinanceDoctorBillsSurgeonBillPaidIndexRoute: typeof AuthenticatedDashboardFinanceDoctorBillsSurgeonBillPaidIndexRoute
   AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute: typeof AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute
   AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute: typeof AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute
   AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute: typeof AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdIndexRoute
@@ -9167,11 +11013,21 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdIndexRoute
   AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute
   AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute
+  AuthenticatedDashboardPharmacyCategoriesEditIdIndexRoute: typeof AuthenticatedDashboardPharmacyCategoriesEditIdIndexRoute
+  AuthenticatedDashboardPharmacyMedicinesIdBatchesIndexRoute: typeof AuthenticatedDashboardPharmacyMedicinesIdBatchesIndexRoute
+  AuthenticatedDashboardPharmacyMedicinesEditIdIndexRoute: typeof AuthenticatedDashboardPharmacyMedicinesEditIdIndexRoute
+  AuthenticatedDashboardPharmacySalesIdEditIndexRoute: typeof AuthenticatedDashboardPharmacySalesIdEditIndexRoute
+  AuthenticatedDashboardPharmacySalesIdReturnIndexRoute: typeof AuthenticatedDashboardPharmacySalesIdReturnIndexRoute
+  AuthenticatedDashboardPharmacySuppliersEditIdIndexRoute: typeof AuthenticatedDashboardPharmacySuppliersEditIdIndexRoute
+  AuthenticatedDashboardPrescriptionsMedicineGroupsEditIdIndexRoute: typeof AuthenticatedDashboardPrescriptionsMedicineGroupsEditIdIndexRoute
+  AuthenticatedDashboardPrescriptionsMedicinesEditIdIndexRoute: typeof AuthenticatedDashboardPrescriptionsMedicinesEditIdIndexRoute
+  AuthenticatedDashboardPrescriptionsPatientsEditIdIndexRoute: typeof AuthenticatedDashboardPrescriptionsPatientsEditIdIndexRoute
   AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute: typeof AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute
   AuthenticatedDashboardPurchaseRequestsEditIdIndexRoute: typeof AuthenticatedDashboardPurchaseRequestsEditIdIndexRoute
   AuthenticatedDashboardPurchaseSuppliersEditIdIndexRoute: typeof AuthenticatedDashboardPurchaseSuppliersEditIdIndexRoute
   AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute: typeof AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute
   AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute: typeof AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute
+  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdPaymentReceiptPaymentIdRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdPaymentReceiptPaymentIdRoute
   AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute: typeof AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute
   AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRoute: typeof AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRoute
   AuthenticatedDashboardPathologyHematologyAllEditIdIndexRoute: typeof AuthenticatedDashboardPathologyHematologyAllEditIdIndexRoute
@@ -9211,6 +11067,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardMyAccountIndexRoute,
   AuthenticatedDashboardNotificationsIndexRoute:
     AuthenticatedDashboardNotificationsIndexRoute,
+  AuthenticatedDashboardPharmacyIndexRoute:
+    AuthenticatedDashboardPharmacyIndexRoute,
+  AuthenticatedDashboardPrescriptionsIndexRoute:
+    AuthenticatedDashboardPrescriptionsIndexRoute,
   AuthenticatedDashboardPurchaseIndexRoute:
     AuthenticatedDashboardPurchaseIndexRoute,
   AuthenticatedDashboardResetDatabaseIndexRoute:
@@ -9220,6 +11080,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardSubscriptionIndexRoute,
   AuthenticatedDashboardTasksIndexRoute: AuthenticatedDashboardTasksIndexRoute,
   AuthenticatedDashboardUsersIndexRoute: AuthenticatedDashboardUsersIndexRoute,
+  AuthenticatedDashboardAccountingAccountsPrintRoute:
+    AuthenticatedDashboardAccountingAccountsPrintRoute,
+  AuthenticatedDashboardAccountingIncomePrintRoute:
+    AuthenticatedDashboardAccountingIncomePrintRoute,
+  AuthenticatedDashboardPrescriptionsIdPrintRoute:
+    AuthenticatedDashboardPrescriptionsIdPrintRoute,
   AuthenticatedDashboardRolesEditIdRoute:
     AuthenticatedDashboardRolesEditIdRoute,
   AuthenticatedDashboardAccountingAccountsIndexRoute:
@@ -9294,10 +11160,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardBanksBankTransactionsIndexRoute,
   AuthenticatedDashboardBanksBankWithdrawalsIndexRoute:
     AuthenticatedDashboardBanksBankWithdrawalsIndexRoute,
+  AuthenticatedDashboardDiagnosticsDashboardIndexRoute:
+    AuthenticatedDashboardDiagnosticsDashboardIndexRoute,
   AuthenticatedDashboardEcgAllIndexRoute:
     AuthenticatedDashboardEcgAllIndexRoute,
+  AuthenticatedDashboardFinancePaymentHistoryIndexRoute:
+    AuthenticatedDashboardFinancePaymentHistoryIndexRoute,
   AuthenticatedDashboardFinancePaymentsIndexRoute:
     AuthenticatedDashboardFinancePaymentsIndexRoute,
+  AuthenticatedDashboardFinanceReconciliationIndexRoute:
+    AuthenticatedDashboardFinanceReconciliationIndexRoute,
+  AuthenticatedDashboardIndoorDashboardIndexRoute:
+    AuthenticatedDashboardIndoorDashboardIndexRoute,
   AuthenticatedDashboardOutdoorDashboardIndexRoute:
     AuthenticatedDashboardOutdoorDashboardIndexRoute,
   AuthenticatedDashboardPathologyCustomTestsIndexRoute:
@@ -9314,6 +11188,54 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardPayrollOverviewIndexRoute,
   AuthenticatedDashboardPayrollSalaryStructureIndexRoute:
     AuthenticatedDashboardPayrollSalaryStructureIndexRoute,
+  AuthenticatedDashboardPharmacyCategoriesIndexRoute:
+    AuthenticatedDashboardPharmacyCategoriesIndexRoute,
+  AuthenticatedDashboardPharmacyCustomersIndexRoute:
+    AuthenticatedDashboardPharmacyCustomersIndexRoute,
+  AuthenticatedDashboardPharmacyExpiryReportIndexRoute:
+    AuthenticatedDashboardPharmacyExpiryReportIndexRoute,
+  AuthenticatedDashboardPharmacyLowStockIndexRoute:
+    AuthenticatedDashboardPharmacyLowStockIndexRoute,
+  AuthenticatedDashboardPharmacyMedicinesIndexRoute:
+    AuthenticatedDashboardPharmacyMedicinesIndexRoute,
+  AuthenticatedDashboardPharmacyPurchaseOrdersIndexRoute:
+    AuthenticatedDashboardPharmacyPurchaseOrdersIndexRoute,
+  AuthenticatedDashboardPharmacyPurchaseReturnsIndexRoute:
+    AuthenticatedDashboardPharmacyPurchaseReturnsIndexRoute,
+  AuthenticatedDashboardPharmacyReorderIndexRoute:
+    AuthenticatedDashboardPharmacyReorderIndexRoute,
+  AuthenticatedDashboardPharmacySalesReturnsIndexRoute:
+    AuthenticatedDashboardPharmacySalesReturnsIndexRoute,
+  AuthenticatedDashboardPharmacySalesIndexRoute:
+    AuthenticatedDashboardPharmacySalesIndexRoute,
+  AuthenticatedDashboardPharmacyShiftsIndexRoute:
+    AuthenticatedDashboardPharmacyShiftsIndexRoute,
+  AuthenticatedDashboardPharmacyStockAdjustmentsIndexRoute:
+    AuthenticatedDashboardPharmacyStockAdjustmentsIndexRoute,
+  AuthenticatedDashboardPharmacyStockInIndexRoute:
+    AuthenticatedDashboardPharmacyStockInIndexRoute,
+  AuthenticatedDashboardPharmacyStockLedgerIndexRoute:
+    AuthenticatedDashboardPharmacyStockLedgerIndexRoute,
+  AuthenticatedDashboardPharmacyStockReportIndexRoute:
+    AuthenticatedDashboardPharmacyStockReportIndexRoute,
+  AuthenticatedDashboardPharmacySupplierDuesIndexRoute:
+    AuthenticatedDashboardPharmacySupplierDuesIndexRoute,
+  AuthenticatedDashboardPharmacySuppliersIndexRoute:
+    AuthenticatedDashboardPharmacySuppliersIndexRoute,
+  AuthenticatedDashboardPrescriptionsCreateIndexRoute:
+    AuthenticatedDashboardPrescriptionsCreateIndexRoute,
+  AuthenticatedDashboardPrescriptionsDashboardIndexRoute:
+    AuthenticatedDashboardPrescriptionsDashboardIndexRoute,
+  AuthenticatedDashboardPrescriptionsMedicineGroupsIndexRoute:
+    AuthenticatedDashboardPrescriptionsMedicineGroupsIndexRoute,
+  AuthenticatedDashboardPrescriptionsMedicinesIndexRoute:
+    AuthenticatedDashboardPrescriptionsMedicinesIndexRoute,
+  AuthenticatedDashboardPrescriptionsMyPrescriptionsIndexRoute:
+    AuthenticatedDashboardPrescriptionsMyPrescriptionsIndexRoute,
+  AuthenticatedDashboardPrescriptionsPatientsIndexRoute:
+    AuthenticatedDashboardPrescriptionsPatientsIndexRoute,
+  AuthenticatedDashboardPrescriptionsQuickPhrasesIndexRoute:
+    AuthenticatedDashboardPrescriptionsQuickPhrasesIndexRoute,
   AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute:
     AuthenticatedDashboardPurchaseGoodsReceiptIndexRoute,
   AuthenticatedDashboardPurchaseRequestsIndexRoute:
@@ -9330,6 +11252,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardUltrasonogramAllIndexRoute,
   AuthenticatedDashboardXRayAllIndexRoute:
     AuthenticatedDashboardXRayAllIndexRoute,
+  AuthenticatedDashboardAccountingExpensesExpenseIdPrintRoute:
+    AuthenticatedDashboardAccountingExpensesExpenseIdPrintRoute,
+  AuthenticatedDashboardAccountingIncomeIncomeIdPrintRoute:
+    AuthenticatedDashboardAccountingIncomeIncomeIdPrintRoute,
   AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute:
     AuthenticatedDashboardAccountingReportsBalanceSheetPrintRoute,
   AuthenticatedDashboardAccountingReportsCashFlowPrintRoute:
@@ -9356,6 +11282,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardIndoorMasterBedCabinListIdRoute,
   AuthenticatedDashboardIndoorMasterServicesIdRoute:
     AuthenticatedDashboardIndoorMasterServicesIdRoute,
+  AuthenticatedDashboardIndoorMasterTreatmentOutcomesIdRoute:
+    AuthenticatedDashboardIndoorMasterTreatmentOutcomesIdRoute,
   AuthenticatedDashboardOutdoorMasterCategoriesIdRoute:
     AuthenticatedDashboardOutdoorMasterCategoriesIdRoute,
   AuthenticatedDashboardOutdoorMasterDepartmentsIdRoute:
@@ -9372,6 +11300,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardPathologyCustomTestsEditIdRoute,
   AuthenticatedDashboardPathologyCustomTestsReportReportIdRoute:
     AuthenticatedDashboardPathologyCustomTestsReportReportIdRoute,
+  AuthenticatedDashboardPharmacySalesIdPrintRoute:
+    AuthenticatedDashboardPharmacySalesIdPrintRoute,
   AuthenticatedDashboardReportsAccountingBankBookPrintRoute:
     AuthenticatedDashboardReportsAccountingBankBookPrintRoute,
   AuthenticatedDashboardReportsAccountingCashFlowPrintRoute:
@@ -9522,6 +11452,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardAdmissionPatientsDueIndexRoute,
   AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute:
     AuthenticatedDashboardAdmissionPatientsFinalBillCreatedListIndexRoute,
+  AuthenticatedDashboardAdmissionPatientsOverpaidIndexRoute:
+    AuthenticatedDashboardAdmissionPatientsOverpaidIndexRoute,
   AuthenticatedDashboardAdmissionPatientsPaidIndexRoute:
     AuthenticatedDashboardAdmissionPatientsPaidIndexRoute,
   AuthenticatedDashboardAdmissionPatientsPaymentCompletedListIndexRoute:
@@ -9534,16 +11466,34 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardAssetsLocationsCreateIndexRoute,
   AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute:
     AuthenticatedDashboardAssetsMaintenanceCreateIndexRoute,
+  AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillIndexRoute:
+    AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillIndexRoute,
+  AuthenticatedDashboardFinanceDoctorBillsAssistantBillIndexRoute:
+    AuthenticatedDashboardFinanceDoctorBillsAssistantBillIndexRoute,
+  AuthenticatedDashboardFinanceDoctorBillsClinicalBillsIndexRoute:
+    AuthenticatedDashboardFinanceDoctorBillsClinicalBillsIndexRoute,
+  AuthenticatedDashboardFinanceDoctorBillsConsultantBillIndexRoute:
+    AuthenticatedDashboardFinanceDoctorBillsConsultantBillIndexRoute,
+  AuthenticatedDashboardFinanceDoctorBillsDashboardIndexRoute:
+    AuthenticatedDashboardFinanceDoctorBillsDashboardIndexRoute,
+  AuthenticatedDashboardFinanceDoctorBillsInvoicesIndexRoute:
+    AuthenticatedDashboardFinanceDoctorBillsInvoicesIndexRoute,
+  AuthenticatedDashboardFinanceDoctorBillsSurgeonBillIndexRoute:
+    AuthenticatedDashboardFinanceDoctorBillsSurgeonBillIndexRoute,
   AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute:
     AuthenticatedDashboardIndoorManagementAnesthesiaBillIndexRoute,
   AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute:
     AuthenticatedDashboardIndoorManagementAssistantBillIndexRoute,
   AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute:
     AuthenticatedDashboardIndoorManagementClinicalBillsIndexRoute,
+  AuthenticatedDashboardIndoorManagementConsultantBillIndexRoute:
+    AuthenticatedDashboardIndoorManagementConsultantBillIndexRoute,
   AuthenticatedDashboardIndoorManagementDistributionsIndexRoute:
     AuthenticatedDashboardIndoorManagementDistributionsIndexRoute,
   AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute:
     AuthenticatedDashboardIndoorManagementDoctorReferredIndexRoute,
+  AuthenticatedDashboardIndoorManagementOtherBillsIndexRoute:
+    AuthenticatedDashboardIndoorManagementOtherBillsIndexRoute,
   AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute:
     AuthenticatedDashboardIndoorManagementSurgeonBillIndexRoute,
   AuthenticatedDashboardIndoorMasterAnasthesiaTypesIndexRoute:
@@ -9636,6 +11586,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardPathologyImmunologyBetaHcgIndexRoute,
   AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute:
     AuthenticatedDashboardPathologyImmunologyBloodGroupIndexRoute,
+  AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningIndexRoute:
+    AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningIndexRoute,
   AuthenticatedDashboardPathologyImmunologyMtIndexRoute:
     AuthenticatedDashboardPathologyImmunologyMtIndexRoute,
   AuthenticatedDashboardPathologyImmunologyWidalTestIndexRoute:
@@ -9656,6 +11608,46 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardPayrollAttendanceStaffIdIndexRoute,
   AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute:
     AuthenticatedDashboardPayrollSalaryStaffIdIndexRoute,
+  AuthenticatedDashboardPharmacyCategoriesCreateIndexRoute:
+    AuthenticatedDashboardPharmacyCategoriesCreateIndexRoute,
+  AuthenticatedDashboardPharmacyCustomersIdIndexRoute:
+    AuthenticatedDashboardPharmacyCustomersIdIndexRoute,
+  AuthenticatedDashboardPharmacyMedicinesCreateIndexRoute:
+    AuthenticatedDashboardPharmacyMedicinesCreateIndexRoute,
+  AuthenticatedDashboardPharmacyPurchaseOrdersIdIndexRoute:
+    AuthenticatedDashboardPharmacyPurchaseOrdersIdIndexRoute,
+  AuthenticatedDashboardPharmacyPurchaseOrdersCreateIndexRoute:
+    AuthenticatedDashboardPharmacyPurchaseOrdersCreateIndexRoute,
+  AuthenticatedDashboardPharmacyPurchaseReturnsCreateIndexRoute:
+    AuthenticatedDashboardPharmacyPurchaseReturnsCreateIndexRoute,
+  AuthenticatedDashboardPharmacySalesReturnsCreateIndexRoute:
+    AuthenticatedDashboardPharmacySalesReturnsCreateIndexRoute,
+  AuthenticatedDashboardPharmacySalesCreateIndexRoute:
+    AuthenticatedDashboardPharmacySalesCreateIndexRoute,
+  AuthenticatedDashboardPharmacyStockAdjustmentsCreateIndexRoute:
+    AuthenticatedDashboardPharmacyStockAdjustmentsCreateIndexRoute,
+  AuthenticatedDashboardPharmacyStockInCreateIndexRoute:
+    AuthenticatedDashboardPharmacyStockInCreateIndexRoute,
+  AuthenticatedDashboardPharmacySupplierDuesIdIndexRoute:
+    AuthenticatedDashboardPharmacySupplierDuesIdIndexRoute,
+  AuthenticatedDashboardPharmacySuppliersCreateIndexRoute:
+    AuthenticatedDashboardPharmacySuppliersCreateIndexRoute,
+  AuthenticatedDashboardPrescriptionsEditIdIndexRoute:
+    AuthenticatedDashboardPrescriptionsEditIdIndexRoute,
+  AuthenticatedDashboardPrescriptionsMedicineGroupsCreateIndexRoute:
+    AuthenticatedDashboardPrescriptionsMedicineGroupsCreateIndexRoute,
+  AuthenticatedDashboardPrescriptionsMedicinesCreateIndexRoute:
+    AuthenticatedDashboardPrescriptionsMedicinesCreateIndexRoute,
+  AuthenticatedDashboardPrescriptionsPatientsIdIndexRoute:
+    AuthenticatedDashboardPrescriptionsPatientsIdIndexRoute,
+  AuthenticatedDashboardPrescriptionsPatientsCreateIndexRoute:
+    AuthenticatedDashboardPrescriptionsPatientsCreateIndexRoute,
+  AuthenticatedDashboardPrescriptionsReportsDoctorWiseIndexRoute:
+    AuthenticatedDashboardPrescriptionsReportsDoctorWiseIndexRoute,
+  AuthenticatedDashboardPrescriptionsReportsMedicineWiseIndexRoute:
+    AuthenticatedDashboardPrescriptionsReportsMedicineWiseIndexRoute,
+  AuthenticatedDashboardPrescriptionsReportsPatientWiseIndexRoute:
+    AuthenticatedDashboardPrescriptionsReportsPatientWiseIndexRoute,
   AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute:
     AuthenticatedDashboardPurchaseGoodsReceiptCreateIndexRoute,
   AuthenticatedDashboardPurchaseRequestsCreateIndexRoute:
@@ -9764,6 +11756,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardAdmissionPatientsAdmissionIdPrintStepRoute,
   AuthenticatedDashboardEcgAllEditBuilderIdRoute:
     AuthenticatedDashboardEcgAllEditBuilderIdRoute,
+  AuthenticatedDashboardFinanceDoctorBillsInvoicesInvoiceIdPrintRoute:
+    AuthenticatedDashboardFinanceDoctorBillsInvoicesInvoiceIdPrintRoute,
   AuthenticatedDashboardIndoorMasterServicesEditIdRoute:
     AuthenticatedDashboardIndoorMasterServicesEditIdRoute,
   AuthenticatedDashboardOutdoorMasterDoctorsDoctorIdEditRoute:
@@ -9814,6 +11808,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardPathologyImmunologyBetaHcgReportReportIdRoute,
   AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute:
     AuthenticatedDashboardPathologyImmunologyBloodGroupReportReportIdRoute,
+  AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningReportReportIdRoute:
+    AuthenticatedDashboardPathologyImmunologyCrossMatchingScreeningReportReportIdRoute,
   AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute:
     AuthenticatedDashboardPathologyImmunologyMtReportReportIdRoute,
   AuthenticatedDashboardPathologyImmunologyWidalTestReportReportIdRoute:
@@ -9868,6 +11864,16 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardAssetsLocationsEditIdIndexRoute,
   AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute:
     AuthenticatedDashboardAssetsMaintenanceEditIdIndexRoute,
+  AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillPaidIndexRoute:
+    AuthenticatedDashboardFinanceDoctorBillsAnesthesiaBillPaidIndexRoute,
+  AuthenticatedDashboardFinanceDoctorBillsAssistantBillPaidIndexRoute:
+    AuthenticatedDashboardFinanceDoctorBillsAssistantBillPaidIndexRoute,
+  AuthenticatedDashboardFinanceDoctorBillsConsultantBillPaidIndexRoute:
+    AuthenticatedDashboardFinanceDoctorBillsConsultantBillPaidIndexRoute,
+  AuthenticatedDashboardFinanceDoctorBillsInvoicesDashboardIndexRoute:
+    AuthenticatedDashboardFinanceDoctorBillsInvoicesDashboardIndexRoute,
+  AuthenticatedDashboardFinanceDoctorBillsSurgeonBillPaidIndexRoute:
+    AuthenticatedDashboardFinanceDoctorBillsSurgeonBillPaidIndexRoute,
   AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute:
     AuthenticatedDashboardIndoorMasterBedCabinListCreateIndexRoute,
   AuthenticatedDashboardIndoorMasterServicesCreateIndexRoute:
@@ -9882,6 +11888,24 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardOutdoorReceptionInvoicesCreateIndexRoute,
   AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute:
     AuthenticatedDashboardOutdoorReceptionInvoicesListIndexRoute,
+  AuthenticatedDashboardPharmacyCategoriesEditIdIndexRoute:
+    AuthenticatedDashboardPharmacyCategoriesEditIdIndexRoute,
+  AuthenticatedDashboardPharmacyMedicinesIdBatchesIndexRoute:
+    AuthenticatedDashboardPharmacyMedicinesIdBatchesIndexRoute,
+  AuthenticatedDashboardPharmacyMedicinesEditIdIndexRoute:
+    AuthenticatedDashboardPharmacyMedicinesEditIdIndexRoute,
+  AuthenticatedDashboardPharmacySalesIdEditIndexRoute:
+    AuthenticatedDashboardPharmacySalesIdEditIndexRoute,
+  AuthenticatedDashboardPharmacySalesIdReturnIndexRoute:
+    AuthenticatedDashboardPharmacySalesIdReturnIndexRoute,
+  AuthenticatedDashboardPharmacySuppliersEditIdIndexRoute:
+    AuthenticatedDashboardPharmacySuppliersEditIdIndexRoute,
+  AuthenticatedDashboardPrescriptionsMedicineGroupsEditIdIndexRoute:
+    AuthenticatedDashboardPrescriptionsMedicineGroupsEditIdIndexRoute,
+  AuthenticatedDashboardPrescriptionsMedicinesEditIdIndexRoute:
+    AuthenticatedDashboardPrescriptionsMedicinesEditIdIndexRoute,
+  AuthenticatedDashboardPrescriptionsPatientsEditIdIndexRoute:
+    AuthenticatedDashboardPrescriptionsPatientsEditIdIndexRoute,
   AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute:
     AuthenticatedDashboardPurchaseGoodsReceiptEditIdIndexRoute,
   AuthenticatedDashboardPurchaseRequestsEditIdIndexRoute:
@@ -9892,6 +11916,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardReportsMyOutdoorDateWiseCollectionIndexRoute,
   AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute:
     AuthenticatedDashboardReportsMyOutdoorTodayCollectionIndexRoute,
+  AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdPaymentReceiptPaymentIdRoute:
+    AuthenticatedDashboardOutdoorReceptionInvoicesInvoiceIdPaymentReceiptPaymentIdRoute,
   AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute:
     AuthenticatedDashboardOutdoorMasterTestsEditIdIndexRoute,
   AuthenticatedDashboardOutdoorReceptionInvoicesEditInvoiceIdIndexRoute:
@@ -9954,6 +11980,7 @@ interface platformAdminRouteRouteChildren {
   platformAdminAdminsRoute: typeof platformAdminAdminsRoute
   platformAdminCommonCommandsRoute: typeof platformAdminCommonCommandsRoute
   platformAdminContactsRoute: typeof platformAdminContactsRoute
+  platformAdminDatabaseMigrationRoute: typeof platformAdminDatabaseMigrationRoute
   platformAdminLoginRoute: typeof platformAdminLoginRoute
   platformAdminModulesRoute: typeof platformAdminModulesRoute
   platformAdminNginxDomainListRoute: typeof platformAdminNginxDomainListRoute
@@ -9976,6 +12003,7 @@ const platformAdminRouteRouteChildren: platformAdminRouteRouteChildren = {
   platformAdminAdminsRoute: platformAdminAdminsRoute,
   platformAdminCommonCommandsRoute: platformAdminCommonCommandsRoute,
   platformAdminContactsRoute: platformAdminContactsRoute,
+  platformAdminDatabaseMigrationRoute: platformAdminDatabaseMigrationRoute,
   platformAdminLoginRoute: platformAdminLoginRoute,
   platformAdminModulesRoute: platformAdminModulesRoute,
   platformAdminNginxDomainListRoute: platformAdminNginxDomainListRoute,

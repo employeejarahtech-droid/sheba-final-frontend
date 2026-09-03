@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ReportPrintLayout } from '@/components/reports/ReportPrintLayout'
 import { useQuery } from '@tanstack/react-query'
 import { getCookie } from '@/lib/cookies'
+import { useCurrency } from '@/hooks/use-currency'
 import { useMemo } from 'react'
 import { z } from 'zod'
 
@@ -9,6 +10,7 @@ const printSearchSchema = z.object({
   search: z.string().optional(),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
+  user_id: z.string().optional(),
 })
 
 export const Route = createFileRoute('/_authenticated/dashboard/reports/outdoor/date-wise-collection/print')({
@@ -17,17 +19,21 @@ export const Route = createFileRoute('/_authenticated/dashboard/reports/outdoor/
 })
 
 function AllDateWiseCollectionPrint() {
-  const { search, start_date, end_date } = Route.useSearch()
+  const { search, start_date, end_date, user_id } = Route.useSearch()
   const token = getCookie('accessToken')
+  const { currencySymbol } = useCurrency()
   const API_URL = import.meta.env.VITE_API_URL || ''
 
-  // Fetch all-users date-wise collection data
+  // Fetch all-users (optionally filtered to one user) date-wise collection data
   const { data, isLoading } = useQuery({
-    queryKey: ["outdoor-date-wise-collection-print", search, start_date, end_date],
+    queryKey: ["outdoor-date-wise-collection-print", search, start_date, end_date, user_id],
     queryFn: async () => {
-      const params = new URLSearchParams({ limit: '999', search: search ?? '' })
+      // No date range = print everything, so the limit must not truncate the
+      // full history (999 was too low for an unbounded "all time" fetch).
+      const params = new URLSearchParams({ limit: '99999', search: search ?? '' })
       if (start_date) params.set('start_date', start_date)
       if (end_date) params.set('end_date', end_date)
+      if (user_id) params.set('user_id', user_id)
       const res = await fetch(`${API_URL}/api/outdoor-invoice/all-collection?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -61,18 +67,18 @@ function AllDateWiseCollectionPrint() {
       },
       {
         label: "Total Collected",
-        value: `৳${(serverStats.total_collected || 0).toLocaleString()}`
+        value: `${currencySymbol}${(serverStats.total_collected || 0).toLocaleString()}`
       },
       {
         label: "Total Discount",
-        value: `৳${(serverStats.total_discount || 0).toLocaleString()}`
+        value: `${currencySymbol}${(serverStats.total_discount || 0).toLocaleString()}`
       },
       {
         label: "Gross Bill",
-        value: `৳${(serverStats.total_bill || 0).toLocaleString()}`
+        value: `${currencySymbol}${(serverStats.total_bill || 0).toLocaleString()}`
       },
     ]
-  }, [data])
+  }, [data, currencySymbol])
 
   const companyLogo = companySettings?.company_logo
     ? (companySettings.company_logo.startsWith('http') || companySettings.company_logo.startsWith('data:'))
@@ -84,7 +90,7 @@ function AllDateWiseCollectionPrint() {
 
   const columns = [
     { header: "#", render: (_: any, i: number) => String(i + 1) },
-    { header: "Date", field: "date" },
+    { header: "Date", field: "payment_date" },
     { header: "Invoice ID", field: "id" },
     { header: "Patient Name", field: "patient_name" },
     { header: "Phone", field: "phone" },
@@ -93,11 +99,16 @@ function AllDateWiseCollectionPrint() {
       render: (row: any) => row.doctor?.doctor_name || "-"
     },
     {
-      header: "Bill Amount (৳)",
-      render: (row: any) => (row.total_amount || 0).toFixed(2)
+      header: "Bill Amount",
+      align: 'right' as const,
+      // total_amount is a Sequelize DECIMAL column, serialized as a string —
+      // calling .toFixed() on it directly throws (strings have no .toFixed),
+      // which ReportPrintLayout's render try/catch silently turns into "-".
+      render: (row: any) => Number(row.total_amount || 0).toFixed(2)
     },
     {
-      header: "Discount (৳)",
+      header: "Discount",
+      align: 'right' as const,
       render: (row: any) => {
         const total = Number(row.total_amount || 0)
         const net = Number(row.net_amount || 0)
@@ -106,20 +117,42 @@ function AllDateWiseCollectionPrint() {
       }
     },
     {
-      header: "Collected (৳)",
-      render: (row: any) => (row.payment_amount || 0).toFixed(2)
+      header: "Collected",
+      align: 'right' as const,
+      // payment_amount is also a DECIMAL-as-string column — same fix as Bill Amount.
+      render: (row: any) => Number(row.payment_amount || 0).toFixed(2)
     },
-    { header: "Payment Method", field: "payment_method" },
+    {
+      header: "Payment Type",
+      // No prior payment on the invoice before this one = the regular payment
+      // made at billing time. Otherwise it's collecting an already-outstanding due.
+      render: (row: any) => Number(row.previous_paid || 0) > 0 ? "Due Collection" : "Regular"
+    },
     {
       header: "Collected By",
       render: (row: any) => row.payment_created_by?.name || row.creator?.name || "-"
     },
   ]
 
+  const fmtDate = (d?: string) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''
+  const dateRangePart = start_date && end_date
+    ? `from ${fmtDate(start_date)} to ${fmtDate(end_date)}`
+    : start_date
+      ? `from ${fmtDate(start_date)}`
+      : end_date
+        ? `up to ${fmtDate(end_date)}`
+        : '(all time)'
+  // When filtered to one user, every row was collected by the same person —
+  // grab the name off the first row rather than a second lookup call.
+  const selectedUserName = user_id ? (items[0]?.payment_created_by?.name || items[0]?.creator?.name) : undefined
+  const subtitle = selectedUserName
+    ? `Collected by ${selectedUserName} — ${dateRangePart}`
+    : `All outdoor payments collected ${dateRangePart}`
+
   return (
     <ReportPrintLayout
       title="Date Wise Collections"
-      subtitle="All outdoor payments collected within a date range"
+      subtitle={subtitle}
       hospitalName={companyName}
       hospitalAddress={companyAddress}
       companyLogo={companyLogo}
