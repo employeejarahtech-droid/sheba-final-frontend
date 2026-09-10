@@ -10,13 +10,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCookie } from '@/lib/cookies'
 import api from '@/lib/axios'
 
-type FooterItemType = 'blank' | 'current_user'
-type FooterItem = { text: string; type: FooterItemType }
+type FooterItemType = 'blank' | 'current_user' | 'custom'
+type FooterItem = { text: string; type: FooterItemType; customText?: string }
 
 const DEFAULT_ITEMS: FooterItem[] = [
     { text: 'Checked by', type: 'blank' },
     { text: 'Medical Technologist Lab.', type: 'blank' },
 ]
+
+function normalizeType(raw: unknown): FooterItemType {
+    return raw === 'current_user' ? 'current_user' : raw === 'custom' ? 'custom' : 'blank'
+}
 
 // Older saved data is a plain string[] — upgrade each entry to the new
 // { text, type } shape (defaulting to 'blank', the prior behavior) so
@@ -26,7 +30,7 @@ function normalizeItems(raw: unknown): FooterItem[] | null {
     return raw.map((it) =>
         typeof it === 'string'
             ? { text: it, type: 'blank' as const }
-            : { text: it?.text ?? '', type: it?.type === 'current_user' ? 'current_user' : 'blank' }
+            : { text: it?.text ?? '', type: normalizeType(it?.type), customText: typeof it?.customText === 'string' ? it.customText : '' }
     )
 }
 
@@ -92,6 +96,7 @@ export default function ReportSettings() {
     const removeItem = (idx: number) => setItems(items.filter((_, i) => i !== idx))
     const updateItemText = (idx: number, text: string) => setItems(items.map((it, i) => i === idx ? { ...it, text } : it))
     const updateItemType = (idx: number, type: FooterItemType) => setItems(items.map((it, i) => i === idx ? { ...it, type } : it))
+    const updateItemCustomText = (idx: number, customText: string) => setItems(items.map((it, i) => i === idx ? { ...it, customText } : it))
 
     return (
         <div className="space-y-6">
@@ -123,36 +128,49 @@ export default function ReportSettings() {
                 </CardHeader>
                 <CardContent className="p-4 space-y-3">
                                     {items.map((item, idx) => (
-                                        <div key={idx} className="flex items-center gap-2">
-                                            <span className="text-sm text-muted-foreground w-6">{idx + 1}.</span>
-                                            <Input
-                                                value={item.text}
-                                                onChange={(e) => updateItemText(idx, e.target.value)}
-                                                placeholder="Enter footer item text"
-                                                className="flex-1"
-                                                disabled={saveMutation.isPending}
-                                            />
-                                            <Select
-                                                value={item.type}
-                                                onValueChange={(v) => updateItemType(idx, v as FooterItemType)}
-                                                disabled={saveMutation.isPending}
-                                            >
-                                                <SelectTrigger className="w-[150px]">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="blank">Blank</SelectItem>
-                                                    <SelectItem value="current_user">Current User</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                onClick={() => removeItem(idx)}
-                                                disabled={saveMutation.isPending || items.length <= 1}
-                                            >
-                                                <Trash2 className="h-4 w-4 text-red-500" />
-                                            </Button>
+                                        <div key={idx} className="space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm text-muted-foreground w-6">{idx + 1}.</span>
+                                                <Input
+                                                    value={item.text}
+                                                    onChange={(e) => updateItemText(idx, e.target.value)}
+                                                    placeholder="Enter footer item text"
+                                                    className="flex-1"
+                                                    disabled={saveMutation.isPending}
+                                                />
+                                                <Select
+                                                    value={item.type}
+                                                    onValueChange={(v) => updateItemType(idx, v as FooterItemType)}
+                                                    disabled={saveMutation.isPending}
+                                                >
+                                                    <SelectTrigger className="w-[150px]">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="blank">Blank</SelectItem>
+                                                        <SelectItem value="current_user">Current User</SelectItem>
+                                                        <SelectItem value="custom">Custom</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    onClick={() => removeItem(idx)}
+                                                    disabled={saveMutation.isPending || items.length <= 1}
+                                                >
+                                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                                </Button>
+                                            </div>
+                                            {item.type === 'custom' && (
+                                                <Textarea
+                                                    value={item.customText ?? ''}
+                                                    onChange={(e) => updateItemCustomText(idx, e.target.value)}
+                                                    placeholder="Custom text to print above the signature line, e.g. a specific doctor's name & designation"
+                                                    rows={2}
+                                                    className="ml-8"
+                                                    disabled={saveMutation.isPending}
+                                                />
+                                            )}
                                         </div>
                                     ))}
                     <div className="pt-4 border-t">

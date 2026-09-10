@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useAuthStore } from '@/stores/auth-store'
 
-type FooterItemType = 'blank' | 'current_user'
-type FooterItem = { text: string; type: FooterItemType }
+type FooterItemType = 'blank' | 'current_user' | 'custom'
+type FooterItem = { text: string; type: FooterItemType; customText?: string }
 
 const DEFAULT_ITEMS: FooterItem[] = [
     { text: 'Checked by', type: 'blank' },
@@ -20,7 +20,11 @@ function normalizeItems(raw: unknown): FooterItem[] | null {
         .map((it) =>
             typeof it === 'string'
                 ? { text: it, type: 'blank' as const }
-                : { text: it?.text ?? '', type: it?.type === 'current_user' ? 'current_user' as const : 'blank' as const }
+                : {
+                    text: it?.text ?? '',
+                    type: it?.type === 'current_user' ? 'current_user' as const : it?.type === 'custom' ? 'custom' as const : 'blank' as const,
+                    customText: typeof it?.customText === 'string' ? it.customText : '',
+                }
         )
         .filter((it) => it.text?.trim())
     return items.length > 0 ? items : null
@@ -141,6 +145,11 @@ export function ReportFooter({ showSignature: controlledShowSignature, onShowSig
                                 {item.type === 'current_user' ? (
                                     <>
                                         <p className="font-medium">{currentUserName || '-'}</p>
+                                        <span className="inline-block border-t border-dashed pt-1">{item.text}:</span>
+                                    </>
+                                ) : item.type === 'custom' && item.customText?.trim() ? (
+                                    <>
+                                        <p className="font-medium whitespace-pre-line">{item.customText}</p>
                                         <span className="inline-block border-t border-dashed pt-1">{item.text}:</span>
                                     </>
                                 ) : (

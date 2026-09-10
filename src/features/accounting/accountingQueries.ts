@@ -34,24 +34,24 @@ export const useGetAccountingOverviewQuery = () => {
     });
 };
 
-export const useGetRecentActivityQuery = () => {
+export const useGetRecentActivityQuery = (params?: { from?: string; to?: string }) => {
     return useQuery({
-        queryKey: ACCOUNTING_KEYS.recentActivity(),
-        queryFn: accountingService.getRecentActivity,
+        queryKey: [...ACCOUNTING_KEYS.recentActivity(), params],
+        queryFn: () => accountingService.getRecentActivity(params),
     });
 };
 
-export const useGetExpenseBreakdownQuery = () => {
+export const useGetExpenseBreakdownQuery = (params?: { from?: string; to?: string }) => {
     return useQuery({
-        queryKey: ACCOUNTING_KEYS.expenseBreakdown(),
-        queryFn: accountingService.getExpenseBreakdown,
+        queryKey: [...ACCOUNTING_KEYS.expenseBreakdown(), params],
+        queryFn: () => accountingService.getExpenseBreakdown(params),
     });
 };
 
-export const useGetAccountingChartDataQuery = () => {
+export const useGetAccountingChartDataQuery = (params?: { from?: string; to?: string }) => {
     return useQuery({
-        queryKey: ACCOUNTING_KEYS.chartData(),
-        queryFn: accountingService.getAccountingChartData,
+        queryKey: [...ACCOUNTING_KEYS.chartData(), params],
+        queryFn: () => accountingService.getAccountingChartData(params),
     });
 };
 

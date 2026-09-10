@@ -1,11 +1,14 @@
 
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { z } from 'zod'
 import { AppHeader } from '@/components/layout/app-header'
 import { PageHeader } from '@/components/layout/page-header'
 import { cn } from '@/lib/utils'
 
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DateField } from '@/components/date-field'
 import { AddIncomeModal } from '@/components/accounting/AddIncomeModal'
 import { AddExpenseModal } from '@/components/accounting/AddExpenseModal'
 import { createFileRoute } from '@tanstack/react-router'
@@ -36,7 +39,20 @@ import {
 import { Overview } from '@/types/accounting.types'
 import { useCurrency } from '@/hooks/use-currency'
 
+function toYMD(d: Date) {
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${day}`
+}
+
+const searchSchema = z.object({
+    from: z.string().catch(''),
+    to: z.string().catch(''),
+})
+
 export const Route = createFileRoute('/_authenticated/dashboard/accounting/')({
+    validateSearch: (search) => searchSchema.parse(search),
     component: AccountingOverview,
 })
 
@@ -63,11 +79,76 @@ function Kpi({ label, value, tone = 'default' }: { label: string; value: string;
 function AccountingOverview() {
     const { currencySymbol } = useCurrency()
 
+    const searchParams: any = Route.useSearch()
+    const navigate: any = Route.useNavigate()
+
+    // The selected range lives in the URL (?from=&to=) so the dashboard view is
+    // shareable/bookmarkable and survives back/forward navigation — same
+    // convention as the Diagnostics Dashboard.
+    const setRange = (from: string, to: string, replace = false) =>
+        navigate({ to: '.', search: (prev: any) => ({ ...prev, from, to }), replace })
+
+    const todayStr = useMemo(() => toYMD(new Date()), [])
+
+    const datePresets = useMemo(() => {
+        const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d }
+        const shift = (n: number) => { const d = today(); d.setDate(d.getDate() - n); return d }
+        return ({
+            today: { label: 'Today', from: toYMD(today()), to: toYMD(today()) },
+            yesterday: { label: 'Yesterday', from: toYMD(shift(1)), to: toYMD(shift(1)) },
+            last7: { label: 'Last 7 days', from: toYMD(shift(6)), to: toYMD(today()) },
+            last15: { label: 'Last 15 days', from: toYMD(shift(14)), to: toYMD(today()) },
+            last30: { label: 'Last 30 days', from: toYMD(shift(29)), to: toYMD(today()) },
+            last45: { label: 'Last 45 days', from: toYMD(shift(44)), to: toYMD(today()) },
+            last60: { label: 'Last 60 days', from: toYMD(shift(59)), to: toYMD(today()) },
+            last90: { label: 'Last 90 days', from: toYMD(shift(89)), to: toYMD(today()) },
+            last180: { label: 'Last 180 days', from: toYMD(shift(179)), to: toYMD(today()) },
+            last365: { label: 'Last 365 days', from: toYMD(shift(364)), to: toYMD(today()) },
+            thisMonth: { label: 'This Month', from: toYMD(new Date(new Date().getFullYear(), new Date().getMonth(), 1)), to: toYMD(today()) },
+            allTime: { label: 'All Time', from: '2000-01-01', to: toYMD(today()) },
+        } as const)
+    }, [])
+
+    // Default to "Last 30 days" — matches the trend chart's original fixed window.
+    useEffect(() => {
+        if (!searchParams?.from || !searchParams?.to) {
+            const p = datePresets.last30
+            setRange(p.from, p.to, true)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    const effFrom = searchParams?.from || datePresets.last30.from
+    const effTo = searchParams?.to || todayStr
+
+    // Selecting "Custom" reveals the date pickers even while the current
+    // from/to still matches a preset.
+    const [customSelected, setCustomSelected] = useState(false)
+    const [presetOpen, setPresetOpen] = useState(false)
+
+    const activePreset = useMemo(() => {
+        const match = Object.entries(datePresets).find(([, v]) => v.from === effFrom && v.to === effTo)
+        return match ? match[0] : 'custom'
+    }, [effFrom, effTo, datePresets])
+
+    const showCustomFields = customSelected || activePreset === 'custom'
+
+    const applyPreset = (key: string) => {
+        if (key === 'custom') {
+            setCustomSelected(true)
+        } else {
+            setCustomSelected(false)
+            const p = (datePresets as any)[key]
+            if (p) setRange(p.from, p.to)
+        }
+        setPresetOpen(false)
+    }
+
     // Queries
     const { data: accountingOverview } = useGetAccountingOverviewQuery();
-    const { data: recentActivityData, isLoading: recentLoading, isError: recentError } = useGetRecentActivityQuery();
-    const { data: expenseBreakdownResponse } = useGetExpenseBreakdownQuery();
-    const { data: chartData } = useGetAccountingChartDataQuery();
+    const { data: recentActivityData, isLoading: recentLoading, isError: recentError } = useGetRecentActivityQuery({ from: effFrom, to: effTo });
+    const { data: expenseBreakdownResponse } = useGetExpenseBreakdownQuery({ from: effFrom, to: effTo });
+    const { data: chartData } = useGetAccountingChartDataQuery({ from: effFrom, to: effTo });
 
     const summaryData = accountingOverview?.data || {
         today: { income: 0, expense: 0, net: 0 },
@@ -127,7 +208,7 @@ function AccountingOverview() {
     return (
         <>
             <AppHeader fixed />
-            <main className='p-4 space-y-4'>
+            <main className='space-y-4'>
                 <PageHeader
                     title="Accounting Overview"
                     description="Track financial trends and manage transactions."
@@ -146,6 +227,37 @@ function AccountingOverview() {
                         </>
                     }
                 />
+
+                {/* Date range filter */}
+                <div className='flex flex-wrap items-center justify-end gap-1.5'>
+                    <Select value={activePreset} onValueChange={applyPreset} open={presetOpen} onOpenChange={setPresetOpen}>
+                        <SelectTrigger className='w-[160px] h-9'>
+                            <SelectValue placeholder='Filter by' />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value='today'>Today</SelectItem>
+                            <SelectItem value='yesterday'>Yesterday</SelectItem>
+                            <SelectItem value='last7'>Last 7 days</SelectItem>
+                            <SelectItem value='last15'>Last 15 days</SelectItem>
+                            <SelectItem value='last30'>Last 30 days</SelectItem>
+                            <SelectItem value='last45'>Last 45 days</SelectItem>
+                            <SelectItem value='last60'>Last 60 days</SelectItem>
+                            <SelectItem value='last90'>Last 90 days</SelectItem>
+                            <SelectItem value='last180'>Last 180 days</SelectItem>
+                            <SelectItem value='last365'>Last 365 days</SelectItem>
+                            <SelectItem value='thisMonth'>This Month</SelectItem>
+                            <SelectItem value='allTime'>All Time</SelectItem>
+                            <SelectItem value='custom'>Custom range</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    {showCustomFields && (
+                        <>
+                            <DateField value={effFrom} onChange={(v: string) => setRange(v, effTo)} placeholder='From' />
+                            <span className='text-xs text-muted-foreground'>to</span>
+                            <DateField value={effTo} onChange={(v: string) => setRange(effFrom, v)} placeholder='To' />
+                        </>
+                    )}
+                </div>
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -262,7 +374,7 @@ function AccountingOverview() {
                                 </div>
                                 <div>
                                     <CardTitle className="text-lg font-bold">Income vs Expense Trend</CardTitle>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400">Daily totals · last 30 days</p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">Daily totals · {(datePresets as any)[activePreset]?.label || `${effFrom} to ${effTo}`}</p>
                                 </div>
                             </div>
                         </CardHeader>

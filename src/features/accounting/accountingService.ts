@@ -46,14 +46,14 @@ export const accountingService = {
     },
 
     // GET RECENT ACTIVITY
-    getRecentActivity: async () => {
-        const response = await api.get<RecentActivityResponse>('/accounting/recent-activity');
+    getRecentActivity: async (params?: { from?: string; to?: string }) => {
+        const response = await api.get<RecentActivityResponse>('/accounting/recent-activity', { params });
         return response.data;
     },
 
     // GET EXPENSE BREAKDOWN
-    getExpenseBreakdown: async () => {
-        const response = await api.get<ExpenseBreakdownResponse>('/accounting/expense-breakdown');
+    getExpenseBreakdown: async (params?: { from?: string; to?: string }) => {
+        const response = await api.get<ExpenseBreakdownResponse>('/accounting/expense-breakdown', { params });
         return response.data;
     },
 
@@ -166,8 +166,8 @@ export const accountingService = {
     },
 
     // GET CHART DATA
-    getAccountingChartData: async () => {
-        const response = await api.get<ChartResponse>('/accounting/charts');
+    getAccountingChartData: async (params?: { from?: string; to?: string }) => {
+        const response = await api.get<ChartResponse>('/accounting/charts', { params });
         return response.data;
     },
 
